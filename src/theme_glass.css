@@ -1,0 +1,193 @@
+/* ===== الثيم «الزجاجي» (الافتراضي) — بأسلوب زجاج آيفون. يأتي بعد قواعد Linear المشتركة (html:is(linear,glass)) ويضبط فوقها:
+   ألوان الهوية الجديدة، زجاج أعمق مع تمويه وتشبّع، حواف لامعة، خط IBM Plex Sans Arabic، والتخطيط الجديد
+   (شريط تنقل + عمود العملاء + المحتوى، وشريط سفلي على الجوال). الشاشة فقط؛ الطباعة والملفات المصدَّرة كما هي. ===== */
+@media screen{
+html[data-theme="glass"]{
+  --lbg:#0d1636;--ltext:#f5f7ff;--lmut:#b4c1e2;--lacc:#6fe3a9;--lacc-d:#04261a;--lglow:rgba(111,227,169,.28);--lerr:#ffb4b4;--lwarn:#ffe08a;
+  --lpanel:rgba(255,255,255,.075);--lpanel2:rgba(255,255,255,.12);--lline:rgba(255,255,255,.14);--lline2:rgba(255,255,255,.26);
+  --gblur:saturate(170%) blur(22px);--ghi:inset 0 1px 0 rgba(255,255,255,.22),inset 0 -1px 0 rgba(255,255,255,.04);--gsh:0 18px 50px rgba(3,8,30,.45);
+  --r1:22px;--r2:16px;--r3:12px;--hh:68px}
+html[data-theme="glass"] body{font-family:'Hissa Plex',-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',Tahoma,Arial,sans-serif;background:var(--lbg);color:var(--ltext);-webkit-font-smoothing:antialiased;min-height:100vh}
+html[data-theme="glass"] input,html[data-theme="glass"] select,html[data-theme="glass"] textarea,html[data-theme="glass"] button{font-family:inherit}
+/* خلفية حيّة: توهجات ضبابية تتحرك ببطء خلف الزجاج */
+html[data-theme="glass"] body::before{content:"";position:fixed;inset:-20%;z-index:-1;pointer-events:none;
+  background:radial-gradient(38% 34% at 72% 18%,rgba(74,118,235,.55),transparent 70%),radial-gradient(30% 30% at 22% 32%,rgba(88,104,220,.40),transparent 70%),radial-gradient(34% 32% at 40% 82%,rgba(45,170,150,.33),transparent 70%),radial-gradient(28% 26% at 85% 75%,rgba(110,227,169,.16),transparent 70%),linear-gradient(165deg,#16245e 0%,#0d1636 55%,#0a1230 100%);
+  filter:blur(10px);animation:gDrift 36s ease-in-out infinite alternate}
+@keyframes gDrift{0%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(-2.5%,1.5%,0) scale(1.05)}100%{transform:translate3d(2%,-2%,0) scale(1.02)}}
+@media (prefers-reduced-motion:reduce){html[data-theme="glass"] body::before{animation:none}}
+html[data-theme="glass"] ::selection{background:rgba(111,227,169,.35)}
+html[data-theme="glass"] a{color:var(--lacc)}
+
+/* ---------- الترويسة: شريط زجاجي عائم ---------- */
+html[data-theme="glass"] header{position:sticky;top:0;z-index:50;height:var(--hh);padding:0 22px;gap:14px;background:rgba(13,22,54,.42);-webkit-backdrop-filter:var(--gblur);backdrop-filter:var(--gblur);border-bottom:1px solid var(--lline);box-shadow:0 1px 0 rgba(255,255,255,.04)}
+html[data-theme="glass"] header>*{order:3}
+html[data-theme="glass"] #menuBtn{order:0}
+html[data-theme="glass"] .uchip{order:1;display:inline-flex;align-items:center;gap:10px;color:#fff;white-space:nowrap}
+html[data-theme="glass"] .uchip b{font-size:16px;font-weight:700}
+html[data-theme="glass"] .uchip small{display:block;font-size:11px;color:var(--lmut);font-weight:400}
+html[data-theme="glass"] .uchip small.warn{color:var(--lwarn);background:none;border:0;padding:0;margin:0}
+html[data-theme="glass"] .hsrch{order:2;display:flex;align-items:center;gap:8px;flex:0 1 380px;margin-inline:18px auto;padding:0 14px;height:40px;border-radius:14px;background:rgba(255,255,255,.08);border:1px solid var(--lline);box-shadow:var(--ghi);color:var(--lmut)}
+html[data-theme="glass"] .hsrch input{background:transparent;border:0;box-shadow:none;padding:0;height:100%;color:#fff}
+html[data-theme="glass"] .hsrch input:focus{box-shadow:none}
+html[data-theme="glass"] .hsrch:focus-within{border-color:rgba(111,227,169,.6);box-shadow:0 0 0 3px var(--lglow)}
+html[data-theme="glass"] .hinfo{display:none}
+html[data-theme="glass"] .hlogo{order:9;height:46px;margin-inline-start:6px}
+html[data-theme="glass"] header button.sec{border-radius:12px;height:38px;min-width:38px;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:0 12px;background:rgba(255,255,255,.08)}
+html[data-theme="glass"] .cav{display:inline-grid;place-items:center;flex:none;width:38px;height:38px;border-radius:50%;font-weight:700;font-size:16px;color:#06281a;background:linear-gradient(145deg,#a7f3cc,#5fd49b);box-shadow:0 4px 14px rgba(95,212,155,.35),inset 0 1px 0 rgba(255,255,255,.6)}
+
+/* ---------- التخطيط: [شريط التنقل | العملاء] + المحتوى ---------- */
+html[data-theme="glass"] #app{max-width:1720px;grid-template-columns:minmax(0,580px) minmax(0,1fr);gap:18px;padding:18px 22px 28px}
+html[data-theme="glass"] aside{display:grid;grid-template-columns:240px minmax(0,1fr);gap:16px;align-self:start;position:sticky;top:calc(var(--hh) + 18px);height:calc(100vh - var(--hh) - 36px);max-height:none;overflow:visible;padding:0;background:none;border:0;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
+html[data-theme="glass"] aside>.rail,html[data-theme="glass"] aside>.clients,html[data-theme="glass"] main{background:var(--lpanel);border:1px solid var(--lline);border-radius:var(--r1);box-shadow:var(--gsh),var(--ghi);-webkit-backdrop-filter:var(--gblur);backdrop-filter:var(--gblur)}
+html[data-theme="glass"] aside>.rail,html[data-theme="glass"] aside>.clients{overflow:auto;padding:12px;min-height:0}
+html[data-theme="glass"] main{padding:20px 22px;min-height:calc(100vh - var(--hh) - 36px)}
+/* شريط التنقل */
+html[data-theme="glass"] .rail{display:flex;flex-direction:column;gap:2px}
+html[data-theme="glass"] .rail .sidebtn{display:flex;align-items:center;gap:12px;height:46px;padding:0 14px;margin:0;border-radius:14px;background:transparent;border:1px solid transparent;box-shadow:none;color:#d9e1f5;font-weight:500;font-size:15px;text-align:right;line-height:1.3}
+html[data-theme="glass"] .rail .sidebtn .ico{width:22px;height:22px;opacity:.9}
+html[data-theme="glass"] .rail .sidebtn:hover{background:rgba(255,255,255,.07);color:#fff}
+html[data-theme="glass"] .rail .sidebtn.on{background:linear-gradient(90deg,rgba(255,255,255,.16),rgba(255,255,255,.06));border-color:var(--lline2);color:#fff;box-shadow:var(--ghi)}
+html[data-theme="glass"] .rail .sidebtn.on .ico{color:var(--lacc);opacity:1}
+html[data-theme="glass"] .rail .sbg{margin-top:10px;padding-top:10px;border-top:1px solid var(--lline)}
+html[data-theme="glass"] .rail .sbh{font-size:12px;color:var(--lmut);padding:6px 10px;min-height:30px;background:transparent;border:0;box-shadow:none;font-weight:500}
+html[data-theme="glass"] .rail .sbh:hover{background:rgba(255,255,255,.06);filter:none}
+html[data-theme="glass"] .rail .sbh .ico{width:16px;height:16px}
+html[data-theme="glass"] .sbg.closed .sbh i{transform:rotate(90deg)}
+html[data-theme="glass"] .rail .small{padding:4px 12px;margin:4px 0;line-height:1.6}
+/* عمود العملاء */
+html[data-theme="glass"] .clients .clh{display:flex;align-items:center;justify-content:space-between;padding:4px 6px 10px}
+html[data-theme="glass"] .clients .clh b{font-size:17px}
+html[data-theme="glass"] .clients .cnt{min-width:28px;height:24px;padding:0 8px;border-radius:12px;background:rgba(255,255,255,.1);display:inline-grid;place-items:center;font-size:12px;color:var(--lmut)}
+html[data-theme="glass"] .srch{display:flex;align-items:center;gap:8px;margin:0 0 10px;padding:0 12px;height:42px;border-radius:14px;background:rgba(255,255,255,.07);border:1px solid var(--lline);color:var(--lmut)}
+html[data-theme="glass"] .srch input{border:0;background:transparent;box-shadow:none;padding:0;height:100%;color:#fff}
+html[data-theme="glass"] .srch:focus-within{border-color:rgba(111,227,169,.6);box-shadow:0 0 0 3px var(--lglow)}
+html[data-theme="glass"] .clients .two{gap:8px;margin:0 0 12px}
+html[data-theme="glass"] .clients .two button{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:42px;font-size:14px}
+html[data-theme="glass"] .cl{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:12px;align-items:center;padding:10px 12px;margin:0 0 8px;border-radius:var(--r2);background:rgba(255,255,255,.06);border:1px solid var(--lline);box-shadow:var(--ghi);transition:background .15s,border-color .15s,transform .15s}
+html[data-theme="glass"] .cl .cav{grid-row:1/3;width:40px;height:40px;font-size:15px;color:#fff;background:linear-gradient(145deg,rgba(120,150,255,.55),rgba(80,110,220,.35));box-shadow:inset 0 1px 0 rgba(255,255,255,.3)}
+html[data-theme="glass"] .cl b{font-size:15px;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+html[data-theme="glass"] .cl small{color:var(--lmut);font-size:12px;direction:rtl;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+html[data-theme="glass"] .cl:hover{background:rgba(255,255,255,.1);border-color:var(--lline2)}
+html[data-theme="glass"] .cl:active{transform:scale(.985)}
+html[data-theme="glass"] .cl.on{background:linear-gradient(135deg,rgba(111,227,169,.18),rgba(255,255,255,.07));border-color:rgba(111,227,169,.55)}
+html[data-theme="glass"] .cl.on .cav{background:linear-gradient(145deg,#a7f3cc,#5fd49b);color:#06281a}
+
+/* ---------- عناصر التحكم ---------- */
+html[data-theme="glass"] input,html[data-theme="glass"] select,html[data-theme="glass"] textarea{border-radius:var(--r3);background:rgba(255,255,255,.07);border:1px solid var(--lline);min-height:40px;box-shadow:inset 0 1px 2px rgba(0,0,0,.12)}
+html[data-theme="glass"] input[type=checkbox],html[data-theme="glass"] input[type=radio]{min-height:0;box-shadow:none}
+html[data-theme="glass"] textarea{min-height:64px}
+html[data-theme="glass"] select option{background:#16224f}
+html[data-theme="glass"] label{color:var(--lmut);font-size:13px}
+html[data-theme="glass"] button{border-radius:var(--r3);min-height:36px;background:linear-gradient(180deg,#8ff0bf,#5fd49b);color:var(--lacc-d);font-weight:700;border:1px solid rgba(255,255,255,.35);box-shadow:0 6px 18px rgba(95,212,155,.25),inset 0 1px 0 rgba(255,255,255,.55);transition:transform .12s,filter .15s,box-shadow .15s}
+html[data-theme="glass"] button:hover{filter:brightness(1.05);box-shadow:0 8px 24px rgba(95,212,155,.35),inset 0 1px 0 rgba(255,255,255,.55)}
+html[data-theme="glass"] button:active{transform:scale(.97)}
+html[data-theme="glass"] button.sec{background:rgba(255,255,255,.09);color:#e8eeff;border:1px solid var(--lline);box-shadow:var(--ghi)}
+html[data-theme="glass"] button.sec:hover{background:rgba(255,255,255,.15);border-color:var(--lline2);filter:none}
+html[data-theme="glass"] button.o{background:linear-gradient(180deg,rgba(255,170,110,.3),rgba(255,140,80,.2));color:#ffd9bf;border:1px solid rgba(255,160,100,.45);box-shadow:var(--ghi)}
+html[data-theme="glass"] button.r{background:rgba(255,100,100,.16);color:#ffd0d0;border:1px solid rgba(255,120,120,.45);box-shadow:var(--ghi)}
+html[data-theme="glass"] button.sm{min-height:30px;border-radius:10px}
+html[data-theme="glass"] button .ico-w,html[data-theme="glass"] button>.ico{margin-inline-end:2px}
+/* التبويبات: شريط مقسَّم بأسلوب iOS */
+html[data-theme="glass"] .tabs{display:inline-flex;gap:4px;padding:4px;border-radius:14px;background:rgba(0,0,0,.18);border:1px solid var(--lline);margin-bottom:16px;flex-wrap:wrap}
+html[data-theme="glass"] .tabs button{min-height:36px;border-radius:10px;padding:6px 16px;box-shadow:none;border:1px solid transparent;font-weight:500}
+html[data-theme="glass"] .tabs button.on{background:rgba(255,255,255,.18);border-color:var(--lline2);color:#fff;box-shadow:0 2px 10px rgba(0,0,0,.2),var(--ghi)}
+html[data-theme="glass"] .day-tabs button.on,html[data-theme="glass"] .pnav button.on{background:rgba(111,227,169,.16);border-color:rgba(111,227,169,.5)}
+html[data-theme="glass"] main h2{font-size:22px}
+html[data-theme="glass"] main h3{font-size:17px;color:#fff}
+html[data-theme="glass"] .t{border-radius:var(--r2);background:linear-gradient(135deg,rgba(86,128,255,.30),rgba(111,227,169,.14));box-shadow:var(--ghi)}
+html[data-theme="glass"] .warn,html[data-theme="glass"] .ok,html[data-theme="glass"] .gok{border-radius:var(--r3);border-right-width:3px}
+html[data-theme="glass"] .addbox,html[data-theme="glass"] .mcard,html[data-theme="glass"] .ucard,html[data-theme="glass"] .appcard,html[data-theme="glass"] .minicard,html[data-theme="glass"] .rembox,html[data-theme="glass"] .gbox,html[data-theme="glass"] .thcard{border-radius:var(--r2);box-shadow:var(--ghi)}
+html[data-theme="glass"] .thcard.on{border-color:var(--lacc);background:rgba(111,227,169,.10)}
+html[data-theme="glass"] .toast{border-radius:16px;background:rgba(20,32,74,.82);-webkit-backdrop-filter:var(--gblur);backdrop-filter:var(--gblur);border:1px solid var(--lline2)}
+html[data-theme="glass"] .pg{border-radius:18px}
+
+/* ---------- الصفحة الرئيسية ---------- */
+html[data-theme="glass"] .ghome{text-align:right;padding:4px}
+html[data-theme="glass"] .ghome .hero{display:grid;grid-template-columns:1fr minmax(200px,340px);align-items:center;gap:24px;padding:26px 28px;border-radius:var(--r1);background:linear-gradient(135deg,rgba(255,255,255,.12),rgba(255,255,255,.04));border:1px solid var(--lline2);box-shadow:var(--ghi);margin-bottom:16px}
+html[data-theme="glass"] .ghome .hero h2{font-size:30px;margin:0 0 8px;color:#fff;letter-spacing:-.01em}
+html[data-theme="glass"] .ghome .hero p{margin:0;color:var(--lmut);line-height:1.8}
+html[data-theme="glass"] .ghome .hero .splash{width:100%;margin:0;background:none;border:0;box-shadow:none;padding:0}
+html[data-theme="glass"] .ghome .hero video.splash{border-radius:14px}
+html[data-theme="glass"] .ghome .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+html[data-theme="glass"] .ghome .stats div{padding:14px 18px;border-radius:var(--r2);background:var(--lpanel);border:1px solid var(--lline);box-shadow:var(--ghi)}
+html[data-theme="glass"] .ghome .stats b{display:block;font-size:28px;color:#fff}
+html[data-theme="glass"] .ghome .stats small{color:var(--lmut)}
+html[data-theme="glass"] .ghome .qgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:18px}
+html[data-theme="glass"] .ghome .qa{display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:right;padding:16px;border-radius:var(--r2);background:var(--lpanel);border:1px solid var(--lline);color:#fff;box-shadow:var(--ghi);font-weight:500}
+html[data-theme="glass"] .ghome .qa:hover{background:rgba(255,255,255,.12);border-color:var(--lline2);filter:none}
+html[data-theme="glass"] .ghome .qa .qai{display:grid;place-items:center;width:42px;height:42px;border-radius:13px;background:linear-gradient(145deg,#8ff0bf,#4fc48d);color:#04261a;box-shadow:0 6px 16px rgba(95,212,155,.3),inset 0 1px 0 rgba(255,255,255,.6)}
+html[data-theme="glass"] .ghome .qa .qai .ico{width:22px;height:22px}
+html[data-theme="glass"] .ghome .qa b{font-size:16px}
+html[data-theme="glass"] .ghome .qa small{color:var(--lmut);font-size:12px;font-weight:400}
+html[data-theme="glass"] .ghome .recent{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;margin-bottom:12px}
+html[data-theme="glass"] .ghome .recent .cl{margin:0}
+
+/* ---------- شاشة الدخول (كما في التصميم: شعار أعلى بطاقة زجاجية) ---------- */
+html[data-theme="glass"] body.gating,html[data-theme="glass"] #gate{background-color:var(--lbg)}
+html[data-theme="glass"] #gate{gap:22px;padding:24px 16px}
+html[data-theme="glass"] body.gating header{display:none}
+html[data-theme="glass"] #gsp .hxlogo{width:min(78vw,360px)}
+html[data-theme="glass"] .gcard{border-radius:24px;padding:26px 28px;background:rgba(255,255,255,.08);border:1px solid var(--lline2);box-shadow:0 30px 80px rgba(2,6,24,.55),var(--ghi);-webkit-backdrop-filter:var(--gblur);backdrop-filter:var(--gblur)}
+html[data-theme="glass"] .gcard h2{font-size:22px;text-align:right}
+html[data-theme="glass"] .gcard input:not([type=checkbox]):not([type=radio]){height:46px;border-radius:14px;padding-inline-start:42px;background-repeat:no-repeat;background-position:right 14px center;background-size:18px}
+html[data-theme="glass"] .gcard textarea{padding-inline-start:12px}
+html[data-theme="glass"] .gcard #lu,html[data-theme="glass"] .gcard #au,html[data-theme="glass"] .gcard #su{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b4c1e2' stroke-width='1.75' stroke-linecap='round'%3E%3Ccircle cx='12' cy='8' r='4'/%3E%3Cpath d='M4 21a8 8 0 0 1 16 0'/%3E%3C/svg%3E")}
+html[data-theme="glass"] .gcard input[type=password],html[data-theme="glass"] .gcard #lp,html[data-theme="glass"] .gcard #ap,html[data-theme="glass"] .gcard #sp,html[data-theme="glass"] .gcard #sp2{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b4c1e2' stroke-width='1.75' stroke-linecap='round'%3E%3Crect x='4' y='11' width='16' height='10' rx='2'/%3E%3Cpath d='M8 11V7a4 4 0 0 1 8 0v4'/%3E%3C/svg%3E")}
+html[data-theme="glass"] .gcard button:not(.sec):not(.sm){width:100%;height:48px;border-radius:16px;font-size:16px;margin-top:6px}
+html[data-theme="glass"] .gcard .chk{font-size:13px;line-height:1.6}
+
+/* ---------- العناصر العائمة ---------- */
+html[data-theme="glass"] .hud,html[data-theme="glass"] .dtp,html[data-theme="glass"] .bkbuild{border-radius:20px;background:rgba(16,26,62,.72);-webkit-backdrop-filter:var(--gblur);backdrop-filter:var(--gblur);box-shadow:var(--gsh),var(--ghi)}
+html[data-theme="glass"] .dtfab{background:rgba(255,255,255,.12);border:1px solid var(--lline2);-webkit-backdrop-filter:var(--gblur);backdrop-filter:var(--gblur);box-shadow:var(--gsh),var(--ghi);color:#fff}
+html[data-theme="glass"] *{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.25) transparent}
+
+/* ---------- شاشات متوسطة: شريط التنقل أيقونات فقط ---------- */
+@media (max-width:1280px) and (min-width:901px){
+  html[data-theme="glass"] #app{grid-template-columns:minmax(0,380px) minmax(0,1fr)}
+  html[data-theme="glass"] aside{grid-template-columns:68px minmax(0,1fr)}
+  html[data-theme="glass"] .rail{padding:10px 8px;align-items:center}
+  html[data-theme="glass"] .rail .sidebtn{width:48px;height:48px;padding:0;justify-content:center}
+  html[data-theme="glass"] .rail .sidebtn span,html[data-theme="glass"] .rail .sbh,html[data-theme="glass"] .rail .small{display:none}
+  html[data-theme="glass"] .rail .sbg.closed .sbb{display:block}
+  html[data-theme="glass"] .hsrch{flex-basis:260px}
+}
+/* ---------- الجوال: درج القائمة + شريط سفلي عائم ---------- */
+@media (max-width:900px){
+  html[data-theme="glass"]{--hh:58px}
+  html[data-theme="glass"] header{padding:0 12px;padding-top:env(safe-area-inset-top,0px);height:calc(var(--hh) + env(safe-area-inset-top,0px));gap:8px}
+  html[data-theme="glass"] .hsrch,html[data-theme="glass"] .uchip b,html[data-theme="glass"] .uchip small{display:none}
+  html[data-theme="glass"] .uchip .cav{width:34px;height:34px}
+  html[data-theme="glass"] .hlogo{height:38px;margin-inline-start:auto;order:2}
+  html[data-theme="glass"] header button[data-a="lock"]{font-size:0;gap:0;padding:0;width:38px}
+  html[data-theme="glass"] header button[data-a="lock"] .ico{font-size:16px}
+  html[data-theme="glass"] #app{display:block;padding:12px 12px calc(96px + env(safe-area-inset-bottom,0px))}
+  html[data-theme="glass"] aside{display:none;position:static;height:auto;grid-template-columns:1fr;gap:12px;margin-bottom:12px}
+  html[data-theme="glass"] body.menu aside{display:grid}
+  html[data-theme="glass"] body.menu main{display:none}
+  html[data-theme="glass"] aside>.rail,html[data-theme="glass"] aside>.clients{overflow:visible}
+  html[data-theme="glass"] .clients{order:-1}
+  html[data-theme="glass"] .rail .sbg.closed .sbb{display:none}
+  html[data-theme="glass"] main{padding:16px 14px;min-height:0;border-radius:20px}
+  html[data-theme="glass"] .ghome .hero{grid-template-columns:1fr;padding:20px}
+  html[data-theme="glass"] .ghome .hero h2{font-size:24px}
+  html[data-theme="glass"] .ghome .qgrid{grid-template-columns:1fr 1fr}
+  html[data-theme="glass"] .ghome .stats b{font-size:22px}
+  html[data-theme="glass"] .tabs{display:flex;flex-wrap:nowrap;overflow-x:auto}
+  html[data-theme="glass"] .tabs button{flex:1 0 auto}
+  html[data-theme="glass"] #tabbar{display:flex;position:fixed;z-index:90;left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom,0px));height:66px;padding:6px;gap:4px;border-radius:24px;background:rgba(18,28,68,.62);border:1px solid var(--lline2);-webkit-backdrop-filter:saturate(180%) blur(26px);backdrop-filter:saturate(180%) blur(26px);box-shadow:0 14px 40px rgba(0,0,0,.45),var(--ghi)}
+  html[data-theme="glass"] #tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:0;height:100%;padding:0;border-radius:18px;background:transparent;border:0;box-shadow:none;color:var(--lmut);font-weight:500;font-size:11px}
+  html[data-theme="glass"] #tabbar button .ico{width:24px;height:24px}
+  html[data-theme="glass"] #tabbar button.on{background:rgba(255,255,255,.14);color:#fff;box-shadow:var(--ghi)}
+  html[data-theme="glass"] #tabbar button.on .ico{color:var(--lacc)}
+  html[data-theme="glass"] .dtfab{bottom:calc(88px + env(safe-area-inset-bottom,0px));padding:4px;border-radius:50%}
+  html[data-theme="glass"] .dtfab span{display:none}
+  html[data-theme="glass"] .ghome .hero .splash{width:70%;margin:0 auto}
+  html[data-theme="glass"] .dtp{bottom:calc(88px + env(safe-area-inset-bottom,0px));height:min(70vh,640px)}
+  html[data-theme="glass"] .toast{bottom:calc(92px + env(safe-area-inset-bottom,0px))}
+}
+/* متصفح بلا دعم للتمويه: خلفيات أعتم لتبقى النصوص مقروءة */
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  html[data-theme="glass"] header,html[data-theme="glass"] #tabbar{background:rgba(14,22,54,.96)}
+  html[data-theme="glass"] aside>.rail,html[data-theme="glass"] aside>.clients,html[data-theme="glass"] main,html[data-theme="glass"] .gcard{background:rgba(24,36,82,.94)}
+}
+}

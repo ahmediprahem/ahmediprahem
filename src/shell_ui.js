@@ -40,7 +40,7 @@ function initial(n) { n = String(n || '').trim(); return n ? n.charAt(0) : '؟';
 Object.assign(A, {
   home: function () { S.view = 'client'; S.cur = null; document.body.classList.remove('menu'); render(); window.scrollTo(0, 0); },
   nav: function (v) {
-    if (v === 'menu') { A.menu(); tabbar(); return; }
+    if (v === 'menu') { A.menu(); return; }
     document.body.classList.remove('menu');
     if (v === 'home') return A.home();
     if (v === 'settings') { S.view = 'settings'; render(); }
@@ -49,8 +49,9 @@ Object.assign(A, {
   }
 });
 document.addEventListener('input', function (e) {                // بحث الترويسة = بحث العملاء نفسه
-  if (e.target && e.target.id === 'hq') { var q = $('#q'); if (q) { q.value = e.target.value; DPApp.relist(); } if (matchMedia('(max-width:900px)').matches && !document.body.classList.contains('menu')) { A.menu(); tabbar(); } }
+  if (e.target && e.target.id === 'hq') { var q = $('#q'); if (q) { q.value = e.target.value; DPApp.relist(); } if (matchMedia('(max-width:900px)').matches && !document.body.classList.contains('menu')) A.menu(); }
 });
+(function (f) { A.menu = function () { var r = f.apply(this, arguments); if (isGlass()) tabbar(); return r; }; })(A.menu);
 ['pick', 'new', 'users'].forEach(function (k) {                // على الجوال: اختيار عميل أو صفحة يغلق درج القائمة فيظهر المحتوى مباشرة
   var f = A[k]; if (f) A[k] = function () { if (isGlass()) { document.body.classList.remove('menu'); window.scrollTo(0, 0); } return f.apply(this, arguments); };
 });
