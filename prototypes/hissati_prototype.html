@@ -342,6 +342,9 @@ const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch
 let sheet = null, toastT = 0, toastMsg = '';
 const dl = (d) => (S.log[d] = S.log[d] || { ck: {}, sw: {}, note: {}, whole: {}, skip: {}, water: 0 });
 const lineN = (l) => l[1], lineT = (l) => l[2];
+// الأرقام العربية (٠-٩) والفارسية (۰-۹) والفاصلة العشرية العربية (٫) تُقبل في كل حقول الأرقام وتتحول فوراً إلى أرقام لاتينية
+const latin = (s) => String(s).replace(/[\u0660-\u0669]/g, (d) => d.charCodeAt(0) - 0x660).replace(/[\u06F0-\u06F9]/g, (d) => d.charCodeAt(0) - 0x6F0).replace(/\u066B/g, '.').replace(/\u066C/g, '');
+const numOnly = (s) => latin(s).replace(/[,،]/g, '.').replace(/[^\d.]/g, '');
 
 // ---------- مساعدات
 function toast(m) { toastMsg = m; clearTimeout(toastT); toastT = setTimeout(() => { toastMsg = ''; render(); }, 3200); }
@@ -379,13 +382,14 @@ function head(t, act, v, sub) { return '<div class="hd"><button class="back" dat
 const STEPS = ['بياناتك', 'صحتك', 'وجباتك المفضلة', 'أكلاتك', 'يومك'];
 function scrWizard() {
   const s = S.step, body = [null, stepBasic, stepHealth, stepMeals, stepFoods, stepHabits][s]();
-  const ok = s !== 1 || (S.p.name.trim() && S.p.phone.trim() && S.p.age && S.p.weight && S.p.height);
+  const ok = s !== 1 || basicOk();
   return '<div class="scr">' + head(STEPS[s - 1], 'step', s - 1, 'الخطوة ' + s + ' من 5')
     + '<div class="prog"><i style="width:' + (s * 20) + '%"></i></div>'
     + '<div class="scroll"><div class="stack">' + body + '</div></div>'
     + '<div class="foot"><button class="btn full" data-act="step" data-v="' + (s + 1) + '" ' + (ok ? '' : 'disabled') + '>' + (s === 5 ? 'مراجعة' : 'التالي') + '</button></div></div>';
 }
-function inp(k, label, type, extra) { return '<div class="field"><label for="f_' + k + '">' + label + '</label><input class="inp" id="f_' + k + '" data-bind="' + k + '" type="' + (type || 'text') + '" value="' + esc(S.p[k]) + '" ' + (extra || '') + '></div>'; }
+function basicOk() { return !!(S.p.name.trim() && S.p.phone.trim() && +S.p.age > 0 && +S.p.weight > 0 && +S.p.height > 0); }
+function inp(k, label, type, extra) { const nm = type === 'number', ph = type === 'tel'; return '<div class="field"><label for="f_' + k + '">' + label + '</label><input class="inp" id="f_' + k + '" data-bind="' + k + '" type="' + (nm ? 'text' : type || 'text') + '"' + (nm ? ' data-numf="1" autocomplete="off"' : ph ? ' data-tel="1"' : '') + ' value="' + esc(S.p[k]) + '" ' + (extra || '') + '></div>'; }
 function stepBasic() {
   const acts = DATA.activity.map((a, i) => '<button class="act' + (S.p.act === i ? ' on' : '') + '" data-act="set" data-k="act" data-v="' + i + '"><span class="bars">' + [0, 1, 2, 3, 4].map((j) => '<i class="' + (j <= i ? 'f' : '') + '" style="height:' + (6 + j * 4) + 'px"></i>').join('') + '</span><span>' + esc(a) + '</span></button>').join('');
   const goals = DATA.goals.map((g, i) => '<button class="chip' + (S.p.goal === i ? ' on' : '') + '" data-act="set" data-k="goal" data-v="' + i + '">' + esc(g.replace(/[−+]\d+/, '').trim()) + '</button>').join('');
@@ -516,7 +520,7 @@ function tabProgress() {
   const bars = LAST7.map(([back, i]) => { const n = DATA.dayNames[i], v = dayAdh(back, past); return '<div><b>' + (v == null ? '' : Math.round(v * 100)) + '</b><i class="' + (v == null ? 'na' : v < .6 ? 'lo' : '') + '" style="height:' + (v == null ? 6 : Math.max(6, v * 80)) + 'px"></i><small>' + n.replace('ال', '').slice(0, 3) + '</small></div>'; }).join('');
   return '<h2>تقدّمي</h2><section class="card stack"><div class="row" style="justify-content:space-between"><h3>الوزن</h3><span class="dim">' + (diff <= 0 ? diff + ' كجم منذ البداية' : '+' + diff + ' كجم') + '</span></div>'
     + '<svg class="chart" viewBox="0 0 310 160" role="img" aria-label="منحنى الوزن">' + ticks + '<polyline points="' + pts + '" fill="none" stroke="#9dbbff" stroke-width="2.5" stroke-linejoin="round"/>' + dots + lbl + '</svg>'
-    + '<div class="row"><input class="inp" id="wIn" type="number" step="0.1" inputmode="decimal" placeholder="وزن اليوم (كجم)" style="flex:1"><button class="btn sm" data-act="weigh">' + I('scale') + ' سجّل</button></div></section>'
+    + '<div class="row"><input class="inp" id="wIn" type="text" data-numf="1" autocomplete="off" inputmode="decimal" placeholder="وزن اليوم (كجم)" style="flex:1"><button class="btn sm" data-act="weigh">' + I('scale') + ' سجّل</button></div></section>'
     + '<section class="card stack"><div class="row" style="justify-content:space-between"><h3>الالتزام آخر 7 أيام</h3><span class="dim">% من الأصناف</span></div><div class="wk">' + bars + '</div></section>';
 }
 
@@ -665,7 +669,7 @@ document.addEventListener('click', (e) => {
     case 'htog': { const arr = S._h, i = arr.indexOf(v); i < 0 ? arr.push(v) : arr.splice(i, 1); const b = el; b.classList.toggle('on'); return; }
     case 'sendhealth': S.pending = S._h.length ? S._h.slice() : ['لا حالات']; sheet = null; toast('أُرسل الطلب، ولن تتغير خطتك قبل اعتماد أخصائيك.'); break;
     case 'okhealth': S.p.cond = S.pending.filter((x) => x !== 'لا حالات'); S.pending = []; toast('اعتُمد التعديل الصحي.'); break;
-    case 'weigh': { const w = parseFloat(($('#wIn') || {}).value); if (!(w > 25 && w < 300)) { toast('اكتب وزناً صحيحاً بالكيلوجرام.'); break; } S.weights = S.weights.filter((x) => x[0] !== 0).concat([[0, Math.round(w * 10) / 10]]); toast('سُجّل وزنك، وسيصل لأخصائيك.'); break; }
+    case 'weigh': { const w = parseFloat(numOnly(($('#wIn') || {}).value || '')); if (!(w > 25 && w < 300)) { toast('اكتب وزناً صحيحاً بالكيلوجرام.'); break; } S.weights = S.weights.filter((x) => x[0] !== 0).concat([[0, Math.round(w * 10) / 10]]); toast('سُجّل وزنك، وسيصل لأخصائيك.'); break; }
     case 'close': sheet = null; break;
     default: return;
   }
@@ -676,9 +680,14 @@ document.addEventListener('change', (e) => {
   if (t.dataset.act === 'pickmeal' && t.value) { const arr = S.p[t.dataset.k][t.dataset.v]; if (!arr.includes(t.value)) arr.push(t.value); render(); }
   if (t.dataset.act === 'consent') { S.consent = t.checked; render(); }
 });
+document.addEventListener('input', (e) => {               // التقاط أولاً: تحويل الأرقام قبل أي قراءة للقيمة
+  const t = e.target; if (!t || t.tagName !== 'INPUT' || !(t.dataset.numf || t.dataset.tel)) return;
+  const v = t.value, n = t.dataset.numf ? numOnly(v) : latin(v); if (n === v) return;
+  const p = Math.max(0, (t.selectionStart == null ? n.length : t.selectionStart) - (v.length - n.length)); t.value = n; try { t.setSelectionRange(p, p); } catch (x) { }
+}, true);
 document.addEventListener('input', (e) => {
   const t = e.target;
-  if (t.dataset.bind) { S.p[t.dataset.bind] = t.value; save(); const btn = $('.foot .btn'); if (btn && S.screen === 'wizard' && S.step === 1) btn.disabled = !(S.p.name.trim() && S.p.phone.trim() && S.p.age && S.p.weight && S.p.height); }
+  if (t.dataset.bind) { S.p[t.dataset.bind] = t.value; save(); const btn = $('.foot .btn'); if (btn && S.screen === 'wizard' && S.step === 1) btn.disabled = !basicOk(); }
   if (t.dataset.q) { S[t.dataset.q] = t.value; const pos = t.selectionStart; render(); const n = document.getElementById(t.id); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (x) { } } }
 });
 function approve() { S.req = 'approved'; S.code = 'C' + String(6).padStart(4, '0'); }

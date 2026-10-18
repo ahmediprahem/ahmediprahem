@@ -88,7 +88,7 @@ document.addEventListener('change', function (e) {
   if (t.dataset.ag) { var g = t.dataset.ag.split(',').map(Number); Ath.setGrams(c.plan, AD, g[0], g[1], g[2], +t.value || 0); save(); main(); return; }
   if (t.dataset.asw && t.value) { var s = t.dataset.asw.split(',').map(Number); Ath.swapItem(c.plan, AD, s[0], s[1], s[2], t.value); save(); main(); toast('تم التبديل (حُسبت الجرامات لتعادل الماكرو الرئيسي)'); }
 });
-document.addEventListener('input', function (e) { var t = e.target, c = cur(); if (c && c.kind === 'athlete' && t.dataset.f && t.type === 'number') { var b = $('#atg'); if (b) b.innerHTML = athTargetsBox(c); } });
+document.addEventListener('input', function (e) { var t = e.target, c = cur(); if (c && c.kind === 'athlete' && t.dataset.f && (t.type === 'number' || t.dataset.num)) { var b = $('#atg'); if (b) b.innerHTML = athTargetsBox(c); } });
 
 // ================= إدارة أغذية الرياضيين (استيراد xlsx/csv + اختيار المدير + إخفاء المستخدم) =================
 Ath.prepare(AD, window.AthImport); var BASEAF = JSON.parse(JSON.stringify(AD.foods)), ROLES = { p: 'بروتين', c: 'كارب', f: 'دهون', v: 'خضار', x: 'أخرى (لا يُخطَّط تلقائياً)' }, MEALN = { B: 'فطور', L: 'غداء', D: 'عشاء', S1: 'سناك1', S2: 'سناك2', N: 'ليلي' }, DEFMEALS = { p: ['L', 'D'], c: ['L', 'D'], f: ['B', 'L', 'D'], v: ['L', 'D'], x: [] };
