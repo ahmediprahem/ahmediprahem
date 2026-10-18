@@ -111,7 +111,8 @@ Object.assign(A, {
     var B = BK.b, bl = DPRecipe.blockers(B.rows || []); B.name = (document.getElementById('bkrn') || {}).value || B.name; if (bl.length) { B.err = 'ما زالت هناك أسطر تحتاج قراراً'; bkBuildRender(); return; }
     var meal = DPRecipe.toMeal(B.rows, { id: 'U-' + Date.now().toString(36) + Math.floor(Math.random() * 1296).toString(36), n: B.name, m: B.m, note: B.note || 'من وصفة (حصصها محسوبة من قاعدتك)', time: B.time }), er = !meal.n ? 'اكتب اسم الوجبة' : !meal.m.some(function (x) { return x; }) ? 'اختر قسماً واحداً على الأقل' : !meal.ing.length ? 'لا مكوّنات صالحة' : (D.bank.some(function (x) { return bkNorm(x.n) === bkNorm(meal.n); }) ? 'اسم الوجبة مستعمل لوجبة أخرى' : E.validateMeal(D, meal));
     if (er) { B.err = er; bkBuildRender(); return; } var M = bkSet(); M.custom = M.custom || []; M.custom.push(meal); saveSettings(); applyS();
-    BK.b = { open: true, text: '', name: '', note: '', time: '', m: B.m.slice(), rows: null, err: '' }; meal.m.forEach(function (x, i) { if (x) BK.open[BK_CATS[i][0]] = true; }); main(); toast('أُضيفت «' + meal.n + '» إلى بنك الوجبات');
+    // بعد الإضافة يُطوى المربع العائم إلى عنوانه فلا يغطي الوجبة الجديدة في القائمة (يُفتح بنقرة لوجبة أخرى)
+    BK.b = { open: false, text: '', name: '', note: '', time: '', m: B.m.slice(), rows: null, err: '' }; meal.m.forEach(function (x, i) { if (x) BK.open[BK_CATS[i][0]] = true; }); main(); toast('أُضيفت «' + meal.n + '» إلى بنك الوجبات');
   }
 });
 document.addEventListener('change', function (e) {

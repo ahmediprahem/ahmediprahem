@@ -2,6 +2,7 @@
 //   node assets/make_brand.js        (يحتاج Playwright/Chromium — المثبَّت للاختبارات)
 // المخرجات: logo_light.png (كحلي لصفحات الخطة وWord) | logo_dark.png (أبيض للخلفيات الداكنة) | logo_icon.png (أيقونة التبويب)
 //           native/assets/* (أيقونة التطبيق وشاشة البداية) | src/assets.js (PNG للتصدير + SVG خام للواجهة يتلوّن بـ currentColor)
+// بعده (اختياري لتصغير الحجم): python3 -c "from PIL import Image;[Image.open(f).convert('RGB').quantize(256,dither=1).save(f,optimize=True) for f in ['native/assets/splash.png','native/assets/splash-dark.png','native/assets/icon-background.png','native/assets/icon-only.png']]"
 const fs = require('fs'), path = require('path'), { chromium } = require('playwright');
 const H = path.join(__dirname, '..'), A = (p) => path.join(__dirname, p), NAVY = '#1d2c63', NAVY_D = '#101a40';
 const logo = fs.readFileSync(A('hissa_logo.svg'), 'utf8').trim(), mark = fs.readFileSync(A('hissa_mark.svg'), 'utf8').trim();
