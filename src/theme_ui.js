@@ -24,7 +24,7 @@ function themePage() {
     + opts.map(function (o) { return '<label class="thcard' + (sel === o[0] ? ' on' : '') + (locked ? ' dis' : '') + '"><input type="radio" name="thm" data-thm="1" value="' + o[0] + '" ' + (sel === o[0] ? 'checked' : '') + (locked ? ' disabled' : '') + '>' + (sw[o[0]] || '<span class="thsw mx"><i></i><b></b></span>') + '<b>' + o[1] + '</b><small>' + o[2] + '</small></label>'; }).join('') + '</div>'
     + (admin ? '<label class="chk" style="margin-top:12px"><input type="checkbox" data-thl="1" ' + (e.lock || (S.settings.ui && S.settings.ui.lock) ? 'checked' : '') + '> 🔒 قفل القالب: يمنع المستخدمين من تغييره (يُطبَّق مع التصدير التالي)</label>' : '') + '<p class="small">الشعار وكل الميزات واحدة في القوالب الثلاثة. صفحات الخطة (الورقة التي تُطبع وتُصدَّر) تبقى بيضاء في كل القوالب.</p>';
 }
-var SBG; try { SBG = JSON.parse(localStorage.getItem('hissa_sbg') || '{"tools":1,"bak":0}'); } catch (e) { SBG = { tools: 1, bak: 0 }; }
+var SBG; try { SBG = JSON.parse(localStorage.getItem('hissa_sbg') || '{"tools":1,"bak":1}'); } catch (e) { SBG = { tools: 1, bak: 1 }; }
 function sbc(k) { return SBG[k] === 0 ? ' closed' : ''; }
 Object.assign(A, {
   themeToggle: function () { S.settings.ui = S.settings.ui || {}; var o = ['glass', 'linear', 'legacy']; S.settings.ui.theme = o[(o.indexOf(themeCur()) + 1) % 3]; saveSettings(); applyTheme(); header(); render(); toast('المظهر: ' + themeName(themeCur())); },

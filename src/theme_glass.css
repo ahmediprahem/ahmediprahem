@@ -54,6 +54,11 @@ html[data-theme="glass"] .rail .sbh:hover{background:rgba(255,255,255,.06);filte
 html[data-theme="glass"] .rail .sbh .ico{width:16px;height:16px}
 html[data-theme="glass"] .sbg.closed .sbh i{transform:rotate(90deg)}
 html[data-theme="glass"] .rail .small{padding:4px 12px;margin:4px 0;line-height:1.6}
+/* عمود العملاء مطويّ (خارج الرئيسية): شريط التنقل فقط والمحتوى بعرض كامل */
+html[data-theme="glass"] body.clx #app{grid-template-columns:240px minmax(0,1fr)}
+html[data-theme="glass"] body.clx aside{grid-template-columns:1fr}
+html[data-theme="glass"] body.clx aside>.clients{display:none}
+html[data-theme="glass"] .rail .cltog em{margin-inline-start:auto;font-style:normal;font-size:12px;min-width:26px;height:22px;padding:0 7px;border-radius:11px;background:rgba(255,255,255,.12);display:inline-grid;place-items:center;color:var(--lmut)}
 /* عمود العملاء */
 html[data-theme="glass"] .clients .clh{display:flex;align-items:center;justify-content:space-between;padding:4px 6px 10px}
 html[data-theme="glass"] .clients .clh b{font-size:17px}
@@ -87,6 +92,8 @@ html[data-theme="glass"] button.o{background:linear-gradient(180deg,rgba(255,170
 html[data-theme="glass"] button.r{background:rgba(255,100,100,.16);color:#ffd0d0;border:1px solid rgba(255,120,120,.45);box-shadow:var(--ghi)}
 html[data-theme="glass"] button.sm{min-height:30px;border-radius:10px}
 html[data-theme="glass"] button .ico-w,html[data-theme="glass"] button>.ico{margin-inline-end:2px}
+/* إجراءات الخطة: كلها ظاهرة على الحاسوب (أسهل للوصول)، و«⋯ المزيد» على الجوال فقط */
+@media (min-width:901px){html[data-theme="glass"] .mxrow .mxb{display:none}html[data-theme="glass"] .mxrow:not(.mxopen) .mx{display:inline-block}html[data-theme="glass"] .mxrow:not(.mxopen) span.mx,html[data-theme="glass"] .mxrow:not(.mxopen) div.mx{display:inline-flex}}
 /* التبويبات: شريط مقسَّم بأسلوب iOS */
 html[data-theme="glass"] .tabs{display:inline-flex;gap:4px;padding:4px;border-radius:14px;background:rgba(0,0,0,.18);border:1px solid var(--lline);margin-bottom:16px;flex-wrap:wrap}
 html[data-theme="glass"] .tabs button{min-height:36px;border-radius:10px;padding:6px 16px;box-shadow:none;border:1px solid transparent;font-weight:500}
@@ -138,6 +145,7 @@ html[data-theme="glass"] .gcard .chk{font-size:13px;line-height:1.6}
 
 /* ---------- العناصر العائمة ---------- */
 html[data-theme="glass"] .hud,html[data-theme="glass"] .dtp,html[data-theme="glass"] .bkbuild{border-radius:20px;background:rgba(16,26,62,.72);-webkit-backdrop-filter:var(--gblur);backdrop-filter:var(--gblur);box-shadow:var(--gsh),var(--ghi)}
+@media (min-width:901px){html[data-theme="glass"] .hud{top:calc(var(--hh) + 30px)}}
 html[data-theme="glass"] .dtfab{background:rgba(255,255,255,.12);border:1px solid var(--lline2);-webkit-backdrop-filter:var(--gblur);backdrop-filter:var(--gblur);box-shadow:var(--gsh),var(--ghi);color:#fff}
 html[data-theme="glass"] *{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.25) transparent}
 
@@ -150,6 +158,8 @@ html[data-theme="glass"] *{scrollbar-width:thin;scrollbar-color:rgba(255,255,255
   html[data-theme="glass"] .rail .sidebtn span,html[data-theme="glass"] .rail .sbh,html[data-theme="glass"] .rail .small{display:none}
   html[data-theme="glass"] .rail .sbg.closed .sbb{display:block}
   html[data-theme="glass"] .hsrch{flex-basis:260px}
+  html[data-theme="glass"] body.clx #app{grid-template-columns:68px minmax(0,1fr)}
+  html[data-theme="glass"] .rail .cltog em{display:none}
 }
 /* ---------- الجوال: درج القائمة + شريط سفلي عائم ---------- */
 @media (max-width:900px){
@@ -166,6 +176,8 @@ html[data-theme="glass"] *{scrollbar-width:thin;scrollbar-color:rgba(255,255,255
   html[data-theme="glass"] body.menu main{display:none}
   html[data-theme="glass"] aside>.rail,html[data-theme="glass"] aside>.clients{overflow:visible}
   html[data-theme="glass"] .clients{order:-1}
+  html[data-theme="glass"] body.clx aside>.clients{display:block}
+  html[data-theme="glass"] .rail .cltog{display:none}
   html[data-theme="glass"] .rail .sbg.closed .sbb{display:none}
   html[data-theme="glass"] main{padding:16px 14px;min-height:0;border-radius:20px}
   html[data-theme="glass"] .ghome .hero{grid-template-columns:1fr;padding:20px}

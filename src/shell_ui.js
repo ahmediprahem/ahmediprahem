@@ -5,8 +5,9 @@ var IC = function (n) { return window.HIcon ? HIcon.svg(n) : ''; };
 function railBtn(a, icon, label, on, v) { return '<button class="sec sidebtn' + (on ? ' on' : '') + '" data-a="' + a + '"' + (v ? ' data-v="' + v + '"' : '') + (on ? ' aria-current="page"' : '') + '>' + IC(icon) + '<span>' + label + '</span></button>'; }
 function glassSide() {
   var home = S.view === 'client' && !S.cur, admin = S.mode === 'admin';
+  var clx = !home && !S.clOpen; document.body.classList.toggle('clx', clx);        // عمود العملاء يُطوى تلقائياً خارج الرئيسية ليتسع المحتوى (الخطة والجداول)، ويُفتح من «العملاء»
   var rail = '<nav class="rail" aria-label="التنقل">'
-    + railBtn('home', 'home', 'الرئيسية', home) + railBtn('bank', 'book', 'محرر الحصص', S.view === 'bank') + railBtn('settings', 'settings', 'إعدادات النظام', S.view === 'settings')
+    + railBtn('home', 'home', 'الرئيسية', home) + (home ? '' : '<button class="sec sidebtn cltog' + (clx ? '' : ' on') + '" data-a="clToggle" aria-expanded="' + (!clx) + '">' + IC('users') + '<span>العملاء</span><em>' + S.clients.length + '</em></button>') + railBtn('bank', 'book', 'محرر الحصص', S.view === 'bank') + railBtn('settings', 'settings', 'إعدادات النظام', S.view === 'settings')
     + (admin ? '<div class="sbg' + sbc('tools') + '" data-g="tools"><button class="sbh" data-a="sbg" data-v="tools" aria-expanded="' + (SBG.tools === 0 ? 'false' : 'true') + '">أدوات الإدارة <i>' + IC('chevron') + '</i></button><div class="sbb">'
       + railBtn('users', 'users', 'المستخدمون والأجهزة', S.view === 'users') + railBtn('exportUsers', 'package', 'تصدير نسخة المستخدمين') + railBtn('exportSite', 'globe', 'تصدير موقع للنشر (ZIP)') + '</div></div>' : '')
     + '<div class="sbg' + sbc('bak') + '" data-g="bak"><button class="sbh" data-a="sbg" data-v="bak" aria-expanded="' + (SBG.bak === 0 ? 'false' : 'true') + '">النسخ الاحتياطي <i>' + IC('chevron') + '</i></button><div class="sbb">'
@@ -38,6 +39,7 @@ function homeGlass() {
 }
 function initial(n) { n = String(n || '').trim(); return n ? n.charAt(0) : '؟'; }
 Object.assign(A, {
+  clToggle: function () { S.clOpen = !S.clOpen; sidebar(); var q = S.clOpen && $('#q'); if (q && !matchMedia('(max-width:900px)').matches) q.focus(); },
   home: function () { S.view = 'client'; S.cur = null; document.body.classList.remove('menu'); render(); window.scrollTo(0, 0); },
   nav: function (v) {
     if (v === 'menu') { A.menu(); return; }

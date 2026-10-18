@@ -406,6 +406,11 @@ html[data-theme="glass"] .rail .sbh:hover{background:rgba(255,255,255,.06);filte
 html[data-theme="glass"] .rail .sbh .ico{width:16px;height:16px}
 html[data-theme="glass"] .sbg.closed .sbh i{transform:rotate(90deg)}
 html[data-theme="glass"] .rail .small{padding:4px 12px;margin:4px 0;line-height:1.6}
+/* عمود العملاء مطويّ (خارج الرئيسية): شريط التنقل فقط والمحتوى بعرض كامل */
+html[data-theme="glass"] body.clx #app{grid-template-columns:240px minmax(0,1fr)}
+html[data-theme="glass"] body.clx aside{grid-template-columns:1fr}
+html[data-theme="glass"] body.clx aside>.clients{display:none}
+html[data-theme="glass"] .rail .cltog em{margin-inline-start:auto;font-style:normal;font-size:12px;min-width:26px;height:22px;padding:0 7px;border-radius:11px;background:rgba(255,255,255,.12);display:inline-grid;place-items:center;color:var(--lmut)}
 /* عمود العملاء */
 html[data-theme="glass"] .clients .clh{display:flex;align-items:center;justify-content:space-between;padding:4px 6px 10px}
 html[data-theme="glass"] .clients .clh b{font-size:17px}
@@ -439,6 +444,8 @@ html[data-theme="glass"] button.o{background:linear-gradient(180deg,rgba(255,170
 html[data-theme="glass"] button.r{background:rgba(255,100,100,.16);color:#ffd0d0;border:1px solid rgba(255,120,120,.45);box-shadow:var(--ghi)}
 html[data-theme="glass"] button.sm{min-height:30px;border-radius:10px}
 html[data-theme="glass"] button .ico-w,html[data-theme="glass"] button>.ico{margin-inline-end:2px}
+/* إجراءات الخطة: كلها ظاهرة على الحاسوب (أسهل للوصول)، و«⋯ المزيد» على الجوال فقط */
+@media (min-width:901px){html[data-theme="glass"] .mxrow .mxb{display:none}html[data-theme="glass"] .mxrow:not(.mxopen) .mx{display:inline-block}html[data-theme="glass"] .mxrow:not(.mxopen) span.mx,html[data-theme="glass"] .mxrow:not(.mxopen) div.mx{display:inline-flex}}
 /* التبويبات: شريط مقسَّم بأسلوب iOS */
 html[data-theme="glass"] .tabs{display:inline-flex;gap:4px;padding:4px;border-radius:14px;background:rgba(0,0,0,.18);border:1px solid var(--lline);margin-bottom:16px;flex-wrap:wrap}
 html[data-theme="glass"] .tabs button{min-height:36px;border-radius:10px;padding:6px 16px;box-shadow:none;border:1px solid transparent;font-weight:500}
@@ -490,6 +497,7 @@ html[data-theme="glass"] .gcard .chk{font-size:13px;line-height:1.6}
 
 /* ---------- العناصر العائمة ---------- */
 html[data-theme="glass"] .hud,html[data-theme="glass"] .dtp,html[data-theme="glass"] .bkbuild{border-radius:20px;background:rgba(16,26,62,.72);-webkit-backdrop-filter:var(--gblur);backdrop-filter:var(--gblur);box-shadow:var(--gsh),var(--ghi)}
+@media (min-width:901px){html[data-theme="glass"] .hud{top:calc(var(--hh) + 30px)}}
 html[data-theme="glass"] .dtfab{background:rgba(255,255,255,.12);border:1px solid var(--lline2);-webkit-backdrop-filter:var(--gblur);backdrop-filter:var(--gblur);box-shadow:var(--gsh),var(--ghi);color:#fff}
 html[data-theme="glass"] *{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.25) transparent}
 
@@ -502,6 +510,8 @@ html[data-theme="glass"] *{scrollbar-width:thin;scrollbar-color:rgba(255,255,255
   html[data-theme="glass"] .rail .sidebtn span,html[data-theme="glass"] .rail .sbh,html[data-theme="glass"] .rail .small{display:none}
   html[data-theme="glass"] .rail .sbg.closed .sbb{display:block}
   html[data-theme="glass"] .hsrch{flex-basis:260px}
+  html[data-theme="glass"] body.clx #app{grid-template-columns:68px minmax(0,1fr)}
+  html[data-theme="glass"] .rail .cltog em{display:none}
 }
 /* ---------- الجوال: درج القائمة + شريط سفلي عائم ---------- */
 @media (max-width:900px){
@@ -518,6 +528,8 @@ html[data-theme="glass"] *{scrollbar-width:thin;scrollbar-color:rgba(255,255,255
   html[data-theme="glass"] body.menu main{display:none}
   html[data-theme="glass"] aside>.rail,html[data-theme="glass"] aside>.clients{overflow:visible}
   html[data-theme="glass"] .clients{order:-1}
+  html[data-theme="glass"] body.clx aside>.clients{display:block}
+  html[data-theme="glass"] .rail .cltog{display:none}
   html[data-theme="glass"] .rail .sbg.closed .sbb{display:none}
   html[data-theme="glass"] main{padding:16px 14px;min-height:0;border-radius:20px}
   html[data-theme="glass"] .ghome .hero{grid-template-columns:1fr;padding:20px}
@@ -2876,7 +2888,7 @@ function themePage() {
     + opts.map(function (o) { return '<label class="thcard' + (sel === o[0] ? ' on' : '') + (locked ? ' dis' : '') + '"><input type="radio" name="thm" data-thm="1" value="' + o[0] + '" ' + (sel === o[0] ? 'checked' : '') + (locked ? ' disabled' : '') + '>' + (sw[o[0]] || '<span class="thsw mx"><i></i><b></b></span>') + '<b>' + o[1] + '</b><small>' + o[2] + '</small></label>'; }).join('') + '</div>'
     + (admin ? '<label class="chk" style="margin-top:12px"><input type="checkbox" data-thl="1" ' + (e.lock || (S.settings.ui && S.settings.ui.lock) ? 'checked' : '') + '> 🔒 قفل القالب: يمنع المستخدمين من تغييره (يُطبَّق مع التصدير التالي)</label>' : '') + '<p class="small">الشعار وكل الميزات واحدة في القوالب الثلاثة. صفحات الخطة (الورقة التي تُطبع وتُصدَّر) تبقى بيضاء في كل القوالب.</p>';
 }
-var SBG; try { SBG = JSON.parse(localStorage.getItem('hissa_sbg') || '{"tools":1,"bak":0}'); } catch (e) { SBG = { tools: 1, bak: 0 }; }
+var SBG; try { SBG = JSON.parse(localStorage.getItem('hissa_sbg') || '{"tools":1,"bak":1}'); } catch (e) { SBG = { tools: 1, bak: 1 }; }
 function sbc(k) { return SBG[k] === 0 ? ' closed' : ''; }
 Object.assign(A, {
   themeToggle: function () { S.settings.ui = S.settings.ui || {}; var o = ['glass', 'linear', 'legacy']; S.settings.ui.theme = o[(o.indexOf(themeCur()) + 1) % 3]; saveSettings(); applyTheme(); header(); render(); toast('المظهر: ' + themeName(themeCur())); },
@@ -2896,8 +2908,9 @@ var IC = function (n) { return window.HIcon ? HIcon.svg(n) : ''; };
 function railBtn(a, icon, label, on, v) { return '<button class="sec sidebtn' + (on ? ' on' : '') + '" data-a="' + a + '"' + (v ? ' data-v="' + v + '"' : '') + (on ? ' aria-current="page"' : '') + '>' + IC(icon) + '<span>' + label + '</span></button>'; }
 function glassSide() {
   var home = S.view === 'client' && !S.cur, admin = S.mode === 'admin';
+  var clx = !home && !S.clOpen; document.body.classList.toggle('clx', clx);        // عمود العملاء يُطوى تلقائياً خارج الرئيسية ليتسع المحتوى (الخطة والجداول)، ويُفتح من «العملاء»
   var rail = '<nav class="rail" aria-label="التنقل">'
-    + railBtn('home', 'home', 'الرئيسية', home) + railBtn('bank', 'book', 'محرر الحصص', S.view === 'bank') + railBtn('settings', 'settings', 'إعدادات النظام', S.view === 'settings')
+    + railBtn('home', 'home', 'الرئيسية', home) + (home ? '' : '<button class="sec sidebtn cltog' + (clx ? '' : ' on') + '" data-a="clToggle" aria-expanded="' + (!clx) + '">' + IC('users') + '<span>العملاء</span><em>' + S.clients.length + '</em></button>') + railBtn('bank', 'book', 'محرر الحصص', S.view === 'bank') + railBtn('settings', 'settings', 'إعدادات النظام', S.view === 'settings')
     + (admin ? '<div class="sbg' + sbc('tools') + '" data-g="tools"><button class="sbh" data-a="sbg" data-v="tools" aria-expanded="' + (SBG.tools === 0 ? 'false' : 'true') + '">أدوات الإدارة <i>' + IC('chevron') + '</i></button><div class="sbb">'
       + railBtn('users', 'users', 'المستخدمون والأجهزة', S.view === 'users') + railBtn('exportUsers', 'package', 'تصدير نسخة المستخدمين') + railBtn('exportSite', 'globe', 'تصدير موقع للنشر (ZIP)') + '</div></div>' : '')
     + '<div class="sbg' + sbc('bak') + '" data-g="bak"><button class="sbh" data-a="sbg" data-v="bak" aria-expanded="' + (SBG.bak === 0 ? 'false' : 'true') + '">النسخ الاحتياطي <i>' + IC('chevron') + '</i></button><div class="sbb">'
@@ -2929,6 +2942,7 @@ function homeGlass() {
 }
 function initial(n) { n = String(n || '').trim(); return n ? n.charAt(0) : '؟'; }
 Object.assign(A, {
+  clToggle: function () { S.clOpen = !S.clOpen; sidebar(); var q = S.clOpen && $('#q'); if (q && !matchMedia('(max-width:900px)').matches) q.focus(); },
   home: function () { S.view = 'client'; S.cur = null; document.body.classList.remove('menu'); render(); window.scrollTo(0, 0); },
   nav: function (v) {
     if (v === 'menu') { A.menu(); return; }
