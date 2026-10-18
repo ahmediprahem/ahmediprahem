@@ -1,0 +1,165 @@
+/* ===== ثيم «Linear داكن» — طبقة إضافية فقط، لا تُحذف قواعد القالب الكلاسيكي ولا تُعطَّل. يعمل عند html[data-theme="linear"] وعلى الشاشة فقط (الطباعة والتصدير كما هما). ===== */
+@media screen{
+html[data-theme="linear"]{color-scheme:dark;--lbg:#0b1329;--lpanel:rgba(255,255,255,.045);--lpanel2:rgba(255,255,255,.08);--lline:rgba(255,255,255,.10);--lline2:rgba(255,255,255,.2);--ltext:#f4f6fc;--lmut:#a3b2d6;--lacc:#22c55e;--lacc-d:#052e16;--lglow:rgba(34,197,94,.22);--lerr:#fca5a5;--lwarn:#fde68a}
+html[data-theme="linear"] body{background:radial-gradient(900px 520px at 88% -8%,rgba(59,130,246,.20),transparent 62%),radial-gradient(760px 520px at 8% 108%,rgba(34,197,94,.11),transparent 62%),radial-gradient(600px 400px at 50% 40%,rgba(56,189,248,.05),transparent 70%),var(--lbg);background-attachment:fixed;color:var(--ltext)}
+html[data-theme="linear"] ::selection{background:rgba(34,197,94,.35)}
+html[data-theme="linear"] a{color:#86efac}
+html[data-theme="linear"] hr{border:0;border-top:1px solid var(--lline)}
+/* الترويسة: زجاج رقيق، الشعار كما هو (logo_dark) */
+html[data-theme="linear"] header{background:rgba(11,19,41,.72);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-bottom:1px solid var(--lline);padding:8px 20px;position:sticky;top:0;z-index:50}
+html[data-theme="linear"] .hinfo{color:var(--lmut)}
+/* اللوحات */
+html[data-theme="linear"] #app{max-width:1560px;gap:16px;padding:18px}
+html[data-theme="linear"] aside,html[data-theme="linear"] main{background:var(--lpanel);border:1px solid var(--lline);border-radius:16px;box-shadow:0 12px 44px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.05);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:var(--ltext)}
+html[data-theme="linear"] main h2,html[data-theme="linear"] main h3,html[data-theme="linear"] aside h2{color:#fff;letter-spacing:-.01em}
+html[data-theme="linear"] small,html[data-theme="linear"] .small{color:var(--lmut)}
+/* النماذج */
+html[data-theme="linear"] input,html[data-theme="linear"] select,html[data-theme="linear"] textarea{background:rgba(255,255,255,.055);border:1px solid var(--lline);color:#fff;border-radius:10px}
+html[data-theme="linear"] input::placeholder,html[data-theme="linear"] textarea::placeholder{color:#8396c2}
+html[data-theme="linear"] input:focus,html[data-theme="linear"] select:focus,html[data-theme="linear"] textarea:focus{outline:0;border-color:var(--lacc);box-shadow:0 0 0 3px var(--lglow)}
+html[data-theme="linear"] select option{background:#111c3a;color:#fff}
+html[data-theme="linear"] input[type=checkbox],html[data-theme="linear"] input[type=radio]{accent-color:var(--lacc)}
+html[data-theme="linear"] label{color:var(--lmut)}
+html[data-theme="linear"] .chk{color:#dbe3f7}
+/* الأزرار: أخضر زمردي بنص داكن للتباين، والثانوي زجاجي */
+html[data-theme="linear"] button{background:var(--lacc);color:var(--lacc-d);font-weight:700;border:1px solid transparent;border-radius:10px;transition:background .15s,box-shadow .15s,border-color .15s}
+html[data-theme="linear"] button:hover{box-shadow:0 0 0 3px var(--lglow)}
+html[data-theme="linear"] button:focus-visible{outline:2px solid #fff;outline-offset:2px}
+html[data-theme="linear"] button:disabled{opacity:.45;box-shadow:none;cursor:not-allowed}
+html[data-theme="linear"] button.sec{background:var(--lpanel2);color:#e4eaf9;border:1px solid var(--lline)}
+html[data-theme="linear"] button.sec:hover{border-color:var(--lline2);box-shadow:none;background:rgba(255,255,255,.12)}
+html[data-theme="linear"] button.o{background:rgba(249,115,22,.16);color:#fdba74;border:1px solid rgba(249,115,22,.4)}
+html[data-theme="linear"] button.r{background:rgba(248,113,113,.14);color:#fecaca;border:1px solid rgba(248,113,113,.4)}
+/* التبويبات وأزرار التنقل */
+html[data-theme="linear"] .tabs button,html[data-theme="linear"] .day-tabs button,html[data-theme="linear"] .pnav button{background:transparent;color:var(--lmut);border:1px solid transparent;font-weight:600}
+html[data-theme="linear"] .tabs button:hover,html[data-theme="linear"] .day-tabs button:hover,html[data-theme="linear"] .pnav button:hover{background:var(--lpanel2);color:#fff;box-shadow:none}
+html[data-theme="linear"] .tabs button.on,html[data-theme="linear"] .day-tabs button.on,html[data-theme="linear"] .pnav button.on{background:rgba(34,197,94,.14);color:#fff;border-color:rgba(34,197,94,.45)}
+html[data-theme="linear"] .pnav{overflow-x:auto;white-space:nowrap;flex-wrap:nowrap;scrollbar-width:thin;padding-bottom:4px;border-bottom:1px solid var(--lline)}
+/* قائمة العملاء */
+html[data-theme="linear"] .cl{background:var(--lpanel);border:1px solid var(--lline);border-radius:12px;margin:6px 0;color:#fff}
+html[data-theme="linear"] .cl:hover{background:var(--lpanel2);border-color:var(--lline2)}
+html[data-theme="linear"] .cl.on{background:rgba(34,197,94,.11);border-color:rgba(34,197,94,.5)}
+html[data-theme="linear"] .cl small{color:var(--lmut)}
+/* الشريط الجانبي: مجموعات قابلة للطيّ */
+html[data-theme="linear"] .sbh{display:flex;justify-content:space-between;align-items:center;width:100%;background:transparent;color:var(--lmut);font-size:12px;letter-spacing:.03em;border:0;padding:8px 6px;margin-top:6px;border-radius:8px}
+html[data-theme="linear"] .sbh:hover{background:var(--lpanel2);box-shadow:none;color:#fff}
+html[data-theme="linear"] .sbh i{font-style:normal;transition:transform .2s}
+html[data-theme="linear"] .sbg.closed .sbh i{transform:rotate(90deg)}
+html[data-theme="linear"] .sbg.closed .sbb{display:none}
+html[data-theme="linear"] .sidebtn{display:flex;align-items:center;width:100%;background:transparent;color:#cfd8ee;border:1px solid transparent;text-align:right;margin:2px 0;font-weight:600}
+html[data-theme="linear"] .sidebtn:hover{background:var(--lpanel2);color:#fff;box-shadow:none}
+html[data-theme="linear"] .sidebtn.on{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.4);color:#fff}
+/* إجراءات الخطة: الثانوية تُطوى تحت «⋯ المزيد» */
+html[data-theme="linear"] .mxb{display:inline-block}
+html[data-theme="linear"] .mxrow:not(.mxopen) .mx{display:none}
+html[data-theme="linear"] .mxrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px}
+html[data-theme="linear"] .mxrow .mx input{width:130px}
+/* شرائط وتنبيهات */
+html[data-theme="linear"] .t{background:linear-gradient(135deg,rgba(59,130,246,.22),rgba(34,197,94,.10));border:1px solid var(--lline);color:#fff}
+html[data-theme="linear"] .warn{background:rgba(245,158,11,.10);border-right:4px solid #f59e0b;color:var(--lwarn)}
+html[data-theme="linear"] .ok,html[data-theme="linear"] .gok{background:rgba(34,197,94,.10);border-right:4px solid var(--lacc);color:#bbf7d0}
+html[data-theme="linear"] .bad,html[data-theme="linear"] .gerr{color:var(--lerr)}
+html[data-theme="linear"] .chips span{background:var(--lpanel2);color:#e4eaf9;border:1px solid var(--lline)}
+html[data-theme="linear"] .chips span b{color:var(--lerr)}
+html[data-theme="linear"] .toast{background:#14214a;color:#fff;border:1px solid var(--lline2);box-shadow:0 10px 30px rgba(0,0,0,.4)}
+html[data-theme="linear"] .addbox,html[data-theme="linear"] .mcard,html[data-theme="linear"] .ucard,html[data-theme="linear"] .appcard,html[data-theme="linear"] .minicard,html[data-theme="linear"] .rembox,html[data-theme="linear"] .gbox{background:var(--lpanel);border:1px solid var(--lline);color:#e8ecf8;border-radius:12px}
+html[data-theme="linear"] .applink,html[data-theme="linear"] .mchip,html[data-theme="linear"] .fopt,html[data-theme="linear"] .fpick,html[data-theme="linear"] .fres,html[data-theme="linear"] .gprev,html[data-theme="linear"] .hm,html[data-theme="linear"] .at,html[data-theme="linear"] .cu,html[data-theme="linear"] .dims{background:var(--lpanel2);color:#e8ecf8;border-color:var(--lline)}
+html[data-theme="linear"] table th:not([class*="th-"]){color:var(--lmut)}
+html[data-theme="linear"] table td{border-color:var(--lline)}
+html[data-theme="linear"] main summary[style*="background"],html[data-theme="linear"] main span[style*="background"]{background-image:linear-gradient(rgba(0,0,0,.36),rgba(0,0,0,.36))!important;color:#fff}
+html[data-theme="linear"] main summary[style*="background"] small,html[data-theme="linear"] main span[style*="background"] small{color:inherit}
+html[data-theme="linear"] th.th-o{background-image:linear-gradient(rgba(0,0,0,.18),rgba(0,0,0,.18))}
+/* الورقة (صفحات الخطة التي تُطبع وتُصدَّر): تبقى بيضاء بصرياً داخل الواجهة الداكنة */
+html[data-theme="linear"] .pg{background:#fff;color:#222;border-radius:14px;box-shadow:0 14px 50px rgba(0,0,0,.4)}
+html[data-theme="linear"] .pg input,html[data-theme="linear"] .pg select,html[data-theme="linear"] .pg textarea{background:#fff;color:#222;border:1px solid #d9dbe3}
+html[data-theme="linear"] .pg input::placeholder{color:#889}
+html[data-theme="linear"] .pg label{color:#556}
+html[data-theme="linear"] .pg small,html[data-theme="linear"] .pg .small{color:#667}
+html[data-theme="linear"] .pg button{background:#3A7F53;color:#fff;font-weight:400;border:0;box-shadow:none}
+html[data-theme="linear"] .pg button.sec{background:#e8ecef;color:#253464;border:0}
+html[data-theme="linear"] .pg button.o{background:#CA562F;color:#fff;border:0}
+html[data-theme="linear"] .pg button.r{background:#b3261e;color:#fff;border:0}
+html[data-theme="linear"] .pg .gdw{background:#f8f9fe}
+html[data-theme="linear"] .pg select option{background:#fff;color:#222}
+/* الصفحة الرئيسية والبطاقة الترحيبية */
+html[data-theme="linear"] .home{color:#fff}
+html[data-theme="linear"] .splash{border:1px solid var(--lline);box-shadow:0 0 60px rgba(59,130,246,.18)}
+/* شاشة الدخول: زجاج داكن ولمعان ناعم (شعار الفيديو/الصورة كما هو) */
+html[data-theme="linear"] body.gating,html[data-theme="linear"] #gate{background:radial-gradient(800px 520px at 80% -10%,rgba(59,130,246,.30),transparent 62%),radial-gradient(700px 500px at 5% 110%,rgba(34,197,94,.14),transparent 62%),#0b1329}
+html[data-theme="linear"] .gcard{background:rgba(255,255,255,.06);border:1px solid var(--lline2);box-shadow:0 20px 70px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.08);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);color:var(--ltext);border-radius:20px}
+html[data-theme="linear"] .gcard h2,html[data-theme="linear"] .gcard h3{color:#fff}
+html[data-theme="linear"] .gcard [style*="color:#253464"],html[data-theme="linear"] #gate [style*="color:#253464"]{color:#fff!important}
+html[data-theme="linear"] .gcard [style*="color:#a33"],html[data-theme="linear"] #gate [style*="color:#a33"]{color:#fca5a5!important}
+html[data-theme="linear"] .gdev{background:var(--lpanel2);color:#e8ecf8;border:1px solid var(--lline)}
+html[data-theme="linear"] .gerr{background:rgba(248,113,113,.10);border-radius:8px;padding:4px 8px}
+/* مؤشر الحصص العائم */
+html[data-theme="linear"] .hud{background:rgba(15,26,56,.78);border-color:var(--lline2);color:#e8ecf8;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+html[data-theme="linear"] .hud .hudh,html[data-theme="linear"] .hud .hudmt{color:#fff}
+html[data-theme="linear"] .hud .huddy,html[data-theme="linear"] .hud .hudcl,html[data-theme="linear"] .hud .hudcols,html[data-theme="linear"] .hud .hudcols .hudq,html[data-theme="linear"] .hud .hudcols .huda{color:var(--lmut)}
+html[data-theme="linear"] .hud .huda{color:#fff}
+html[data-theme="linear"] .hud .hudbtn,html[data-theme="linear"] .hud .hudchip{background:var(--lpanel2);color:#e8ecf8;border:1px solid var(--lline2)}
+html[data-theme="linear"] .hud .hudchip.hf-sel{background:var(--lacc);color:var(--lacc-d)}
+html[data-theme="linear"] .hud .hudr{border-top-color:var(--lline)}
+html[data-theme="linear"] .hud .hudr.hs-low .hudq,html[data-theme="linear"] .hud .hudsum.hs-low{color:#fca5a5}
+html[data-theme="linear"] .hud .hudr.hs-ok .hudq,html[data-theme="linear"] .hud .hudsum.hs-ok,html[data-theme="linear"] .hud .hudok{color:#4ade80}
+html[data-theme="linear"] .hud .hudr.hs-over .hudq{color:#fbbf24}
+html[data-theme="linear"] .hud .hudr.hf-neu .hudq,html[data-theme="linear"] .hud .hudr.hf-neu.hs-ok .hudq{color:#bcd0ff}
+html[data-theme="linear"] .hud .hudr.hs-low .huda small{color:#fca5a5}
+html[data-theme="linear"] .hud .hudr.hs-over .huda small{color:#fbbf24}
+html[data-theme="linear"] .hud .hudwarn{color:var(--lwarn)}
+/* محرر الحصص (بنك الوجبات) والمربع العائم */
+html[data-theme="linear"] .bank .bk{background:var(--lpanel);border-color:var(--lline)}
+html[data-theme="linear"] .bank .bkh{background:linear-gradient(90deg,rgba(59,130,246,.16),transparent);color:#fff}
+html[data-theme="linear"] .bank .bkc{color:var(--lmut)}
+html[data-theme="linear"] .bank .bkr{border-top-color:var(--lline)}
+html[data-theme="linear"] .bank .bkt,html[data-theme="linear"] .bank .bkm small{color:var(--lmut)}
+html[data-theme="linear"] .bank .bkw{background:rgba(245,158,11,.10);border-color:rgba(245,158,11,.4);color:var(--lwarn)}
+html[data-theme="linear"] .bank .bkb{background:var(--lpanel2);color:#cfdaf6}
+html[data-theme="linear"] .bank .bkb.off{background:rgba(248,113,113,.16);color:#fecaca}
+html[data-theme="linear"] .bank .bkb.own{background:rgba(34,197,94,.16);color:#bbf7d0}
+html[data-theme="linear"] .bank .bkb.adm{background:rgba(245,158,11,.16);color:var(--lwarn)}
+html[data-theme="linear"] .bank .bkb.new{background:rgba(129,140,248,.2);color:#c7d2fe}
+html[data-theme="linear"] .bank .bkknob{background:#44527c}
+html[data-theme="linear"] .bank .bksw input:checked+.bkknob{background:var(--lacc)}
+html[data-theme="linear"] .bank .bkcat{background:transparent;color:var(--lmut);border-color:var(--lline2);font-weight:600}
+html[data-theme="linear"] .bank .bkcat.on{background:rgba(34,197,94,.15);border-color:rgba(34,197,94,.55);color:#bbf7d0}
+html[data-theme="linear"] .bank .bkmv{background:var(--lpanel2);color:#dbe3f7}
+html[data-theme="linear"] .bank .bked{background:rgba(15,26,56,.7);border-color:rgba(34,197,94,.45)}
+html[data-theme="linear"] .bank .bked label,html[data-theme="linear"] .bank .bking th{color:var(--lmut)}
+html[data-theme="linear"] .bank .bkerr{color:var(--lerr)}
+html[data-theme="linear"] .bkbuild{background:rgba(15,26,56,.86);border-color:var(--lline2);color:#e8ecf8;box-shadow:0 14px 50px rgba(0,0,0,.5)}
+html[data-theme="linear"] .bkbuild .bkbh{background:linear-gradient(135deg,#1d4ed8,#16a34a);color:#fff}
+html[data-theme="linear"] .bkbuild .bkbb{color:#e8ecf8}
+html[data-theme="linear"] .bkbuild .bkrt td,html[data-theme="linear"] .bkbuild .bkrt th{border-bottom-color:var(--lline);color:#e8ecf8}
+html[data-theme="linear"] .bkbuild .bkrt th{color:var(--lmut)}
+html[data-theme="linear"] .bkbuild .bkwhy,html[data-theme="linear"] .bkbuild .bkhow{color:var(--lmut)}
+html[data-theme="linear"] .bkbuild .bkerr{color:var(--lerr)}
+html[data-theme="linear"] .bkst.ok{background:rgba(34,197,94,.16);color:#bbf7d0}
+html[data-theme="linear"] .bkst.rv{background:rgba(245,158,11,.16);color:var(--lwarn)}
+html[data-theme="linear"] .bkst.ms{background:rgba(248,113,113,.16);color:#fecaca}
+html[data-theme="linear"] .bkst.sk{background:var(--lpanel2);color:#cfdaf6}
+html[data-theme="linear"] .bkbuild .chk{color:#dbe3f7}
+/* مساعد dt/hamed */
+html[data-theme="linear"] .dtpre{background:rgba(255,255,255,.06);color:#dbe3f7;border:1px solid var(--lline)}
+html[data-theme="linear"] .dtp .dtchips,html[data-theme="linear"] .dtp .dtdays,html[data-theme="linear"] .dtp .dtbtns{background:transparent}
+html[data-theme="linear"] .dtp .dth{background:rgba(255,255,255,.06);border-bottom:1px solid var(--lline);color:#fff}
+html[data-theme="linear"] .dtp .dtm{background:rgba(255,255,255,.025)}
+html[data-theme="linear"] .dtp .dtcard{background:var(--lpanel2);border-color:rgba(34,197,94,.55)}
+html[data-theme="linear"] .dt-bl{background:rgba(248,113,113,.12);border-color:rgba(248,113,113,.4);color:#fecaca}
+html[data-theme="linear"] .dt-wn{background:rgba(245,158,11,.10);border-color:rgba(245,158,11,.4);color:var(--lwarn)}
+html[data-theme="linear"] .dt-in{background:rgba(96,165,250,.10);border-color:rgba(96,165,250,.35);color:#bfdbfe}
+html[data-theme="linear"] .dtb{background:rgba(248,113,113,.2);color:#fecaca}
+html[data-theme="linear"] .dtp{background:rgba(13,22,48,.94);border:1px solid var(--lline2);color:#e8ecf8;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+html[data-theme="linear"] .dtp .dtb-b,html[data-theme="linear"] .dtp .dtcard,html[data-theme="linear"] .dtp .dtpre,html[data-theme="linear"] .dtp .dtm,html[data-theme="linear"] .dtp .dtmode,html[data-theme="linear"] .dtp .dtin,html[data-theme="linear"] .dtp .dtsug,html[data-theme="linear"] .dtp .dtchips span{background:var(--lpanel2);color:#e8ecf8;border-color:var(--lline)}
+html[data-theme="linear"] .dtp .dtb-u{background:rgba(34,197,94,.18);color:#eafff1}
+html[data-theme="linear"] .dtp .dtrow,html[data-theme="linear"] .dtp .dtrule,html[data-theme="linear"] .dtp .dtday,html[data-theme="linear"] .dtp .dtchg{color:#dbe3f7;border-color:var(--lline)}
+html[data-theme="linear"] .dtp small,html[data-theme="linear"] .dtp .dtx{color:var(--lmut)}
+/* صفحة المظهر نفسها */
+html[data-theme="linear"] .thcard{background:var(--lpanel);border-color:var(--lline);color:#e8ecf8}
+html[data-theme="linear"] .thcard.on{border-color:var(--lacc);background:rgba(34,197,94,.10)}
+html[data-theme="linear"] .thcard small{color:var(--lmut)}
+html[data-theme="linear"] .thsw.ln{background:radial-gradient(60px 30px at 80% 0,rgba(59,130,246,.45),transparent),#0b1329}
+html[data-theme="linear"] .thsw.ln i{background:rgba(255,255,255,.1)}
+html[data-theme="linear"] .thsw.ln b{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);box-shadow:none}
+html[data-theme="linear"] *{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.22) transparent}
+}

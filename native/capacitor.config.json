@@ -1,0 +1,11 @@
+{
+  "appId": "app.hissa.dtahmed",
+  "appName": "حصة",
+  "webDir": "www",
+  "server": { "androidScheme": "https" },
+  "ios": { "contentInset": "never" },
+  "android": { "allowMixedContent": false },
+  "plugins": {
+    "SplashScreen": { "launchShowDuration": 0, "backgroundColor": "#092061", "showSpinner": false }
+  }
+}

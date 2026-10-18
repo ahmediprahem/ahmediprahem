@@ -1,0 +1,21 @@
+{
+  "name": "hissa-mobile",
+  "version": "1.0.0",
+  "private": true,
+  "description": "غلاف Capacitor لتطبيق «حصة» (Hissa by dt/Ahmed hamed) لأندرويد وآيفون. الإصدارات تُثبَّت عند `npm run setup` (لا تثبيت قديم هنا).",
+  "scripts": {
+    "setup": "npm i @capacitor/core @capacitor/app @capacitor/browser @capacitor/device @capacitor/filesystem @capacitor/share @capacitor/splash-screen @capacitor/status-bar && npm i -D @capacitor/cli @capacitor/android @capacitor/ios @capacitor/assets",
+    "web": "node scripts/sync-web.js",
+    "add:android": "npx cap add android",
+    "add:ios": "npx cap add ios",
+    "assets": "npx capacitor-assets generate --iconBackgroundColor \"#092061\" --splashBackgroundColor \"#092061\"",
+    "sync": "npx cap sync",
+    "doctor": "npx cap doctor",
+    "android:open": "npx cap open android",
+    "android:debug": "cd android && ./gradlew assembleDebug",
+    "android:release": "cd android && ./gradlew assembleRelease",
+    "android:aab": "cd android && ./gradlew bundleRelease",
+    "ios:open": "npx cap open ios",
+    "test:web": "cd .. && node tests/test_native.js && node tests/e2e_native.js"
+  }
+}

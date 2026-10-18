@@ -1,0 +1,15 @@
+{
+  "name": "hessa-app",
+  "version": "0.13.0",
+  "private": true,
+  "description": "حصة (Hissa/Hessa) — تطبيق تغذية علاجية عربي مبني على نظام الحصص والبدائل، مع المساعد dt/hamed",
+  "scripts": {
+    "build": "python3 build_web.py",
+    "test": "node tests/run_all.js --node",
+    "test:e2e": "node tests/run_all.js --e2e",
+    "test:word": "node tests/run_all.js --word",
+    "test:all": "node tests/run_all.js"
+  },
+  "devDependencies": { "playwright": "^1.56.0" },
+  "engines": { "node": ">=20" }
+}

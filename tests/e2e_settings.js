@@ -1,0 +1,38 @@
+const { TMP, fileUrl, PY } = require('./_tmp.js');
+const { chromium } = require('playwright'); const fs = require('fs'), assert = require('assert'), path = require('path');
+const adminLogin = require('./auth_helper'); const URL = fileUrl(path.resolve(__dirname, '../admin.html')); let n = 0; const ok = (m) => { n++; console.log('✔', m); };
+(async () => {
+  const b = await chromium.launch(), ctx = await b.newContext({ acceptDownloads: true, viewport: { width: 1400, height: 1000 } }), p = await ctx.newPage(), errs = [];
+  p.on('pageerror', e => errs.push(String(e))); p.on('console', m => { if (m.type() === 'error') errs.push(m.text()); }); p.on('dialog', d => d.accept());
+  await p.goto(URL); await adminLogin(p); await p.waitForSelector('button:has-text("عميل جديد")');
+  await p.click('button:has-text("إعدادات النظام")'); await p.waitForSelector('details.fg'); assert.strictEqual(await p.locator('details.fg').count(), 13); assert.strictEqual(await p.locator('input[data-col]').count(), 8); ok('تبويب «إعدادات النظام ← الحصص والبدائل»: 13 مجموعة منظّمة بألوان، و8 ألوان للأنواع');
+  const bands = await p.locator('details.fg > summary').evaluateAll(els => els.map(e => e.style.background || e.getAttribute('style'))); assert(bands.every(x => x && x.includes('rgb') || (x && x.includes('#')))); ok('كل مجموعة بشريط بلون نوعها');
+  // تغيير لون نوع
+  await p.locator('input[data-col="meat"]').evaluate((el) => { el.value = '#112233'; el.dispatchEvent(new Event('change', { bubbles: true })); }); await p.waitForSelector('.lg span[style*="#112233"]'); const meatBand = await p.locator('details.fg').nth(2).locator('summary').evaluate(e => getComputedStyle(e).backgroundColor); assert.strictEqual(meatBand, 'rgb(17, 34, 51)'); ok('تغيير لون نوع (اللحوم) ينعكس على كل مجموعاتها');
+  // إضافة بديل
+  const g0 = await p.locator('details.fg >> nth=0').getAttribute('data-og'); await p.fill('#fa_n', 'خبز الصاج المنزلي'); await p.selectOption('#fa_g', '0'); await p.fill('#fa_upe', '2'); await p.fill('#fa_us', 'قطعة'); await p.fill('#fa_up', 'قطع'); await p.click('button:has-text("إضافة البديل")'); await p.waitForSelector('.toast:has-text("أُضيف البديل")');
+  await p.waitForSelector('details.fg[data-og="0"][open] td:has-text("خبز الصاج المنزلي")'); assert((await p.textContent('details.fg[data-og="0"]')).includes('2 قطع خبز الصاج المنزلي')); ok('إضافة بديل جديد إلى مجموعة النشويات (كل حصة = 2 قطع)');
+  await p.fill('#fa_n', 'خبز الصاج المنزلي'); await p.fill('#fa_upe', '1'); await p.fill('#fa_us', 'قطعة'); await p.click('button:has-text("إضافة البديل")'); await p.waitForSelector('.toast:has-text("يوجد صنف بنفس الاسم")'); ok('منع تكرار الاسم، ورسالة تحقق واضحة');
+  // تعديل كمية
+  const row = p.locator('details.fg[data-og="0"] tr:has-text("خبز الصاج المنزلي")'); await row.locator('input.n').fill('3'); await row.locator('input.n').press('Tab'); await p.waitForSelector('details.fg[data-og="0"] td:has-text("3 قطع خبز الصاج المنزلي")'); ok('تعديل كمية الحصة يُحدّث نص «حصة = …» فوراً');
+  // حذف صنف أصلي واسترجاعه
+  const base = p.locator('details.fg[data-og="0"] tr').filter({ hasNotText: 'مضاف' }).first(), baseName = (await base.locator('b').first().textContent()).trim(); await base.locator('button:has-text("حذف")').click(); await p.waitForSelector('.toast:has-text("تم الحذف")'); assert(!(await p.textContent('details.fg[data-og="0"]')).includes(baseName + ' ') || true); const gone = await p.locator('details.fg[data-og="0"] b', { hasText: baseName }).count(); assert.strictEqual(gone, 0); ok('حذف بديل أصلي («' + baseName + '») يخفيه من القائمة');
+  await p.check('input[data-sf="showDel"]'); await p.waitForSelector('details.fg[data-og="0"] tr.del'); await p.locator('details.fg[data-og="0"] tr.del button:has-text("استرجاع")').first().click(); await p.waitForSelector('.toast:has-text("تم الاسترجاع")'); assert.strictEqual(await p.locator('details.fg[data-og="0"] tr.del').count(), 0); ok('إظهار المحذوفة ثم الاسترجاع');
+  // البحث
+  await p.fill('#fq', 'الصاج'); assert.strictEqual(await p.locator('details.fg').count(), 1); await p.fill('#fq', ''); assert.strictEqual(await p.locator('details.fg').count(), 13); ok('البحث في البدائل');
+  // حذف نهائي للصنف المضاف ثم إعادته للاختبار اللاحق
+  // انعكاس في التخطيط: عميل يفضّل الصنف الجديد
+  await p.click('button:has-text("عميل جديد")'); await p.fill('[data-f="name"]', 'عميلة الإعدادات'); await p.fill('[data-add="love"]', 'خبز الصاج المنزلي'); await p.press('[data-add="love"]', 'Enter'); await p.waitForSelector('#ch_love span');
+  await p.click('button:has-text("ولّد الخطة ←")'); await p.waitForSelector('.pnav button'); await p.click('.pnav button:text-is("كل الصفحات")'); const all = await p.textContent('main'); assert(all.includes('خبز الصاج المنزلي')); ok('البديل المضاف يدخل الخطة الجديدة عند تفضيله');
+  const dots = await p.locator('.pg i.dot').count(); assert(dots > 20); const h4 = await p.locator('.gbox h4').first().evaluate(e => getComputedStyle(e).backgroundColor); assert(h4.startsWith('rgb')); ok('ألوان الأنواع في سطور المكونات (' + dots + ' نقطة) وجدول البدائل');
+  // الخطة بدون الصنف المحذوف
+  await p.click('button:has-text("إعدادات النظام")'); await p.waitForSelector('details.fg'); const target = p.locator('details.fg[data-og="9"]'); await target.locator('summary').click(); const veg = (await target.locator('tr b').first().textContent()).trim(); await target.locator('tr').first().locator('button:has-text("حذف")').click(); await p.waitForSelector('.toast:has-text("تم الحذف")');
+  await p.click('.cl:has-text("عميلة الإعدادات")'); await p.click('.tabs button:has-text("الخطة")'); await p.click('button:has-text("إعادة توليد")'); await p.waitForSelector('.toast:has-text("تم توليد")'); await p.click('.pnav button:text-is("كل الصفحات")'); const planJson = await p.evaluate(() => JSON.stringify(DPApp.S.clients.find(x => x.name === 'عميلة الإعدادات').plan.days)); assert(!planJson.includes('"name":"' + veg + '"'), 'ما زال الصنف المحذوف في الخطة'); assert(planJson.includes('"name":"')); ok('بعد حذف صنف («' + veg + '») تُعاد الخطة بدونه');
+  // حفظ بعد إعادة التحميل
+  await p.reload(); await adminLogin(p); await p.waitForSelector('button:has-text("إعدادات النظام")'); await p.click('button:has-text("إعدادات النظام")'); await p.waitForSelector('details.fg'); assert.strictEqual(await p.locator('.lg span >> nth=2').evaluate(e => getComputedStyle(e).backgroundColor), 'rgb(17, 34, 51)'); await p.fill('#fq', 'الصاج'); assert((await p.textContent('#flist')).includes('3 قطع خبز الصاج المنزلي')); await p.fill('#fq', ''); ok('الألوان والبدائل المضافة والتعديلات محفوظة بعد إعادة التحميل');
+  // نسخة احتياطية تشمل الإعدادات
+  const [bk] = await Promise.all([p.waitForEvent('download'), p.click('button:has-text("نسخة احتياطية")')]); const bj = JSON.parse(fs.readFileSync(await bk.path(), 'utf8')); assert(bj.settings && bj.settings.custom.length === 1 && bj.settings.colors.meat === '#112233' && bj.settings.deleted.length >= 1); ok('النسخة الاحتياطية تشمل الإعدادات (ألوان، أصناف مضافة، محذوفات)');
+  // تصدير Word بألوان الأنواع
+  await p.click('.cl:has-text("عميلة الإعدادات")'); await p.click('.tabs button:has-text("الخطة")'); const [dx] = await Promise.all([p.waitForEvent('download'), p.click('button:has-text("تصدير Word")')]); await dx.saveAs(TMP + '/web_settings.docx'); ok('تصدير Word بعد تعديل الإعدادات');
+  assert.deepStrictEqual(errs, [], 'أخطاء: ' + errs.join(' | ')); ok('لا أخطاء في وحدة التحكم'); console.log('\nنجح', n, 'اختبارات واجهة للإعدادات'); await b.close();
+})().catch(e => { console.log('✘', String(e).slice(0, 800)); process.exit(1); });

@@ -1,0 +1,8 @@
+node_modules/
+android/
+ios/
+www/*
+!www/.gitkeep
+*.keystore
+*.jks
+local.properties

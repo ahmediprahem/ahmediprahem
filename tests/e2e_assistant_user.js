@@ -1,0 +1,21 @@
+// المستخدم العادي (لا المدير): إعداد المدير يصله، الموافقة له وحده، ورمز الوسيط هو كود تفعيله نفسه ويقبله كود التحقق الحقيقي للوسيط.
+const { TMP, fileUrl, PY } = require('./_tmp.js');
+const { chromium } = require('playwright'); const fs = require('fs'), assert = require('assert'), setup = require('./user_helper');
+let n = 0; const ok = (m) => { n++; console.log('✔', m); };
+(async () => {
+  const b = await chromium.launch(), S = await setup(b), W = await import('../worker/index.mjs');
+  // المدير يفعّل الاتصال ثم يعيد التصدير (يستبدل ملف المستخدمين)
+  await S.A.click('button:has-text("إعدادات النظام")'); await S.A.click('button[data-a="setTab"][data-v="dt"]'); await S.A.fill('[data-ai="url"]', 'https://dt-test.example'); await S.A.press('[data-ai="url"]', 'Tab'); await S.A.check('[data-ai="enabled"]'); await S.A.waitForTimeout(300);
+  const [dl] = await Promise.all([S.A.waitForEvent('download'), S.A.click('button:has-text("تصدير نسخة المستخدمين")')]); await dl.saveAs(S.USERS);
+  const html = fs.readFileSync(S.USERS, 'utf8'), pub = JSON.parse(/window\.ADMIN_PUB=(\{.*?\});/s.exec(html)[1]); const seen = [];
+  const U = await S.activated('u'); await U.context().route('https://dt-test.example/**', async route => { const h = { 'access-control-allow-origin': '*', 'access-control-allow-headers': 'authorization, content-type', 'access-control-allow-methods': 'POST, OPTIONS' }, rq = route.request(); if (rq.method() === 'OPTIONS') return route.fulfill({ status: 204, headers: h }); seen.push({ auth: rq.headers()['authorization'], body: rq.postDataJSON() }); return route.fulfill({ status: 200, headers: Object.assign({ 'content-type': 'application/json' }, h), body: JSON.stringify({ actions: [{ type: 'improve_variety' }], clarify: '' }) }); });
+  let dialogs = []; U.removeAllListeners('dialog'); U.on('dialog', d => { dialogs.push(d.message()); d.accept(); });
+  await U.fill('#lp', S.pw); await U.click('#lbtn'); await U.waitForSelector('aside .sidebtn', { state: 'attached' }); await U.click('button:has-text("عميل جديد")'); await U.fill('[data-f="name"]', 'عميلة المستخدم'); await U.press('[data-f="name"]', 'Tab'); await U.click('button:has-text("ولّد الخطة")'); await U.waitForSelector('.pnav button');
+  await U.click('#dtfab'); await U.waitForSelector('#dtp.open'); assert((await U.textContent('.dtmode')).includes('محلي')); ok('المستخدم: إعداد الاتصال الذي حدّده المدير يصله مع ملفه، لكن الوضع يبقى محلياً حتى يوافق هو');
+  await U.fill('#dtin', 'نوّع لي الأصناف يا دكتور'); await U.click('[data-a="dtSendBtn"]'); await U.waitForFunction(() => document.querySelector('#dtmsgs').textContent.includes('تنويع') || document.querySelector('.dtcard') || document.querySelector('#dtmsgs').textContent.includes('متنوعة'), null, { timeout: 15000 });
+  assert(dialogs.some(d => d.includes('ما يُرسَل فعلاً')), 'لم يُطلب إذن المستخدم'); assert.strictEqual(seen.length, 1); const tok = seen[0].auth.replace('Bearer ', ''); assert.strictEqual(tok.split('.').length, 2);
+  const who = await W.verifyToken(tok, JSON.stringify(pub)); assert(who && who.u === 'sara' && who.v === 1, 'كود التفعيل لم يُقبل لدى الوسيط: ' + JSON.stringify(who)); assert(!JSON.stringify(seen[0].body).includes('عميلة المستخدم'));
+  const other = await (await import('node:crypto')).webcrypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']), otherPub = await (await import('node:crypto')).webcrypto.subtle.exportKey('jwk', other.publicKey); assert.strictEqual(await W.verifyToken(tok, JSON.stringify(otherPub)), null);
+  ok('رمز الوسيط للمستخدم هو كود تفعيله الموقَّع: يقبله كود التحقق الحقيقي للوسيط بمفتاح المدير، ويرفضه بمفتاح آخر؛ وطُلب إذنه وحمولته بلا اسم العميل');
+  assert.deepStrictEqual(S.errs.filter(e => !/Failed to load/.test(e)), []); ok('لا أخطاء'); console.log('\nنجح', n, 'اختبارات المساعد للمستخدم العادي'); await b.close();
+})().catch(e => { console.log('✘', String(e).slice(0, 1000)); process.exit(1); });
