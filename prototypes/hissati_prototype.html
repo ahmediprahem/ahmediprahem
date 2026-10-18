@@ -223,6 +223,38 @@ select.inp option{background:#16224f;color:#fff}
 .opt:hover{border-color:var(--line2)}
 @keyframes up{from{transform:translateY(40px);opacity:0}}
 @keyframes fade{from{opacity:0}}
+/* المحادثة */
+.chatbtn{position:relative;display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 13px;border-radius:14px;background:rgba(111,227,169,.15);border:1px solid rgba(111,227,169,.45);color:#d6ffe9;font-weight:600;font-size:13px}
+.chatbtn .nb,.bell .nb{position:absolute;top:-6px;left:-6px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:var(--coral);color:#3a0d05;font-size:11px;font-weight:700;display:grid;place-items:center;box-shadow:0 0 0 2px var(--bg)}
+.chat{flex:1;min-height:0;display:flex;flex-direction:column}
+.chat .who{display:flex;align-items:center;gap:10px;padding:6px 18px 10px;border-bottom:1px solid var(--line)}
+.thread{flex:1;min-height:0;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:8px;scrollbar-width:none}
+.thread::-webkit-scrollbar{display:none}
+.bub{max-width:82%;padding:9px 12px;border-radius:18px;font-size:14px;line-height:1.6;align-self:flex-start;background:rgba(255,255,255,.1);border:1px solid var(--line);border-bottom-right-radius:6px;overflow-wrap:anywhere}
+.bub.me{align-self:flex-end;background:rgba(111,227,169,.2);border-color:rgba(111,227,169,.4);border-bottom-right-radius:18px;border-bottom-left-radius:6px}
+.bub .cx{display:inline-block;font-size:11px;padding:1px 8px;border-radius:9px;background:rgba(157,187,255,.18);color:#dce6ff;margin-bottom:4px}
+.bub .mt{display:flex;gap:6px;justify-content:flex-end;font-size:11px;color:var(--dim);margin-top:2px}
+.bub .mt .rd{color:var(--mint)}
+.daysep{align-self:center;font-size:11px;color:var(--dim);padding:2px 10px;border-radius:9px;background:rgba(255,255,255,.06)}
+.composer{display:flex;gap:8px;align-items:flex-end;padding:10px 12px calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);background:rgba(12,21,52,.6)}
+.composer textarea{flex:1;min-height:44px;max-height:120px;padding:10px 14px;border-radius:22px;background:rgba(255,255,255,.08);border:1px solid var(--line);color:#fff;resize:none;font-size:15px;line-height:1.5}
+.composer textarea:focus{outline:0;border-color:rgba(111,227,169,.6)}
+.composer .snd{width:44px;height:44px;border-radius:50%;flex:none;display:grid;place-items:center;background:#76e4ae linear-gradient(180deg,#8ff0bf,#5fd49b);color:var(--mintInk)}
+.composer .snd[disabled]{opacity:.4}
+.ctxbar{display:flex;align-items:center;gap:8px;padding:6px 14px 0;font-size:12px;color:#dce6ff}
+.qr{display:flex;gap:6px;overflow-x:auto;padding:8px 12px 0;scrollbar-width:none}
+.qr::-webkit-scrollbar{display:none}
+.qr button{flex:none;min-height:34px;padding:0 12px;border-radius:17px;background:rgba(255,255,255,.07);border:1px solid var(--line);font-size:13px;color:#e8eeff}
+.bell{position:relative;width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:var(--glass);border:1px solid var(--line)}
+.dchat{display:grid;grid-template-columns:260px minmax(0,1fr);min-height:520px;padding:0;overflow:hidden}
+@media (max-width:820px){.dchat{grid-template-columns:1fr}}
+.dchat .conv{border-left:1px solid var(--line);padding:12px;display:flex;flex-direction:column;gap:8px}
+.dchat .ci{display:flex;gap:10px;align-items:center;padding:10px;border-radius:14px;background:rgba(255,255,255,.08);border:1px solid var(--line2);text-align:right;width:100%}
+.dchat .ci .tx{flex:1;min-width:0}
+.dchat .ci .tx div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dchat .pane{display:flex;flex-direction:column;min-height:0;max-height:640px}
+.dtoast{position:fixed;left:max(16px,env(safe-area-inset-left,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:30;max-width:360px;padding:12px 14px;border-radius:16px;background:rgba(20,32,74,.96);border:1px solid var(--line2);box-shadow:0 12px 30px rgba(0,0,0,.45);display:flex;gap:10px;align-items:flex-start;font-size:14px;animation:up .25s}
+.dtoast .ico{color:var(--amber);margin-top:2px}
 .toast{position:absolute;left:16px;right:16px;bottom:96px;z-index:20;padding:12px 14px;border-radius:16px;background:rgba(20,32,74,.95);border:1px solid var(--line2);box-shadow:0 12px 30px rgba(0,0,0,.4);font-size:14px;display:flex;gap:10px;align-items:flex-start;animation:up .25s}
 .toast .ico{color:var(--mint);margin-top:2px}
 
@@ -335,9 +367,11 @@ const fresh = () => ({
   mode: 'client', screen: 'invite', step: 1, pin: '', tab: 'today', day: TODAY, foodCat: 0, foodQ: '', prefCat: 0,
   p: { name: '', phone: '', sex: 'أنثى', age: '', weight: '', height: '', act: 2, goal: 1, cond: [], allg: [], meds: '', notes: '',
        like: { B: [], L: [], D: [], S: [] }, nope: { B: [], L: [], D: [], S: [] }, food: {}, wake: '07:00', sleep: '23:00', nmeals: 5, wdays: [] },
-  consent: false, req: 'none', reqMsg: '', code: '', plan: null, log: {}, weights: [[ -28, 74.2 ], [ -21, 73.6 ], [ -14, 73.1 ], [ -7, 72.4 ]], prefLog: [], pending: [], spTab: 'inbox'
+  consent: false, req: 'none', reqMsg: '', code: '', plan: null, log: {}, weights: [[ -28, 74.2 ], [ -21, 73.6 ], [ -14, 73.1 ], [ -7, 72.4 ]], prefLog: [], pending: [], spTab: 'inbox',
+  msgs: [], unreadD: 0, unreadC: 0, chat: false, ctx: ''
 });
 let S; try { S = JSON.parse(localStorage.getItem(KEY)) || fresh(); } catch (e) { S = fresh(); }
+S = Object.assign(fresh(), S);                      // حقول جديدة لنسخ محفوظة قديمة
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { } };
 let sheet = null, toastT = 0, toastMsg = '';
 const dl = (d) => (S.log[d] = S.log[d] || { ck: {}, sw: {}, note: {}, whole: {}, skip: {}, water: 0 });
@@ -459,6 +493,7 @@ function scrSent() {
     + step(st === 'approved' ? 'ok' : 'now', st === 'approved' ? 'اعتمدك أخصائيك' : 'قيد المراجعة', st === 'approved' ? 'رقم ملفك ' + esc(S.code) : 'عادة خلال يوم عمل')
     + step(st === 'approved' ? 'now' : '', 'خطتك الأولى', 'تظهر هنا يوماً بيوم') + '</div>'
     + '<div class="banner info">' + I('sparkle') + '<span>في هذا النموذج: انتقل إلى «شاشة الأخصائي» في الأعلى لتعتمد الطلب وترسل الخطة، أو اختصر الطريق.</span></div>'
+    + '<button class="btn sec full" data-act="chat" style="position:relative">' + I('msg') + ' راسل أخصائيك' + (S.unreadC ? '<span class="nb" style="position:absolute;top:-6px;left:-6px;min-width:20px;height:20px;border-radius:10px;background:var(--coral);color:#3a0d05;font-size:11px;display:grid;place-items:center">' + S.unreadC + '</span>' : '') + '</button>'
     + '<button class="btn sec full" data-act="simulate">محاكاة: الأخصائي اعتمد وأرسل الخطة</button>'
     + '</div></div></div>';
 }
@@ -472,7 +507,7 @@ function scrApp() {
 function tabToday() {
   const d = TODAY, L = dl(d), [done, n] = itemsOfDay(d), pct = n ? Math.round(done / n * 100) : 0, C = 2 * Math.PI * 40;
   const first = (S.p.name || 'سارة').trim().split(/\s+/)[0];
-  let out = '<div class="hello"><div class="av sm">' + esc(first.charAt(0)) + '</div><div style="flex:1"><div class="dim">' + DATA.dayNames[d] + '</div><h2>أهلاً ' + esc(first) + '</h2></div></div>';
+  let out = '<div class="hello"><div class="av sm">' + esc(first.charAt(0)) + '</div><div style="flex:1"><div class="dim">' + DATA.dayNames[d] + '</div><h2>أهلاً ' + esc(first) + '</h2></div>' + chatBtn() + '</div>';
   out += '<section class="card ring"><svg viewBox="0 0 100 100" role="img" aria-label="التزام اليوم ' + pct + '%"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="10"/><circle cx="50" cy="50" r="40" fill="none" stroke="#6fe3a9" stroke-width="10" stroke-linecap="round" stroke-dasharray="' + C + '" stroke-dashoffset="' + (C * (1 - pct / 100)) + '"/></svg><div style="flex:1"><div class="num">' + pct + '%</div><div class="mut">' + done + ' من ' + n + ' أصناف اليوم</div>'
     + (pct === 100 ? '<div class="dim" style="color:var(--mint)">يوم كامل، أحسنت!</div>' : '<div class="dim">علّم ما أكلته باللمس.</div>') + '</div></section>';
   out += '<div class="stats3"><div class="st"><b>' + DATA.kcal + '</b><small>سعرة هدفك</small></div><div class="st"><b>' + DATA.pro + ' جم</b><small>بروتين</small></div><div class="st"><b>' + (L.water * CUP).toFixed(2).replace(/\.?0+$/, '') + ' / ' + DATA.water.toFixed(1) + '</b><small>لتر ماء</small></div></div>';
@@ -492,7 +527,7 @@ function mealCard(d, si, s, live) {
   if (!live) return '<section class="card"><div class="row" style="justify-content:space-between"><h3>' + esc(s.name) + '</h3><span class="dim">' + s.time + ' • ' + s.kcal + ' سعرة</span></div>' + meal + '<ul class="plist" style="margin-top:8px">' + items + '</ul></section>';
   return '<section class="card meal' + (all ? ' done' : '') + (skip ? ' skip' : '') + '"><div class="mt"><span class="tm">' + s.time + '</span><div style="flex:1;min-width:0"><h3>' + esc(s.name) + '</h3>' + meal + '</div><span class="pc">' + s.kcal + ' سعرة</span></div><div class="items">' + items + '</div>'
     + (L.note[si] ? '<div class="note">' + I('edit') + ' ' + esc(L.note[si]) + '</div>' : '')
-    + '<div class="macts"><button class="btn sm sec" data-act="whole" data-v="' + si + '">' + I('check') + (all ? ' تمّت' : ' أكلتها كاملة') + '</button><button class="btn sm sec" data-act="note" data-v="' + si + '">' + I('edit') + ' أضفت / ملاحظة</button><button class="btn sm sec" data-act="skip" data-v="' + si + '">' + (skip ? 'تراجع' : 'لم آكلها') + '</button></div></section>';
+    + '<div class="macts"><button class="btn sm sec" data-act="whole" data-v="' + si + '">' + I('check') + (all ? ' تمّت' : ' أكلتها كاملة') + '</button><button class="btn sm sec" data-act="note" data-v="' + si + '">' + I('edit') + ' أضفت / ملاحظة</button><button class="btn sm sec" data-act="skip" data-v="' + si + '">' + (skip ? 'تراجع' : 'لم آكلها') + '</button><button class="btn sm sec" data-act="ask" data-v="' + si + '">' + I('msg') + ' اسأل عنها</button></div></section>';
 }
 function tabPlan() {
   const chips = DATA.dayNames.map((n, i) => { const [a, b] = itemsOfDay(i); return '<button class="' + (S.day === i ? 'on' : '') + (i === TODAY ? ' today' : '') + '" data-act="day" data-v="' + i + '"><b>' + n.replace('ال', '') + '</b><span>' + (b ? Math.round(a / b * 100) : 0) + '%</span></button>'; }).join('');
@@ -546,11 +581,56 @@ function sheetHtml() {
   return '<div class="sheet-bg" data-act="close"></div><div class="sheet" role="dialog" aria-label="' + h.replace(/<[^>]+>/g, '') + '"><div class="grab"></div><div class="sh"><h2>' + h + '</h2><button class="back" data-act="close" aria-label="إغلاق">' + I('x') + '</button></div><div class="sb">' + b + '</div></div>';
 }
 
+// ---------- المحادثة بين العميل والأخصائي
+const CLIENT_Q = ['عندي سؤال عن خطتي', 'لم أستطع الالتزام اليوم', 'أريد تبديل وجبة', 'أشعر بالجوع بين الوجبات'];
+const DR_Q = ['أحسنتِ، استمري على هذا', 'بدّلي من زر ⇄ بأي بديل من نفس المجموعة', 'سأعدّل خطتك اليوم وأرسلها لك', 'اشربي كوب ماء وانتظري 20 دقيقة قبل السناك'];
+const hm = (ts) => { const d = new Date(ts); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); };
+function chatBtn() { return '<button class="chatbtn" data-act="chat">' + I('msg') + 'راسل الأخصائي' + (S.unreadC ? '<span class="nb" aria-label="' + S.unreadC + ' رسائل جديدة">' + S.unreadC + '</span>' : '') + '</button>'; }
+function bubbles(me) {
+  if (!S.msgs.length) return '';
+  return '<span class="daysep">اليوم</span>' + S.msgs.map((m) => {
+    const mine = m.from === me;
+    return '<div class="bub' + (mine ? ' me' : '') + '">' + (m.ctx ? '<span class="cx">بخصوص: ' + esc(m.ctx) + '</span><br>' : '') + esc(m.t)
+      + '<div class="mt"><span>' + hm(m.ts) + '</span>' + (mine ? '<span class="' + (m.read ? 'rd' : '') + '">' + (m.read ? '✓✓ قُرئت' : '✓ أُرسلت') + '</span>' : '') + '</div></div>';
+  }).join('');
+}
+function scrChat() {
+  const empty = S.msgs.length ? '' : '<div class="empty" style="padding:20px 6px"><div class="ei" style="background:rgba(111,227,169,.15);color:var(--mint)">' + I('msg') + '</div><p class="mut">اكتب لأخصائيك أي سؤال عن خطتك أو يومك. يصله إشعار فوراً.</p></div>';
+  return '<div class="scr"><div class="chat"><div class="who"><button class="back" data-act="chatClose" aria-label="رجوع" style="width:40px;height:40px;border-radius:13px;display:grid;place-items:center;background:var(--glass);border:1px solid var(--line)">' + I('back') + '</button><div class="av sm">أ</div><div style="flex:1;min-width:0"><b>' + DR.name + '</b><div class="dim">يرد عادة خلال ساعات العمل</div></div></div>'
+    + '<div class="thread" id="thread">' + empty + bubbles('c') + '</div>'
+    + (S.msgs.length ? '' : '<div class="qr">' + CLIENT_Q.map((q) => '<button data-act="qmsg" data-v="' + esc(q) + '">' + esc(q) + '</button>').join('') + '</div>')
+    + (S.ctx ? '<div class="ctxbar">' + I('utensils') + '<span>بخصوص: ' + esc(S.ctx) + '</span><button class="link" data-act="ctxClear" aria-label="إزالة">' + I('x') + '</button></div>' : '')
+    + '<div class="composer"><textarea id="chatIn" rows="1" placeholder="اكتب رسالتك…" aria-label="رسالتك"></textarea><button class="snd" data-act="sendc" aria-label="إرسال">' + I('send') + '</button></div></div></div>';
+}
+function deskChat() {
+  const last = S.msgs[S.msgs.length - 1], nm = S.p.name || 'سارة أحمد';
+  if (!S.msgs.length) return '<section class="panel empty"><div class="ei">' + I('msg') + '</div><h2>لا محادثات بعد</h2><p class="mut">عندما يضغط عميلك «راسل الأخصائي» في «حصتي» تظهر رسالته هنا مع إشعار.</p><button class="btn sec" data-act="mode" data-v="client">افتح تطبيق العميل وأرسل رسالة</button></section>';
+  return '<section class="panel dchat"><div class="conv"><h3>المحادثات</h3><button class="ci"><div class="av sm">' + esc(nm.charAt(0)) + '</div><div class="tx"><b>' + esc(nm) + '</b><div class="dim">' + esc(last.t) + '</div></div><span class="dim">' + hm(last.ts) + '</span></button></div>'
+    + '<div class="pane"><div class="who" style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line)"><div class="av sm">' + esc(nm.charAt(0)) + '</div><div style="flex:1"><b>' + esc(nm) + '</b><div class="dim">' + (S.code ? 'ملف ' + esc(S.code) + ' • ' : '') + 'عميلة عبر «حصتي»</div></div>' + (S.plan ? '<button class="btn sm sec" data-act="sptab" data-v="follow">' + I('pulse') + ' متابعتها</button>' : '') + '</div>'
+    + '<div class="thread" id="thread">' + bubbles('d') + '</div>'
+    + '<div class="qr">' + DR_Q.map((q) => '<button data-act="qmsgD" data-v="' + esc(q) + '">' + esc(q) + '</button>').join('') + '</div>'
+    + '<div class="composer"><textarea id="dChatIn" rows="1" placeholder="اكتب ردك…" aria-label="ردك"></textarea><button class="snd" data-act="sendd" aria-label="إرسال الرد">' + I('send') + '</button></div></div></section>';
+}
+document.addEventListener('keydown', (e) => {     // Enter يرسل، وShift+Enter سطر جديد
+  const t = e.target; if (e.key !== 'Enter' || e.shiftKey || e.isComposing || !t || (t.id !== 'chatIn' && t.id !== 'dChatIn')) return;
+  e.preventDefault(); const b = t.parentNode.querySelector('.snd'); if (b) b.click();
+});
+function sendMsg(from, text) {
+  text = String(text || '').trim(); if (!text) return false;
+  S.msgs.push({ from: from, t: text, ts: Date.now(), ctx: from === 'c' ? S.ctx : '', read: false });
+  if (from === 'c') { S.unreadD++; S.ctx = ''; } else { S.unreadC++; S.msgs.forEach((m) => { if (m.from === 'c') m.read = true; }); }
+  return true;
+}
+let dToast = '', dToastT = 0, focusChat = false;
+function deskToast(m) { dToast = m; clearTimeout(dToastT); dToastT = setTimeout(() => { dToast = ''; render(); }, 4500); }
+
 // ---------- شاشة الأخصائي (داخل «حصة»)
 function desk() {
-  const n = S.req === 'sent' ? 1 : 0;
-  const tabs = '<div class="seg"><button class="' + (S.spTab === 'inbox' ? 'on' : '') + '" data-act="sptab" data-v="inbox">' + I('inbox') + 'طلبات العملاء' + (n ? '<span class="badge">' + n + '</span>' : '') + '</button><button class="' + (S.spTab === 'follow' ? 'on' : '') + '" data-act="sptab" data-v="follow">' + I('pulse') + 'المتابعة</button></div>';
-  return '<div class="desk"><div class="deskin"><div class="dhead"><div class="hlogo">' + LOGO + '</div><div style="flex:1"></div>' + tabs + '</div>' + (S.spTab === 'inbox' ? inbox() : follow()) + '</div></div>';
+  const n = S.req === 'sent' ? 1 : 0, all = n + S.unreadD;
+  const tabs = '<div class="seg"><button class="' + (S.spTab === 'inbox' ? 'on' : '') + '" data-act="sptab" data-v="inbox">' + I('inbox') + 'طلبات العملاء' + (n ? '<span class="badge">' + n + '</span>' : '') + '</button><button class="' + (S.spTab === 'chat' ? 'on' : '') + '" data-act="sptab" data-v="chat">' + I('msg') + 'المحادثات' + (S.unreadD ? '<span class="badge">' + S.unreadD + '</span>' : '') + '</button><button class="' + (S.spTab === 'follow' ? 'on' : '') + '" data-act="sptab" data-v="follow">' + I('pulse') + 'المتابعة</button></div>';
+  const bell = '<button class="bell" data-act="bell" aria-label="الإشعارات' + (all ? ': ' + all + ' جديدة' : '') + '"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>' + (all ? '<span class="nb">' + all + '</span>' : '') + '</button>';
+  const body = S.spTab === 'inbox' ? inbox() : S.spTab === 'chat' ? deskChat() : follow();
+  return '<div class="desk"><div class="deskin"><div class="dhead"><div class="hlogo">' + LOGO + '</div><div style="flex:1"></div>' + bell + tabs + '</div>' + body + '</div></div>' + (dToast ? '<div class="dtoast" role="status">' + I('msg') + '<span>' + dToast + '</span></div>' : '');
 }
 function inbox() {
   if (S.req === 'none') return '<section class="panel empty"><div class="ei">' + I('inbox') + '</div><h2>لا طلبات جديدة</h2><p class="mut">أرسل رابط «حصتي» لعميلك على واتساب. عندما يكمل التسجيل يظهر طلبه هنا.</p><div class="row" style="flex-wrap:wrap;justify-content:center"><button class="btn sec" data-act="mode" data-v="client">املأ التسجيل كعميل</button><button class="btn" data-act="sample">أرسل طلباً تجريبياً</button></div></section>';
@@ -608,16 +688,21 @@ function foodInPlan(f) { return S.plan && S.plan.some((d) => d.slots.some((s) =>
 // ---------- العرض
 let lastKey = '';
 function render() {
-  const sc = $('.scroll'), dk = $('.desk'), key = S.mode + S.screen + S.step + S.tab, top = sc ? sc.scrollTop : dk ? dk.scrollTop : 0;
-  const reqBadge = S.req === 'sent' ? '<span class="badge">1</span>' : '';
-  let html = '<div class="topbar"><div class="seg" role="tablist" aria-label="العرض"><button class="' + (S.mode === 'client' ? 'on' : '') + '" data-act="mode" data-v="client">' + I('user') + 'تطبيق العميل</button><button class="' + (S.mode === 'desk' ? 'on' : '') + '" data-act="mode" data-v="desk">' + I('inbox') + 'شاشة الأخصائي' + reqBadge + '</button></div><button class="ghost" data-act="reset">' + I('reset').replace('class="ico"', 'class="ico" style="width:15px;height:15px;vertical-align:-3px"') + ' من البداية</button><span class="proto">نموذج تجريبي — البيانات في متصفحك فقط</span></div>';
+  // فتح المحادثة يعني قراءتها: يُصفَّر عدّاد الطرف الذي فتحها وتظهر «قُرئت» للطرف الآخر
+  if (S.mode === 'desk' && S.spTab === 'chat' && S.unreadD) { S.unreadD = 0; S.msgs.forEach((m) => { if (m.from === 'c') m.read = true; }); }
+  if (S.mode === 'client' && S.chat) { if (S.unreadC) S.unreadC = 0; S.msgs.forEach((m) => { if (m.from === 'd') m.read = true; }); }
+  const sc = $('.scroll'), dk = $('.desk'), key = S.mode + S.screen + S.step + S.tab + S.spTab, top = sc ? sc.scrollTop : dk ? dk.scrollTop : 0;
+  const dn = (S.req === 'sent' ? 1 : 0) + S.unreadD, reqBadge = dn ? '<span class="badge">' + dn + '</span>' : '';
+  let html = '<div class="topbar"><div class="seg" role="tablist" aria-label="العرض"><button class="' + (S.mode === 'client' ? 'on' : '') + '" data-act="mode" data-v="client">' + I('user') + 'تطبيق العميل' + (S.unreadC ? '<span class="badge">' + S.unreadC + '</span>' : '') + '</button><button class="' + (S.mode === 'desk' ? 'on' : '') + '" data-act="mode" data-v="desk">' + I('inbox') + 'شاشة الأخصائي' + reqBadge + '</button></div><button class="ghost" data-act="reset">' + I('reset').replace('class="ico"', 'class="ico" style="width:15px;height:15px;vertical-align:-3px"') + ' من البداية</button><span class="proto">نموذج تجريبي — البيانات في متصفحك فقط</span></div>';
   if (S.mode === 'desk') html += desk();
   else {
-    const scr = S.plan && S.screen === 'app' ? scrApp() : { invite: scrInvite, pin: scrPin, wizard: scrWizard, review: scrReview, sent: scrSent, app: scrSent }[S.screen]();
+    const scr = S.chat ? scrChat() : S.plan && S.screen === 'app' ? scrApp() : { invite: scrInvite, pin: scrPin, wizard: scrWizard, review: scrReview, sent: scrSent, app: scrSent }[S.screen]();
     html += '<div class="stage"><div class="device"><div class="notch"><span>9:41</span><i></i><span>حصتي</span></div>' + scr + sheetHtml() + (toastMsg ? '<div class="toast" role="status">' + I('check') + '<span>' + toastMsg + '</span></div>' : '') + '</div></div>';
   }
   $('#root').innerHTML = html;
   const s2 = $('.scroll') || $('.desk'); if (s2 && key === lastKey) s2.scrollTop = top; lastKey = key;
+  const th = $('#thread'); if (th) th.scrollTop = th.scrollHeight;
+  if (focusChat) { const c = $('#chatIn') || $('#dChatIn'); if (c) c.focus(); focusChat = false; }
   save();
 }
 
@@ -626,7 +711,16 @@ document.addEventListener('click', (e) => {
   const el = e.target.closest('[data-act]'); if (!el || el.tagName === 'SELECT' || el.dataset.act === 'consent') return;
   const a = el.dataset.act, v = el.dataset.v, k = el.dataset.k;
   switch (a) {
-    case 'mode': S.mode = v; break;
+    case 'mode': S.mode = v; if (v === 'desk' && S.unreadD) deskToast('رسالة جديدة من ' + esc(S.p.name || 'سارة أحمد') + ': «' + esc(S.msgs.filter((m) => m.from === 'c').slice(-1)[0].t) + '»'); if (v === 'client' && S.unreadC && !S.chat) toast('ردّ ' + DR.name + ' على رسالتك.'); break;
+    case 'chat': S.chat = true; S.unreadC = 0; sheet = null; break;
+    case 'chatClose': S.chat = false; break;
+    case 'ask': { const sl = S.plan[TODAY].slots[+v]; S.ctx = sl.name + (sl.meal ? ' (' + sl.meal + ')' : ''); S.chat = true; S.unreadC = 0; break; }
+    case 'ctxClear': S.ctx = ''; break;
+    case 'qmsg': sendMsg('c', v); break;
+    case 'sendc': { const t = $('#chatIn'); if (!sendMsg('c', t && t.value)) return; focusChat = true; break; }
+    case 'qmsgD': { const t = $('#dChatIn'); t.value = v; t.focus(); return; }
+    case 'sendd': { const t = $('#dChatIn'); if (!sendMsg('d', t && t.value)) return; focusChat = true; deskToast('وصل ردك إلى «حصتي» مع إشعار للعميلة.'); break; }
+    case 'bell': S.spTab = S.unreadD ? 'chat' : S.req === 'sent' ? 'inbox' : S.spTab; dToast = ''; break;
     case 'reset': S = fresh(); sheet = null; toastMsg = ''; break;
     case 'go': S.screen = v; if (v === 'wizard') S.step = 1; break;
     case 'pin': if (v === '⌫') S.pin = S.pin.slice(0, -1); else if (S.pin.length < 4) S.pin += v; break;
@@ -651,7 +745,7 @@ document.addEventListener('click', (e) => {
     case 'approve': approve(); break;
     case 'askchg': { const box = $('#chgBox'); box.innerHTML = '<div class="row" style="margin-top:10px"><input class="inp" id="chgIn" value="أرجو كتابة جرعة الدواء ووقت تناوله"><button class="btn sm" data-act="sendchg">إرسال</button></div>'; return; }
     case 'sendchg': S.reqMsg = $('#chgIn').value || 'أرجو مراجعة بياناتك'; S.req = 'changes'; break;
-    case 'sendplan': sendPlan(); toast('أُرسلت الخطة إلى «حصتي».'); break;
+    case 'sendplan': sendPlan(); deskToast('أُرسلت الخطة إلى «حصتي»، ووصل للعميلة إشعار.'); break;
     case 'sptab': S.spTab = v; break;
     case 'tab': S.tab = v; break;
     case 'day': S.day = +v; break;
