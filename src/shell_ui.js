@@ -6,7 +6,7 @@ function railBtn(a, icon, label, on, v) { return '<button class="sec sidebtn' + 
 function glassSide() {
   var home = S.view === 'client' && !S.cur, admin = S.mode === 'admin';
   var clx = !home && !S.clOpen; document.body.classList.toggle('clx', clx);        // عمود العملاء يُطوى تلقائياً خارج الرئيسية ليتسع المحتوى (الخطة والجداول)، ويُفتح من «العملاء»
-  var rail = '<nav class="rail" aria-label="التنقل">'
+  var rail = '<nav class="rail" aria-label="التنقل"><p class="two newc"><button data-a="new" data-v="ex" title="عميل جديد">+ عميل جديد</button><button class="o" data-a="new" data-v="ath" title="عميل رياضي">+ عميل رياضي</button></p>'
     + railBtn('home', 'home', 'الرئيسية', home) + (home ? '' : '<button class="sec sidebtn cltog' + (clx ? '' : ' on') + '" data-a="clToggle" aria-expanded="' + (!clx) + '">' + IC('users') + '<span>العملاء</span><em>' + S.clients.length + '</em></button>') + railBtn('bank', 'book', 'محرر الحصص', S.view === 'bank') + railBtn('settings', 'settings', 'إعدادات النظام', S.view === 'settings')
     + (admin ? '<div class="sbg' + sbc('tools') + '" data-g="tools"><button class="sbh" data-a="sbg" data-v="tools" aria-expanded="' + (SBG.tools === 0 ? 'false' : 'true') + '">أدوات الإدارة <i>' + IC('chevron') + '</i></button><div class="sbb">'
       + railBtn('users', 'users', 'المستخدمون والأجهزة', S.view === 'users') + railBtn('exportUsers', 'package', 'تصدير نسخة المستخدمين') + railBtn('exportSite', 'globe', 'تصدير موقع للنشر (ZIP)') + '</div></div>' : '')
@@ -15,7 +15,7 @@ function glassSide() {
     + '</nav>';
   var cls = '<section class="clients" aria-label="العملاء"><div class="clh"><b>العملاء</b><span class="cnt">' + S.clients.length + '</span></div>'
     + '<label class="srch">' + IC('search') + '<input id="q" placeholder="بحث بالاسم أو الكود أو الجوال" oninput="DPApp.relist()" aria-label="بحث في العملاء"></label>'
-    + '<p class="two"><button data-a="new" data-v="ex">' + IC('userPlus') + ' عميل جديد</button><button class="o" data-a="new" data-v="ath">' + IC('dumbbell') + ' عميل رياضي</button></p><div id="lst">' + list() + '</div></section>';
+    + '<div id="lst">' + list() + '</div></section>';
   $('aside').innerHTML = rail + cls; tabbar();
 }
 function tabbar() {                                                // شريط سفلي للجوال (يظهر بالـ CSS على الشاشات الصغيرة في الثيم الزجاجي فقط)
