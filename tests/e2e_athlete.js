@@ -6,9 +6,8 @@ const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html')); let n = 0; cons
   p.on('pageerror', e => errs.push(String(e))); p.on('console', m => { if (m.type() === 'error' && !/Failed to load resource/.test(m.text())) errs.push(m.text()); }); p.on('dialog', d => d.accept(d.type() === 'prompt' ? (ans !== null ? ans : 'x') : undefined));
   await p.goto(ADMIN); await login(p);
   // ---- الصفحة الرئيسية بالشعار المتحرك
-  const vid = await p.evaluate(() => { const v = document.querySelector('video.splash'), plate = document.querySelector('.logoplate.splash'); return { v: v ? { src: v.src.slice(0, 22), poster: v.poster.slice(0, 22), muted: v.muted, pi: v.playsInline } : null, plate: !!plate, asset: window.ASSETS.splash.slice(0, 22), poster: window.ASSETS.poster.slice(0, 22) }; });
-  // Chromium المستعمل في الاختبار لا يفك H.264 فيستبدل التطبيق الفيديو بلوحة الشعار (احتياط مقصود)؛ في Chrome/Safari الحقيقيين يبقى الفيديو
-  assert(vid.asset === 'data:video/mp4;base64,' && vid.poster.startsWith('data:image/jpeg')); assert(vid.v ? (vid.v.src === 'data:video/mp4;base64,' && vid.v.poster.startsWith('data:image/jpeg') && vid.v.muted && vid.v.pi) : vid.plate, 'لا فيديو ولا لوحة شعار احتياطية'); ok('الصفحة الرئيسية: الشعار المتحرك مضمَّن بلا اتصال خارجي (صامت، playsinline، صورة ختامية)، وإن تعذّر فك الفيديو تظهر لوحة الشعار بدل فراغ');
+  const sp = await p.evaluate(() => { const h = document.querySelector('.hxlogo.splash'); return { svg: !!(h && h.querySelector('svg .hx-mark') && h.querySelector('svg .hx-word')), video: !!document.querySelector('video.splash'), net: [...document.querySelectorAll('.hxlogo [href],.hxlogo [src]')].length }; });
+  assert(sp.svg && !sp.video && sp.net === 0, JSON.stringify(sp)); ok('الصفحة الرئيسية: شعار «حصة» الجديد متجهي متحرك مضمَّن بلا اتصال خارجي ولا فيديو');
   // ---- عميل رياضي
   await p.click('button:has-text("عميل رياضي")'); await p.waitForSelector('#atg'); await p.fill('[data-f="name"]', 'كابتن رياضي'); await p.fill('[data-f="weight"]', '80'); await p.fill('[data-f="height"]', '178'); await p.fill('[data-f="age"]', '28'); await p.press('[data-f="age"]', 'Tab');
   let box = await p.textContent('#atg'); assert(box.includes('1778') && box.includes('Mifflin') && box.includes('2836') && box.includes('3.4')); ok('نموذج الرياضي: BMR=1778 (ميفلين) وسعرات الأحد 2836 كما في الإكسل، والماء 3.4 لتر');
