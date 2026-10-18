@@ -14,13 +14,14 @@
   window.addEventListener('error', function (e) { showFatal((e.message || 'خطأ غير معروف') + (e.filename ? ' — ' + String(e.filename).split('/').pop() + ':' + e.lineno : '')); });
   window.addEventListener('unhandledrejection', function (e) { showFatal(String(e.reason && e.reason.message || e.reason || 'خطأ غير معروف')); });
   // ---------- إعدادات واجهة الدخول: خلفية (افتراضي/لون/صورة) + فيديو أو شعار (افتراضي/مخصص/ثابت/بلا)
-  var GATE_DEF = { bgType: 'default', bgColor: '#092061', bgImage: '', splash: 'video', video: '' };
+  var GATE_DEF = { bgType: 'default', bgColor: '#152257', bgImage: '', splash: 'video', video: '' };
   function gateCfg() { return Object.assign({}, GATE_DEF, window.HGateCfg || (window.BASE_SETTINGS && window.BASE_SETTINGS.gate) || {}); }
   function bgCss(cfg) { cfg = cfg || gateCfg(); if (cfg.bgType === 'image' && cfg.bgImage) return 'url(' + cfg.bgImage + ') center/cover no-repeat ' + (cfg.bgColor || GATE_DEF.bgColor); if (cfg.bgType === 'color' && cfg.bgColor) return cfg.bgColor; return window.ASSETS.splashBg; }
-  function splashHtml(cfg, cls) {
+  function splashHtml(cfg, cls) {                              // 'video' (الافتراضي) = الشعار المتجهي المتحرك؛ 'custom' = فيديو المدير؛ 'logo' = ثابت على لوحة بيضاء
     cfg = cfg || gateCfg(); var m = cfg.splash || 'video'; if (m === 'none') return '';
     if (m === 'logo') return '<div class="logoplate ' + cls + '"><img src="' + window.ASSETS.light + '" alt="حصة"></div>';
-    var custom = m === 'custom' && cfg.video; return '<video class="' + cls + '" src="' + (custom ? cfg.video : window.ASSETS.splash) + '" ' + (custom ? '' : 'poster="' + window.ASSETS.poster + '" ') + (reduced() ? '' : 'autoplay ') + 'muted playsinline preload="auto"></video>';
+    if (m === 'custom' && cfg.video) return '<video class="' + cls + '" src="' + cfg.video + '" ' + (reduced() ? '' : 'autoplay ') + 'muted playsinline preload="auto"></video>';
+    return '<div class="hxlogo ' + (reduced() ? '' : 'hxanim ') + cls + '">' + window.ASSETS.logoSvg + '</div>';
   }
   function bindVideo(root) {                                   // إن تعذّر تشغيل الفيديو (ترميز غير مدعوم) يظهر الشعار الثابت بدل فراغ
     [].forEach.call(root.querySelectorAll('video'), function (v) {
