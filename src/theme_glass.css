@@ -201,6 +201,7 @@ html[data-theme="glass"] *{scrollbar-width:thin;scrollbar-color:rgba(255,255,255
   html[data-theme="glass"] .ghome .hero .splash{width:70%;margin:0 auto}
   html[data-theme="glass"] .dtp{bottom:calc(88px + env(safe-area-inset-bottom,0px));height:min(70vh,640px)}
   html[data-theme="glass"] .toast{bottom:calc(92px + env(safe-area-inset-bottom,0px))}
+  html[data-theme="glass"] .hud{bottom:calc(146px + env(safe-area-inset-bottom,0px));max-height:40vh}
 }
 /* متصفح بلا دعم للتمويه: خلفيات أعتم لتبقى النصوص مقروءة */
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
