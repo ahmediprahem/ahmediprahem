@@ -30,6 +30,14 @@ const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html'));
   await p.click('.ghome .recent .cl'); await p.click('.tabs button[data-v="plan"]'); await p.click('button:has-text("ولّد الخطة")'); await p.waitForSelector('.pnav button'); await p.click('.pnav button[data-v="0"]'); await p.waitForSelector('#hud .hudr');
   const geo = await p.evaluate(() => { const h = document.getElementById('hud').getBoundingClientRect(), m = document.querySelector('main').getBoundingClientRect(); return { hr: h.right, ml: m.left }; });
   assert(geo.hr <= geo.ml, JSON.stringify(geo)); assert(await vis('.mxrow [data-a="html"]')); assert.strictEqual(await vis('.mxrow .mxb'), false);
+  const lum = (c) => { const m = c.match(/[\d.]+/g).map(Number), f = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }; return 0.2126 * f(m[0]) + 0.7152 * f(m[1]) + 0.0722 * f(m[2]); };
+  const pgStyle = () => p.evaluate(() => { const g = getComputedStyle(document.querySelector('.pg')), f = document.querySelector('.pg table.dt td.f'); return { bg: g.backgroundImage, col: g.color, fcol: f ? getComputedStyle(f).color : '' }; });
+  const scr = await pgStyle(); assert(scr.bg.includes('gradient') && lum(scr.col) > 0.8 && lum(scr.fcol) > 0.6, JSON.stringify(scr));
+  await p.emulateMedia({ media: 'print' }); const pr = await p.evaluate(() => { const g = getComputedStyle(document.querySelector('.pg')); return { bg: g.backgroundColor, img: g.backgroundImage, col: g.color }; }); await p.emulateMedia({ media: 'screen' });
+  assert(pr.bg === 'rgb(255, 255, 255)' && pr.img === 'none' && lum(pr.col) < 0.1, JSON.stringify(pr));
+  const [dh] = await Promise.all([p.waitForEvent('download'), p.click('.mxrow [data-a="html"]')]); const hp = require('./_tmp.js').TMP + '/glass_client.html'; await dh.saveAs(hp); const hh = require('fs').readFileSync(hp, 'utf8');
+  assert(!hh.includes('data-theme') && !hh.includes('Hissa Plex') && !hh.includes('saturate(170%)') && !hh.includes('rgba(255,255,255,.085)') && hh.includes('class="pg"'), 'تسرّب الثيم إلى ملف العميل');
+  ok('صفحات الخطة على الشاشة بشكل النظام الداكن ونص فاتح واضح، وفي الطباعة وملف HTML للعميل تبقى بيضاء كما هي');
   assert.strictEqual(await p.locator('.pg .ico-w').count(), 0); ok('صفحة اليوم: مؤشر الحصص في مساحة محجوزة لا تغطي الجدول، وكل إجراءات الخطة ظاهرة على الحاسوب، وصفحات الخطة بلا تحويل أيقونات');
   // ---- 6) الجوال
   const m = await b.newContext({ ...devices['Pixel 7'] }), mp = await m.newPage(); mp.on('pageerror', e => errs.push('mobile:' + e)); mp.on('dialog', d => d.accept());

@@ -496,6 +496,65 @@ html[data-theme="glass"] .gcard input[type=password],html[data-theme="glass"] .g
 html[data-theme="glass"] .gcard button:not(.sec):not(.sm){width:100%;height:48px;border-radius:16px;font-size:16px;margin-top:6px}
 html[data-theme="glass"] .gcard .chk{font-size:13px;line-height:1.6}
 
+/* ---------- صفحات الخطة على الشاشة بنفس شكل النظام (زجاج داكن) ----------
+   الطباعة وPDF وWord وصفحة HTML للعميل لا تتأثر: هذه القواعد للشاشة فقط ولا تُنسخ إلى ملفات التصدير (تُبنى من وسم style الأول). */
+html[data-theme="glass"] .pg{background:linear-gradient(160deg,rgba(255,255,255,.085),rgba(255,255,255,.035));color:var(--ltext);border:1px solid var(--lline);border-radius:20px;box-shadow:var(--ghi);padding:16px 12px}
+html[data-theme="glass"] .pg .phd h1{color:var(--lacc)}
+html[data-theme="glass"] .pg .phd .sub,html[data-theme="glass"] .pg .phd .br{color:var(--lmut)}
+html[data-theme="glass"] .pg .ph,html[data-theme="glass"] .pg table.dt td.f b{color:#ffb38f}
+html[data-theme="glass"] .pg .plogo{background:#fff;border-radius:12px;padding:6px 10px;box-shadow:var(--ghi)}   /* الشعار على لوحة بيضاء صغيرة فيبقى واضحاً بأي لون */
+html[data-theme="glass"] .pg p[style*="color:#253464"]{color:#dce6ff!important}
+html[data-theme="glass"] .pg td[style*="background:#fff"]{background:rgba(255,255,255,.06)!important;border-color:var(--lline2)!important;color:#fff!important}   /* خانات بخلفية بيضاء مضمّنة (أوقات الوجبات) */
+html[data-theme="glass"] .pg .mh small,html[data-theme="glass"] .pg .mh span{color:rgba(255,255,255,.92)}
+/* الألوان الأساسية للخطة تبقى؛ الكحلي يفتح قليلاً ليتميّز عن الخلفية الداكنة */
+html[data-theme="glass"] .pg .th-n,html[data-theme="glass"] .pg table.at th,html[data-theme="glass"] .pg table.gt tr.tot td,html[data-theme="glass"] .pg table.dt tr.tot td,html[data-theme="glass"] .pg .cards .b,html[data-theme="glass"] .pg .kp .b{background:#33489a;color:#fff}
+html[data-theme="glass"] .pg table th:not([class*="th-"]){color:#fff}
+/* الخانات البيضاء تصير زجاجية */
+html[data-theme="glass"] .pg table.gt td.v,html[data-theme="glass"] .pg table.st td.v,html[data-theme="glass"] .pg table.dt td.v{background:rgba(255,255,255,.06);border-color:var(--lline2);color:#fff}
+html[data-theme="glass"] .pg table.dt td.f{background:rgba(255,255,255,.04);border-color:var(--lline2);color:#e8eeff}
+html[data-theme="glass"] .pg table.p td.f{background:rgba(255,255,255,.06);border-color:var(--lline2);color:#fff}
+html[data-theme="glass"] .pg input,html[data-theme="glass"] .pg select,html[data-theme="glass"] .pg textarea{background:rgba(255,255,255,.08);color:#fff;border:1px solid var(--lline2)}
+html[data-theme="glass"] .pg input::placeholder{color:#8f9cc4}
+html[data-theme="glass"] .pg input.n,html[data-theme="glass"] .pg input.tm,html[data-theme="glass"] .pg input.le{color:#fff;border-radius:10px}
+html[data-theme="glass"] .pg select option{background:#16224f;color:#fff}
+html[data-theme="glass"] .pg label,html[data-theme="glass"] .pg small,html[data-theme="glass"] .pg .small{color:var(--lmut)}
+html[data-theme="glass"] .pg button{background:#76e4ae linear-gradient(180deg,#8ff0bf,#5fd49b);color:var(--lacc-d);font-weight:700;border:1px solid rgba(255,255,255,.35);box-shadow:inset 0 1px 0 rgba(255,255,255,.55)}
+html[data-theme="glass"] .pg button.sec{background:rgba(255,255,255,.1);color:#e8eeff;border:1px solid var(--lline);box-shadow:var(--ghi)}
+html[data-theme="glass"] .pg button.o{background:rgba(255,160,100,.22);color:#ffd9bf;border:1px solid rgba(255,160,100,.45);box-shadow:none}
+html[data-theme="glass"] .pg button.r{background:rgba(255,100,100,.2);color:#ffd0d0;border:1px solid rgba(255,120,120,.45);box-shadow:none}
+html[data-theme="glass"] .pg .mh .sec{background:rgba(255,255,255,.22);color:#fff}
+/* بطاقات الوجبات (الرياضي والجوال) */
+html[data-theme="glass"] .pg .mcard{background:rgba(255,255,255,.05);border-color:var(--lline);color:var(--ltext)}
+html[data-theme="glass"] .pg table.at td{border-top-color:var(--lline);color:#f4f7ff}
+html[data-theme="glass"] .pg table.at tr{border-top-color:var(--lline)}
+html[data-theme="glass"] .pg table.at td[data-l]::before,html[data-theme="glass"] .pg table.dt td.v::before{color:var(--lmut)}
+html[data-theme="glass"] .pg table.at tr.mt td{background:rgba(111,227,169,.14);color:#d6ffe9}
+html[data-theme="glass"] .pg .madd{background:rgba(255,255,255,.04)}
+html[data-theme="glass"] .pg table.dt tr:not(.sum){background:rgba(255,255,255,.04);border-color:var(--lline)}
+html[data-theme="glass"] .pg .tcards div{background:rgba(255,255,255,.07);border:1px solid var(--lline)}
+html[data-theme="glass"] .pg .tcards b{color:#fff}
+html[data-theme="glass"] .pg .tcards small,html[data-theme="glass"] .pg .tcards span{color:var(--lmut)}
+html[data-theme="glass"] .pg .okb{background:rgba(111,227,169,.16);color:#bbf7d0}
+html[data-theme="glass"] .pg .badb{background:rgba(255,120,100,.18);color:#ffd0c8}
+html[data-theme="glass"] .pg .hm,html[data-theme="glass"] .pg .hmdef{background:rgba(157,187,255,.16);color:#dce6ff}
+html[data-theme="glass"] .pg .diff.bad{color:#fca5a5}
+html[data-theme="glass"] .pg .gbox div{border-color:var(--lline2)}
+html[data-theme="glass"] .pg .gbox p{border-top-color:var(--lline)}
+html[data-theme="glass"] .pg .fres{background:#18265a;border-color:var(--lline2)}
+/* توزيع الحصص على الأيام */
+html[data-theme="glass"] .pg .gdw{background:rgba(255,255,255,.04);border-color:rgba(157,187,255,.45)}
+html[data-theme="glass"] .pg .gdw h3{color:#fff}
+html[data-theme="glass"] .pg .gdt{background:transparent}
+html[data-theme="glass"] .pg .gdt th,html[data-theme="glass"] .pg .gdt td{border-color:var(--lline)}
+html[data-theme="glass"] .pg .gdt th{background:rgba(255,255,255,.08);color:#dce6ff}
+html[data-theme="glass"] .pg .gdf td{background:rgba(255,255,255,.05)}
+html[data-theme="glass"] .pg .gd-ok{color:#4ade80}
+html[data-theme="glass"] .pg .gd-bad{color:#fca5a5}
+html[data-theme="glass"] .pg .gdi.over,html[data-theme="glass"] .pg .gdh.chg{background:rgba(255,210,122,.18);border-color:#e0a32e}
+html[data-theme="glass"] .pg .gdi.bad{background:rgba(255,120,100,.2);border-color:#e06a5a}
+html[data-theme="glass"] .pg .gdc{color:var(--lwarn)}
+html[data-theme="glass"] .pg .gdwarn{background:rgba(255,210,122,.1);border-color:rgba(255,210,122,.4);color:var(--lwarn)}
+
 /* ---------- العناصر العائمة ---------- */
 html[data-theme="glass"] .hud,html[data-theme="glass"] .dtp,html[data-theme="glass"] .bkbuild{border-radius:20px;background:rgba(16,26,62,.72);-webkit-backdrop-filter:var(--gblur);backdrop-filter:var(--gblur);box-shadow:var(--gsh),var(--ghi)}
 @media (min-width:901px){html[data-theme="glass"] .hud{top:calc(var(--hh) + 30px)}}
@@ -521,7 +580,7 @@ html[data-theme="glass"] *{scrollbar-width:thin;scrollbar-color:rgba(255,255,255
 /* ---------- الجوال: درج القائمة + شريط سفلي عائم ---------- */
 @media (max-width:900px){
   html[data-theme="glass"]{--hh:58px}
-  html[data-theme="glass"] header{padding:0 12px;padding-top:env(safe-area-inset-top,0px);height:calc(var(--hh) + env(safe-area-inset-top,0px));gap:8px}
+  html[data-theme="glass"] header{background:rgba(13,22,54,.78);padding:0 12px;padding-top:env(safe-area-inset-top,0px);height:calc(var(--hh) + env(safe-area-inset-top,0px));gap:8px}
   html[data-theme="glass"] .hsrch,html[data-theme="glass"] .uchip b,html[data-theme="glass"] .uchip small{display:none}
   html[data-theme="glass"] .uchip .cav{width:34px;height:34px}
   html[data-theme="glass"] .hlogo{height:38px;margin-inline-start:auto;order:2}
