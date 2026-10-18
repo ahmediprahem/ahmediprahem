@@ -163,3 +163,13 @@ html:is([data-theme="linear"],[data-theme="glass"]) .thsw.ln i{background:rgba(2
 html:is([data-theme="linear"],[data-theme="glass"]) .thsw.ln b{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);box-shadow:none}
 html:is([data-theme="linear"],[data-theme="glass"]) *{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.22) transparent}
 }
+
+/* «حصتي» */
+html:is([data-theme="linear"],[data-theme="glass"]) .hxrh small,html:is([data-theme="linear"],[data-theme="glass"]) .hxkv dt,html:is([data-theme="linear"],[data-theme="glass"]) .hxday .hxex,html:is([data-theme="linear"],[data-theme="glass"]) .hxb small,html:is([data-theme="linear"],[data-theme="glass"]) .hxw small,html:is([data-theme="linear"],[data-theme="glass"]) .hxpl small,html:is([data-theme="linear"],[data-theme="glass"]) .hxtab h3 small{color:var(--lmut)}
+html:is([data-theme="linear"],[data-theme="glass"]) .hxb{background:var(--lpanel2);color:var(--ltext)}
+html:is([data-theme="linear"],[data-theme="glass"]) .hxb.me{background:rgba(34,197,94,.18)}
+html:is([data-theme="linear"],[data-theme="glass"]) .hxbar{background:rgba(255,255,255,.1)}
+html:is([data-theme="linear"],[data-theme="glass"]) .hxbar i{background:var(--lacc)}
+html:is([data-theme="linear"],[data-theme="glass"]) .hxlink{border-color:var(--lline2);background:rgba(0,0,0,.18);color:var(--ltext)}
+html:is([data-theme="linear"],[data-theme="glass"]) .hxday{border-color:var(--lline)}
+html:is([data-theme="linear"],[data-theme="glass"]) .hxinv.made{border-color:var(--lacc);box-shadow:0 0 0 2px var(--lglow)}

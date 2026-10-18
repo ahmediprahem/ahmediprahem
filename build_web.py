@@ -13,9 +13,20 @@ def font_css():
     return out
 def build(mode, tpl):
     t = R('template.html').replace('/*MODE*/', json.dumps(mode)).replace('/*TPL*/', tpl).replace('/*CSS*/', R('style.css')).replace('/*THEMECSS*/', R('theme_linear.css') + font_css() + R('theme_glass.css')).replace('/*ASSETS*/', R('assets.js')).replace('/*DATA*/', R('data.json')).replace('/*ATHLETE*/', R('athlete.json'))
-    for k, f in (('ICONS', 'icons.js'), ('DIGITS', 'digits.js'), ('ENGINE', 'engine.js'), ('ASSIST', 'assistant.js'), ('RECIPE', 'recipe.js'), ('DTICON', 'dt_icon.js'), ('NATIVE', 'native.js'), ('XLSXR', 'xlsx_read.js'), ('ATHIMP', 'athimport.js'), ('ATHENG', 'athlete.js'), ('DOCX', 'docx.js'), ('SEC', 'sec.js'), ('APP', 'app.js'), ('AUTH', 'auth.js')): t = t.replace('/*%s*/' % k, R(f).replace('/*ATHUI*/', R('athlete_ui.js')).replace('/*ASSISTUI*/', R('assistant_ui.js')).replace('/*HUDUI*/', R('hud_ui.js')).replace('/*BANKUI*/', R('bank_ui.js')).replace('/*DAYSUI*/', R('daydist_ui.js')).replace('/*THEMEUI*/', R('theme_ui.js')).replace('/*SHELLUI*/', R('shell_ui.js')) if k == 'APP' else R(f))
+    for k, f in (('ICONS', 'icons.js'), ('DIGITS', 'digits.js'), ('ENGINE', 'engine.js'), ('ASSIST', 'assistant.js'), ('RECIPE', 'recipe.js'), ('DTICON', 'dt_icon.js'), ('NATIVE', 'native.js'), ('XLSXR', 'xlsx_read.js'), ('ATHIMP', 'athimport.js'), ('ATHENG', 'athlete.js'), ('DOCX', 'docx.js'), ('SEC', 'sec.js'), ('HXC', 'hx_crypto.js'), ('APP', 'app.js'), ('AUTH', 'auth.js')): t = t.replace('/*%s*/' % k, R(f).replace('/*ATHUI*/', R('athlete_ui.js')).replace('/*ASSISTUI*/', R('assistant_ui.js')).replace('/*HUDUI*/', R('hud_ui.js')).replace('/*BANKUI*/', R('bank_ui.js')).replace('/*DAYSUI*/', R('daydist_ui.js')).replace('/*THEMEUI*/', R('theme_ui.js')).replace('/*SHELLUI*/', R('shell_ui.js')).replace('/*HXUI*/', R('hissati_ui.js')) if k == 'APP' else R(f))
     t = t.replace('<script>/*ADMIN*/</script>', '<script>' + R('admin.js') + '</script>' if mode == 'admin' else '')
     return t
 user = build('user', 'null'); admin = build('admin', json.dumps(user).replace('</', '<\\/'))
 open(os.path.join(H, 'index.html'), 'w', encoding='utf-8').write(user); open(os.path.join(H, 'admin.html'), 'w', encoding='utf-8').write(admin)
+# «حصتي»: تطبيق العميل ملف واحد (hissati.html)، ونسخة المحطة الوسيطة الجاهزة للصق في Cloudflare (worker/relay/dist/worker.js) وهي تقدّمه على «/»
+import re
+A = R('assets.js'); js = lambda k: json.loads('"' + re.search(k + r':"((?:[^"\\]|\\.)*)"', A).group(1) + '"')
+hx = open(os.path.join(H, 'src', 'hissati', 'template.html'), encoding='utf-8').read().replace('/*FONT*/', font_css()).replace('/*CSS*/', R('hissati/style.css')).replace('/*LOGO*/', json.dumps(js('logoSvg'), ensure_ascii=False).replace('</', '<\\/')).replace('/*HXC*/', R('hx_crypto.js')).replace('/*APP*/', R('hissati/app.js'))
+open(os.path.join(H, 'hissati.html'), 'w', encoding='utf-8').write(hx)
+jsstr = lambda v: json.dumps(v, ensure_ascii=False).replace('\u2028', '\\u2028').replace('\u2029', '\\u2029')
+wk = open(os.path.join(H, 'worker', 'relay', 'index.mjs'), encoding='utf-8').read()
+wk = re.sub(r'/\*HISSATI_HTML\*/.*?/\*END\*/', lambda m: '/*HISSATI_HTML*/' + jsstr(hx) + '/*END*/', wk, count=1, flags=re.S)
+wk = re.sub(r'/\*HISSATI_ICON\*/.*?/\*END\*/', lambda m: '/*HISSATI_ICON*/' + jsstr(js('icon').split(',', 1)[1]) + '/*END*/', wk, count=1, flags=re.S)
+os.makedirs(os.path.join(H, 'worker', 'relay', 'dist'), exist_ok=True); open(os.path.join(H, 'worker', 'relay', 'dist', 'worker.js'), 'w', encoding='utf-8').write(wk)
+print('hissati.html', round(len(hx.encode('utf-8')) / 1024), 'KB | worker/relay/dist/worker.js', round(len(wk.encode('utf-8')) / 1024), 'KB')
 print('index.html (قالب المستخدمين)', round(len(user.encode('utf-8')) / 1024), 'KB | admin.html', round(len(admin.encode('utf-8')) / 1024), 'KB')

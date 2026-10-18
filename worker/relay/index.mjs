@@ -109,6 +109,10 @@ async function api(req, env, url) {
     await run(db, 'INSERT INTO invites (h, did, label, exp, used, cat, created) VALUES (?, ?, ?, ?, 0, ?, ?)', J.h, me.id, String(J.label || '').slice(0, LIM.label), exp, cat, now());
     return json({ ok: true, exp });
   }
+  if (p === '/v1/invites/revoke' && method === 'POST') {           // الأخصائي يلغي دعوة لم تُستعمل
+    if (me.role !== 'd') return err(403, 'role', 'للأخصائي فقط');
+    await run(db, 'UPDATE invites SET used = 1, cat = NULL WHERE h = ? AND did = ?', String(J.h || ''), me.id); return json({ ok: true });
+  }
   if (p === '/v1/send' && method === 'POST') {
     const to = String(J.to || ''), box = J.box; if (!box || typeof box !== 'object') return err(400, 'box', 'رسالة فارغة');
     const s = JSON.stringify(box); if (s.length > LIM.box) return err(413, 'big', 'الرسالة أكبر من المسموح');

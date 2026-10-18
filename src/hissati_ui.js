@@ -1,0 +1,308 @@
+// ================= «حصتي»: ربط «حصة» بتطبيق العميل عبر المحطة الوسيطة (يُدمج داخل app.js عند /*HXUI*/)
+// الأخصائي يدعو العميل برابط (واتساب) ← العميل يسجّل بياناته في «حصتي» ← تصل هنا «طلب عميل» فيعتمده الأخصائي كعميل جديد
+// ← تُرسل الخطة إلى جوال العميل ← تعود المتابعة اليومية والوزن والتفضيلات والمحادثة إلى ملف العميل هنا.
+// كل ما يمر بالمحطة مشفّر من طرف إلى طرف (HXC: ECDH + AES-GCM) وكل طلب موقَّع؛ ورمز الدعوة سرّ مشترك داخل كل رسالة فلا تستطيع المحطة انتحال أي طرف.
+// التخزين: meta.hx (هوية هذا الجهاز ومفاتيحه الخاصة، الدعوات، الطلبات) مشفّر مثل باقي البيانات؛ وبيانات «حصتي» لكل عميل في c.hx (تدخل النسخة الاحتياطية).
+var HX = { st: null, loaded: false, busy: false, err: '', form: false, last: null, timer: 0, every: 60000 }, HXC0 = window.HXC;
+var HX_DAYS = [[1, 'يوم واحد'], [3, '3 أيام'], [7, 'أسبوع'], [14, 'أسبوعان'], [30, 'شهر']];
+function hxDef() { return eff().hx || {}; }
+function hxOn() { return !!(HX.st && HX.st.reg && HX.st.ident); }
+function hxRelay() { return String((HX.st && HX.st.relay) || hxDef().relay || '').trim().replace(/\/+$/, ''); }
+function hxUrlOk(u) { return /^https:\/\/[^\s/?#]+(\/[^\s?#]*)?$/i.test(u) || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?(\/[^\s?#]*)?$/i.test(u); }
+function hxLoad() {
+  return tx('meta', 'readonly', function (s) { return s.get('hx'); }).then(function (r) { return r ? decRec('meta', r) : null; }).then(function (r) {
+    HX.st = Object.assign({ key: 'hx', relay: '', name: '', cc: '966', after: 0, inv: {}, reqs: {} }, r || {}); HX.loaded = true; hxTimer();
+  }).catch(function () { HX.st = { key: 'hx', relay: '', name: '', cc: '966', after: 0, inv: {}, reqs: {} }; HX.loaded = true; });
+}
+function hxSave() { saveQ = saveQ.then(function () { return dbPut('meta', HX.st); }).catch(function () { }); return saveQ; }
+function hxTimer() { clearInterval(HX.timer); if (hxOn()) { HX.timer = setInterval(function () { if (document.visibilityState !== 'hidden') hxPoll(); }, HX.every); setTimeout(hxPoll, 400); } }
+document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible' && hxOn() && (!HX.last || Date.now() - HX.last > 20000)) hxPoll(); });
+function hxFetch(method, path, obj, signed) {
+  var base = hxRelay(); if (!hxUrlOk(base)) return Promise.reject(new Error('اكتب عنوان المحطة (https://…) في الإعدادات ← حصتي'));
+  var body = obj === undefined ? '' : JSON.stringify(obj), h = { 'content-type': 'application/json' };
+  return (signed ? HXC0.signReq(HX.st.ident, method, path, body).then(function (a) { h.authorization = a; }) : Promise.resolve()).then(function () {
+    return fetch(base + path, { method: method, headers: h, body: method === 'POST' ? body : undefined, cache: 'no-store' });
+  }).catch(function () { throw new Error('تعذّر الاتصال بالمحطة — تحقق من الإنترنت والعنوان'); }).then(function (r) {
+    return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) { var e = new Error((j.error || ('خطأ من المحطة (' + r.status + ')')) + (j.code === 'clock' ? ' — اضبط تاريخ ووقت الجهاز تلقائياً' : '')); e.code = j.code; e.status = r.status; throw e; } return j; });
+  });
+}
+// ---------- الهوية والتسجيل
+function hxRegister(relay, regKey, name) {
+  HX.st.relay = relay; HX.st.name = name;
+  return (HX.st.ident ? Promise.resolve(HX.st.ident) : HXC0.genIdentity()).then(function (id) {
+    HX.st.ident = id; return hxFetch('POST', '/v1/register', { sigPub: id.sigPub, encPub: id.encPub, name: name, regKey: regKey || '' }, true);
+  }).then(function (j) { HX.st.reg = 1; HX.st.did = j.id; return hxSave(); }).then(hxTimer);
+}
+// ---------- قوائم النظام التي يختار منها العميل (تُرفق بالدعوة؛ بيانات عامة لا بيانات شخصية)
+function hxCat() {
+  var b = BR();
+  return {
+    v: 1, dname: HX.st.name, clinic: b.clinic || '', groups: D.groups, days: D.days,
+    bank: D.bank.filter(function (x) { return x.on; }).map(function (x) { return [x.n, x.m, ((x.ing || [])[0] || {}).n || '']; }),
+    foods: D.foods.filter(function (f) { return f.on !== 0; }).map(function (f) { return [f.n, f.g]; }),
+    conditions: D.conditions.slice(), allergens: D.allergens.map(function (a) { return a.label; }),
+    activity: D.settings.activity.map(function (a) { return a[0]; }), goals: D.settings.goals.map(function (g) { return g[0]; })
+  };
+}
+function hxPhone(p) { p = String(p || '').replace(/[٠-٩]/g, function (d) { return d.charCodeAt(0) - 0x660; }).replace(/[۰-۹]/g, function (d) { return d.charCodeAt(0) - 0x6F0; }).replace(/[^\d+]/g, ''); if (!p) return ''; if (p.charAt(0) === '+') return p.slice(1); if (p.slice(0, 2) === '00') return p.slice(2); var cc = String(HX.st.cc || '966').replace(/\D/g, ''); return p.charAt(0) === '0' ? cc + p.slice(1) : (p.indexOf(cc) === 0 ? p : cc + p); }
+function hxLink(inv) { return hxRelay() + '/#t=' + inv.tok + '.' + inv.fp; }
+function hxWaText(inv) { return 'مرحباً ' + inv.label + '،\nأرسل لك ' + (HX.st.name || 'أخصائي التغذية') + ' رابط تطبيق «حصتي» لتسجيل بياناتك واستلام خطتك الغذائية على جوالك:\n' + hxLink(inv) + '\n\nالرابط شخصي ويُستعمل مرة واحدة، وصالح حتى ' + new Date(inv.exp * 1000).toLocaleDateString('ar') + '.'; }
+function hxWa(inv) { var p = hxPhone(inv.phone); return 'https://wa.me/' + (p || '') + '?text=' + encodeURIComponent(hxWaText(inv)); }
+function hxInvite(label, phone, days) {
+  var tok = HXC0.token(), exp = Math.floor(Date.now() / 1000) + days * 86400, h;
+  return Promise.all([HXC0.tokenHash(tok), HXC0.fpOf(HX.st.ident.encPub)]).then(function (r) {
+    h = r[0]; HX.st.inv[h] = { tok: tok, fp: r[1], label: label, phone: phone, exp: exp, at: Date.now() };
+    return hxFetch('POST', '/v1/invites', { h: h, label: label, exp: exp, cat: hxCat() }, true);
+  }).then(function () { return hxSave(); }).then(function () { return HX.st.inv[h]; }).catch(function (e) { delete HX.st.inv[h]; throw e; });
+}
+// ---------- الإرسال للعميل (مشفّر لمفتاحه، ومعه السر المشترك)
+function hxSendTo(cid, enc, tok, payload) {
+  payload.a = tok; payload.ts = payload.ts || Date.now();
+  return HXC0.seal(enc, payload).then(function (box) { return hxFetch('POST', '/v1/send', { to: cid, box: box }, true); });
+}
+function hxSend(c, payload) { return hxSendTo(c.hx.cid, c.hx.enc, c.hx.tok, payload); }
+function hxClientOf(cid) { return S.clients.filter(function (c) { return c.hx && c.hx.cid === cid; })[0]; }
+// ---------- الاستقبال
+function hxPoll() {
+  if (!hxOn() || HX.busy) return Promise.resolve(0);
+  HX.busy = true; var got = 0, touched = {}, maxId = HX.st.after || 0;
+  return hxFetch('GET', '/v1/inbox?after=' + (HX.st.after || 0), undefined, true).then(function (j) {
+    return j.msgs.reduce(function (p, m) {
+      return p.then(function () { maxId = Math.max(maxId, m.id); return hxHandle(m, touched); }).then(function (n) { got += n || 0; }).catch(function () { });
+    }, Promise.resolve()).then(function () { return j.msgs.length; });
+  }).then(function (n) {
+    HX.err = ''; HX.last = Date.now(); HX.st.after = maxId;
+    Object.keys(touched).forEach(function (k) { var c = S.clients.filter(function (x) { return x.code === k; })[0]; if (c) persist(c); });
+    return hxSave().then(function () { return n ? hxFetch('POST', '/v1/ack', { upTo: maxId }, true).catch(function () { }) : 0; });
+  }).catch(function (e) { HX.err = e.message; HX.last = Date.now(); }).then(function () {
+    HX.busy = false; if (got) { var c = cur(); if (S.view === 'hx' || (c && S.tab === 'hx')) hxRe(); hxRail(); }
+    return got;
+  });
+}
+function hxHandle(m, touched) {
+  var st = HX.st;
+  if (m.kind === 'join') {                                       // رسالة نظام من المحطة: انضمّ عميل عبر دعوة (بلا بيانات شخصية)
+    var b = m.body || {}, inv = st.inv[b.inv]; if (!inv || st.reqs[b.cid]) return 0;
+    inv.used = b.cid; st.reqs[b.cid] = { cid: b.cid, sigPub: b.sigPub, encPub: b.encPub, label: inv.label || b.label, phone: inv.phone, h: b.inv, at: m.ts * 1000, st: 'join', msgs: [] };
+    return 0;
+  }
+  if (m.kind !== 'e') return 0;
+  var req = st.reqs[m.from], c = req ? null : hxClientOf(m.from), tok = req ? (st.inv[req.h] || {}).tok : c && c.hx.tok, enc = req ? req.encPub : c && c.hx.enc;
+  if (!tok) return 0;
+  return HXC0.open(st.ident, m.body).then(function (p) {
+    if (!p || p.a !== tok) return 0;                              // ليست من صاحب الدعوة: تُهمل
+    if (req) return hxReq(req, p, enc);
+    touched[c.code] = 1; return hxIn(c, p);
+  });
+}
+function hxReq(req, p, enc) {                                     // قبل الاعتماد: بيانات التسجيل والمحادثة فقط
+  if (p.t === 'intake') {
+    return HXC0.fpOf(enc).then(function (fp) {
+      if (p.fp !== fp || !p.p || !String(p.p.name || '').trim()) return 0;
+      req.intake = p.p; req.st = 'new'; req.at = p.ts || Date.now(); toast('📲 طلب جديد من «حصتي»: ' + p.p.name); return 1;
+    });
+  }
+  if (p.t === 'msg' && p.text) { req.msgs = (req.msgs || []).concat([{ from: 'c', t: String(p.text).slice(0, 2000), ts: p.ts, ctx: p.ctx || '' }]).slice(-200); req.unread = (req.unread || 0) + 1; toast('💬 ' + (req.intake ? req.intake.name : req.label) + ': ' + String(p.text).slice(0, 60)); return 1; }
+  return 0;
+}
+function hxIn(c, p) {                                              // بعد الاعتماد: المتابعة اليومية، الوزن، التفضيلات، الصحة، المحادثة
+  var x = c.hx, nm = c.name || x.label || '';
+  if (p.t === 'log' && /^\d{4}-\d{2}-\d{2}$/.test(p.d)) {
+    x.logs = x.logs || {}; x.logs[p.d] = { dow: p.dow, pv: p.pv, ck: p.ck || {}, sw: p.sw || {}, note: p.note || {}, skip: p.skip || {}, water: +p.water || 0, done: +p.done || 0, n: +p.n || 0, ts: p.ts };
+    var ks = Object.keys(x.logs).sort(); if (ks.length > 90) ks.slice(0, ks.length - 90).forEach(function (k) { delete x.logs[k]; });
+    return 0;                                                       // المتابعة تُحدَّث بصمت (بلا إشعار لكل لمسة)
+  }
+  if (p.t === 'weight' && +p.w > 20 && +p.w < 400) { x.weights = (x.weights || []).concat([[p.ts || Date.now(), Math.round(+p.w * 10) / 10]]).slice(-200); c.weight = Math.round(+p.w * 10) / 10; toast('⚖ ' + nm + ' سجّل وزنه: ' + c.weight + ' كجم'); return 1; }
+  if (p.t === 'prefs' && p.food) {                                  // ما لا يحبه العميل يُضاف تلقائياً إلى «يتجنبها»، وما يحبه إلى «المفضلة»
+    var no = [], lv = []; Object.keys(p.food).forEach(function (f) { if (p.food[f] === 'no') no.push(f); else if (p.food[f] === 'love') lv.push(f); });
+    var was = (x.prefs && x.prefs.food) || {}, add = no.filter(function (f) { return (c.avoid || []).indexOf(f) < 0; });
+    c.avoid = (c.avoid || []).filter(function (f) { return !(was[f] === 'no' && p.food[f] !== 'no'); }).concat(add);
+    c.love = (c.love || []).filter(function (f) { return !(was[f] === 'love' && p.food[f] !== 'love') && no.indexOf(f) < 0; }).concat(lv.filter(function (f) { return (c.love || []).indexOf(f) < 0; }));
+    x.prefs = { food: p.food, like: p.like || {}, nope: p.nope || {} }; x.prefLog = (x.prefLog || []).concat((p.changes || []).map(function (q) { return { t: q.t, f: q.f, n: q.n, ts: p.ts }; })).slice(-100);
+    if (add.length) toast('🚫 ' + nm + ': أُضيف إلى «يتجنبها» — ' + add.slice(0, 3).join('، ')); return 1;
+  }
+  if (p.t === 'health') { x.health = { cond: (p.cond || []).filter(function (k) { return D.conditions.indexOf(k) >= 0; }), allg: p.allg || [], note: String(p.note || '').slice(0, 500), at: p.ts }; toast('🩺 ' + nm + ' يطلب تعديل حالته الصحية'); return 1; }
+  if (p.t === 'msg' && p.text) { x.msgs = (x.msgs || []).concat([{ from: 'c', t: String(p.text).slice(0, 2000), ts: p.ts, ctx: String(p.ctx || '').slice(0, 120) }]).slice(-300); x.unread = (x.unread || 0) + 1; toast('💬 ' + nm + ': ' + String(p.text).slice(0, 60)); return 1; }
+  if (p.t === 'read') { (x.msgs || []).forEach(function (q) { if (q.from === 'd' && q.ts <= p.upTo) q.read = 1; }); return 0; }
+  return 0;
+}
+// ---------- الاعتماد: الطلب ← عميل جديد في «حصة»
+function hxMap(q) {
+  var food = q.food || {}, flat = function (o) { return ['B', 'L', 'D', 'S'].reduce(function (a, k) { return a.concat((o || {})[k] || []); }, []); }, act = D.settings.activity[+q.act] || D.settings.activity[2], goal = D.settings.goals[+q.goal] || D.settings.goals[2];
+  var nums = function (v, lo, hi, d) { v = +v; return v >= lo && v <= hi ? v : d; }, al = D.allergens.map(function (a) { return a.label; });
+  var notes = [q.meds ? 'الأدوية والمكملات: ' + q.meds : '', q.notes ? 'ملاحظات العميل: ' + q.notes : '', 'الاستيقاظ ' + (q.wake || '—') + ' • النوم ' + (q.sleep || '—') + (q.wdays && q.wdays.length ? ' • التمرين: ' + q.wdays.map(function (i) { return D.days[i]; }).join('، ') : ''), 'سُجّل من «حصتي» ' + new Date().toLocaleDateString('ar')].filter(Boolean).join('\n');
+  return {
+    name: String(q.name || '').trim().slice(0, 80), phone: String(q.phone || '').slice(0, 30), sex: q.sex === 'أنثى' ? 'أنثى' : 'ذكر', age: nums(q.age, 5, 110, 30), weight: nums(q.weight, 20, 400, 80), height: nums(q.height, 80, 250, 170),
+    activity: act[0], goal: goal[0], meals: nums(q.nmeals, 3, 6, 5), conditions: (q.cond || []).filter(function (k) { return D.conditions.indexOf(k) >= 0; }), allergens: (q.allg || []).filter(function (k) { return al.indexOf(k) >= 0; }),
+    love: Object.keys(food).filter(function (f) { return food[f] === 'love'; }), avoid: Object.keys(food).filter(function (f) { return food[f] === 'no'; }), favMeals: flat(q.like), excludedMeals: flat(q.nope), notes: notes
+  };
+}
+function hxApprove(cid) {
+  var req = HX.st.reqs[cid]; if (!req || !req.intake) return Promise.resolve();
+  var c = newClient(''); Object.assign(c, hxMap(req.intake));
+  c.hx = { cid: cid, enc: req.encPub, tok: HX.st.inv[req.h].tok, label: req.label, msgs: req.msgs || [], unread: req.unread || 0, logs: {}, weights: [[Date.now(), c.weight]], prefLog: [], prefs: { food: req.intake.food || {}, like: req.intake.like || {}, nope: req.intake.nope || {} }, intake: req.intake, planV: 0, since: Date.now() };
+  S.clients.push(c);
+  return persist(c).then(function () { return hxSend(c, { t: 'status', st: 'approved', code: c.code, dname: HX.st.name }); }).then(function () {
+    delete HX.st.reqs[cid]; delete HX.st.inv[req.h]; return hxSave();
+  }).then(function () { S.view = 'client'; S.cur = c.code; S.tab = 'client'; S.versions = []; render(); toast('✓ اعتُمد «' + c.name + '» عميلاً جديداً (' + c.code + ') — راجع بياناته ثم ولّد الخطة وأرسلها إلى «حصتي»'); });
+}
+// ---------- لقطة الخطة لتطبيق العميل (نفس شكل نموذج «حصتي»: [مجموعة، صنف، نص، بدائل[[صنف، نص]]])
+function hxSnap(c) {
+  var p = c.plan, T = p.targets || {}, av = c.avoid || [];
+  return {
+    kcal: Math.round(T.kcal || 0), pro: Math.round(T.pro || 0), cho: Math.round(T.cho || 0), fat: Math.round(T.fat || 0), water: Math.round((T.water || 0) * 100) / 100, groups: D.groups,
+    dayNames: p.days.map(function (d, i) { return dayName(p, i); }),
+    days: p.days.map(function (d) {
+      return { slots: d.slots.map(function (s) {
+        return { name: mealNm(p, s), type: s.type, time: s.time || '', kcal: Math.round(s.kcal || 0), meal: s.mealLabel || s.meal || '', lines: s.lines.map(function (l) {
+          var alts = []; try { alts = E.alternatives(l, s.type, p, D, 10).filter(function (a) { return av.indexOf(a.name) < 0; }).slice(0, 6).map(function (a) { return [a.name, a.text]; }); } catch (e) { }
+          return [l.g, l.name, l.label || l.text, alts];
+        }) };
+      }) };
+    })
+  };
+}
+// ---------- الواجهة
+function hxCounts() {
+  var r = HX.st ? Object.keys(HX.st.reqs).map(function (k) { return HX.st.reqs[k]; }) : [];
+  return { req: r.filter(function (q) { return q.st === 'new'; }).length, msg: S.clients.reduce(function (a, c) { return a + ((c.hx && c.hx.unread) || 0) + (c.hx && c.hx.health ? 1 : 0); }, 0) + r.reduce(function (a, q) { return a + (q.unread || 0); }, 0) };
+}
+function hxBadge() { var n = hxCounts(), t = n.req + n.msg; document.title = (t ? '(' + t + ') ' : '') + 'حصة — Hissa'; return t; }
+function hxRail() { var t = hxBadge(), b = document.querySelector('[data-a="hxv"] em'); if (b) { b.textContent = t || ''; b.style.display = t ? '' : 'none'; } }
+function hxAgo(ts) { if (!ts) return '—'; var m = Math.round((Date.now() - ts) / 60000); return m < 1 ? 'الآن' : m < 60 ? 'قبل ' + m + ' د' : m < 1440 ? 'قبل ' + Math.round(m / 60) + ' س' : new Date(ts).toLocaleDateString('ar'); }
+function hxSetPage() {
+  var st = HX.st || {}, d = hxDef(), on = hxOn(), relay = hxRelay(), admin = S.mode === 'admin';
+  return '<h3>📲 «حصتي» — تطبيق العميل</h3><p class="small">ادعُ عميلك برابط على واتساب: يسجّل بياناته وصحته وما يحب وما لا يحب في «حصتي» على جواله، فتصلك هنا طلباً تعتمده بضغطة، ثم تُرسل له خطته ويتابع يومه بلمسة. كل البيانات مشفّرة من جهازك إلى جواله؛ المحطة الوسيطة ترى نصاً مشفّراً فقط.</p>'
+    + (on ? '<div class="ok">✓ متصل بالمحطة <b dir="ltr">' + esc(relay) + '</b> باسم «' + esc(st.name) + '». آخر تحقق: ' + hxAgo(HX.last) + (HX.err ? ' — <span style="color:#c0392b">' + esc(HX.err) + '</span>' : '') + '</div><p class="two"><button data-a="hxCheck">↻ تحقق الآن</button><button class="sec" data-a="hxv">طلبات «حصتي»</button></p>'
+      + '<div class="row"><div><label>رمز الدولة لروابط واتساب</label><input data-hx="cc" value="' + esc(st.cc || '966') + '" inputmode="numeric" dir="ltr"></div><div><label>اسمك كما يراه العميل</label><input data-hx="name" value="' + esc(st.name) + '"></div></div>'
+      + '<p class="small">لتغيير المحطة أو نقل الربط إلى جهاز آخر: افصل هذا الجهاز ثم اربطه من جديد (العملاء المرتبطون يبقون مرتبطين بهذا الجهاز فقط).</p><button class="sec sm" data-a="hxUnlink">فصل هذا الجهاز</button>'
+      : '<div class="ucard"><div class="row"><div><label>عنوان المحطة (Cloudflare Worker)</label><input id="hx_relay" dir="ltr" placeholder="https://hissati.example.workers.dev" value="' + esc(relay) + '"></div><div><label>مفتاح التسجيل (REG_KEY)</label><input id="hx_key" dir="ltr" type="password" autocomplete="off" value="' + esc(d.regKey || '') + '"></div><div><label>اسمك كما يراه العميل</label><input id="hx_name" value="' + esc(st.name || BR().specialist || firstName() || '') + '"></div></div>'
+      + '<p><button data-a="hxReg">ربط هذا الجهاز بالمحطة</button></p>' + (HX.err ? '<div class="warn">' + esc(HX.err) + '</div>' : '') + '<p class="small">لا محطة بعد؟ اتبع «worker/relay/DEPLOY_AR.md» (حساب Cloudflare مجاني، 10 دقائق) ثم الصق العنوان والمفتاح هنا.' + (admin ? ' عند الربط يُحفظ العنوان والمفتاح في إعداداتك ويصلان المستخدمين مع «تصدير نسخة المستخدمين» التالي فيربطون أجهزتهم بضغطة.' : '') + '</p></div>');
+}
+function hxInvForm() {
+  return '<div class="ucard hxform"><h3>دعوة عميل إلى «حصتي»</h3><div class="row"><div><label>اسم العميل</label><input id="hxi_l" maxlength="80" placeholder="مثال: سارة أحمد"></div><div><label>جوال العميل (للواتساب)</label><input id="hxi_p" type="tel" inputmode="tel" dir="ltr" placeholder="05xxxxxxxx"></div><div><label>صلاحية الرابط</label><select id="hxi_d">' + HX_DAYS.map(function (x) { return '<option value="' + x[0] + '"' + (x[0] === 7 ? ' selected' : '') + '>' + x[1] + '</option>'; }).join('') + '</select></div></div>'
+    + '<p class="two"><button data-a="hxInvMake">إنشاء الرابط</button><button class="sec" data-a="hxInvForm">إلغاء</button></p></div>';
+}
+function hxInvCard(h, v) {
+  var exp = v.exp * 1000 < Date.now();
+  return '<div class="ucard hxinv' + (exp ? ' exp' : '') + '"><b>' + esc(v.label) + '</b> <small>' + (v.phone ? '<span dir="ltr">' + esc(v.phone) + '</span> • ' : '') + (exp ? 'انتهت صلاحيته' : 'صالح حتى ' + new Date(v.exp * 1000).toLocaleDateString('ar')) + ' • لم يُفتح بعد</small>'
+    + (exp ? '' : '<div class="hxlink" dir="ltr">' + esc(hxLink(v)) + '</div><p class="two"><a class="btn" href="' + esc(hxWa(v)) + '" target="_blank" rel="noopener" data-hxwa="1">💬 إرسال على واتساب</a><button class="sec" data-a="hxCopy" data-v="' + h + '">نسخ الرابط</button><button class="sec" data-a="hxInvDel" data-v="' + h + '">إلغاء الدعوة</button></p>')
+    + (exp ? '<button class="sec sm" data-a="hxInvDel" data-v="' + h + '">حذف</button>' : '') + '</div>';
+}
+function hxReqCard(q) {
+  var p = q.intake || {}, ml = function (o) { return ['B', 'L', 'D', 'S'].reduce(function (a, k) { return a.concat((o || {})[k] || []); }, []); }, food = p.food || {}, lv = Object.keys(food).filter(function (f) { return food[f] === 'love'; }), no = Object.keys(food).filter(function (f) { return food[f] === 'no'; });
+  var act = (D.settings.activity[+p.act] || [''])[0], goal = (D.settings.goals[+p.goal] || [''])[0], bmi = p.weight && p.height ? (p.weight / Math.pow(p.height / 100, 2)).toFixed(1) : '—';
+  if (q.st === 'join') return '<div class="ucard hxreq wait"><b>' + esc(q.label) + '</b> <small>فتح الرابط وأنشأ حسابه ' + hxAgo(q.at) + ' — يكمل التسجيل الآن…</small>' + hxMini(q) + '</div>';
+  return '<div class="ucard hxreq' + (q.st === 'changes' ? ' wait' : '') + '"><div class="hxrh"><span class="cav">' + esc(initial(p.name)) + '</span><div><b>' + esc(p.name) + '</b><small>' + (q.st === 'changes' ? 'طلبتَ تعديلاً — بانتظار العميل' : 'طلب جديد ' + hxAgo(q.at)) + ' • دعوة «' + esc(q.label) + '»</small></div></div>'
+    + '<dl class="hxkv"><dt>الجوال</dt><dd dir="ltr">' + esc(p.phone) + '</dd><dt>الجنس والعمر</dt><dd>' + esc(p.sex) + ' • ' + esc(p.age) + ' سنة</dd><dt>الوزن والطول</dt><dd>' + esc(p.weight) + ' كجم • ' + esc(p.height) + ' سم • BMI ' + bmi + '</dd><dt>النشاط والهدف</dt><dd>' + esc(act) + ' • ' + esc(goal) + '</dd>'
+    + '<dt>الحالة الصحية</dt><dd>' + (esc((p.cond || []).concat(p.allg || []).join('، ')) || 'لا حالات ولا حساسية') + '</dd>' + (p.meds ? '<dt>الأدوية</dt><dd>' + esc(p.meds) + '</dd>' : '') + (p.notes ? '<dt>ملاحظات</dt><dd>' + esc(p.notes) + '</dd>' : '')
+    + '<dt>وجبات يحبها</dt><dd>' + (esc(ml(p.like).join('، ')) || '—') + '</dd><dt>وجبات لا يريدها</dt><dd>' + (esc(ml(p.nope).join('، ')) || '—') + '</dd><dt>أصناف يحبها</dt><dd>' + (esc(lv.join('، ')) || '—') + '</dd><dt>لا يحبها</dt><dd>' + (esc(no.join('، ')) || '—') + '</dd>'
+    + '<dt>يومه</dt><dd>' + esc(p.nmeals || 5) + ' وجبات • ' + esc(p.wake || '') + '–' + esc(p.sleep || '') + '</dd></dl>'
+    + (q.st === 'new' ? '<p class="two"><button data-a="hxOk" data-v="' + q.cid + '">✓ اعتماد كعميل جديد</button><button class="sec" data-a="hxChg" data-v="' + q.cid + '">طلب تعديل</button><button class="sec" data-a="hxRej" data-v="' + q.cid + '">رفض</button></p>' : '') + hxMini(q) + '</div>';
+}
+function hxMini(q) {                                                // محادثة قبل الاعتماد
+  if (!(q.msgs || []).length) return '';
+  return '<details class="hxmini"' + (q.unread ? ' open' : '') + '><summary>💬 رسائل (' + q.msgs.length + ')' + (q.unread ? ' <em class="hxnb">' + q.unread + '</em>' : '') + '</summary>' + hxThread(q.msgs) + '<div class="hxcomp"><textarea data-hxr="' + q.cid + '" rows="1" placeholder="ردّك…"></textarea><button class="sm" data-a="hxReqMsg" data-v="' + q.cid + '">إرسال</button></div></details>';
+}
+function hxThread(msgs) {
+  return '<div class="hxthread">' + (msgs || []).map(function (m) { return '<div class="hxb' + (m.from === 'd' ? ' me' : '') + '">' + (m.ctx ? '<small class="hxcx">بخصوص: ' + esc(m.ctx) + '</small>' : '') + esc(m.t) + '<small>' + new Date(m.ts).toLocaleString('ar', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' }) + (m.from === 'd' ? (m.read ? ' ✓✓' : ' ✓') : '') + '</small></div>'; }).join('') + '</div>';
+}
+function hxPage() {
+  if (HX.loaded !== true) return '<p class="small">جارٍ التحميل…</p>';
+  if (!hxOn()) return '<h2>📲 «حصتي»</h2>' + hxSetPage();
+  var st = HX.st, reqs = Object.keys(st.reqs).map(function (k) { return st.reqs[k]; }).sort(function (a, b) { return (b.at || 0) - (a.at || 0); }), inv = Object.keys(st.inv).filter(function (h) { return !st.inv[h].used; });
+  var linked = S.clients.filter(function (c) { return c.hx; }).sort(function (a, b) { return ((b.hx.unread || 0) - (a.hx.unread || 0)) || ((b.updated || 0) - (a.updated || 0)); });
+  return '<div class="hxpage"><div class="hxtop"><h2>📲 طلبات «حصتي»</h2><p class="two"><button data-a="hxInvForm">+ دعوة عميل</button><button class="sec" data-a="hxCheck">↻ تحقق الآن</button></p></div>'
+    + '<p class="small">آخر تحقق: ' + hxAgo(HX.last) + ' • يُتحقق تلقائياً كل دقيقة أثناء فتح «حصة»' + (HX.err ? ' • <span style="color:#c0392b">' + esc(HX.err) + '</span>' : '') + '</p>'
+    + (HX.form ? hxInvForm() : '') + (HX.made ? hxInvCard(HX.made, st.inv[HX.made] || {}).replace('hxinv', 'hxinv made') : '')
+    + '<h3>طلبات العملاء (' + reqs.length + ')</h3>' + (reqs.map(hxReqCard).join('') || '<p class="small">لا طلبات الآن. ادعُ عميلاً برابط، وحين يكمل تسجيله يظهر طلبه هنا لتعتمده.</p>')
+    + (inv.length ? '<h3>دعوات لم تُفتح (' + inv.length + ')</h3>' + inv.filter(function (h) { return h !== HX.made; }).map(function (h) { return hxInvCard(h, st.inv[h]); }).join('') : '')
+    + (linked.length ? '<h3>عملاء على «حصتي» (' + linked.length + ')</h3><div class="hxlinked">' + linked.map(function (c) { var t = hxToday(c); return '<div class="cl" data-a="hxOpen" data-v="' + c.code + '"><span class="cav">' + esc(initial(c.name)) + '</span><b>' + esc(c.name) + (c.hx.unread || c.hx.health ? ' <em class="hxnb">' + ((c.hx.unread || 0) + (c.hx.health ? 1 : 0)) + '</em>' : '') + '</b><small>' + c.code + ' • ' + (c.hx.planV ? 'الخطة v' + c.hx.planV : 'لم تُرسل خطة') + (t ? ' • اليوم ' + t + '%' : '') + '</small></div>'; }).join('') + '</div>' : '')
+    + '</div>';
+}
+function hxToday(c) { var d = new Date(), k = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'), l = (c.hx.logs || {})[k]; return l && l.n ? Math.round(l.done / l.n * 100) : 0; }
+function hxTab(c) {                                                // تبويب «حصتي» داخل ملف العميل
+  var x = c.hx, ath = c.kind === 'athlete', logs = x.logs || {}, days = Object.keys(logs).sort().reverse().slice(0, 7), w = (x.weights || []).slice(-8);
+  var adh = days.map(function (k) {
+    var l = logs[k], pct = l.n ? Math.round(l.done / l.n * 100) : 0, extra = [];
+    Object.keys(l.sw || {}).forEach(function (q) { extra.push('⇄ ' + l.sw[q]); }); Object.keys(l.note || {}).forEach(function (q) { extra.push('✎ ' + l.note[q]); }); Object.keys(l.skip || {}).forEach(function (q) { extra.push('⤼ تخطّى وجبة ' + (+q + 1)); });
+    return '<div class="hxday"><b>' + esc((D.days[l.dow] || '') + ' ' + k.slice(5)) + '</b><span class="hxbar"><i style="width:' + pct + '%"></i></span><span>' + pct + '%</span><small>💧 ' + (l.water * 0.25).toFixed(2).replace(/\.?0+$/, '') + ' ل</small>' + (extra.length ? '<small class="hxex">' + esc(extra.join(' • ')) + '</small>' : '') + '</div>';
+  }).join('');
+  return '<div class="hxtab"><div class="ucard"><div class="hxtop"><h3>📲 «حصتي» <small>مرتبط منذ ' + new Date(x.since || Date.now()).toLocaleDateString('ar') + ' • آخر تحقق ' + hxAgo(HX.last) + '</small></h3><button class="sec sm" data-a="hxCheck">↻ تحقق الآن</button></div>'
+    + (ath ? '<p class="small">خطط الرياضيين لا تُرسل إلى «حصتي» بعد (قريباً). المحادثة والوزن والتفضيلات تعمل.</p>' : !c.plan ? '<p class="small">ولّد الخطة من تبويب «الخطة» ثم أرسلها من هنا.</p>' : '<p>' + (x.planV ? 'آخر خطة أُرسلت: v' + x.planV + ' ' + hxAgo(x.sentAt) + '. ' : '') + '<button data-a="hxSendPlan">' + (x.planV ? '↻ أرسل الخطة المحدَّثة إلى «حصتي»' : '➤ أرسل الخطة إلى «حصتي»') + '</button></p><p class="small">تصل الخطة بكل أيامها ووجباتها مع بدائل كل صنف من نفس المجموعة. ما لا يحبه العميل يُستبدل تلقائياً في جواله.</p>')
+    + '</div>'
+    + (x.health ? '<div class="warn">🩺 يطلب العميل تعديل حالته الصحية إلى: <b>' + (esc(x.health.cond.concat(x.health.allg).join('، ')) || 'لا حالات') + '</b>' + (x.health.note ? ' — ' + esc(x.health.note) : '') + '<p class="two"><button class="sm" data-a="hxHealthOk">اعتماد وتحديث ملفه</button><button class="sec sm" data-a="hxHealthNo">رفض</button></p></div>' : '')
+    + '<div class="hxgrid"><div class="ucard"><h3>💬 المحادثة</h3>' + (hxThread(x.msgs).replace('<div class="hxthread"></div>', '<p class="small">لا رسائل بعد. ما يكتبه العميل من «راسل الأخصائي» يظهر هنا مع إشعار.</p>')) + '<div class="hxcomp"><textarea id="hxMsg" rows="2" placeholder="اكتب رسالة للعميل…"></textarea><button data-a="hxSendMsg">إرسال</button></div></div>'
+    + '<div class="ucard"><h3>✅ المتابعة اليومية</h3>' + (adh || '<p class="small">لم يسجّل العميل متابعة بعد. يعلّم في «حصتي» ما أكله بلمسة، ويكتب ما أضاف أو حذف.</p>') + '</div>'
+    + '<div class="ucard"><h3>⚖ الوزن</h3>' + (w.length ? '<div class="hxw">' + w.map(function (q) { return '<span><b>' + q[1] + '</b><small>' + new Date(q[0]).toLocaleDateString('ar', { day: 'numeric', month: 'short' }) + '</small></span>'; }).join('') + '</div>' : '<p class="small">—</p>') + '</div>'
+    + '<div class="ucard"><h3>❤ التفضيلات</h3>' + ((x.prefLog || []).length ? '<ul class="hxpl">' + x.prefLog.slice(-10).reverse().map(function (q) { return '<li>' + (q.t === 'no' ? '🚫 لا يحب' : '❤ يحب') + ' «' + esc(q.f) + '»' + (q.n ? ' — استُبدل في ' + q.n + ' موضعاً' : '') + ' <small>' + hxAgo(q.ts) + '</small></li>'; }).join('') + '</ul>' : '<p class="small">ما يغيّره العميل يُضاف تلقائياً إلى «أصناف يتجنبها / مفضّلة» في بياناته.</p>') + '</div></div></div>';
+}
+// إعادة الرسم مع الإبقاء على ما يكتبه الأخصائي في صناديق الرد (الاستقبال الدوري لا يمسح رسالة قيد الكتابة)
+function hxRe() { var keep = [].map.call(document.querySelectorAll('#hxMsg,[data-hxr]'), function (t) { return [t.id ? '#' + t.id : '[data-hxr="' + t.dataset.hxr + '"]', t.value, document.activeElement === t]; }); main(); keep.forEach(function (k) { var n = $(k[0]); if (n) { n.value = k[1]; if (k[2]) n.focus(); } }); }
+// ---------- الإجراءات
+function hxErr(e) { HX.err = e.message; toast('⚠ ' + e.message); main(); }
+Object.assign(A, {
+  hxv: function () { S.view = 'hx'; S.cur = null; render(); if (hxOn()) hxPoll(); },
+  hxOpen: function (v) { return A.pick(v).then(function () { S.tab = 'hx'; main(); }).then(function () { A.hxRead(); }); },
+  hxReg: function () {
+    var relay = ($('#hx_relay').value || '').trim().replace(/\/+$/, ''), key = ($('#hx_key').value || '').trim(), name = ($('#hx_name').value || '').trim();
+    if (!hxUrlOk(relay)) { toast('اكتب عنوان المحطة كاملاً ويبدأ بـ https://'); return; } if (!name) { toast('اكتب اسمك كما يراه العميل'); return; }
+    HX.err = ''; toast('جارٍ الربط…');
+    hxRegister(relay, key, name).then(function () {
+      if (S.mode === 'admin') { S.settings.hx = { relay: relay, regKey: key }; saveSettings(); }
+      main(); hxRail(); toast('✓ رُبط هذا الجهاز بالمحطة — يمكنك الآن دعوة العملاء إلى «حصتي»');
+    }).catch(hxErr);
+  },
+  hxUnlink: function () { if (!confirm('فصل هذا الجهاز عن «حصتي»؟ لن تصل رسائل العملاء المرتبطين إلى هذا الجهاز بعد الآن.')) return; HX.st = { key: 'hx', relay: HX.st.relay, name: HX.st.name, cc: HX.st.cc, after: 0, inv: {}, reqs: {} }; clearInterval(HX.timer); hxSave(); main(); },
+  hxCheck: function () { toast('جارٍ التحقق…'); hxPoll().then(function (n) { toast(HX.err ? '⚠ ' + HX.err : n ? 'وصل ' + n + ' جديد' : 'لا جديد'); main(); }); },
+  hxInvForm: function () { HX.form = !HX.form; HX.made = null; main(); var i = $('#hxi_l'); if (i) i.focus(); },
+  hxInvMake: function () {
+    var l = ($('#hxi_l').value || '').trim(), ph = ($('#hxi_p').value || '').trim(), d = +$('#hxi_d').value || 7;
+    if (!l) { toast('اكتب اسم العميل'); return; }
+    hxInvite(l, ph, d).then(function (inv) { HX.form = false; HX.made = Object.keys(HX.st.inv).filter(function (h) { return HX.st.inv[h] === inv; })[0]; main(); toast('✓ جاهز — أرسل الرابط على واتساب أو انسخه'); }).catch(hxErr);
+  },
+  hxCopy: function (h) { var v = HX.st.inv[h]; if (!v) return; var t = hxWaText(v); (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function () { toast('نُسخت الرسالة مع الرابط'); }).catch(function () { prompt('انسخ الرابط:', hxLink(v)); }); },
+  hxInvDel: function (h) { if (!confirm('إلغاء هذه الدعوة؟ لن يعمل الرابط بعد الآن.')) return; hxFetch('POST', '/v1/invites/revoke', { h: h }, true).catch(function () { }).then(function () { delete HX.st.inv[h]; if (HX.made === h) HX.made = null; return hxSave(); }).then(main); },
+  hxOk: function (cid) { hxApprove(cid).catch(hxErr); },
+  hxChg: function (cid) {
+    var q = HX.st.reqs[cid], m = prompt('ما الذي تريد من العميل تعديله؟ (تصله الرسالة في «حصتي»)', 'أرجو كتابة جرعة الدواء ووقت تناوله'); if (!m) return;
+    hxSendTo(cid, q.encPub, HX.st.inv[q.h].tok, { t: 'status', st: 'changes', msg: m.slice(0, 500) }).then(function () { q.st = 'changes'; q.msgs = (q.msgs || []).concat([{ from: 'd', t: m, ts: Date.now() }]); return hxSave(); }).then(function () { main(); toast('أُرسل طلب التعديل'); }).catch(hxErr);
+  },
+  hxRej: function (cid) {
+    var q = HX.st.reqs[cid]; if (!confirm('رفض طلب «' + ((q.intake || {}).name || q.label) + '»؟ يُحذف من المحطة ولا يستطيع المراسلة.')) return;
+    hxSendTo(cid, q.encPub, HX.st.inv[q.h].tok, { t: 'status', st: 'rejected' }).catch(function () { }).then(function () { return hxFetch('POST', '/v1/clients/remove', { cid: cid }, true).catch(function () { }); })
+      .then(function () { delete HX.st.reqs[cid]; delete HX.st.inv[q.h]; return hxSave(); }).then(main);
+  },
+  hxReqMsg: function (cid) {
+    var q = HX.st.reqs[cid], ta = document.querySelector('[data-hxr="' + cid + '"]'), t = ta && ta.value.trim(); if (!t) return;
+    var ts = Date.now(); hxSendTo(cid, q.encPub, HX.st.inv[q.h].tok, { t: 'msg', text: t.slice(0, 2000), ts: ts }).then(function () { q.msgs = (q.msgs || []).concat([{ from: 'd', t: t, ts: ts }]); q.unread = 0; return hxSave(); }).then(main).catch(hxErr);
+  },
+  hxSendPlan: function () {
+    var c = cur(); if (!c || !c.hx || !c.plan || c.kind === 'athlete') return; var snap;
+    try { snap = hxSnap(c); } catch (e) { toast('تعذّر تجهيز الخطة: ' + e.message); return; }
+    var v = (c.hx.planV || 0) + 1; toast('جارٍ الإرسال…');
+    hxSend(c, { t: 'plan', v: v, plan: snap, note: '' }).then(function () { c.hx.planV = v; c.hx.sentAt = Date.now(); persist(c); main(); toast('✓ وصلت الخطة v' + v + ' إلى «حصتي» مع إشعار للعميل'); }).catch(hxErr);
+  },
+  hxSendMsg: function () {
+    var c = cur(), ta = $('#hxMsg'), t = ta && ta.value.trim(); if (!c || !t) return;
+    var ts = Date.now(); hxSend(c, { t: 'msg', text: t.slice(0, 2000), ts: ts }).then(function () { c.hx.msgs = (c.hx.msgs || []).concat([{ from: 'd', t: t, ts: ts }]); c.hx.unread = 0; persist(c); main(); var n = $('#hxMsg'); if (n) n.focus(); }).catch(hxErr);
+  },
+  hxRead: function () {
+    var c = cur(); if (!c || !c.hx || !c.hx.unread) return; c.hx.unread = 0; persist(c); hxRail();
+    var last = (c.hx.msgs || []).filter(function (m) { return m.from === 'c'; }).slice(-1)[0]; if (last) hxSend(c, { t: 'read', upTo: last.ts }).catch(function () { });
+  },
+  hxHealthOk: function () {
+    var c = cur(), h = c.hx.health; c.conditions = h.cond.slice(); c.allergens = h.allg.filter(function (k) { return D.allergens.some(function (a) { return a.label === k; }); });
+    hxSend(c, { t: 'health', ok: 1, cond: c.conditions, allg: c.allergens }).then(function () { delete c.hx.health; persist(c); main(); toast('✓ حُدّثت الحالة الصحية — أعد توليد الخطة وأرسلها'); }).catch(hxErr);
+  },
+  hxHealthNo: function () { var c = cur(); hxSend(c, { t: 'health', ok: 0 }).catch(function () { }).then(function () { delete c.hx.health; persist(c); main(); }); }
+});
+(function (f) { A.tab = function (v) { var r = f.apply(this, arguments); if (v === 'hx') A.hxRead(); return r; }; })(A.tab);
+document.addEventListener('change', function (e) {
+  var t = e.target; if (!t.dataset || !t.dataset.hx || !HX.st) return;
+  if (t.dataset.hx === 'cc') HX.st.cc = t.value.replace(/\D/g, '') || '966'; else if (t.dataset.hx === 'name' && t.value.trim()) HX.st.name = t.value.trim().slice(0, 80);
+  hxSave(); if (t.dataset.hx === 'name' && hxOn()) hxFetch('POST', '/v1/register', { sigPub: HX.st.ident.sigPub, encPub: HX.st.ident.encPub, name: HX.st.name, regKey: hxDef().regKey || '' }, true).catch(function () { });
+});
+document.addEventListener('keydown', function (e) { var t = e.target; if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && t && (t.id === 'hxMsg' || (t.dataset && t.dataset.hxr))) { e.preventDefault(); if (t.id === 'hxMsg') A.hxSendMsg(); else A.hxReqMsg(t.dataset.hxr); } });
+(function (f) { render = function () { var r = f.apply(this, arguments); if (!HX.loaded && DB) { HX.loaded = 'loading'; hxLoad().then(function () { hxRail(); if (S.view === 'hx' || S.view === 'settings') main(); }); } else hxRail(); return r; }; })(render);
+(function (f) { main0 = function () { if (S.view === 'hx') { $('main').innerHTML = hxPage(); return; } return f.apply(this, arguments); }; })(main0);

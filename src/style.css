@@ -181,3 +181,39 @@ body:not(.gating) main{padding-bottom:92px}
 @keyframes hxFade{0%{opacity:0;transform:translateX(18px)}100%{opacity:1;transform:none}}
 .thsw.gl{background:radial-gradient(50px 30px at 20% 20%,rgba(96,140,255,.7),transparent),radial-gradient(50px 30px at 85% 90%,rgba(80,200,160,.55),transparent),#16214d}.thsw.gl i{background:rgba(255,255,255,.14)}.thsw.gl b{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);border-radius:8px}
 @media print{#tabbar{display:none!important}}
+/* «حصتي»: طلبات العملاء، الدعوات، تبويب العميل */
+.hxnb{display:inline-block;min-width:18px;padding:0 5px;border-radius:9px;background:#e5484d;color:#fff;font:700 11px/18px Tahoma,Arial,sans-serif;font-style:normal;text-align:center;vertical-align:middle}
+.hxnb:empty{display:none}
+.hxtop{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
+.hxtop h2{margin:0}
+.hxreq.wait,.hxinv.exp{opacity:.75}
+.hxinv.made{border-color:var(--g);box-shadow:0 0 0 2px rgba(58,127,83,.18)}
+.hxrh{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.hxrh small{display:block;color:#667}
+.hxkv{display:grid;grid-template-columns:max-content 1fr;gap:4px 12px;margin:6px 0 10px;font-size:14px}
+.hxkv dt{color:#667}
+.hxkv dd{margin:0;overflow-wrap:anywhere}
+.hxlink{margin:8px 0;padding:8px 10px;border:1px dashed var(--line);border-radius:8px;font:12px/1.5 monospace;overflow-wrap:anywhere;user-select:all}
+a.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 14px;border-radius:8px;background:#25a35a;color:#fff;text-decoration:none;font-weight:700}
+.hxthread{display:flex;flex-direction:column;gap:6px;max-height:340px;overflow:auto;padding:4px 2px}
+.hxb{align-self:flex-start;max-width:85%;padding:7px 11px;border-radius:14px 14px 14px 4px;background:#eef1f7;white-space:pre-wrap;overflow-wrap:anywhere}
+.hxb.me{align-self:flex-end;border-radius:14px 14px 4px 14px;background:#dff3e6}
+.hxb small{display:block;margin-top:2px;font-size:11px;color:#778}
+.hxb small.hxcx{margin:0 0 2px}
+.hxcomp{display:flex;gap:8px;margin-top:8px;align-items:flex-end}
+.hxcomp textarea{flex:1;min-height:40px;resize:vertical}
+.hxgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.hxgrid .ucard{margin:0}
+.hxday{display:grid;grid-template-columns:7.5em 1fr 3em auto;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--line);font-size:13px}
+.hxday .hxex{grid-column:1/-1;color:#667}
+.hxbar{height:8px;border-radius:4px;background:#e4e7ee;overflow:hidden}
+.hxbar i{display:block;height:100%;background:var(--g)}
+.hxw{display:flex;flex-wrap:wrap;gap:10px}
+.hxw span{display:flex;flex-direction:column;align-items:center;min-width:56px}
+.hxw small,.hxpl small{color:#778;font-size:11px}
+.hxpl{margin:0;padding-inline-start:18px}
+.hxmini summary{cursor:pointer;margin-top:6px}
+.hxlinked{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px}
+.hxtab h3 small{font-weight:400;font-size:12px;color:#778}
+.hxtop .two button{white-space:nowrap}
+.hxkv dd[dir=ltr]{text-align:right}

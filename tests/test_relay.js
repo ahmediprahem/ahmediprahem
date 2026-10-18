@@ -29,7 +29,9 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); };
   const inv = await call(dr, 'POST', '/v1/invites', { h, label: 'سارة أحمد', exp: Math.floor(Date.now() / 1000) + 3 * 86400, cat }); assert.strictEqual(inv.s, 200);
   const info = await call(null, 'GET', '/v1/invites/' + h); assert.strictEqual(info.j.dname, 'د. أحمد حامد'); assert.deepStrictEqual(info.j.cat, cat); assert.strictEqual(await HXC.fpOf(info.j.encPub), await HXC.fpOf(dr.encPub));
   assert.strictEqual((await call(null, 'GET', '/v1/invites/' + 'x'.repeat(32))).s, 404);
-  ok('الدعوة: يصدرها الأخصائي فقط، ويقرأ العميل اسم الأخصائي ومفتاحه (البصمة تطابق) وقائمة الوجبات من الرمز وحده');
+  const t2 = HXC.token(), h2 = await HXC.tokenHash(t2); await call(dr, 'POST', '/v1/invites', { h: h2, label: 'ملغاة' }); assert.strictEqual((await call(dr2, 'POST', '/v1/invites/revoke', { h: h2 })).s, 200); assert.strictEqual((await call(null, 'GET', '/v1/invites/' + h2)).s, 200);
+  assert.strictEqual((await call(dr, 'POST', '/v1/invites/revoke', { h: h2 })).s, 200); assert.strictEqual((await call(null, 'GET', '/v1/invites/' + h2)).s, 410);
+  ok('الدعوة: يصدرها الأخصائي فقط ويلغيها هو وحده، ويقرأ العميل اسم الأخصائي ومفتاحه (البصمة تطابق) وقائمة الوجبات من الرمز وحده');
   // 4) الانضمام
   assert.strictEqual((await call(cl, 'POST', '/v1/join', { token: 'bad-token', sigPub: cl.sigPub, encPub: cl.encPub })).s, 404);
   const j = await call(cl, 'POST', '/v1/join', { token: tok, sigPub: cl.sigPub, encPub: cl.encPub }); assert.strictEqual(j.s, 200); assert.strictEqual(j.j.did, dr.id); assert.strictEqual(j.j.cid, cl.id);
