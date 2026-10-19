@@ -98,13 +98,13 @@ function send(payload) {                           // صندوق صادر: يُ�
   if (payload.t === 'prefs') S.outbox = S.outbox.filter((q) => q.t !== 'prefs' || (payload.changes = (q.changes || []).concat(payload.changes || []), false));
   S.outbox.push(payload); save(); return flush();
 }
-let flushing = null;
+let flushing = null; const PUSHT = ['intake', 'msg', 'health'];     // ما يستحق إشعاراً للأخصائي (المتابعة اليومية تصل بصمت)
 function flush() {
   if (flushing) return flushing;
   flushing = (async () => {
     while (S && S.outbox.length) {
       const q = S.outbox[0];
-      try { const box = await HXC.seal(S.dEnc, q); await api('POST', '/v1/send', { to: S.did, box }); S.outbox.shift(); save(); }
+      try { const box = await HXC.seal(S.dEnc, q); await api('POST', '/v1/send', { to: S.did, box, push: PUSHT.indexOf(q.t) >= 0 }); S.outbox.shift(); save(); }
       catch (e) {
         if (e.status === 413 || e.status === 400) { S.outbox.shift(); continue; }        // رسالة مرفوضة نهائياً: تُسقط ويستمر الباقي
         if (e.net) { V.online = false; render(); } else if (e.code === 'unknown') { S.removed = true; S.outbox = []; render(); }
@@ -129,6 +129,42 @@ async function poll() {
     if (j.more) setTimeout(poll, 300);
   } catch (e) { if (e.net) { if (V.online) { V.online = false; render(); } } else if (e.code === 'unknown') { S.removed = true; persist(); render(); } }
   finally { V.polling = false; }
+}
+// ---------- الإشعارات والتطبيق مغلق (Web Push بلا محتوى عبر عامل الخدمة /sw.js)
+const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent), standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+const pushOk = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+let swReg = null;
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+  swReg = navigator.serviceWorker.register('/sw.js').catch(() => null);
+  navigator.serviceWorker.addEventListener('message', (e) => { if (e.data && e.data.t === 'push') poll(); });
+}
+function pushState() {
+  if (!pushOk()) return isIOS && !standalone ? 'ios' : 'na';
+  if (Notification.permission === 'denied') return 'denied';
+  return Notification.permission === 'granted' && S && S.pushEp ? 'on' : 'off';
+}
+async function pushSetup(ask) {
+  if (!S || !S.cid || !pushOk() || !swReg) return pushState();
+  let perm = Notification.permission; if (perm === 'default' && ask) perm = await Notification.requestPermission();
+  if (perm !== 'granted') return pushState();
+  try {
+    const reg = await Promise.race([swReg, new Promise((r) => setTimeout(() => r(null), 8000))]); if (!reg) throw new Error('sw');
+    await Promise.race([navigator.serviceWorker.ready, new Promise((r, j) => setTimeout(() => j(new Error('sw')), 8000))]);
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) { const k = await (await fetch(API + '/v1/push/key', { cache: 'no-store' })).json(); sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: HXC.unb64u(k.key) }); }
+    if (sub.endpoint !== S.pushEp || !S.pushAt || now() - S.pushAt > 7 * 86400000) { await api('POST', '/v1/push/sub', { ep: sub.endpoint }); S.pushEp = sub.endpoint; S.pushAt = now(); save(); }
+  } catch (e) { V.pushErr = 1; }
+  return pushState();
+}
+function notifCard(compact) {                       // بطاقة حالة الإشعارات (شاشة الانتظار، اليوم، الحساب)
+  const st = pushState();
+  if (st === 'on') return compact ? '' : '<p class="dim">' + I('check') + ' الإشعارات مفعّلة: يصلك خبر الخطة ورسائل أخصائيك والتطبيق مغلق.</p>';
+  if (st === 'na') return '';
+  if (compact && S.notifLater && now() - S.notifLater < 3 * 86400000) return '';
+  const body = st === 'ios' ? 'على آيفون: افتح «حصتي» في Safari ← زر المشاركة ← «إضافة إلى الشاشة الرئيسية»، ثم افتحه من الأيقونة وفعّل الإشعارات.'
+    : st === 'denied' ? 'الإشعارات محظورة لهذا الموقع. فعّلها من إعدادات المتصفح ← الإشعارات ← السماح لـ«حصتي».'
+    : 'ليصلك خبر خطتك ورد أخصائيك حتى والتطبيق مغلق.' + (V.pushErr ? ' (تعذّر التفعيل الآن؛ أعد المحاولة)' : '');
+  return '<div class="banner info notif">' + I('alert') + '<span>' + body + (st === 'off' ? '<br><button class="btn sm" data-act="notif" style="margin-top:8px">تفعيل الإشعارات</button>' + (compact ? ' <button class="link" data-act="notifLater">لاحقاً</button>' : '') : '') + '</span></div>';
 }
 function notify(t, b) { toast(t); try { if (document.hidden && 'Notification' in window && Notification.permission === 'granted') new Notification(t, { body: b || '', icon: '/icon.png', lang: 'ar', dir: 'rtl' }); } catch (e) { } }
 function handle(p) {
@@ -298,7 +334,7 @@ function scrSent() {
     + '<div class="card tl">' + step('ok', 'أُرسلت بياناتك', 'مشفّرة إلى ' + esc(S.dname))
     + step(ok ? 'ok' : 'now', ok ? 'اعتمدك أخصائيك' : 'قيد المراجعة', ok ? 'رقم ملفك ' + esc(S.code) : 'عادة خلال يوم عمل')
     + step(ok ? 'now' : '', 'خطتك الأولى', 'تظهر هنا يوماً بيوم') + '</div>'
-    + '<p class="sync">' + (S.outbox.length ? 'بانتظار الإنترنت لإرسال ' + S.outbox.length + ' عنصر…' : 'يُتحقق من الجديد تلقائياً كل نصف دقيقة') + '</p>'
+    + notifCard(false) + '<p class="sync">' + (S.outbox.length ? 'بانتظار الإنترنت لإرسال ' + S.outbox.length + ' عنصر…' : 'يُتحقق من الجديد تلقائياً كل نصف دقيقة') + '</p>'
     + '<button class="btn sec full" data-act="chat" style="position:relative">' + I('msg') + ' راسل أخصائيك' + (S.unreadC ? '<span class="nb" style="position:absolute;top:-6px;left:-6px;min-width:20px;height:20px;border-radius:10px;background:var(--coral);color:#3a0d05;font-size:11px;display:grid;place-items:center">' + S.unreadC + '</span>' : '') + '</button>'
     + '<button class="btn sec full" data-act="refresh">' + I('reset') + ' تحقق الآن</button>'
     + '</div></div></div>';
@@ -313,7 +349,7 @@ function scrApp() {
 function tabToday() {
   const d = TODAY, L = dl(d), [done, n] = itemsOfDay(d), pct = n ? Math.round(done / n * 100) : 0, C = 2 * Math.PI * 40;
   const first = (S.p.name || '').trim().split(/\s+/)[0] || '';
-  let out = '<div class="hello"><div class="av sm">' + esc(first.charAt(0) || '؟') + '</div><div style="flex:1"><div class="dim">' + esc(DATA.dayNames[d] || '') + '</div><h2>أهلاً ' + esc(first) + '</h2></div>' + chatBtn() + '</div>';
+  let out = notifCard(true) + '<div class="hello"><div class="av sm">' + esc(first.charAt(0) || '؟') + '</div><div style="flex:1"><div class="dim">' + esc(DATA.dayNames[d] || '') + '</div><h2>أهلاً ' + esc(first) + '</h2></div>' + chatBtn() + '</div>';
   out += '<section class="card ring"><svg viewBox="0 0 100 100" role="img" aria-label="التزام اليوم ' + pct + '%"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="10"/><circle cx="50" cy="50" r="40" fill="none" stroke="#6fe3a9" stroke-width="10" stroke-linecap="round" stroke-dasharray="' + C + '" stroke-dashoffset="' + (C * (1 - pct / 100)) + '"/></svg><div style="flex:1"><div class="num">' + pct + '%</div><div class="mut">' + done + ' من ' + n + ' أصناف اليوم</div>'
     + (pct === 100 ? '<div class="dim" style="color:var(--mint)">يوم كامل، أحسنت!</div>' : '<div class="dim">علّم ما أكلته باللمس.</div>') + '</div></section>';
   out += '<div class="stats3"><div class="st"><b>' + DATA.kcal + '</b><small>سعرة هدفك</small></div><div class="st"><b>' + DATA.pro + ' جم</b><small>بروتين</small></div><div class="st"><b>' + (L.water * CUP).toFixed(2).replace(/\.?0+$/, '') + ' / ' + (+DATA.water).toFixed(1) + '</b><small>لتر ماء</small></div></div>';
@@ -366,7 +402,7 @@ function tabProgress() {
   return '<h2>تقدّمي</h2><section class="card stack"><div class="row" style="justify-content:space-between"><h3>الوزن</h3><span class="dim">' + (W.length > 1 ? (diff <= 0 ? diff + ' كجم منذ البداية' : '+' + diff + ' كجم') : '') + '</span></div>' + chart
     + '<div class="row"><input class="inp" id="wIn" type="text" data-numf="1" autocomplete="off" inputmode="decimal" placeholder="وزن اليوم (كجم)" style="flex:1"><button class="btn sm" data-act="weigh">' + I('scale') + ' سجّل</button></div></section>'
     + '<section class="card stack"><div class="row" style="justify-content:space-between"><h3>الالتزام آخر 7 أيام</h3><span class="dim">% من الأصناف</span></div><div class="wk">' + bars + '</div></section>'
-    + '<section class="card stack"><h3>الحساب</h3><p class="dim">ملفك لدى ' + esc(S.dname) + (S.code ? ' • رقم ' + esc(S.code) : '') + '. بياناتك محفوظة مشفّرة على هذا الجوال فقط.</p><div class="row"><button class="btn sm sec" data-act="lock">' + I('lock') + ' قفل التطبيق</button>' + ('Notification' in window && Notification.permission === 'default' ? '<button class="btn sm sec" data-act="notif">تفعيل الإشعارات</button>' : '') + '</div><button class="link" data-act="wipe" style="color:var(--coral)">حذف بياناتي من هذا الجوال</button></section>';
+    + '<section class="card stack"><h3>الحساب</h3><p class="dim">ملفك لدى ' + esc(S.dname) + (S.code ? ' • رقم ' + esc(S.code) : '') + '. بياناتك محفوظة مشفّرة على هذا الجوال فقط.</p>' + notifCard(false) + '<div class="row"><button class="btn sm sec" data-act="lock">' + I('lock') + ' قفل التطبيق</button></div><button class="link" data-act="wipe" style="color:var(--coral)">حذف بياناتي من هذا الجوال</button></section>';
 }
 
 // ---------- الأوراق السفلية
@@ -446,7 +482,7 @@ function render() {
   if (S && K) save();
 }
 let focusChat = false;
-function startLoop() { clearInterval(V.timer); V.timer = setInterval(() => { if (!document.hidden) poll(); }, POLL); poll(); }
+function startLoop() { clearInterval(V.timer); V.timer = setInterval(() => { if (!document.hidden) poll(); }, POLL); poll(); pushSetup(false).then((st) => { if (st === 'on') render(); }); }
 
 // ---------- رمز الدخول: الإنشاء والفتح
 async function onPin() {
@@ -505,11 +541,13 @@ document.addEventListener('click', (e) => {
     case 'pinBack': if (V.pin1) { V.pin1 = ''; V.pin = ''; } else { V.screen = ''; V.pin = ''; } V.err = ''; break;
     case 'forgot': sheet = { t: 'forgot' }; if (!S) { S = fresh(); S.__tmp = 1; } break;
     case 'lock': clearInterval(V.timer); persist(); S = null; K = null; sheet = null; V.screen = 'lock'; V.pin = ''; V.err = ''; break;
-    case 'notif': try { Notification.requestPermission().then(render); } catch (x) { } return;
+    case 'notif': V.pushErr = 0; pushSetup(true).then((st) => { toast(st === 'on' ? 'فُعّلت الإشعارات ✓' : st === 'denied' ? 'الإشعارات محظورة من إعدادات المتصفح' : 'تعذّر تفعيل الإشعارات الآن'); render(); }); return;
+    case 'notifLater': S.notifLater = now(); break;
     case 'wipe': {
       if (!confirm('حذف كل بيانات «حصتي» من هذا الجوال؟ لا يمكن التراجع، وستحتاج رابطاً جديداً من أخصائيك.')) return;
       const done = () => { try { localStorage.removeItem(KEY); sessionStorage.removeItem(TKEY); } catch (x) { } location.replace(location.pathname); };
-      if (S && S.ident && S.cid && !S.__tmp) api('POST', '/v1/clients/remove', {}).catch(() => { }).then(done); else done(); return;
+      const unsub = swReg ? swReg.then((r) => r && r.pushManager.getSubscription()).then((x) => x && x.unsubscribe()).catch(() => { }) : Promise.resolve();
+      if (S && S.ident && S.cid && !S.__tmp) unsub.then(() => api('POST', '/v1/clients/remove', {})).catch(() => { }).then(done); else unsub.then(done); return;
     }
     case 'chat': S.chat = true; sheet = null; focusChat = true; break;
     case 'chatClose': S.chat = false; break;
@@ -544,7 +582,7 @@ document.addEventListener('click', (e) => {
         if (!S.weights.length && p.weight) S.weights.push([now(), p.weight]);
         S.req = 'sent'; S.reqMsg = ''; S.screen = 'sent';
         return send({ t: 'intake', p, fp });
-      }).then(() => { V.busy = false; render(); try { if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission(); } catch (x) { } });
+      }).then(() => { V.busy = false; render(); return pushSetup(true); }).then(render).catch(() => { });
       return;
     }
     case 'tab': S.tab = v; break;

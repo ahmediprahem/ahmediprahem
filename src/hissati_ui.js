@@ -56,9 +56,10 @@ function hxInvite(label, phone, days) {
   }).then(function () { return hxSave(); }).then(function () { return HX.st.inv[h]; }).catch(function (e) { delete HX.st.inv[h]; throw e; });
 }
 // ---------- الإرسال للعميل (مشفّر لمفتاحه، ومعه السر المشترك)
+var HX_PUSH = ['plan', 'msg', 'status', 'health'];             // ما يصل العميلَ إشعاراً على جواله (علامات القراءة تصل بصمت)
 function hxSendTo(cid, enc, tok, payload) {
   payload.a = tok; payload.ts = payload.ts || Date.now();
-  return HXC0.seal(enc, payload).then(function (box) { return hxFetch('POST', '/v1/send', { to: cid, box: box }, true); });
+  return HXC0.seal(enc, payload).then(function (box) { return hxFetch('POST', '/v1/send', { to: cid, box: box, push: HX_PUSH.indexOf(payload.t) >= 0 }, true); });
 }
 function hxSend(c, payload) { return hxSendTo(c.hx.cid, c.hx.enc, c.hx.tok, payload); }
 function hxClientOf(cid) { return S.clients.filter(function (c) { return c.hx && c.hx.cid === cid; })[0]; }

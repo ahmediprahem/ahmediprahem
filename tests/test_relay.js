@@ -64,5 +64,30 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); };
   const pre = await W.default.fetch(new Request(base + '/v1/send', { method: 'OPTIONS' }), env); assert.strictEqual(pre.status, 204); assert(pre.headers.get('access-control-allow-headers').includes('authorization'));
   assert.strictEqual((await W.default.fetch(new Request(base + '/v1/health'), { DB: null })).status, 500);
   ok('الحذف: الأخصائي يفصل عميله فتُحذف بياناته ورسائله، والرسالة الضخمة تُرفض، والصفحة الرئيسية تقدّم «حصتي» بسياسة أمان صارمة');
+  // 8) الإشعارات: مفتاح VAPID ثابت، اشتراك من خدمات معروفة فقط، إشعار بلا محتوى عند push:true، حد زمني، وحذف الاشتراك الميت
+  const env2 = { DB: d1() }, W2 = W.default, ctxs = [], ctx = { waitUntil: (pr) => ctxs.push(pr) }; W._test.reset();
+  const call2 = async (ident, method, p, obj) => { const body = obj === undefined ? '' : JSON.stringify(obj), h = { 'content-type': 'application/json' }; if (ident) h.authorization = await HXC.signReq(ident, method, p, body); const r = await W2.fetch(new Request(base + p, { method, headers: h, body: method === 'POST' ? body : undefined }), env2, ctx); return { s: r.status, j: await r.json().catch(() => null) }; };
+  const k1 = (await call2(null, 'GET', '/v1/push/key')).j.key, k2 = (await call2(null, 'GET', '/v1/push/key')).j.key; assert.strictEqual(k1, k2); assert.strictEqual(HXC.unb64u(k1).length, 65);
+  const D = await HXC.genIdentity(), Cl = await HXC.genIdentity(), tk = HXC.token();
+  await call2(D, 'POST', '/v1/register', { sigPub: D.sigPub, encPub: D.encPub, name: 'د' }); await call2(D, 'POST', '/v1/invites', { h: await HXC.tokenHash(tk), label: 'ع' });
+  const calls = [], realFetch = globalThis.fetch; let status = 201; globalThis.fetch = async (u, o) => { calls.push({ u: String(u), o }); return new Response(null, { status }); };
+  try {
+    await call2(Cl, 'POST', '/v1/join', { token: tk, sigPub: Cl.sigPub, encPub: Cl.encPub }); await Promise.all(ctxs.splice(0)); assert.strictEqual(calls.length, 0);
+    assert.strictEqual((await call2(null, 'POST', '/v1/push/sub', { ep: 'https://fcm.googleapis.com/fcm/send/abc12345' })).s, 401);
+    assert.strictEqual((await call2(Cl, 'POST', '/v1/push/sub', { ep: 'https://evil.example/hook/123456789' })).s, 400);
+    const EP = 'https://fcm.googleapis.com/fcm/send/cl-device-123456'; assert.strictEqual((await call2(Cl, 'POST', '/v1/push/sub', { ep: EP })).s, 200);
+    await call2(D, 'POST', '/v1/send', { to: Cl.id, box: { v: 1 }, push: false }); await Promise.all(ctxs.splice(0)); assert.strictEqual(calls.length, 0, 'المتابعة الصامتة لا تُرسل إشعاراً');
+    await call2(D, 'POST', '/v1/send', { to: Cl.id, box: { v: 1 }, push: true }); await Promise.all(ctxs.splice(0)); assert.strictEqual(calls.length, 1);
+    const c0 = calls[0]; assert.strictEqual(c0.u, EP); assert.strictEqual(c0.o.method, 'POST'); assert.strictEqual(c0.o.headers['Content-Length'], '0'); assert(!c0.o.body, 'الإشعار يجب أن يكون بلا محتوى');
+    const m = /^vapid t=([\w-]+)\.([\w-]+)\.([\w-]+), k=([\w-]+)$/.exec(c0.o.headers.Authorization); assert(m, c0.o.headers.Authorization); assert.strictEqual(m[4], k1);
+    const claims = JSON.parse(Buffer.from(m[2], 'base64url').toString()); assert.strictEqual(claims.aud, 'https://fcm.googleapis.com'); assert(claims.exp > Date.now() / 1000 && /^https:\/\//.test(claims.sub));
+    const pk = await crypto.subtle.importKey('raw', HXC.unb64u(k1), { name: 'ECDSA', namedCurve: 'P-256' }, false, ['verify']);
+    assert(await crypto.subtle.verify({ name: 'ECDSA', hash: 'SHA-256' }, pk, HXC.unb64u(m[3]), new TextEncoder().encode(m[1] + '.' + m[2])), 'توقيع VAPID غير صالح');
+    await call2(D, 'POST', '/v1/send', { to: Cl.id, box: { v: 2 }, push: true }); await Promise.all(ctxs.splice(0)); assert.strictEqual(calls.length, 1, 'إشعار واحد كل 30 ثانية لكل جهاز');
+    env2.DB._raw.prepare('UPDATE push_subs SET last = 0').run(); status = 410; await call2(D, 'POST', '/v1/send', { to: Cl.id, box: { v: 3 }, push: true }); await Promise.all(ctxs.splice(0));
+    assert.strictEqual(calls.length, 2); assert.strictEqual(env2.DB._raw.prepare('SELECT COUNT(*) AS n FROM push_subs').get().n, 0, 'الاشتراك المنتهي (410) يُحذف');
+    status = 201; await call2(Cl, 'POST', '/v1/push/sub', { ep: EP }); await call2(D, 'POST', '/v1/clients/remove', { cid: Cl.id }); assert.strictEqual(env2.DB._raw.prepare('SELECT COUNT(*) AS n FROM push_subs').get().n, 0);
+  } finally { globalThis.fetch = realFetch; }
+  ok('الإشعارات: مفتاح VAPID يُولَّد مرة ويبقى، الاشتراك من خدمات معروفة فقط، إشعار بلا محتوى وموقّع عند push فقط، حد 30 ثانية، وحذف الاشتراك المنتهي أو عند فصل العميل');
   console.log('\nنجح', n, 'اختبارات المحطة الوسيطة');
 })().catch((e) => { console.log('✘', e && e.stack ? e.stack.split('\n').slice(0, 4).join(' | ') : e); process.exit(1); });

@@ -4,9 +4,10 @@
    - تقدّم تطبيق «حصتي» نفسه على الصفحة الرئيسية (/)، فرابط الدعوة = عنوان هذه المحطة.
    - الجداول تُنشأ تلقائياً أول مرة؛ يكفي ربط قاعدة D1 باسم DB. متغير اختياري REG_KEY: مفتاح تسجيل الأخصائيين (بدونه يقبل أي «حصة»).
    - لا تسجّل أي محتوى (لا console.log). يُبنى منه worker/relay/dist/worker.js بـ py build_web.py (يُضمَّن تطبيق «حصتي» وأيقونته). */
-const VER = '1.0';
+const VER = '1.1';
 const APP_HTML = /*HISSATI_HTML*/'<!doctype html><meta charset="utf-8"><title>حصتي</title><p>ابنِ الملف بـ py build_web.py</p>'/*END*/;
 const ICON_B64 = /*HISSATI_ICON*/''/*END*/;
+const SW_JS = /*HISSATI_SW*/''/*END*/;
 const LIM = { body: 600000, box: 450000, cat: 300000, label: 80, invitesActive: 300, perHour: 400, inbox: 100, skew: 300 };
 const enc = new TextEncoder();
 const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-methods': 'GET, POST, OPTIONS', 'access-control-allow-headers': 'authorization, content-type', 'access-control-max-age': '86400' };
@@ -39,7 +40,10 @@ const SCHEMA = [
   'CREATE INDEX IF NOT EXISTS clients_did ON clients (did)',
   'CREATE TABLE IF NOT EXISTS msgs (id INTEGER PRIMARY KEY AUTOINCREMENT, rcpt TEXT NOT NULL, sender TEXT NOT NULL, kind TEXT NOT NULL, body TEXT NOT NULL, ts INTEGER)',
   'CREATE INDEX IF NOT EXISTS msgs_rcpt ON msgs (rcpt, id)',
-  'CREATE INDEX IF NOT EXISTS msgs_sender ON msgs (sender, ts)'
+  'CREATE INDEX IF NOT EXISTS msgs_sender ON msgs (sender, ts)',
+  'CREATE TABLE IF NOT EXISTS kv (k TEXT PRIMARY KEY, v TEXT)',
+  'CREATE TABLE IF NOT EXISTS push_subs (ep TEXT PRIMARY KEY, id TEXT NOT NULL, created INTEGER, last INTEGER DEFAULT 0)',
+  'CREATE INDEX IF NOT EXISTS push_id ON push_subs (id)'
 ];
 let ready = null;
 const init = (db) => ready || (ready = (async () => { for (const q of SCHEMA) await db.prepare(q).run(); })().catch((e) => { ready = null; throw e; }));
@@ -62,8 +66,40 @@ async function authed(req, db, path, body, selfPub) {   // selfPub: للتسجي
   return { id: a.id, who };
 }
 
+// ---------- الإشعارات (Web Push بلا محتوى): المحطة لا ترسل أي بيانات عبر خدمات Google/Apple — فقط «لديك جديد»، والتطبيق يجلب الرسالة المشفّرة بنفسه.
+// مفاتيح VAPID تُولَّد تلقائياً أول مرة وتُحفظ في D1 (لا إعداد مطلوب). الاشتراكات من خدمات الدفع المعروفة فقط، وإشعار واحد كل 30 ثانية لكل جهاز.
+const PUSH_HOSTS = /^https:\/\/(fcm\.googleapis\.com|android\.googleapis\.com|updates\.push\.services\.mozilla\.com|[a-z0-9-]+\.push\.services\.mozilla\.com|web\.push\.apple\.com|[a-z0-9-]+\.push\.apple\.com|[a-z0-9-]+\.notify\.windows\.com)\/[^\s]{8,900}$/;
+const PUSH = { gap: 30, perId: 5 }; let vapidC = null; const jwtC = new Map();
+async function vapid(db) {
+  if (vapidC) return vapidC;
+  let r = await one(db, "SELECT v FROM kv WHERE k = 'vapid'");
+  if (!r) {
+    const k = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']);
+    const v = JSON.stringify({ pub: b64u(await crypto.subtle.exportKey('raw', k.publicKey)), priv: await crypto.subtle.exportKey('jwk', k.privateKey) });
+    await run(db, "INSERT OR IGNORE INTO kv (k, v) VALUES ('vapid', ?)", v); r = await one(db, "SELECT v FROM kv WHERE k = 'vapid'");
+  }
+  const v = JSON.parse(r.v); v.key = await crypto.subtle.importKey('jwk', v.priv, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['sign']); return (vapidC = v);
+}
+async function vapidAuth(db, aud, sub) {
+  const c = jwtC.get(aud); if (c && c.exp - now() > 600) return c.h;
+  const v = await vapid(db), exp = now() + 12 * 3600, part = (o) => b64u(enc.encode(JSON.stringify(o)));
+  const unsigned = part({ typ: 'JWT', alg: 'ES256' }) + '.' + part({ aud, exp, sub });
+  const sig = await crypto.subtle.sign({ name: 'ECDSA', hash: 'SHA-256' }, v.key, enc.encode(unsigned));
+  const h = 'vapid t=' + unsigned + '.' + b64u(sig) + ', k=' + v.pub; jwtC.set(aud, { h, exp }); return h;
+}
+async function pushTo(db, id, origin) {
+  const rows = await all(db, 'SELECT ep, last FROM push_subs WHERE id = ?', id), t = now();
+  await Promise.all(rows.filter((r) => t - (r.last || 0) >= PUSH.gap).map(async (r) => {
+    try {
+      const res = await fetch(r.ep, { method: 'POST', headers: { TTL: '86400', Urgency: 'high', 'Content-Length': '0', Authorization: await vapidAuth(db, new URL(r.ep).origin, origin) } });
+      if (res.status === 404 || res.status === 410) await run(db, 'DELETE FROM push_subs WHERE ep = ?', r.ep); else await run(db, 'UPDATE push_subs SET last = ? WHERE ep = ?', t, r.ep);
+    } catch { /* خدمة الإشعارات غير متاحة: تُعاد المحاولة مع الرسالة التالية */ }
+  }));
+}
+
 // ---------- المسارات
-async function api(req, env, url) {
+async function api(req, env, url, ctx) {
+  const bg = (pr) => { pr = pr.catch(() => { }); if (ctx && ctx.waitUntil) ctx.waitUntil(pr); return pr; }, origin = 'https://' + url.host;
   const db = env.DB; if (!db) return err(500, 'nodb', 'لم تُربط قاعدة D1 باسم DB'); await init(db);
   const p = url.pathname, path = p + url.search, method = req.method;
   const body = method === 'POST' ? await req.text() : ''; if (body.length > LIM.body) return err(413, 'big', 'الطلب أكبر من المسموح');
@@ -96,8 +132,9 @@ async function api(req, env, url) {
       db.prepare('INSERT INTO clients (id, did, sig, enc, label, created) VALUES (?, ?, ?, ?, ?, ?)').bind(a.id, iv.did, JSON.stringify(pubOnly(J.sigPub)), JSON.stringify(pubOnly(J.encPub)), iv.label || '', t),
       db.prepare('INSERT INTO msgs (rcpt, sender, kind, body, ts) VALUES (?, ?, ?, ?, ?)').bind(iv.did, a.id, 'join', JSON.stringify({ cid: a.id, sigPub: pubOnly(J.sigPub), encPub: pubOnly(J.encPub), label: iv.label || '', inv: h }), t)
     ]);
-    return json({ ok: true, cid: a.id, did: iv.did, dEncPub: JSON.parse(d.enc) });
+    bg(pushTo(db, iv.did, origin)); return json({ ok: true, cid: a.id, did: iv.did, dEncPub: JSON.parse(d.enc) });
   }
+  if (p === '/v1/push/key' && method === 'GET') return json({ ok: true, key: (await vapid(db)).pub });
   // كل ما يلي يحتاج طرفاً مسجّلاً
   const a = await authed(req, db, path, body); if (a.e) return a.e; const me = a.who;
   if (p === '/v1/invites' && method === 'POST') {
@@ -113,12 +150,20 @@ async function api(req, env, url) {
     if (me.role !== 'd') return err(403, 'role', 'للأخصائي فقط');
     await run(db, 'UPDATE invites SET used = 1, cat = NULL WHERE h = ? AND did = ?', String(J.h || ''), me.id); return json({ ok: true });
   }
+  if (p === '/v1/push/sub' && method === 'POST') {                // اشتراك جهاز في الإشعارات (عنوان الخدمة فقط؛ لا مفاتيح ولا محتوى)
+    const ep = String(J.ep || ''); if (!PUSH_HOSTS.test(ep)) return err(400, 'push', 'خدمة إشعارات غير معروفة');
+    await run(db, 'INSERT INTO push_subs (ep, id, created, last) VALUES (?, ?, ?, 0) ON CONFLICT(ep) DO UPDATE SET id = excluded.id', ep, me.id, now());
+    const old = await all(db, 'SELECT ep FROM push_subs WHERE id = ? ORDER BY created DESC LIMIT -1 OFFSET ?', me.id, PUSH.perId); for (const o of old) await run(db, 'DELETE FROM push_subs WHERE ep = ?', o.ep);
+    return json({ ok: true });
+  }
+  if (p === '/v1/push/unsub' && method === 'POST') { await run(db, 'DELETE FROM push_subs WHERE ep = ? AND id = ?', String(J.ep || ''), me.id); return json({ ok: true }); }
   if (p === '/v1/send' && method === 'POST') {
     const to = String(J.to || ''), box = J.box; if (!box || typeof box !== 'object') return err(400, 'box', 'رسالة فارغة');
     const s = JSON.stringify(box); if (s.length > LIM.box) return err(413, 'big', 'الرسالة أكبر من المسموح');
     if (me.role === 'c' ? to !== me.did : !(await one(db, 'SELECT id FROM clients WHERE id = ? AND did = ?', to, me.id))) return err(403, 'pair', 'لا علاقة بين المرسل والمستلم');
     const n = await one(db, 'SELECT COUNT(*) AS n FROM msgs WHERE sender = ? AND ts > ?', me.id, now() - 3600); if (n && n.n >= LIM.perHour) return err(429, 'rate', 'رسائل كثيرة خلال ساعة');
     const r = await run(db, 'INSERT INTO msgs (rcpt, sender, kind, body, ts) VALUES (?, ?, ?, ?, ?)', to, me.id, 'e', s, now());
+    if (J.push) bg(pushTo(db, to, origin));                         // المرسل يحدد ما يستحق إشعاراً (خطة، رسالة…) لا المتابعة الصامتة
     return json({ ok: true, id: r.meta && r.meta.last_row_id });
   }
   if (p === '/v1/inbox' && method === 'GET') {
@@ -130,26 +175,27 @@ async function api(req, env, url) {
   if (p === '/v1/clients/remove' && method === 'POST') {          // الأخصائي يفصل عميلاً (أو العميل يحذف نفسه): تُحذف بياناته ورسائله من المحطة
     const cid = me.role === 'c' ? me.id : String(J.cid || ''), c = await one(db, 'SELECT did FROM clients WHERE id = ?', cid);
     if (!c || (me.role === 'd' && c.did !== me.id)) return err(404, 'client', 'غير موجود');
-    await db.batch([db.prepare('DELETE FROM msgs WHERE rcpt = ? OR sender = ?').bind(cid, cid), db.prepare('DELETE FROM clients WHERE id = ?').bind(cid)]);
+    await db.batch([db.prepare('DELETE FROM msgs WHERE rcpt = ? OR sender = ?').bind(cid, cid), db.prepare('DELETE FROM push_subs WHERE id = ?').bind(cid), db.prepare('DELETE FROM clients WHERE id = ?').bind(cid)]);
     return json({ ok: true });
   }
   return err(404, 'route', 'مسار غير معروف');
 }
 function appPage(url) {
   if (url.pathname === '/icon.png' && ICON_B64) return new Response(unb64u(ICON_B64), { headers: { 'content-type': 'image/png', 'cache-control': 'public, max-age=86400' } });
-  if (url.pathname === '/manifest.webmanifest') return new Response(JSON.stringify({ name: 'حصتي', short_name: 'حصتي', start_url: '/', display: 'standalone', dir: 'rtl', lang: 'ar', background_color: '#0c1534', theme_color: '#121c45', icons: ICON_B64 ? [{ src: '/icon.png', sizes: '256x256', type: 'image/png' }] : [] }), { headers: { 'content-type': 'application/manifest+json' } });
-  if (url.pathname === '/' || url.pathname === '/index.html') return new Response(APP_HTML, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-cache', 'x-content-type-options': 'nosniff', 'referrer-policy': 'no-referrer', 'x-frame-options': 'DENY', 'content-security-policy': "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: 'self'; font-src data:; connect-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'" } });
+  if (url.pathname === '/manifest.webmanifest') return new Response(JSON.stringify({ name: 'حصتي', short_name: 'حصتي', id: '/', start_url: '/', scope: '/', display: 'standalone', orientation: 'portrait', dir: 'rtl', lang: 'ar', background_color: '#0c1534', theme_color: '#121c45', icons: ICON_B64 ? [{ src: '/icon.png', sizes: '256x256', type: 'image/png' }] : [] }), { headers: { 'content-type': 'application/manifest+json' } });
+  if (url.pathname === '/' || url.pathname === '/index.html') return new Response(APP_HTML, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-cache', 'x-content-type-options': 'nosniff', 'referrer-policy': 'no-referrer', 'x-frame-options': 'DENY', 'content-security-policy': "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: 'self'; font-src data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'" } });
+  if (url.pathname === '/sw.js' && SW_JS) return new Response(SW_JS, { headers: { 'content-type': 'text/javascript; charset=utf-8', 'cache-control': 'no-cache', 'x-content-type-options': 'nosniff' } });
   if (url.pathname === '/robots.txt') return new Response('User-agent: *\nDisallow: /\n', { headers: { 'content-type': 'text/plain' } });
   return null;
 }
 export default {
-  async fetch(req, env) {
+  async fetch(req, env, ctx) {
     const url = new URL(req.url);
     if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS });
     try {
-      if (url.pathname.startsWith('/v1/')) return await api(req, env, url);
+      if (url.pathname.startsWith('/v1/')) return await api(req, env, url, ctx);
       return appPage(url) || new Response('Not found', { status: 404 });
     } catch (e) { return err(500, 'server', 'خطأ في المحطة'); }
   }
 };
-export const _test = { reset: () => { ready = null; } };
+export const _test = { reset: () => { ready = null; vapidC = null; jwtC.clear(); } };
