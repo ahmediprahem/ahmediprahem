@@ -15,7 +15,35 @@ function hxLoad() {
   }).catch(function () { HX.st = { key: 'hx', relay: '', name: '', cc: '966', after: 0, inv: {}, reqs: {} }; HX.loaded = true; });
 }
 function hxSave() { saveQ = saveQ.then(function () { return dbPut('meta', HX.st); }).catch(function () { }); return saveQ; }
-function hxTimer() { clearInterval(HX.timer); if (hxOn()) { HX.timer = setInterval(function () { if (document.visibilityState !== 'hidden') hxPoll(); }, HX.every); setTimeout(hxPoll, 400); } }
+function hxTimer() { clearInterval(HX.timer); if (hxOn()) { HX.timer = setInterval(function () { if (document.visibilityState !== 'hidden') hxPoll(); }, HX.every); setTimeout(hxPoll, 400); hxPushSetup(false); } }
+// ---------- إشعارات المتصفح للأخصائي (موقع «حصة» على الإنترنت فقط؛ عامل الخدمة sw.js يأتي مع «تصدير موقع للنشر»)
+var HXP = { reg: null, err: 0 };
+function hxPushOk() { return (location.protocol === 'https:' || /^(localhost|127\.0\.0\.1)$/.test(location.hostname)) && 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window && !(window.HNative && HNative.isNative()); }
+function hxPushState() { if (!hxPushOk()) return 'na'; if (Notification.permission === 'denied') return 'denied'; return Notification.permission === 'granted' && HX.st && HX.st.pushEp ? 'on' : 'off'; }
+function hxSw() {
+  if (!HXP.reg) { HXP.reg = navigator.serviceWorker.register('sw.js').catch(function () { return null; }); navigator.serviceWorker.addEventListener('message', function (e) { if (e.data && e.data.t === 'hxpush') hxPoll(); }); }
+  return HXP.reg;
+}
+function hxPushSetup(ask) {
+  if (!hxOn() || !hxPushOk()) return Promise.resolve(hxPushState());
+  var reg; HXP.err = 0;
+  return (Notification.permission === 'default' && ask ? Notification.requestPermission() : Promise.resolve(Notification.permission)).then(function (perm) {
+    if (perm !== 'granted') return null;
+    return hxSw().then(function (r) { if (!r) throw new Error('sw'); reg = r; return navigator.serviceWorker.ready; }).then(function () { return reg.pushManager.getSubscription(); }).then(function (sub) {
+      return sub || hxFetch('GET', '/v1/push/key').then(function (k) { return reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: HXC0.unb64u(k.key) }); });
+    }).then(function (sub) {
+      if (sub.endpoint === HX.st.pushEp && HX.st.pushAt && Date.now() - HX.st.pushAt < 7 * 86400000) return;
+      return hxFetch('POST', '/v1/push/sub', { ep: sub.endpoint }, true).then(function () { HX.st.pushEp = sub.endpoint; HX.st.pushAt = Date.now(); return hxSave(); });
+    });
+  }).catch(function () { HXP.err = 1; }).then(function () { return hxPushState(); });
+}
+function hxNotifRow(compact) {
+  var st = hxPushState();
+  if (st === 'on') return compact ? '' : '<p class="small">🔔 إشعارات المتصفح مفعّلة: يصلك طلب العميل الجديد ورسائله حتى وموقع «حصة» مغلق.</p>';
+  if (st === 'na') return compact ? '' : '<p class="small">🔔 إشعارات المتصفح تعمل من موقع «حصة» على الإنترنت (https) فقط، لا من ملف على الجهاز.</p>';
+  if (st === 'denied') return '<div class="warn">🔕 إشعارات «حصة» محظورة في هذا المتصفح. فعّلها من إعدادات الموقع ← الإشعارات ← السماح.</div>';
+  return '<div class="warn hxnotif">🔔 فعّل إشعارات المتصفح ليصلك طلب العميل الجديد ورسائله حتى والموقع مغلق.' + (HXP.err ? ' (تعذّر التفعيل؛ تأكد أن الموقع صُدّر من الإصدار 0.27 أو أحدث)' : '') + ' <button class="sm" data-a="hxNotif">تفعيل الإشعارات</button></div>';
+}
 document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible' && hxOn() && (!HX.last || Date.now() - HX.last > 20000)) hxPoll(); });
 function hxFetch(method, path, obj, signed) {
   var base = hxRelay(); if (!hxUrlOk(base)) return Promise.reject(new Error('اكتب عنوان المحطة (https://…) في الإعدادات ← حصتي'));
@@ -174,7 +202,7 @@ function hxAgo(ts) { if (!ts) return '—'; var m = Math.round((Date.now() - ts)
 function hxSetPage() {
   var st = HX.st || {}, d = hxDef(), on = hxOn(), relay = hxRelay(), admin = S.mode === 'admin';
   return '<h3>📲 «حصتي» — تطبيق العميل</h3><p class="small">ادعُ عميلك برابط على واتساب: يسجّل بياناته وصحته وما يحب وما لا يحب في «حصتي» على جواله، فتصلك هنا طلباً تعتمده بضغطة، ثم تُرسل له خطته ويتابع يومه بلمسة. كل البيانات مشفّرة من جهازك إلى جواله؛ المحطة الوسيطة ترى نصاً مشفّراً فقط.</p>'
-    + (on ? '<div class="ok">✓ متصل بالمحطة <b dir="ltr">' + esc(relay) + '</b> باسم «' + esc(st.name) + '». آخر تحقق: ' + hxAgo(HX.last) + (HX.err ? ' — <span style="color:#c0392b">' + esc(HX.err) + '</span>' : '') + '</div><p class="two"><button data-a="hxCheck">↻ تحقق الآن</button><button class="sec" data-a="hxv">طلبات «حصتي»</button></p>'
+    + (on ? '<div class="ok">✓ متصل بالمحطة <b dir="ltr">' + esc(relay) + '</b> باسم «' + esc(st.name) + '». آخر تحقق: ' + hxAgo(HX.last) + (HX.err ? ' — <span style="color:#c0392b">' + esc(HX.err) + '</span>' : '') + '</div><p class="two"><button data-a="hxCheck">↻ تحقق الآن</button><button class="sec" data-a="hxv">طلبات «حصتي»</button></p>' + hxNotifRow(false)
       + '<div class="row"><div><label>رمز الدولة لروابط واتساب</label><input data-hx="cc" value="' + esc(st.cc || '966') + '" inputmode="numeric" dir="ltr"></div><div><label>اسمك كما يراه العميل</label><input data-hx="name" value="' + esc(st.name) + '"></div></div>'
       + '<p class="small">لتغيير المحطة أو نقل الربط إلى جهاز آخر: افصل هذا الجهاز ثم اربطه من جديد (العملاء المرتبطون يبقون مرتبطين بهذا الجهاز فقط).</p><button class="sec sm" data-a="hxUnlink">فصل هذا الجهاز</button>'
       : '<div class="ucard"><div class="row"><div><label>عنوان المحطة (Cloudflare Worker)</label><input id="hx_relay" dir="ltr" placeholder="https://hissati.example.workers.dev" value="' + esc(relay) + '"></div><div><label>مفتاح التسجيل (REG_KEY)</label><input id="hx_key" dir="ltr" type="password" autocomplete="off" value="' + esc(d.regKey || '') + '"></div><div><label>اسمك كما يراه العميل</label><input id="hx_name" value="' + esc(st.name || BR().specialist || firstName() || '') + '"></div></div>'
@@ -214,7 +242,7 @@ function hxPage() {
   var st = HX.st, reqs = Object.keys(st.reqs).map(function (k) { return st.reqs[k]; }).sort(function (a, b) { return (b.at || 0) - (a.at || 0); }), inv = Object.keys(st.inv).filter(function (h) { return !st.inv[h].used; });
   var linked = S.clients.filter(function (c) { return c.hx; }).sort(function (a, b) { return ((b.hx.unread || 0) - (a.hx.unread || 0)) || ((b.updated || 0) - (a.updated || 0)); });
   return '<div class="hxpage"><div class="hxtop"><h2>📲 طلبات «حصتي»</h2><p class="two"><button data-a="hxInvForm">+ دعوة عميل</button><button class="sec" data-a="hxCheck">↻ تحقق الآن</button></p></div>'
-    + '<p class="small">آخر تحقق: ' + hxAgo(HX.last) + ' • يُتحقق تلقائياً كل دقيقة أثناء فتح «حصة»' + (HX.err ? ' • <span style="color:#c0392b">' + esc(HX.err) + '</span>' : '') + '</p>'
+    + hxNotifRow(true) + '<p class="small">آخر تحقق: ' + hxAgo(HX.last) + ' • يُتحقق تلقائياً كل دقيقة أثناء فتح «حصة»' + (HX.err ? ' • <span style="color:#c0392b">' + esc(HX.err) + '</span>' : '') + '</p>'
     + (HX.form ? hxInvForm() : '') + (HX.made ? hxInvCard(HX.made, st.inv[HX.made] || {}).replace('hxinv', 'hxinv made') : '')
     + '<h3>طلبات العملاء (' + reqs.length + ')</h3>' + (reqs.map(hxReqCard).join('') || '<p class="small">لا طلبات الآن. ادعُ عميلاً برابط، وحين يكمل تسجيله يظهر طلبه هنا لتعتمده.</p>')
     + (inv.length ? '<h3>دعوات لم تُفتح (' + inv.length + ')</h3>' + inv.filter(function (h) { return h !== HX.made; }).map(function (h) { return hxInvCard(h, st.inv[h]); }).join('') : '')
@@ -254,7 +282,8 @@ Object.assign(A, {
       main(); hxRail(); toast('✓ رُبط هذا الجهاز بالمحطة — يمكنك الآن دعوة العملاء إلى «حصتي»');
     }).catch(hxErr);
   },
-  hxUnlink: function () { if (!confirm('فصل هذا الجهاز عن «حصتي»؟ لن تصل رسائل العملاء المرتبطين إلى هذا الجهاز بعد الآن.')) return; HX.st = { key: 'hx', relay: HX.st.relay, name: HX.st.name, cc: HX.st.cc, after: 0, inv: {}, reqs: {} }; clearInterval(HX.timer); hxSave(); main(); },
+  hxNotif: function () { hxPushSetup(true).then(function (st) { toast(st === 'on' ? 'فُعّلت إشعارات «حصتي» على هذا المتصفح ✓' : st === 'denied' ? 'الإشعارات محظورة من إعدادات المتصفح' : 'تعذّر تفعيل الإشعارات'); main(); }); },
+  hxUnlink: function () { if (!confirm('فصل هذا الجهاز عن «حصتي»؟ لن تصل رسائل العملاء المرتبطين إلى هذا الجهاز بعد الآن.')) return; if (HX.st.pushEp) hxFetch('POST', '/v1/push/unsub', { ep: HX.st.pushEp }, true).catch(function () { }); HX.st = { key: 'hx', relay: HX.st.relay, name: HX.st.name, cc: HX.st.cc, after: 0, inv: {}, reqs: {} }; clearInterval(HX.timer); hxSave(); main(); },
   hxCheck: function () { toast('جارٍ التحقق…'); hxPoll().then(function (n) { toast(HX.err ? '⚠ ' + HX.err : n ? 'وصل ' + n + ' جديد' : 'لا جديد'); main(); }); },
   hxInvForm: function () { HX.form = !HX.form; HX.made = null; main(); var i = $('#hxi_l'); if (i) i.focus(); },
   hxInvMake: function () {
