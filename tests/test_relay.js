@@ -89,5 +89,19 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); };
     status = 201; await call2(Cl, 'POST', '/v1/push/sub', { ep: EP }); await call2(D, 'POST', '/v1/clients/remove', { cid: Cl.id }); assert.strictEqual(env2.DB._raw.prepare('SELECT COUNT(*) AS n FROM push_subs').get().n, 0);
   } finally { globalThis.fetch = realFetch; }
   ok('الإشعارات: مفتاح VAPID يُولَّد مرة ويبقى، الاشتراك من خدمات معروفة فقط، إشعار بلا محتوى وموقّع عند push فقط، حد 30 ثانية، وحذف الاشتراك المنتهي أو عند فصل العميل');
+  // 9) نقل الحساب: يرفعه العميل فقط، يُؤخذ مرة واحدة، والمالك يعرف أنه استُلم؛ والمنتهي يُرفض
+  {
+    const env3 = { DB: d1() }; W._test.reset(); const c3 = async (ident, method, p, obj) => { const body = obj === undefined ? '' : JSON.stringify(obj), h = { 'content-type': 'application/json' }; if (ident) h.authorization = await HXC.signReq(ident, method, p, body); const r = await W.default.fetch(new Request(base + p, { method, headers: h, body: method === 'POST' ? body : undefined }), env3); return { s: r.status, j: await r.json().catch(() => null) }; };
+    const D = await HXC.genIdentity(), Cl = await HXC.genIdentity(), tk = HXC.token(); await c3(D, 'POST', '/v1/register', { sigPub: D.sigPub, encPub: D.encPub, name: 'د' }); await c3(D, 'POST', '/v1/invites', { h: await HXC.tokenHash(tk), label: 'ع' }); await c3(Cl, 'POST', '/v1/join', { token: tk, sigPub: Cl.sigPub, encPub: Cl.encPub });
+    const id = HXC.b64u(new Uint8Array(12).fill(7)), blob = { iv: 'aaa', c: 'bbb' };
+    assert.strictEqual((await c3(D, 'POST', '/v1/xfer', { id, blob })).s, 403); assert.strictEqual((await c3(null, 'POST', '/v1/xfer', { id, blob })).s, 401); assert.strictEqual((await c3(Cl, 'POST', '/v1/xfer', { id: 'short', blob })).s, 400);
+    assert.strictEqual((await c3(Cl, 'POST', '/v1/xfer', { id, blob })).s, 200); assert.strictEqual((await c3(Cl, 'GET', '/v1/xfer/' + id + '/status')).j.claimed, false);
+    assert.strictEqual((await c3(D, 'GET', '/v1/xfer/' + id + '/status')).j.claimed, false, 'الحالة لمالك الحزمة فقط');
+    const got = await c3(null, 'GET', '/v1/xfer/' + id); assert.deepStrictEqual(got.j.blob, blob); assert.strictEqual((await c3(null, 'GET', '/v1/xfer/' + id)).s, 410); assert.strictEqual((await c3(Cl, 'GET', '/v1/xfer/' + id + '/status')).j.claimed, true);
+    assert.strictEqual(env3.DB._raw.prepare('SELECT blob FROM xfer').get().blob, '', 'الحزمة تُمسح من المحطة فور أخذها');
+    const id2 = HXC.b64u(new Uint8Array(12).fill(9)); await c3(Cl, 'POST', '/v1/xfer', { id: id2, blob }); env3.DB._raw.prepare('UPDATE xfer SET exp = 1').run(); assert.strictEqual((await c3(null, 'GET', '/v1/xfer/' + id2)).s, 404);
+    assert.strictEqual((await c3(Cl, 'POST', '/v1/xfer', { id: id2, blob: { c: 'x'.repeat(1600000) } })).s, 413);
+    ok('نقل الحساب: يرفعه العميل وحده، ويُؤخذ مرة واحدة ثم يُمسح، ويعرف المالك أنه استُلم، والمنتهي أو الضخم يُرفض');
+  }
   console.log('\nنجح', n, 'اختبارات المحطة الوسيطة');
 })().catch((e) => { console.log('✘', e && e.stack ? e.stack.split('\n').slice(0, 4).join(' | ') : e); process.exit(1); });

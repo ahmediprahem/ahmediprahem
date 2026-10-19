@@ -1,6 +1,6 @@
 // عامل الخدمة لـ«حصتي» (تقدّمه المحطة على /sw.js): إشعارات والتطبيق مغلق، وفتح سريع وبلا إنترنت.
 // الإشعار بلا محتوى عمداً: لا تمر بيانات صحية عبر خدمات الإشعارات؛ والبيانات نفسها مشفّرة برمز الدخول فلا يقرؤها عامل الخدمة أصلاً.
-const C = 'hissati-v1';
+const C = 'hissati-v2';
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(C).then((c) => c.addAll(['/', '/icon.png'])).catch(() => { }).then(() => self.skipWaiting())); });
 self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== C).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', (e) => {                // الشبكة أولاً (أحدث نسخة دائماً)، والنسخة المحفوظة عند انقطاع الإنترنت. واجهة البيانات (/v1/) لا تُخزَّن أبداً

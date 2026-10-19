@@ -39,7 +39,11 @@ const P = {
   moon:'<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>',
   dumbbell:'<path d="M6.5 6.5 17.5 17.5"/><path d="m21 21-1-1M3 3l1 1"/><path d="m18 22 4-4M2 6l4-4M3 10l7-7M14 21l7-7"/>',
   msg:'<path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.6 8.6 0 0 1-3.8-.9L3 21l1.9-5.2A8.4 8.4 0 0 1 3.5 11.5 8.5 8.5 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5z"/>',
-  reset:'<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>'
+  reset:'<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>',
+  share:'<path d="M12 3v12M8 7l4-4 4 4"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/>',
+  plusSq:'<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/>',
+  phone:'<rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/>',
+  copy:'<rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/>'
 };
 const I = (n, c) => '<svg class="ico' + (c ? ' ' + c : '') + '" viewBox="0 0 24 24" aria-hidden="true">' + (P[n] || '') + '</svg>';
 const MEALS = [['B', 'الفطور', 'sun'], ['L', 'الغداء', 'utensils'], ['D', 'العشاء', 'moon'], ['S', 'السناك', 'apple']];
@@ -166,6 +170,51 @@ function notifCard(compact) {                       // بطاقة حالة ال�
     : 'ليصلك خبر خطتك ورد أخصائيك حتى والتطبيق مغلق.' + (V.pushErr ? ' (تعذّر التفعيل الآن؛ أعد المحاولة)' : '');
   return '<div class="banner info notif">' + I('alert') + '<span>' + body + (st === 'off' ? '<br><button class="btn sm" data-act="notif" style="margin-top:8px">تفعيل الإشعارات</button>' + (compact ? ' <button class="link" data-act="notifLater">لاحقاً</button>' : '') : '') + '</span></div>';
 }
+// ---------- التثبيت من المتصفح (بلا متجر): زر التثبيت في Chrome/أندرويد، وخطوات «إضافة إلى الشاشة الرئيسية» على آيفون
+let bip = null;
+window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); bip = e; if (S) render(); });
+window.addEventListener('appinstalled', () => { bip = null; if (S) toast('ثُبّت «حصتي» على جهازك ✓ افتحه من أيقونته'); });
+const inApp = /FBAN|FBAV|Instagram|Line\/|Snapchat|TikTok|WhatsApp/i.test(navigator.userAgent), isAndroid = /Android/i.test(navigator.userAgent);
+function installState() { if (standalone) return 'done'; if (inApp) return 'inapp'; if (bip) return 'prompt'; if (isIOS) return 'ios'; if (isAndroid) return 'android'; return 'desktop'; }
+function installCard(where) {                       // where: invite | today | sent | acct
+  const st = installState(), reg = !!(S && S.cid);
+  if (st === 'done') return where === 'acct' ? '<p class="dim">' + I('check') + ' «حصتي» مثبّت على هذا الجهاز.</p>' : '';
+  if ((where === 'today' || where === 'sent') && (st === 'desktop' || (S.instLater && now() - S.instLater < 7 * 86400000))) return '';
+  const later = where === 'today' || where === 'sent' ? ' <button class="link" data-act="instLater">لاحقاً</button>' : '';
+  let b;
+  if (st === 'prompt') b = '<b>ثبّت «حصتي» على جوالك</b><br>يفتح بلمسة من الشاشة الرئيسية كأي تطبيق، وتصلك الإشعارات.<br><button class="btn sm" data-act="install" style="margin-top:8px">' + I('plusSq') + ' تثبيت «حصتي»</button>' + later;
+  else if (st === 'ios') b = '<b>ثبّت «حصتي» على آيفون</b><ol class="steps"><li>اضغط زر المشاركة ' + I('share') + ' في Safari</li><li>اختر «إضافة إلى الشاشة الرئيسية» ' + I('plusSq') + '</li><li>افتح «حصتي» من أيقونته</li></ol>'
+    + (where === 'invite' ? 'ثم اضغط «لديّ رابط دعوة» وألصق رمز دعوتك:<br><button class="btn sm sec" data-act="copyInv" style="margin-top:6px">' + I('copy') + ' نسخ رمز الدعوة</button>'
+      : reg ? 'آيفون يفصل بيانات التطبيق المثبّت عن Safari، فانقل حسابك إليه برمز:<br><button class="btn sm sec" data-act="xferNew" style="margin-top:6px">' + I('phone') + ' إنشاء رمز النقل</button>' : '') + later;
+  else if (st === 'android') b = '<b>ثبّت «حصتي» على جوالك</b><br>من قائمة المتصفح ⋮ اختر «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية».' + later;
+  else if (st === 'inapp') b = '<b>افتح «حصتي» في المتصفح</b><br>أنت داخل متصفح تطبيق آخر. افتح الرابط في Chrome أو Safari لتتمكن من التثبيت والإشعارات.' + (where === 'invite' ? '<br><button class="btn sm sec" data-act="copyLink" style="margin-top:6px">' + I('copy') + ' نسخ الرابط</button>' : '') + later;
+  else b = 'يمكنك تثبيت «حصتي» على الكمبيوتر من زر التثبيت في شريط العنوان.';
+  return '<div class="banner info inst">' + I('phone') + '<span>' + b + '</span></div>';
+}
+function copyText(t, ok) { (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => toast(ok)).catch(() => { window.prompt('انسخ:', t); }); }
+// ---------- نقل الحساب إلى تطبيق مثبّت أو جوال آخر: حزمة مشفّرة بمفتاح عشوائي داخل الرمز، تُرفع للمحطة 15 دقيقة وتُستعمل مرة واحدة
+const XPRE = 'HX1-', xferParse = (c) => { const m = /HX1-([A-Za-z0-9_-]{16})([A-Za-z0-9_-]{22})/.exec(String(c || '').replace(/\s+/g, '')); return m ? { id: m[1], key: m[2] } : null; };
+async function xferNew() {
+  const id = HXC.b64u(crypto.getRandomValues(new Uint8Array(12))), raw = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12));
+  const st = JSON.parse(JSON.stringify(S)); delete st.pushEp; delete st.pushAt; delete st.xferId; st.chat = false;
+  const k = await crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['encrypt']), c = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, k, enc.encode(JSON.stringify(st)));
+  const j = await api('POST', '/v1/xfer', { id, blob: { iv: HXC.b64u(iv), c: HXC.b64u(c) } });
+  S.xferId = id; save(); return { code: XPRE + id + HXC.b64u(raw), exp: j.exp * 1000 };
+}
+async function xferImport(code) {
+  const x = xferParse(code); if (!x) throw new Error('رمز النقل غير صحيح. انسخه كاملاً كما ظهر.');
+  let r; try { r = await fetch(API + '/v1/xfer/' + x.id, { cache: 'no-store' }); } catch (e) { throw new Error('لا اتصال بالإنترنت.'); }
+  const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.error || 'تعذّر النقل');
+  const k = await crypto.subtle.importKey('raw', HXC.unb64u(x.key), 'AES-GCM', false, ['decrypt']);
+  const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: HXC.unb64u(j.blob.iv) }, k, HXC.unb64u(j.blob.c)).catch(() => { throw new Error('رمز النقل غير صحيح.'); });
+  S = Object.assign(fresh(), JSON.parse(dec.decode(pt))); S.chat = false; S.day = TODAY; mkData();
+}
+async function xferDone() {                         // الحساب انتقل: يُمسح من هنا (بلا فصله من المحطة) ويتوقف الإشعار لهذا المتصفح
+  clearInterval(V.timer); clearInterval(V.xt);
+  try { const reg = swReg && await swReg, sub = reg && await reg.pushManager.getSubscription(); if (sub) { if (S && S.ident) await api('POST', '/v1/push/unsub', { ep: sub.endpoint }).catch(() => { }); await sub.unsubscribe(); } } catch (e) { }
+  try { localStorage.removeItem(KEY); } catch (e) { }
+  S = null; K = null; sheet = null; V.screen = 'moved'; render();
+}
 function notify(t, b) { toast(t); try { if (document.hidden && 'Notification' in window && Notification.permission === 'granted') new Notification(t, { body: b || '', icon: '/icon.png', lang: 'ar', dir: 'rtl' }); } catch (e) { } }
 function handle(p) {
   if (p.t === 'status') {
@@ -220,11 +269,18 @@ function scrBad() {
   return '<div class="scr"><div class="boot"><div class="stack" style="max-width:320px"><div class="logo">' + LOGO + '</div><div class="empty"><div class="ei" style="color:var(--coral)">' + I('alert') + '</div><p class="err">' + esc(V.err) + '</p></div>'
     + (V.retry ? '<button class="btn full" data-act="retry">إعادة المحاولة</button>' : '') + (has ? '<button class="btn sec full" data-act="toLock">لدي حساب على هذا الجوال</button>' : '') + '</div></div></div>';
 }
+function scrStart() {                               // بلا حساب ولا رابط (مثل فتح التطبيق المثبّت أول مرة): رمز الدعوة أو رمز النقل
+  return '<div class="scr"><div class="scroll"><div class="stack" style="padding-top:22px"><div class="logo" style="width:180px;margin:0 auto;color:#fff">' + LOGO + '</div>'
+    + '<section class="card stack"><h3>لديّ رابط دعوة من أخصائيي</h3><p class="dim">ألصق الرابط أو رمز الدعوة كما وصلك على واتساب.</p><input class="inp" id="invIn" dir="ltr" autocomplete="off" placeholder="https://… أو رمز الدعوة"><button class="btn" data-act="useInv">متابعة</button></section>'
+    + '<section class="card stack"><h3>لديّ حساب في متصفح أو جوال آخر</h3><p class="dim">من «حصتي» القديم: تقدّمي ← «نقل حسابي» ← انسخ الرمز وألصقه هنا.</p><input class="inp" id="xferIn" dir="ltr" autocomplete="off" placeholder="HX1-…"><button class="btn sec" data-act="useXfer"' + (V.busy ? ' disabled' : '') + '>' + (V.busy ? 'جارٍ النقل…' : 'نقل حسابي إلى هنا') + '</button></section>'
+    + (V.err ? '<p class="err">' + esc(V.err) + '</p>' : '') + '</div></div></div>';
+}
+function scrMoved() { return '<div class="scr"><div class="boot"><div class="stack" style="max-width:320px"><div class="empty"><div class="ei" style="background:rgba(111,227,169,.15);color:var(--mint)">' + I('check') + '</div><h1>انتقل حسابك ✓</h1><p class="mut">صار «حصتي» يعمل من التطبيق المثبّت أو الجوال الجديد، ومُسح من هنا. افتح «حصتي» من أيقونته.</p></div></div></div></div>'; }
 function scrInvite() {
   const c = S.cat || {};
   return '<div class="scr"><div class="scroll"><div class="invite">'
     + '<div class="logo">' + LOGO + '</div>'
-    + '<div class="card dr"><div class="av">' + esc(drInit()) + '</div><div><b>' + esc(S.dname) + '</b>' + (c.clinic ? '<div class="dim">' + esc(c.clinic) + '</div>' : '') + '<div class="mut" style="font-size:14px;margin-top:4px">يدعوك لبدء خطتك الغذائية على «حصتي»</div></div></div>'
+    + '<div class="card dr"><div class="av">' + esc(drInit()) + '</div><div><b>' + esc(S.dname) + '</b>' + (c.clinic ? '<div class="dim">' + esc(c.clinic) + '</div>' : '') + '<div class="mut" style="font-size:14px;margin-top:4px">يدعوك لبدء خطتك الغذائية على «حصتي»</div></div></div>' + (['ios', 'inapp'].indexOf(installState()) >= 0 ? installCard('invite') : '')
     + '<div class="feats">'
     + feat('user', 'سجّل بياناتك مرة واحدة', 'خمس خطوات قصيرة، ويُحفظ ما تكتبه تلقائياً.')
     + feat('heart', 'اختر ما تحب وما لا تحب', 'ما لا تحبه لا يظهر في خطتك.')
@@ -232,7 +288,7 @@ function scrInvite() {
     + feat('check', 'تابع يومك بلمسة', 'علّم ما أكلته، وبدّل بما يناسبك من نفس المجموعة.')
     + feat('lock', 'بياناتك مشفّرة', 'لا يقرؤها إلا أخصائيك، وتُقفل على جوالك برمز دخول.')
     + '</div></div></div>'
-    + '<div class="foot"><button class="btn full" data-act="go" data-v="pin">ابدأ التسجيل</button></div></div>';
+    + '<div class="foot"><button class="btn full" data-act="go" data-v="pin">' + (installState() === 'ios' ? 'التسجيل هنا في Safari' : 'ابدأ التسجيل') + '</button></div></div>';
 }
 function feat(i, t, d) { return '<div class="feat"><span class="fi">' + I(i) + '</span><div><b>' + t + '</b><div class="dim">' + d + '</div></div></div>'; }
 function pad(cur) {
@@ -242,7 +298,7 @@ function pad(cur) {
 }
 function scrPin() {
   const conf = !!V.pin1;
-  return '<div class="scr">' + head(conf ? 'أعد كتابة الرمز' : 'أنشئ رمز الدخول', 'pinBack', '') + '<div class="scroll"><div class="stack" style="text-align:center;padding-top:20px;gap:22px">'
+  return '<div class="scr">' + head(conf ? 'أعد كتابة الرمز' : V.xfer ? 'رمز الدخول لهذا الجهاز' : 'أنشئ رمز الدخول', 'pinBack', '') + '<div class="scroll"><div class="stack" style="text-align:center;padding-top:20px;gap:22px">'
     + '<p class="mut">' + (conf ? 'للتأكيد، اكتب الرمز نفسه مرة ثانية.' : 'رمز من 4 أرقام تفتح به «حصتي» على هذا الجوال. بلا بريد ولا كلمة سر طويلة.') + '</p>'
     + pad(V.pin) + (V.err ? '<p class="err">' + esc(V.err) + '</p>' : '') + (V.busy ? '<div class="spin"></div><p class="dim">جارٍ إنشاء حسابك المشفّر…</p>' : '<p class="dim">إن غيّرت جوالك يرسل لك أخصائيك رابطاً جديداً.</p>') + '</div></div></div>';
 }
@@ -334,7 +390,7 @@ function scrSent() {
     + '<div class="card tl">' + step('ok', 'أُرسلت بياناتك', 'مشفّرة إلى ' + esc(S.dname))
     + step(ok ? 'ok' : 'now', ok ? 'اعتمدك أخصائيك' : 'قيد المراجعة', ok ? 'رقم ملفك ' + esc(S.code) : 'عادة خلال يوم عمل')
     + step(ok ? 'now' : '', 'خطتك الأولى', 'تظهر هنا يوماً بيوم') + '</div>'
-    + notifCard(false) + '<p class="sync">' + (S.outbox.length ? 'بانتظار الإنترنت لإرسال ' + S.outbox.length + ' عنصر…' : 'يُتحقق من الجديد تلقائياً كل نصف دقيقة') + '</p>'
+    + installCard('sent') + notifCard(false) + '<p class="sync">' + (S.outbox.length ? 'بانتظار الإنترنت لإرسال ' + S.outbox.length + ' عنصر…' : 'يُتحقق من الجديد تلقائياً كل نصف دقيقة') + '</p>'
     + '<button class="btn sec full" data-act="chat" style="position:relative">' + I('msg') + ' راسل أخصائيك' + (S.unreadC ? '<span class="nb" style="position:absolute;top:-6px;left:-6px;min-width:20px;height:20px;border-radius:10px;background:var(--coral);color:#3a0d05;font-size:11px;display:grid;place-items:center">' + S.unreadC + '</span>' : '') + '</button>'
     + '<button class="btn sec full" data-act="refresh">' + I('reset') + ' تحقق الآن</button>'
     + '</div></div></div>';
@@ -349,7 +405,7 @@ function scrApp() {
 function tabToday() {
   const d = TODAY, L = dl(d), [done, n] = itemsOfDay(d), pct = n ? Math.round(done / n * 100) : 0, C = 2 * Math.PI * 40;
   const first = (S.p.name || '').trim().split(/\s+/)[0] || '';
-  let out = notifCard(true) + '<div class="hello"><div class="av sm">' + esc(first.charAt(0) || '؟') + '</div><div style="flex:1"><div class="dim">' + esc(DATA.dayNames[d] || '') + '</div><h2>أهلاً ' + esc(first) + '</h2></div>' + chatBtn() + '</div>';
+  let out = (installState() === 'done' || installState() === 'desktop' ? notifCard(true) : installCard('today')) + '<div class="hello"><div class="av sm">' + esc(first.charAt(0) || '؟') + '</div><div style="flex:1"><div class="dim">' + esc(DATA.dayNames[d] || '') + '</div><h2>أهلاً ' + esc(first) + '</h2></div>' + chatBtn() + '</div>';
   out += '<section class="card ring"><svg viewBox="0 0 100 100" role="img" aria-label="التزام اليوم ' + pct + '%"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="10"/><circle cx="50" cy="50" r="40" fill="none" stroke="#6fe3a9" stroke-width="10" stroke-linecap="round" stroke-dasharray="' + C + '" stroke-dashoffset="' + (C * (1 - pct / 100)) + '"/></svg><div style="flex:1"><div class="num">' + pct + '%</div><div class="mut">' + done + ' من ' + n + ' أصناف اليوم</div>'
     + (pct === 100 ? '<div class="dim" style="color:var(--mint)">يوم كامل، أحسنت!</div>' : '<div class="dim">علّم ما أكلته باللمس.</div>') + '</div></section>';
   out += '<div class="stats3"><div class="st"><b>' + DATA.kcal + '</b><small>سعرة هدفك</small></div><div class="st"><b>' + DATA.pro + ' جم</b><small>بروتين</small></div><div class="st"><b>' + (L.water * CUP).toFixed(2).replace(/\.?0+$/, '') + ' / ' + (+DATA.water).toFixed(1) + '</b><small>لتر ماء</small></div></div>';
@@ -402,7 +458,7 @@ function tabProgress() {
   return '<h2>تقدّمي</h2><section class="card stack"><div class="row" style="justify-content:space-between"><h3>الوزن</h3><span class="dim">' + (W.length > 1 ? (diff <= 0 ? diff + ' كجم منذ البداية' : '+' + diff + ' كجم') : '') + '</span></div>' + chart
     + '<div class="row"><input class="inp" id="wIn" type="text" data-numf="1" autocomplete="off" inputmode="decimal" placeholder="وزن اليوم (كجم)" style="flex:1"><button class="btn sm" data-act="weigh">' + I('scale') + ' سجّل</button></div></section>'
     + '<section class="card stack"><div class="row" style="justify-content:space-between"><h3>الالتزام آخر 7 أيام</h3><span class="dim">% من الأصناف</span></div><div class="wk">' + bars + '</div></section>'
-    + '<section class="card stack"><h3>الحساب</h3><p class="dim">ملفك لدى ' + esc(S.dname) + (S.code ? ' • رقم ' + esc(S.code) : '') + '. بياناتك محفوظة مشفّرة على هذا الجوال فقط.</p>' + notifCard(false) + '<div class="row"><button class="btn sm sec" data-act="lock">' + I('lock') + ' قفل التطبيق</button></div><button class="link" data-act="wipe" style="color:var(--coral)">حذف بياناتي من هذا الجوال</button></section>';
+    + '<section class="card stack"><h3>الحساب</h3><p class="dim">ملفك لدى ' + esc(S.dname) + (S.code ? ' • رقم ' + esc(S.code) : '') + '. بياناتك محفوظة مشفّرة على هذا الجوال فقط.</p>' + installCard('acct') + notifCard(false) + '<div class="row"><button class="btn sm sec" data-act="lock">' + I('lock') + ' قفل التطبيق</button><button class="btn sm sec" data-act="xferNew">' + I('phone') + ' نقل حسابي</button></div><button class="link" data-act="wipe" style="color:var(--coral)">حذف بياناتي من هذا الجوال</button></section>';
 }
 
 // ---------- الأوراق السفلية
@@ -423,6 +479,11 @@ function sheetHtml() {
     h = 'قائمة تسوّق الأسبوع'; b = Object.keys(byG).map((g) => '<section class="card"><h3 style="margin-bottom:6px">' + esc(g) + '</h3><ul class="plist">' + Object.keys(byG[g]).map((n) => '<li>' + esc(n) + ' <span class="dim">× ' + byG[g][n] + '</span></li>').join('') + '</ul></section>').join('');
   } else if (sheet.t === 'health') {
     h = 'طلب تعديل الحالة الصحية'; b = '<p class="dim">يصل طلبك للأخصائي ليعتمده قبل أن يغيّر خطتك.</p><span class="lbl">الحالات</span>' + toggles('cond', DATA.conditions, sheet.cond).replace(/data-act="tog"/g, 'data-act="htog"') + '<span class="lbl">الحساسية</span>' + toggles('allg', DATA.allergens, sheet.allg).replace(/data-act="tog"/g, 'data-act="htog"') + '<button class="btn" data-act="sendhealth">أرسل للأخصائي</button>';
+  } else if (sheet.t === 'xfer') {
+    h = 'نقل حسابي'; b = sheet.busy ? '<div class="spin"></div><p class="dim" style="text-align:center">جارٍ تجهيز حسابك مشفّراً…</p>' : sheet.err ? '<p class="err">' + esc(sheet.err) + '</p>'
+      : '<p class="mut">لنقل «حصتي» إلى التطبيق المثبّت على الشاشة الرئيسية، أو إلى جوال جديد:</p><ol class="steps"><li>انسخ هذا الرمز</li><li>افتح «حصتي» هناك واختر «لديّ حساب في متصفح أو جوال آخر»</li><li>ألصق الرمز واختر رمز دخول</li></ol>'
+      + '<div class="xcode" dir="ltr">' + esc(sheet.code) + '</div><button class="btn" data-act="copyXfer">' + I('copy') + ' نسخ الرمز</button>'
+      + '<p class="dim">الرمز صالح 15 دقيقة ولمرة واحدة، ويحمل مفتاح فك التشفير فلا ترسله لأحد. بعد النقل يُمسح الحساب من هنا تلقائياً.</p>';
   } else if (sheet.t === 'forgot') {
     h = 'نسيت رمز الدخول؟'; b = '<p class="mut">لا يمكن استرجاع الرمز: بياناتك مشفّرة به على هذا الجوال ولا نسخة منها في أي مكان آخر.</p><p class="mut">اطلب من أخصائيك رابط دعوة جديداً، ثم احذف الحساب القديم من هنا وابدأ بالرابط الجديد. خطتك تبقى محفوظة لدى أخصائيك.</p><button class="btn sec" data-act="wipe" style="color:var(--coral)">حذف الحساب من هذا الجوال</button>';
   }
@@ -473,7 +534,7 @@ function render() {
   if (S && S.chat && (S.unreadC || S.msgs.some((m) => m.from === 'd' && !m.rr))) readReceipt();
   const sc = $('.scroll'), key = (S ? S.screen + S.step + S.tab + (S.chat ? 'c' : '') : '') + V.screen, top = sc ? sc.scrollTop : 0;
   let scr;
-  if (V.screen === 'boot') scr = scrBoot(); else if (V.screen === 'bad') scr = scrBad(); else if (V.screen === 'lock') scr = scrLock(); else if (V.screen === 'pin') scr = scrPin();
+  if (V.screen === 'boot') scr = scrBoot(); else if (V.screen === 'bad') scr = scrBad(); else if (V.screen === 'start') scr = scrStart(); else if (V.screen === 'moved') scr = scrMoved(); else if (V.screen === 'lock') scr = scrLock(); else if (V.screen === 'pin') scr = scrPin();
   else scr = S.chat ? scrChat() : S.plan && S.screen === 'app' ? scrApp() : { invite: scrInvite, wizard: scrWizard, review: scrReview, sent: scrSent, app: scrSent }[S.screen]();
   $('#root').innerHTML = '<div class="stage"><div class="device">' + (V.online ? '' : '<div class="offline">بلا اتصال — تُرسل بياناتك عند عودة الإنترنت</div>') + scr + (S ? sheetHtml() : '') + (toastMsg ? '<div class="toast" role="status">' + I('check') + '<span>' + esc(toastMsg) + '</span></div>' : '') + '</div></div>';
   const s2 = $('.scroll'); if (s2 && key === lastKey) s2.scrollTop = top; lastKey = key;
@@ -489,6 +550,10 @@ async function onPin() {
   if (V.screen === 'pin') {
     if (!V.pin1) { V.pin1 = V.pin; V.pin = ''; V.err = ''; return render(); }
     if (V.pin !== V.pin1) { V.pin = ''; V.pin1 = ''; V.err = 'الرمزان غير متطابقين، ابدأ من جديد.'; return render(); }
+    if (V.xfer) {                                    // حساب منقول: لا انضمام جديد، فقط قفل نسخة هذا الجهاز برمزه
+      SALT = crypto.getRandomValues(new Uint8Array(16)); K = await pinKey(V.pin, SALT); await persist();
+      V.xfer = false; V.screen = ''; V.pin = V.pin1 = ''; startLoop(); toast('وصل حسابك ✓ وخطتك كما هي'); return render();
+    }
     V.busy = true; V.err = ''; render();
     try {
       S.ident = await HXC.genIdentity();
@@ -507,7 +572,11 @@ async function onPin() {
   if (V.screen === 'lock') {
     if (V.until > now()) { V.pin = ''; return render(); }
     V.busy = true; render();
-    try { await unlock(V.pin); V.screen = ''; V.pin = ''; V.err = ''; V.tries = 0; V.busy = false; startLoop(); render(); }
+    try {
+      await unlock(V.pin); V.screen = ''; V.pin = ''; V.err = ''; V.tries = 0; V.busy = false;
+      if (S.xferId) { const x = await api('GET', '/v1/xfer/' + S.xferId + '/status').catch(() => null); if (x && x.claimed) return xferDone(); if (x && x.expired) { delete S.xferId; save(); } }
+      startLoop(); render();
+    }
     catch (e) { V.busy = false; V.pin = ''; V.tries++; V.err = 'الرمز غير صحيح'; if (V.tries >= 5) { V.until = now() + 30000 * Math.pow(2, V.tries - 5); setTimeout(render, V.until - now() + 50); } render(); }
   }
 }
@@ -517,7 +586,7 @@ async function boot() {
   if (m) { try { sessionStorage.setItem(TKEY, m[1] + '.' + m[2]); } catch (e) { } history.replaceState(null, '', location.pathname); }
   if (localStorage.getItem(KEY)) { V.screen = 'lock'; return render(); }
   let t = m ? m[1] + '.' + m[2] : null; try { t = t || sessionStorage.getItem(TKEY); } catch (e) { }
-  if (!t) { V.err = 'افتح «حصتي» من الرابط الذي أرسله لك أخصائيك على واتساب.'; V.screen = 'bad'; return render(); }
+  if (!t) { V.err = ''; V.screen = 'start'; return render(); }
   const [tok, fp] = t.split('.'); V.screen = 'boot'; V.retry = false; render();
   try {
     const h = await HXC.tokenHash(tok); let r;
@@ -537,8 +606,29 @@ document.addEventListener('click', (e) => {
   switch (a) {
     case 'retry': boot(); return;
     case 'toLock': V.screen = 'lock'; V.err = ''; break;
+    case 'install': if (bip) { bip.prompt(); bip.userChoice.then((c) => { if (c && c.outcome === 'accepted') toast('جارٍ التثبيت…'); bip = null; render(); }).catch(() => { }); } return;
+    case 'instLater': S.instLater = now(); break;
+    case 'copyInv': copyText(S.tok + '.' + S.fp, 'نُسخ رمز الدعوة — ألصقه في «حصتي» بعد فتحه من الشاشة الرئيسية'); return;
+    case 'copyLink': copyText(API + '/#t=' + S.tok + '.' + S.fp, 'نُسخ الرابط — افتحه في Chrome أو Safari'); return;
+    case 'useInv': {
+      const v = ($('#invIn') || {}).value || '', m = /(?:#t=)?([A-Za-z0-9_-]{16,40})\.([A-Za-z0-9_-]{11})(?![A-Za-z0-9_-])/.exec(v.trim());
+      if (!m) { V.err = 'الرابط أو الرمز غير صحيح. انسخه كاملاً من رسالة أخصائيك.'; break; }
+      try { sessionStorage.setItem(TKEY, m[1] + '.' + m[2]); } catch (x) { } V.err = ''; boot(); return;
+    }
+    case 'useXfer': {
+      const v = ($('#xferIn') || {}).value || ''; V.busy = true; V.err = ''; render();
+      xferImport(v).then(() => { V.busy = false; V.xfer = true; V.screen = 'pin'; V.pin = V.pin1 = ''; render(); }).catch((x) => { V.busy = false; V.err = x.message; render(); }); return;
+    }
+    case 'xferNew': {
+      sheet = { t: 'xfer', busy: 1 }; render();
+      xferNew().then((x) => {
+        sheet = { t: 'xfer', code: x.code, exp: x.exp }; render(); clearInterval(V.xt);
+        V.xt = setInterval(() => { if (!sheet || sheet.t !== 'xfer' || now() > x.exp) { clearInterval(V.xt); return; } api('GET', '/v1/xfer/' + S.xferId + '/status').then((r) => { if (r.claimed) xferDone(); }).catch(() => { }); }, 3000);
+      }).catch((x) => { sheet = { t: 'xfer', err: x.net ? 'لا اتصال بالإنترنت.' : x.message }; render(); }); return;
+    }
+    case 'copyXfer': copyText(sheet.code, 'نُسخ رمز النقل'); return;
     case 'pin': if (V.busy) return; if (v === '⌫') V.pin = V.pin.slice(0, -1); else if (V.pin.length < 4) { V.pin += v; if (V.pin.length === 4) { render(); onPin(); return; } } break;
-    case 'pinBack': if (V.pin1) { V.pin1 = ''; V.pin = ''; } else { V.screen = ''; V.pin = ''; } V.err = ''; break;
+    case 'pinBack': if (V.pin1) { V.pin1 = ''; V.pin = ''; } else if (V.xfer) { V.xfer = false; S = null; V.screen = 'start'; V.pin = ''; } else { V.screen = ''; V.pin = ''; } V.err = ''; break;
     case 'forgot': sheet = { t: 'forgot' }; if (!S) { S = fresh(); S.__tmp = 1; } break;
     case 'lock': clearInterval(V.timer); persist(); S = null; K = null; sheet = null; V.screen = 'lock'; V.pin = ''; V.err = ''; break;
     case 'notif': V.pushErr = 0; pushSetup(true).then((st) => { toast(st === 'on' ? 'فُعّلت الإشعارات ✓' : st === 'denied' ? 'الإشعارات محظورة من إعدادات المتصفح' : 'تعذّر تفعيل الإشعارات الآن'); render(); }); return;

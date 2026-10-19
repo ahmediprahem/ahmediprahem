@@ -4,11 +4,12 @@
    - تقدّم تطبيق «حصتي» نفسه على الصفحة الرئيسية (/)، فرابط الدعوة = عنوان هذه المحطة.
    - الجداول تُنشأ تلقائياً أول مرة؛ يكفي ربط قاعدة D1 باسم DB. متغير اختياري REG_KEY: مفتاح تسجيل الأخصائيين (بدونه يقبل أي «حصة»).
    - لا تسجّل أي محتوى (لا console.log). يُبنى منه worker/relay/dist/worker.js بـ py build_web.py (يُضمَّن تطبيق «حصتي» وأيقونته). */
-const VER = '1.1';
+const VER = '1.2';
 const APP_HTML = /*HISSATI_HTML*/'<!doctype html><meta charset="utf-8"><title>حصتي</title><p>ابنِ الملف بـ py build_web.py</p>'/*END*/;
 const ICON_B64 = /*HISSATI_ICON*/''/*END*/;
 const SW_JS = /*HISSATI_SW*/''/*END*/;
-const LIM = { body: 600000, box: 450000, cat: 300000, label: 80, invitesActive: 300, perHour: 400, inbox: 100, skew: 300 };
+const ICONS = /*HISSATI_ICONS*/{}/*END*/;                          // أيقونات التثبيت من المتصفح: icon-192 / icon-512 / maskable-512 / apple-180
+const LIM = { xfer: 1500000, xferTtl: 900, body: 1600000, box: 450000, cat: 300000, label: 80, invitesActive: 300, perHour: 400, inbox: 100, skew: 300 };
 const enc = new TextEncoder();
 const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-methods': 'GET, POST, OPTIONS', 'access-control-allow-headers': 'authorization, content-type', 'access-control-max-age': '86400' };
 const json = (o, status = 200) => new Response(JSON.stringify(o), { status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', ...CORS } });
@@ -43,7 +44,8 @@ const SCHEMA = [
   'CREATE INDEX IF NOT EXISTS msgs_sender ON msgs (sender, ts)',
   'CREATE TABLE IF NOT EXISTS kv (k TEXT PRIMARY KEY, v TEXT)',
   'CREATE TABLE IF NOT EXISTS push_subs (ep TEXT PRIMARY KEY, id TEXT NOT NULL, created INTEGER, last INTEGER DEFAULT 0)',
-  'CREATE INDEX IF NOT EXISTS push_id ON push_subs (id)'
+  'CREATE INDEX IF NOT EXISTS push_id ON push_subs (id)',
+  'CREATE TABLE IF NOT EXISTS xfer (id TEXT PRIMARY KEY, cid TEXT NOT NULL, blob TEXT NOT NULL, exp INTEGER, claimed INTEGER DEFAULT 0)'
 ];
 let ready = null;
 const init = (db) => ready || (ready = (async () => { for (const q of SCHEMA) await db.prepare(q).run(); })().catch((e) => { ready = null; throw e; }));
@@ -134,6 +136,12 @@ async function api(req, env, url, ctx) {
     ]);
     bg(pushTo(db, iv.did, origin)); return json({ ok: true, cid: a.id, did: iv.did, dEncPub: JSON.parse(d.enc) });
   }
+  const mX = /^\/v1\/xfer\/([A-Za-z0-9_-]{16})$/.exec(p);
+  if (mX && method === 'GET') {                                     // نقل الحساب: الجهاز الجديد يأخذ الحزمة المشفّرة مرة واحدة (المفتاح عنده في الرمز لا هنا)
+    const x = await one(db, 'SELECT blob, exp, claimed FROM xfer WHERE id = ?', mX[1]);
+    if (!x || x.exp < now()) return err(404, 'xfer', 'رمز النقل غير صحيح أو انتهت صلاحيته'); if (x.claimed) return err(410, 'used', 'استُعمل رمز النقل من قبل');
+    await run(db, "UPDATE xfer SET claimed = 1, blob = '' WHERE id = ?", mX[1]); return json({ ok: true, blob: JSON.parse(x.blob) });
+  }
   if (p === '/v1/push/key' && method === 'GET') return json({ ok: true, key: (await vapid(db)).pub });
   // كل ما يلي يحتاج طرفاً مسجّلاً
   const a = await authed(req, db, path, body); if (a.e) return a.e; const me = a.who;
@@ -150,6 +158,14 @@ async function api(req, env, url, ctx) {
     if (me.role !== 'd') return err(403, 'role', 'للأخصائي فقط');
     await run(db, 'UPDATE invites SET used = 1, cat = NULL WHERE h = ? AND did = ?', String(J.h || ''), me.id); return json({ ok: true });
   }
+  if (p === '/v1/xfer' && method === 'POST') {                     // العميل يرفع حسابه مشفّراً بمفتاح عشوائي لينقله إلى تطبيق مثبَّت أو جوال جديد (15 دقيقة، مرة واحدة)
+    if (me.role !== 'c') return err(403, 'role', 'للعميل فقط'); const id = String(J.id || ''), blob = JSON.stringify(J.blob || null);
+    if (!/^[A-Za-z0-9_-]{16}$/.test(id) || !J.blob) return err(400, 'xfer', 'بيانات ناقصة'); if (blob.length > LIM.xfer) return err(413, 'big', 'الحساب أكبر من المسموح للنقل');
+    await run(db, 'DELETE FROM xfer WHERE exp < ? OR cid = ?', now(), me.id);
+    await run(db, 'INSERT INTO xfer (id, cid, blob, exp, claimed) VALUES (?, ?, ?, ?, 0)', id, me.id, blob, now() + LIM.xferTtl); return json({ ok: true, exp: now() + LIM.xferTtl });
+  }
+  const mXs = /^\/v1\/xfer\/([A-Za-z0-9_-]{16})\/status$/.exec(p);
+  if (mXs && method === 'GET') { const x = await one(db, 'SELECT claimed, exp FROM xfer WHERE id = ? AND cid = ?', mXs[1], me.id); return json({ ok: true, claimed: !!(x && x.claimed), expired: !x || x.exp < now() }); }
   if (p === '/v1/push/sub' && method === 'POST') {                // اشتراك جهاز في الإشعارات (عنوان الخدمة فقط؛ لا مفاتيح ولا محتوى)
     const ep = String(J.ep || ''); if (!PUSH_HOSTS.test(ep)) return err(400, 'push', 'خدمة إشعارات غير معروفة');
     await run(db, 'INSERT INTO push_subs (ep, id, created, last) VALUES (?, ?, ?, 0) ON CONFLICT(ep) DO UPDATE SET id = excluded.id', ep, me.id, now());
@@ -175,14 +191,20 @@ async function api(req, env, url, ctx) {
   if (p === '/v1/clients/remove' && method === 'POST') {          // الأخصائي يفصل عميلاً (أو العميل يحذف نفسه): تُحذف بياناته ورسائله من المحطة
     const cid = me.role === 'c' ? me.id : String(J.cid || ''), c = await one(db, 'SELECT did FROM clients WHERE id = ?', cid);
     if (!c || (me.role === 'd' && c.did !== me.id)) return err(404, 'client', 'غير موجود');
-    await db.batch([db.prepare('DELETE FROM msgs WHERE rcpt = ? OR sender = ?').bind(cid, cid), db.prepare('DELETE FROM push_subs WHERE id = ?').bind(cid), db.prepare('DELETE FROM clients WHERE id = ?').bind(cid)]);
+    await db.batch([db.prepare('DELETE FROM msgs WHERE rcpt = ? OR sender = ?').bind(cid, cid), db.prepare('DELETE FROM push_subs WHERE id = ?').bind(cid), db.prepare('DELETE FROM xfer WHERE cid = ?').bind(cid), db.prepare('DELETE FROM clients WHERE id = ?').bind(cid)]);
     return json({ ok: true });
   }
   return err(404, 'route', 'مسار غير معروف');
 }
 function appPage(url) {
+  const ic = /^\/(icon-192|icon-512|maskable-512|apple-180)\.png$/.exec(url.pathname);
+  if (ic && ICONS[ic[1]]) return new Response(unb64u(ICONS[ic[1]]), { headers: { 'content-type': 'image/png', 'cache-control': 'public, max-age=604800' } });
   if (url.pathname === '/icon.png' && ICON_B64) return new Response(unb64u(ICON_B64), { headers: { 'content-type': 'image/png', 'cache-control': 'public, max-age=86400' } });
-  if (url.pathname === '/manifest.webmanifest') return new Response(JSON.stringify({ name: 'حصتي', short_name: 'حصتي', id: '/', start_url: '/', scope: '/', display: 'standalone', orientation: 'portrait', dir: 'rtl', lang: 'ar', background_color: '#0c1534', theme_color: '#121c45', icons: ICON_B64 ? [{ src: '/icon.png', sizes: '256x256', type: 'image/png' }] : [] }), { headers: { 'content-type': 'application/manifest+json' } });
+  if (url.pathname === '/manifest.webmanifest') return new Response(JSON.stringify({
+    id: '/', name: 'حصتي — خطتك الغذائية', short_name: 'حصتي', description: 'خطتك من أخصائي التغذية، ومتابعة يومك، والمحادثة معه — مشفّرة على جوالك.', start_url: '/', scope: '/', display: 'standalone', orientation: 'portrait', dir: 'rtl', lang: 'ar',
+    background_color: '#0c1534', theme_color: '#121c45', categories: ['health', 'food', 'lifestyle'], prefer_related_applications: false,
+    icons: ICONS['icon-192'] ? [{ src: '/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' }, { src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' }, { src: '/maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }] : ICON_B64 ? [{ src: '/icon.png', sizes: '256x256', type: 'image/png' }] : []
+  }), { headers: { 'content-type': 'application/manifest+json', 'cache-control': 'no-cache' } });
   if (url.pathname === '/' || url.pathname === '/index.html') return new Response(APP_HTML, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-cache', 'x-content-type-options': 'nosniff', 'referrer-policy': 'no-referrer', 'x-frame-options': 'DENY', 'content-security-policy': "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: 'self'; font-src data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'" } });
   if (url.pathname === '/sw.js' && SW_JS) return new Response(SW_JS, { headers: { 'content-type': 'text/javascript; charset=utf-8', 'cache-control': 'no-cache', 'x-content-type-options': 'nosniff' } });
   if (url.pathname === '/robots.txt') return new Response('User-agent: *\nDisallow: /\n', { headers: { 'content-type': 'text/plain' } });

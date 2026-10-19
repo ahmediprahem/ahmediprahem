@@ -271,3 +271,7 @@ select.inp option{background:#16224f;color:#fff}
 @keyframes sp{to{transform:rotate(360deg)}}
 .offline{position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:12;font-size:12px;padding:3px 12px;border-radius:10px;background:rgba(255,157,136,.2);color:#ffd9cf;border:1px solid rgba(255,157,136,.35)}
 .sync{font-size:12px;color:var(--dim);text-align:center}
+/* التثبيت ونقل الحساب */
+.banner.inst .ico,.steps .ico{vertical-align:-4px}
+.steps{margin:6px 0;padding-inline-start:20px;display:flex;flex-direction:column;gap:4px}
+.xcode{padding:12px;border-radius:14px;border:1px dashed var(--line2);background:rgba(0,0,0,.2);font:600 13px/1.6 ui-monospace,monospace;overflow-wrap:anywhere;user-select:all;text-align:left}
