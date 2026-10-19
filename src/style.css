@@ -229,3 +229,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padd
 .fmb{font-size:11px;padding:2px 8px;border-radius:9px;background:#e8ebf3;color:#445}
 .fmb.c{background:#e3f4ea;color:#245}
 .fmadd{margin-top:8px;padding:10px;border:1px dashed var(--line);border-radius:10px}
+/* النسخ الاحتياطي */
+.vtlist{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.vtv{display:flex;align-items:center;gap:10px;padding:6px 0;border-top:1px solid var(--line)}
+.vtv small{flex:1;color:#667}

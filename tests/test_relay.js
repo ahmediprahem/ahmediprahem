@@ -103,5 +103,24 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); };
     assert.strictEqual((await c3(Cl, 'POST', '/v1/xfer', { id: id2, blob: { c: 'x'.repeat(1600000) } })).s, 413);
     ok('نقل الحساب: يرفعه العميل وحده، ويُؤخذ مرة واحدة ثم يُمسح، ويعرف المالك أنه استُلم، والمنتهي أو الضخم يُرفض');
   }
+  // 10) خزنة النسخ الاحتياطي: أجزاء ونسخ مرقّمة، كلمة السر (auth) تُفحص، والكتابة لأخصائي مسجّل فقط، وتُحفظ آخر 7 نسخ
+  {
+    const env4 = { DB: d1() }; W._test.reset(); const c4 = async (ident, method, p, obj) => { const body = obj === undefined ? '' : JSON.stringify(obj), h = { 'content-type': 'application/json' }; if (ident) h.authorization = await HXC.signReq(ident, method, p, body); const r = await W.default.fetch(new Request(base + p, { method, headers: h, body: method === 'POST' ? body : undefined }), env4); return { s: r.status, j: await r.json().catch(() => null) }; };
+    const D = await HXC.genIdentity(); await c4(D, 'POST', '/v1/register', { sigPub: D.sigPub, encPub: D.encPub, name: 'د' });
+    const vid = HXC.b64u(new Uint8Array(16).fill(1)), auth = HXC.b64u(new Uint8Array(16).fill(2)), up = (i) => HXC.b64u(new Uint8Array(12).fill(i));
+    assert.strictEqual((await c4(null, 'POST', '/v1/vault/head', { vid, auth })).s, 404);
+    assert.strictEqual((await c4(null, 'POST', '/v1/vault/put', { vid, auth, up: up(1), idx: 0, n: 1, data: 'x' })).s, 401, 'الكتابة تحتاج أخصائياً مسجّلاً');
+    let r = await c4(D, 'POST', '/v1/vault/put', { vid, auth, up: up(1), idx: 1, n: 2, data: 'BBB', dev: 'جهاز 1' }); assert.strictEqual(r.j.done, false); assert.strictEqual((await c4(null, 'POST', '/v1/vault/head', { vid, auth })).j.head, 0);
+    r = await c4(D, 'POST', '/v1/vault/put', { vid, auth, up: up(1), idx: 0, n: 2, data: 'AAA', dev: 'جهاز 1' }); assert.deepStrictEqual([r.j.done, r.j.ver], [true, 1]);
+    const hd = (await c4(null, 'POST', '/v1/vault/head', { vid, auth })).j; assert.deepStrictEqual([hd.head, hd.vers[0].n, hd.vers[0].size, hd.vers[0].dev], [1, 2, 6, 'جهاز 1']);
+    assert.strictEqual((await c4(null, 'POST', '/v1/vault/get', { vid, auth, ver: 1, idx: 1 })).j.data, 'BBB');
+    assert.strictEqual((await c4(null, 'POST', '/v1/vault/head', { vid, auth: HXC.b64u(new Uint8Array(16).fill(9)) })).s, 403, 'كلمة سر خاطئة');
+    assert.strictEqual((await c4(D, 'POST', '/v1/vault/put', { vid, auth: HXC.b64u(new Uint8Array(16).fill(9)), up: up(2), idx: 0, n: 1, data: 'Z' })).s, 403);
+    assert.strictEqual((await c4(D, 'POST', '/v1/vault/put', { vid, auth, up: up(3), idx: 0, n: 1, data: 'x'.repeat(900001) })).s, 413);
+    for (let i = 10; i < 18; i++) await c4(D, 'POST', '/v1/vault/put', { vid, auth, up: up(i), idx: 0, n: 1, data: 'v' + i });
+    const h2 = (await c4(null, 'POST', '/v1/vault/head', { vid, auth })).j; assert.strictEqual(h2.head, 9); assert.deepStrictEqual(h2.vers.map((v) => v.ver), [9, 8, 7, 6, 5, 4, 3]);
+    assert.strictEqual((await c4(null, 'POST', '/v1/vault/get', { vid, auth, ver: 1, idx: 0 })).s, 404); assert.strictEqual(env4.DB._raw.prepare("SELECT COUNT(*) AS n FROM vault_chunks").get().n, 7);
+    ok('خزنة النسخ: تُرفع أجزاءً وتكتمل نسخة مرقّمة، كلمة سر النسخ تُفحص قراءةً وكتابة، الكتابة لأخصائي مسجّل، الجزء الضخم يُرفض، وتُحفظ آخر 7 نسخ فقط');
+  }
   console.log('\nنجح', n, 'اختبارات المحطة الوسيطة');
 })().catch((e) => { console.log('✘', e && e.stack ? e.stack.split('\n').slice(0, 4).join(' | ') : e); process.exit(1); });

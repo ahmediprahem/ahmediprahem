@@ -171,6 +171,7 @@ window.DPApp={relist:function(){$('#lst').innerHTML=list()},S:S,A:A};
 /*SHELLUI*/
 /*HXUI*/
 /*FORMSUI*/
+/*VAULTUI*/
 
 // ================= بطاقة «تطبيق الجوال»: روابط التنزيل والتحديث (يحرّرها المدير وتصل المستخدمين مع نسخة المستخدمين) =================
 function appCfg(){return eff().app||{}}

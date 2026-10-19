@@ -35,7 +35,7 @@ function homeGlass() {
     + '<div class="qgrid">' + tile('new', 'ex', 'userPlus', 'نظام الحصص', 'عميل جديد: خطة بالحصص والبدائل') + tile('new', 'ath', 'dumbbell', 'نظام الجرامات', 'عميل جديد: خطة بالجرام والماكروز') + tile('bank', '', 'book', 'محرر الحصص', 'بنك الوجبات وابتكار وجبة') + tile('hxv', '', 'phone', 'حصتي', 'ادعُ عميلاً برابط واتساب واستقبل طلباته') + tile('settings', '', 'settings', 'إعدادات النظام', 'الألوان والبدائل والشعار والمظهر') + '</div>'
     + (recent ? '<h3>آخر العملاء</h3><div class="recent">' + recent + '</div>' : '<p class="small">لا عملاء بعد — ابدأ بـ«عميل جديد».</p>')
     + '<p class="two mobonly"><button data-a="new" data-v="ex">+ عميل جديد — الحصص</button><button class="o" data-a="new" data-v="ath">+ عميل جديد — الجرامات</button></p>'
-    + appCard() + '</div>';
+    + vtHomeCard() + appCard() + '</div>';
 }
 function initial(n) { n = String(n || '').trim(); return n ? n.charAt(0) : '؟'; }
 Object.assign(A, {

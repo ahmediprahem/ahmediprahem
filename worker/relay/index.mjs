@@ -4,12 +4,12 @@
    - تقدّم تطبيق «حصتي» نفسه على الصفحة الرئيسية (/)، فرابط الدعوة = عنوان هذه المحطة.
    - الجداول تُنشأ تلقائياً أول مرة؛ يكفي ربط قاعدة D1 باسم DB. متغير اختياري REG_KEY: مفتاح تسجيل الأخصائيين (بدونه يقبل أي «حصة»).
    - لا تسجّل أي محتوى (لا console.log). يُبنى منه worker/relay/dist/worker.js بـ py build_web.py (يُضمَّن تطبيق «حصتي» وأيقونته). */
-const VER = '1.2';
+const VER = '1.3';
 const APP_HTML = /*HISSATI_HTML*/'<!doctype html><meta charset="utf-8"><title>حصتي</title><p>ابنِ الملف بـ py build_web.py</p>'/*END*/;
 const ICON_B64 = /*HISSATI_ICON*/''/*END*/;
 const SW_JS = /*HISSATI_SW*/''/*END*/;
 const ICONS = /*HISSATI_ICONS*/{}/*END*/;                          // أيقونات التثبيت من المتصفح: icon-192 / icon-512 / maskable-512 / apple-180
-const LIM = { xfer: 1500000, xferTtl: 900, body: 1600000, box: 450000, cat: 300000, label: 80, invitesActive: 300, perHour: 400, inbox: 100, skew: 300 };
+const LIM = { chunk: 900000, chunks: 40, keep: 7, xfer: 1500000, xferTtl: 900, body: 1600000, box: 450000, cat: 300000, label: 80, invitesActive: 300, perHour: 400, inbox: 100, skew: 300 };
 const enc = new TextEncoder();
 const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-methods': 'GET, POST, OPTIONS', 'access-control-allow-headers': 'authorization, content-type', 'access-control-max-age': '86400' };
 const json = (o, status = 200) => new Response(JSON.stringify(o), { status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', ...CORS } });
@@ -45,7 +45,10 @@ const SCHEMA = [
   'CREATE TABLE IF NOT EXISTS kv (k TEXT PRIMARY KEY, v TEXT)',
   'CREATE TABLE IF NOT EXISTS push_subs (ep TEXT PRIMARY KEY, id TEXT NOT NULL, created INTEGER, last INTEGER DEFAULT 0)',
   'CREATE INDEX IF NOT EXISTS push_id ON push_subs (id)',
-  'CREATE TABLE IF NOT EXISTS xfer (id TEXT PRIMARY KEY, cid TEXT NOT NULL, blob TEXT NOT NULL, exp INTEGER, claimed INTEGER DEFAULT 0)'
+  'CREATE TABLE IF NOT EXISTS xfer (id TEXT PRIMARY KEY, cid TEXT NOT NULL, blob TEXT NOT NULL, exp INTEGER, claimed INTEGER DEFAULT 0)',
+  'CREATE TABLE IF NOT EXISTS vaults (vid TEXT PRIMARY KEY, ah TEXT NOT NULL, head INTEGER DEFAULT 0, owner TEXT, created INTEGER)',
+  'CREATE TABLE IF NOT EXISTS vault_vers (vid TEXT NOT NULL, ver INTEGER NOT NULL, up TEXT NOT NULL, n INTEGER, size INTEGER, dev TEXT, at INTEGER, PRIMARY KEY (vid, ver))',
+  'CREATE TABLE IF NOT EXISTS vault_chunks (vid TEXT NOT NULL, up TEXT NOT NULL, idx INTEGER NOT NULL, data TEXT NOT NULL, ts INTEGER, PRIMARY KEY (vid, up, idx))'
 ];
 let ready = null;
 const init = (db) => ready || (ready = (async () => { for (const q of SCHEMA) await db.prepare(q).run(); })().catch((e) => { ready = null; throw e; }));
@@ -142,6 +145,19 @@ async function api(req, env, url, ctx) {
     if (!x || x.exp < now()) return err(404, 'xfer', 'رمز النقل غير صحيح أو انتهت صلاحيته'); if (x.claimed) return err(410, 'used', 'استُعمل رمز النقل من قبل');
     await run(db, "UPDATE xfer SET claimed = 1, blob = '' WHERE id = ?", mX[1]); return json({ ok: true, blob: JSON.parse(x.blob) });
   }
+  // ---------- خزنة النسخ الاحتياطي: نسخ «حصة» مشفّرة بالكامل على جهاز الأخصائي (المفتاح من كلمة سر النسخ ولا يصل المحطة)
+  // vid ومفتاح الوصول auth مشتقان من كلمة السر أيضاً؛ المحطة تحفظ بصمة auth فقط. القراءة تحتاج auth، والكتابة تحتاج auth + أخصائياً مسجّلاً.
+  const vauth = async (J) => { const vid = String(J.vid || ''), a = String(J.auth || ''); if (!/^[A-Za-z0-9_-]{22}$/.test(vid) || !/^[A-Za-z0-9_-]{22,64}$/.test(a)) return { e: err(400, 'vault', 'بيانات الخزنة ناقصة') }; const v = await one(db, 'SELECT vid, ah, head FROM vaults WHERE vid = ?', vid); if (v && v.ah !== hex(await sha256('vault.' + a))) return { e: err(403, 'vauth', 'كلمة سر النسخ غير صحيحة') }; return { vid, v, ah: hex(await sha256('vault.' + a)) }; };
+  if (p === '/v1/vault/head' && method === 'POST') {
+    const x = await vauth(J); if (x.e) return x.e; if (!x.v) return err(404, 'novault', 'لا توجد نسخة بهذه البيانات');
+    return json({ ok: true, head: x.v.head, vers: await all(db, 'SELECT ver, n, size, dev, at FROM vault_vers WHERE vid = ? ORDER BY ver DESC', x.vid) });
+  }
+  if (p === '/v1/vault/get' && method === 'POST') {
+    const x = await vauth(J); if (x.e) return x.e; if (!x.v) return err(404, 'novault', 'لا توجد نسخة بهذه البيانات');
+    const vr = await one(db, 'SELECT up, n FROM vault_vers WHERE vid = ? AND ver = ?', x.vid, +J.ver || 0); if (!vr) return err(404, 'nover', 'النسخة غير موجودة');
+    const c = await one(db, 'SELECT data FROM vault_chunks WHERE vid = ? AND up = ? AND idx = ?', x.vid, vr.up, +J.idx || 0); if (!c) return err(404, 'nochunk', 'جزء مفقود');
+    return json({ ok: true, n: vr.n, data: c.data });
+  }
   if (p === '/v1/push/key' && method === 'GET') return json({ ok: true, key: (await vapid(db)).pub });
   // كل ما يلي يحتاج طرفاً مسجّلاً
   const a = await authed(req, db, path, body); if (a.e) return a.e; const me = a.who;
@@ -157,6 +173,21 @@ async function api(req, env, url, ctx) {
   if (p === '/v1/invites/revoke' && method === 'POST') {           // الأخصائي يلغي دعوة لم تُستعمل
     if (me.role !== 'd') return err(403, 'role', 'للأخصائي فقط');
     await run(db, 'UPDATE invites SET used = 1, cat = NULL WHERE h = ? AND did = ?', String(J.h || ''), me.id); return json({ ok: true });
+  }
+  if (p === '/v1/vault/put' && method === 'POST') {                // رفع جزء من نسخة؛ عند اكتمال الأجزاء تصبح النسخة التالية وتُحذف الأقدم من 7
+    if (me.role !== 'd') return err(403, 'role', 'للأخصائي فقط'); const x = await vauth(J); if (x.e) return x.e;
+    const up = String(J.up || ''), idx = +J.idx, n = +J.n, data = String(J.data || '');
+    if (!/^[A-Za-z0-9_-]{16}$/.test(up) || !(n >= 1 && n <= LIM.chunks) || !(idx >= 0 && idx < n) || !data) return err(400, 'vault', 'جزء غير صالح'); if (data.length > LIM.chunk) return err(413, 'big', 'الجزء أكبر من المسموح');
+    if (!x.v) await run(db, 'INSERT OR IGNORE INTO vaults (vid, ah, head, owner, created) VALUES (?, ?, 0, ?, ?)', x.vid, x.ah, me.id, now());
+    await run(db, 'INSERT OR REPLACE INTO vault_chunks (vid, up, idx, data, ts) VALUES (?, ?, ?, ?, ?)', x.vid, up, idx, data, now());
+    const cnt = await one(db, 'SELECT COUNT(*) AS c, SUM(LENGTH(data)) AS z FROM vault_chunks WHERE vid = ? AND up = ?', x.vid, up);
+    if (cnt.c < n) return json({ ok: true, done: false });
+    const v = await one(db, 'SELECT head FROM vaults WHERE vid = ?', x.vid), ver = (v ? v.head : 0) + 1;
+    await db.batch([db.prepare('INSERT INTO vault_vers (vid, ver, up, n, size, dev, at) VALUES (?, ?, ?, ?, ?, ?, ?)').bind(x.vid, ver, up, n, cnt.z, String(J.dev || '').slice(0, 60), now()), db.prepare('UPDATE vaults SET head = ? WHERE vid = ?').bind(ver, x.vid)]);
+    const old = await all(db, 'SELECT up FROM vault_vers WHERE vid = ? AND ver <= ?', x.vid, ver - LIM.keep);
+    for (const o of old) await db.batch([db.prepare('DELETE FROM vault_chunks WHERE vid = ? AND up = ?').bind(x.vid, o.up), db.prepare('DELETE FROM vault_vers WHERE vid = ? AND up = ?').bind(x.vid, o.up)]);
+    await run(db, 'DELETE FROM vault_chunks WHERE vid = ? AND ts < ? AND up NOT IN (SELECT up FROM vault_vers WHERE vid = ?)', x.vid, now() - 86400, x.vid);   // رفع لم يكتمل منذ يوم
+    return json({ ok: true, done: true, ver });
   }
   if (p === '/v1/xfer' && method === 'POST') {                     // العميل يرفع حسابه مشفّراً بمفتاح عشوائي لينقله إلى تطبيق مثبَّت أو جوال جديد (15 دقيقة، مرة واحدة)
     if (me.role !== 'c') return err(403, 'role', 'للعميل فقط'); const id = String(J.id || ''), blob = JSON.stringify(J.blob || null);
