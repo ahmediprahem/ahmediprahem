@@ -80,7 +80,7 @@ function verTab(c){return'<p><button class="sm" data-a="ver">حفظ إصدار �
 function homeHtml(){if(isGlass())return homeGlass();return'<div class="home">'+(window.HK?HK.splashHtml(HK.gateCfg(),'splash'):'')+'<h2>مرحباً بك في حصة</h2><p class="small">اختر عميلاً من القائمة أو أنشئ عميلاً جديداً.</p><p class="two"><button data-a="new" data-v="ex">+ عميل جديد — الحصص</button><button class="o" data-a="new" data-v="ath">+ عميل جديد — الجرامات</button></p><p class="mobonly"><button class="sec" data-a="menu">☰ قائمة العملاء</button></p>'+appCard()+'</div>'}
 function main(){try{main0();legacyBanner();hudRender()}catch(e){renderFatal(e)}}
 function main0(){var c=cur(),m=$('main');if(S.view==='users'&&window.HAdminUI){m.innerHTML=HAdminUI.html();return}if(S.view==='bank'){m.innerHTML=bankPage();bkAfter();return}if(S.view==='settings'){m.innerHTML=setPage();if(S.setTab==='gate')gatePrev();return}if(!c){m.innerHTML=homeHtml();if(window.HK)HK.bindVideo(m);return}
-m.innerHTML='<div class="tabs"><button class="'+(S.tab==='client'?'on':'')+'" data-a="tab" data-v="client">بيانات العميل</button><button class="'+(S.tab==='plan'?'on':'')+'" data-a="tab" data-v="plan">الخطة</button><button class="'+(S.tab==='ver'?'on':'')+'" data-a="tab" data-v="ver">الإصدارات ('+S.versions.length+')</button>'+(c.hx?'<button class="'+(S.tab==='hx'?'on':'')+'" data-a="tab" data-v="hx">📲 حصتي'+((c.hx.unread||0)+(c.hx.health?1:0)?' <em class="hxnb">'+((c.hx.unread||0)+(c.hx.health?1:0))+'</em>':'')+'</button>':'')+'</div>'+(S.tab==='client'?clientTab(c):S.tab==='plan'?planTab(c):S.tab==='hx'&&c.hx?hxTab(c):verTab(c))}
+m.innerHTML='<div class="tabs"><button class="'+(S.tab==='client'?'on':'')+'" data-a="tab" data-v="client">بيانات العميل</button><button class="'+(S.tab==='plan'?'on':'')+'" data-a="tab" data-v="plan">الخطة</button><button class="'+(S.tab==='ver'?'on':'')+'" data-a="tab" data-v="ver">الإصدارات ('+S.versions.length+')</button>'+'<button class="'+(S.tab==='med'?'on':'')+'" data-a="tab" data-v="med">🩺 الملف الطبي'+(function(n){return n?' <em class="hxnb">'+n+'</em>':''})(medAlerts(c).filter(function(a){return a.lvl>1}).length)+'</button>'+(c.hx?'<button class="'+(S.tab==='hx'?'on':'')+'" data-a="tab" data-v="hx">📲 حصتي'+((c.hx.unread||0)+(c.hx.health?1:0)?' <em class="hxnb">'+((c.hx.unread||0)+(c.hx.health?1:0))+'</em>':'')+'</button>':'')+'</div>'+(S.tab==='client'?clientTab(c):S.tab==='plan'?planTab(c):S.tab==='hx'&&c.hx?hxTab(c):S.tab==='med'?medTab(c):verTab(c))}
 function render(){try{sidebar();main();dtEnsure()}catch(e){renderFatal(e)}}
 function loadVersions(){var c=cur();return dbAll('versions').then(function(v){S.versions=v.filter(function(x){return c&&x.code===c.code}).sort(function(a,b){return b.at-a.at})})}
 // ============ الأحداث
@@ -172,6 +172,7 @@ window.DPApp={relist:function(){$('#lst').innerHTML=list()},S:S,A:A};
 /*HXUI*/
 /*FORMSUI*/
 /*VAULTUI*/
+/*MEDUI*/
 
 // ================= بطاقة «تطبيق الجوال»: روابط التنزيل والتحديث (يحرّرها المدير وتصل المستخدمين مع نسخة المستخدمين) =================
 function appCfg(){return eff().app||{}}

@@ -233,3 +233,16 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padd
 .vtlist{display:flex;flex-direction:column;gap:6px;margin-top:8px}
 .vtv{display:flex;align-items:center;gap:10px;padding:6px 0;border-top:1px solid var(--line)}
 .vtv small{flex:1;color:#667}
+/* الملف الطبي */
+.medsum{margin:8px 0}
+.medsum small.dn,.medt .dn{color:#1e8c4e}
+.medsum small.up{color:#c0392b}
+.medal{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.medlo{background:#fff8e6;border-right:4px solid #e9b949;padding:6px 10px;border-radius:6px;font-size:13px}
+.medcharts{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px;margin:10px 0}
+.medch{margin:0;border:1px solid var(--line);border-radius:10px;padding:8px}
+.medch figcaption{display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px}
+.medch svg{width:100%;height:auto;display:block}
+.medt td.medn{text-align:right;font-size:12px;max-width:260px}
+.lf{font-weight:700}.lf.l0{color:#1e8c4e}.lf.l1{color:#b26a00}.lf.l2{color:#c0392b}
+.medlabs>div{min-width:150px}

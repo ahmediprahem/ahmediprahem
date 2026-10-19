@@ -179,3 +179,9 @@ html:is([data-theme="linear"],[data-theme="glass"]) .fmb{background:var(--lpanel
 html:is([data-theme="linear"],[data-theme="glass"]) .fmb.c{background:rgba(34,197,94,.16);color:#bff3d0}
 html:is([data-theme="linear"],[data-theme="glass"]) .fmq{border-color:var(--lline)}
 html:is([data-theme="linear"],[data-theme="glass"]) .fmadd{border-color:var(--lline2)}
+
+/* الملف الطبي */
+html:is([data-theme="linear"],[data-theme="glass"]) .medlo{background:rgba(245,158,11,.10);color:var(--lwarn)}
+html:is([data-theme="linear"],[data-theme="glass"]) .medch{border-color:var(--lline)}
+html:is([data-theme="linear"],[data-theme="glass"]) .lf.l0{color:#6fe3a9}html:is([data-theme="linear"],[data-theme="glass"]) .lf.l1{color:#ffd27a}html:is([data-theme="linear"],[data-theme="glass"]) .lf.l2{color:#ff9d88}
+html:is([data-theme="linear"],[data-theme="glass"]) .medsum small.dn{color:#6fe3a9}html:is([data-theme="linear"],[data-theme="glass"]) .medsum small.up{color:#ff9d88}
