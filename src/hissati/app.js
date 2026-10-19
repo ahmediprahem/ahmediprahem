@@ -60,7 +60,7 @@ const numOnly = (s) => latin(s).replace(/[,،]/g, '.').replace(/[^\d.]/g, '');
 const fresh = () => ({
   v: 1, screen: 'invite', step: 1, tab: 'today', day: TODAY, foodCat: 0, foodQ: '', prefCat: 0, prefQ: '',
   p: { name: '', phone: '', sex: 'أنثى', age: '', weight: '', height: '', act: 2, goal: 1, cond: [], allg: [], meds: '', notes: '',
-       like: { B: [], L: [], D: [], S: [] }, nope: { B: [], L: [], D: [], S: [] }, food: {}, wake: '07:00', sleep: '23:00', nmeals: 5, wdays: [] },
+       like: { B: [], L: [], D: [], S: [] }, nope: { B: [], L: [], D: [], S: [] }, food: {}, wake: '07:00', sleep: '23:00', nmeals: 5, wdays: [], bf: '', sport: '', gphase: '', supp: '', sched: null, cq: {} },
   consent: false, req: 'none', reqMsg: '', code: '', plan: null, pm: null, pv: 0, log: {}, weights: [], prefLog: [], pending: [], msgs: [], unreadC: 0, chat: false, ctx: '',
   ident: null, tok: '', fp: '', did: '', cid: '', dEnc: null, dname: '', cat: {}, after: 0, outbox: [], removed: false
 });
@@ -224,7 +224,7 @@ function handle(p) {
     return true;
   }
   if (p.t === 'plan' && p.plan && Array.isArray(p.plan.days) && p.plan.days.length) {
-    const pl = p.plan; S.pm = { kcal: pl.kcal, pro: pl.pro, cho: pl.cho, fat: pl.fat, water: pl.water, dayNames: pl.dayNames, groups: pl.groups };
+    const pl = p.plan; S.pm = { sys: pl.sys || 'ex', kcal: pl.kcal, pro: pl.pro, cho: pl.cho, fat: pl.fat, water: pl.water, dayNames: pl.dayNames, groups: pl.groups };
     S.plan = JSON.parse(JSON.stringify(pl.days)); S.pv = +p.v || 1; mkData(); if (S.req !== 'approved') S.req = 'approved';
     foodsOf('no').forEach((f) => { if (foodInPlan(f)) applyDislike(f); });
     const first = S.screen !== 'app'; S.screen = 'app'; if (first) S.tab = 'today';
@@ -310,76 +310,109 @@ function scrLock() {
     + '<button class="link" data-act="forgot">نسيت الرمز؟</button></div></div></div>';
 }
 function head(t, act, v, sub) { return '<div class="hd"><button class="back" data-act="' + act + '" data-v="' + v + '" aria-label="رجوع">' + I('back') + '</button><div class="t">' + (sub ? '<div class="stepk">' + sub + '</div>' : '') + '<h2>' + t + '</h2></div></div>'; }
-const STEPS = ['بياناتك', 'صحتك', 'وجباتك المفضلة', 'أكلاتك', 'يومك'];
-function scrWizard() {
-  const s = S.step, body = [null, stepBasic, stepHealth, stepMeals, stepFoods, stepHabits][s]();
-  const ok = s !== 1 || basicOk();
-  return '<div class="scr">' + head(STEPS[s - 1], 'step', s - 1, 'الخطوة ' + s + ' من 5')
-    + '<div class="prog"><i style="width:' + (s * 20) + '%"></i></div>'
-    + '<div class="scroll"><div class="stack">' + (s === 1 && S.req === 'changes' && S.reqMsg ? '<div class="banner warn">' + I('msg') + '<span><b>' + esc(S.dname) + ':</b> ' + esc(S.reqMsg) + '</span></div>' : '') + body + '</div></div>'
-    + '<div class="foot"><button class="btn full" data-act="step" data-v="' + (s + 1) + '" ' + (ok ? '' : 'disabled') + '>' + (s === 5 ? 'مراجعة' : 'التالي') + '</button></div></div>';
-}
-function basicOk() { return !!(S.p.name.trim() && S.p.phone.trim() && +S.p.age > 0 && +S.p.weight > 0 && +S.p.height > 0); }
+// ---------- الاستبيان: يُعرض كما أعدّه الأخصائي (يصل مع الدعوة؛ HForms يكمّل ما ينقصه). نظامان: الحصص (ex) والجرامات (g)
+let FS = [], SYS = 'ex';
+function mkForm() { const f = HForms.normalize(S.cat && S.cat.form, S.cat && S.cat.form && S.cat.form.sys); SYS = f.sys; FS = HForms.visibleSteps(f); }
+const vq = (st) => st.q.filter((q) => !q.hide);
+const lab = (q, forId) => (forId ? '<label for="' + forId + '">' : '<span class="lbl">') + esc(q.label) + (q.req ? ' <span class="req">*</span>' : '') + (forId ? '</label>' : '</span>') + (q.help ? '<div class="dim">' + esc(q.help) + '</div>' : '');
 function inp(k, label, type, extra) { const nm = type === 'number', ph = type === 'tel'; return '<div class="field"><label for="f_' + k + '">' + label + '</label><input class="inp" id="f_' + k + '" data-bind="' + k + '" type="' + (nm ? 'text' : type || 'text') + '"' + (nm ? ' data-numf="1" autocomplete="off"' : ph ? ' data-tel="1"' : '') + ' value="' + esc(S.p[k]) + '" ' + (extra || '') + '></div>'; }
-function stepBasic() {
-  const acts = DATA.activity.map((a, i) => '<button class="act' + (S.p.act === i ? ' on' : '') + '" data-act="set" data-k="act" data-v="' + i + '"><span class="bars">' + [0, 1, 2, 3, 4].map((j) => '<i class="' + (j <= i ? 'f' : '') + '" style="height:' + (6 + j * 4) + 'px"></i>').join('') + '</span><span>' + esc(a) + '</span></button>').join('');
-  const goals = DATA.goals.map((g, i) => '<button class="chip' + (S.p.goal === i ? ' on' : '') + '" data-act="set" data-k="goal" data-v="' + i + '">' + esc(g.replace(/[−+]\d+/, '').trim()) + '</button>').join('');
-  return inp('name', 'الاسم الكامل', 'text', 'autocomplete="name"') + inp('phone', 'رقم الجوال', 'tel', 'inputmode="tel" dir="ltr"')
-    + '<div class="field"><span class="lbl">الجنس</span><div class="segc">' + ['أنثى', 'ذكر'].map((x) => '<button class="' + (S.p.sex === x ? 'on' : '') + '" data-act="set" data-k="sex" data-v="' + x + '">' + x + '</button>').join('') + '</div></div>'
-    + '<div class="grid3">' + inp('age', 'العمر', 'number', 'inputmode="numeric"') + inp('weight', 'الوزن (كجم)', 'number', 'inputmode="decimal"') + inp('height', 'الطول (سم)', 'number', 'inputmode="numeric"') + '</div>'
-    + '<div class="field"><span class="lbl">نشاطك اليومي</span><div class="acts">' + acts + '</div></div>'
-    + '<div class="field"><span class="lbl">هدفك</span><div class="chips">' + goals + '</div></div>';
-}
 function toggles(key, list, sel) { sel = sel || S.p[key]; return '<div class="chips">' + list.map((x) => '<button class="chip' + (sel.includes(x) ? ' on' : '') + '" data-act="tog" data-k="' + key + '" data-v="' + esc(x) + '">' + (sel.includes(x) ? I('check') : '') + esc(x) + '</button>').join('') + '</div>'; }
-function stepHealth() {
-  return '<div class="banner info">' + I('lock') + '<span>بياناتك الصحية تُشفَّر على جوالك ولا يقرؤها إلا أخصائيك.</span></div>'
-    + '<div class="field"><span class="lbl">هل لديك أي من هذه الحالات؟</span>' + toggles('cond', DATA.conditions) + '</div>'
-    + '<div class="field"><span class="lbl">الحساسية وما تتجنبه</span>' + toggles('allg', DATA.allergens) + '</div>'
-    + '<div class="field"><label for="f_meds">أدوية أو مكملات تتناولها</label><textarea class="inp" id="f_meds" data-bind="meds" placeholder="مثال: ميتفورمين 500 ملغ مرتين يومياً">' + esc(S.p.meds) + '</textarea></div>'
-    + '<div class="field"><label for="f_notes">أي شيء آخر يحتاج أخصائيك معرفته</label><textarea class="inp" id="f_notes" data-bind="notes" placeholder="مثال: أعمل بنظام مناوبات ليلية">' + esc(S.p.notes) + '</textarea></div>';
+const seg = (k, vals, cur, labels) => '<div class="segc">' + vals.map((x, i) => '<button class="' + (String(cur) === String(x) ? 'on' : '') + '" data-act="set" data-k="' + k + '" data-v="' + esc(x) + '">' + esc(labels ? labels[i] : x) + '</button>').join('') + '</div>';
+const dayTypes = () => (S.cat && S.cat.dayTypes) || ['راحة', 'تدريب خفيف', 'تدريب متوسط', 'تدريب ثقيل'];
+function sched() { if (!Array.isArray(S.p.sched) || S.p.sched.length !== 7) S.p.sched = Array.from({ length: 7 }, () => ({ type: dayTypes()[0], min: 0, time: '' })); return S.p.sched; }
+const BQ = {                                       // الأسئلة الأساسية: عرض بنص الأخصائي، وحفظ في حقل ثابت يفهمه «حصة»
+  name: (q) => inp('name', esc(q.label), 'text', 'autocomplete="name"'),
+  phone: (q) => inp('phone', esc(q.label), 'tel', 'inputmode="tel" dir="ltr"'),
+  sex: (q) => '<div class="field">' + lab(q) + seg('sex', ['أنثى', 'ذكر'], S.p.sex) + '</div>',
+  age: (q) => inp('age', esc(q.label), 'number', 'inputmode="numeric"'),
+  weight: (q) => inp('weight', esc(q.label), 'number', 'inputmode="decimal"'),
+  height: (q) => inp('height', esc(q.label), 'number', 'inputmode="numeric"'),
+  bf: (q) => inp('bf', esc(q.label), 'number', 'inputmode="decimal" placeholder="اختياري"'),
+  sport: (q) => inp('sport', esc(q.label), 'text', 'placeholder="مثال: كمال أجسام، كرة قدم، جري"'),
+  act: (q) => '<div class="field">' + lab(q) + '<div class="acts">' + DATA.activity.map((a, i) => '<button class="act' + (S.p.act === i ? ' on' : '') + '" data-act="set" data-k="act" data-v="' + i + '"><span class="bars">' + [0, 1, 2, 3, 4].map((j) => '<i class="' + (j <= i ? 'f' : '') + '" style="height:' + (6 + j * 4) + 'px"></i>').join('') + '</span><span>' + esc(a) + '</span></button>').join('') + '</div></div>',
+  goal: (q) => '<div class="field">' + lab(q) + '<div class="chips">' + DATA.goals.map((g, i) => '<button class="chip' + (S.p.goal === i ? ' on' : '') + '" data-act="set" data-k="goal" data-v="' + i + '">' + esc(g.replace(/[−+]\d+/, '').trim()) + '</button>').join('') + '</div></div>',
+  gphase: (q) => '<div class="field">' + lab(q) + '<div class="chips">' + ((S.cat && S.cat.phases) || []).map((g) => '<button class="chip' + (S.p.gphase === g ? ' on' : '') + '" data-act="set" data-k="gphase" data-v="' + esc(g) + '">' + esc(g) + '</button>').join('') + '</div></div>',
+  cond: (q) => '<div class="banner info">' + I('lock') + '<span>بياناتك الصحية تُشفَّر على جوالك ولا يقرؤها إلا أخصائيك.</span></div><div class="field">' + lab(q) + toggles('cond', DATA.conditions) + '</div>',
+  allg: (q) => '<div class="field">' + lab(q) + toggles('allg', DATA.allergens) + '</div>',
+  meds: (q) => '<div class="field">' + lab(q, 'f_meds') + '<textarea class="inp" id="f_meds" data-bind="meds" placeholder="مثال: ميتفورمين 500 ملغ مرتين يومياً">' + esc(S.p.meds) + '</textarea></div>',
+  supp: (q) => '<div class="field">' + lab(q, 'f_supp') + '<textarea class="inp" id="f_supp" data-bind="supp" placeholder="مثال: واي بروتين بعد التمرين، كرياتين 5 جم">' + esc(S.p.supp) + '</textarea></div>',
+  notes: (q) => '<div class="field">' + lab(q, 'f_notes') + '<textarea class="inp" id="f_notes" data-bind="notes" placeholder="مثال: أعمل بنظام مناوبات ليلية">' + esc(S.p.notes) + '</textarea></div>',
+  meals: (q) => '<p class="mut">' + esc(q.label) + '</p>' + MEALS.map((m) => {
+    const opts = mealsBy(m[0]), used = S.p.like[m[0]].concat(S.p.nope[m[0]]);
+    const sel = (kind, label) => '<select class="inp" data-act="pickmeal" data-k="' + kind + '" data-v="' + m[0] + '" aria-label="' + label + ' ' + m[1] + '"><option value="">' + label + '</option>' + opts.filter((o) => !used.includes(o[0])).map((o) => '<option>' + esc(o[0]) + '</option>').join('') + '</select>';
+    const card = (n, kind) => { const b = DATA.bank.find((x) => x[0] === n) || [n, [], '']; return '<div class="pk ' + kind + '">' + I(kind === 'like' ? 'up' : 'down') + '<div class="tx"><b>' + esc(n) + '</b><small>' + esc(b[2]) + '</small></div><button class="x" data-act="unmeal" data-k="' + (kind === 'like' ? 'like' : 'nope') + '" data-m="' + m[0] + '" data-v="' + esc(n) + '" aria-label="إزالة">' + I('x') + '</button></div>'; };
+    return '<section class="card msec"><div class="mhd"><span class="mi">' + I(m[2]) + '</span><h3>' + m[1] + '</h3><span class="dim">' + opts.length + ' وجبة</span></div>'
+      + sel('like', '＋ وجبة أحبها') + '<div class="pick">' + S.p.like[m[0]].map((n) => card(n, 'like')).join('') + '</div>'
+      + sel('nope', '－ وجبة لا أريدها') + '<div class="pick">' + S.p.nope[m[0]].map((n) => card(n, 'nope')).join('') + '</div></section>';
+  }).join(''),
+  foods: (q) => '<p class="mut">' + esc(q.label) + ': <b style="color:var(--mint)">أحب</b> ثم <b style="color:var(--coral)">لا أحب</b> ثم رجوع.</p>'
+    + '<div class="legend"><span><i class="dot" style="background:var(--mint)"></i>أحب ' + foodsOf('love').length + '</span><span><i class="dot" style="background:var(--coral)"></i>لا أحب ' + foodsOf('no').length + '</span></div>' + foodGrid('foodCat', 'foodQ'),
+  wake: (q) => '<div class="field">' + lab(q, 'f_wake') + '<input class="inp" id="f_wake" type="time" data-bind="wake" value="' + esc(S.p.wake) + '"></div>',
+  sleep: (q) => '<div class="field">' + lab(q, 'f_sleep') + '<input class="inp" id="f_sleep" type="time" data-bind="sleep" value="' + esc(S.p.sleep) + '"></div>',
+  nmeals: (q) => '<div class="field">' + lab(q) + seg('nmeals', SYS === 'g' ? [3, 4, 5, 6, 7] : [3, 4, 5, 6], S.p.nmeals) + '</div>',
+  wdays: (q) => '<div class="field">' + lab(q) + '<div class="chips">' + DATA.dayNames.map((d, i) => '<button class="chip' + (S.p.wdays.includes(i) ? ' on' : '') + '" data-act="wday" data-v="' + i + '">' + esc(d) + '</button>').join('') + '</div></div>',
+  train: (q) => '<p class="mut">' + esc(q.label) + '</p><div class="trows">' + sched().map((x, i) => {
+    const rest = x.type === dayTypes()[0];
+    return '<div class="trow' + (rest ? ' rest' : '') + '"><b>' + esc(DATA.dayNames[i]) + '</b><select class="inp" data-sch="' + i + '" aria-label="نوع يوم ' + esc(DATA.dayNames[i]) + '">' + dayTypes().map((t) => '<option' + (t === x.type ? ' selected' : '') + '>' + esc(t) + '</option>').join('') + '</select>'
+      + (rest ? '' : '<input class="inp" data-schm="' + i + '" data-numf="1" inputmode="numeric" placeholder="دقائق" value="' + esc(x.min || '') + '" aria-label="مدة التدريب بالدقائق"><input class="inp" type="time" data-scht="' + i + '" value="' + esc(x.time || '') + '" aria-label="وقت التدريب">') + '</div>';
+  }).join('') + '</div><div class="banner info">' + I('clock') + '<span>يحسب أخصائيك سعرات كل يوم وكربوهيدراته حسب نوع التدريب ومدته.</span></div>'
+};
+function cqHtml(q) {                               // الأسئلة المخصّصة (يضيفها الأخصائي)
+  const v = (S.p.cq || {})[q.id], id = 'cq_' + q.id;
+  if (q.type === 'text') return '<div class="field">' + lab(q, id) + '<input class="inp" id="' + id + '" data-cq="' + q.id + '" value="' + esc(v || '') + '"></div>';
+  if (q.type === 'long') return '<div class="field">' + lab(q, id) + '<textarea class="inp" id="' + id + '" data-cq="' + q.id + '">' + esc(v || '') + '</textarea></div>';
+  if (q.type === 'num') return '<div class="field">' + lab(q, id) + '<div class="row"><input class="inp" id="' + id + '" data-cq="' + q.id + '" data-numf="1" inputmode="decimal" value="' + esc(v || '') + '" style="flex:1">' + (q.unit ? '<span class="dim">' + esc(q.unit) + '</span>' : '') + '</div></div>';
+  const btn = (val, text, on, act) => '<button class="chip' + (on ? ' on' : '') + '" data-act="' + act + '" data-k="' + q.id + '" data-v="' + esc(val) + '">' + (on ? I('check') : '') + esc(text) + '</button>';
+  if (q.type === 'one') return '<div class="field">' + lab(q) + '<div class="chips">' + q.opts.map((o) => btn(o, o, v === o, 'cq1')).join('') + '</div></div>';
+  if (q.type === 'many') return '<div class="field">' + lab(q) + '<div class="chips">' + q.opts.map((o) => btn(o, o, (v || []).includes(o), 'cqm')).join('') + '</div></div>';
+  if (q.type === 'yn') return '<div class="field">' + lab(q) + '<div class="segc">' + [['y', 'نعم'], ['n', 'لا']].map((o) => '<button class="' + (v === o[0] ? 'on' : '') + '" data-act="cq1" data-k="' + q.id + '" data-v="' + o[0] + '">' + o[1] + '</button>').join('') + '</div></div>';
+  if (q.type === 'scale') return '<div class="field">' + lab(q) + '<div class="segc">' + [1, 2, 3, 4, 5].map((n) => '<button class="' + (String(v) === String(n) ? 'on' : '') + '" data-act="cq1" data-k="' + q.id + '" data-v="' + n + '">' + n + '</button>').join('') + '</div></div>';
+  return '';
 }
-function stepMeals() {
-  return '<p class="mut">اختر من وجبات أخصائيك ما تحب أن يتكرر في خطتك، وما لا تريده أبداً.</p>'
-    + MEALS.map((m) => {
-      const opts = mealsBy(m[0]), used = S.p.like[m[0]].concat(S.p.nope[m[0]]);
-      const sel = (kind, label) => '<select class="inp" data-act="pickmeal" data-k="' + kind + '" data-v="' + m[0] + '" aria-label="' + label + ' ' + m[1] + '"><option value="">' + label + '</option>' + opts.filter((o) => !used.includes(o[0])).map((o) => '<option>' + esc(o[0]) + '</option>').join('') + '</select>';
-      const card = (n, kind) => { const b = DATA.bank.find((x) => x[0] === n) || [n, [], '']; return '<div class="pk ' + kind + '">' + I(kind === 'like' ? 'up' : 'down') + '<div class="tx"><b>' + esc(n) + '</b><small>' + esc(b[2]) + '</small></div><button class="x" data-act="unmeal" data-k="' + (kind === 'like' ? 'like' : 'nope') + '" data-m="' + m[0] + '" data-v="' + esc(n) + '" aria-label="إزالة">' + I('x') + '</button></div>'; };
-      return '<section class="card msec"><div class="mhd"><span class="mi">' + I(m[2]) + '</span><h3>' + m[1] + '</h3><span class="dim">' + opts.length + ' وجبة</span></div>'
-        + sel('like', '＋ وجبة أحبها') + '<div class="pick">' + S.p.like[m[0]].map((n) => card(n, 'like')).join('') + '</div>'
-        + sel('nope', '－ وجبة لا أريدها') + '<div class="pick">' + S.p.nope[m[0]].map((n) => card(n, 'nope')).join('') + '</div></section>';
-    }).join('');
+function stepOk(st) {
+  return vq(st).every((q) => {
+    if (q.b) { if (q.id === 'name' || q.id === 'phone') return !!String(S.p[q.id] || '').trim(); if (q.id === 'age' || q.id === 'weight' || q.id === 'height') return +S.p[q.id] > 0; return true; }
+    return !q.req || HForms.answered(q, (S.p.cq || {})[q.id]);
+  });
+}
+function scrWizard() {
+  mkForm(); const N = FS.length; if (S.step > N) S.step = N; const s = S.step, st = FS[s - 1];
+  const body = vq(st).map((q) => q.b ? (BQ[q.id] ? BQ[q.id](q) : '') : cqHtml(q)).join('');
+  return '<div class="scr">' + head(esc(st.t), 'step', s - 1, 'الخطوة ' + s + ' من ' + N)
+    + '<div class="prog"><i style="width:' + Math.round(s / N * 100) + '%"></i></div>'
+    + '<div class="scroll"><div class="stack">' + (s === 1 && S.req === 'changes' && S.reqMsg ? '<div class="banner warn">' + I('msg') + '<span><b>' + esc(S.dname) + ':</b> ' + esc(S.reqMsg) + '</span></div>' : '') + body + '</div></div>'
+    + '<div class="foot"><button class="btn full" data-act="step" data-v="' + (s + 1) + '" ' + (stepOk(st) ? '' : 'disabled') + '>' + (s === N ? 'مراجعة' : 'التالي') + '</button></div></div>';
 }
 function foodGrid(catKey, qKey) {
-  const cat = S[catKey], q = (S[qKey] || '').trim();
-  const list = DATA.foods.filter((f) => (q ? f[0].includes(q) : CATS[cat][1].includes(f[1])));
-  const tabs = '<div class="tabs" role="tablist">' + CATS.map((c, i) => '<button class="' + (i === cat && !q ? 'on' : '') + '" data-act="cat" data-k="' + catKey + '" data-v="' + i + '">' + c[0] + '</button>').join('') + '</div>';
+  const cats = foodCats(), cat = Math.min(S[catKey] || 0, cats.length - 1), q = (S[qKey] || '').trim();
+  const list = DATA.foods.filter((f) => (q ? f[0].includes(q) : cats[cat][1].includes(f[1])));
+  const tabs = '<div class="tabs" role="tablist">' + cats.map((c, i) => '<button class="' + (i === cat && !q ? 'on' : '') + '" data-act="cat" data-k="' + catKey + '" data-v="' + i + '">' + esc(c[0]) + '</button>').join('') + '</div>';
   const grid = '<div class="fgrid">' + list.slice(0, 80).map((f) => { const st = S.p.food[f[0]]; return '<button class="food ' + (st || '') + '" data-act="food" data-v="' + esc(f[0]) + '" aria-pressed="' + (st ? 'true' : 'false') + '">' + (st === 'love' ? I('up') : st === 'no' ? I('down') : '') + esc(f[0]) + '</button>'; }).join('') + (list.length ? '' : '<p class="dim">لا صنف بهذا الاسم.</p>') + '</div>';
   return '<label class="srch">' + I('sparkle') + '<input id="fq_' + catKey + '" data-q="' + qKey + '" placeholder="ابحث عن صنف…" value="' + esc(S[qKey]) + '"></label>' + tabs + grid;
 }
-function stepFoods() {
-  const lv = foodsOf('love').length, no = foodsOf('no').length;
-  return '<p class="mut">المس الصنف مرة إذا كنت <b style="color:var(--mint)">تحبه</b>، ومرتين إذا كنت <b style="color:var(--coral)">لا تحبه</b>، وثالثة للرجوع.</p>'
-    + '<div class="legend"><span><i class="dot" style="background:var(--mint)"></i>أحب ' + lv + '</span><span><i class="dot" style="background:var(--coral)"></i>لا أحب ' + no + '</span></div>'
-    + foodGrid('foodCat', 'foodQ');
-}
-function stepHabits() {
-  return '<div class="grid2"><div class="field"><label for="f_wake">أستيقظ عادة</label><input class="inp" id="f_wake" type="time" data-bind="wake" value="' + esc(S.p.wake) + '"></div><div class="field"><label for="f_sleep">أنام عادة</label><input class="inp" id="f_sleep" type="time" data-bind="sleep" value="' + esc(S.p.sleep) + '"></div></div>'
-    + '<div class="field"><span class="lbl">كم وجبة تفضّل في اليوم؟</span><div class="segc">' + [3, 4, 5, 6].map((n) => '<button class="' + (S.p.nmeals === n ? 'on' : '') + '" data-act="set" data-k="nmeals" data-v="' + n + '">' + n + '</button>').join('') + '</div></div>'
-    + '<div class="field"><span class="lbl">أيام التمرين</span><div class="chips">' + DATA.dayNames.map((d, i) => '<button class="chip' + (S.p.wdays.includes(i) ? ' on' : '') + '" data-act="wday" data-v="' + i + '">' + esc(d) + '</button>').join('') + '</div></div>'
-    + '<div class="banner info">' + I('clock') + '<span>يضبط أخصائيك أوقات وجباتك وعددها من هذه الإجابات.</span></div>';
+function foodCats() { return S.cat && S.cat.fcats ? S.cat.fcats.map((n, i) => [n, [i]]) : CATS; }   // نظام الجرامات: فئات أغذيته
+function bqText(q) {                               // نص الإجابة الأساسية في شاشة المراجعة
+  const p = S.p, lk = foodsOf('love'), no = foodsOf('no');
+  switch (q.id) {
+    case 'weight': return p.weight ? p.weight + ' كجم (مؤشر الكتلة ' + bmi() + ')' : ''; case 'height': return p.height ? p.height + ' سم' : ''; case 'age': return p.age ? p.age + ' سنة' : '';
+    case 'bf': return p.bf ? p.bf + '%' : ''; case 'act': return DATA.activity[p.act] || ''; case 'goal': return (DATA.goals[p.goal] || '').replace(/[−+]\d+/, '').trim();
+    case 'cond': return p.cond.join('، ') || 'لا'; case 'allg': return p.allg.join('، ') || 'لا';
+    case 'meals': { const ml = MEALS.reduce((a, m) => a + p.like[m[0]].length, 0), mn = MEALS.reduce((a, m) => a + p.nope[m[0]].length, 0); return ml + ' وجبة تحبها • ' + mn + ' لا تريدها'; }
+    case 'foods': return 'تحب: ' + (lk.slice(0, 6).join('، ') || '—') + (lk.length > 6 ? ' و' + (lk.length - 6) + ' غيرها' : '') + ' • لا تحب: ' + (no.slice(0, 6).join('، ') || '—');
+    case 'nmeals': return p.nmeals + ' وجبات'; case 'wdays': return p.wdays.map((i) => DATA.dayNames[i]).join('، ') || 'لا تمرين';
+    case 'train': { const t = sched().map((x, i) => x.type === dayTypes()[0] ? '' : DATA.dayNames[i] + ': ' + x.type + (x.min ? ' ' + x.min + 'د' : '') + (x.time ? ' ' + x.time : '')).filter(Boolean); return t.length ? t.join(' • ') : 'لا تدريب'; }
+    default: return String(p[q.id] == null ? '' : p[q.id]);
+  }
 }
 function scrReview() {
-  const p = S.p, g = DATA.goals[p.goal] || '', lk = foodsOf('love'), no = foodsOf('no'), ml = MEALS.reduce((a, m) => a + p.like[m[0]].length, 0), mn = MEALS.reduce((a, m) => a + p.nope[m[0]].length, 0);
-  const sec = (t, step, inner) => '<section class="card rv"><div class="rh"><h3>' + t + '</h3><button class="link" data-act="step" data-v="' + step + '">تعديل</button></div>' + inner + '</section>';
-  return '<div class="scr">' + head('راجع بياناتك', 'step', 5) + '<div class="scroll"><div class="stack">'
-    + sec('بياناتك', 1, '<dl class="kv"><dt>الاسم</dt><dd>' + esc(p.name) + '</dd><dt>الجوال</dt><dd dir="ltr" style="text-align:right">' + esc(p.phone) + '</dd><dt>العمر والجنس</dt><dd>' + esc(p.age) + ' سنة • ' + esc(p.sex) + '</dd><dt>الوزن والطول</dt><dd>' + esc(p.weight) + ' كجم • ' + esc(p.height) + ' سم (مؤشر الكتلة ' + bmi() + ')</dd><dt>الهدف</dt><dd>' + esc(g) + '</dd></dl>')
-    + sec('صحتك', 2, '<p>' + (p.cond.concat(p.allg).map(esc).join('، ') || '<span class="mut">لا حالات ولا حساسية</span>') + '</p>' + (p.meds ? '<p class="dim">أدوية: ' + esc(p.meds) + '</p>' : ''))
-    + sec('وجباتك', 3, '<p>' + ml + ' وجبة تحبها • ' + mn + ' وجبة لا تريدها</p>')
-    + sec('أكلاتك', 4, '<p><span style="color:var(--mint)">تحب:</span> ' + (lk.slice(0, 8).map(esc).join('، ') || '—') + (lk.length > 8 ? ' و' + (lk.length - 8) + ' غيرها' : '') + '</p><p><span style="color:var(--coral)">لا تحب:</span> ' + (no.slice(0, 8).map(esc).join('، ') || '—') + '</p>')
-    + sec('يومك', 5, '<p>' + p.nmeals + ' وجبات • من ' + esc(p.wake) + ' إلى ' + esc(p.sleep) + (p.wdays.length ? ' • تمرين ' + p.wdays.length + ' أيام' : '') + '</p>')
+  mkForm(); const N = FS.length;
+  const sec = (st, i) => '<section class="card rv"><div class="rh"><h3>' + esc(st.t) + '</h3><button class="link" data-act="step" data-v="' + (i + 1) + '">تعديل</button></div><dl class="kv">'
+    + vq(st).map((q) => { const t = q.b ? bqText(q) : HForms.answerText(q, (S.p.cq || {})[q.id]); return t ? '<dt>' + esc(q.label) + '</dt><dd' + (q.id === 'phone' ? ' dir="ltr" style="text-align:right"' : '') + '>' + esc(t) + '</dd>' : ''; }).join('') + '</dl></section>';
+  return '<div class="scr">' + head('راجع بياناتك', 'step', N) + '<div class="scroll"><div class="stack">' + FS.map(sec).join('')
     + '<label class="consent"><input type="checkbox" id="consent" data-act="consent" ' + (S.consent ? 'checked' : '') + '><span>أوافق على حفظ بياناتي الصحية مشفّرة ومشاركتها مع ' + esc(S.dname) + ' فقط لإعداد خطتي ومتابعتي.</span></label>'
     + '</div></div><div class="foot"><button class="btn full" data-act="submit" ' + (S.consent && !V.busy ? '' : 'disabled') + '>' + I('send') + (V.busy ? ' جارٍ الإرسال…' : ' أرسل إلى أخصائيك') + '</button></div></div>';
 }
+function intakeQA() { mkForm(); const out = []; FS.forEach((st) => vq(st).forEach((q) => { if (q.b) return; const t = HForms.answerText(q, (S.p.cq || {})[q.id]); if (t) out.push([q.label, t]); })); return out; }
 function scrSent() {
   const st = S.req, ch = st === 'changes', ok = st === 'approved';
   if (st === 'rejected' || S.removed) return '<div class="scr"><div class="scroll"><div class="stack" style="padding-top:26px"><div class="empty"><div class="ei" style="color:var(--coral)">' + I('alert') + '</div><h1>توقف الربط مع أخصائيك</h1><p class="mut">لا يمكن إرسال بيانات جديدة من هذا الحساب. تواصل مع أخصائيك إن كان ذلك خطأ، وسيرسل لك رابطاً جديداً.</p></div><button class="btn sec full" data-act="wipe">حذف بياناتي من هذا الجوال</button></div></div></div>';
@@ -408,8 +441,10 @@ function tabToday() {
   let out = (installState() === 'done' || installState() === 'desktop' ? notifCard(true) : installCard('today')) + '<div class="hello"><div class="av sm">' + esc(first.charAt(0) || '؟') + '</div><div style="flex:1"><div class="dim">' + esc(DATA.dayNames[d] || '') + '</div><h2>أهلاً ' + esc(first) + '</h2></div>' + chatBtn() + '</div>';
   out += '<section class="card ring"><svg viewBox="0 0 100 100" role="img" aria-label="التزام اليوم ' + pct + '%"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="10"/><circle cx="50" cy="50" r="40" fill="none" stroke="#6fe3a9" stroke-width="10" stroke-linecap="round" stroke-dasharray="' + C + '" stroke-dashoffset="' + (C * (1 - pct / 100)) + '"/></svg><div style="flex:1"><div class="num">' + pct + '%</div><div class="mut">' + done + ' من ' + n + ' أصناف اليوم</div>'
     + (pct === 100 ? '<div class="dim" style="color:var(--mint)">يوم كامل، أحسنت!</div>' : '<div class="dim">علّم ما أكلته باللمس.</div>') + '</div></section>';
-  out += '<div class="stats3"><div class="st"><b>' + DATA.kcal + '</b><small>سعرة هدفك</small></div><div class="st"><b>' + DATA.pro + ' جم</b><small>بروتين</small></div><div class="st"><b>' + (L.water * CUP).toFixed(2).replace(/\.?0+$/, '') + ' / ' + (+DATA.water).toFixed(1) + '</b><small>لتر ماء</small></div></div>';
-  out += '<section class="card water"><span style="color:var(--sky)">' + I('drop') + '</span><span class="dim">كوب = 250 مل</span><div class="cups">' + Array.from({ length: CUPS }, (_, i) => '<button class="' + (i < L.water ? 'f' : '') + '" data-act="water" data-v="' + (i + 1) + '" aria-label="' + (i + 1) + ' أكواب"></button>').join('') + '</div></section>';
+  const dp = dayPlan(d), kc = dp.kcal || DATA.kcal, pr = dp.p || DATA.pro, wt = +(dp.water || DATA.water), cups = Math.max(4, Math.min(16, Math.round(wt / CUP)));
+  if (dp.type) out += '<div class="banner info">' + I('dumbbell') + '<span><b>' + esc(dp.type) + '</b> • كارب ' + dp.c + ' جم • دهون ' + dp.f + ' جم</span></div>';
+  out += '<div class="stats3"><div class="st"><b>' + kc + '</b><small>سعرة هدفك' + (dp.type ? ' اليوم' : '') + '</small></div><div class="st"><b>' + pr + ' جم</b><small>بروتين</small></div><div class="st"><b>' + (L.water * CUP).toFixed(2).replace(/\.?0+$/, '') + ' / ' + wt.toFixed(1) + '</b><small>لتر ماء</small></div></div>';
+  out += '<section class="card water"><span style="color:var(--sky)">' + I('drop') + '</span><span class="dim">كوب = 250 مل</span><div class="cups">' + Array.from({ length: cups }, (_, i) => '<button class="' + (i < L.water ? 'f' : '') + '" data-act="water" data-v="' + (i + 1) + '" aria-label="' + (i + 1) + ' أكواب"></button>').join('') + '</div></section>';
   out += dayPlan(d).slots.map((s, si) => mealCard(d, si, s, true)).join('');
   return out + syncLine();
 }
@@ -431,8 +466,8 @@ function mealCard(d, si, s, live) {
 function tabPlan() {
   const chips = DATA.dayNames.map((n, i) => { const [a, b] = itemsOfDay(i); return '<button class="' + (S.day === i ? 'on' : '') + (i === TODAY ? ' today' : '') + '" data-act="day" data-v="' + i + '"><b>' + esc(String(n).replace('ال', '')) + '</b><span>' + (b && i <= TODAY ? Math.round(a / b * 100) + '%' : '—') + '</span></button>'; }).join('');
   return '<div class="row" style="justify-content:space-between"><h2>خطتي</h2><button class="btn sm sec" data-act="shop">' + I('cart') + ' قائمة التسوّق</button></div>'
-    + '<div class="dim">من ' + esc(S.dname) + ' • ' + DATA.kcal + ' سعرة يومياً • الإصدار ' + S.pv + '</div>'
-    + '<div class="daychips">' + chips + '</div>' + dayPlan(S.day).slots.map((s, si) => mealCard(S.day, si, s, false)).join('');
+    + '<div class="dim">من ' + esc(S.dname) + ' • ' + (S.pm && S.pm.sys === 'g' ? 'نظام الجرامات: السعرات حسب نوع كل يوم' : DATA.kcal + ' سعرة يومياً') + ' • الإصدار ' + S.pv + '</div>'
+    + '<div class="daychips">' + chips + '</div>' + (dayPlan(S.day).type ? '<div class="banner info">' + I('dumbbell') + '<span><b>' + esc(dayPlan(S.day).type) + '</b> • ' + dayPlan(S.day).kcal + ' سعرة • بروتين ' + dayPlan(S.day).p + ' • كارب ' + dayPlan(S.day).c + ' • دهون ' + dayPlan(S.day).f + ' جم</span></div>' : '') + dayPlan(S.day).slots.map((s, si) => mealCard(S.day, si, s, false)).join('');
 }
 function tabPrefs() {
   const lv = foodsOf('love').length, no = foodsOf('no').length;
@@ -647,8 +682,10 @@ document.addEventListener('click', (e) => {
     case 'sendc': { const t = $('#chatIn'); if (!sendMsg(t && t.value)) return; focusChat = true; break; }
     case 'refresh': toast('جارٍ التحقق…'); poll().then(() => toast(S.req === 'approved' ? 'اعتمدك أخصائيك — خطتك قيد الإعداد' : 'لا جديد بعد')); return;
     case 'go': if (v === 'pin') { V.screen = 'pin'; V.pin = V.pin1 = ''; V.err = ''; } break;
-    case 'step': { const n = +v; if (n < 1) return; if (n > 5) S.screen = 'review'; else { S.screen = 'wizard'; S.step = n; } break; }
-    case 'set': S.p[k] = isNaN(+v) || k === 'sex' ? v : +v; break;
+    case 'step': { mkForm(); const n = +v; if (n < 1) return; if (n > FS.length) S.screen = 'review'; else { S.screen = 'wizard'; S.step = n; } break; }
+    case 'cq1': { S.p.cq = S.p.cq || {}; S.p.cq[k] = S.p.cq[k] === v ? '' : v; break; }
+    case 'cqm': { S.p.cq = S.p.cq || {}; const a = S.p.cq[k] = Array.isArray(S.p.cq[k]) ? S.p.cq[k] : [], i = a.indexOf(v); i < 0 ? a.push(v) : a.splice(i, 1); break; }
+    case 'set': S.p[k] = isNaN(+v) || k === 'sex' || k === 'gphase' ? v : +v; break;
     case 'tog': { const arr = S.p[k], i = arr.indexOf(v); i < 0 ? arr.push(v) : arr.splice(i, 1); break; }
     case 'wday': { const i = S.p.wdays.indexOf(+v); i < 0 ? S.p.wdays.push(+v) : S.p.wdays.splice(i, 1); break; }
     case 'unmeal': { const arr = S.p[k][el.dataset.m]; arr.splice(arr.indexOf(v), 1); break; }
@@ -668,7 +705,7 @@ document.addEventListener('click', (e) => {
     case 'submit': {
       if (V.busy) return; V.busy = true; render();
       HXC.fpOf(S.ident.encPub).then((fp) => {
-        const p = JSON.parse(JSON.stringify(S.p)); ['age', 'weight', 'height'].forEach((x) => { p[x] = +numOnly(p[x]) || 0; }); p.phone = latin(p.phone);
+        const p = JSON.parse(JSON.stringify(S.p)); ['age', 'weight', 'height', 'bf'].forEach((x) => { p[x] = +numOnly(p[x]) || 0; }); p.phone = latin(p.phone); mkForm(); p.sys = SYS; p.qa = intakeQA(); if (SYS === 'g') p.sched = sched();
         if (!S.weights.length && p.weight) S.weights.push([now(), p.weight]);
         S.req = 'sent'; S.reqMsg = ''; S.screen = 'sent';
         return send({ t: 'intake', p, fp });
@@ -700,6 +737,7 @@ document.addEventListener('change', (e) => {
   const t = e.target;
   if (t.dataset.act === 'pickmeal' && t.value) { const arr = S.p[t.dataset.k][t.dataset.v]; if (!arr.includes(t.value)) arr.push(t.value); render(); }
   if (t.dataset.act === 'consent') { S.consent = t.checked; render(); }
+  if (t.dataset.sch) { const x = sched()[+t.dataset.sch]; x.type = t.value; if (t.value === dayTypes()[0]) { x.min = 0; x.time = ''; } else if (!x.min) { x.min = 60; x.time = x.time || '17:00'; } render(); }
 });
 document.addEventListener('input', (e) => {               // التقاط أولاً: تحويل الأرقام العربية قبل أي قراءة للقيمة
   const t = e.target; if (!t || t.tagName !== 'INPUT' || !(t.dataset.numf || t.dataset.tel)) return;
@@ -708,7 +746,10 @@ document.addEventListener('input', (e) => {               // التقاط أول
 }, true);
 document.addEventListener('input', (e) => {
   const t = e.target;
-  if (t.dataset.bind) { S.p[t.dataset.bind] = t.value; save(); const btn = $('.foot .btn'); if (btn && S.screen === 'wizard' && S.step === 1) btn.disabled = !basicOk(); }
+  if (t.dataset.bind || t.dataset.cq || t.dataset.schm || t.dataset.scht) {
+    if (t.dataset.bind) S.p[t.dataset.bind] = t.value; else if (t.dataset.cq) { S.p.cq = S.p.cq || {}; S.p.cq[t.dataset.cq] = t.value; } else if (t.dataset.schm) sched()[+t.dataset.schm].min = +t.value || 0; else sched()[+t.dataset.scht].time = t.value;
+    save(); const btn = $('.foot .btn'); if (btn && S.screen === 'wizard') { mkForm(); btn.disabled = !stepOk(FS[S.step - 1]); }
+  }
   if (t.dataset.q) { S[t.dataset.q] = t.value; const pos = t.selectionStart; render(); const n = document.getElementById(t.id); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (x) { } } }
 });
 window.addEventListener('online', () => { V.online = true; poll(); });

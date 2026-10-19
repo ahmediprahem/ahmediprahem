@@ -275,3 +275,10 @@ select.inp option{background:#16224f;color:#fff}
 .banner.inst .ico,.steps .ico{vertical-align:-4px}
 .steps{margin:6px 0;padding-inline-start:20px;display:flex;flex-direction:column;gap:4px}
 .xcode{padding:12px;border-radius:14px;border:1px dashed var(--line2);background:rgba(0,0,0,.2);font:600 13px/1.6 ui-monospace,monospace;overflow-wrap:anywhere;user-select:all;text-align:left}
+/* الاستبيان: جدول التدريب والأسئلة المخصّصة */
+.req{color:var(--coral)}
+.trows{display:flex;flex-direction:column;gap:8px}
+.trow{display:grid;grid-template-columns:72px 1fr 78px 96px;gap:6px;align-items:center}
+.trow.rest{grid-template-columns:72px 1fr}
+.trow b{font-size:13px}
+.trow .inp{padding:8px;min-height:40px}

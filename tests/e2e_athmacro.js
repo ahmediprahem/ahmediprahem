@@ -6,7 +6,7 @@ const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html')); let n = 0; cons
   const b = await chromium.launch(), p = await (await b.newContext({ viewport: { width: 1400, height: 1000 } })).newPage(); p.on('pageerror', (e) => errs.push(String(e))); p.on('dialog', (d) => d.accept());
   await p.goto(ADMIN); await login(p);
   const C = () => p.evaluate(() => { const c = DPApp.S.clients.filter((x) => x.code === DPApp.S.cur)[0]; return JSON.parse(JSON.stringify(c)); });
-  await p.click('button:has-text("عميل رياضي")'); await p.waitForSelector('#atg'); await p.fill('[data-f="name"]', 'كابتن يدوي'); await p.fill('[data-f="weight"]', '80'); await p.press('[data-f="weight"]', 'Tab');
+  await p.click('button:has-text("عميل جديد — الجرامات")'); await p.waitForSelector('#atg'); await p.fill('[data-f="name"]', 'كابتن يدوي'); await p.fill('[data-f="weight"]', '80'); await p.press('[data-f="weight"]', 'Tab');
   await p.selectOption('[data-f="phase"]', 'تنشيف'); assert.strictEqual(await p.locator('[data-f="pVal"]').count(), 0); assert((await p.textContent('#atg')).includes('حسب المرحلة'));
   ok('الافتراضي «حسب المرحلة»: لا حقول يدوية، ويظهر وصف الطريقة في صندوق الأهداف');
   await p.selectOption('[data-f="macroMode"]', 'manual'); await p.waitForSelector('[data-f="pVal"]');

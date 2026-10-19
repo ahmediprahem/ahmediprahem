@@ -148,6 +148,7 @@
     var by = A.index(AD), meal = plan.days[d].meals[m], old = meal.items[i], nf = by[newId], key = old.role === 'p' ? 'p' : old.role === 'c' ? 'c' : old.role === 'f' ? 'f' : null, g = old.g;
     if (key && nf[key] > 0) g = roundG(nf, old[key] / (nf[key] / 100), AD); meal.items[i] = mk(nf, g, old.role, old.fixed); meal.edited = true; A.dayStats(plan.days[d]);
   };
+  A.swapGrams = function (AD, old, nf) { var key = old.role === 'p' ? 'p' : old.role === 'c' ? 'c' : old.role === 'f' ? 'f' : null; return key && nf[key] > 0 ? roundG(nf, old[key] / (nf[key] / 100), AD) : old.g; };   // جرامات البديل التي تعادل الماكرو الرئيسي (مثل swapItem)
   A.addItem = function (plan, AD, d, m, id, g) { var f = A.index(AD)[id], meal = plan.days[d].meals[m]; meal.items.push(mk(f, g || 100, 'x', false)); meal.edited = true; A.dayStats(plan.days[d]); };
   A.delItem = function (plan, AD, d, m, i) { var meal = plan.days[d].meals[m]; meal.items.splice(i, 1); meal.edited = true; A.dayStats(plan.days[d]); };
   A.refitMeal = function (plan, AD, d, m) { var meal = plan.days[d].meals[m]; meal.items = A.refit(AD, meal.items.map(function (i) { return i.role === 'x' ? Object.assign({}, i, { fixed: true }) : i; }), meal.target); meal.edited = false; A.dayStats(plan.days[d]); };

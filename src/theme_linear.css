@@ -173,3 +173,9 @@ html:is([data-theme="linear"],[data-theme="glass"]) .hxbar i{background:var(--la
 html:is([data-theme="linear"],[data-theme="glass"]) .hxlink{border-color:var(--lline2);background:rgba(0,0,0,.18);color:var(--ltext)}
 html:is([data-theme="linear"],[data-theme="glass"]) .hxday{border-color:var(--lline)}
 html:is([data-theme="linear"],[data-theme="glass"]) .hxinv.made{border-color:var(--lacc);box-shadow:0 0 0 2px var(--lglow)}
+
+/* محرر الاستبيانات */
+html:is([data-theme="linear"],[data-theme="glass"]) .fmb{background:var(--lpanel2);color:var(--lmut)}
+html:is([data-theme="linear"],[data-theme="glass"]) .fmb.c{background:rgba(34,197,94,.16);color:#bff3d0}
+html:is([data-theme="linear"],[data-theme="glass"]) .fmq{border-color:var(--lline)}
+html:is([data-theme="linear"],[data-theme="glass"]) .fmadd{border-color:var(--lline2)}

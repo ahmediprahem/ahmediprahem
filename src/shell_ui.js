@@ -6,7 +6,7 @@ function railBtn(a, icon, label, on, v) { return '<button class="sec sidebtn' + 
 function glassSide() {
   var home = S.view === 'client' && !S.cur, admin = S.mode === 'admin';
   var clx = !home && !S.clOpen; document.body.classList.toggle('clx', clx);        // عمود العملاء يُطوى تلقائياً خارج الرئيسية ليتسع المحتوى (الخطة والجداول)، ويُفتح من «العملاء»
-  var rail = '<nav class="rail" aria-label="التنقل"><p class="two newc"><button data-a="new" data-v="ex" title="عميل جديد">+ عميل جديد</button><button class="o" data-a="new" data-v="ath" title="عميل رياضي">+ عميل رياضي</button></p>'
+  var rail = '<nav class="rail" aria-label="التنقل"><p class="two newc"><button data-a="new" data-v="ex" title="عميل جديد بنظام الحصص">+ عميل جديد — الحصص</button><button class="o" data-a="new" data-v="ath" title="عميل جديد بنظام الجرامات">+ عميل جديد — الجرامات</button></p>'
     + railBtn('home', 'home', 'الرئيسية', home) + (home ? '' : '<button class="sec sidebtn cltog' + (clx ? '' : ' on') + '" data-a="clToggle" aria-expanded="' + (!clx) + '">' + IC('users') + '<span>العملاء</span><em>' + S.clients.length + '</em></button>') + railBtn('bank', 'book', 'محرر الحصص', S.view === 'bank') + railBtn('hxv', 'phone', 'طلبات حصتي', S.view === 'hx').replace('</span></button>', '</span><em class="hxnb"></em></button>') + railBtn('settings', 'settings', 'إعدادات النظام', S.view === 'settings')
     + (admin ? '<div class="sbg' + sbc('tools') + '" data-g="tools"><button class="sbh" data-a="sbg" data-v="tools" aria-expanded="' + (SBG.tools === 0 ? 'false' : 'true') + '">أدوات الإدارة <i>' + IC('chevron') + '</i></button><div class="sbb">'
       + railBtn('users', 'users', 'المستخدمون والأجهزة', S.view === 'users') + railBtn('exportUsers', 'package', 'تصدير نسخة المستخدمين') + railBtn('exportSite', 'globe', 'تصدير موقع للنشر (ZIP)') + '</div></div>' : '')
@@ -31,10 +31,10 @@ function homeGlass() {
   var recent = cs.slice(0, 6).map(function (c) { return '<div class="cl" data-a="pick" data-v="' + c.code + '"><span class="cav">' + esc(initial(c.name)) + '</span><b>' + esc(c.name || '(بلا اسم)') + '</b><small>' + c.code + (c.phone ? ' • ' + esc(c.phone) : '') + (c.plan ? ' • له خطة' : '') + '</small></div>'; }).join('');
   return '<div class="home ghome">'
     + '<section class="hero"><div class="herot"><h2>أهلاً بك' + (firstName() ? '، ' + esc(firstName()) : '') + '</h2><p>اختر عميلاً أو ابدأ خطة جديدة. كل بياناتك محفوظة ومشفّرة على هذا الجهاز.</p></div>' + (window.HK ? HK.splashHtml(HK.gateCfg(), 'splash') : '') + '</section>'
-    + '<div class="stats"><div><b>' + cs.length + '</b><small>عميل</small></div><div><b>' + withPlan + '</b><small>له خطة</small></div><div><b>' + ath + '</b><small>رياضي</small></div></div>'
-    + '<div class="qgrid">' + tile('new', 'ex', 'userPlus', 'عميل جديد', 'خطة بنظام الحصص والبدائل') + tile('new', 'ath', 'dumbbell', 'عميل رياضي', 'خطة بالجرام حسب التدريب') + tile('bank', '', 'book', 'محرر الحصص', 'بنك الوجبات وابتكار وجبة') + tile('hxv', '', 'phone', 'حصتي', 'ادعُ عميلاً برابط واتساب واستقبل طلباته') + tile('settings', '', 'settings', 'إعدادات النظام', 'الألوان والبدائل والشعار والمظهر') + '</div>'
+    + '<div class="stats"><div><b>' + cs.length + '</b><small>عميل</small></div><div><b>' + withPlan + '</b><small>له خطة</small></div><div><b>' + ath + '</b><small>بالجرامات</small></div></div>'
+    + '<div class="qgrid">' + tile('new', 'ex', 'userPlus', 'نظام الحصص', 'عميل جديد: خطة بالحصص والبدائل') + tile('new', 'ath', 'dumbbell', 'نظام الجرامات', 'عميل جديد: خطة بالجرام والماكروز') + tile('bank', '', 'book', 'محرر الحصص', 'بنك الوجبات وابتكار وجبة') + tile('hxv', '', 'phone', 'حصتي', 'ادعُ عميلاً برابط واتساب واستقبل طلباته') + tile('settings', '', 'settings', 'إعدادات النظام', 'الألوان والبدائل والشعار والمظهر') + '</div>'
     + (recent ? '<h3>آخر العملاء</h3><div class="recent">' + recent + '</div>' : '<p class="small">لا عملاء بعد — ابدأ بـ«عميل جديد».</p>')
-    + '<p class="two mobonly"><button data-a="new" data-v="ex">+ إنشاء عميل حصص</button><button class="o" data-a="new" data-v="ath">+ عميل رياضي</button></p>'
+    + '<p class="two mobonly"><button data-a="new" data-v="ex">+ عميل جديد — الحصص</button><button class="o" data-a="new" data-v="ath">+ عميل جديد — الجرامات</button></p>'
     + appCard() + '</div>';
 }
 function initial(n) { n = String(n || '').trim(); return n ? n.charAt(0) : '؟'; }

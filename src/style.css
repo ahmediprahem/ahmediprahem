@@ -217,3 +217,15 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padd
 .hxtab h3 small{font-weight:400;font-size:12px;color:#778}
 .hxtop .two button{white-space:nowrap}
 .hxkv dd[dir=ltr]{text-align:right}
+/* محرر الاستبيانات */
+.fmstep.off{opacity:.6}
+.fmh{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:8px}
+.fmh input{flex:1;min-width:160px;font-weight:700}
+.fmn{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--n);color:#fff;font-weight:700}
+.fmq{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start;padding:6px 0;border-top:1px solid var(--line)}
+.fmq.off{opacity:.55}
+.fmql{flex:1;min-width:220px;display:flex;flex-direction:column;gap:4px}
+.fmqa{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.fmb{font-size:11px;padding:2px 8px;border-radius:9px;background:#e8ebf3;color:#445}
+.fmb.c{background:#e3f4ea;color:#245}
+.fmadd{margin-top:8px;padding:10px;border:1px dashed var(--line);border-radius:10px}
