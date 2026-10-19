@@ -143,7 +143,7 @@ function hxReq(req, p, enc) {                                     // قبل ال
 function hxIn(c, p) {                                              // بعد الاعتماد: المتابعة اليومية، الوزن، التفضيلات، الصحة، المحادثة
   var x = c.hx, nm = c.name || x.label || '';
   if (p.t === 'log' && /^\d{4}-\d{2}-\d{2}$/.test(p.d)) {
-    x.logs = x.logs || {}; x.logs[p.d] = { dow: p.dow, pv: p.pv, ck: p.ck || {}, sw: p.sw || {}, note: p.note || {}, skip: p.skip || {}, water: +p.water || 0, done: +p.done || 0, n: +p.n || 0, ts: p.ts };
+    x.logs = x.logs || {}; x.logs[p.d] = { dow: p.dow, pv: p.pv, ck: p.ck || {}, sw: p.sw || {}, note: p.note || {}, skip: p.skip || {}, water: +p.water || 0, done: +p.done || 0, n: +p.n || 0, ts: p.ts, h: p.h && typeof p.h === 'object' && JSON.stringify(p.h).length < 2000 ? p.h : {}, hs: Array.isArray(p.hs) ? p.hs.slice(0, 12).map(String) : [] };
     var ks = Object.keys(x.logs).sort(); if (ks.length > 90) ks.slice(0, ks.length - 90).forEach(function (k) { delete x.logs[k]; });
     return 0;                                                       // المتابعة تُحدَّث بصمت (بلا إشعار لكل لمسة)
   }
@@ -161,6 +161,11 @@ function hxIn(c, p) {                                              // بعد ا�
   if (p.t === 'read') { (x.msgs || []).forEach(function (q) { if (q.from === 'd' && q.ts <= p.upTo) q.read = 1; }); return 0; }
   return 0;
 }
+// عادات العميل من «حصتي» (ملخص اليوم في المتابعة): ✓ ما أنجزه من العادات التي يتابعها
+var HX_HB = { steps: ['🚶', function (v) { return v + ' خطوة'; }, function (v) { return v >= 8000; }], sleep: ['😴', function (v) { return v + ' س نوم'; }, function (v) { return v >= 7 && v <= 9; }], veg: ['🥗', function (v) { return v + '/5 خضار وفاكهة'; }, function (v) { return v >= 5; }],
+  sugar: ['🍬', function (v) { return v ? 'بلا سكر' : 'تناول سكراً'; }, function (v) { return v === 1; }], move: ['⚡', function (v) { return v + ' د نشاط'; }, function (v) { return v >= 30; }], breath: ['🫧', function (v) { return v + ' جلسة تنفّس'; }, function (v) { return v >= 1; }],
+  mindful: ['🍽', function (v) { return (v || []).length + ' وجبات بوعي'; }, function (v) { return (v || []).length >= 2; }], kitchen: ['🌙', function (v) { return v ? 'المطبخ مغلق ليلاً' : 'أكل بعد العشاء'; }, function (v) { return v === 1; }], coffee: ['☕', function (v) { return v + ' كوب قهوة'; }, function (v) { return v <= 3; }] };
+function hxHabits(l) { var h = l.h || {}; return Object.keys(h).filter(function (k) { return HX_HB[k] && h[k] != null; }).map(function (k) { var d = HX_HB[k]; return (d[2](h[k]) ? '✓' : '✗') + d[0] + ' ' + d[1](h[k]); }).join(' • '); }
 // ---------- الاعتماد: الطلب ← عميل جديد في «حصة»
 function hxMap(q) {
   var food = q.food || {}, flat = function (o) { return ['B', 'L', 'D', 'S'].reduce(function (a, k) { return a.concat((o || {})[k] || []); }, []); }, act = D.settings.activity[+q.act] || D.settings.activity[2], goal = D.settings.goals[+q.goal] || D.settings.goals[2];
@@ -301,6 +306,7 @@ function hxTab(c) {                                                // تبويب
   var adh = days.map(function (k) {
     var l = logs[k], pct = l.n ? Math.round(l.done / l.n * 100) : 0, extra = [];
     Object.keys(l.sw || {}).forEach(function (q) { extra.push('⇄ ' + l.sw[q]); }); Object.keys(l.note || {}).forEach(function (q) { extra.push('✎ ' + l.note[q]); }); Object.keys(l.skip || {}).forEach(function (q) { extra.push('⤼ تخطّى وجبة ' + (+q + 1)); });
+    var hb = hxHabits(l); if (hb) extra.unshift(hb);
     return '<div class="hxday"><b>' + esc((D.days[l.dow] || '') + ' ' + k.slice(5)) + '</b><span class="hxbar"><i style="width:' + pct + '%"></i></span><span>' + pct + '%</span><small>💧 ' + (l.water * 0.25).toFixed(2).replace(/\.?0+$/, '') + ' ل</small>' + (extra.length ? '<small class="hxex">' + esc(extra.join(' • ')) + '</small>' : '') + '</div>';
   }).join('');
   return '<div class="hxtab"><div class="ucard"><div class="hxtop"><h3>📲 «حصتي» <small>مرتبط منذ ' + new Date(x.since || Date.now()).toLocaleDateString('ar') + ' • آخر تحقق ' + hxAgo(HX.last) + '</small></h3><button class="sec sm" data-a="hxCheck">↻ تحقق الآن</button></div>'

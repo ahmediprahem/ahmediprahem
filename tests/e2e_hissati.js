@@ -228,6 +228,27 @@ const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html'));
     await ip.check('[data-rem="meals"]'); assert(await remRow(7), 'أوقات الوجبات أُضيفت');
     ok('التذكيرات: الماء كل ساعتين والوجبات في أوقات الخطة — تُحفظ أوقاتها بتوقيت UTC في المحطة، ونصوصها في عامل الخدمة');
   }
+  // ---- العادات: مكتبة العادات ← إضافتها لـ«اليوم» بتصاميمها ← الإنجاز والسلسلة والأسبوع ← تصل الأخصائي مع المتابعة
+  {
+    await ip.click('[data-act="tab"][data-v="today"]'); await ip.waitForSelector('.hb[data-hb="water"] .bottle'); assert.strictEqual(await ip.locator('.hb').count(), 1, 'الماء افتراضياً');
+    await ip.click('[data-act="habits"]'); await ip.waitForSelector('.hlib'); assert.strictEqual(await ip.locator('.hli').count(), 10);
+    for (const id of ['steps', 'sleep', 'veg', 'sugar', 'move', 'breath', 'mindful', 'kitchen', 'coffee']) await ip.click('[data-act="htoggle"][data-v="' + id + '"]');
+    await ip.click('.sheet [data-act="close"]'); assert.strictEqual(await ip.locator('.hb').count(), 10);
+    for (let i = 0; i < 9; i++) await ip.click('[data-hb="steps"] [data-k="+1000"]');
+    await ip.click('[data-hb="sleep"] [data-k="8"]'); for (let i = 0; i < 5; i++) await ip.click('[data-hb="veg"] path[data-k="' + i + '"]');
+    await ip.click('[data-hb="sugar"] [data-k="1"]'); await ip.click('[data-hb="move"] [data-k="2"]'); await ip.click('[data-hb="mindful"] [data-k="0"]'); await ip.click('[data-hb="mindful"] [data-k="1"]');
+    await ip.click('[data-hb="kitchen"] [data-k="1"]'); await ip.click('[data-hb="coffee"] [data-k="3"]');
+    for (const id of ['steps', 'sleep', 'veg', 'sugar', 'move', 'mindful', 'kitchen']) assert(await ip.isVisible('[data-hb="' + id + '"].done'), 'لم تكتمل: ' + id);
+    assert(!(await ip.isVisible('[data-hb="coffee"].done')), '4 أكواب أكثر من 3'); assert((await ip.textContent('[data-hb="coffee"]')).includes('4 أكواب • الحد 3'));
+    assert((await ip.textContent('[data-hb="steps"]')).includes('9,000')); assert(await ip.isVisible('[data-hb="sugar"] .flame.lit'));
+    await ip.click('[data-hb="breath"] [data-act="breathe"]'); await ip.waitForSelector('#brx .ring.in', { timeout: 3000 }); await ip.click('#brstop'); assert.strictEqual(await ip.locator('#brx').count(), 0);
+    if (process.env.SHOTS) for (const id of ['water', 'steps', 'sleep', 'veg', 'sugar', 'move', 'breath', 'mindful', 'kitchen', 'coffee']) await ip.locator('[data-hb="' + id + '"]').screenshot({ path: path.join(process.env.SHOTS, 'h_' + id + '.png') }); await ip.evaluate(() => { const S = window.HissatiApp.state(), d = new Date(Date.now() - 86400000), k = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); S.log[k] = Object.assign(S.log[k] || { ck: {}, sw: {}, note: {}, skip: {}, water: 0 }, { h: { sugar: 1 } }); });
+    await ip.click('[data-hb="sleep"] [data-k="8"]'); await ip.click('[data-hb="sleep"] [data-k="8"]'); assert((await ip.textContent('[data-hb="sugar"] .hbs')).includes('2'), 'سلسلة يومين');
+    await ip.click('[data-act="tab"][data-v="progress"]'); assert((await ip.textContent('.hgrid')).includes('المشي اليومي'));
+    await ip.waitForTimeout(2800); await ip.evaluate(() => window.HissatiApp.flush()); await hxCheck(); await d.click('main .tabs [data-v="hx"]').catch(() => { });
+    const tx = await d.textContent('.hxday'); assert(tx.includes('✓🚶 9000 خطوة') && tx.includes('✓😴 8 س نوم') && tx.includes('✗☕ 4 كوب قهوة'), tx.slice(0, 400));
+    ok('العادات: مكتبة من 10 عادات صحية تُضاف لـ«اليوم» بتصميم لكل عادة (قارورة الماء، عدّاد الخطوات، سماء النوم، صحن الخضار، شعلة السلسلة، بطارية النشاط، جلسة تنفّس، أكواب القهوة)، والإنجاز والسلسلة والأسبوع، وتصل الأخصائي في المتابعة اليومية');
+  }
   await ictx.close(); await jctx.close();
   site.close(); globalThis.fetch = realFetch;
   assert.deepStrictEqual(errs, [], errs.join(' | ')); ok('لا أخطاء في وحدة التحكم');

@@ -253,7 +253,7 @@ let logT = {}; function queueLog(k) { clearTimeout(logT[k]); logT[k] = setTimeou
 function sendLog(k) {
   const L = S.log[k]; if (!L || !S.plan) return; const dow = new Date(k + 'T12:00:00').getDay(), day = S.plan[dow % S.plan.length]; let n = 0, done = 0;
   day.slots.forEach((s, si) => s.lines.forEach((l, li) => { n++; if (L.ck[si + '_' + li]) done++; }));
-  send({ t: 'log', d: k, dow, pv: S.pv, ck: L.ck, sw: L.sw, note: L.note, skip: L.skip, water: L.water, done, n });
+  send({ t: 'log', d: k, dow, pv: S.pv, ck: L.ck, sw: L.sw, note: L.note, skip: L.skip, water: L.water, done, n, h: L.h || {}, hs: hList() });
 }
 
 // ---------- مساعدات
@@ -450,8 +450,7 @@ function tabToday() {
   const dp = dayPlan(d), kc = dp.kcal || DATA.kcal, pr = dp.p || DATA.pro, wt = +(dp.water || DATA.water), cups = Math.max(4, Math.min(16, Math.round(wt / CUP)));
   if (dp.type) out += '<div class="banner info">' + I('dumbbell') + '<span><b>' + esc(dp.type) + '</b> • كارب ' + dp.c + ' جم • دهون ' + dp.f + ' جم</span></div>';
   out += '<div class="stats3"><div class="st"><b>' + kc + '</b><small>سعرة هدفك' + (dp.type ? ' اليوم' : '') + '</small></div><div class="st"><b>' + pr + ' جم</b><small>بروتين</small></div><div class="st"><b>' + (L.water * CUP).toFixed(2).replace(/\.?0+$/, '') + ' / ' + wt.toFixed(1) + '</b><small>لتر ماء</small></div></div>';
-  out += '<section class="card water"><span style="color:var(--sky)">' + I('drop') + '</span><span class="dim">كوب = 250 مل</span><div class="cups">' + Array.from({ length: cups }, (_, i) => '<button class="' + (i < L.water ? 'f' : '') + '" data-act="water" data-v="' + (i + 1) + '" aria-label="' + (i + 1) + ' أكواب"></button>').join('') + '</div></section>';
-  out += dayPlan(d).slots.map((s, si) => mealCard(d, si, s, true)).join('');
+  out += habitsHome() + '<h2 class="mealsh">وجباتي</h2>' + dayPlan(d).slots.map((s, si) => mealCard(d, si, s, true)).join('');
   return out + syncLine();
 }
 function syncLine() { return '<p class="sync">' + (S.outbox.length ? 'بانتظار الإنترنت لإرسال ' + S.outbox.length + ' تحديث إلى أخصائيك' : 'متابعتك تصل أخصائيك تلقائياً') + ' • الخطة الإصدار ' + S.pv + '</p>'; }
@@ -500,7 +499,7 @@ function tabProgress() {
   return '<h2>تقدّمي</h2><section class="card stack"><div class="row" style="justify-content:space-between"><h3>الوزن</h3><span class="dim">' + (W.length > 1 ? (diff <= 0 ? diff + ' كجم منذ البداية' : '+' + diff + ' كجم') : '') + '</span></div>' + chart
     + '<div class="row"><input class="inp" id="wIn" type="text" data-numf="1" autocomplete="off" inputmode="decimal" placeholder="وزن اليوم (كجم)" style="flex:1"><button class="btn sm" data-act="weigh">' + I('scale') + ' سجّل</button></div></section>'
     + '<section class="card stack"><div class="row" style="justify-content:space-between"><h3>الالتزام آخر 7 أيام</h3><span class="dim">% من الأصناف</span></div><div class="wk">' + bars + '</div></section>'
-    + remCard() + '<section class="card stack"><h3>الحساب</h3><p class="dim">ملفك لدى ' + esc(S.dname) + (S.code ? ' • رقم ' + esc(S.code) : '') + '. بياناتك محفوظة مشفّرة على هذا الجوال فقط.</p>' + installCard('acct') + notifCard(false) + '<div class="row"><button class="btn sm sec" data-act="lock">' + I('lock') + ' قفل التطبيق</button><button class="btn sm sec" data-act="xferNew">' + I('phone') + ' نقل حسابي</button></div><button class="link" data-act="wipe" style="color:var(--coral)">حذف بياناتي من هذا الجوال</button></section>';
+    + habitsProgress() + remCard() + '<section class="card stack"><h3>الحساب</h3><p class="dim">ملفك لدى ' + esc(S.dname) + (S.code ? ' • رقم ' + esc(S.code) : '') + '. بياناتك محفوظة مشفّرة على هذا الجوال فقط.</p>' + installCard('acct') + notifCard(false) + '<div class="row"><button class="btn sm sec" data-act="lock">' + I('lock') + ' قفل التطبيق</button><button class="btn sm sec" data-act="xferNew">' + I('phone') + ' نقل حسابي</button></div><button class="link" data-act="wipe" style="color:var(--coral)">حذف بياناتي من هذا الجوال</button></section>';
 }
 
 // ---------- التثقيف: منشورات أخصائيك (ومنشورات عامة لمراجعي «حصة» توافق عليها الإدارة) — إعجاب وتعليق
@@ -592,6 +591,79 @@ function remCard() {
   return '<section class="card stack"><h3>' + I('bell') + ' التذكيرات</h3>' + tg('water', 'شرب الماء', 'كل ساعتين من 10 صباحاً إلى 8 مساءً') + tg('meals', 'مواعيد الوجبات', 'في أوقات وجبات خطتك')
     + (pushState() === 'on' ? '<p class="dim">تصلك والتطبيق مغلق.</p>' : '<p class="dim">تحتاج تفعيل الإشعارات؛ يُطلب الإذن عند التشغيل.</p>') + '</section>';
 }
+// ---------- العادات: مكتبة عادات صحية يختار منها العميل ما يتابعه في «اليوم»، لكل عادة تصميم خاص، وسلسلة أيام 🔥 وأسبوع ملوّن
+// القيم في سجل اليوم (S.log[يوم].h) فتصل الأخصائي مع المتابعة اليومية؛ والماء هو كاسات اليوم نفسها.
+const HABITS = [
+  { id: 'water', n: 'شرب الماء', ic: '💧', c: '#7fa8ff', why: 'الماء يقلل الجوع الكاذب ويحسّن الطاقة والتركيز وعمل الكلى. هدفك من خطتك.', ok: (v) => v >= hWaterGoal() },
+  { id: 'steps', n: 'المشي اليومي', ic: '🚶', c: '#6fe3a9', why: '8 آلاف خطوة يومياً مرتبطة بصحة القلب وحرق أفضل وتحكم في الشهية — دون نادٍ رياضي.', goal: 8000, ok: (v) => v >= 8000 },
+  { id: 'sleep', n: 'النوم الكافي', ic: '😴', c: '#b39dff', why: 'النوم أقل من 7 ساعات يرفع هرمون الجوع ويزيد الرغبة في السكريات. الهدف 7–9 ساعات.', ok: (v) => v >= 7 && v <= 9 },
+  { id: 'veg', n: 'خضار وفاكهة', ic: '🥗', c: '#8fd16a', why: '5 حصص يومياً من الخضار والفاكهة: ألياف تُشبع وفيتامينات تحمي — املأ صحنك الملوّن.', ok: (v) => v >= 5 },
+  { id: 'sugar', n: 'يوم بلا سكر مضاف', ic: '🍬', c: '#ff9d88', why: 'بلا حلويات ولا مشروبات غازية أو عصائر محلّاة. كل يوم تكسبه يقوّي سلسلتك.', ok: (v) => v === 1 },
+  { id: 'move', n: 'النشاط البدني', ic: '⚡', c: '#ffd27a', why: '30 دقيقة حركة يومياً (مشي سريع، رياضة، درج) — اشحن بطاريتك 10 دقائق في كل مرة.', ok: (v) => v >= 30 },
+  { id: 'breath', n: 'تنفّس وهدوء', ic: '🫧', c: '#7fe3e0', why: 'التوتر يدفع للأكل العاطفي. دقيقتان من التنفّس الهادئ تخفضه — جلسة موجّهة داخل التطبيق.', ok: (v) => v >= 1 },
+  { id: 'mindful', n: 'أكل بوعي بلا شاشة', ic: '🍽', c: '#f6a6d1', why: 'الأكل ببطء ودون جوال أو تلفاز يمنح الشبع وقته (20 دقيقة) فتأكل أقل وتستمتع أكثر.', ok: (v) => (v || []).length >= 2 },
+  { id: 'kitchen', n: 'المطبخ مغلق ليلاً', ic: '🌙', c: '#9dbbff', why: 'لا أكل بعد العشاء حتى النوم: نوم أعمق وهضم أريح وسعرات أقل دون حرمان.', ok: (v) => v === 1 },
+  { id: 'coffee', n: 'كافيين باعتدال', ic: '☕', c: '#d9a77a', why: 'حتى 3 أكواب يومياً، وآخرها قبل العصر، حتى لا يسرق نومك.', ok: (v) => v != null && v <= 3 }
+];
+const HB = (id) => HABITS.find((h) => h.id === id);
+function hWaterGoal() { const dp = S.plan ? dayPlan(TODAY) : {}, wt = +(dp.water || DATA.water || 2.5); return Math.max(4, Math.min(16, Math.round(wt / CUP))); }
+function hList() { if (!Array.isArray(S.habits)) S.habits = ['water']; return S.habits.filter((id) => HB(id)); }
+function hVal(id, k) { const L = S.log[k || dkey(new Date())]; if (!L) return null; if (id === 'water') return L.water || 0; return L.h ? L.h[id] : null; }
+function hSet(id, v) { const L = dl(TODAY); if (id === 'water') L.water = v; else { L.h = L.h || {}; if (v == null) delete L.h[id]; else L.h[id] = v; } queueLog(dkey(new Date())); }
+function hOkDay(id, k) { const v = hVal(id, k); return v != null && HB(id).ok(v); }
+function hStreak(id) { let n = 0, d = new Date(); if (!hOkDay(id, dkey(d))) d.setDate(d.getDate() - 1); while (n < 400 && hOkDay(id, dkey(d))) { n++; d.setDate(d.getDate() - 1); } return n; }
+function hWeek(id) { return [6, 5, 4, 3, 2, 1, 0].map((b) => { const d = new Date(now() - b * 86400000), k = dkey(d), v = hVal(id, k); return '<i class="' + (v == null ? '' : HB(id).ok(v) ? 'ok' : 'no') + (b === 0 ? ' td' : '') + '" title="' + esc(DATA.dayNames[d.getDay()] || '') + '"></i>'; }).join(''); }
+function hArc(p, r, w, col) { const C = Math.PI * r; return '<path d="M' + (60 - r) + ' 60 A' + r + ' ' + r + ' 0 0 1 ' + (60 + r) + ' 60" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="' + w + '" stroke-linecap="round"/><path d="M' + (60 - r) + ' 60 A' + r + ' ' + r + ' 0 0 1 ' + (60 + r) + ' 60" fill="none" stroke="' + col + '" stroke-width="' + w + '" stroke-linecap="round" stroke-dasharray="' + C + '" stroke-dashoffset="' + (C * (1 - Math.min(1, p))) + '"/>'; }
+function hWidget(h) {
+  const v = hVal(h.id), b = (k, lbl, cls) => '<button class="' + (cls || '') + '" data-act="hb" data-v="' + h.id + '" data-k="' + k + '">' + lbl + '</button>';
+  switch (h.id) {
+    case 'water': { const g = hWaterGoal(), n = v || 0, pct = Math.min(1, n / g);
+      return '<div class="hw-water"><svg viewBox="0 0 60 100" class="bottle" aria-hidden="true"><defs><clipPath id="bt"><path d="M22 4h16v12l8 10v66a6 6 0 0 1-6 6H20a6 6 0 0 1-6-6V26l8-10z"/></clipPath></defs><g clip-path="url(#bt)"><rect x="0" y="0" width="60" height="100" fill="rgba(255,255,255,.07)"/><rect class="wv" x="0" y="' + (100 - 88 * pct) + '" width="60" height="100" fill="url(#wg)"/></g><linearGradient id="wg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a9c4ff"/><stop offset="1" stop-color="#5d86f0"/></linearGradient><path d="M22 4h16v12l8 10v66a6 6 0 0 1-6 6H20a6 6 0 0 1-6-6V26l8-10z" fill="none" stroke="rgba(169,196,255,.7)" stroke-width="2"/></svg>'
+        + '<div class="hwr"><b class="big">' + (n * CUP).toFixed(2).replace(/\.?0+$/, '') + ' <small>من ' + (g * CUP).toFixed(1) + ' لتر</small></b><div class="cups">' + Array.from({ length: g }, (_, i) => '<button class="' + (i < n ? 'f' : '') + '" data-act="water" data-v="' + (i + 1) + '" aria-label="' + (i + 1) + ' أكواب"></button>').join('') + '</div><span class="dim">كوب = 250 مل • المس الكوب</span></div></div>'; }
+    case 'steps': { const n = v || 0;
+      return '<div class="hw-gauge"><svg viewBox="0 0 120 70">' + hArc(n / 8000, 48, 10, h.c) + '<text x="60" y="52" text-anchor="middle" class="gv">' + n.toLocaleString('en') + '</text><text x="60" y="66" text-anchor="middle" class="gl">من 8,000 خطوة</text></svg><div class="row hbtns">' + b('-1000', '−1000', 'btn sm sec') + b('set', 'اكتب العدد', 'btn sm sec') + b('+1000', '+1000', 'btn sm') + '</div></div>'; }
+    case 'sleep': { const n = v || 0;
+      return '<div class="hw-sleep"><div class="sky"><span class="moon"></span>' + [12, 30, 55, 72, 88].map((x, i) => '<i class="star" style="left:' + x + '%;top:' + (14 + (i * 23) % 50) + '%"></i>').join('') + '<b>' + (n ? n + ' ساعات' : 'كم نمت؟') + '</b>' + (n ? '<small>' + (h.ok(n) ? 'نوم مثالي ✨' : n < 7 ? 'أقل من حاجتك' : 'أكثر من المعتاد') + '</small>' : '') + '</div><div class="chips">' + [5, 6, 7, 8, 9, 10].map((x) => b(x, x + 'س', 'chip' + (n === x ? ' on' : '') + (x >= 7 && x <= 9 ? ' good' : ''))).join('') + '</div></div>'; }
+    case 'veg': { const n = v || 0, cols = ['#8fd16a', '#ff9d6b', '#e85d75', '#ffd27a', '#6fe3a9'];
+      const sl = cols.map((c, i) => { const a0 = (i / 5) * 2 * Math.PI - Math.PI / 2, a1 = ((i + 1) / 5) * 2 * Math.PI - Math.PI / 2, x0 = 50 + 40 * Math.cos(a0), y0 = 50 + 40 * Math.sin(a0), x1 = 50 + 40 * Math.cos(a1), y1 = 50 + 40 * Math.sin(a1);
+        return '<path data-act="hb" data-v="veg" data-k="' + i + '" d="M50 50 L' + x0.toFixed(1) + ' ' + y0.toFixed(1) + ' A40 40 0 0 1 ' + x1.toFixed(1) + ' ' + y1.toFixed(1) + 'Z" fill="' + (i < n ? c : 'rgba(255,255,255,.08)') + '" stroke="#16224f" stroke-width="2.5" style="cursor:pointer"><title>' + (i + 1) + ' حصص</title></path>'; }).join('');
+      return '<div class="hw-plate"><svg viewBox="0 0 100 100" role="img" aria-label="' + n + ' من 5 حصص"><circle cx="50" cy="50" r="47" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.25)" stroke-width="2"/>' + sl + '<circle cx="50" cy="50" r="13" fill="#16224f"/><text x="50" y="55" text-anchor="middle" class="gv">' + n + '/5</text></svg><span class="dim">المس قطعة لكل حصة: كوب خضار، أو ثمرة فاكهة</span></div>'; }
+    case 'sugar': case 'kitchen': { const st = hStreak(h.id), yes = h.id === 'sugar' ? 'اليوم بلا سكر ✓' : 'أغلقتُ المطبخ ✓', no = h.id === 'sugar' ? 'تناولت سكراً' : 'أكلت بعد العشاء';
+      return '<div class="hw-streak"><div class="flame' + (v === 1 ? ' lit' : '') + '"><span>' + (h.id === 'sugar' ? '🔥' : '🌙') + '</span><b>' + st + '</b><small>' + (st === 1 ? 'يوم' : 'أيام') + ' متتالية</small></div><div class="col">' + b(1, yes, 'btn sm' + (v === 1 ? '' : ' sec')) + b(0, no, 'btn sm sec' + (v === 0 ? ' bad' : '')) + '</div></div>'; }
+    case 'move': { const n = v || 0;
+      return '<div class="hw-battery"><div class="bat">' + [0, 1, 2].map((i) => b(i, '', 'cell' + (n >= (i + 1) * 10 ? ' on' : ''))).join('') + '<span class="tip"></span></div><b>' + n + ' / 30 دقيقة</b><span class="dim">' + (n >= 30 ? '⚡ مشحون بالكامل!' : 'كل خانة = 10 دقائق حركة') + '</span></div>'; }
+    case 'breath': { const n = v || 0;
+      return '<div class="hw-breath"><button class="orb" data-act="breathe" aria-label="ابدأ جلسة التنفس"><span>ابدأ</span></button><div><b>' + (n ? n + (n === 1 ? ' جلسة' : ' جلسات') + ' اليوم' : 'دقيقتان فقط') + '</b><span class="dim">شهيق 4 • احبس 4 • زفير 6 ثوانٍ</span></div></div>'; }
+    case 'mindful': { const sel = v || [], sl = S.plan ? dayPlan(TODAY).slots : [];
+      return '<div class="hw-mind"><div class="chips">' + sl.map((s, i) => b(i, (sel.indexOf(i) >= 0 ? '✓ ' : '') + esc(s.name), 'chip' + (sel.indexOf(i) >= 0 ? ' on' : ''))).join('') + '</div><span class="dim">علّم الوجبة التي أكلتها ببطء ودون شاشة</span></div>'; }
+    case 'coffee': { const n = v == null ? -1 : v;
+      return '<div class="hw-coffee"><div class="mugs">' + [0, 1, 2, 3, 4, 5].map((i) => b(i, '☕', 'mug' + (i < n ? ' on' : '') + (i >= 3 ? ' over' : ''))).join('') + '</div><div class="row">' + b('z', 'لا كافيين اليوم', 'btn sm sec' + (n === 0 ? ' on' : '')) + '<b class="' + (n > 3 ? 'warn' : '') + '">' + (n < 0 ? 'كم كوباً؟' : n + (n === 1 ? ' كوب' : ' أكواب') + ' • الحد 3') + '</b></div></div>'; }
+  }
+  return '';
+}
+function hCard(id) {
+  const h = HB(id), st = hStreak(id), ok = hOkDay(id);
+  return '<section class="card hb' + (ok ? ' done' : '') + '" style="--hc:' + h.c + '" data-hb="' + id + '"><div class="hbh"><span class="hbi">' + h.ic + '</span><h3>' + h.n + '</h3>' + (st ? '<span class="hbs" title="أيام متتالية">🔥 ' + st + '</span>' : '') + (ok ? '<span class="hbok">' + I('check') + '</span>' : '') + '</div>' + hWidget(h) + '<div class="hbw" aria-label="آخر 7 أيام">' + hWeek(id) + '</div></section>';
+}
+function habitsHome() { const ls = hList(); return '<div class="row hbhead"><h2>عاداتي</h2><button class="btn sm sec" data-act="habits">' + I('plus') + ' العادات</button></div>' + (ls.length ? ls.map(hCard).join('') : '<div class="card dim">لا عادات في صفحتك. اختر من «العادات» ما تريد تنميته.</div>'); }
+function habitsSheet() {
+  const ls = hList();
+  return '<p class="dim">اختر العادات التي تريد تنميتها؛ تظهر في «اليوم» بتصميمها، ويرى أخصائيك تقدّمك فيها. ابدأ بعادتين أو ثلاث.</p><div class="hlib">' + HABITS.map((h) => { const on = ls.indexOf(h.id) >= 0;
+    return '<div class="hli' + (on ? ' on' : '') + '" style="--hc:' + h.c + '"><span class="hbi">' + h.ic + '</span><div><b>' + h.n + '</b><span class="dim">' + h.why + '</span></div><button class="btn sm' + (on ? ' sec' : '') + '" data-act="htoggle" data-v="' + h.id + '">' + (on ? 'إزالة' : I('plus') + ' أضف') + '</button></div>'; }).join('') + '</div>';
+}
+function habitsProgress() {
+  const ls = hList(); if (!ls.length) return '';
+  return '<section class="card stack"><div class="row" style="justify-content:space-between"><h3>عاداتي هذا الأسبوع</h3><button class="btn sm sec" data-act="habits">تعديل</button></div><div class="hgrid">' + ls.map((id) => { const h = HB(id), n = [0, 1, 2, 3, 4, 5, 6].filter((b) => hOkDay(id, dkey(new Date(now() - b * 86400000)))).length;
+    return '<div class="hrow" style="--hc:' + h.c + '"><span>' + h.ic + ' ' + h.n + '</span><div class="hbw">' + hWeek(id) + '</div><b>' + n + '/7</b></div>'; }).join('') + '</div></section>';
+}
+// جلسة تنفّس موجّهة: طبقة مستقلة خارج #root فلا تقطعها إعادة الرسم
+function breathe() {
+  if (document.getElementById('brx')) return; const ph = [['شهيق', 4000, 'in'], ['احبس', 4000, 'hold'], ['زفير', 6000, 'out']], total = 120000, t0 = now();
+  const el = document.createElement('div'); el.id = 'brx'; el.className = 'brx'; el.innerHTML = '<div class="brc"><div class="ring"></div><b id="brt">استعد</b><small id="brs">دقيقتان</small></div><button class="btn sec" id="brstop">إنهاء</button>'; document.body.appendChild(el);
+  let i = 0, tm = 0; const step = () => { const left = total - (now() - t0); if (left <= 0) return done(true); const p = ph[i % 3]; el.querySelector('.ring').className = 'ring ' + p[2]; el.querySelector('#brt').textContent = p[0]; el.querySelector('#brs').textContent = Math.ceil(left / 1000) + ' ث'; i++; tm = setTimeout(step, p[1]); };
+  const done = (full) => { clearTimeout(tm); el.remove(); if (full || now() - t0 > 60000) { hSet('breath', (hVal('breath') || 0) + 1); toast('أحسنت 🫧 جلسة هدوء مكتملة'); render(); } };
+  el.querySelector('#brstop').onclick = () => done(false); tm = setTimeout(step, 800);
+}
 // ---------- الأوراق السفلية
 function sheetHtml() {
   if (!sheet) return '';
@@ -617,6 +689,8 @@ function sheetHtml() {
       + '<p class="dim">الرمز صالح 15 دقيقة ولمرة واحدة، ويحمل مفتاح فك التشفير فلا ترسله لأحد. بعد النقل يُمسح الحساب من هنا تلقائياً.</p>';
   } else if (sheet.t === 'rcp') {
     const [d0, s0] = sheet.k.split('_').map(Number); h = esc(dayPlan(d0).slots[s0].meal); b = rcpSheet();
+  } else if (sheet.t === 'habits') {
+    h = 'العادات'; b = habitsSheet();
   } else if (sheet.t === 'cm') {
     h = 'التعليقات'; b = cmSheet();
   } else if (sheet.t === 'forgot') {
@@ -837,6 +911,21 @@ document.addEventListener('click', (e) => {
       return;
     }
     case 'fdCmDel': { if (!confirm('حذف تعليقك؟')) return; const pid = sheet.pid; api('POST', '/v1/comments/' + v + '/delete', {}).then(() => { const x = FD.posts.find((p) => p.id === pid); if (x) x.comments = Math.max(0, (x.comments || 0) - 1); return fdComments(pid); }).catch((er) => toast(er.message)); return; }
+    case 'habits': sheet = { t: 'habits' }; break;
+    case 'htoggle': { const ls = hList(), i = ls.indexOf(v); if (i >= 0) ls.splice(i, 1); else { ls.push(v); toast('أُضيفت «' + HB(v).n + '» إلى صفحتك'); } S.habits = ls; queueLog(dkey(new Date())); break; }
+    case 'breathe': breathe(); return;
+    case 'hb': {
+      const cv = hVal(v), x = k;
+      if (v === 'steps') { if (x === 'set') { const r = prompt('عدد خطواتك اليوم:', cv || ''); if (r == null) return; const n = parseInt(numOnly(r), 10); if (!(n >= 0 && n < 100000)) { toast('اكتب رقماً صحيحاً'); return; } hSet(v, n); } else hSet(v, Math.max(0, (cv || 0) + (+x))); }
+      else if (v === 'sleep') hSet(v, cv === +x ? null : +x);
+      else if (v === 'veg') hSet(v, cv === +x + 1 ? +x : +x + 1);
+      else if (v === 'sugar' || v === 'kitchen') hSet(v, cv === +x ? null : +x);
+      else if (v === 'move') hSet(v, (cv || 0) === (+x + 1) * 10 ? +x * 10 : (+x + 1) * 10);
+      else if (v === 'mindful') { const a = (cv || []).slice(), i = a.indexOf(+x); i < 0 ? a.push(+x) : a.splice(i, 1); hSet(v, a); }
+      else if (v === 'coffee') hSet(v, x === 'z' ? (cv === 0 ? null : 0) : cv === +x + 1 ? +x : +x + 1);
+      const hh = HB(v); if (hh && !(cv != null && hh.ok(cv)) && hOkDay(v)) toast(hh.ic + ' أحسنت! أنجزت «' + hh.n + '» اليوم' + (hStreak(v) > 1 ? ' — ' + hStreak(v) + ' أيام متتالية 🔥' : ''));
+      break;
+    }
     case 'tab': S.tab = v; if (v === 'feed' && now() - FD.at > 60000) fdLoad().then(render); break;
     case 'day': S.day = +v; break;
     case 'ck': { const L = dl(TODAY); L.ck[v] = !L.ck[v]; if (!L.ck[v]) delete L.ck[v]; queueLog(dkey(new Date())); break; }
