@@ -1909,14 +1909,34 @@ window.ASSETS={light:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABLAAAAHYCAYA
     var ffm = w * (1 - bf); return { v: 370 + 21.6 * ffm, method: 'Cunningham', ffm: ffm };
   };
   A.targets = function (c, AD) {
-    var w = num(c.weight), ph = A.phase(AD, c.phase), b = A.bmr(c), F = AD.fac, days = (c.schedule || A.DEFAULT_SCHEDULE).map(function (s, i) {
+    var w = num(c.weight), ph = A.phase(AD, c.phase), b = A.bmr(c), F = AD.fac, M = A.manual(c, ph, b, w), days = (c.schedule || A.DEFAULT_SCHEDULE).map(function (s, i) {
       var dt = A.dayType(AD, s.type), min = dt.train ? num(s.min) : 0, tk = min * dt.kpm, tdee = b.v * F.neat + tk, kcal = tdee * (1 + ph.adj), p = ph.p * w, f = ph.f * w;
-      var cho = c.carbMethod === 'remainder' ? Math.max(0, (kcal - 4 * p - 9 * f) / 4) : dt.carb * w, mk = 4 * p + 4 * cho + 9 * f, warns = [];
-      if (ph.p < F.minP) warns.push('البروتين أقل من الحد الأدنى (' + F.minP + ' جم/كجم)'); if (ph.f < F.minF) warns.push('الدهون أقل من الحد الأدنى (' + F.minF + ' جم/كجم)'); if (w > 0 && cho / w < F.minC) warns.push('الكارب أقل من ' + F.minC + ' جم/كجم');
+      if (M) { kcal = M.kcal(tdee, dt.train) || kcal; p = M.p(kcal); f = M.f(kcal); }
+      var cho = c.carbMethod === 'remainder' ? Math.max(0, (kcal - 4 * p - 9 * f) / 4) : dt.carb * w, mk = 4 * p + 4 * cho + 9 * f, warns = M ? M.warns.slice() : [];
+      if (w > 0 && p / w < F.minP - 1e-9) warns.push('البروتين أقل من الحد الأدنى (' + F.minP + ' جم/كجم)'); if (w > 0 && f / w < F.minF - 1e-9) warns.push('الدهون أقل من الحد الأدنى (' + F.minF + ' جم/كجم)'); if (w > 0 && cho / w < F.minC) warns.push('الكارب أقل من ' + F.minC + ' جم/كجم');
       if (b.ffm && (kcal - tk) / b.ffm < F.minEA) warns.push('الطاقة المتاحة أقل من ' + F.minEA + ' سعرة/كجم كتلة خالية');
       return { i: i, name: AD.days[i], type: s.type, train: dt.train, min: min, time: s.time || '', trainKcal: tk, tdee: tdee, kcal: kcal, p: p, c: cho, f: f, macroKcal: mk, diff: mk - kcal, cPerKg: w > 0 ? cho / w : 0, water: (F.water * w + F.waterHr * min / 60) / 1000, warns: warns };
     });
-    return { bmr: b.v, method: b.method, ffm: b.ffm, phase: ph, days: days, weight: w };
+    return { bmr: b.v, method: b.method, ffm: b.ffm, phase: ph, days: days, weight: w, manual: !!M, info: A.macroInfo(c, ph, b, w) };
+  };
+  // ماكروز يدوية (c.macroMode === 'manual'): السعرات من المرحلة أو بنسبة تعديل أو ثابتة لأيام التدريب/الراحة،
+  // والبروتين والدهون بالجرام لكل كجم (البروتين على وزن الجسم أو الكتلة الخالية من الدهون) أو بنسبة % من السعرات، والكارب بالطريقة المختارة.
+  A.manual = function (c, ph, b, w) {
+    if (c.macroMode !== 'manual') return null;
+    var warns = [], ffmOk = !!b.ffm, base = c.pBase === 'ffm' ? (ffmOk ? b.ffm : (warns.push('أساس البروتين «الكتلة الخالية» يحتاج نسبة الدهون؛ حُسب على وزن الجسم'), w)) : w;
+    var pv = num(c.pVal), fv = num(c.fVal), pPct = c.pMode === 'pct', fPct = c.fMode === 'pct';
+    if (pPct && fPct && pv + fv >= 100) warns.push('مجموع نسبتي البروتين والدهون ' + (pv + fv) + '% — لا يبقى للكارب شيء');
+    return {
+      warns: warns,
+      kcal: function (tdee, train) { var k = c.kcalMode; if (k === 'adj') return tdee * (1 + num(c.kcalAdj) / 100); if (k === 'fixed') return num(train ? c.kcalTrain : (c.kcalRest === '' || c.kcalRest == null ? c.kcalTrain : c.kcalRest)) || 0; return 0; },
+      p: function (kcal) { return pPct ? kcal * pv / 100 / 4 : pv * base; },
+      f: function (kcal) { return fPct ? kcal * fv / 100 / 9 : fv * w; }
+    };
+  };
+  A.macroInfo = function (c, ph, b, w) {                     // وصف مختصر للطريقة (للملخص والصفحات)
+    if (c.macroMode !== 'manual') return 'حسب المرحلة: بروتين ' + ph.p + ' جم/كجم • دهون ' + ph.f + ' جم/كجم • سعرات ' + (ph.adj > 0 ? '+' : '') + Math.round(ph.adj * 100) + '%';
+    var ffm = c.pBase === 'ffm' && b.ffm, k = c.kcalMode === 'adj' ? 'سعرات ' + (num(c.kcalAdj) > 0 ? '+' : '') + num(c.kcalAdj) + '%' : c.kcalMode === 'fixed' ? 'سعرات ثابتة ' + num(c.kcalTrain) + (c.kcalRest !== '' && c.kcalRest != null && num(c.kcalRest) !== num(c.kcalTrain) ? ' تدريب / ' + num(c.kcalRest) + ' راحة' : '') : 'سعرات المرحلة ' + (ph.adj > 0 ? '+' : '') + Math.round(ph.adj * 100) + '%';
+    return 'يدوي: بروتين ' + (c.pMode === 'pct' ? num(c.pVal) + '% من السعرات' : num(c.pVal) + ' جم/كجم ' + (ffm ? 'كتلة خالية' : 'وزن')) + ' • دهون ' + (c.fMode === 'pct' ? num(c.fVal) + '% من السعرات' : num(c.fVal) + ' جم/كجم') + ' • ' + k;
   };
   A.mealTargets = function (c, AD, day) {                    // توزيع ماكروز اليوم على الوجبات الفعّالة (يُطبَّع تلقائياً)
     var meals = (c.athMeals || AD.meals).map(function (m, i) { return { m: m, i: i }; }).filter(function (x) { return x.m.on; }), col = day.train ? 'train' : 'rest', sum = [0, 0, 0];
@@ -2473,23 +2493,52 @@ var AD = window.ATHLETE, Ath = window.Ath, ROLE_KEY = { p: 'meat', c: 'starch', 
 function athRoleColor(r) { return colors()[ROLE_KEY[r] || 'other']; }
 function athTargetsBox(c) {
   var T = Ath.targets(ec(c), AD), warn = T.days.some(function (d) { return d.warns.length; });
-  return '<div class="t"><div><small>BMR (' + T.method + ')</small><b>' + Math.round(T.bmr) + '</b></div>' + (T.ffm ? '<div><small>الكتلة الخالية</small><b>' + T.ffm.toFixed(1) + ' كجم</b></div>' : '') + '<div><small>بروتين</small><b>' + Math.round(T.days[0].p) + ' جم</b></div><div><small>دهون</small><b>' + Math.round(T.days[0].f) + ' جم</b></div><div><small>تعديل السعرات</small><b>' + Math.round(T.phase.adj * 100) + '%</b></div></div>'
+  return '<div class="t"><div><small>BMR (' + T.method + ')</small><b>' + Math.round(T.bmr) + '</b></div>' + (T.ffm ? '<div><small>الكتلة الخالية</small><b>' + T.ffm.toFixed(1) + ' كجم</b></div>' : '') + '<div><small>بروتين</small><b>' + Math.round(T.days[0].p) + ' جم</b></div><div><small>دهون</small><b>' + Math.round(T.days[0].f) + ' جم</b></div>' + (T.manual ? '' : '<div><small>تعديل السعرات</small><b>' + Math.round(T.phase.adj * 100) + '%</b></div>') + '<div><small>بروتين / كجم</small><b>' + (T.weight ? (T.days[0].p / T.weight).toFixed(1) : '—') + (T.ffm ? ' • ' + (T.days[0].p / T.ffm).toFixed(1) + ' خالية' : '') + '</b></div></div><p class="small amethod">' + esc(T.info) + '</p>'
     + '<div class="tw"><table class="st"><tr><th class="th-o">اليوم</th><th class="th-n">النوع</th><th class="th-g">سعرات</th><th class="th-y">بروتين</th><th class="th-y">كارب</th><th class="th-y">دهون</th><th class="th-g">ماء</th></tr>'
     + T.days.map(function (d) { return '<tr><td class="g">' + esc(d.name) + '</td><td class="v">' + esc(d.type) + (d.min ? ' • ' + d.min + 'د' : '') + '</td><td class="v">' + Math.round(d.kcal) + '</td><td class="v">' + Math.round(d.p) + '</td><td class="v">' + Math.round(d.c) + '</td><td class="v">' + Math.round(d.f) + '</td><td class="v">' + d.water.toFixed(1) + ' ل' + (d.warns.length ? ' ⚠' : '') + '</td></tr>'; }).join('') + '</table></div>'
     + (warn ? '<div class="warn">⚠ ' + esc(T.days.filter(function (d) { return d.warns.length; })[0].warns.join(' • ')) + '</div>' : '') + '<p class="small">' + esc(T.phase.note || '') + '</p>';
+}
+function athMacroBox(c) {                                        // طريقة الماكروز: حسب المرحلة (الافتراضي) أو يدوي
+  var man = c.macroMode === 'manual', hasBf = +c.bf > 0, pPct = c.pMode === 'pct', fPct = c.fMode === 'pct', km = c.kcalMode || 'phase';
+  var h = '<div class="row amacro">' + sel('macroMode', 'طريقة الماكروز', ['phase', 'manual'], function (o) { return [o, o === 'phase' ? 'حسب المرحلة (تلقائي)' : 'يدوي (أحدد السعرات والماكروز)']; });
+  if (!man) return h + '</div>';
+  h += sel('kcalMode', 'السعرات', ['phase', 'adj', 'fixed'], function (o) { return [o, { phase: 'من المرحلة', adj: 'نسبة تعديل يدوية %', fixed: 'سعرات ثابتة' }[o]]; })
+    + (km === 'adj' ? fld('kcalAdj', 'تعديل السعرات % (− عجز / + فائض)', 'number', 'step="1"') : '')
+    + (km === 'fixed' ? fld('kcalTrain', 'سعرات يوم التدريب', 'number', 'step="10"') + fld('kcalRest', 'سعرات يوم الراحة (فارغ = مثل التدريب)', 'number', 'step="10"') : '') + '</div>'
+    + '<div class="row amacro">' + sel('pMode', 'البروتين', ['gkg', 'pct'], function (o) { return [o, o === 'gkg' ? 'جرام لكل كجم' : 'نسبة % من السعرات']; })
+    + (pPct ? '' : sel('pBase', 'أساس حساب البروتين', hasBf ? ['bw', 'ffm'] : ['bw'], function (o) { return [o, o === 'bw' ? 'وزن الجسم' : 'الكتلة الخالية من الدهون']; }))
+    + fld('pVal', pPct ? 'البروتين % من السعرات' : 'البروتين جم/كجم', 'number', 'step="' + (pPct ? 1 : 0.1) + '"')
+    + sel('fMode', 'الدهون', ['gkg', 'pct'], function (o) { return [o, o === 'gkg' ? 'جرام لكل كجم وزن' : 'نسبة % من السعرات']; })
+    + fld('fVal', fPct ? 'الدهون % من السعرات' : 'الدهون جم/كجم', 'number', 'step="' + (fPct ? 1 : 0.1) + '"') + '</div>'
+    + '<p class="small">الكارب: ' + (c.carbMethod === 'remainder' ? 'الباقي من السعرات' : 'حسب حمل التدريب (غيّره من «طريقة حساب الكارب»)') + '. ' + (hasBf ? '' : 'لحساب البروتين على الكتلة الخالية من الدهون أدخل نسبة الدهون. ') + 'عند تغيير الوحدة تُحوَّل القيمة تلقائياً لتبقى الجرامات نفسها تقريباً.</p>';
+  return h;
+}
+function athMacroSeed(c, k) {                                     // تعبئة/تحويل القيم عند التبديل حتى لا تتغير الجرامات فجأة
+  var nv = c[k], old = { pMode: nv === 'pct' ? 'gkg' : 'pct', fMode: nv === 'pct' ? 'gkg' : 'pct', pBase: nv === 'ffm' ? 'bw' : 'ffm' }[k], T0;
+  var r1 = function (x) { return Math.round(x * 10) / 10; }, ph = Ath.phase(AD, c.phase), w = +c.weight || 0;
+  if (old !== undefined) c[k] = old; T0 = Ath.targets(ec(c), AD); if (old !== undefined) c[k] = nv;
+  var d = T0.days.filter(function (x) { return x.train; })[0] || T0.days[0], rest = T0.days.filter(function (x) { return !x.train; })[0] || d;
+  if (k === 'macroMode' && nv === 'manual') {
+    if (c.pVal == null || c.pVal === '') Object.assign(c, { pMode: 'gkg', pBase: 'bw', pVal: ph.p, fMode: 'gkg', fVal: ph.f });
+    if (!c.kcalMode) c.kcalMode = 'phase';
+  }
+  if (k === 'kcalMode') { if (nv === 'adj' && (c.kcalAdj == null || c.kcalAdj === '')) c.kcalAdj = Math.round(ph.adj * 100); if (nv === 'fixed' && !+c.kcalTrain) { c.kcalTrain = Math.round(d.kcal / 10) * 10; c.kcalRest = Math.round(rest.kcal / 10) * 10; } }
+  if (k === 'pMode') c.pVal = nv === 'pct' ? Math.round(d.p * 4 / d.kcal * 100) : r1(d.p / (c.pBase === 'ffm' && T0.ffm ? T0.ffm : w));
+  if (k === 'fMode') c.fVal = nv === 'pct' ? Math.round(d.f * 9 / d.kcal * 100) : r1(d.f / w);
+  if (k === 'pBase' && c.pMode !== 'pct' && T0.ffm) c.pVal = r1(d.p / (nv === 'ffm' ? T0.ffm : w));
 }
 function athClientTab(c) {
   var foods = AD.foods.map(function (f) { return '<option value="' + esc(f.n) + '">'; }).join(''), pc = function (v) { return v === '' || v == null ? '' : Math.round(+v * 100); };
   var sch = '<div class="tw"><table class="st sch"><tr><th class="th-o">اليوم</th><th class="th-n">نوع اليوم</th><th class="th-y">مدة التدريب (د)</th><th class="th-g">وقت التدريب</th></tr>' + c.schedule.map(function (s, i) { return '<tr><td class="g">' + AD.days[i] + '</td><td><select data-sch="' + i + ',type">' + AD.dayTypes.map(function (d) { return '<option ' + (d.n === s.type ? 'selected' : '') + '>' + esc(d.n) + '</option>'; }).join('') + '</select></td><td><input type="number" min="0" step="5" data-sch="' + i + ',min" value="' + (s.min || 0) + '"></td><td><input type="time" data-sch="' + i + ',time" value="' + esc(s.time || '') + '"></td></tr>'; }).join('') + '</table></div>';
   var ml = '<div class="tw"><table class="st sch"><tr><th class="th-o">الوجبة</th><th class="th-n">الوقت</th><th class="th-g">فعّالة</th><th class="th-y" colspan="3">راحة % (ب/ك/د)</th><th class="th-y" colspan="3">تدريب % (ب/ك/د)</th><th class="th-o"></th></tr>' + c.athMeals.map(function (m, i) { var cell = function (arr, k) { return '<td><input type="number" min="0" max="100" data-am="' + i + ',' + arr + ',' + k + '" value="' + pc(m[arr][k]) + '"></td>'; }; return '<tr><td><input data-am="' + i + ',n" value="' + esc(m.n) + '"></td><td><input type="time" data-am="' + i + ',t" value="' + esc(m.t) + '"></td><td><input type="checkbox" data-am="' + i + ',on" ' + (m.on ? 'checked' : '') + '></td>' + [0, 1, 2].map(function (k) { return cell('rest', k); }).join('') + [0, 1, 2].map(function (k) { return cell('train', k); }).join('') + '<td><button class="r sm" data-a="athMealDel" data-i="' + i + '" title="حذف الوجبة">×</button></td></tr>'; }).join('') + '</table></div><p class="small">تُطبَّع النسب تلقائياً على الوجبات الفعّالة. اسم الوجبة يحدد نوعها: «إفطار/غداء/عشاء/بعد التمرين/ليلي»، وأي اسم آخر سناك.</p><p><button class="sec sm" data-a="athMealAdd">+ إضافة وجبة</button></p>';
-  return '<datalist id="dl_af">' + foods + '</datalist><div class="row">' + fld('name', 'الاسم') + fld('phone', 'الجوال') + sel('sex', 'الجنس', ['ذكر', 'أنثى']) + fld('age', 'العمر', 'number') + fld('weight', 'الوزن (كجم)', 'number', 'step="0.1"') + fld('height', 'الطول (سم)', 'number') + fld('bf', 'نسبة الدهون % (اختياري)', 'number', 'step="0.1"') + fld('sport', 'الرياضة') + sel('phase', 'المرحلة', AD.phases.map(function (p) { return p.n; })) + sel('carbMethod', 'طريقة حساب الكارب', ['load', 'remainder'], function (o) { return [o, o === 'load' ? 'حسب حمل التدريب (جم/كجم)' : 'الباقي من السعرات']; }) + '</div>'
+  return '<datalist id="dl_af">' + foods + '</datalist><div class="row">' + fld('name', 'الاسم') + fld('phone', 'الجوال') + sel('sex', 'الجنس', ['ذكر', 'أنثى']) + fld('age', 'العمر', 'number') + fld('weight', 'الوزن (كجم)', 'number', 'step="0.1"') + fld('height', 'الطول (سم)', 'number') + fld('bf', 'نسبة الدهون % (اختياري)', 'number', 'step="0.1"') + fld('sport', 'الرياضة') + sel('phase', 'المرحلة', AD.phases.map(function (p) { return p.n; })) + sel('carbMethod', 'طريقة حساب الكارب', ['load', 'remainder'], function (o) { return [o, o === 'load' ? 'حسب حمل التدريب (جم/كجم)' : 'الباقي من السعرات']; }) + '</div>' + athMacroBox(c)
     + '<div id="atg">' + athTargetsBox(c) + '</div><h3>جدول التدريب الأسبوعي</h3>' + sch + '<div class="row"><div><label>عدد الوجبات الفعّالة يومياً</label><select data-amc>' + [2, 3, 4, 5, 6, 7, 8].map(function (n) { return '<option ' + (n === c.athMeals.filter(function (m) { return m.on; }).length ? 'selected' : '') + '>' + n + '</option>'; }).join('') + '</select></div></div><details class="addbox" data-md="1" ' + (S.mealsOpen ? 'open' : '') + '><summary><b>توزيع الوجبات</b> (الأسماء والأوقات والتفعيل ونسب الماكروز) — ' + c.athMeals.filter(function (m) { return m.on; }).length + ' فعّالة من ' + c.athMeals.length + '</summary>' + ml + '</details>'
     + '<h3>التفضيلات</h3><div class="row"><div><label>أصناف مفضّلة (اكتب واضغط Enter)</label><input list="dl_af" data-add="love">' + chips('love', c.love) + '</div><div><label>أصناف يتجنبها</label><input list="dl_af" data-add="avoid">' + chips('avoid', c.avoid) + '</div></div><label>كلمات استبعاد إضافية (مفصولة بفاصلة)</label><input data-f="keywords" value="' + esc(c.keywords) + '" placeholder="مثال: سمك، لوز"><label>ملاحظات</label><textarea data-f="notes" rows="2">' + esc(c.notes) + '</textarea><p><button class="o" data-a="gen">ولّد الخطة ←</button> <button class="r sm" data-a="del">حذف العميل</button></p>';
 }
 function athZoom(d) { var nl = d.meals.reduce(function (a, m) { return a + 48 + 21 * m.items.length; }, 0); return Math.min(1, Math.max(0.55, 1000 / (340 + nl))).toFixed(2); }
 function athBadge(got, tg, tol) { var dv = got - tg, ok = Math.abs(dv) <= tol; return '<small class="' + (ok ? 'okb' : 'badb') + '">' + (dv > 0 ? '+' : '') + Math.round(dv) + '</small>'; }
 function athPgSum(c, p) {
-  var T = p.T, info = [['الاسم', c.name, 'الكود', c.code], ['العمر', c.age, 'الجنس', c.sex], ['الوزن (كجم)', c.weight, 'الطول (سم)', c.height], ['الرياضة', c.sport || '—', 'نسبة الدهون', c.bf ? c.bf + '%' : '—'], ['المرحلة', c.phase, 'BMR', Math.round(T.bmr) + ' (' + T.method + ')']];
+  var T = p.T, info = [['الاسم', c.name, 'الكود', c.code], ['العمر', c.age, 'الجنس', c.sex], ['الوزن (كجم)', c.weight, 'الطول (سم)', c.height], ['الرياضة', c.sport || '—', 'نسبة الدهون', c.bf ? c.bf + '%' : '—'], ['المرحلة', c.phase, 'BMR', Math.round(T.bmr) + ' (' + T.method + ')']].concat(T.manual ? [['الماكروز', T.info.replace(/^يدوي: /, ''), 'البروتين', (T.weight ? (T.days[0].p / T.weight).toFixed(1) + ' جم/كجم وزن' : '') + (T.ffm ? ' • ' + (T.days[0].p / T.ffm).toFixed(1) + ' جم/كجم كتلة خالية' : '')]] : []);
   return '<div class="pg" style="--z:1">' + hdr('خطتك الرياضية', c.phase, p.phr[0][0]) + '<h3>بيانات الرياضي</h3><div class="tw"><table class="st">' + info.map(function (r) { return '<tr><td class="g" style="width:15%">' + r[0] + '</td><td class="v" style="width:35%">' + esc(r[1]) + '</td><td class="g" style="width:15%">' + r[2] + '</td><td class="v" style="width:35%">' + esc(r[3]) + '</td></tr>'; }).join('') + '</table></div>'
     + '<h3>أهدافك اليومية بالجرام</h3><div class="tw"><table class="st"><tr><th class="th-o">اليوم</th><th class="th-n">النوع</th><th class="th-g">سعرات</th><th class="th-y">بروتين</th><th class="th-y">كارب</th><th class="th-y">دهون</th><th class="th-g">ماء (ل)</th></tr>' + T.days.map(function (d, i) { return '<tr><td class="g">' + esc(dayName(p, i)) + '</td><td class="v">' + esc(d.type) + (d.min ? ' • ' + d.min + 'د' + (d.time ? ' (' + d.time + ')' : '') : '') + '</td><td class="v">' + Math.round(d.kcal) + '</td><td class="v">' + Math.round(d.p) + '</td><td class="v">' + Math.round(d.c) + '</td><td class="v">' + Math.round(d.f) + '</td><td class="v">' + d.water.toFixed(1) + '</td></tr>'; }).join('') + '</table></div>'
     + (p.expect && p.expect.length ? '<div class="ob"><b>ماذا تتوقع:</b><br>' + p.expect.map(function (x) { return '• ' + esc(x); }).join('<br>') + '</div>' : '') + (p.warn && p.warn.length ? '<div class="ob" style="background:#8a3a1e"><b>تنبيهات:</b><br>' + p.warn.map(function (x) { return '• ' + esc(x); }).join('<br>') + '</div>' : '') + '<div class="tipb">' + esc(p.phr[0][1]) + '</div></div>';
@@ -2552,7 +2601,7 @@ Object.assign(A, {
 });
 document.addEventListener('change', function (e) {
   var t = e.target, c = cur(); if (!c || c.kind !== 'athlete') return; var refresh = function () { var b = $('#atg'); if (b) b.innerHTML = athTargetsBox(c); };
-  if (t.dataset.f) { refresh(); return; }
+  if (t.dataset.f) { if (['macroMode', 'kcalMode', 'pMode', 'fMode', 'pBase'].indexOf(t.dataset.f) >= 0) { athMacroSeed(c, t.dataset.f); save(); main(); return; } if (t.dataset.f === 'bf' && c.macroMode === 'manual') { main(); return; } refresh(); return; }
   if (t.dataset.sch) { var q = t.dataset.sch.split(','); c.schedule[+q[0]][q[1]] = q[1] === 'min' ? (+t.value || 0) : t.value; save(); refresh(); return; }
   if (t.dataset.am) { var a = t.dataset.am.split(','), m = c.athMeals[+a[0]]; if (a[1] === 'n' || a[1] === 't') m[a[1]] = t.value; else if (a[1] === 'on') m.on = t.checked; else m[a[1]][+a[2]] = Math.max(0, +t.value || 0) / 100; save(); return; }
   if (t.dataset.ag) { var g = t.dataset.ag.split(',').map(Number); Ath.setGrams(c.plan, AD, g[0], g[1], g[2], +t.value || 0); save(); main(); return; }

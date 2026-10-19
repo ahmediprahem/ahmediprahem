@@ -14,14 +14,34 @@
     var ffm = w * (1 - bf); return { v: 370 + 21.6 * ffm, method: 'Cunningham', ffm: ffm };
   };
   A.targets = function (c, AD) {
-    var w = num(c.weight), ph = A.phase(AD, c.phase), b = A.bmr(c), F = AD.fac, days = (c.schedule || A.DEFAULT_SCHEDULE).map(function (s, i) {
+    var w = num(c.weight), ph = A.phase(AD, c.phase), b = A.bmr(c), F = AD.fac, M = A.manual(c, ph, b, w), days = (c.schedule || A.DEFAULT_SCHEDULE).map(function (s, i) {
       var dt = A.dayType(AD, s.type), min = dt.train ? num(s.min) : 0, tk = min * dt.kpm, tdee = b.v * F.neat + tk, kcal = tdee * (1 + ph.adj), p = ph.p * w, f = ph.f * w;
-      var cho = c.carbMethod === 'remainder' ? Math.max(0, (kcal - 4 * p - 9 * f) / 4) : dt.carb * w, mk = 4 * p + 4 * cho + 9 * f, warns = [];
-      if (ph.p < F.minP) warns.push('البروتين أقل من الحد الأدنى (' + F.minP + ' جم/كجم)'); if (ph.f < F.minF) warns.push('الدهون أقل من الحد الأدنى (' + F.minF + ' جم/كجم)'); if (w > 0 && cho / w < F.minC) warns.push('الكارب أقل من ' + F.minC + ' جم/كجم');
+      if (M) { kcal = M.kcal(tdee, dt.train) || kcal; p = M.p(kcal); f = M.f(kcal); }
+      var cho = c.carbMethod === 'remainder' ? Math.max(0, (kcal - 4 * p - 9 * f) / 4) : dt.carb * w, mk = 4 * p + 4 * cho + 9 * f, warns = M ? M.warns.slice() : [];
+      if (w > 0 && p / w < F.minP - 1e-9) warns.push('البروتين أقل من الحد الأدنى (' + F.minP + ' جم/كجم)'); if (w > 0 && f / w < F.minF - 1e-9) warns.push('الدهون أقل من الحد الأدنى (' + F.minF + ' جم/كجم)'); if (w > 0 && cho / w < F.minC) warns.push('الكارب أقل من ' + F.minC + ' جم/كجم');
       if (b.ffm && (kcal - tk) / b.ffm < F.minEA) warns.push('الطاقة المتاحة أقل من ' + F.minEA + ' سعرة/كجم كتلة خالية');
       return { i: i, name: AD.days[i], type: s.type, train: dt.train, min: min, time: s.time || '', trainKcal: tk, tdee: tdee, kcal: kcal, p: p, c: cho, f: f, macroKcal: mk, diff: mk - kcal, cPerKg: w > 0 ? cho / w : 0, water: (F.water * w + F.waterHr * min / 60) / 1000, warns: warns };
     });
-    return { bmr: b.v, method: b.method, ffm: b.ffm, phase: ph, days: days, weight: w };
+    return { bmr: b.v, method: b.method, ffm: b.ffm, phase: ph, days: days, weight: w, manual: !!M, info: A.macroInfo(c, ph, b, w) };
+  };
+  // ماكروز يدوية (c.macroMode === 'manual'): السعرات من المرحلة أو بنسبة تعديل أو ثابتة لأيام التدريب/الراحة،
+  // والبروتين والدهون بالجرام لكل كجم (البروتين على وزن الجسم أو الكتلة الخالية من الدهون) أو بنسبة % من السعرات، والكارب بالطريقة المختارة.
+  A.manual = function (c, ph, b, w) {
+    if (c.macroMode !== 'manual') return null;
+    var warns = [], ffmOk = !!b.ffm, base = c.pBase === 'ffm' ? (ffmOk ? b.ffm : (warns.push('أساس البروتين «الكتلة الخالية» يحتاج نسبة الدهون؛ حُسب على وزن الجسم'), w)) : w;
+    var pv = num(c.pVal), fv = num(c.fVal), pPct = c.pMode === 'pct', fPct = c.fMode === 'pct';
+    if (pPct && fPct && pv + fv >= 100) warns.push('مجموع نسبتي البروتين والدهون ' + (pv + fv) + '% — لا يبقى للكارب شيء');
+    return {
+      warns: warns,
+      kcal: function (tdee, train) { var k = c.kcalMode; if (k === 'adj') return tdee * (1 + num(c.kcalAdj) / 100); if (k === 'fixed') return num(train ? c.kcalTrain : (c.kcalRest === '' || c.kcalRest == null ? c.kcalTrain : c.kcalRest)) || 0; return 0; },
+      p: function (kcal) { return pPct ? kcal * pv / 100 / 4 : pv * base; },
+      f: function (kcal) { return fPct ? kcal * fv / 100 / 9 : fv * w; }
+    };
+  };
+  A.macroInfo = function (c, ph, b, w) {                     // وصف مختصر للطريقة (للملخص والصفحات)
+    if (c.macroMode !== 'manual') return 'حسب المرحلة: بروتين ' + ph.p + ' جم/كجم • دهون ' + ph.f + ' جم/كجم • سعرات ' + (ph.adj > 0 ? '+' : '') + Math.round(ph.adj * 100) + '%';
+    var ffm = c.pBase === 'ffm' && b.ffm, k = c.kcalMode === 'adj' ? 'سعرات ' + (num(c.kcalAdj) > 0 ? '+' : '') + num(c.kcalAdj) + '%' : c.kcalMode === 'fixed' ? 'سعرات ثابتة ' + num(c.kcalTrain) + (c.kcalRest !== '' && c.kcalRest != null && num(c.kcalRest) !== num(c.kcalTrain) ? ' تدريب / ' + num(c.kcalRest) + ' راحة' : '') : 'سعرات المرحلة ' + (ph.adj > 0 ? '+' : '') + Math.round(ph.adj * 100) + '%';
+    return 'يدوي: بروتين ' + (c.pMode === 'pct' ? num(c.pVal) + '% من السعرات' : num(c.pVal) + ' جم/كجم ' + (ffm ? 'كتلة خالية' : 'وزن')) + ' • دهون ' + (c.fMode === 'pct' ? num(c.fVal) + '% من السعرات' : num(c.fVal) + ' جم/كجم') + ' • ' + k;
   };
   A.mealTargets = function (c, AD, day) {                    // توزيع ماكروز اليوم على الوجبات الفعّالة (يُطبَّع تلقائياً)
     var meals = (c.athMeals || AD.meals).map(function (m, i) { return { m: m, i: i }; }).filter(function (x) { return x.m.on; }), col = day.train ? 'train' : 'rest', sum = [0, 0, 0];

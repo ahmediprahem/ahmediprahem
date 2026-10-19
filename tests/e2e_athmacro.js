@@ -1,0 +1,35 @@
+// واجهة الماكروز اليدوية للرياضي: إظهار الحقول، التحويل التلقائي عند تغيير الوحدة، أساس الكتلة الخالية، السعرات الثابتة، وظهور الطريقة في ملخص الخطة.
+const { fileUrl } = require('./_tmp.js');
+const { chromium } = require('playwright'); const assert = require('assert'), path = require('path'), login = require('./auth_helper');
+const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html')); let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
+(async () => {
+  const b = await chromium.launch(), p = await (await b.newContext({ viewport: { width: 1400, height: 1000 } })).newPage(); p.on('pageerror', (e) => errs.push(String(e))); p.on('dialog', (d) => d.accept());
+  await p.goto(ADMIN); await login(p);
+  const C = () => p.evaluate(() => { const c = DPApp.S.clients.filter((x) => x.code === DPApp.S.cur)[0]; return JSON.parse(JSON.stringify(c)); });
+  await p.click('button:has-text("عميل رياضي")'); await p.waitForSelector('#atg'); await p.fill('[data-f="name"]', 'كابتن يدوي'); await p.fill('[data-f="weight"]', '80'); await p.press('[data-f="weight"]', 'Tab');
+  await p.selectOption('[data-f="phase"]', 'تنشيف'); assert.strictEqual(await p.locator('[data-f="pVal"]').count(), 0); assert((await p.textContent('#atg')).includes('حسب المرحلة'));
+  ok('الافتراضي «حسب المرحلة»: لا حقول يدوية، ويظهر وصف الطريقة في صندوق الأهداف');
+  await p.selectOption('[data-f="macroMode"]', 'manual'); await p.waitForSelector('[data-f="pVal"]');
+  let c = await C(); assert.deepStrictEqual([c.pMode, c.pBase, c.pVal, c.fMode, c.fVal, c.kcalMode], ['gkg', 'bw', 2.4, 'gkg', 0.8, 'phase']);
+  assert.strictEqual(await p.locator('[data-f="pBase"] option').count(), 1); assert((await p.textContent('main')).includes('أدخل نسبة الدهون'));
+  ok('«يدوي» يُملأ بقيم المرحلة (2.4 جم/كجم بروتين، 0.8 دهون)، وأساس «الكتلة الخالية» مخفي حتى تُدخل نسبة الدهون');
+  await p.selectOption('[data-f="pMode"]', 'pct'); c = await C(); assert(c.pVal > 15 && c.pVal < 45, String(c.pVal)); assert.strictEqual(await p.locator('[data-f="pBase"]').count(), 0);
+  await p.selectOption('[data-f="pMode"]', 'gkg'); c = await C(); assert(Math.abs(c.pVal - 2.4) <= 0.15, String(c.pVal));
+  ok('تحويل البروتين بين جم/كجم والنسبة % يحافظ على الجرامات تقريباً (2.4 ← % ← ' + c.pVal + ')');
+  await p.fill('[data-f="bf"]', '20'); await p.press('[data-f="bf"]', 'Tab'); await p.waitForSelector('[data-f="pBase"] option[value="ffm"]', { state: 'attached' });
+  await p.selectOption('[data-f="pBase"]', 'ffm'); c = await C(); assert(Math.abs(c.pVal - 3.0) <= 0.1, String(c.pVal)); const box = await p.textContent('#atg'); assert(box.includes('كتلة خالية') && box.includes('خالية'), box);
+  await p.fill('[data-f="pVal"]', '2.5'); await p.press('[data-f="pVal"]', 'Tab'); assert((await p.textContent('#atg')).includes('2.5 خالية'));
+  ok('مع نسبة الدهون يظهر أساس «الكتلة الخالية» وتتحول القيمة (2.4 وزن ≈ 3.0 خالية)، والصندوق يعرض البروتين لكل كجم وزن ولكل كجم خالية');
+  await p.selectOption('[data-f="kcalMode"]', 'fixed'); await p.waitForSelector('[data-f="kcalTrain"]'); c = await C(); assert(c.kcalTrain > 1500 && c.kcalRest > 1200 && c.kcalTrain >= c.kcalRest);
+  await p.fill('[data-f="kcalTrain"]', '2600'); await p.press('[data-f="kcalTrain"]', 'Tab'); await p.fill('[data-f="kcalRest"]', '2200'); await p.press('[data-f="kcalRest"]', 'Tab');
+  const kc = await p.$$eval('#atg table.st tr', (rs) => rs.slice(1).map((r) => +r.children[2].textContent)); assert(kc.every((k) => k === 2600 || k === 2200) && kc.includes(2600) && kc.includes(2200), String(kc));
+  await p.selectOption('[data-f="kcalMode"]', 'adj'); await p.waitForSelector('[data-f="kcalAdj"]'); assert.strictEqual(await p.inputValue('[data-f="kcalAdj"]'), '-20');
+  await p.fill('[data-f="kcalAdj"]', '-12'); await p.press('[data-f="kcalAdj"]', 'Tab'); assert((await p.textContent('#atg')).includes('-12%'));
+  ok('السعرات يدوياً: ثابتة لأيام التدريب والراحة (تُملأ أولاً بالقيم الحالية) أو بنسبة تعديل (تبدأ بنسبة المرحلة −20%)');
+  await p.click('button:has-text("ولّد الخطة ←")'); await p.waitForSelector('.pnav button'); const sum = await p.textContent('main');
+  assert(sum.includes('الماكروز') && sum.includes('2.5 جم/كجم كتلة خالية') && sum.includes('سعرات -12%'), sum.slice(0, 600));
+  ok('ملخص الخطة يذكر الطريقة اليدوية والبروتين لكل كجم وزن ولكل كجم كتلة خالية');
+  await p.click('main .tabs [data-v="client"]'); await p.selectOption('[data-f="macroMode"]', 'phase'); assert.strictEqual(await p.locator('[data-f="pVal"]').count(), 0); assert((await p.textContent('#atg')).includes('حسب المرحلة'));
+  ok('الرجوع إلى «حسب المرحلة» يعيد الحساب التلقائي (وتبقى القيم اليدوية محفوظة إن عدت إليها)');
+  assert.deepStrictEqual(errs, [], errs.join(' | ')); ok('لا أخطاء في وحدة التحكم'); console.log('\nنجح', n, 'اختبارات واجهة الماكروز اليدوية'); await b.close();
+})().catch((e) => { console.log('✘', String(e && e.stack || e).slice(0, 1200)); console.log('أخطاء:', JSON.stringify(errs).slice(0, 400)); process.exit(1); });
