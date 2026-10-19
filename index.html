@@ -3904,7 +3904,7 @@ function vaultPage() {
         + '<p class="small">⚠ احفظ كلمة سر النسخ: لا يمكن استرجاعها، وبدونها لا تُفتح النسخ. يمكن أن تكون كلمة سر دخولك نفسها. استعمل نفس المعرّف وكلمة السر على أجهزتك الأخرى لتتزامن.</p><p><button data-a="vtOn"' + (VT.busy ? ' disabled' : '') + '>تفعيل وأخذ أول نسخة</button></p></div>')
     + (VT.msg ? '<div class="warn">' + esc(VT.msg) + '</div>' : '') + restore;
 }
-function vtHomeCard() { return VT.st && !VT.st.on && !S.clients.length ? '<div class="appcard vthome"><h3>☁ جهاز جديد؟</h3><p class="small">إن كانت لديك نسخة احتياطية تلقائية على محطة «حصتي»، استرجع عملاءك هنا بمعرّف النسخة وكلمة سرها.</p><button data-a="vtOpen">استرجاع عملائي</button></div>' : ''; }
+function vtHomeCard() { return VT.st && !VT.st.on && !S.clients.length ? '<div class="ucard vthome"><h3>☁ جهاز جديد؟</h3><p class="small">إن كانت لديك نسخة احتياطية تلقائية على محطة «حصتي»، استرجع عملاءك هنا بمعرّف النسخة وكلمة سرها.</p><button data-a="vtOpen">استرجاع عملائي</button></div>' : ''; }
 Object.assign(A, {
   vtOpen: function () { S.view = 'settings'; S.setTab = 'vault'; render(); },
   vtOn: function () {
