@@ -366,9 +366,37 @@ select.inp option{background:#16224f;color:#fff}
 .hgrid{display:flex;flex-direction:column;gap:8px}.hrow{display:flex;align-items:center;gap:8px;font-size:13.5px}.hrow>span{flex:1}.hrow b{min-width:34px;text-align:left;color:var(--hc)}
 .brx{position:fixed;inset:0;z-index:50;background:rgba(5,14,38,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:40px;direction:rtl;color:#fff;font-family:var(--font)}
 .brc{position:relative;width:260px;height:260px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}.brc b{font-size:28px;z-index:1}.brc small{z-index:1;color:#bfeeee}
-.ring{position:absolute;inset:0;margin:auto;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(127,227,224,.55),rgba(79,196,192,.15) 70%);box-shadow:0 0 50px rgba(127,227,224,.4);transition:width 4s ease-in-out,height 4s ease-in-out}
-.ring.in,.ring.hold{width:250px;height:250px}.ring.out{width:120px;height:120px;transition-duration:6s}
+.brring{position:absolute;inset:0;margin:auto;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(127,227,224,.55),rgba(79,196,192,.15) 70%);box-shadow:0 0 50px rgba(127,227,224,.4);transition:width 4s ease-in-out,height 4s ease-in-out}
+.brring.in,.brring.hold{width:250px;height:250px}.brring.out{width:120px;height:120px;transition-duration:6s}
 .toast{pointer-events:none}
+/* أذكار الصباح والاحتفالات */
+.heart{width:100%;height:100%;overflow:visible}.heart .hf{transition:y .45s cubic-bezier(.3,1.3,.5,1)}.heart.full{filter:drop-shadow(0 0 14px rgba(111,227,169,.65))}
+.hwave{animation:wave 2.2s linear infinite}@keyframes wave{to{transform:translateX(-30px)}}
+.hw-adhkar{display:flex;align-items:center;gap:16px}.hw-adhkar .adheart{width:96px;height:90px;flex:none}.hw-adhkar .col{display:flex;flex-direction:column;gap:6px;flex:1}
+.adx{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;direction:rtl;font-family:var(--font);color:#fff;background:linear-gradient(180deg,#07261c,#0c1534 45%)}
+.adh{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:16px 16px 10px;padding-top:calc(16px + env(safe-area-inset-top,0px))}
+.adh #adclose{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));left:14px}
+.adheart{position:relative;width:140px;height:132px}.adheart b{position:absolute;inset:0;display:grid;place-items:center;font-size:22px;padding-bottom:12px;text-shadow:0 1px 6px rgba(0,0,0,.5)}
+.adheart.pulse{animation:hp .45s ease}@keyframes hp{40%{transform:scale(1.12)}}
+.adh small{color:#a8e6c6}
+.adlist{flex:1;overflow-y:auto;padding:6px 14px calc(24px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:10px}
+.adk{display:flex;flex-direction:column;gap:8px;text-align:right;padding:14px;border-radius:18px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);color:#fff;font-size:17px;line-height:1.9;transition:transform .1s,background .3s}
+.adk:active{transform:scale(.98);background:rgba(111,227,169,.16)}.adk.cur{border-color:#6fe3a9;box-shadow:0 0 0 1px #6fe3a9}
+.adk.fin{flex-direction:row;align-items:center;gap:10px;padding:10px 14px;opacity:.75;background:rgba(111,227,169,.08);border-color:rgba(111,227,169,.3);font-size:14px;line-height:1.5}
+.adone{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.adt{font-size:12.5px;color:#6fe3a9;font-weight:700}.adc{align-self:flex-start;font-size:13px;font-weight:700;padding:3px 12px;border-radius:12px;background:rgba(111,227,169,.2);color:#9ff5c8}
+.cel{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;direction:rtl;font-family:var(--font);background:rgba(5,12,34,.82);animation:fade .25s;overflow:hidden}
+.celc{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:26px 22px;margin:20px;max-width:340px;border-radius:28px;background:rgba(24,36,82,.92);border:1px solid rgba(255,255,255,.2);box-shadow:0 20px 60px rgba(0,0,0,.5);animation:pop .5s cubic-bezier(.2,1.5,.4,1)}
+@keyframes pop{from{transform:scale(.6);opacity:0}}
+.celc h2{font-size:22px;color:#fff}.celc p{margin:0;color:#dfe7ff;line-height:1.8}.celc small{color:var(--dim)}.celc .adheart{width:150px;height:140px}
+.celi{font-size:64px;line-height:1;animation:bob 1.2s ease-in-out infinite}@keyframes bob{50%{transform:translateY(-8px) scale(1.06)}}
+.fx{position:absolute;inset:0;pointer-events:none}.fx i{position:absolute;top:-40px;font-style:normal;animation:fall 3.2s linear infinite}
+@keyframes fall{to{transform:translateY(110vh) rotate(25deg)}}
+.cel-steps .fx i,.cel-breath .fx i,.cel-adhkar .fx i,.cel-move .fx i{top:auto;bottom:-40px;animation-name:rise}@keyframes rise{to{transform:translateY(-110vh)}}
+.cel-sleep .fx i,.cel-kitchen .fx i{top:auto;animation:twk 1.8s ease-in-out infinite alternate}.cel-sleep .fx i:nth-child(n),.cel-kitchen .fx i:nth-child(n){top:calc(var(--y,10) * 1%)}
+@keyframes twk{from{opacity:.15;transform:scale(.6)}to{opacity:1;transform:scale(1.1)}}
+.cel-sugar .celi{animation:flm .6s ease-in-out infinite alternate}@keyframes flm{to{transform:scale(1.18) rotate(-4deg);filter:drop-shadow(0 0 18px #ff9d6b)}}
+.cel-adhkar{background:radial-gradient(circle at 50% 40%,rgba(31,164,99,.45),rgba(5,20,16,.92) 70%)}.cel-adhkar .celc{border-color:#6fe3a9}.cel-adhkar h2{color:#9ff5c8}
 </style></head>
 <body><div id="root"><div style="display:grid;place-items:center;height:100%;color:#b4c1e2">حصتي — جارٍ التحميل…</div></div>
 <noscript><div style="position:fixed;inset:0;background:#0c1534;color:#fff;padding:24px;text-align:center;font:16px Tahoma,Arial">«حصتي» يحتاج تفعيل JavaScript. افتح الرابط في Chrome أو Safari (وليس من معاينة واتساب).</div></noscript>
@@ -1097,6 +1125,7 @@ function remCard() {
 // ---------- العادات: مكتبة عادات صحية يختار منها العميل ما يتابعه في «اليوم»، لكل عادة تصميم خاص، وسلسلة أيام 🔥 وأسبوع ملوّن
 // القيم في سجل اليوم (S.log[يوم].h) فتصل الأخصائي مع المتابعة اليومية؛ والماء هو كاسات اليوم نفسها.
 const HABITS = [
+  { id: 'adhkar', n: 'أذكار الصباح', ic: '📿', c: '#6fe3a9', why: 'للمسلم: أذكار الصباح من حصن المسلم، تلمس الذكر لكل مرة ويمتلئ القلب بالأخضر حتى يكتمل — طمأنينة تبدأ بها يومك.', ok: (v) => adhDone(v) >= ADH_TOTAL },
   { id: 'water', n: 'شرب الماء', ic: '💧', c: '#7fa8ff', why: 'الماء يقلل الجوع الكاذب ويحسّن الطاقة والتركيز وعمل الكلى. هدفك من خطتك.', ok: (v) => v >= hWaterGoal() },
   { id: 'steps', n: 'المشي اليومي', ic: '🚶', c: '#6fe3a9', why: '8 آلاف خطوة يومياً مرتبطة بصحة القلب وحرق أفضل وتحكم في الشهية — دون نادٍ رياضي.', goal: 8000, ok: (v) => v >= 8000 },
   { id: 'sleep', n: 'النوم الكافي', ic: '😴', c: '#b39dff', why: 'النوم أقل من 7 ساعات يرفع هرمون الجوع ويزيد الرغبة في السكريات. الهدف 7–9 ساعات.', ok: (v) => v >= 7 && v <= 9 },
@@ -1139,6 +1168,8 @@ function hWidget(h) {
       return '<div class="hw-breath"><button class="orb" data-act="breathe" aria-label="ابدأ جلسة التنفس"><span>ابدأ</span></button><div><b>' + (n ? n + (n === 1 ? ' جلسة' : ' جلسات') + ' اليوم' : 'دقيقتان فقط') + '</b><span class="dim">شهيق 4 • احبس 4 • زفير 6 ثوانٍ</span></div></div>'; }
     case 'mindful': { const sel = v || [], sl = S.plan ? dayPlan(TODAY).slots : [];
       return '<div class="hw-mind"><div class="chips">' + sl.map((s, i) => b(i, (sel.indexOf(i) >= 0 ? '✓ ' : '') + esc(s.name), 'chip' + (sel.indexOf(i) >= 0 ? ' on' : ''))).join('') + '</div><span class="dim">علّم الوجبة التي أكلتها ببطء ودون شاشة</span></div>'; }
+    case 'adhkar': { const dn = adhDone(v), p = dn / ADH_TOTAL;
+      return '<div class="hw-adhkar"><div class="adheart">' + heartSvg(p) + '</div><div class="col"><b class="big">' + (p >= 1 ? 'اكتملت 🤍' : Math.round(p * 100) + '%') + '</b><span class="dim">' + dn + ' من ' + ADH_TOTAL + ' • ' + ADHKAR.length + ' ذكراً</span><button class="btn sm" data-act="adhkar">' + (p >= 1 ? 'عرض الأذكار' : dn ? 'أكمل الأذكار' : 'ابدأ أذكار الصباح') + '</button></div></div>'; }
     case 'coffee': { const n = v == null ? -1 : v;
       return '<div class="hw-coffee"><div class="mugs">' + [0, 1, 2, 3, 4, 5].map((i) => b(i, '☕', 'mug' + (i < n ? ' on' : '') + (i >= 3 ? ' over' : ''))).join('') + '</div><div class="row">' + b('z', 'لا كافيين اليوم', 'btn sm sec' + (n === 0 ? ' on' : '')) + '<b class="' + (n > 3 ? 'warn' : '') + '">' + (n < 0 ? 'كم كوباً؟' : n + (n === 1 ? ' كوب' : ' أكواب') + ' • الحد 3') + '</b></div></div>'; }
   }
@@ -1162,10 +1193,76 @@ function habitsProgress() {
 // جلسة تنفّس موجّهة: طبقة مستقلة خارج #root فلا تقطعها إعادة الرسم
 function breathe() {
   if (document.getElementById('brx')) return; const ph = [['شهيق', 4000, 'in'], ['احبس', 4000, 'hold'], ['زفير', 6000, 'out']], total = 120000, t0 = now();
-  const el = document.createElement('div'); el.id = 'brx'; el.className = 'brx'; el.innerHTML = '<div class="brc"><div class="ring"></div><b id="brt">استعد</b><small id="brs">دقيقتان</small></div><button class="btn sec" id="brstop">إنهاء</button>'; document.body.appendChild(el);
-  let i = 0, tm = 0; const step = () => { const left = total - (now() - t0); if (left <= 0) return done(true); const p = ph[i % 3]; el.querySelector('.ring').className = 'ring ' + p[2]; el.querySelector('#brt').textContent = p[0]; el.querySelector('#brs').textContent = Math.ceil(left / 1000) + ' ث'; i++; tm = setTimeout(step, p[1]); };
-  const done = (full) => { clearTimeout(tm); el.remove(); if (full || now() - t0 > 60000) { hSet('breath', (hVal('breath') || 0) + 1); toast('أحسنت 🫧 جلسة هدوء مكتملة'); render(); } };
+  const el = document.createElement('div'); el.id = 'brx'; el.className = 'brx'; el.innerHTML = '<div class="brc"><div class="brring"></div><b id="brt">استعد</b><small id="brs">دقيقتان</small></div><button class="btn sec" id="brstop">إنهاء</button>'; document.body.appendChild(el);
+  let i = 0, tm = 0; const step = () => { const left = total - (now() - t0); if (left <= 0) return done(true); const p = ph[i % 3]; el.querySelector('.brring').className = 'brring ' + p[2]; el.querySelector('#brt').textContent = p[0]; el.querySelector('#brs').textContent = Math.ceil(left / 1000) + ' ث'; i++; tm = setTimeout(step, p[1]); };
+  const done = (full) => { clearTimeout(tm); el.remove(); if (full || now() - t0 > 60000) { const was = hOkDay('breath'); hSet('breath', (hVal('breath') || 0) + 1); render(); if (!was) celebrate('breath'); else toast('أحسنت 🫧 جلسة هدوء مكتملة'); } };
   el.querySelector('#brstop').onclick = () => done(false); tm = setTimeout(step, 800);
+}
+// ---------- أذكار الصباح (من حصن المسلم): المس الذكر لكل مرة، ويمتلئ القلب بالأخضر حتى يكتمل
+const ADHKAR = [
+  ['أعوذ بالله من الشيطان الرجيم: الله لا إله إلا هو الحي القيوم لا تأخذه سنة ولا نوم له ما في السماوات وما في الأرض من ذا الذي يشفع عنده إلا بإذنه يعلم ما بين أيديهم وما خلفهم ولا يحيطون بشيء من علمه إلا بما شاء وسع كرسيه السماوات والأرض ولا يئوده حفظهما وهو العلي العظيم', 1, 'آية الكرسي'],
+  ['بسم الله الرحمن الرحيم: قل هو الله أحد، الله الصمد، لم يلد ولم يولد، ولم يكن له كفوا أحد', 3, 'سورة الإخلاص'],
+  ['بسم الله الرحمن الرحيم: قل أعوذ برب الفلق، من شر ما خلق، ومن شر غاسق إذا وقب، ومن شر النفاثات في العقد، ومن شر حاسد إذا حسد', 3, 'سورة الفلق'],
+  ['بسم الله الرحمن الرحيم: قل أعوذ برب الناس، ملك الناس، إله الناس، من شر الوسواس الخناس، الذي يوسوس في صدور الناس، من الجنة والناس', 3, 'سورة الناس'],
+  ['أصبحنا وأصبح الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير، رب أسألك خير ما في هذا اليوم وخير ما بعده، وأعوذ بك من شر ما في هذا اليوم وشر ما بعده، رب أعوذ بك من الكسل وسوء الكبر، رب أعوذ بك من عذاب في النار وعذاب في القبر', 1],
+  ['اللهم أنت ربي لا إله إلا أنت، خلقتني وأنا عبدك، وأنا على عهدك ووعدك ما استطعت، أعوذ بك من شر ما صنعت، أبوء لك بنعمتك علي، وأبوء بذنبي فاغفر لي فإنه لا يغفر الذنوب إلا أنت', 1, 'سيد الاستغفار'],
+  ['اللهم بك أصبحنا، وبك أمسينا، وبك نحيا، وبك نموت، وإليك النشور', 1],
+  ['أصبحنا على فطرة الإسلام، وعلى كلمة الإخلاص، وعلى دين نبينا محمد صلى الله عليه وسلم، وعلى ملة أبينا إبراهيم حنيفا مسلما وما كان من المشركين', 1],
+  ['اللهم عافني في بدني، اللهم عافني في سمعي، اللهم عافني في بصري، لا إله إلا أنت. اللهم إني أعوذ بك من الكفر والفقر، وأعوذ بك من عذاب القبر، لا إله إلا أنت', 3],
+  ['بسم الله الذي لا يضر مع اسمه شيء في الأرض ولا في السماء وهو السميع العليم', 3],
+  ['رضيت بالله ربا، وبالإسلام دينا، وبمحمد صلى الله عليه وسلم نبيا', 3],
+  ['يا حي يا قيوم برحمتك أستغيث، أصلح لي شأني كله، ولا تكلني إلى نفسي طرفة عين', 1],
+  ['حسبي الله لا إله إلا هو عليه توكلت وهو رب العرش العظيم', 7],
+  ['سبحان الله وبحمده عدد خلقه، ورضا نفسه، وزنة عرشه، ومداد كلماته', 3],
+  ['لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير', 10],
+  ['اللهم صل وسلم على نبينا محمد', 10],
+  ['سبحان الله وبحمده', 100],
+  ['أستغفر الله وأتوب إليه', 100]
+];
+const ADH_TOTAL = ADHKAR.reduce((a, x) => a + x[1], 0);
+function adhDone(v) { return (v && v.c || []).reduce((a, n, i) => a + Math.min(n || 0, ADHKAR[i] ? ADHKAR[i][1] : 0), 0); }
+function heartSvg(p, big) {
+  const id = 'hc' + Math.round(p * 1000) + (big ? 'b' : ''), y = 6 + 88 * (1 - Math.min(1, p)), d = 'M50 88 C20 66 4 50 4 30 C4 15 16 5 29 5 C39 5 46 11 50 18 C54 11 61 5 71 5 C84 5 96 15 96 30 C96 50 80 66 50 88Z';
+  return '<svg viewBox="0 0 100 94" class="heart' + (p >= 1 ? ' full' : '') + '" aria-hidden="true"><defs><clipPath id="' + id + '"><path d="' + d + '"/></clipPath><linearGradient id="' + id + 'g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8ff0b8"/><stop offset="1" stop-color="#1fa463"/></linearGradient></defs>'
+    + '<path d="' + d + '" fill="rgba(255,255,255,.07)"/><g clip-path="url(#' + id + ')"><rect class="hf" x="0" y="' + y.toFixed(1) + '" width="100" height="100" fill="url(#' + id + 'g)"/>' + (p > 0 && p < 1 ? '<path class="hwave" d="M-10 ' + y.toFixed(1) + ' q15 -5 30 0 t30 0 t30 0 t30 0 v6 h-120z" fill="#8ff0b8" opacity=".6"/>' : '') + '</g><path d="' + d + '" fill="none" stroke="' + (p >= 1 ? '#6fe3a9' : 'rgba(111,227,169,.6)') + '" stroke-width="3"/></svg>';
+}
+function adhOpen() {
+  if (document.getElementById('adx')) return; const el = document.createElement('div'); el.id = 'adx'; el.className = 'adx'; document.body.appendChild(el);
+  const draw = (pulse) => {
+    const v = hVal('adhkar') || { c: [] }, done = adhDone(v), p = done / ADH_TOTAL, nx = ADHKAR.findIndex((a, i) => (v.c[i] || 0) < a[1]);
+    el.innerHTML = '<div class="adh"><button class="btn sm sec" id="adclose">' + I('x') + ' إغلاق</button><div class="adheart' + (pulse ? ' pulse' : '') + '">' + heartSvg(p, 1) + '<b>' + Math.round(p * 100) + '%</b></div><small>' + done + ' من ' + ADH_TOTAL + '</small></div>'
+      + '<div class="adlist">' + ADHKAR.map((a, i) => { const n = v.c[i] || 0, left = a[1] - n, fin = left <= 0;
+        return '<button class="adk' + (fin ? ' fin' : '') + (i === nx ? ' cur' : '') + '" data-i="' + i + '"' + (fin ? ' aria-disabled="true"' : '') + '>' + (fin ? '<span class="adone">' + (a[2] || a[0].split(/[،,:.]/)[0]) + '</span><span class="adc">✓ تمّ</span>' : (a[2] ? '<span class="adt">' + a[2] + '</span>' : '') + '<span class="adtx">' + a[0] + '</span><span class="adc">' + left + (a[1] > 1 ? ' من ' + a[1] : '') + '</span>') + '</button>'; }).join('') + '</div>';
+    el.querySelector('#adclose').onclick = () => { el.remove(); render(); };
+    const cur = el.querySelector('.adk.cur'); if (cur && (pulse === 'next' || pulse === 0)) cur.scrollIntoView({ block: 'center', behavior: pulse ? 'smooth' : 'auto' });
+  };
+  el.addEventListener('click', (e) => {
+    const b = e.target.closest('.adk'); if (!b || b.classList.contains('fin')) return; const i = +b.dataset.i, v = JSON.parse(JSON.stringify(hVal('adhkar') || { c: [] })), was = hOkDay('adhkar');
+    v.c[i] = Math.min(ADHKAR[i][1], (v.c[i] || 0) + 1); hSet('adhkar', v); if (navigator.vibrate) try { navigator.vibrate(12); } catch (x) { }
+    const fin = v.c[i] >= ADHKAR[i][1]; draw(fin ? 'next' : 1);
+    if (!was && hOkDay('adhkar')) { el.remove(); render(); celebrate('adhkar'); }
+  });
+  draw(0);
+}
+// ---------- احتفال مختلف عند إنجاز كل عادة (طبقة مستقلة تُغلق باللمس أو بعد ثوانٍ)
+const CHEER = {
+  adhkar: { fx: '🤍', t: 'اكتملت أذكار الصباح', m: 'كل ذكرٍ يجعلك في مقربة من ربك، وخطوةٌ تخطوها نحو الجنة. حفظك الله في يومك.' },
+  water: { fx: '💧', t: 'ارتويت اليوم!', m: 'جسمك ممتنّ لك: الماء ينعش خلاياك ويصفّي ذهنك ويُبعد الجوع الكاذب.' },
+  steps: { fx: '👣', t: '8 آلاف خطوة!', m: 'كل خطوة تقوّي قلبك. أنت اليوم أنشط من أمس.' },
+  sleep: { fx: '✨', t: 'نوم هانئ', m: 'نومك الكافي يوازن هرمونات الجوع ويمنحك طاقة يومك.' },
+  veg: { fx: '🍎', t: 'صحنك قوس قزح!', m: 'خمس حصص ملوّنة = ألياف تُشبعك وفيتامينات تحميك.' },
+  sugar: { fx: '🔥', t: 'يوم بلا سكر!', m: 'إرادتك أقوى من الرغبة. حافظ على سلسلتك.' },
+  move: { fx: '⚡', t: 'بطاريتك مشحونة!', m: '30 دقيقة حركة اليوم — جسمك يحرق أفضل ومزاجك أجمل.' },
+  breath: { fx: '🫧', t: 'هدوءك قوّتك', m: 'دقيقتان من الهدوء تخفضان التوتر والأكل العاطفي.' },
+  mindful: { fx: '🍽', t: 'أكلت بوعي', m: 'أعطيت الشبع وقته واستمتعت بطعامك — هذا سرّ الأكل الأقل.' },
+  kitchen: { fx: '🌙', t: 'المطبخ مغلق', m: 'هضم أريح ونوم أعمق الليلة. أحسنت!' }
+};
+function celebrate(id) {
+  const c = CHEER[id]; if (!c) return; const old = document.getElementById('cel'); if (old) old.remove();
+  const el = document.createElement('div'); el.id = 'cel'; el.className = 'cel cel-' + id; const st = hStreak(id);
+  el.innerHTML = '<div class="fx">' + Array.from({ length: 18 }, (_, i) => '<i style="--y:' + ((i * 53) % 90) + ';left:' + ((i * 37) % 100) + '%;animation-delay:' + ((i % 6) * 0.18).toFixed(2) + 's;font-size:' + (18 + (i * 7) % 18) + 'px">' + c.fx + '</i>').join('') + '</div>'
+    + '<div class="celc">' + (id === 'adhkar' ? '<div class="adheart pulse">' + heartSvg(1, 1) + '</div>' : '<div class="celi">' + HB(id).ic + '</div>') + '<h2>' + c.t + '</h2><p>' + c.m + '</p>' + (st > 1 ? '<span class="hbs">🔥 ' + st + ' أيام متتالية</span>' : '') + '<small>المس للمتابعة</small></div>';
+  el.onclick = () => el.remove(); document.body.appendChild(el); if (navigator.vibrate) try { navigator.vibrate([30, 60, 30]); } catch (x) { } setTimeout(() => el.remove(), 6000);
 }
 // ---------- الأوراق السفلية
 function sheetHtml() {
@@ -1417,6 +1514,7 @@ document.addEventListener('click', (e) => {
     case 'habits': sheet = { t: 'habits' }; break;
     case 'htoggle': { const ls = hList(), i = ls.indexOf(v); if (i >= 0) ls.splice(i, 1); else { ls.push(v); toast('أُضيفت «' + HB(v).n + '» إلى صفحتك'); } S.habits = ls; queueLog(dkey(new Date())); break; }
     case 'breathe': breathe(); return;
+    case 'adhkar': adhOpen(); return;
     case 'hb': {
       const cv = hVal(v), x = k;
       if (v === 'steps') { if (x === 'set') { const r = prompt('عدد خطواتك اليوم:', cv || ''); if (r == null) return; const n = parseInt(numOnly(r), 10); if (!(n >= 0 && n < 100000)) { toast('اكتب رقماً صحيحاً'); return; } hSet(v, n); } else hSet(v, Math.max(0, (cv || 0) + (+x))); }
@@ -1426,7 +1524,7 @@ document.addEventListener('click', (e) => {
       else if (v === 'move') hSet(v, (cv || 0) === (+x + 1) * 10 ? +x * 10 : (+x + 1) * 10);
       else if (v === 'mindful') { const a = (cv || []).slice(), i = a.indexOf(+x); i < 0 ? a.push(+x) : a.splice(i, 1); hSet(v, a); }
       else if (v === 'coffee') hSet(v, x === 'z' ? (cv === 0 ? null : 0) : cv === +x + 1 ? +x : +x + 1);
-      const hh = HB(v); if (hh && !(cv != null && hh.ok(cv)) && hOkDay(v)) toast(hh.ic + ' أحسنت! أنجزت «' + hh.n + '» اليوم' + (hStreak(v) > 1 ? ' — ' + hStreak(v) + ' أيام متتالية 🔥' : ''));
+      const hh = HB(v); if (hh && !(cv != null && hh.ok(cv)) && hOkDay(v)) { if (CHEER[v]) setTimeout(() => celebrate(v), 50); else toast(hh.ic + ' أحسنت! أنجزت «' + hh.n + '» اليوم'); }
       break;
     }
     case 'tab': S.tab = v; if (v === 'feed' && now() - FD.at > 60000) fdLoad().then(render); break;
@@ -1434,7 +1532,7 @@ document.addEventListener('click', (e) => {
     case 'ck': { const L = dl(TODAY); L.ck[v] = !L.ck[v]; if (!L.ck[v]) delete L.ck[v]; queueLog(dkey(new Date())); break; }
     case 'whole': { const L = dl(TODAY), s = dayPlan(TODAY).slots[+v], all = s.lines.every((l, li) => L.ck[v + '_' + li]); s.lines.forEach((l, li) => { if (all) delete L.ck[v + '_' + li]; else L.ck[v + '_' + li] = 1; }); delete L.skip[v]; queueLog(dkey(new Date())); break; }
     case 'skip': { const L = dl(TODAY); L.skip[v] = !L.skip[v]; if (L.skip[v]) dayPlan(TODAY).slots[+v].lines.forEach((l, li) => delete L.ck[v + '_' + li]); else delete L.skip[v]; queueLog(dkey(new Date())); break; }
-    case 'water': { const L = dl(TODAY); L.water = L.water === +v ? +v - 1 : +v; queueLog(dkey(new Date())); break; }
+    case 'water': { const was = hOkDay('water'), L = dl(TODAY); L.water = L.water === +v ? +v - 1 : +v; queueLog(dkey(new Date())); if (!was && hOkDay('water') && hList().indexOf('water') >= 0) setTimeout(() => celebrate('water'), 50); break; }
     case 'swap': sheet = { t: 'swap', k: v }; break;
     case 'doswap': { const L = dl(TODAY); if (v) { L.sw[sheet.k] = v; L.ck[sheet.k] = 1; toast('تم التبديل، وسيعرف أخصائيك.'); } else delete L.sw[sheet.k]; sheet = null; queueLog(dkey(new Date())); break; }
     case 'note': sheet = { t: 'note', si: +v }; break;
