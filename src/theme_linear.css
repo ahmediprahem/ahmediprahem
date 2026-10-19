@@ -199,3 +199,5 @@ html:is([data-theme="linear"],[data-theme="glass"]) .wkst.ok{background:rgba(111
 html:is([data-theme="linear"],[data-theme="glass"]) .wklate h3,html:is([data-theme="linear"],[data-theme="glass"]) .wkit.p0 .wkgo b{color:#ff9d88}
 html:is([data-theme="linear"],[data-theme="glass"]) .wktodo button.wkgo{background:none!important;box-shadow:none!important;border:0!important;color:var(--ltext)!important;height:auto;min-height:0;padding:4px 2px;border-radius:10px;display:block;font-weight:400}
 html:is([data-theme="linear"],[data-theme="glass"]) .wktodo button.wkgo:hover{background:var(--lpanel)!important}
+html:is([data-theme="linear"],[data-theme="glass"]) .phgrid figure{border-color:var(--lline)}html:is([data-theme="linear"],[data-theme="glass"]) .phgrid figure.new{border-color:#ffd27a}
+html:is([data-theme="linear"],[data-theme="glass"]) .phgrid small{color:var(--lmut)}html:is([data-theme="linear"],[data-theme="glass"]) .phcm{color:#6fe3a9}html:is([data-theme="linear"],[data-theme="glass"]) .bkact .rcon{outline-color:var(--lacc)}

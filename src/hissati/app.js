@@ -45,6 +45,9 @@ const P = {
   phone:'<rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/>',
   news:'<path d="M4 22h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8M15 18h-5M10 6h8v4h-8z"/>',
   play:'<path d="M6 3l14 9-14 9z"/>',
+  camera:'<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3.5"/>',
+  book:'<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>',
+  bell:'<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
   copy:'<rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/>'
 };
 const I = (n, c) => '<svg class="ico' + (c ? ' ' + c : '') + '" viewBox="0 0 24 24" aria-hidden="true">' + (P[n] || '') + '</svg>';
@@ -64,7 +67,7 @@ const fresh = () => ({
   p: { name: '', phone: '', sex: 'أنثى', age: '', weight: '', height: '', act: 2, goal: 1, cond: [], allg: [], meds: '', notes: '',
        like: { B: [], L: [], D: [], S: [] }, nope: { B: [], L: [], D: [], S: [] }, food: {}, wake: '07:00', sleep: '23:00', nmeals: 5, wdays: [], bf: '', sport: '', gphase: '', supp: '', sched: null, cq: {} },
   consent: false, req: 'none', reqMsg: '', code: '', plan: null, pm: null, pv: 0, log: {}, weights: [], prefLog: [], pending: [], msgs: [], unreadC: 0, chat: false, ctx: '',
-  ident: null, tok: '', fp: '', did: '', cid: '', dEnc: null, dname: '', cat: {}, after: 0, outbox: [], removed: false
+  photos: [], rem: { water: false, meals: false }, remSig: '', ident: null, tok: '', fp: '', did: '', cid: '', dEnc: null, dname: '', cat: {}, after: 0, outbox: [], removed: false
 });
 let S = null, K = null, SALT = null, DATA = {}, CUPS = 10;
 const V = { screen: 'boot', err: '', pin: '', pin1: '', busy: false, tries: 0, until: 0, online: true, polling: false, timer: 0 };
@@ -142,7 +145,7 @@ const pushOk = () => 'serviceWorker' in navigator && 'PushManager' in window && 
 let swReg = null;
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
   swReg = navigator.serviceWorker.register('/sw.js').catch(() => null);
-  navigator.serviceWorker.addEventListener('message', (e) => { if (e.data && e.data.t === 'push') { poll(); fdLoad().then(() => { if (S) render(); }); } });
+  navigator.serviceWorker.addEventListener('message', (e) => { if (e.data && e.data.t === 'rem') { if (S) toast(e.data.text); return; } if (e.data && e.data.t === 'push') { poll(); fdLoad().then(() => { if (S) render(); }); } });
 }
 function pushState() {
   if (!pushOk()) return isIOS && !standalone ? 'ios' : 'na';
@@ -226,10 +229,10 @@ function handle(p) {
     return true;
   }
   if (p.t === 'plan' && p.plan && Array.isArray(p.plan.days) && p.plan.days.length) {
-    const pl = p.plan; S.pm = { sys: pl.sys || 'ex', kcal: pl.kcal, pro: pl.pro, cho: pl.cho, fat: pl.fat, water: pl.water, dayNames: pl.dayNames, groups: pl.groups };
+    const pl = p.plan; S.pm = { sys: pl.sys || 'ex', kcal: pl.kcal, pro: pl.pro, cho: pl.cho, fat: pl.fat, water: pl.water, dayNames: pl.dayNames, groups: pl.groups, recipes: pl.recipes && typeof pl.recipes === 'object' ? pl.recipes : {} };
     S.plan = JSON.parse(JSON.stringify(pl.days)); S.pv = +p.v || 1; mkData(); if (S.req !== 'approved') S.req = 'approved';
     foodsOf('no').forEach((f) => { if (foodInPlan(f)) applyDislike(f); });
-    const first = S.screen !== 'app'; S.screen = 'app'; if (first) S.tab = 'today';
+    const first = S.screen !== 'app'; S.screen = 'app'; if (first) S.tab = 'today'; remSync();
     notify(first ? 'وصلت خطتك من ' + S.dname : 'وصلت خطتك المحدَّثة (الإصدار ' + S.pv + ')', 'افتح «حصتي» لترى يومك'); return true;
   }
   if (p.t === 'msg' && p.text) {
@@ -241,6 +244,7 @@ function handle(p) {
     if (p.ok) { S.p.cond = (p.cond || []).slice(); S.p.allg = (p.allg || []).slice(); toast('اعتمد أخصائيك تعديل حالتك الصحية.'); } else toast('لم يعتمد أخصائيك تعديل الحالة الصحية — راسله للتفاصيل.');
     S.pending = []; return true;
   }
+  if (p.t === 'pcm' && p.id) { const ph = (S.photos || []).find((x) => x.id === p.id); if (ph) { ph.cm = String(p.text || '').slice(0, 300); notify('علّق أخصائيك على صورة وجبتك', ph.cm); return true; } return false; }
   if (p.t === 'read') { S.msgs.forEach((m) => { if (m.from === 'c' && m.ts <= p.upTo) m.read = true; }); return true; }
   return false;
 }
@@ -459,11 +463,12 @@ function mealCard(d, si, s, live) {
     if (!live) return '<li><span>' + esc(txt) + (tag ? '<br>' + tag : '') + '</span></li>';
     return '<div class="it' + (on ? ' on' : '') + '"><button class="ck" data-act="ck" data-v="' + k + '" aria-pressed="' + on + '" aria-label="' + (on ? 'إلغاء' : 'أكلت') + ' ' + esc(txt) + '">' + I('check') + '</button><button class="tx" data-act="ck" data-v="' + k + '" style="text-align:right">' + esc(txt) + (tag ? '<br>' + tag : '') + '</button>' + ((l[3] || []).length ? '<button class="sw" data-act="swap" data-v="' + k + '" aria-label="بدّل">' + I('swap') + '</button>' : '') + '</div>';
   }).join('');
-  const meal = s.meal ? '<div class="dim">' + esc(s.meal) + '</div>' : '';
-  if (!live) return '<section class="card"><div class="row" style="justify-content:space-between"><h3>' + esc(s.name) + '</h3><span class="dim">' + esc(s.time) + ' • ' + s.kcal + ' سعرة</span></div>' + meal + '<ul class="plist" style="margin-top:8px">' + items + '</ul></section>';
+  const meal = s.meal ? '<div class="dim">' + esc(s.meal) + '</div>' : '', rec = s.meal && S.pm && S.pm.recipes && S.pm.recipes[s.meal];
+  const rbtn = rec ? '<button class="btn sm sec" data-act="rcp" data-v="' + d + '_' + si + '">' + I('book') + ' الوصفة</button>' : '';
+  if (!live) return '<section class="card"><div class="row" style="justify-content:space-between"><h3>' + esc(s.name) + '</h3><span class="dim">' + esc(s.time) + ' • ' + s.kcal + ' سعرة</span></div>' + meal + '<ul class="plist" style="margin-top:8px">' + items + '</ul>' + (rbtn ? '<div class="macts">' + rbtn + '</div>' : '') + '</section>';
   return '<section class="card meal' + (all ? ' done' : '') + (skip ? ' skip' : '') + '"><div class="mt"><span class="tm">' + esc(s.time) + '</span><div style="flex:1;min-width:0"><h3>' + esc(s.name) + '</h3>' + meal + '</div><span class="pc">' + s.kcal + ' سعرة</span></div><div class="items">' + items + '</div>'
-    + (L.note[si] ? '<div class="note">' + I('edit') + ' ' + esc(L.note[si]) + '</div>' : '')
-    + '<div class="macts"><button class="btn sm sec" data-act="whole" data-v="' + si + '">' + I('check') + (all ? ' تمّت' : ' أكلتها كاملة') + '</button><button class="btn sm sec" data-act="note" data-v="' + si + '">' + I('edit') + ' أضفت / ملاحظة</button><button class="btn sm sec" data-act="skip" data-v="' + si + '">' + (skip ? 'تراجع' : 'لم آكلها') + '</button><button class="btn sm sec" data-act="ask" data-v="' + si + '">' + I('msg') + ' اسأل عنها</button></div></section>';
+    + (L.note[si] ? '<div class="note">' + I('edit') + ' ' + esc(L.note[si]) + '</div>' : '') + phStrip(si)
+    + '<div class="macts"><button class="btn sm sec" data-act="whole" data-v="' + si + '">' + I('check') + (all ? ' تمّت' : ' أكلتها كاملة') + '</button><button class="btn sm sec" data-act="note" data-v="' + si + '">' + I('edit') + ' أضفت / ملاحظة</button><button class="btn sm sec" data-act="skip" data-v="' + si + '">' + (skip ? 'تراجع' : 'لم آكلها') + '</button><button class="btn sm sec" data-act="ask" data-v="' + si + '">' + I('msg') + ' اسأل عنها</button><button class="btn sm sec" data-act="photo" data-v="' + si + '">' + I('camera') + ' صوّر وجبتك</button>' + rbtn + '</div></section>';
 }
 function tabPlan() {
   const chips = DATA.dayNames.map((n, i) => { const [a, b] = itemsOfDay(i); return '<button class="' + (S.day === i ? 'on' : '') + (i === TODAY ? ' today' : '') + '" data-act="day" data-v="' + i + '"><b>' + esc(String(n).replace('ال', '')) + '</b><span>' + (b && i <= TODAY ? Math.round(a / b * 100) + '%' : '—') + '</span></button>'; }).join('');
@@ -495,7 +500,7 @@ function tabProgress() {
   return '<h2>تقدّمي</h2><section class="card stack"><div class="row" style="justify-content:space-between"><h3>الوزن</h3><span class="dim">' + (W.length > 1 ? (diff <= 0 ? diff + ' كجم منذ البداية' : '+' + diff + ' كجم') : '') + '</span></div>' + chart
     + '<div class="row"><input class="inp" id="wIn" type="text" data-numf="1" autocomplete="off" inputmode="decimal" placeholder="وزن اليوم (كجم)" style="flex:1"><button class="btn sm" data-act="weigh">' + I('scale') + ' سجّل</button></div></section>'
     + '<section class="card stack"><div class="row" style="justify-content:space-between"><h3>الالتزام آخر 7 أيام</h3><span class="dim">% من الأصناف</span></div><div class="wk">' + bars + '</div></section>'
-    + '<section class="card stack"><h3>الحساب</h3><p class="dim">ملفك لدى ' + esc(S.dname) + (S.code ? ' • رقم ' + esc(S.code) : '') + '. بياناتك محفوظة مشفّرة على هذا الجوال فقط.</p>' + installCard('acct') + notifCard(false) + '<div class="row"><button class="btn sm sec" data-act="lock">' + I('lock') + ' قفل التطبيق</button><button class="btn sm sec" data-act="xferNew">' + I('phone') + ' نقل حسابي</button></div><button class="link" data-act="wipe" style="color:var(--coral)">حذف بياناتي من هذا الجوال</button></section>';
+    + remCard() + '<section class="card stack"><h3>الحساب</h3><p class="dim">ملفك لدى ' + esc(S.dname) + (S.code ? ' • رقم ' + esc(S.code) : '') + '. بياناتك محفوظة مشفّرة على هذا الجوال فقط.</p>' + installCard('acct') + notifCard(false) + '<div class="row"><button class="btn sm sec" data-act="lock">' + I('lock') + ' قفل التطبيق</button><button class="btn sm sec" data-act="xferNew">' + I('phone') + ' نقل حسابي</button></div><button class="link" data-act="wipe" style="color:var(--coral)">حذف بياناتي من هذا الجوال</button></section>';
 }
 
 // ---------- التثقيف: منشورات أخصائيك (ومنشورات عامة لمراجعي «حصة» توافق عليها الإدارة) — إعجاب وتعليق
@@ -543,6 +548,50 @@ function cmSheet() {
     + '<p class="dim">التعليق يراه من يرى المنشور' + (x.mine ? ' (مراجعو أخصائيك)' : ' (مراجعو «حصة»)') + ' باسم «' + esc(S.fdAnon ? 'مراجع' : me) + '». لا تكتب بيانات صحية خاصة؛ اسأل أخصائيك عنها في «راسل الأخصائي».</p>';
 }
 async function fdComments(pid) { try { const j = await api('GET', '/v1/posts/' + pid + '/comments'); FD.cm[pid] = { list: j.comments }; } catch (e) { FD.cm[pid] = { list: [], err: e.net ? 'لا اتصال بالإنترنت' : e.message }; } if (sheet && sheet.t === 'cm' && sheet.pid === pid) render(); }
+// ---------- صور الوجبات: تُضغط على الجوال (حوالي 100 كيلوبايت) وتُشفَّر لأخصائيك فقط؛ يبقى هنا مصغّر صغير، ويصل تعليقه عليها
+function shrink(file, dims) {
+  return new Promise((res, rej) => {
+    const im = new Image(), fr = new FileReader();           // data: لا blob: (سياسة أمان الصفحة تسمح بـ data: للصور فقط)
+    im.onload = () => { const out = dims.map(([mx, q]) => { const k = Math.min(1, mx / Math.max(im.naturalWidth, im.naturalHeight)), cv = document.createElement('canvas'); cv.width = Math.round(im.naturalWidth * k); cv.height = Math.round(im.naturalHeight * k); const g = cv.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, cv.width, cv.height); g.drawImage(im, 0, 0, cv.width, cv.height); return cv.toDataURL('image/jpeg', q); }); res(out); };
+    im.onerror = () => rej(new Error('تعذّر فتح الصورة')); fr.onload = () => { im.src = fr.result; }; fr.onerror = () => rej(new Error('تعذّر قراءة الصورة')); fr.readAsDataURL(file);
+  });
+}
+async function phTake(file, si) {
+  if (!file) return; toast('جارٍ تجهيز الصورة…');
+  try {
+    const [a, b, c, th] = await shrink(file, [[1024, 0.72], [860, 0.6], [700, 0.5], [240, 0.6]]), img = [a, b, c].find((x) => x.length < 165000) || c;
+    const id = 'p' + now().toString(36) + Math.random().toString(36).slice(2, 5), sl = dayPlan(TODAY).slots[si] || {}, d = dkey(new Date());
+    S.photos = (S.photos || []).concat([{ id, d, si, th, ts: now() }]).slice(-30);
+    send({ t: 'photo', id, d, si, slot: sl.name || '', img: img.split(',')[1] }); toast('أُرسلت صورة ' + (sl.name || 'وجبتك') + ' لأخصائيك');
+  } catch (e) { toast(e.message); }
+}
+function phStrip(si) {
+  const ps = (S.photos || []).filter((p) => p.d === dkey(new Date()) && p.si === si); if (!ps.length) return '';
+  return '<div class="phs">' + ps.map((p) => '<figure><img src="' + p.th + '" alt="صورة الوجبة"><figcaption>' + (p.cm ? '<b>' + esc(S.dname) + ':</b> ' + esc(p.cm) : S.outbox.some((q) => q.id === p.id) ? 'بانتظار الإرسال…' : 'وصلت أخصائيك ✓') + '</figcaption></figure>').join('') + '</div>';
+}
+// ---------- الوصفات: يكتبها الأخصائي لوجبات البنك (خطوات ووقت وصورة) وتصل مع الخطة
+function rcpSheet() {
+  const [d, si] = sheet.k.split('_').map(Number), s = dayPlan(d).slots[si], r = S.pm.recipes[s.meal] || {};
+  return '<div class="rcp">' + (r.img ? '<img src="/m/' + esc(r.img) + '" alt="' + esc(s.meal) + '">' : '') + (r.mins ? '<p class="dim">' + I('clock') + ' التحضير حوالي ' + (+r.mins) + ' دقيقة</p>' : '')
+    + '<h3>المقادير لك</h3><ul class="plist">' + s.lines.map((l) => '<li>' + esc(lineT(l)) + '</li>').join('') + '</ul>' + ((r.steps || []).length ? '<h3>الطريقة</h3><ol class="steps">' + r.steps.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ol>' : '') + (r.tip ? '<div class="banner ok">' + I('sparkle') + '<span>' + esc(r.tip) + '</span></div>' : '') + '</div>';
+}
+// ---------- التذكيرات: الماء كل ساعتين والوجبات في أوقات خطتك — تصل والتطبيق مغلق (المحطة تعرف الأوقات فقط)
+const WATER = [600, 720, 840, 960, 1080, 1200];
+function remItems() {
+  const it = []; if (S.rem && S.rem.water) WATER.forEach((m) => it.push({ m, t: 'water' }));
+  if (S.rem && S.rem.meals && S.plan) dayPlan(TODAY).slots.forEach((s) => { const x = /^(\d{1,2}):(\d{2})/.exec(s.time || ''); if (x) it.push({ m: (Math.round((+x[1] * 60 + +x[2]) / 15) * 15) % 1440, t: 'meal', label: s.name }); });
+  return it;
+}
+async function remSync(force) {
+  if (!S || !S.cid) return; const it = remItems(), off = new Date().getTimezoneOffset(), sig = JSON.stringify(it) + off; if (!force && sig === S.remSig) return;
+  try { if ('caches' in window) await (await caches.open('hissati-rem')).put('/rem', new Response(JSON.stringify({ items: it }), { headers: { 'content-type': 'application/json' } })); } catch (e) { }
+  try { await api('POST', '/v1/remind', { mins: it.map((x) => ((x.m + off) % 1440 + 1440) % 1440) }); S.remSig = sig; save(); } catch (e) { }
+}
+function remCard() {
+  const tg = (k, t, d) => '<label class="remrow"><span><b>' + t + '</b><span class="dim">' + d + '</span></span><input type="checkbox" class="sw" data-rem="' + k + '"' + (S.rem && S.rem[k] ? ' checked' : '') + '></label>';
+  return '<section class="card stack"><h3>' + I('bell') + ' التذكيرات</h3>' + tg('water', 'شرب الماء', 'كل ساعتين من 10 صباحاً إلى 8 مساءً') + tg('meals', 'مواعيد الوجبات', 'في أوقات وجبات خطتك')
+    + (pushState() === 'on' ? '<p class="dim">تصلك والتطبيق مغلق.</p>' : '<p class="dim">تحتاج تفعيل الإشعارات؛ يُطلب الإذن عند التشغيل.</p>') + '</section>';
+}
 // ---------- الأوراق السفلية
 function sheetHtml() {
   if (!sheet) return '';
@@ -566,6 +615,8 @@ function sheetHtml() {
       : '<p class="mut">لنقل «حصتي» إلى التطبيق المثبّت على الشاشة الرئيسية، أو إلى جوال جديد:</p><ol class="steps"><li>انسخ هذا الرمز</li><li>افتح «حصتي» هناك واختر «لديّ حساب في متصفح أو جوال آخر»</li><li>ألصق الرمز واختر رمز دخول</li></ol>'
       + '<div class="xcode" dir="ltr">' + esc(sheet.code) + '</div><button class="btn" data-act="copyXfer">' + I('copy') + ' نسخ الرمز</button>'
       + '<p class="dim">الرمز صالح 15 دقيقة ولمرة واحدة، ويحمل مفتاح فك التشفير فلا ترسله لأحد. بعد النقل يُمسح الحساب من هنا تلقائياً.</p>';
+  } else if (sheet.t === 'rcp') {
+    const [d0, s0] = sheet.k.split('_').map(Number); h = esc(dayPlan(d0).slots[s0].meal); b = rcpSheet();
   } else if (sheet.t === 'cm') {
     h = 'التعليقات'; b = cmSheet();
   } else if (sheet.t === 'forgot') {
@@ -631,7 +682,7 @@ function render() {
   if (S && K) save();
 }
 let focusChat = false;
-function startLoop() { clearInterval(V.timer); V.timer = setInterval(() => { if (!document.hidden) { poll(); if (now() - FD.at > 5 * 60000) fdLoad().then(render); } }, POLL); poll(); fdLoad().then(render); pushSetup(false).then((st) => { if (st === 'on') render(); }); }
+function startLoop() { clearInterval(V.timer); V.timer = setInterval(() => { if (!document.hidden) { poll(); if (now() - FD.at > 5 * 60000) fdLoad().then(render); } }, POLL); poll(); fdLoad().then(render); pushSetup(false).then((st) => { if (st === 'on') render(); remSync(); }); }
 
 // ---------- رمز الدخول: الإنشاء والفتح
 async function onPin() {
@@ -765,6 +816,8 @@ document.addEventListener('click', (e) => {
       }).then(() => { V.busy = false; render(); return pushSetup(true); }).then(render).catch(() => { });
       return;
     }
+    case 'photo': { const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'; inp.setAttribute('capture', 'environment'); inp.style.display = 'none'; document.body.appendChild(inp); inp.onchange = () => { phTake(inp.files && inp.files[0], +v); inp.remove(); }; inp.click(); return; }
+    case 'rcp': sheet = { t: 'rcp', k: v }; break;
     case 'fdRefresh': FD.at = 0; render(); fdLoad().then(render); return;
     case 'fdMore': fdLoad(true).then(render); render(); return;
     case 'fdPlay': FD.play[+v] = 1; break;
@@ -809,6 +862,10 @@ document.addEventListener('change', (e) => {
   const t = e.target;
   if (t.dataset.act === 'pickmeal' && t.value) { const arr = S.p[t.dataset.k][t.dataset.v]; if (!arr.includes(t.value)) arr.push(t.value); render(); }
   if (t.dataset.act === 'consent') { S.consent = t.checked; render(); }
+  if (t.dataset.rem) {
+    S.rem = Object.assign({ water: false, meals: false }, S.rem); S.rem[t.dataset.rem] = t.checked; save();
+    (t.checked && pushState() !== 'on' ? pushSetup(true) : Promise.resolve(pushState())).then((st) => { if (t.checked && st !== 'on') toast(st === 'denied' ? 'الإشعارات محظورة من إعدادات المتصفح — فعّلها ليصلك التذكير' : 'فعّل الإشعارات ليصلك التذكير والتطبيق مغلق'); return remSync(true); }).then(() => { if (t.checked) toast(t.dataset.rem === 'water' ? 'سيصلك تذكير الماء كل ساعتين 💧' : 'سيصلك تذكير في أوقات وجباتك 🍽'); render(); });
+  }
   if (t.dataset.sch) { const x = sched()[+t.dataset.sch]; x.type = t.value; if (t.value === dayTypes()[0]) { x.min = 0; x.time = ''; } else if (!x.min) { x.min = 60; x.time = x.time || '17:00'; } render(); }
 });
 document.addEventListener('input', (e) => {               // التقاط أولاً: تحويل الأرقام العربية قبل أي قراءة للقيمة

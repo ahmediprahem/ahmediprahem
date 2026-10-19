@@ -174,5 +174,24 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); };
     await c5(ca, 'POST', '/v1/posts/' + pBpub.id + '/like', { on: 1 }); await c5(A, 'POST', '/v1/clients/remove', { cid: ca.id }); assert.deepStrictEqual([(await c5(B, 'GET', '/v1/feed')).j.posts.find((x) => x.id === pBpub.id)].map((x) => [x.likes, x.comments])[0], [0, 0], 'العدّادات تُصحَّح'); assert.strictEqual(env5.DB._raw.prepare('SELECT COUNT(*) AS n FROM comments WHERE uid = ?').get(ca.id).n, 0, 'فصل العميل يحذف تعليقاته');
     ok('التفاعل: إعجاب واحد لكل شخص ويُلغى، التعليق باسم المراجع وتعليق الأخصائي مميّز، لا تعليق على ما لا تراه، صاحب المنشور يحذف التعليقات، وحذف المنشور يحذف صوره وتعليقاته، وفصل العميل يحذف تعليقاته');
   }
+  // 12) التذكيرات: العميل يحفظ أوقاته (مقرّبة لربع ساعة)، والمشغّل المجدول يرسل إشعاراً بلا محتوى لمن حان وقته فقط، وعامل الخدمة يعرف أنه تذكير
+  {
+    const env7 = { DB: d1() }; W._test.reset(); const sent = [], rf = globalThis.fetch; globalThis.fetch = async (u) => { sent.push(String(u)); return new Response(null, { status: 201 }); };
+    const c7 = async (ident, method, p, obj) => { const body = obj === undefined ? '' : JSON.stringify(obj), h = { 'content-type': 'application/json' }; if (ident) h.authorization = await HXC.signReq(ident, method, p, body); const r = await W.default.fetch(new Request(base + p, { method, headers: h, body: method === 'POST' ? body : undefined }), env7); return { s: r.status, j: await r.json().catch(() => null) }; };
+    const D = await HXC.genIdentity(), C1 = await HXC.genIdentity(), C2 = await HXC.genIdentity(); await c7(D, 'POST', '/v1/register', { sigPub: D.sigPub, encPub: D.encPub, name: 'د' });
+    for (const C of [C1, C2]) { const t = HXC.token(); await c7(D, 'POST', '/v1/invites', { h: await HXC.tokenHash(t), label: 'ع' }); await c7(C, 'POST', '/v1/join', { token: t, sigPub: C.sigPub, encPub: C.encPub }); }
+    const ep1 = 'https://fcm.googleapis.com/fcm/send/rem-c1-0001', ep2 = 'https://fcm.googleapis.com/fcm/send/rem-c2-0002';
+    await c7(C1, 'POST', '/v1/push/sub', { ep: ep1 }); await c7(C2, 'POST', '/v1/push/sub', { ep: ep2 });
+    assert.strictEqual((await c7(D, 'POST', '/v1/remind', { mins: [360] })).s, 403);
+    assert.deepStrictEqual((await c7(C1, 'POST', '/v1/remind', { mins: [360, 360, 487, 600, -15, 2000, 'x'] })).j.mins, [360, 600], 'ربع ساعة فقط وبلا تكرار');
+    await c7(C2, 'POST', '/v1/remind', { mins: [615] });
+    const at = (m) => Date.UTC(2026, 9, 19, 0, 0) + m * 60000 + 7000;
+    assert.strictEqual(await W.remindTick(env7, at(360)), 1); assert.deepStrictEqual(sent, [ep1]);
+    assert.strictEqual((await c7(null, 'GET', '/v1/push/last?ep=' + encodeURIComponent(ep1))).j.kind, 'rem'); assert.strictEqual((await c7(null, 'GET', '/v1/push/last?ep=' + encodeURIComponent(ep2))).j.kind, 'msg');
+    assert.strictEqual(await W.default.scheduled({ scheduledTime: at(615) }, env7, null), 1); assert.strictEqual(sent[1], ep2); assert.strictEqual(await W.remindTick(env7, at(375)), 0);
+    await c7(C1, 'POST', '/v1/remind', { mins: [] }); assert.strictEqual(await W.remindTick(env7, at(600)), 0, 'الإيقاف يحذف التذكيرات');
+    await c7(C2, 'POST', '/v1/clients/remove', {}); assert.strictEqual(env7.DB._raw.prepare('SELECT COUNT(*) AS n FROM remind').get().n, 0);
+    globalThis.fetch = rf; ok('التذكيرات: للعميل فقط، أوقات بربع ساعة، المشغّل المجدول يُشعر من حان وقته فقط، وعامل الخدمة يعرف أنه تذكير لا رسالة، والإيقاف أو حذف الحساب يمسحها');
+  }
   console.log('\nنجح', n, 'اختبارات المحطة الوسيطة');
 })().catch((e) => { console.log('✘', e && e.stack ? e.stack.split('\n').slice(0, 4).join(' | ') : e); process.exit(1); });

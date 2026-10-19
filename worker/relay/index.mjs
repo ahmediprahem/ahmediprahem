@@ -4,12 +4,12 @@
    - تقدّم تطبيق «حصتي» نفسه على الصفحة الرئيسية (/)، فرابط الدعوة = عنوان هذه المحطة.
    - الجداول تُنشأ تلقائياً أول مرة؛ يكفي ربط قاعدة D1 باسم DB. متغير اختياري REG_KEY: مفتاح تسجيل الأخصائيين (بدونه يقبل أي «حصة»).
    - لا تسجّل أي محتوى (لا console.log). يُبنى منه worker/relay/dist/worker.js بـ py build_web.py (يُضمَّن تطبيق «حصتي» وأيقونته). */
-const VER = '1.4';
+const VER = '1.5';
 const APP_HTML = /*HISSATI_HTML*/'<!doctype html><meta charset="utf-8"><title>حصتي</title><p>ابنِ الملف بـ py build_web.py</p>'/*END*/;
 const ICON_B64 = /*HISSATI_ICON*/''/*END*/;
 const SW_JS = /*HISSATI_SW*/''/*END*/;
 const ICONS = /*HISSATI_ICONS*/{}/*END*/;                          // أيقونات التثبيت من المتصفح: icon-192 / icon-512 / maskable-512 / apple-180
-const LIM = { chunk: 900000, chunks: 40, keep: 7, xfer: 1500000, xferTtl: 900, body: 1600000, box: 450000, cat: 300000, label: 80, invitesActive: 300, perHour: 400, inbox: 100, skew: 300 };
+const LIM = { remind: 24, chunk: 900000, chunks: 40, keep: 7, xfer: 1500000, xferTtl: 900, body: 1600000, box: 450000, cat: 300000, label: 80, invitesActive: 300, perHour: 400, inbox: 100, skew: 300 };
 const enc = new TextEncoder();
 const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-methods': 'GET, POST, OPTIONS', 'access-control-allow-headers': 'authorization, content-type', 'access-control-max-age': '86400' };
 const json = (o, status = 200) => new Response(JSON.stringify(o), { status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', ...CORS } });
@@ -55,10 +55,12 @@ const SCHEMA = [
   'CREATE TABLE IF NOT EXISTS comments (id INTEGER PRIMARY KEY AUTOINCREMENT, pid INTEGER NOT NULL, uid TEXT NOT NULL, name TEXT, dr INTEGER DEFAULT 0, body TEXT, created INTEGER)',
   'CREATE INDEX IF NOT EXISTS comments_pid ON comments (pid, id)',
   'CREATE TABLE IF NOT EXISTS media (key TEXT PRIMARY KEY, did TEXT NOT NULL, type TEXT, size INTEGER, store TEXT, data TEXT, created INTEGER)',
+  'CREATE TABLE IF NOT EXISTS remind (id TEXT PRIMARY KEY, mins TEXT NOT NULL, upd INTEGER)',
   'CREATE TABLE IF NOT EXISTS vault_chunks (vid TEXT NOT NULL, up TEXT NOT NULL, idx INTEGER NOT NULL, data TEXT NOT NULL, ts INTEGER, PRIMARY KEY (vid, up, idx))'
 ];
 let ready = null;
-const init = (db) => ready || (ready = (async () => { for (const q of SCHEMA) await db.prepare(q).run(); })().catch((e) => { ready = null; throw e; }));
+const MIGRATE = ['ALTER TABLE push_subs ADD COLUMN kind TEXT'];          // جداول قديمة: أعمدة جديدة (يُتجاهل الخطأ إن وُجد العمود)
+const init = (db) => ready || (ready = (async () => { for (const q of SCHEMA) await db.prepare(q).run(); for (const q of MIGRATE) { try { await db.prepare(q).run(); } catch { } } })().catch((e) => { ready = null; throw e; }));
 const one = (db, q, ...a) => db.prepare(q).bind(...a).first();
 const all = async (db, q, ...a) => (await db.prepare(q).bind(...a).all()).results || [];
 const run = (db, q, ...a) => db.prepare(q).bind(...a).run();
@@ -99,12 +101,12 @@ async function vapidAuth(db, aud, sub) {
   const sig = await crypto.subtle.sign({ name: 'ECDSA', hash: 'SHA-256' }, v.key, enc.encode(unsigned));
   const h = 'vapid t=' + unsigned + '.' + b64u(sig) + ', k=' + v.pub; jwtC.set(aud, { h, exp }); return h;
 }
-async function pushTo(db, id, origin) {
+async function pushTo(db, id, origin, kind) {
   const rows = await all(db, 'SELECT ep, last FROM push_subs WHERE id = ?', id), t = now();
   await Promise.all(rows.filter((r) => t - (r.last || 0) >= PUSH.gap).map(async (r) => {
     try {
       const res = await fetch(r.ep, { method: 'POST', headers: { TTL: '86400', Urgency: 'high', 'Content-Length': '0', Authorization: await vapidAuth(db, new URL(r.ep).origin, origin) } });
-      if (res.status === 404 || res.status === 410) await run(db, 'DELETE FROM push_subs WHERE ep = ?', r.ep); else await run(db, 'UPDATE push_subs SET last = ? WHERE ep = ?', t, r.ep);
+      if (res.status === 404 || res.status === 410) await run(db, 'DELETE FROM push_subs WHERE ep = ?', r.ep); else await run(db, 'UPDATE push_subs SET last = ?, kind = ? WHERE ep = ?', t, kind || 'msg', r.ep);
     } catch { /* خدمة الإشعارات غير متاحة: تُعاد المحاولة مع الرسالة التالية */ }
   }));
 }
@@ -166,6 +168,9 @@ async function api(req, env, url, ctx) {
     const c = await one(db, 'SELECT data FROM vault_chunks WHERE vid = ? AND up = ? AND idx = ?', x.vid, vr.up, +J.idx || 0); if (!c) return err(404, 'nochunk', 'جزء مفقود');
     return json({ ok: true, n: vr.n, data: c.data });
   }
+  if (p === '/v1/push/last' && method === 'GET') {               // عامل الخدمة يسأل: هل آخر إشعار لهذا الجهاز تذكير أم جديد من الأخصائي؟ (يعرف عنوان اشتراكه فقط)
+    const r = await one(db, 'SELECT kind, last FROM push_subs WHERE ep = ?', String(url.searchParams.get('ep') || '')); return json({ ok: true, kind: r ? r.kind || 'msg' : 'msg', at: r ? r.last : 0 });
+  }
   if (p === '/v1/push/key' && method === 'GET') return json({ ok: true, key: (await vapid(db)).pub });
   // كل ما يلي يحتاج طرفاً مسجّلاً
   const a = await authed(req, db, path, body); if (a.e) return a.e; const me = a.who;
@@ -211,6 +216,12 @@ async function api(req, env, url, ctx) {
     const old = await all(db, 'SELECT ep FROM push_subs WHERE id = ? ORDER BY created DESC LIMIT -1 OFFSET ?', me.id, PUSH.perId); for (const o of old) await run(db, 'DELETE FROM push_subs WHERE ep = ?', o.ep);
     return json({ ok: true });
   }
+  if (p === '/v1/remind' && method === 'POST') {                  // تذكيرات العميل (الماء والوجبات): دقائق اليوم بتوقيت UTC مقرّبة لربع ساعة؛ المحطة لا تعرف إلا الأوقات
+    if (me.role !== 'c') return err(403, 'role', 'للعميل فقط');
+    const mins = [...new Set((Array.isArray(J.mins) ? J.mins : []).map((x) => Math.round(+x)).filter((x) => x >= 0 && x < 1440 && x % 15 === 0))].sort((a, b) => a - b).slice(0, LIM.remind);
+    if (mins.length) await run(db, 'INSERT INTO remind (id, mins, upd) VALUES (?, ?, ?) ON CONFLICT(id) DO UPDATE SET mins = excluded.mins, upd = excluded.upd', me.id, JSON.stringify(mins), now()); else await run(db, 'DELETE FROM remind WHERE id = ?', me.id);
+    await run(db, "INSERT OR REPLACE INTO kv (k, v) VALUES ('origin', ?)", origin); return json({ ok: true, mins });
+  }
   if (p === '/v1/push/unsub' && method === 'POST') { await run(db, 'DELETE FROM push_subs WHERE ep = ? AND id = ?', String(J.ep || ''), me.id); return json({ ok: true }); }
   if (p === '/v1/send' && method === 'POST') {
     const to = String(J.to || ''), box = J.box; if (!box || typeof box !== 'object') return err(400, 'box', 'رسالة فارغة');
@@ -230,7 +241,7 @@ async function api(req, env, url, ctx) {
   if (p === '/v1/clients/remove' && method === 'POST') {          // الأخصائي يفصل عميلاً (أو العميل يحذف نفسه): تُحذف بياناته ورسائله من المحطة
     const cid = me.role === 'c' ? me.id : String(J.cid || ''), c = await one(db, 'SELECT did FROM clients WHERE id = ?', cid);
     if (!c || (me.role === 'd' && c.did !== me.id)) return err(404, 'client', 'غير موجود');
-    await db.batch([db.prepare('DELETE FROM msgs WHERE rcpt = ? OR sender = ?').bind(cid, cid), db.prepare('DELETE FROM push_subs WHERE id = ?').bind(cid), db.prepare('DELETE FROM xfer WHERE cid = ?').bind(cid), db.prepare('UPDATE posts SET likes = MAX(0, likes - (SELECT COUNT(*) FROM post_likes WHERE pid = posts.id AND uid = ?)), comments = MAX(0, comments - (SELECT COUNT(*) FROM comments WHERE pid = posts.id AND uid = ?))').bind(cid, cid), db.prepare('DELETE FROM post_likes WHERE uid = ?').bind(cid), db.prepare('DELETE FROM comments WHERE uid = ?').bind(cid), db.prepare('DELETE FROM clients WHERE id = ?').bind(cid)]);
+    await db.batch([db.prepare('DELETE FROM msgs WHERE rcpt = ? OR sender = ?').bind(cid, cid), db.prepare('DELETE FROM push_subs WHERE id = ?').bind(cid), db.prepare('DELETE FROM remind WHERE id = ?').bind(cid), db.prepare('DELETE FROM xfer WHERE cid = ?').bind(cid), db.prepare('UPDATE posts SET likes = MAX(0, likes - (SELECT COUNT(*) FROM post_likes WHERE pid = posts.id AND uid = ?)), comments = MAX(0, comments - (SELECT COUNT(*) FROM comments WHERE pid = posts.id AND uid = ?))').bind(cid, cid), db.prepare('DELETE FROM post_likes WHERE uid = ?').bind(cid), db.prepare('DELETE FROM comments WHERE uid = ?').bind(cid), db.prepare('DELETE FROM clients WHERE id = ?').bind(cid)]);
     return json({ ok: true });
   }
   const fr = await feedApi(p, method, J, me, db, env, url, bg, origin); if (fr) return fr;
@@ -287,7 +298,7 @@ async function feedApi(p, method, J, me, db, env, url, bg, origin) {
     if (!title && !bodyT && !media.length && !link) return err(400, 'empty', 'المنشور فارغ');
     const status = scope === 'public' && !isMod ? 'pending' : 'live';
     const r = await run(db, 'INSERT INTO posts (did, scope, status, kind, title, body, media, link, created) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', me.id, scope, status, kind, title, bodyT, JSON.stringify(media), link, now());
-    if (status === 'live') bg((async () => { const cs = await all(db, 'SELECT DISTINCT s.id FROM push_subs s JOIN clients c ON c.id = s.id WHERE c.did = ? ORDER BY s.created DESC LIMIT ?', me.id, FEED.push); for (const c of cs) await pushTo(db, c.id, origin); })());
+    if (status === 'live') bg((async () => { const cs = await all(db, 'SELECT DISTINCT s.id FROM push_subs s JOIN clients c ON c.id = s.id WHERE c.did = ? ORDER BY s.created DESC LIMIT ?', me.id, FEED.push); for (const c of cs) await pushTo(db, c.id, origin, 'feed'); })());
     return json({ ok: true, id: r.meta && r.meta.last_row_id, status });
   }
   const mP = /^\/v1\/posts\/(\d+)\/(like|comments|delete)$/.exec(p);
@@ -342,7 +353,15 @@ function appPage(url) {
   if (url.pathname === '/robots.txt') return new Response('User-agent: *\nDisallow: /\n', { headers: { 'content-type': 'text/plain' } });
   return null;
 }
+// ---------- التذكيرات المجدولة: مشغّل Cron كل ربع ساعة (*/15 * * * *) يرسل إشعاراً بلا محتوى لمن حان وقت تذكيره، وعامل الخدمة يعرض «وقت الماء/الوجبة»
+export async function remindTick(env, at) {
+  const db = env.DB; if (!db) return 0; await init(db);
+  const m = Math.floor(((at || Date.now()) / 60000) % 1440 / 15) * 15, o = await one(db, "SELECT v FROM kv WHERE k = 'origin'"), origin = o ? o.v : 'https://hissati.workers.dev';
+  const rows = (await all(db, 'SELECT id, mins FROM remind')).filter((r) => JSON.parse(r.mins).includes(m));
+  for (const r of rows) await pushTo(db, r.id, origin, 'rem'); return rows.length;
+}
 export default {
+  async scheduled(event, env, ctx) { const p = remindTick(env, event && event.scheduledTime).catch(() => 0); if (ctx && ctx.waitUntil) ctx.waitUntil(p); return p; },
   async fetch(req, env, ctx) {
     const url = new URL(req.url);
     if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS });

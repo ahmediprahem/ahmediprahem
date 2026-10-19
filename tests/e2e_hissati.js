@@ -200,6 +200,34 @@ const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html'));
     assert.strictEqual(env.DB._raw.prepare('SELECT COUNT(*) AS n FROM media').get().n, 0, 'حذف المنشور يحذف صوره'); await ip.click('[data-act="fdRefresh"]'); await ip.waitForFunction(() => !document.body.textContent.includes('طبق متوازن'));
     ok('المنشور العام من أخصائي آخر لا يظهر للمراجعين قبل موافقة الإدارة؛ يظهر للإدارة في «المراجعة» بشارة، وبعد الاعتماد يصل مراجعي «حصة» «منشوراً عاماً»؛ وحذف المنشور يحذفه وصوره');
   }
+  // ---- المرحلة 5: وصفة بصورة من محرر الحصص ← تصل مع الخطة وتُفتح بلمس الوجبة؛ صورة وجبة مشفّرة من «حصتي» ← تعليق سريع من «حصة»؛ تذكير الماء
+  {
+    const tgt = await d.evaluate(() => { const c = DPApp.S.clients.find((x) => x.name === 'سارة أحمد'), day = c.plan.days[new Date().getDay()], s = day.slots.find((q) => q.meal); return { meal: s && s.meal, code: c.code }; });
+    assert(tgt.meal, 'وجبة من البنك في خطة اليوم');
+    await d.click('.rail [data-a="bank"]'); await d.waitForSelector('.bkr', { state: 'attached' });
+    await d.evaluate((n) => { const el = [...document.querySelectorAll('.bkr')].find((r) => r.querySelector('.bkn b').textContent === n); el.querySelector('[data-a="rcEdit"]').click(); }, tgt.meal); await d.waitForSelector('.rced');
+    await d.fill('#rc_steps', 'سخّن المقلاة\nأضف المكونات وقلّب 5 دقائق'); await d.fill('#rc_mins', '١٥'); await d.setInputFiles('#rc_file', path.resolve(__dirname, '../assets/hissati/icon-512.png')); await d.waitForSelector('.rcimg img');
+    await d.click('[data-a="rcSave"]'); await d.waitForSelector('.toast:has-text("حُفظت الوصفة")'); assert(await d.isVisible('.bkr:has-text("' + tgt.meal + '") .rcon'));
+    await d.evaluate((code) => DPApp.A.pick(code), tgt.code); await d.click('main .tabs [data-v="hx"]'); const m0 = env.DB._raw.prepare('SELECT COUNT(*) AS n FROM media').get().n;
+    await d.click('[data-a="hxSendPlan"]'); await d.waitForSelector('text=آخر خطة أُرسلت: v2'); assert.strictEqual(env.DB._raw.prepare('SELECT COUNT(*) AS n FROM media').get().n, m0 + 1, 'صورة الوصفة رُفعت مرة');
+    assert(await d.evaluate(() => Object.values(DPApp.S.settings.recipes)[0].key.length === 24));
+    await ip.evaluate(() => window.HissatiApp.poll()); await ip.click('[data-act="tab"][data-v="today"]'); await ip.waitForSelector('[data-act="rcp"]');
+    await ip.locator('[data-act="rcp"]').first().click(); await ip.waitForSelector('.rcp'); const rt = await ip.textContent('.rcp'); assert(rt.includes('أضف المكونات وقلّب') && rt.includes('15 دقيقة') && rt.includes('المقادير لك'), rt);
+    await ip.waitForFunction(() => { const i = document.querySelector('.rcp img'); return i && i.complete && i.naturalWidth > 100; }); await shot(ip, 'c13_recipe'); await ip.click('.sheet [data-act="close"]');
+    ok('الوصفات: تُكتب لوجبة البنك بخطوات ووقت (أرقام عربية) وصورة تُضغط، وتُرفع صورتها مرة عند إرسال الخطة، وتظهر في «حصتي» بلمس «الوصفة» مع مقادير العميل من خطته');
+    const [fc] = await Promise.all([ip.waitForEvent('filechooser'), ip.locator('[data-act="photo"]').first().click()]); await fc.setFiles(path.resolve(__dirname, '../assets/hissati/icon-512.png'));
+    await ip.waitForSelector('.toast:has-text("أُرسلت صورة")'); await ip.evaluate(() => window.HissatiApp.flush()); await ip.waitForSelector('.phs figure img');
+    const raw = env.DB._raw.prepare("SELECT body FROM msgs WHERE kind = 'e' ORDER BY id DESC LIMIT 1").get().body; assert(raw.length > 5000 && !raw.includes('/9j/'), 'الصورة مشفّرة');
+    await hxCheck(); await d.waitForSelector('.phgrid figure.new img'); assert(await d.evaluate(() => document.querySelector('.phgrid img').src.startsWith('data:image/jpeg;base64,')));
+    await d.click('.phgrid [data-a="phCm"] >> nth=0'); await d.waitForSelector('.phcm:has-text("ممتاز")');
+    await ip.evaluate(() => window.HissatiApp.poll()); await ip.waitForSelector('.phs figcaption:has-text("ممتاز")'); await shot(ip, 'c14_photo');
+    ok('صور الوجبات: «صوّر وجبتك» تُضغط وتُرسل مشفّرة (المحطة لا ترى JPEG)، وتظهر في ملف العميل بـ«حصة»، والتعليق السريع يصل تحت الصورة في «حصتي»');
+    await ip.click('[data-act="tab"][data-v="progress"]'); await ip.check('[data-rem="water"]'); const remRow = async (n) => { for (let i = 0; i < 80; i++) { const r = env.DB._raw.prepare('SELECT mins FROM remind').get(); if (r && JSON.parse(r.mins).length >= n) return r; await new Promise((z) => setTimeout(z, 100)); } return null; }; await remRow(6);
+    const rr = env.DB._raw.prepare('SELECT mins FROM remind').get(); assert.strictEqual(JSON.parse(rr.mins).length, 6);
+    const cache = await ip.evaluate(async () => (await (await caches.open('hissati-rem')).match('/rem')).json()); assert.strictEqual(cache.items.filter((x) => x.t === 'water').length, 6);
+    await ip.check('[data-rem="meals"]'); assert(await remRow(7), 'أوقات الوجبات أُضيفت');
+    ok('التذكيرات: الماء كل ساعتين والوجبات في أوقات الخطة — تُحفظ أوقاتها بتوقيت UTC في المحطة، ونصوصها في عامل الخدمة');
+  }
   await ictx.close(); await jctx.close();
   site.close(); globalThis.fetch = realFetch;
   assert.deepStrictEqual(errs, [], errs.join(' | ')); ok('لا أخطاء في وحدة التحكم');

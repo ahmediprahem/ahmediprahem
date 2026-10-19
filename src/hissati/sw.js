@@ -1,19 +1,31 @@
 // عامل الخدمة لـ«حصتي» (تقدّمه المحطة على /sw.js): إشعارات والتطبيق مغلق، وفتح سريع وبلا إنترنت.
 // الإشعار بلا محتوى عمداً: لا تمر بيانات صحية عبر خدمات الإشعارات؛ والبيانات نفسها مشفّرة برمز الدخول فلا يقرؤها عامل الخدمة أصلاً.
-const C = 'hissati-v2';
+const C = 'hissati-v3';
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(C).then((c) => c.addAll(['/', '/icon.png'])).catch(() => { }).then(() => self.skipWaiting())); });
-self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== C).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });
+self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== C && k !== 'hissati-rem').map((k) => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', (e) => {                // الشبكة أولاً (أحدث نسخة دائماً)، والنسخة المحفوظة عند انقطاع الإنترنت. واجهة البيانات (/v1/) لا تُخزَّن أبداً
   const r = e.request, u = new URL(r.url); if (r.method !== 'GET' || u.origin !== location.origin || u.pathname.startsWith('/v1/')) return;
   const key = r.mode === 'navigate' || u.pathname === '/' || u.pathname === '/index.html' ? '/' : u.pathname === '/icon.png' ? '/icon.png' : null; if (!key) return;
   e.respondWith(fetch(r).then((res) => { if (res.ok) { const cp = res.clone(); caches.open(C).then((c) => c.put(key, cp)); } return res; }).catch(() => caches.match(key)));
 });
+// نوع الإشعار يُسأل عنه من المحطة بعنوان الاشتراك (بلا محتوى عبر Google/Apple): تذكير ماء/وجبة، منشور تثقيفي، أو جديد من الأخصائي.
+// أوقات التذكير يحفظها التطبيق هنا (hissati-rem) فيُعرض نص التذكير الأقرب للوقت الحالي.
+async function remText() {
+  try {
+    const r = await (await caches.open('hissati-rem')).match('/rem'); if (!r) return null; const it = (await r.json()).items || [], d = new Date(), m = d.getHours() * 60 + d.getMinutes();
+    let best = null, bd = 1e9; it.forEach((x) => { const dd = Math.min(Math.abs(x.m - m), 1440 - Math.abs(x.m - m)); if (dd < bd) { bd = dd; best = x; } }); return best && bd <= 25 ? best : null;
+  } catch (e) { return null; }
+}
 self.addEventListener('push', (e) => {
   e.waitUntil((async () => {
+    let kind = 'msg';
+    try { const sub = await self.registration.pushManager.getSubscription(); if (sub) kind = (await (await fetch('/v1/push/last?ep=' + encodeURIComponent(sub.endpoint), { cache: 'no-store' })).json()).kind || 'msg'; } catch (x) { }
+    const rem = kind === 'rem' ? await remText() : null; if (kind === 'rem' && !rem) return;           // تذكير أُلغي من الجوال: لا شيء
     const cl = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
-    cl.forEach((c) => c.postMessage({ t: 'push' }));                       // التطبيق المفتوح يجلب الجديد فوراً
+    const body = rem ? (rem.t === 'water' ? '💧 وقت كوب ماء — سجّله في «حصتي»' : '🍽 حان وقت ' + (rem.label || 'وجبتك') + ' — افتح خطتك') : kind === 'feed' ? '📣 منشور تثقيفي جديد من أخصائيك' : 'لديك جديد من أخصائيك — افتح «حصتي»';
+    cl.forEach((c) => c.postMessage(rem ? { t: 'rem', text: body } : { t: 'push', kind }));          // التطبيق المفتوح يجلب الجديد فوراً (أو يعرض التذكير)
     if (cl.some((c) => c.visibilityState === 'visible')) return;          // ظاهر أمام المستخدم: يكفي التنبيه داخل التطبيق
-    await self.registration.showNotification('حصتي', { body: 'لديك جديد من أخصائيك — افتح «حصتي»', icon: '/icon.png', badge: '/icon.png', tag: 'hissati', renotify: true, lang: 'ar', dir: 'rtl' });
+    await self.registration.showNotification('حصتي', { body, icon: '/icon.png', badge: '/icon.png', tag: rem ? 'hissati-rem' : 'hissati', renotify: true, lang: 'ar', dir: 'rtl' });
   })());
 });
 self.addEventListener('notificationclick', (e) => {
