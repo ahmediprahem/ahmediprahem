@@ -1,7 +1,7 @@
 // «حصة ↔ حصتي» من طرف إلى طرف: المحطة الحقيقية (worker/relay/dist/worker.js فوق خادم محلي + D1 بديل)، و«حصة» (admin.html)، و«حصتي» على جوال.
 // الدعوة برابط واتساب ← تسجيل العميل برمز دخول وأرقام عربية ← طلب في «حصة» ← اعتماد كعميل جديد ← إرسال الخطة ← المتابعة اليومية والوزن والمحادثة والتفضيلات في الاتجاهين.
 const { fileUrl, TMP } = require('./_tmp.js');
-const { chromium, devices } = require('playwright'); const assert = require('assert'), path = require('path'), fs = require('fs'), http = require('http'), login = require('./auth_helper'), d1 = require('./d1_shim.js');
+const { chromium, devices } = require('playwright'); const assert = require('assert'), path = require('path'), fs = require('fs'), http = require('http'), login = require('./auth_helper'), d1 = require('./d1_shim.js'), HXC = require('../src/hx_crypto.js');
 let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
 const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html'));
 (async () => {
@@ -165,6 +165,41 @@ const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html'));
   await ip.evaluate(() => { const e = new Event('beforeinstallprompt', { cancelable: true }); e.prompt = () => { window.__prompted = 1; }; e.userChoice = Promise.resolve({ outcome: 'accepted' }); window.dispatchEvent(e); });
   await ip.click('[data-act="tab"][data-v="progress"]'); await ip.click('.inst [data-act="install"]'); assert.strictEqual(await ip.evaluate(() => window.__prompted), 1); await ip.waitForSelector('text=جارٍ التثبيت');
   ok('حين يتيح المتصفح التثبيت (Chrome/أندرويد) يظهر زر «تثبيت «حصتي»» ويفتح نافذة التثبيت الأصلية');
+  // ---- التثقيف: الأخصائي ينشر من «حصة» (نصيحة، صور تُضغط وتُرفع، ريلز يوتيوب) ← تبويب «تثقيف» في «حصتي» بشارة «جديد» ← إعجاب وتعليق ← رد الأخصائي ← منشور عام من أخصائي آخر ينتظر الإدارة
+  {
+    await d.click('.rail [data-a="feed"]'); await d.waitForSelector('.fdcomp'); await d.waitForSelector('.fdpage .ok:has-text("إدارة المحطة")', { timeout: 8000 });
+    await d.click('[data-a="fdKind"][data-v="tip"]'); await d.fill('#fd_title', 'اشرب الماء قبل الوجبة'); await d.fill('#fd_body', 'كوب ماء قبل الوجبة بربع ساعة يساعد على الشبع.'); await d.click('[data-a="fdPost"]'); await d.waitForSelector('.toast:has-text("نُشر")');
+    await d.click('[data-a="fdKind"][data-v="image"]'); await d.setInputFiles('#fd_files', [path.resolve(__dirname, '../assets/hissati/icon-512.png'), path.resolve(__dirname, '../assets/hissati/icon-192.png')]); await d.waitForSelector('.fdth img >> nth=1');
+    await d.fill('#fd_title', 'طبق متوازن'); await d.click('[data-a="fdPost"]'); await d.waitForSelector('.fdpost h3:has-text("طبق متوازن")');
+    const med = env.DB._raw.prepare('SELECT type, size FROM media').all(); assert.deepStrictEqual(med.map((x) => x.type), ['image/jpeg', 'image/jpeg']); assert(med.every((x) => x.size < 200000), 'الصور تُضغط');
+    await d.click('[data-a="fdKind"][data-v="reel"]'); assert((await d.textContent('.fdcomp')).includes('R2')); await d.fill('#fd_link', 'https://evil.example/x'); await d.click('[data-a="fdPost"]'); await d.waitForSelector('.toast:has-text("رابط يوتيوب غير صحيح")');
+    await d.fill('#fd_link', 'https://youtube.com/shorts/abcDEF12345'); await d.fill('#fd_title', 'وجبة خفيفة في دقيقة'); await d.click('[data-a="fdPost"]'); await d.waitForSelector('.fdpost h3:has-text("وجبة خفيفة")');
+    await d.waitForSelector('.fdimgs img[src^="blob:"]'); assert.strictEqual(await d.locator('.fdpost').count(), 3); await shot(d, 'd5_feed');
+    ok('التثقيف في «حصة»: نسخة المدير تصبح الإدارة تلقائياً، ونشر نصيحة وصور (تُضغط JPEG قبل الرفع وتُعرض من المحطة) وريلز يوتيوب (الرابط غير يوتيوب يُرفض، وملف الفيديو يحتاج R2)');
+    await ip.evaluate(() => window.HissatiApp.feedLoad()); await ip.click('[data-act="tab"][data-v="today"]'); assert.strictEqual(await ip.textContent('.tabbar [data-v="feed"] .nb'), '3');
+    await ip.click('[data-act="tab"][data-v="feed"]'); await ip.waitForSelector('.post >> nth=2'); assert.strictEqual(await ip.locator('.tabbar [data-v="feed"] .nb').count(), 0, 'الشارة تختفي بعد المشاهدة');
+    const t = await ip.textContent('.scroll'); assert(t.includes('اشرب الماء قبل الوجبة') && t.includes('د. أحمد حامد') && t.includes('من أخصائيك') && t.includes('نصيحة'));
+    await ip.waitForFunction(() => [...document.querySelectorAll('.pimgs img')].length === 2 && [...document.querySelectorAll('.pimgs img')].every((i) => i.complete && i.naturalWidth > 100));
+    await ip.click('.pyt.ph.reel'); assert((await ip.getAttribute('.pyt.reel iframe', 'src')).startsWith('https://www.youtube-nocookie.com/embed/abcDEF12345')); await shot(ip, 'c12_feed');
+    const tip = '.post:has(h3:has-text("اشرب الماء"))'; await ip.click(tip + ' [data-act="fdLike"]'); await ip.waitForFunction(() => document.querySelector('.post [data-act="fdLike"].on'));
+    await ip.waitForTimeout(300); assert.strictEqual(env.DB._raw.prepare("SELECT likes FROM posts WHERE title = 'اشرب الماء قبل الوجبة'").get().likes, 1);
+    await ip.click(tip + ' [data-act="fdCm"]'); await ip.waitForSelector('#cmIn'); assert((await ip.textContent('.sheet')).includes('«سارة»')); await ip.fill('#cmIn', 'كم كوب يكفي؟'); await ip.click('[data-act="fdCmSend"]'); await ip.waitForSelector('.cms .cm:has-text("كم كوب يكفي؟")'); assert.strictEqual(await ip.inputValue('#cmIn'), '', 'المسودة تُفرَّغ بعد النشر');
+    assert((await ip.textContent('.cms .cm')).includes('سارة')); await ip.click('.sheet [data-act="close"]');
+    ok('«حصتي»: تبويب «تثقيف» بشارة المنشورات الجديدة، الصور من المحطة، ريلز يوتيوب يُشغَّل داخل التطبيق (youtube-nocookie)، والإعجاب والتعليق باسم العميل الأول');
+    await d.click('[data-a="fdRefresh"]'); await d.waitForSelector('.fdpost:has-text("اشرب الماء") [data-a="fdCm"]:has-text("1 تعليق")'); assert((await d.textContent('.fdpost:has-text("اشرب الماء") [data-a="fdLike"]')).includes('1'));
+    await d.click('.fdpost:has-text("اشرب الماء") [data-a="fdCm"]'); await d.waitForSelector('.fdcm:has-text("كم كوب يكفي؟")'); await d.fill('[data-fdr]', 'من 6 إلى 8 أكواب يومياً'); await d.press('[data-fdr]', 'Enter'); await d.waitForSelector('.fdcm.dr:has-text("6 إلى 8")');
+    await ip.click(tip + ' [data-act="fdCm"]'); await ip.waitForSelector('.cm.dr:has-text("6 إلى 8")'); assert((await ip.textContent('.cm.dr')).includes('أخصائي')); await ip.click('.sheet [data-act="close"]');
+    ok('الأخصائي يرى الإعجاب والتعليق ويرد من «حصة»، ويظهر رده مميزاً «أخصائي» في «حصتي»');
+    const B = await HXC.genIdentity(), callB = async (method, p, obj) => { const body = obj === undefined ? '' : JSON.stringify(obj); const r = await realFetch(RELAY + p, { method, headers: { 'content-type': 'application/json', authorization: await HXC.signReq(B, method, p, body) }, body: method === 'POST' ? body : undefined }); return r.json(); };
+    await callB('POST', '/v1/register', { sigPub: B.sigPub, encPub: B.encPub, name: 'د. منى', regKey: 'clinic-key' }); assert.strictEqual((await callB('POST', '/v1/posts', { kind: 'text', title: 'الألياف وصحة الأمعاء', body: 'نص', scope: 'public' })).status, 'pending');
+    await ip.evaluate(() => window.HissatiApp.feedLoad()); assert(!(await ip.evaluate(() => window.HissatiApp.feed().posts.some((x) => x.title === 'الألياف وصحة الأمعاء'))), 'المعلّق لا يظهر للمراجعين');
+    await d.click('[data-a="fdRefresh"]'); await d.waitForFunction(() => (document.querySelector('.rail [data-a="feed"] em') || {}).textContent === '1'); await d.click('[data-a="fdFilter"][data-v="pending"]');
+    await d.waitForSelector('.fdpost:has-text("الألياف") .fdst.wait'); await d.click('.fdpost:has-text("الألياف") [data-a="fdReview"][data-ok="1"]'); await d.waitForSelector('.toast:has-text("اعتُمد")');
+    await ip.click('[data-act="fdRefresh"]'); await ip.waitForSelector('.post:has-text("الألياف وصحة الأمعاء")'); assert((await ip.textContent('.post:has-text("الألياف")')).includes('منشور عام'));
+    await d.click('[data-a="fdFilter"][data-v="all"]'); await d.click('.fdpost:has-text("طبق متوازن") [data-a="fdDel"]'); await d.waitForSelector('.toast:has-text("حُذف المنشور")');
+    assert.strictEqual(env.DB._raw.prepare('SELECT COUNT(*) AS n FROM media').get().n, 0, 'حذف المنشور يحذف صوره'); await ip.click('[data-act="fdRefresh"]'); await ip.waitForFunction(() => !document.body.textContent.includes('طبق متوازن'));
+    ok('المنشور العام من أخصائي آخر لا يظهر للمراجعين قبل موافقة الإدارة؛ يظهر للإدارة في «المراجعة» بشارة، وبعد الاعتماد يصل مراجعي «حصة» «منشوراً عاماً»؛ وحذف المنشور يحذفه وصوره');
+  }
   await ictx.close(); await jctx.close();
   site.close(); globalThis.fetch = realFetch;
   assert.deepStrictEqual(errs, [], errs.join(' | ')); ok('لا أخطاء في وحدة التحكم');

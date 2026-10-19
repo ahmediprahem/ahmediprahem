@@ -4,7 +4,7 @@
    - تقدّم تطبيق «حصتي» نفسه على الصفحة الرئيسية (/)، فرابط الدعوة = عنوان هذه المحطة.
    - الجداول تُنشأ تلقائياً أول مرة؛ يكفي ربط قاعدة D1 باسم DB. متغير اختياري REG_KEY: مفتاح تسجيل الأخصائيين (بدونه يقبل أي «حصة»).
    - لا تسجّل أي محتوى (لا console.log). يُبنى منه worker/relay/dist/worker.js بـ py build_web.py (يُضمَّن تطبيق «حصتي» وأيقونته). */
-const VER = '1.3';
+const VER = '1.4';
 const APP_HTML = /*HISSATI_HTML*/'<!doctype html><meta charset="utf-8"><title>حصتي</title><p>ابنِ الملف بـ py build_web.py</p>'/*END*/;
 const ICON_B64 = /*HISSATI_ICON*/''/*END*/;
 const SW_JS = /*HISSATI_SW*/''/*END*/;
@@ -48,6 +48,13 @@ const SCHEMA = [
   'CREATE TABLE IF NOT EXISTS xfer (id TEXT PRIMARY KEY, cid TEXT NOT NULL, blob TEXT NOT NULL, exp INTEGER, claimed INTEGER DEFAULT 0)',
   'CREATE TABLE IF NOT EXISTS vaults (vid TEXT PRIMARY KEY, ah TEXT NOT NULL, head INTEGER DEFAULT 0, owner TEXT, created INTEGER)',
   'CREATE TABLE IF NOT EXISTS vault_vers (vid TEXT NOT NULL, ver INTEGER NOT NULL, up TEXT NOT NULL, n INTEGER, size INTEGER, dev TEXT, at INTEGER, PRIMARY KEY (vid, ver))',
+  'CREATE TABLE IF NOT EXISTS posts (id INTEGER PRIMARY KEY AUTOINCREMENT, did TEXT NOT NULL, scope TEXT NOT NULL, status TEXT NOT NULL, kind TEXT, title TEXT, body TEXT, media TEXT, link TEXT, note TEXT, likes INTEGER DEFAULT 0, comments INTEGER DEFAULT 0, created INTEGER)',
+  'CREATE INDEX IF NOT EXISTS posts_feed ON posts (status, scope, id)',
+  'CREATE INDEX IF NOT EXISTS posts_did ON posts (did, id)',
+  'CREATE TABLE IF NOT EXISTS post_likes (pid INTEGER NOT NULL, uid TEXT NOT NULL, PRIMARY KEY (pid, uid))',
+  'CREATE TABLE IF NOT EXISTS comments (id INTEGER PRIMARY KEY AUTOINCREMENT, pid INTEGER NOT NULL, uid TEXT NOT NULL, name TEXT, dr INTEGER DEFAULT 0, body TEXT, created INTEGER)',
+  'CREATE INDEX IF NOT EXISTS comments_pid ON comments (pid, id)',
+  'CREATE TABLE IF NOT EXISTS media (key TEXT PRIMARY KEY, did TEXT NOT NULL, type TEXT, size INTEGER, store TEXT, data TEXT, created INTEGER)',
   'CREATE TABLE IF NOT EXISTS vault_chunks (vid TEXT NOT NULL, up TEXT NOT NULL, idx INTEGER NOT NULL, data TEXT NOT NULL, ts INTEGER, PRIMARY KEY (vid, up, idx))'
 ];
 let ready = null;
@@ -107,6 +114,7 @@ async function api(req, env, url, ctx) {
   const bg = (pr) => { pr = pr.catch(() => { }); if (ctx && ctx.waitUntil) ctx.waitUntil(pr); return pr; }, origin = 'https://' + url.host;
   const db = env.DB; if (!db) return err(500, 'nodb', 'لم تُربط قاعدة D1 باسم DB'); await init(db);
   const p = url.pathname, path = p + url.search, method = req.method;
+  if (p === '/v1/media' && method === 'POST') return mediaUp(req, env, db, path);
   const body = method === 'POST' ? await req.text() : ''; if (body.length > LIM.body) return err(413, 'big', 'الطلب أكبر من المسموح');
   let J = {}; if (body) { try { J = JSON.parse(body); } catch { return err(400, 'json', 'صيغة غير صالحة'); } }
   if (p === '/v1/health') return json({ ok: true, ver: VER, reg: !!env.REG_KEY });
@@ -222,10 +230,103 @@ async function api(req, env, url, ctx) {
   if (p === '/v1/clients/remove' && method === 'POST') {          // الأخصائي يفصل عميلاً (أو العميل يحذف نفسه): تُحذف بياناته ورسائله من المحطة
     const cid = me.role === 'c' ? me.id : String(J.cid || ''), c = await one(db, 'SELECT did FROM clients WHERE id = ?', cid);
     if (!c || (me.role === 'd' && c.did !== me.id)) return err(404, 'client', 'غير موجود');
-    await db.batch([db.prepare('DELETE FROM msgs WHERE rcpt = ? OR sender = ?').bind(cid, cid), db.prepare('DELETE FROM push_subs WHERE id = ?').bind(cid), db.prepare('DELETE FROM xfer WHERE cid = ?').bind(cid), db.prepare('DELETE FROM clients WHERE id = ?').bind(cid)]);
+    await db.batch([db.prepare('DELETE FROM msgs WHERE rcpt = ? OR sender = ?').bind(cid, cid), db.prepare('DELETE FROM push_subs WHERE id = ?').bind(cid), db.prepare('DELETE FROM xfer WHERE cid = ?').bind(cid), db.prepare('UPDATE posts SET likes = MAX(0, likes - (SELECT COUNT(*) FROM post_likes WHERE pid = posts.id AND uid = ?)), comments = MAX(0, comments - (SELECT COUNT(*) FROM comments WHERE pid = posts.id AND uid = ?))').bind(cid, cid), db.prepare('DELETE FROM post_likes WHERE uid = ?').bind(cid), db.prepare('DELETE FROM comments WHERE uid = ?').bind(cid), db.prepare('DELETE FROM clients WHERE id = ?').bind(cid)]);
     return json({ ok: true });
   }
+  const fr = await feedApi(p, method, J, me, db, env, url, bg, origin); if (fr) return fr;
   return err(404, 'route', 'مسار غير معروف');
+}
+// ---------- التثقيف (منشورات الأخصائي لمراجعيه، أو عامة لكل مراجعي «حصة» بعد موافقة الإدارة)
+// محتوى تثقيفي عام فيُحفظ مقروءاً (بخلاف البيانات الصحية المشفّرة)، ويراه جمهوره فقط. الإدارة = أول أخصائي يطالب بالإشراف من نسخة المدير (أو MOD_ID).
+// الوسائط: الصور في D1 (مضغوطة)، والفيديو في R2 إن رُبط باسم MEDIA.
+const FEED = { img: 1200000, vid: 60000000, perDay: 60, cPerHour: 60, page: 20, title: 120, body: 5000, comment: 1000, push: 40 };
+const MTYPES = { 'image/jpeg': 'i', 'image/png': 'i', 'image/webp': 'i', 'video/mp4': 'v', 'video/webm': 'v', 'video/quicktime': 'v' };
+async function modId(db, env) { if (env.MOD_ID) return env.MOD_ID; const r = await one(db, "SELECT v FROM kv WHERE k = 'mod'"); return r ? r.v : ''; }
+async function mediaUp(req, env, db, path) {
+  const ct = String(req.headers.get('content-type') || '').split(';')[0].trim(), t = MTYPES[ct]; if (!t) return err(415, 'mtype', 'نوع الملف غير مدعوم (صور JPG/PNG/WebP أو فيديو MP4/WebM/MOV)');
+  const buf = await req.arrayBuffer(), max = t === 'i' ? FEED.img : FEED.vid; if (buf.byteLength > max) return err(413, 'big', t === 'i' ? 'الصورة أكبر من 1.2 ميغابايت بعد الضغط' : 'الفيديو أكبر من 60 ميغابايت');
+  const a = await authed(req, db, path, buf); if (a.e) return a.e; if (a.who.role !== 'd') return err(403, 'role', 'للأخصائي فقط');
+  if (t === 'v' && !env.MEDIA) return err(501, 'nor2', 'رفع الفيديو يحتاج ربط R2 بالمحطة باسم MEDIA — أو استعمل رابط يوتيوب');
+  const key = b64u(crypto.getRandomValues(new Uint8Array(18)));
+  if (env.MEDIA) { await env.MEDIA.put('m/' + key, buf, { httpMetadata: { contentType: ct, cacheControl: 'public, max-age=31536000, immutable' } }); await run(db, 'INSERT INTO media (key, did, type, size, store, created) VALUES (?, ?, ?, ?, ?, ?)', key, a.id, ct, buf.byteLength, 'r2', now()); }
+  else await run(db, 'INSERT INTO media (key, did, type, size, store, data, created) VALUES (?, ?, ?, ?, ?, ?, ?)', key, a.id, ct, buf.byteLength, 'd1', b64u(buf), now());
+  return json({ ok: true, key, type: t, url: '/m/' + key });
+}
+async function mediaGet(req, env, key) {
+  const db = env.DB; if (!db) return null; await init(db); const m = await one(db, 'SELECT type, store, data FROM media WHERE key = ?', key); if (!m) return new Response('Not found', { status: 404 });
+  const h = { 'content-type': m.type, 'cache-control': 'public, max-age=31536000, immutable', 'x-content-type-options': 'nosniff', 'accept-ranges': 'bytes', 'access-control-allow-origin': '*' };
+  if (m.store === 'd1') return new Response(unb64u(m.data), { headers: h });
+  if (!env.MEDIA) return new Response('Not found', { status: 404 });
+  const range = req.headers.get('range'), o = await env.MEDIA.get('m/' + key, range ? { range: req.headers } : undefined); if (!o) return new Response('Not found', { status: 404 });
+  if (range && o.range) { const st = o.range.offset || 0, ln = o.range.length != null ? o.range.length : o.size - st; h['content-range'] = 'bytes ' + st + '-' + (st + ln - 1) + '/' + o.size; h['content-length'] = String(ln); return new Response(o.body, { status: 206, headers: h }); }
+  return new Response(o.body, { headers: h });
+}
+async function feedApi(p, method, J, me, db, env, url, bg, origin) {
+  const mod = await modId(db, env), isMod = me.role === 'd' && mod === me.id, myDid = me.role === 'd' ? me.id : me.did;
+  const canSee = (x) => (x.status === 'live' && (x.scope === 'public' || x.did === myDid)) || (me.role === 'd' && x.did === me.id) || (isMod && x.scope === 'public');
+  const post = async (id) => one(db, 'SELECT * FROM posts WHERE id = ?', +id || 0);
+  const shape = async (rows) => { if (!rows.length) return []; const ids = rows.map((r) => r.id), liked = {}; (await all(db, 'SELECT pid FROM post_likes WHERE uid = ? AND pid IN (' + ids.map(() => '?').join(',') + ')', me.id, ...ids)).forEach((r) => { liked[r.pid] = 1; }); const names = {}; for (const r of rows) if (!names[r.did]) { const d = await one(db, 'SELECT name FROM dietitians WHERE id = ?', r.did); names[r.did] = d ? d.name : ''; }
+    return rows.map((r) => ({ id: r.id, author: names[r.did], mine: r.did === myDid, own: me.role === 'd' && r.did === me.id, scope: r.scope, status: r.status, kind: r.kind, title: r.title, body: r.body, media: JSON.parse(r.media || '[]'), link: r.link, note: r.note, likes: r.likes, comments: r.comments, liked: !!liked[r.id], at: r.created })); };
+  if (p === '/v1/me' && method === 'GET') return json({ ok: true, id: me.id, role: me.role, mod: isMod, modSet: !!mod, r2: !!env.MEDIA });
+  if (p === '/v1/mod/claim' && method === 'POST') {                 // نسخة المدير تطالب بالإشراف مرة واحدة (أول من يطالب)
+    if (me.role !== 'd') return err(403, 'role', 'للأخصائي فقط'); if (mod && mod !== me.id) return err(409, 'modset', 'للمحطة مشرف بالفعل');
+    if (!mod) await run(db, "INSERT OR IGNORE INTO kv (k, v) VALUES ('mod', ?)", me.id); return json({ ok: true, mod: (await modId(db, env)) === me.id });
+  }
+  if (p === '/v1/feed' && method === 'GET') {
+    const before = parseInt(url.searchParams.get('before') || '0', 10) || 2e9, lim = FEED.page;
+    const rows = me.role === 'c' ? await all(db, "SELECT * FROM posts WHERE id < ? AND status = 'live' AND (scope = 'public' OR did = ?) ORDER BY id DESC LIMIT ?", before, myDid, lim)
+      : await all(db, "SELECT * FROM posts WHERE id < ? AND (did = ? OR (scope = 'public' AND (status = 'live' OR ?))) ORDER BY id DESC LIMIT ?", before, me.id, isMod ? 1 : 0, lim);
+    return json({ ok: true, posts: await shape(rows), more: rows.length === lim, mod: isMod, pending: isMod ? (await one(db, "SELECT COUNT(*) AS n FROM posts WHERE status = 'pending'")).n : undefined });
+  }
+  if (p === '/v1/posts' && method === 'POST') {
+    if (me.role !== 'd') return err(403, 'role', 'للأخصائي فقط');
+    const n = await one(db, 'SELECT COUNT(*) AS n FROM posts WHERE did = ? AND created > ?', me.id, now() - 86400); if (n.n >= FEED.perDay) return err(429, 'rate', 'منشورات كثيرة اليوم');
+    const kind = ['text', 'tip', 'image', 'video', 'reel', 'link'].includes(J.kind) ? J.kind : 'text', scope = J.scope === 'public' ? 'public' : 'mine';
+    const title = String(J.title || '').trim().slice(0, FEED.title), bodyT = String(J.body || '').trim().slice(0, FEED.body), link = /^https:\/\/(www\.)?(youtube\.com|youtu\.be|m\.youtube\.com)\/[^\s]{3,200}$/.test(J.link || '') ? J.link : '';
+    const media = []; for (const m of (Array.isArray(J.media) ? J.media.slice(0, 6) : [])) { const r = await one(db, 'SELECT type FROM media WHERE key = ? AND did = ?', String(m.key || ''), me.id); if (r) media.push({ key: m.key, t: MTYPES[r.type], w: +m.w || 0, h: +m.h || 0 }); }
+    if (!title && !bodyT && !media.length && !link) return err(400, 'empty', 'المنشور فارغ');
+    const status = scope === 'public' && !isMod ? 'pending' : 'live';
+    const r = await run(db, 'INSERT INTO posts (did, scope, status, kind, title, body, media, link, created) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', me.id, scope, status, kind, title, bodyT, JSON.stringify(media), link, now());
+    if (status === 'live') bg((async () => { const cs = await all(db, 'SELECT DISTINCT s.id FROM push_subs s JOIN clients c ON c.id = s.id WHERE c.did = ? ORDER BY s.created DESC LIMIT ?', me.id, FEED.push); for (const c of cs) await pushTo(db, c.id, origin); })());
+    return json({ ok: true, id: r.meta && r.meta.last_row_id, status });
+  }
+  const mP = /^\/v1\/posts\/(\d+)\/(like|comments|delete)$/.exec(p);
+  if (mP) {
+    const x = await post(mP[1]); if (!x || !canSee(x)) return err(404, 'post', 'المنشور غير موجود');
+    if (mP[2] === 'like' && method === 'POST') {
+      if (x.status !== 'live') return err(409, 'pending', 'المنشور بانتظار الموافقة');
+      if (J.on) { const r = await run(db, 'INSERT OR IGNORE INTO post_likes (pid, uid) VALUES (?, ?)', x.id, me.id); if (r.meta && r.meta.changes) await run(db, 'UPDATE posts SET likes = likes + 1 WHERE id = ?', x.id); }
+      else { const r = await run(db, 'DELETE FROM post_likes WHERE pid = ? AND uid = ?', x.id, me.id); if (r.meta && r.meta.changes) await run(db, 'UPDATE posts SET likes = MAX(0, likes - 1) WHERE id = ?', x.id); }
+      return json({ ok: true, likes: (await post(x.id)).likes, liked: !!J.on });
+    }
+    if (mP[2] === 'comments' && method === 'GET') {
+      const rows = await all(db, 'SELECT id, uid, name, dr, body, created FROM comments WHERE pid = ? ORDER BY id LIMIT 300', x.id);
+      return json({ ok: true, comments: rows.map((c) => ({ id: c.id, name: c.name, dr: !!c.dr, body: c.body, at: c.created, mine: c.uid === me.id, del: c.uid === me.id || (me.role === 'd' && x.did === me.id) || isMod })) });
+    }
+    if (mP[2] === 'comments' && method === 'POST') {
+      if (x.status !== 'live') return err(409, 'pending', 'المنشور بانتظار الموافقة'); const txt = String(J.body || '').trim().slice(0, FEED.comment); if (!txt) return err(400, 'empty', 'التعليق فارغ');
+      const n = await one(db, 'SELECT COUNT(*) AS n FROM comments WHERE uid = ? AND created > ?', me.id, now() - 3600); if (n.n >= FEED.cPerHour) return err(429, 'rate', 'تعليقات كثيرة خلال ساعة');
+      const name = me.role === 'd' ? (me.name || 'الأخصائي') : String(J.name || 'مراجع').trim().slice(0, 40) || 'مراجع';
+      const r = await run(db, 'INSERT INTO comments (pid, uid, name, dr, body, created) VALUES (?, ?, ?, ?, ?, ?)', x.id, me.id, name, me.role === 'd' ? 1 : 0, txt, now()); await run(db, 'UPDATE posts SET comments = comments + 1 WHERE id = ?', x.id);
+      return json({ ok: true, id: r.meta && r.meta.last_row_id });
+    }
+    if (mP[2] === 'delete' && method === 'POST') {
+      if (!(me.role === 'd' && (x.did === me.id || isMod))) return err(403, 'own', 'ليس منشورك');
+      const ms = JSON.parse(x.media || '[]'); for (const m of ms) { if (env.MEDIA) await env.MEDIA.delete('m/' + m.key).catch(() => { }); await run(db, 'DELETE FROM media WHERE key = ?', m.key); }
+      await db.batch([db.prepare('DELETE FROM post_likes WHERE pid = ?').bind(x.id), db.prepare('DELETE FROM comments WHERE pid = ?').bind(x.id), db.prepare('DELETE FROM posts WHERE id = ?').bind(x.id)]); return json({ ok: true });
+    }
+  }
+  const mC = /^\/v1\/comments\/(\d+)\/delete$/.exec(p);
+  if (mC && method === 'POST') {
+    const c = await one(db, 'SELECT id, pid, uid FROM comments WHERE id = ?', +mC[1]), x = c && await post(c.pid); if (!c || !x || !canSee(x)) return err(404, 'comment', 'غير موجود');
+    if (!(c.uid === me.id || (me.role === 'd' && x.did === me.id) || isMod)) return err(403, 'own', 'لا تملك حذفه');
+    await run(db, 'DELETE FROM comments WHERE id = ?', c.id); await run(db, 'UPDATE posts SET comments = MAX(0, comments - 1) WHERE id = ?', x.id); return json({ ok: true });
+  }
+  if (p === '/v1/mod/review' && method === 'POST') {
+    if (!isMod) return err(403, 'mod', 'للإدارة فقط'); const x = await post(J.id); if (!x || x.status !== 'pending') return err(404, 'post', 'لا يوجد منشور بانتظار المراجعة');
+    await run(db, 'UPDATE posts SET status = ?, note = ? WHERE id = ?', J.ok ? 'live' : 'rejected', String(J.note || '').slice(0, 300), x.id); return json({ ok: true, status: J.ok ? 'live' : 'rejected' });
+  }
+  return null;
 }
 function appPage(url) {
   const ic = /^\/(icon-192|icon-512|maskable-512|apple-180)\.png$/.exec(url.pathname);
@@ -236,7 +337,7 @@ function appPage(url) {
     background_color: '#0c1534', theme_color: '#121c45', categories: ['health', 'food', 'lifestyle'], prefer_related_applications: false,
     icons: ICONS['icon-192'] ? [{ src: '/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' }, { src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' }, { src: '/maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }] : ICON_B64 ? [{ src: '/icon.png', sizes: '256x256', type: 'image/png' }] : []
   }), { headers: { 'content-type': 'application/manifest+json', 'cache-control': 'no-cache' } });
-  if (url.pathname === '/' || url.pathname === '/index.html') return new Response(APP_HTML, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-cache', 'x-content-type-options': 'nosniff', 'referrer-policy': 'no-referrer', 'x-frame-options': 'DENY', 'content-security-policy': "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: 'self'; font-src data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'" } });
+  if (url.pathname === '/' || url.pathname === '/index.html') return new Response(APP_HTML, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-cache', 'x-content-type-options': 'nosniff', 'referrer-policy': 'no-referrer', 'x-frame-options': 'DENY', 'content-security-policy': "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: 'self'; media-src 'self'; frame-src https://www.youtube-nocookie.com; font-src data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'" } });
   if (url.pathname === '/sw.js' && SW_JS) return new Response(SW_JS, { headers: { 'content-type': 'text/javascript; charset=utf-8', 'cache-control': 'no-cache', 'x-content-type-options': 'nosniff' } });
   if (url.pathname === '/robots.txt') return new Response('User-agent: *\nDisallow: /\n', { headers: { 'content-type': 'text/plain' } });
   return null;
@@ -247,6 +348,7 @@ export default {
     if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS });
     try {
       if (url.pathname.startsWith('/v1/')) return await api(req, env, url, ctx);
+      const mm = /^\/m\/([A-Za-z0-9_-]{24})$/.exec(url.pathname); if (mm && req.method === 'GET') return (await mediaGet(req, env, mm[1])) || err(500, 'nodb', 'لم تُربط قاعدة D1 باسم DB');
       return appPage(url) || new Response('Not found', { status: 404 });
     } catch (e) { return err(500, 'server', 'خطأ في المحطة'); }
   }

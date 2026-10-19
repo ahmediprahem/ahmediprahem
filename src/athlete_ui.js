@@ -88,7 +88,7 @@ function athRenderRes(inp) {
   var box = $('#fres_' + inp.dataset.fp.replace(',', '_')), q = inp.value, list = athFind(q), html = '', last = '';
   if (!list.length) html = '<div class="fgrp">لا نتائج — جرّب جزءاً آخر من الاسم</div>';
   else list.forEach(function (f) { if (!q.trim() && f.g !== last) { last = f.g; html += '<div class="fgrp">' + esc(f.g) + '</div>'; } html += '<div class="fopt" data-id="' + f.id + '"><span>' + esc(f.n) + (AthImport.stClean(f.st) ? ' <small>(' + esc(AthImport.stClean(f.st)) + ')</small>' : '') + '</span><small>' + (AthImport.hmDef(f.hm, f.n) ? esc(AthImport.hmDef(f.hm, f.n)) + ' • ' : '') + Math.round(f.k) + ' سعرة • ب ' + f.p + ' • ك ' + f.c + ' • د ' + f.f + ' /100جم</small></div>'; });
-  box.innerHTML = html; box.classList.add('on'); box.scrollTop = 0; var first = box.querySelector('.fopt'); if (first) first.classList.add('act');
+  box.innerHTML = html; var was = box.classList.contains('on'); box.classList.add('on'); box.scrollTop = 0; if (!was) { var r = box.getBoundingClientRect(); if (r.bottom > innerHeight || r.top < 0) box.scrollIntoView({ block: 'nearest' }); }   // القائمة تظهر كاملة ولو فُتحت أسفل الشاشة var first = box.querySelector('.fopt'); if (first) first.classList.add('act');
 }
 function athPick(box, opt) { var inp = box.parentNode.querySelector('.fsearch'), f = athFoodById(opt.dataset.id); inp.value = f.n; inp.dataset.id = f.id; box.classList.remove('on'); var g = $('#aaddg_' + inp.dataset.fp.replace(',', '_')); if (g) { g.focus(); g.select(); } }
 function athFoodById(id) { return AD.foods.filter(function (f) { return f.id === id; })[0]; }

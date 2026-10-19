@@ -43,6 +43,8 @@ const P = {
   share:'<path d="M12 3v12M8 7l4-4 4 4"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/>',
   plusSq:'<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/>',
   phone:'<rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/>',
+  news:'<path d="M4 22h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8M15 18h-5M10 6h8v4h-8z"/>',
+  play:'<path d="M6 3l14 9-14 9z"/>',
   copy:'<rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/>'
 };
 const I = (n, c) => '<svg class="ico' + (c ? ' ' + c : '') + '" viewBox="0 0 24 24" aria-hidden="true">' + (P[n] || '') + '</svg>';
@@ -140,7 +142,7 @@ const pushOk = () => 'serviceWorker' in navigator && 'PushManager' in window && 
 let swReg = null;
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
   swReg = navigator.serviceWorker.register('/sw.js').catch(() => null);
-  navigator.serviceWorker.addEventListener('message', (e) => { if (e.data && e.data.t === 'push') poll(); });
+  navigator.serviceWorker.addEventListener('message', (e) => { if (e.data && e.data.t === 'push') { poll(); fdLoad().then(() => { if (S) render(); }); } });
 }
 function pushState() {
   if (!pushOk()) return isIOS && !standalone ? 'ios' : 'na';
@@ -431,8 +433,8 @@ function scrSent() {
 
 // ---------- التطبيق بعد وصول الخطة
 function scrApp() {
-  const body = { today: tabToday, plan: tabPlan, prefs: tabPrefs, progress: tabProgress }[S.tab]();
-  const tb = [['today', 'today', 'اليوم'], ['plan', 'cal', 'خطتي'], ['prefs', 'heart', 'تفضيلاتي'], ['progress', 'trend', 'تقدّمي']].map((t) => '<button class="' + (S.tab === t[0] ? 'on' : '') + '" data-act="tab" data-v="' + t[0] + '"' + (S.tab === t[0] ? ' aria-current="page"' : '') + '>' + I(t[1]) + '<span>' + t[2] + '</span></button>').join('');
+  const body = { today: tabToday, plan: tabPlan, prefs: tabPrefs, progress: tabProgress, feed: tabFeed }[S.tab]();
+  const tb = [['today', 'today', 'اليوم'], ['plan', 'cal', 'خطتي'], ['prefs', 'heart', 'تفضيلاتي'], ['feed', 'news', 'تثقيف'], ['progress', 'trend', 'تقدّمي']].map((t) => '<button class="' + (S.tab === t[0] ? 'on' : '') + '" data-act="tab" data-v="' + t[0] + '"' + (S.tab === t[0] ? ' aria-current="page"' : '') + '>' + I(t[1]) + '<span>' + t[2] + '</span>' + (t[0] === 'feed' && fdNew() ? '<span class="nb" aria-label="' + fdNew() + ' جديد">' + fdNew() + '</span>' : '') + '</button>').join('');
   return '<div class="scr hasTabs"><div class="scroll"><div class="stack">' + (S.removed ? '<div class="banner warn">' + I('alert') + '<span>أوقف أخصائيك ربط حسابك؛ خطتك الحالية تبقى معروضة لكن لا تصله متابعتك.</span></div>' : '') + body + '</div></div><nav class="tabbar" aria-label="التنقل">' + tb + '</nav></div>';
 }
 function tabToday() {
@@ -496,6 +498,51 @@ function tabProgress() {
     + '<section class="card stack"><h3>الحساب</h3><p class="dim">ملفك لدى ' + esc(S.dname) + (S.code ? ' • رقم ' + esc(S.code) : '') + '. بياناتك محفوظة مشفّرة على هذا الجوال فقط.</p>' + installCard('acct') + notifCard(false) + '<div class="row"><button class="btn sm sec" data-act="lock">' + I('lock') + ' قفل التطبيق</button><button class="btn sm sec" data-act="xferNew">' + I('phone') + ' نقل حسابي</button></div><button class="link" data-act="wipe" style="color:var(--coral)">حذف بياناتي من هذا الجوال</button></section>';
 }
 
+// ---------- التثقيف: منشورات أخصائيك (ومنشورات عامة لمراجعي «حصة» توافق عليها الإدارة) — إعجاب وتعليق
+// محتوى عام يُجلب من المحطة بلا تشفير؛ لا يُحفظ على الجوال إلا رقم آخر منشور رأيته (لشارة «جديد»).
+const FD = { posts: [], more: false, busy: false, err: '', at: 0, top: 0, play: {}, cm: {} };
+const fdNew = () => Math.max(0, FD.posts.filter((x) => x.id > (S.feedSeen || 0)).length);
+async function fdLoad(more) {
+  if (!S || !S.cid || FD.busy) return; FD.busy = true;
+  try {
+    const last = FD.posts.length ? FD.posts[FD.posts.length - 1].id : 0, j = await api('GET', '/v1/feed' + (more && last ? '?before=' + last : ''));
+    FD.posts = more ? FD.posts.concat(j.posts) : j.posts; FD.more = j.more; FD.err = ''; FD.at = now();
+    if (S.feedSeen == null) S.feedSeen = FD.posts.length ? FD.posts[0].id : 0;       // أول مرة: لا شارة لما نُشر قبل انضمامك
+  } catch (e) { FD.err = e.net ? 'لا اتصال بالإنترنت' : e.message; }
+  finally { FD.busy = false; }
+}
+function fdSeen() { if (S.tab === 'feed' && FD.posts.length && FD.posts[0].id > (S.feedSeen || 0)) { S.feedSeen = FD.posts[0].id; save(); } }
+const ago = (t) => { const s = Math.max(0, Math.floor(now() / 1000 - t)); return s < 60 ? 'الآن' : s < 3600 ? 'منذ ' + Math.floor(s / 60) + ' د' : s < 86400 ? 'منذ ' + Math.floor(s / 3600) + ' س' : s < 7 * 86400 ? 'منذ ' + Math.floor(s / 86400) + ' يوم' : new Date(t * 1000).toLocaleDateString('ar', { day: 'numeric', month: 'short' }); };
+function ytId(u) { const m = /(?:youtu\.be\/|[?&]v=|\/shorts\/|\/embed\/|\/live\/)([A-Za-z0-9_-]{11})/.exec(String(u || '')); return m ? m[1] : ''; }
+function fdMedia(x) {
+  const im = x.media.filter((m) => m.t === 'i'), vd = x.media.filter((m) => m.t === 'v'), reel = x.kind === 'reel' || /\/shorts\//.test(x.link || '');
+  let h = im.length ? '<div class="pimgs n' + Math.min(im.length, 4) + '">' + im.slice(0, 4).map((m) => '<img src="/m/' + m.key + '" alt="" loading="lazy"' + (m.w && m.h ? ' width="' + m.w + '" height="' + m.h + '"' : '') + '>').join('') + '</div>' : '';
+  h += vd.map((m) => '<video class="pvid' + (reel ? ' reel' : '') + '" data-keep="v' + m.key + '" src="/m/' + m.key + '" controls playsinline preload="metadata"></video>').join('');
+  const y = ytId(x.link);
+  if (y) h += FD.play[x.id] ? '<div class="pyt' + (reel ? ' reel' : '') + '"><iframe src="https://www.youtube-nocookie.com/embed/' + y + '?autoplay=1&playsinline=1&rel=0" title="فيديو" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>'
+    : '<button class="pyt ph' + (reel ? ' reel' : '') + '" data-act="fdPlay" data-v="' + x.id + '"><span>' + I('play') + '</span><b>تشغيل الفيديو</b></button>';
+  return h;
+}
+function fdCard(x) {
+  return '<article class="card post" data-pid="' + x.id + '"><div class="phd"><span class="pav">' + esc(String(x.author || 'أ').trim().charAt(0)) + '</span><div><b>' + esc(x.author || 'أخصائي التغذية') + '</b><small>' + ago(x.at) + ' • ' + (x.mine ? 'من أخصائيك' : 'منشور عام') + '</small></div>' + (x.kind === 'tip' ? '<span class="ptag">💡 نصيحة</span>' : '') + '</div>'
+    + (x.title ? '<h3 class="pt">' + esc(x.title) + '</h3>' : '') + (x.body ? '<p class="pb">' + esc(x.body) + '</p>' : '') + fdMedia(x)
+    + '<div class="pf"><button class="' + (x.liked ? 'on' : '') + '" data-act="fdLike" data-v="' + x.id + '" aria-pressed="' + x.liked + '">' + I('heart') + '<span>' + (x.likes || '') + '</span> أعجبني</button><button data-act="fdCm" data-v="' + x.id + '">' + I('msg') + '<span>' + (x.comments || '') + '</span> تعليق</button></div></article>';
+}
+function tabFeed() {
+  fdSeen();
+  return '<div class="row" style="justify-content:space-between"><h2>تثقيف</h2><button class="btn sm sec" data-act="fdRefresh">' + I('reset') + ' تحديث</button></div><div class="dim">نصائح ومواضيع وفيديوهات من ' + esc(S.dname) + ' ومن أخصائيي «حصة»</div>'
+    + (FD.err ? '<div class="banner warn">' + I('alert') + '<span>' + esc(FD.err) + '</span></div>' : '')
+    + (FD.posts.length ? FD.posts.map(fdCard).join('') + (FD.more ? '<button class="btn sec" data-act="fdMore">' + (FD.busy ? 'جارٍ التحميل…' : 'المزيد') + '</button>' : '')
+      : '<div class="empty"><div class="ei">' + I('news') + '</div><h3>' + (FD.at ? 'لا منشورات بعد' : 'جارٍ التحميل…') + '</h3><p class="dim">' + (FD.at ? 'ما ينشره أخصائيك من نصائح ومواضيع وفيديوهات يظهر هنا، وتستطيع الإعجاب به والتعليق عليه.' : '') + '</p></div>');
+}
+function cmSheet() {
+  const c = FD.cm[sheet.pid], x = FD.posts.find((p) => p.id === sheet.pid) || {}, me = String(S.p.name || '').trim().split(/\s+/)[0] || 'مراجع';
+  return '<p class="dim">' + esc(x.title || String(x.body || '').slice(0, 80)) + '</p>' + (!c ? '<div class="spin"></div>' : c.err ? '<p class="err">' + esc(c.err) + '</p>'
+    : (c.list.length ? '<div class="cms">' + c.list.map((m) => '<div class="cm' + (m.dr ? ' dr' : '') + '"><b>' + esc(m.name) + (m.dr ? ' <span class="ptag">أخصائي</span>' : '') + '</b><p>' + esc(m.body) + '</p><small>' + ago(m.at) + (m.del ? ' • <button class="lnk" data-act="fdCmDel" data-v="' + m.id + '">حذف</button>' : '') + '</small></div>').join('') + '</div>' : '<p class="dim">لا تعليقات بعد. كن أول من يعلّق.</p>'))
+    + '<textarea class="inp" id="cmIn" maxlength="1000" placeholder="اكتب تعليقاً أو سؤالاً…"></textarea><label class="chk"><input type="checkbox" id="cmAnon"' + (S.fdAnon ? ' checked' : '') + '> علّق باسم «مراجع» بدل اسمك</label><button class="btn" data-act="fdCmSend">' + I('send') + ' نشر التعليق</button>'
+    + '<p class="dim">التعليق يراه من يرى المنشور' + (x.mine ? ' (مراجعو أخصائيك)' : ' (مراجعو «حصة»)') + ' باسم «' + esc(S.fdAnon ? 'مراجع' : me) + '». لا تكتب بيانات صحية خاصة؛ اسأل أخصائيك عنها في «راسل الأخصائي».</p>';
+}
+async function fdComments(pid) { try { const j = await api('GET', '/v1/posts/' + pid + '/comments'); FD.cm[pid] = { list: j.comments }; } catch (e) { FD.cm[pid] = { list: [], err: e.net ? 'لا اتصال بالإنترنت' : e.message }; } if (sheet && sheet.t === 'cm' && sheet.pid === pid) render(); }
 // ---------- الأوراق السفلية
 function sheetHtml() {
   if (!sheet) return '';
@@ -519,6 +566,8 @@ function sheetHtml() {
       : '<p class="mut">لنقل «حصتي» إلى التطبيق المثبّت على الشاشة الرئيسية، أو إلى جوال جديد:</p><ol class="steps"><li>انسخ هذا الرمز</li><li>افتح «حصتي» هناك واختر «لديّ حساب في متصفح أو جوال آخر»</li><li>ألصق الرمز واختر رمز دخول</li></ol>'
       + '<div class="xcode" dir="ltr">' + esc(sheet.code) + '</div><button class="btn" data-act="copyXfer">' + I('copy') + ' نسخ الرمز</button>'
       + '<p class="dim">الرمز صالح 15 دقيقة ولمرة واحدة، ويحمل مفتاح فك التشفير فلا ترسله لأحد. بعد النقل يُمسح الحساب من هنا تلقائياً.</p>';
+  } else if (sheet.t === 'cm') {
+    h = 'التعليقات'; b = cmSheet();
   } else if (sheet.t === 'forgot') {
     h = 'نسيت رمز الدخول؟'; b = '<p class="mut">لا يمكن استرجاع الرمز: بياناتك مشفّرة به على هذا الجوال ولا نسخة منها في أي مكان آخر.</p><p class="mut">اطلب من أخصائيك رابط دعوة جديداً، ثم احذف الحساب القديم من هنا وابدأ بالرابط الجديد. خطتك تبقى محفوظة لدى أخصائيك.</p><button class="btn sec" data-act="wipe" style="color:var(--coral)">حذف الحساب من هذا الجوال</button>';
   }
@@ -571,14 +620,18 @@ function render() {
   let scr;
   if (V.screen === 'boot') scr = scrBoot(); else if (V.screen === 'bad') scr = scrBad(); else if (V.screen === 'start') scr = scrStart(); else if (V.screen === 'moved') scr = scrMoved(); else if (V.screen === 'lock') scr = scrLock(); else if (V.screen === 'pin') scr = scrPin();
   else scr = S.chat ? scrChat() : S.plan && S.screen === 'app' ? scrApp() : { invite: scrInvite, wizard: scrWizard, review: scrReview, sent: scrSent, app: scrSent }[S.screen]();
+  const keep = {}; document.querySelectorAll('video[data-keep]').forEach((n) => { keep[n.dataset.keep] = n; });
+  const cmI = $('#cmIn'), cmV = cmI ? [cmI.value, document.activeElement === cmI] : null;          // مسودة التعليق تبقى عند إعادة الرسم (وصول التعليقات مثلاً)
   $('#root').innerHTML = '<div class="stage"><div class="device">' + (V.online ? '' : '<div class="offline">بلا اتصال — تُرسل بياناتك عند عودة الإنترنت</div>') + scr + (S ? sheetHtml() : '') + (toastMsg ? '<div class="toast" role="status">' + I('check') + '<span>' + esc(toastMsg) + '</span></div>' : '') + '</div></div>';
+  document.querySelectorAll('video[data-keep]').forEach((n) => { const o = keep[n.dataset.keep]; if (o && o !== n) n.replaceWith(o); });   // فيديو يعمل لا يتوقف عند إعادة الرسم
+  if (cmV) { const n = $('#cmIn'); if (n) { n.value = cmV[0]; if (cmV[1]) n.focus(); } }
   const s2 = $('.scroll'); if (s2 && key === lastKey) s2.scrollTop = top; lastKey = key;
   const th = $('#thread'); if (th) th.scrollTop = th.scrollHeight;
   if (focusChat) { const c = $('#chatIn'); if (c) c.focus(); focusChat = false; }
   if (S && K) save();
 }
 let focusChat = false;
-function startLoop() { clearInterval(V.timer); V.timer = setInterval(() => { if (!document.hidden) poll(); }, POLL); poll(); pushSetup(false).then((st) => { if (st === 'on') render(); }); }
+function startLoop() { clearInterval(V.timer); V.timer = setInterval(() => { if (!document.hidden) { poll(); if (now() - FD.at > 5 * 60000) fdLoad().then(render); } }, POLL); poll(); fdLoad().then(render); pushSetup(false).then((st) => { if (st === 'on') render(); }); }
 
 // ---------- رمز الدخول: الإنشاء والفتح
 async function onPin() {
@@ -712,7 +765,26 @@ document.addEventListener('click', (e) => {
       }).then(() => { V.busy = false; render(); return pushSetup(true); }).then(render).catch(() => { });
       return;
     }
-    case 'tab': S.tab = v; break;
+    case 'fdRefresh': FD.at = 0; render(); fdLoad().then(render); return;
+    case 'fdMore': fdLoad(true).then(render); render(); return;
+    case 'fdPlay': FD.play[+v] = 1; break;
+    case 'fdLike': {
+      const x = FD.posts.find((p) => p.id === +v); if (!x) return; x.liked = !x.liked; x.likes = Math.max(0, (x.likes || 0) + (x.liked ? 1 : -1));
+      el.classList.toggle('on', x.liked); el.setAttribute('aria-pressed', x.liked); el.querySelector('span').textContent = x.likes || '';         // بلا إعادة رسم: لا يتوقف فيديو يعمل
+      api('POST', '/v1/posts/' + x.id + '/like', { on: x.liked ? 1 : 0 }).then((j) => { x.likes = j.likes; el.querySelector('span').textContent = j.likes || ''; }).catch((er) => { x.liked = !x.liked; x.likes = Math.max(0, x.likes + (x.liked ? 1 : -1)); toast(er.net ? 'لا اتصال بالإنترنت' : er.message); });
+      return;
+    }
+    case 'fdCm': sheet = { t: 'cm', pid: +v }; delete FD.cm[+v]; fdComments(+v); break;
+    case 'fdCmSend': {
+      const t = $('#cmIn'), txt = (t && t.value || '').trim(), pid = sheet.pid; if (!txt) { toast('اكتب تعليقاً أولاً'); return; } if (V.busy) return;
+      S.fdAnon = !!($('#cmAnon') || {}).checked; const name = S.fdAnon ? 'مراجع' : String(S.p.name || '').trim().split(/\s+/)[0] || 'مراجع';
+      V.busy = true; el.disabled = true;
+      api('POST', '/v1/posts/' + pid + '/comments', { body: txt, name }).then(() => { if ($('#cmIn')) $('#cmIn').value = ''; const x = FD.posts.find((p) => p.id === pid); if (x) x.comments = (x.comments || 0) + 1; return fdComments(pid); }).then(() => { V.busy = false; toast('نُشر تعليقك'); })
+        .catch((er) => { V.busy = false; el.disabled = false; toast(er.net ? 'لا اتصال بالإنترنت' : er.message); });
+      return;
+    }
+    case 'fdCmDel': { if (!confirm('حذف تعليقك؟')) return; const pid = sheet.pid; api('POST', '/v1/comments/' + v + '/delete', {}).then(() => { const x = FD.posts.find((p) => p.id === pid); if (x) x.comments = Math.max(0, (x.comments || 0) - 1); return fdComments(pid); }).catch((er) => toast(er.message)); return; }
+    case 'tab': S.tab = v; if (v === 'feed' && now() - FD.at > 60000) fdLoad().then(render); break;
     case 'day': S.day = +v; break;
     case 'ck': { const L = dl(TODAY); L.ck[v] = !L.ck[v]; if (!L.ck[v]) delete L.ck[v]; queueLog(dkey(new Date())); break; }
     case 'whole': { const L = dl(TODAY), s = dayPlan(TODAY).slots[+v], all = s.lines.every((l, li) => L.ck[v + '_' + li]); s.lines.forEach((l, li) => { if (all) delete L.ck[v + '_' + li]; else L.ck[v + '_' + li] = 1; }); delete L.skip[v]; queueLog(dkey(new Date())); break; }
@@ -754,6 +826,6 @@ document.addEventListener('input', (e) => {
 });
 window.addEventListener('online', () => { V.online = true; poll(); });
 window.addEventListener('offline', () => { V.online = false; render(); });
-window.HissatiApp = { state: () => S, poll, flush };     // للاختبارات
+window.HissatiApp = { state: () => S, poll, flush, feed: () => FD, feedLoad: fdLoad };     // للاختبارات
 boot();
 })();

@@ -246,3 +246,37 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padd
 .medt td.medn{text-align:right;font-size:12px;max-width:260px}
 .lf{font-weight:700}.lf.l0{color:#1e8c4e}.lf.l1{color:#b26a00}.lf.l2{color:#c0392b}
 .medlabs>div{min-width:150px}
+/* التثقيف (feed_ui.js) */
+.fdpage .hxtop h2 small{font-size:13px;color:#667;font-weight:400}
+.fdgrid{display:grid;grid-template-columns:minmax(300px,420px) 1fr;gap:14px;align-items:start}
+@media (max-width:900px){.fdgrid{grid-template-columns:1fr}}
+.fdcomp{position:sticky;top:8px;display:flex;flex-direction:column;gap:8px}
+.fdkinds{display:flex;flex-wrap:wrap;gap:5px;margin:0}
+.fdfile{display:inline-block;cursor:pointer;padding:5px 10px;border-radius:8px;background:#e8ecef;color:var(--n);font-size:13px}
+.fdfiles{display:flex;flex-wrap:wrap;gap:6px}.fdth{position:relative;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:8px;padding:3px;font-size:12px}
+.fdth img{width:72px;height:72px;object-fit:cover;border-radius:6px;display:block}.fdth small{display:block;color:#667}.fdth button{position:absolute;top:2px;left:2px;padding:0 6px}
+.fdfoot{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;justify-content:space-between}.fdfoot label{flex:1;min-width:200px;font-size:12px;color:#667}
+.fdfilters{display:flex;flex-wrap:wrap;gap:5px;margin:0 0 8px}
+.fdpost{margin-bottom:12px;display:flex;flex-direction:column;gap:8px}
+.fdpost .fdhd{display:flex;align-items:center;gap:10px}.fdpost .fdhd>div{flex:1;min-width:0}.fdpost .fdhd small{display:block;color:#667;font-size:12px}
+.fdpost h3{margin:0}.fdbody{white-space:pre-wrap;overflow-wrap:anywhere;margin:0;line-height:1.7}
+.fdst{font-size:12px;padding:2px 8px;border-radius:8px;white-space:nowrap}.fdst.wait{background:#fff3e0;color:#8a4b00}.fdst.no{background:#fde8e8;color:#b3261e;white-space:normal}
+.fdimgs{display:grid;gap:4px;border-radius:10px;overflow:hidden}.fdimgs.n2,.fdimgs.n3,.fdimgs.n4{grid-template-columns:1fr 1fr}.fdimgs.n3 img:first-child{grid-column:1/-1}
+.fdimgs img{width:100%;max-height:380px;object-fit:cover;display:block;background:#e8ecef;min-height:80px}.fdimgs.n2 img,.fdimgs.n3 img,.fdimgs.n4 img{aspect-ratio:1/1}
+.fdvid{width:100%;max-height:420px;border-radius:10px;background:#000}.fdvid.reel{width:auto;max-width:100%;aspect-ratio:9/16;margin:0 auto;display:block}
+.fdyt{display:block;padding:14px;border-radius:10px;background:#1b1b1b;color:#fff;text-decoration:none;font-weight:700;text-align:center}.fdyt small{display:block;opacity:.6;font-weight:400}
+.fdpost .fdft{display:flex;flex-wrap:wrap;gap:6px;border-top:1px solid var(--line);padding-top:8px}.fdpost .fdft .on{outline:2px solid var(--o)}.fdpost .fddel{margin-inline-start:auto}
+.fdcms{display:flex;flex-direction:column;gap:6px}.fdcm{border:1px solid var(--line);border-radius:8px;padding:6px 10px}.fdcm.dr{border-color:var(--g)}.fdcm p{margin:2px 0;white-space:pre-wrap}.fdcm small{color:#667;font-size:11px}
+.lnk{background:none;color:#b3261e;padding:0;text-decoration:underline;font-size:11px}
+.fdmod{margin:0}
+/* أدوات توفير الوقت (work_ui.js) */
+.wkbar{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px}
+.wkpick h4{margin:10px 0 4px}.wkrow{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--line)}.wkrow small{display:block;color:#667;font-size:12px}.wkrow .two{margin:0}
+.wkform{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end}.wkform label{display:flex;flex-direction:column;font-size:12px;color:#667;min-width:130px;flex:1}.wkform label.wide{flex-basis:100%}.wkq{flex-basis:100%;display:flex;flex-wrap:wrap;gap:6px;margin:0}.wkq button:last-child{margin-inline-start:auto}
+.wkappt{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:8px 6px;border-bottom:1px solid var(--line)}.wkappt.today{background:rgba(58,127,83,.08);border-radius:8px}
+.wkt{min-width:120px}.wkt b{font-size:16px}.wkt small{display:block;color:#667;font-size:11px}.wki{flex:1;min-width:160px}.wka{display:flex;flex-wrap:wrap;gap:4px}.wka .btn{display:inline-block;text-decoration:none;padding:3px 8px;font-size:12px;border-radius:8px;background:#e8ecef;color:var(--n)}
+.wkst{font-size:11px;padding:1px 7px;border-radius:7px;margin-inline-start:4px}.wkst.ok{background:#e8f5e9;color:#1e6b3a}.wkst.no{background:#fde8e8;color:#b3261e}.wkst.late{background:#fff3e0;color:#8a4b00}
+.wklate h3{color:#b3261e}
+.wktodo{margin:10px 0}.wktodo .hxtop h3{margin:0}.wktodo select{width:auto;padding:2px 6px}
+.wkit{display:flex;align-items:center;gap:10px;padding:6px 4px;border-bottom:1px solid var(--line)}.wkit:last-of-type{border-bottom:0}.wkic{font-size:18px;width:26px;text-align:center}
+.wkgo{flex:1;text-align:right;background:none!important;color:inherit!important;padding:2px 0;border:0;box-shadow:none}.wkgo b{display:block}.wkgo small{color:#667}.wkit.p0 .wkgo b{color:#b3261e}.wkx{opacity:.6}

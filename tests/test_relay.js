@@ -122,5 +122,57 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); };
     assert.strictEqual((await c4(null, 'POST', '/v1/vault/get', { vid, auth, ver: 1, idx: 0 })).s, 404); assert.strictEqual(env4.DB._raw.prepare("SELECT COUNT(*) AS n FROM vault_chunks").get().n, 7);
     ok('خزنة النسخ: تُرفع أجزاءً وتكتمل نسخة مرقّمة، كلمة سر النسخ تُفحص قراءةً وكتابة، الكتابة لأخصائي مسجّل، الجزء الضخم يُرفض، وتُحفظ آخر 7 نسخ فقط');
   }
+  // 11) التثقيف: منشورات للمراجعين مباشرة، والعامة بانتظار الإدارة، الإعجاب والتعليق، الصور في D1 والفيديو يحتاج R2، ولا يرى العميل منشورات أخصائي آخر الخاصة
+  {
+    const env5 = { DB: d1() }; W._test.reset();
+    const c5 = async (ident, method, p, obj) => { const body = obj === undefined ? '' : JSON.stringify(obj), h = { 'content-type': 'application/json' }; if (ident) h.authorization = await HXC.signReq(ident, method, p, body); const r = await W.default.fetch(new Request(base + p, { method, headers: h, body: method === 'POST' ? body : undefined }), env5); return { s: r.status, j: await r.json().catch(() => null) }; };
+    const up = async (ident, type, bytes, e) => { const h = { 'content-type': type }; if (ident) h.authorization = await HXC.signReq(ident, 'POST', '/v1/media', bytes); const r = await W.default.fetch(new Request(base + '/v1/media', { method: 'POST', headers: h, body: bytes }), e || env5); return { s: r.status, j: await r.json().catch(() => null) }; };
+    const A = await HXC.genIdentity(), B = await HXC.genIdentity(), ca = await HXC.genIdentity(), cb = await HXC.genIdentity();
+    for (const [D, nm] of [[A, 'د. أحمد'], [B, 'د. منى']]) await c5(D, 'POST', '/v1/register', { sigPub: D.sigPub, encPub: D.encPub, name: nm });
+    for (const [D, C] of [[A, ca], [B, cb]]) { const t = HXC.token(); await c5(D, 'POST', '/v1/invites', { h: await HXC.tokenHash(t), label: 'ع' }); await c5(C, 'POST', '/v1/join', { token: t, sigPub: C.sigPub, encPub: C.encPub }); }
+    assert.deepStrictEqual((await c5(A, 'GET', '/v1/me')).j.mod, false); assert.strictEqual((await c5(ca, 'POST', '/v1/mod/claim')).s, 403);
+    assert.strictEqual((await c5(A, 'POST', '/v1/mod/claim')).j.mod, true); assert.strictEqual((await c5(B, 'POST', '/v1/mod/claim')).s, 409, 'المشرف واحد');
+    // الوسائط
+    const img = new Uint8Array([0xff, 0xd8, 0xff, 1, 2, 3, 4, 5]), u = await up(A, 'image/jpeg', img); assert.strictEqual(u.s, 200);
+    const got = await W.default.fetch(new Request(base + u.j.url), env5); assert.strictEqual(got.headers.get('content-type'), 'image/jpeg'); assert.deepStrictEqual(new Uint8Array(await got.arrayBuffer()), img);
+    assert.strictEqual((await up(ca, 'image/jpeg', img)).s, 403); assert.strictEqual((await up(A, 'text/html', img)).s, 415); assert.strictEqual((await up(A, 'video/mp4', img)).s, 501, 'الفيديو بلا R2');
+    assert.strictEqual((await up(A, 'image/jpeg', new Uint8Array(1200001))).s, 413);
+    const bad = { 'content-type': 'image/jpeg', authorization: await HXC.signReq(A, 'POST', '/v1/media', img) }; assert.strictEqual((await W.default.fetch(new Request(base + '/v1/media', { method: 'POST', headers: bad, body: new Uint8Array([9, 9]) }), env5)).status, 401, 'التوقيع على الملف نفسه');
+    const R2 = new Map(), env6 = { DB: env5.DB, MEDIA: { put: async (k, v, o) => { R2.set(k, { v: new Uint8Array(v), o }); }, get: async (k) => R2.has(k) ? { body: R2.get(k).v, size: R2.get(k).v.length } : null, delete: async (k) => { R2.delete(k); } } };
+    const vv = await up(A, 'video/mp4', new Uint8Array([0, 0, 0, 24, 102, 116]), env6); assert.strictEqual(vv.j.type, 'v'); assert(R2.has('m/' + vv.j.key)); assert.strictEqual((await W.default.fetch(new Request(base + vv.j.url), env6)).headers.get('content-type'), 'video/mp4');
+    ok('الوسائط: الأخصائي وحده يرفع، التوقيع على بايتات الملف، الصورة تُحفظ في D1 وتُقدَّم برابطها، الأنواع الأخرى والضخم يُرفض، والفيديو يحتاج R2 (وبه يُحفظ ويُقدَّم)');
+    // النشر والظهور
+    assert.strictEqual((await c5(ca, 'POST', '/v1/posts', { title: 'x' })).s, 403); assert.strictEqual((await c5(B, 'POST', '/v1/posts', {})).s, 400);
+    const pB = (await c5(B, 'POST', '/v1/posts', { kind: 'tip', title: 'نصيحة منى لمراجعيها', body: 'اشرب الماء', scope: 'mine' })).j; assert.strictEqual(pB.status, 'live');
+    const pBpub = (await c5(B, 'POST', '/v1/posts', { kind: 'link', title: 'عام من منى', link: 'https://www.youtube.com/watch?v=abcdEFGH123', scope: 'public' })).j; assert.strictEqual(pBpub.status, 'pending');
+    const pA = (await c5(A, 'POST', '/v1/posts', { kind: 'image', title: 'طبق صحي', media: [{ key: u.j.key, w: 800, h: 600 }, { key: 'x'.repeat(24) }], scope: 'mine' })).j;
+    const pAbad = (await c5(A, 'POST', '/v1/posts', { kind: 'link', title: 'رابط', link: 'https://evil.example/x' })).j; assert.strictEqual((await c5(A, 'GET', '/v1/feed')).j.posts.find((x) => x.id === pAbad.id).link, '', 'يوتيوب فقط');
+    let fa = (await c5(ca, 'GET', '/v1/feed')).j.posts.map((x) => x.title); assert(fa.includes('طبق صحي') && !fa.includes('نصيحة منى لمراجعيها') && !fa.includes('عام من منى'), fa);
+    let fb = (await c5(cb, 'GET', '/v1/feed')).j.posts.map((x) => x.title); assert(fb.includes('نصيحة منى لمراجعيها') && !fb.includes('طبق صحي') && !fb.includes('عام من منى'), fb);
+    const fpA = (await c5(ca, 'GET', '/v1/feed')).j.posts.find((x) => x.id === pA.id); assert.deepStrictEqual(fpA.media, [{ key: u.j.key, t: 'i', w: 800, h: 600 }], 'وسيط غيره لا يُرفق'); assert.strictEqual(fpA.author, 'د. أحمد');
+    assert.strictEqual((await c5(ca, 'POST', '/v1/posts/' + pB.id + '/like', { on: 1 })).s, 404, 'منشور أخصائي آخر الخاص');
+    let fBd = (await c5(B, 'GET', '/v1/feed')).j; assert(fBd.posts.find((x) => x.id === pBpub.id && x.status === 'pending') && fBd.pending === undefined);
+    let fAd = (await c5(A, 'GET', '/v1/feed')).j; assert.strictEqual(fAd.pending, 1); assert(fAd.posts.find((x) => x.id === pBpub.id), 'المشرف يرى المعلّق');
+    assert.strictEqual((await c5(B, 'POST', '/v1/mod/review', { id: pBpub.id, ok: 1 })).s, 403);
+    assert.strictEqual((await c5(A, 'POST', '/v1/mod/review', { id: pBpub.id, ok: 1 })).j.status, 'live');
+    fa = (await c5(ca, 'GET', '/v1/feed')).j.posts.map((x) => x.title); assert(fa.includes('عام من منى'), 'العام يظهر لكل المراجعين بعد الموافقة');
+    const rej = (await c5(B, 'POST', '/v1/posts', { title: 'عام مرفوض', scope: 'public' })).j; await c5(A, 'POST', '/v1/mod/review', { id: rej.id, ok: 0, note: 'غير علمي' });
+    const rr = (await c5(B, 'GET', '/v1/feed')).j.posts.find((x) => x.id === rej.id); assert.deepStrictEqual([rr.status, rr.note], ['rejected', 'غير علمي']); assert(!(await c5(ca, 'GET', '/v1/feed')).j.posts.some((x) => x.id === rej.id));
+    assert.strictEqual((await c5(A, 'POST', '/v1/posts', { title: 'عام من المشرف', scope: 'public' })).j.status, 'live', 'منشور الإدارة العام لا ينتظر');
+    ok('النشر: «لمراجعيّ» يظهر لمراجعي الأخصائي فوراً ولا يراه مراجعو غيره، و«عام» ينتظر موافقة الإدارة (تراه وحدها مع العدّاد) ثم يظهر للجميع، والرفض بملاحظة يراها الكاتب فقط، ويوتيوب فقط للروابط');
+    // التفاعل
+    assert.strictEqual((await c5(ca, 'POST', '/v1/posts/' + pA.id + '/like', { on: 1 })).j.likes, 1); assert.strictEqual((await c5(ca, 'POST', '/v1/posts/' + pA.id + '/like', { on: 1 })).j.likes, 1, 'إعجاب واحد لكل شخص');
+    assert.strictEqual((await c5(ca, 'GET', '/v1/feed')).j.posts.find((x) => x.id === pA.id).liked, true);
+    const cm = (await c5(ca, 'POST', '/v1/posts/' + pA.id + '/comments', { body: 'شكراً دكتور', name: 'سارة' })).j; await c5(A, 'POST', '/v1/posts/' + pA.id + '/comments', { body: 'بالعافية' });
+    assert.strictEqual((await c5(cb, 'POST', '/v1/posts/' + pA.id + '/comments', { body: 'تطفّل' })).s, 404); assert.strictEqual((await c5(ca, 'POST', '/v1/posts/' + pBpub.id + '/comments', { body: 'منشور عام', name: 'سارة' })).s, 200);
+    let cs = (await c5(ca, 'GET', '/v1/posts/' + pA.id + '/comments')).j.comments; assert.deepStrictEqual(cs.map((c) => [c.name, c.dr, c.mine]), [['سارة', false, true], ['د. أحمد', true, false]]);
+    assert.strictEqual((await c5(B, 'POST', '/v1/comments/' + cm.id + '/delete')).s, 404); assert.strictEqual((await c5(A, 'GET', '/v1/feed')).j.posts.find((x) => x.id === pA.id).comments, 2);
+    assert.strictEqual((await c5(A, 'POST', '/v1/comments/' + cm.id + '/delete')).s, 200, 'صاحب المنشور يحذف التعليق'); assert.strictEqual((await c5(A, 'GET', '/v1/feed')).j.posts.find((x) => x.id === pA.id).comments, 1);
+    assert.strictEqual((await c5(ca, 'POST', '/v1/posts/' + pA.id + '/like', { on: 0 })).j.likes, 0);
+    assert.strictEqual((await c5(B, 'POST', '/v1/posts/' + pA.id + '/delete')).s, 404); assert.strictEqual((await c5(A, 'POST', '/v1/posts/' + pA.id + '/delete')).s, 200);
+    assert.strictEqual((await W.default.fetch(new Request(base + u.j.url), env5)).status, 404, 'حذف المنشور يحذف صوره'); assert.strictEqual(env5.DB._raw.prepare('SELECT COUNT(*) AS n FROM comments WHERE pid = ?').get(pA.id).n, 0);
+    await c5(ca, 'POST', '/v1/posts/' + pBpub.id + '/like', { on: 1 }); await c5(A, 'POST', '/v1/clients/remove', { cid: ca.id }); assert.deepStrictEqual([(await c5(B, 'GET', '/v1/feed')).j.posts.find((x) => x.id === pBpub.id)].map((x) => [x.likes, x.comments])[0], [0, 0], 'العدّادات تُصحَّح'); assert.strictEqual(env5.DB._raw.prepare('SELECT COUNT(*) AS n FROM comments WHERE uid = ?').get(ca.id).n, 0, 'فصل العميل يحذف تعليقاته');
+    ok('التفاعل: إعجاب واحد لكل شخص ويُلغى، التعليق باسم المراجع وتعليق الأخصائي مميّز، لا تعليق على ما لا تراه، صاحب المنشور يحذف التعليقات، وحذف المنشور يحذف صوره وتعليقاته، وفصل العميل يحذف تعليقاته');
+  }
   console.log('\nنجح', n, 'اختبارات المحطة الوسيطة');
 })().catch((e) => { console.log('✘', e && e.stack ? e.stack.split('\n').slice(0, 4).join(' | ') : e); process.exit(1); });
