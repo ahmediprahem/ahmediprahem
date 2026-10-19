@@ -257,6 +257,28 @@ const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html'));
     const tx = await d.textContent('.hxday'); assert(tx.includes('✓🚶 9000 خطوة') && tx.includes('✓😴 8 س نوم') && tx.includes('✗☕ 4 كوب قهوة') && tx.includes('✓📿 أذكار الصباح'), tx.slice(0, 400));
     ok('العادات: مكتبة من 10 عادات صحية تُضاف لـ«اليوم» بتصميم لكل عادة (قارورة الماء، عدّاد الخطوات، سماء النوم، صحن الخضار، شعلة السلسلة، بطارية النشاط، جلسة تنفّس، أكواب القهوة)، والإنجاز والسلسلة والأسبوع، وتصل الأخصائي في المتابعة اليومية');
   }
+  // ---- التحديات: قوالب 4 أسابيع في الإعدادات ← تعديل وإرسال للعميل ← بطاقة التحدي في «اليوم» ← إتمام الأسبوع ← شهادة تقدير (صورة وPDF) في «إنجازاتي» ← يصل الإنجاز للأخصائي
+  {
+    await d.click('.rail [data-a="settings"]'); await d.click('[data-a="setTab"][data-v="chal"]'); await d.waitForSelector('.chwk >> nth=3'); assert.strictEqual(await d.locator('.chwk').count(), 4);
+    await d.fill('[data-chf="tpl.0|title"]', 'انطلاقة قوية'); await d.click('[data-a="chTplSave"]'); assert.strictEqual(await d.evaluate(() => DPApp.S.settings.chal.weeks[0].title), 'انطلاقة قوية');
+    await d.evaluate(() => DPApp.A.pick(DPApp.S.clients.find((x) => x.name === 'سارة أحمد').code)); await d.click('main .tabs [data-v="hx"]'); await d.click('[data-a="chNew"][data-v="prog"]');
+    assert.strictEqual(await d.inputValue('[data-chf="ed.0|title"]'), 'انطلاقة قوية'); assert.strictEqual(await d.locator('.chcard .chwk').count(), 4);
+    while (await d.locator('[data-a="chGoalDel"][data-v^="ed.0|"]').count() > 1) await d.click('[data-a="chGoalDel"][data-v="ed.0|1"]');
+    await d.selectOption('[data-chf="ed.0|h|0"]', 'steps'); await d.fill('[data-chf="ed.0|v|0"]', '٨٠٠٠'); await d.fill('[data-chf="ed.0|d|0"]', '1');
+    await d.click('[data-a="chSend"]'); await d.waitForSelector('.toast:has-text("وصل التحدي")'); assert(await d.isVisible('.chrow.cur'));
+    await ip.evaluate(() => window.HissatiApp.poll()); await ip.click('[data-act="tab"][data-v="today"]').catch(() => { });
+    await ip.waitForSelector('#cel.cel-ach', { timeout: 8000 }); assert((await ip.textContent('#cel')).includes('أتممت تحدي الأسبوع 1'));
+    await ip.click('#celcert'); await ip.waitForFunction(() => { const i = document.querySelector('.certbig'); return i && i.src.startsWith('data:image/jpeg') && i.naturalWidth === 1600; }, null, { timeout: 15000 }); await shot(ip, 'c18_cert');
+    if (process.env.SHOTS) { const u = await ip.getAttribute('.certbig', 'src'); fs.writeFileSync(path.join(process.env.SHOTS, 'cert.jpg'), Buffer.from(u.split(',')[1], 'base64')); }
+    const [dj] = await Promise.all([ip.waitForEvent('download'), ip.click('[data-act="certdl"][data-v="png"]')]); assert(/^Hissati-Certificate-Week1-\d{4}-\d{2}-\d{2}\.jpg$/.test(dj.suggestedFilename()), dj.suggestedFilename());
+    const [dp] = await Promise.all([ip.waitForEvent('download'), ip.click('[data-act="certdl"][data-v="pdf"]')]); const pf = TMP + '/cert.pdf'; await dp.saveAs(pf); const pdf = fs.readFileSync(pf);
+    assert(pdf.slice(0, 8).toString() === '%PDF-1.4' && pdf.length > 50000 && pdf.toString('latin1').includes('/DCTDecode'));
+    const pages = +require('child_process').execSync(`pdfinfo "${pf}" | grep Pages | awk '{print $2}'`).toString(); assert.strictEqual(pages, 1, 'PDF صالح بصفحة واحدة');
+    await ip.click('.sheet [data-act="close"]'); await ip.click('[data-act="tab"][data-v="today"]'); assert((await ip.textContent('.chal')).includes('أنجزته')); await shot(ip, 'c19_chal');
+    await ip.click('[data-act="tab"][data-v="progress"]'); await ip.click('[data-act="achs"]'); await ip.waitForSelector('.cthumb img[src^="data:image"]'); assert((await ip.textContent('.astats')).includes('شهادة'));
+    await ip.click('.sheet [data-act="close"]'); await ip.evaluate(() => window.HissatiApp.flush()); await hxCheck(); await d.waitForSelector('.chrow.done'); assert((await d.textContent('.chcard')).includes('🏅 1 شهادة'));
+    ok('التحديات: 4 قوالب جاهزة يعدّلها الأخصائي ويعدّل لكل عميل قبل الإرسال (أرقام عربية)، بطاقة تحدي الأسبوع في «اليوم» بالأيام والنقاط، إتمامه يولّد شهادة تقدير باسم العميل وشعار الأخصائي واسمه تُنزَّل صورة وPDF، وتظهر في «إنجازاتي»، ويصل الإنجاز للأخصائي');
+  }
   await ictx.close(); await jctx.close();
   site.close(); globalThis.fetch = realFetch;
   assert.deepStrictEqual(errs, [], errs.join(' | ')); ok('لا أخطاء في وحدة التحكم');

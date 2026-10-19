@@ -176,6 +176,7 @@ window.DPApp={relist:function(){$('#lst').innerHTML=list()},S:S,A:A};
 /*FEEDUI*/
 /*WORKUI*/
 /*RICHUI*/
+/*CHALUI*/
 
 // ================= بطاقة «تطبيق الجوال»: روابط التنزيل والتحديث (يحرّرها المدير وتصل المستخدمين مع نسخة المستخدمين) =================
 function appCfg(){return eff().app||{}}

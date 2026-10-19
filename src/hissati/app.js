@@ -67,7 +67,7 @@ const fresh = () => ({
   p: { name: '', phone: '', sex: 'أنثى', age: '', weight: '', height: '', act: 2, goal: 1, cond: [], allg: [], meds: '', notes: '',
        like: { B: [], L: [], D: [], S: [] }, nope: { B: [], L: [], D: [], S: [] }, food: {}, wake: '07:00', sleep: '23:00', nmeals: 5, wdays: [], bf: '', sport: '', gphase: '', supp: '', sched: null, cq: {} },
   consent: false, req: 'none', reqMsg: '', code: '', plan: null, pm: null, pv: 0, log: {}, weights: [], prefLog: [], pending: [], msgs: [], unreadC: 0, chat: false, ctx: '',
-  photos: [], rem: { water: false, meals: false }, remSig: '', ident: null, tok: '', fp: '', did: '', cid: '', dEnc: null, dname: '', cat: {}, after: 0, outbox: [], removed: false
+  photos: [], chal: null, chLogo: {}, ach: [], rem: { water: false, meals: false }, remSig: '', ident: null, tok: '', fp: '', did: '', cid: '', dEnc: null, dname: '', cat: {}, after: 0, outbox: [], removed: false
 });
 let S = null, K = null, SALT = null, DATA = {}, CUPS = 10;
 const V = { screen: 'boot', err: '', pin: '', pin1: '', busy: false, tries: 0, until: 0, online: true, polling: false, timer: 0 };
@@ -244,6 +244,12 @@ function handle(p) {
     if (p.ok) { S.p.cond = (p.cond || []).slice(); S.p.allg = (p.allg || []).slice(); toast('اعتمد أخصائيك تعديل حالتك الصحية.'); } else toast('لم يعتمد أخصائيك تعديل الحالة الصحية — راسله للتفاصيل.');
     S.pending = []; return true;
   }
+  if (p.t === 'chal' && p.prog && Array.isArray(p.prog.weeks) && p.prog.weeks.length) {
+    const pr = JSON.parse(JSON.stringify(p.prog)); S.chLogo = S.chLogo || {}; if (typeof pr.logo === 'string' && pr.logo.length < 400000 && /^data:image\/(png|jpeg);base64,/.test(pr.logo)) S.chLogo[pr.id] = pr.logo; delete pr.logo; S.chal = pr;
+    const ls = hList(); pr.weeks.forEach((w) => w.goals.forEach((g) => { if (g.h !== 'plan' && HB(g.h) && ls.indexOf(g.h) < 0) ls.push(g.h); })); S.habits = ls;
+    notify('🏆 تحدٍّ جديد من ' + (pr.dname || S.dname), pr.weeks[0].title); return true;
+  }
+  if (p.t === 'chalx') { S.chal = null; return true; }
   if (p.t === 'pcm' && p.id) { const ph = (S.photos || []).find((x) => x.id === p.id); if (ph) { ph.cm = String(p.text || '').slice(0, 300); notify('علّق أخصائيك على صورة وجبتك', ph.cm); return true; } return false; }
   if (p.t === 'read') { S.msgs.forEach((m) => { if (m.from === 'c' && m.ts <= p.upTo) m.read = true; }); return true; }
   return false;
@@ -444,7 +450,7 @@ function scrApp() {
 function tabToday() {
   const d = TODAY, L = dl(d), [done, n] = itemsOfDay(d), pct = n ? Math.round(done / n * 100) : 0, C = 2 * Math.PI * 40;
   const first = (S.p.name || '').trim().split(/\s+/)[0] || '';
-  let out = (installState() === 'done' || installState() === 'desktop' ? notifCard(true) : installCard('today')) + '<div class="hello"><div class="av sm">' + esc(first.charAt(0) || '؟') + '</div><div style="flex:1"><div class="dim">' + esc(DATA.dayNames[d] || '') + '</div><h2>أهلاً ' + esc(first) + '</h2></div>' + chatBtn() + '</div>';
+  let out = (installState() === 'done' || installState() === 'desktop' ? notifCard(true) : installCard('today')) + '<div class="hello"><div class="av sm">' + esc(first.charAt(0) || '؟') + '</div><div style="flex:1"><div class="dim">' + esc(DATA.dayNames[d] || '') + '</div><h2>أهلاً ' + esc(first) + '</h2></div>' + chatBtn() + '</div>' + chalCard();
   out += '<section class="card ring"><svg viewBox="0 0 100 100" role="img" aria-label="التزام اليوم ' + pct + '%"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="10"/><circle cx="50" cy="50" r="40" fill="none" stroke="#6fe3a9" stroke-width="10" stroke-linecap="round" stroke-dasharray="' + C + '" stroke-dashoffset="' + (C * (1 - pct / 100)) + '"/></svg><div style="flex:1"><div class="num">' + pct + '%</div><div class="mut">' + done + ' من ' + n + ' أصناف اليوم</div>'
     + (pct === 100 ? '<div class="dim" style="color:var(--mint)">يوم كامل، أحسنت!</div>' : '<div class="dim">علّم ما أكلته باللمس.</div>') + '</div></section>';
   const dp = dayPlan(d), kc = dp.kcal || DATA.kcal, pr = dp.p || DATA.pro, wt = +(dp.water || DATA.water), cups = Math.max(4, Math.min(16, Math.round(wt / CUP)));
@@ -499,7 +505,7 @@ function tabProgress() {
   return '<h2>تقدّمي</h2><section class="card stack"><div class="row" style="justify-content:space-between"><h3>الوزن</h3><span class="dim">' + (W.length > 1 ? (diff <= 0 ? diff + ' كجم منذ البداية' : '+' + diff + ' كجم') : '') + '</span></div>' + chart
     + '<div class="row"><input class="inp" id="wIn" type="text" data-numf="1" autocomplete="off" inputmode="decimal" placeholder="وزن اليوم (كجم)" style="flex:1"><button class="btn sm" data-act="weigh">' + I('scale') + ' سجّل</button></div></section>'
     + '<section class="card stack"><div class="row" style="justify-content:space-between"><h3>الالتزام آخر 7 أيام</h3><span class="dim">% من الأصناف</span></div><div class="wk">' + bars + '</div></section>'
-    + habitsProgress() + remCard() + '<section class="card stack"><h3>الحساب</h3><p class="dim">ملفك لدى ' + esc(S.dname) + (S.code ? ' • رقم ' + esc(S.code) : '') + '. بياناتك محفوظة مشفّرة على هذا الجوال فقط.</p>' + installCard('acct') + notifCard(false) + '<div class="row"><button class="btn sm sec" data-act="lock">' + I('lock') + ' قفل التطبيق</button><button class="btn sm sec" data-act="xferNew">' + I('phone') + ' نقل حسابي</button></div><button class="link" data-act="wipe" style="color:var(--coral)">حذف بياناتي من هذا الجوال</button></section>';
+    + '<section class="card achcard"><div class="row" style="justify-content:space-between"><h3>🏅 إنجازاتي</h3><span class="dim">' + (S.ach || []).length + ' شهادة</span></div><button class="btn sm" data-act="achs">' + I('sparkle') + ' عرض إنجازاتي وشهاداتي</button></section>' + habitsProgress() + remCard() + '<section class="card stack"><h3>الحساب</h3><p class="dim">ملفك لدى ' + esc(S.dname) + (S.code ? ' • رقم ' + esc(S.code) : '') + '. بياناتك محفوظة مشفّرة على هذا الجوال فقط.</p>' + installCard('acct') + notifCard(false) + '<div class="row"><button class="btn sm sec" data-act="lock">' + I('lock') + ' قفل التطبيق</button><button class="btn sm sec" data-act="xferNew">' + I('phone') + ' نقل حسابي</button></div><button class="link" data-act="wipe" style="color:var(--coral)">حذف بياناتي من هذا الجوال</button></section>';
 }
 
 // ---------- التثقيف: منشورات أخصائيك (ومنشورات عامة لمراجعي «حصة» توافق عليها الإدارة) — إعجاب وتعليق
@@ -733,6 +739,97 @@ function celebrate(id) {
     + '<div class="celc">' + (id === 'adhkar' ? '<div class="adheart pulse">' + heartSvg(1, 1) + '</div>' : '<div class="celi">' + HB(id).ic + '</div>') + '<h2>' + c.t + '</h2><p>' + c.m + '</p>' + (st > 1 ? '<span class="hbs">🔥 ' + st + ' أيام متتالية</span>' : '') + '<small>المس للمتابعة</small></div>';
   el.onclick = () => el.remove(); document.body.appendChild(el); if (navigator.vibrate) try { navigator.vibrate([30, 60, 30]); } catch (x) { } setTimeout(() => el.remove(), 6000);
 }
+// ---------- التحديات الأسبوعية من أخصائيك وشهادات التقدير («إنجازاتي»)
+const CHG = { water: ['💧', 'شرب الماء', 'أكواب'], plan: ['✅', 'الالتزام بالخطة', '%'], steps: ['🚶', 'المشي', 'خطوة'], sleep: ['😴', 'النوم', 'ساعات'], veg: ['🥗', 'خضار وفاكهة', 'حصص'], sugar: ['🍬', 'بلا سكر مضاف', ''], move: ['⚡', 'النشاط البدني', 'دقيقة'], breath: ['🫧', 'التنفّس', 'جلسة'], mindful: ['🍽', 'أكل بوعي', 'وجبة'], kitchen: ['🌙', 'المطبخ مغلق ليلاً', ''], coffee: ['☕', 'الكافيين', 'أكواب كحد أقصى'], adhkar: ['📿', 'أذكار الصباح', ''] };
+const PHRASES = ['الإنجاز العظيم يبدأ بخطوة صغيرة، وأنت خطوت خطوات ثابتة.', 'التزامك اليوم هو صحتك غداً — فخورون بك!', 'العادات الصغيرة المتكررة تصنع نتائج كبيرة.', 'أثبتَّ أن الإرادة أقوى من الأعذار.', 'جسمك يشكرك على كل اختيار صحي اتخذته.', 'استمر… فأفضل نسخة منك في الطريق.'];
+const nDays = (n) => n === 1 ? 'يوم واحد' : n === 2 ? 'يومان' : n + (n <= 10 ? ' أيام' : ' يوماً');
+const addD = (k, n) => { const d = new Date(k + 'T12:00'); d.setDate(d.getDate() + n); return dkey(d); };
+function planPct(k) { const L = S.log[k]; if (!L || !S.plan) return null; const day = S.plan[new Date(k + 'T12:00').getDay() % S.plan.length]; let n = 0, done = 0; day.slots.forEach((s, si) => s.lines.forEach((l, li) => { n++; if (L.ck[si + '_' + li]) done++; })); return n ? done / n * 100 : null; }
+function gOk(g, k) {
+  const L = S.log[k]; if (!L) return false; const v = g.h === 'water' ? L.water : g.h === 'plan' ? planPct(k) : (L.h || {})[g.h]; if (v == null) return false;
+  if (g.h === 'sugar' || g.h === 'kitchen') return v === 1; if (g.h === 'mindful') return (v || []).length >= g.v; if (g.h === 'coffee') return v <= g.v; if (g.h === 'adhkar') return adhDone(v) >= ADH_TOTAL; return +v >= +g.v;
+}
+function gTxt(g) { const m = CHG[g.h] || ['', g.h, '']; return m[0] + ' ' + m[1] + (m[2] ? ' ' + Number(g.v).toLocaleString('en') + ' ' + m[2] : ''); }
+function chIdx() { if (!S.chal) return -1; return Math.floor((new Date(dkey(new Date()) + 'T12:00') - new Date(S.chal.start + 'T12:00')) / 864e5 / 7); }
+function chProg(wi) { const w = S.chal.weeks[wi], s = addD(S.chal.start, wi * 7), today = dkey(new Date()); return w.goals.map((g) => { let n = 0; for (let i = 0; i < 7; i++) { const k = addD(s, i); if (k <= today && gOk(g, k)) n++; } return n; }); }
+function chHas(w) { return (S.ach || []).some((a) => a.pid === S.chal.id && a.w === w); }
+function chalCheck() {
+  if (!S || !S.chal || !S.plan) return; const ix = Math.min(chIdx(), S.chal.weeks.length - 1); let got = null;
+  for (let wi = 0; wi <= ix; wi++) { if (chHas(wi + 1)) continue; const w = S.chal.weeks[wi], p = chProg(wi); if (w.goals.length && w.goals.every((g, gi) => p[gi] >= g.d)) got = achieve(wi + 1, w.title, w.goals.map((g, gi) => gTxt(g) + ' • ' + nDays(p[gi]))); }
+  if (S.chal.weeks.length > 1 && !chHas(99) && S.chal.weeks.every((w, i) => chHas(i + 1))) got = achieve(99, 'برنامج التحديات الصحية (' + S.chal.weeks.length + ' أسابيع)', S.chal.weeks.map((w, i) => '🏅 الأسبوع ' + (i + 1) + ': ' + w.title));
+  if (got) setTimeout(() => celebrateAch(got), 80);
+}
+function achieve(w, title, lines) {
+  const id = 'a' + now().toString(36) + w, c = { id, pid: S.chal.id, w, title, lines, at: now(), name: String(S.p.name || '').trim(), sex: S.p.sex, dname: S.chal.dname || S.dname, clinic: S.chal.clinic || '', phrase: PHRASES[(now() + w) % PHRASES.length] };
+  S.ach = (S.ach || []).concat([c]); send({ t: 'ach', id: S.chal.id, w, title }); save(); return c;
+}
+function chalCard() {
+  if (!S.chal) return ''; const ix = chIdx(), W = S.chal.weeks;
+  if (ix < 0) return '<section class="card chal"><div class="chh"><span class="trophy">🏆</span><div><small>تحدٍّ من ' + esc(S.chal.dname || S.dname) + '</small><h3>يبدأ ' + esc(S.chal.start) + '</h3></div></div><p class="dim">' + esc(W[0].title) + ' — استعد!</p></section>';
+  if (ix >= W.length) return '<section class="card chal fin"><div class="chh"><span class="trophy">🏆</span><div><small>انتهى البرنامج</small><h3>' + (S.ach || []).filter((a) => a.pid === S.chal.id && a.w < 99).length + ' من ' + W.length + ' أسابيع منجزة</h3></div></div><button class="btn sm" data-act="achs">' + I('sparkle') + ' إنجازاتي وشهاداتي</button></section>';
+  const w = W[ix], p = chProg(ix), left = 7 - ((Math.floor((new Date(dkey(new Date()) + 'T12:00') - new Date(S.chal.start + 'T12:00')) / 864e5)) % 7), won = chHas(ix + 1);
+  return '<section class="card chal' + (won ? ' won' : '') + '"><div class="chh"><span class="trophy">' + (won ? '🏅' : '🏆') + '</span><div><small>تحدي الأسبوع ' + (ix + 1) + (W.length > 1 ? ' من ' + W.length : '') + '</small><h3>' + esc(w.title) + '</h3></div><span class="dleft">' + (won ? 'أنجزته ✓' : 'باقي ' + left + (left === 1 ? ' يوم' : ' أيام')) + '</span></div>' + (w.msg ? '<p class="dim">' + esc(w.msg) + '</p>' : '')
+    + w.goals.map((g, gi) => '<div class="chg' + (p[gi] >= g.d ? ' ok' : '') + '"><span>' + esc(gTxt(g)) + '</span><span class="dots">' + Array.from({ length: g.d }, (_, i) => '<i class="' + (i < p[gi] ? 'on' : '') + '"></i>').join('') + '</span><b>' + Math.min(p[gi], g.d) + '/' + g.d + '</b></div>').join('')
+    + (won ? '<button class="btn sm" data-act="cert" data-v="' + esc(((S.ach || []).find((a) => a.pid === S.chal.id && a.w === ix + 1) || {}).id || '') + '">' + I('sparkle') + ' شهادتي</button>' : '') + '</section>';
+}
+function achStats() {
+  let days = 0, water = 0, steps = 0, best = 0; Object.keys(S.log).forEach((k) => { const L = S.log[k]; water += (L.water || 0) * CUP; steps += +((L.h || {}).steps || 0); if (Object.keys(L.h || {}).length || L.water) days++; });
+  HABITS.forEach((h) => { if (hList().indexOf(h.id) >= 0) best = Math.max(best, hStreak(h.id)); });
+  return [['🏅', (S.ach || []).length, 'شهادة'], ['📅', days, 'يوماً تابعت فيه'], ['💧', Math.round(water), 'لتر ماء'], ['🚶', steps >= 1000 ? Math.round(steps / 1000) + ' ألف' : steps, 'خطوة'], ['🔥', best, 'أطول سلسلة الآن']];
+}
+function achSheet() {
+  const L = (S.ach || []).slice().reverse();
+  return '<div class="astats">' + achStats().map((s) => '<div><span>' + s[0] + '</span><b>' + s[1] + '</b><small>' + s[2] + '</small></div>').join('') + '</div>'
+    + (L.length ? '<div class="clist">' + L.map((a) => '<button class="cthumb" data-act="cert" data-v="' + a.id + '"><img data-cert="' + a.id + '" alt="شهادة"><span><b>' + (a.w === 99 ? '🏆 البرنامج كاملاً' : 'الأسبوع ' + a.w) + '</b><small>' + esc(a.title) + ' • ' + new Date(a.at).toLocaleDateString('ar') + '</small></span></button>').join('') + '</div>'
+      : '<div class="empty"><div class="ei">🏅</div><p class="dim">' + (S.chal ? 'أتمّ أهداف تحدي هذا الأسبوع لتحصل على أول شهادة تقدير باسمك.' : 'حين يرسل لك أخصائيك تحدياً أسبوعياً، تظهر هنا شهاداتك عند إتمامه.') + '</p></div>');
+}
+function certSheet() { const a = (S.ach || []).find((x) => x.id === sheet.v); if (!a) return ''; return '<img class="certbig" data-cert="' + a.id + '" alt="شهادة التقدير"><div class="row">' + '<button class="btn sm" data-act="certdl" data-v="png">' + I('share') + ' صورة</button><button class="btn sm sec" data-act="certdl" data-v="pdf">PDF</button>' + (navigator.share ? '<button class="btn sm sec" data-act="certdl" data-v="share">مشاركة</button>' : '') + '</div><p class="dim">' + esc(a.phrase) + '</p>'; }
+const CERT = {};
+async function certCanvas(a) {
+  try { await document.fonts.load('700 40px "Hissa Plex"'); await document.fonts.load('400 30px "Hissa Plex"'); } catch (e) { }
+  const W = 1600, H = 1131, cv = document.createElement('canvas'); cv.width = W; cv.height = H; const g = cv.getContext('2d'), F = (w, s) => w + ' ' + s + 'px "Hissa Plex", "Segoe UI", Tahoma, sans-serif';
+  g.fillStyle = '#fffdf6'; g.fillRect(0, 0, W, H);
+  const gr = g.createLinearGradient(0, 0, W, H); gr.addColorStop(0, '#1f8a5b'); gr.addColorStop(.5, '#d4a72c'); gr.addColorStop(1, '#1f5fae'); g.strokeStyle = gr; g.lineWidth = 26; g.strokeRect(30, 30, W - 60, H - 60); g.lineWidth = 3; g.strokeStyle = '#d4a72c'; g.strokeRect(62, 62, W - 124, H - 124);
+  [[62, 62], [W - 62, 62], [62, H - 62], [W - 62, H - 62]].forEach(([x, y]) => { g.beginPath(); g.arc(x, y, 18, 0, 7); g.fillStyle = '#d4a72c'; g.fill(); g.beginPath(); g.arc(x, y, 8, 0, 7); g.fillStyle = '#fffdf6'; g.fill(); });
+  g.globalAlpha = .06; g.font = F(700, 520); g.textAlign = 'center'; g.fillStyle = '#1f8a5b'; g.fillText(a.w === 99 ? '🏆' : '🏅', W / 2, H / 2 + 180); g.globalAlpha = 1;
+  const logo = S.chLogo && S.chLogo[a.pid]; let y = 120;
+  if (logo) { const im = new Image(); await new Promise((r) => { im.onload = r; im.onerror = r; im.src = logo; }); if (im.naturalWidth) { const k = Math.min(240 / im.naturalWidth, 120 / im.naturalHeight); g.drawImage(im, W / 2 - im.naturalWidth * k / 2, y, im.naturalWidth * k, im.naturalHeight * k); y += im.naturalHeight * k + 20; } }
+  g.direction = 'rtl'; g.textAlign = 'center'; g.fillStyle = '#12305e'; g.font = F(700, 78); g.fillText('شهادة تقدير', W / 2, y + 70); y += 70;
+  g.strokeStyle = '#d4a72c'; g.lineWidth = 3; g.beginPath(); g.moveTo(W / 2 - 170, y + 24); g.lineTo(W / 2 + 170, y + 24); g.stroke();
+  g.fillStyle = '#44506b'; g.font = F(400, 34); g.fillText('تُمنح هذه الشهادة ' + (a.sex === 'أنثى' ? 'للمتميّزة' : 'للمتميّز'), W / 2, y + 90);
+  g.fillStyle = '#1f8a5b'; g.font = F(700, 92); g.fillText(a.name || 'بطل حصتي', W / 2, y + 200);
+  g.fillStyle = '#12305e'; g.font = F(400, 36); g.fillText((a.sex === 'أنثى' ? 'لإتمامها ' : 'لإتمامه ') + (a.w === 99 ? a.title + ' بنجاح' : 'تحدي الأسبوع ' + a.w + ': «' + a.title + '»'), W / 2, y + 275);
+  g.fillStyle = '#5b6680'; g.font = F(400, 26); const ln = a.lines.slice(0, 6), rows = [ln.slice(0, 3).join('    '), ln.slice(3).join('    ')].filter(Boolean); rows.forEach((r, i) => g.fillText(r, W / 2, y + 335 + i * 42));
+  g.fillStyle = '#b8860b'; g.font = F(700, 38); g.fillText('“ ' + a.phrase + ' ”', W / 2, y + 335 + rows.length * 42 + 60);
+  const by = H - 150; g.fillStyle = '#12305e'; g.font = F(700, 32); g.fillText(a.dname || 'أخصائي التغذية', W - 360, by); g.strokeStyle = '#9aa6c0'; g.lineWidth = 2; g.beginPath(); g.moveTo(W - 540, by + 22); g.lineTo(W - 180, by + 22); g.stroke();
+  g.fillStyle = '#5b6680'; g.font = F(400, 24); g.fillText('أخصائي التغذية' + (a.clinic ? ' — ' + a.clinic : ''), W - 360, by + 60);
+  g.fillStyle = '#12305e'; g.font = F(700, 30); g.fillText(new Date(a.at).toLocaleDateString('ar', { day: 'numeric', month: 'long', year: 'numeric' }), 360, by); g.beginPath(); g.moveTo(180, by + 22); g.lineTo(540, by + 22); g.stroke(); g.fillStyle = '#5b6680'; g.font = F(400, 24); g.fillText('التاريخ', 360, by + 60);
+  g.fillStyle = '#9aa6c0'; g.font = F(400, 20); g.fillText('حصتي • ' + (a.w === 99 ? 'برنامج التحديات الصحية' : 'تحديات العادات الصحية'), W / 2, H - 88);
+  return cv;
+}
+function certUrl(a) { return CERT[a.id] || (CERT[a.id] = certCanvas(a).then((cv) => cv.toDataURL('image/jpeg', 0.9))); }
+function fillCerts() { document.querySelectorAll('img[data-cert]').forEach((im) => { const a = (S.ach || []).find((x) => x.id === im.dataset.cert); if (a) certUrl(a).then((u) => { im.src = u; }); }); }
+function pdfFromJpeg(bytes, w, h) {                                // PDF بصفحة A4 أفقية فيها صورة الشهادة (بلا مكتبات)
+  const te = new TextEncoder(), parts = [], offs = []; let len = 0; const add = (x) => { const b = typeof x === 'string' ? te.encode(x) : x; parts.push(b); len += b.length; }, obj = (n, s) => { offs[n] = len; add(n + ' 0 obj\n' + s + '\nendobj\n'); };
+  add('%PDF-1.4\n%\xE2\xE3\xCF\xD3\n'); obj(1, '<< /Type /Catalog /Pages 2 0 R >>'); obj(2, '<< /Type /Pages /Kids [3 0 R] /Count 1 >>');
+  obj(3, '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 842 595] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>');
+  offs[4] = len; add('4 0 obj\n<< /Type /XObject /Subtype /Image /Width ' + w + ' /Height ' + h + ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' + bytes.length + ' >>\nstream\n'); add(bytes); add('\nendstream\nendobj\n');
+  const cs = 'q 842 0 0 595 0 0 cm /Im0 Do Q'; obj(5, '<< /Length ' + cs.length + ' >>\nstream\n' + cs + '\nendstream');
+  const xo = len; add('xref\n0 6\n0000000000 65535 f \n' + [1, 2, 3, 4, 5].map((n) => String(offs[n]).padStart(10, '0') + ' 00000 n \n').join('') + 'trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n' + xo + '\n%%EOF');
+  return new Blob(parts, { type: 'application/pdf' });
+}
+async function certDownload(kind) {
+  const a = (S.ach || []).find((x) => x.id === sheet.v); if (!a) return; const url = await certUrl(a), bin = atob(url.split(',')[1]), u8 = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+  const base = 'Hissati-Certificate-' + (a.w === 99 ? 'Program' : 'Week' + a.w) + '-' + dkey(new Date(a.at)),        // اسم لاتيني: بعض المتصفحات تُسقط الأسماء العربية للملفات المنزّلة
+    blob = kind === 'pdf' ? pdfFromJpeg(u8, 1600, 1131) : new Blob([u8], { type: 'image/jpeg' }), name = base + (kind === 'pdf' ? '.pdf' : '.jpg');
+  if (kind === 'share') { try { await navigator.share({ files: [new File([u8], base + '.jpg', { type: 'image/jpeg' })], title: 'شهادة تقدير' }); } catch (e) { } return; }
+  const l = document.createElement('a'), ou = URL.createObjectURL(blob); l.href = ou; l.download = name; l.style.display = 'none'; document.body.appendChild(l); l.click(); setTimeout(() => { l.remove(); URL.revokeObjectURL(ou); }, 4000); toast('نُزّلت الشهادة');
+}
+function celebrateAch(a) {
+  const old = document.getElementById('cel'); if (old) old.remove(); const el = document.createElement('div'); el.id = 'cel'; el.className = 'cel cel-ach';
+  el.innerHTML = '<div class="fx">' + Array.from({ length: 22 }, (_, i) => '<i style="left:' + ((i * 37) % 100) + '%;animation-delay:' + ((i % 7) * 0.2).toFixed(2) + 's;font-size:' + (18 + (i * 7) % 20) + 'px">' + ['🎉', '⭐', '🏅', '✨'][i % 4] + '</i>').join('') + '</div><div class="celc"><div class="celi">' + (a.w === 99 ? '🏆' : '🏅') + '</div><h2>' + (a.w === 99 ? 'أتممت البرنامج كاملاً!' : 'أتممت تحدي الأسبوع ' + a.w + '!') + '</h2><p>' + esc(a.phrase) + '</p><button class="btn" id="celcert">' + I('sparkle') + ' استلم شهادتك</button><small>المس خارج الزر للإغلاق</small></div>';
+  el.onclick = (e) => { el.remove(); if (e.target.closest('#celcert')) { sheet = { t: 'cert', v: a.id }; render(); } }; document.body.appendChild(el);
+}
 // ---------- الأوراق السفلية
 function sheetHtml() {
   if (!sheet) return '';
@@ -758,6 +855,10 @@ function sheetHtml() {
       + '<p class="dim">الرمز صالح 15 دقيقة ولمرة واحدة، ويحمل مفتاح فك التشفير فلا ترسله لأحد. بعد النقل يُمسح الحساب من هنا تلقائياً.</p>';
   } else if (sheet.t === 'rcp') {
     const [d0, s0] = sheet.k.split('_').map(Number); h = esc(dayPlan(d0).slots[s0].meal); b = rcpSheet();
+  } else if (sheet.t === 'achs') {
+    h = 'إنجازاتي'; b = achSheet();
+  } else if (sheet.t === 'cert') {
+    h = 'شهادة التقدير'; b = certSheet();
   } else if (sheet.t === 'habits') {
     h = 'العادات'; b = habitsSheet();
   } else if (sheet.t === 'cm') {
@@ -821,6 +922,7 @@ function render() {
   if (cmV) { const n = $('#cmIn'); if (n) { n.value = cmV[0]; if (cmV[1]) n.focus(); } }
   const s2 = $('.scroll'); if (s2 && key === lastKey) s2.scrollTop = top; lastKey = key;
   const th = $('#thread'); if (th) th.scrollTop = th.scrollHeight;
+  fillCerts(); if (S && S.chal && S.screen === 'app' && V.screen === '') chalCheck();
   if (focusChat) { const c = $('#chatIn'); if (c) c.focus(); focusChat = false; }
   if (S && K) save();
 }
@@ -981,6 +1083,9 @@ document.addEventListener('click', (e) => {
     }
     case 'fdCmDel': { if (!confirm('حذف تعليقك؟')) return; const pid = sheet.pid; api('POST', '/v1/comments/' + v + '/delete', {}).then(() => { const x = FD.posts.find((p) => p.id === pid); if (x) x.comments = Math.max(0, (x.comments || 0) - 1); return fdComments(pid); }).catch((er) => toast(er.message)); return; }
     case 'habits': sheet = { t: 'habits' }; break;
+    case 'achs': sheet = { t: 'achs' }; break;
+    case 'cert': if (!v) return; sheet = { t: 'cert', v }; break;
+    case 'certdl': certDownload(v); return;
     case 'htoggle': { const ls = hList(), i = ls.indexOf(v); if (i >= 0) ls.splice(i, 1); else { ls.push(v); toast('أُضيفت «' + HB(v).n + '» إلى صفحتك'); } S.habits = ls; queueLog(dkey(new Date())); break; }
     case 'breathe': breathe(); return;
     case 'adhkar': adhOpen(); return;
