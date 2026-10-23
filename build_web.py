@@ -23,6 +23,9 @@ import re
 A = R('assets.js'); js = lambda k: json.loads('"' + re.search(k + r':"((?:[^"\\]|\\.)*)"', A).group(1) + '"')
 hx = open(os.path.join(H, 'src', 'hissati', 'template.html'), encoding='utf-8').read().replace('/*FONT*/', font_css()).replace('/*CSS*/', R('hissati/style.css')).replace('/*THEMES*/', R('hissati/themes.css') + R('hissati/themes_glass.css') if os.path.exists(os.path.join(H, 'src', 'hissati', 'themes_glass.css')) else R('hissati/themes.css')).replace('/*MOTION*/', R('hissati/motion.js')).replace('/*ONB*/', json.dumps([('data:image/webp;base64,' + base64.b64encode(open(os.path.join(H, 'assets', 'onboarding', f), 'rb').read()).decode()) for f in sorted(os.listdir(os.path.join(H, 'assets', 'onboarding'))) if f.endswith('.webp')] if os.path.isdir(os.path.join(H, 'assets', 'onboarding')) else [])).replace('/*LOGO*/', json.dumps(js('logoSvg'), ensure_ascii=False).replace('</', '<\\/')).replace('/*HXC*/', R('hx_crypto.js')).replace('/*FORMS*/', R('forms.js')).replace('/*APP*/', R('hissati/app.js'))
 open(os.path.join(H, 'hissati.html'), 'w', encoding='utf-8').write(hx)
+_dm = os.path.join(H, 'src', 'hissati', 'demo_state.json')
+if os.path.exists(_dm):      # نسخة تجريبية للعرض (Artifact): نفس التطبيق بحساب وهمي بلا شبكة
+    open(os.path.join(H, 'hissati_demo.html'), 'w', encoding='utf-8').write(hx.replace('window.HX_DEMO=/*DEMO*/null;', 'window.HX_DEMO=' + open(_dm, encoding='utf-8').read().replace('</', '<\\/') + ';').replace('<title>حصتي</title>', '<title>حصتي — نسخة تجريبية</title>'))
 jsstr = lambda v: json.dumps(v, ensure_ascii=False).replace('\u2028', '\\u2028').replace('\u2029', '\\u2029')
 wk = open(os.path.join(H, 'worker', 'relay', 'index.mjs'), encoding='utf-8').read()
 wk = re.sub(r'/\*HISSATI_HTML\*/.*?/\*END\*/', lambda m: '/*HISSATI_HTML*/' + jsstr(hx) + '/*END*/', wk, count=1, flags=re.S)

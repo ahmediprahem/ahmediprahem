@@ -3,7 +3,7 @@
 const { fileUrl, TMP } = require('./_tmp.js');
 const { chromium, devices } = require('playwright'); const assert = require('assert'), path = require('path'), fs = require('fs'), http = require('http'), login = require('./auth_helper'), d1 = require('./d1_shim.js'), HXC = require('../src/hx_crypto.js');
 let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
-const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html'));
+const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADMIN = fileUrl(path.resolve(__dirname, '../admin.html'));
 (async () => {
   // ---- المحطة: نفس الملف الذي يُلصق في Cloudflare
   const wf = path.join(TMP, 'relay_worker.mjs'); fs.copyFileSync(path.resolve(__dirname, '../worker/relay/dist/worker.js'), wf);
@@ -371,6 +371,13 @@ const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html'));
       await ip.click('[data-act="tab"][data-v="plan"]').catch(() => { }); await tour(TH, '[data-act="swap"]', 's8_swap'); await close();
       await ip.click('[data-act="tab"][data-v="progress"]').catch(() => { }); await tour(TH, '[data-act="achs"]', 's9_achievements'); await close(); await ip.evaluate(() => { window.HissatiApp.celebrateTest && window.HissatiApp.celebrateTest('water'); }).catch(() => { }); await ip.waitForTimeout(900); await shot(ip, TH + '_s10_celebrate'); await close();
     }
+  }
+  if (process.env.DEMO_OUT) {      // حالة حساب تجريبي للعرض (Artifact): من حساب الاختبار بعد تنظيف الهوية والمفاتيح والصور
+    const st = await ip.evaluate(() => JSON.parse(JSON.stringify(window.HissatiApp.state())));
+    Object.assign(st, { ident: null, tok: '', fp: '', did: '', cid: 'demo', dEnc: null, outbox: [], photos: [], chLogo: {}, dname: 'د. أخصائي التغذية', fw: 'done', remSig: '', habits: ['water', 'adhkar', 'adhkarPm', 'sunlight', 'gratitude', 'social'], rem: { water: true, meals: true, adhAm: true, adhPm: true } });
+    st.msgs = (st.msgs || []).slice(-6); st.cat = Object.assign({}, st.cat, { form: undefined, clinic: 'عيادة التغذية' });
+    const posts = [{ id: 3, at: Date.now() - 36e5, author: 'د. أخصائي التغذية', mine: true, kind: 'tip', title: 'اشرب الماء قبل الوجبة', body: 'كوب ماء قبل الأكل بنصف ساعة يساعدك على الشعور بالشبع. جرّبه اليوم!', likes: 4, comments: 1 }, { id: 2, at: Date.now() - 9e7, author: 'د. أخصائي التغذية', mine: true, title: 'الإفطار المتوازن', body: 'بيض أو جبن مع خبز بُر وخضار: طاقة تدوم وشبع يمتد للغداء.', likes: 7, comments: 0 }];
+    fs.writeFileSync(DEMO_FILE, JSON.stringify({ state: st, posts }));
   }
   await ictx.close(); await jctx.close();
   site.close(); globalThis.fetch = realFetch;

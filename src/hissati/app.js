@@ -95,6 +95,7 @@ async function unlock(pin) {
 }
 // ---------- الشبكة
 async function api(method, path, obj, unsigned) {
+  if (DEMO) return method === 'GET' && /^\/v1\/feed/.test(path) ? { posts: DEMO.posts || [], more: false } : {};
   const body = obj === undefined ? '' : JSON.stringify(obj), h = { 'content-type': 'application/json' };
   if (!unsigned) h.authorization = await HXC.signReq(S.ident, method, path, body);
   let r; try { r = await fetch(API + path, { method, headers: h, body: method === 'POST' ? body : undefined, cache: 'no-store' }); } catch (e) { const x = new Error('لا اتصال بالإنترنت'); x.net = 1; throw x; }
@@ -102,6 +103,7 @@ async function api(method, path, obj, unsigned) {
   V.online = true; return j;
 }
 function send(payload) {                           // صندوق صادر: يُرسل الآن، ويُعاد لاحقاً إن انقطع الإنترنت (المتابعة اليومية تُدمج بآخر نسخة لليوم)
+  if (DEMO) return Promise.resolve();
   payload.a = S.tok; payload.ts = payload.ts || now();
   if (payload.t === 'log') S.outbox = S.outbox.filter((q) => !(q.t === 'log' && q.d === payload.d));
   if (payload.t === 'prefs') S.outbox = S.outbox.filter((q) => q.t !== 'prefs' || (payload.changes = (q.changes || []).concat(payload.changes || []), false));
@@ -142,8 +144,9 @@ async function poll() {
 // ---------- الإشعارات والتطبيق مغلق (Web Push بلا محتوى عبر عامل الخدمة /sw.js)
 const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent), standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
 const pushOk = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+const DEMO = window.HX_DEMO || null;                  // نسخة تجريبية للعرض (hissati_demo.html): حساب وهمي بلا شبكة ولا حفظ ولا عامل خدمة
 let swReg = null;
-if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+if (!DEMO && 'serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
   swReg = navigator.serviceWorker.register('/sw.js').catch(() => null);
   navigator.serviceWorker.addEventListener('message', (e) => { if (e.data && e.data.t === 'rem') { if (S) toast(e.data.text); return; } if (e.data && e.data.t === 'push') { poll(); fdLoad().then(() => { if (S) render(); }); } });
 }
@@ -180,7 +183,7 @@ let bip = null;
 window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); bip = e; if (S) render(); });
 window.addEventListener('appinstalled', () => { bip = null; if (S) toast('ثُبّت «حصتي» على جهازك ✓ افتحه من أيقونته'); });
 const inApp = /FBAN|FBAV|Instagram|Line\/|Snapchat|TikTok|WhatsApp/i.test(navigator.userAgent), isAndroid = /Android/i.test(navigator.userAgent);
-function installState() { if (standalone) return 'done'; if (inApp) return 'inapp'; if (bip) return 'prompt'; if (isIOS) return 'ios'; if (isAndroid) return 'android'; return 'desktop'; }
+function installState() { if (DEMO) return 'desktop'; if (standalone) return 'done'; if (inApp) return 'inapp'; if (bip) return 'prompt'; if (isIOS) return 'ios'; if (isAndroid) return 'android'; return 'desktop'; }
 function installCard(where) {                       // where: invite | today | sent | acct
   const st = installState(), reg = !!(S && S.cid);
   if (st === 'done') return where === 'acct' ? '<p class="dim">' + I('check') + ' «حصتي» مثبّت على هذا الجهاز.</p>' : '';
@@ -283,7 +286,7 @@ function scrBad() {
 }
 // ---------- شاشات المستخدم الجديد (0.39): بداية حيّة ← 3 قصص تفاعلية ← اختيار الشكل ← (التسجيل) ← أول إنجاز. تظهر مرة واحدة على الجهاز ولها تخطٍّ دائماً.
 const ONB_KEY = 'hissati_onb', ONB_IMG = window.HX_ONB || [], RM = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
-const onbSeen = () => { try { return localStorage.getItem(ONB_KEY) === '1'; } catch (e) { return true; } };
+const onbSeen = () => { if (DEMO) return false; try { return localStorage.getItem(ONB_KEY) === '1'; } catch (e) { return true; } };
 function onbDone() { try { localStorage.setItem(ONB_KEY, '1'); } catch (e) { } if (S) S.fw = S.fw || 'pending'; V.onb = null; V.screen = ''; render(); }
 const onbPhoto = (i) => ONB_IMG[i] ? '<i class="onb-photo" style="background-image:url(' + ONB_IMG[i] + ')"></i>' : '';
 const ONB_PLATE = '<svg viewBox="0 0 200 140" aria-hidden="true"><ellipse cx="100" cy="82" rx="86" ry="46" fill="rgba(255,255,255,.1)" stroke="currentColor" stroke-opacity=".5" stroke-width="2"/><ellipse cx="100" cy="82" rx="62" ry="32" fill="none" stroke="currentColor" stroke-opacity=".25"/><circle cx="78" cy="76" r="17" fill="#ffe9a8"/><circle cx="78" cy="76" r="8" fill="#ffb931"/><circle cx="116" cy="70" r="15" fill="#ffe9a8"/><circle cx="116" cy="70" r="7" fill="#ffb931"/><path d="M62 98c14 8 44 10 76 0" fill="none" stroke="#6fe3a9" stroke-width="7" stroke-linecap="round"/><circle cx="140" cy="94" r="10" fill="#e85d75"/><path d="M140 84c2-6 6-8 9-8" stroke="#6fe3a9" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M58 52c8-14 22-18 30-10" stroke="currentColor" stroke-opacity=".5" fill="none" stroke-width="3" stroke-linecap="round"><animate attributeName="d" dur="3s" repeatCount="indefinite" values="M58 52c8-14 22-18 30-10;M58 50c8-16 24-14 30-12;M58 52c8-14 22-18 30-10"/></path></svg>';
@@ -1087,6 +1090,7 @@ async function onPin() {
 }
 // ---------- البداية
 async function boot() {
+  if (DEMO) { S = Object.assign(fresh(), JSON.parse(JSON.stringify(DEMO.state))); S.chat = false; S.day = TODAY; S.screen = 'app'; S.cid = 'demo'; mkData(); V.screen = onbSeen() ? '' : 'onb'; V.onb = { i: 0 }; return render(); }
   const m = /#t=([A-Za-z0-9_-]{16,40})\.([A-Za-z0-9_-]{11})\b/.exec(location.hash);
   if (m) { try { sessionStorage.setItem(TKEY, m[1] + '.' + m[2]); } catch (e) { } history.replaceState(null, '', location.pathname); }
   if (localStorage.getItem(KEY)) { V.screen = 'lock'; return render(); }
