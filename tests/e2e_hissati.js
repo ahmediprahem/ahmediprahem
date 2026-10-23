@@ -279,6 +279,15 @@ const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html'));
     await ip.click('.sheet [data-act="close"]'); await ip.evaluate(() => window.HissatiApp.flush()); await hxCheck(); await d.waitForSelector('.chrow.done'); assert((await d.textContent('.chcard')).includes('🏅 1 شهادة'));
     ok('التحديات: 4 قوالب جاهزة يعدّلها الأخصائي ويعدّل لكل عميل قبل الإرسال (أرقام عربية)، بطاقة تحدي الأسبوع في «اليوم» بالأيام والنقاط، إتمامه يولّد شهادة تقدير باسم العميل وشعار الأخصائي واسمه تُنزَّل صورة وPDF، وتظهر في «إنجازاتي»، ويصل الإنجاز للأخصائي');
   }
+  if (process.env.SHOTS) {      // جولة لقطات لكل شاشات «حصتي» (للتصميم فقط؛ لا شروط)
+    const tour = async (sel, name) => { try { await ip.click(sel, { timeout: 3000, force: true }); await ip.waitForTimeout(500); await shot(ip, name); await ip.screenshot({ path: path.join(process.env.SHOTS, name + '_full.png'), fullPage: true }); } catch (e) { } };
+    const close = async () => { await ip.click('.sheet [data-act="close"]', { timeout: 1500 }).catch(() => { }); await ip.waitForTimeout(300); };
+    for (const [v, nm] of [['today', 't1_today'], ['plan', 't2_plan'], ['prefs', 't3_prefs'], ['feed', 't4_feed'], ['progress', 't5_progress']]) await tour('[data-act="tab"][data-v="' + v + '"]', nm);
+    await ip.click('[data-act="tab"][data-v="today"]').catch(() => { }); await tour('[data-act="habits"]', 's1_habits'); await close(); await tour('[data-act="adhkar"]', 's2_adhkar'); await close(); await tour('[data-act="breathe"]', 's3_breathe'); await close();
+    await tour('[data-act="water"]', 's4_water'); await close(); await tour('[data-act="chat"]', 's5_chat'); await ip.click('[data-act="chatClose"]', { timeout: 1500 }).catch(() => { });
+    await ip.click('[data-act="tab"][data-v="plan"]').catch(() => { }); await tour('[data-act="shop"]', 's6_shop'); await close(); await tour('[data-act="rcp"]', 's7_recipe'); await close(); await tour('[data-act="swap"]', 's8_swap'); await close();
+    await ip.click('[data-act="tab"][data-v="progress"]').catch(() => { }); await tour('[data-act="achs"]', 's9_achievements'); await close(); await tour('[data-act="weigh"]', 's10_weigh'); await close(); await tour('[data-act="set"]', 's11_settings'); await close();
+  }
   await ictx.close(); await jctx.close();
   site.close(); globalThis.fetch = realFetch;
   assert.deepStrictEqual(errs, [], errs.join(' | ')); ok('لا أخطاء في وحدة التحكم');
