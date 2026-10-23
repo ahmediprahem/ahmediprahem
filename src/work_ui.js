@@ -5,7 +5,7 @@
 // القوالب في الإعدادات (S.settings.tpls) فتدخل النسخ الاحتياطي والمزامنة؛ والمواعيد داخل سجل العميل (c.appts).
 var WK = { pick: false, rem: {}, told: '', all: false, form: null };
 var WK_TYPES = ['متابعة', 'أول زيارة', 'قياس وتحاليل', 'استشارة أونلاين'];
-var WK_RX = { ex: ['kcalManual', 'macroMode', 'proGkg', 'fatPct', 'choPct', 'proPct', 'meals', 'favMeals', 'excludedMeals', 'noBank', 'baseCounts', 'dayCounts'],
+var WK_RX = { ex: ['kcalManual', 'macroMode', 'proGkg', 'proGkgOb', 'proRef', 'fatPct', 'choPct', 'proPct', 'meals', 'favMeals', 'excludedMeals', 'noBank', 'cuisine', 'budget', 'life', 'exotic', 'baseCounts', 'dayCounts'],
   athlete: ['phase', 'carbMethod', 'schedule', 'athMeals', 'macroMode', 'pBase', 'pMode', 'pVal', 'fMode', 'fVal', 'kcalMode', 'kcalAdj', 'kcalTrain', 'kcalRest'] };
 function wkKind(c) { return c.kind === 'athlete' ? 'athlete' : 'ex'; }
 function wkClone(o) { return o == null ? o : JSON.parse(JSON.stringify(o)); }

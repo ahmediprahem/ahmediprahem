@@ -1,5 +1,5 @@
 // ================= مؤشر الحصص العائم (صفحة اليوم) — يُدمج داخل app.js عند /*HUDUI*/
-// المطلوب لليوم = day.counts (من المحرك)، والمتحقق = day.got (مجموع أسطر الوجبات). لا حسابات جديدة هنا: عرض فقط.
+// المطلوب لليوم = day.req (ما ركّبه المخطِّط تلقائياً) أو day.counts (من المحرك)، والمتحقق = day.got (مجموع أسطر الوجبات). لا حسابات جديدة هنا: عرض فقط.
 // أحمر = لم تكتمل، أخضر = اكتملت بالضبط، برتقالي = زادت عن المطلوب. المقترح لكل وجبة معلوماتي (لا يُلوَّن بالأحمر/الأخضر) لأن للأخصائي نقل الحصص بين الوجبات.
 var HUD = { slot: null, page: null, min: false };
 try { var hs0 = localStorage.getItem('hissa_hud_min'); HUD.min = hs0 === null ? window.innerWidth < 820 : hs0 === '1'; } catch (e) { HUD.min = window.innerWidth < 820; }
@@ -49,10 +49,10 @@ function hudRender(live) {
     el.style.display = ''; hudApplyPos(el);
     if (gq) { hudGrpDraw(el, gq, live); return; }
     if (HUD.page !== q.di) { HUD.page = q.di; HUD.slot = null; }
-    var d = q.d, p = q.p, day = hudRows(E.colCounts(d.counts), E.colCounts(d.got), false), k = HUD.slot != null && d.slots[HUD.slot] ? HUD.slot : null, allDone = day.total > 0 && day.done === day.total;
+    var d = q.d, p = q.p, day = hudRows(E.colCounts(d.req || d.counts), E.colCounts(d.got), false), k = HUD.slot != null && d.slots[HUD.slot] ? HUD.slot : null, allDone = day.total > 0 && day.done === day.total;
     var chips = d.slots.map(function (s, i) { return '<button class="hudchip' + (i === k ? ' hf-sel' : '') + '" data-a="hudMeal" data-v="' + i + '">' + esc(mealNm(p, s)) + '</button>'; }).join('');
     var meal = '';
-    if (k !== null) { var s = d.slots[k], m = hudRows(E.colCounts(s.target || new Array(13).fill(0)), E.colCounts(E.actualGroups(s)), true); meal = '<div class="hudmt">المقترح لـ«' + esc(mealNm(p, s)) + '»' + (m.total && m.done === m.total ? ' <span class="hudok">✔ مطابق</span>' : '') + '</div>' + (m.html || '<small>— لا حصص مقترحة —</small>'); }
+    if (k !== null) { var s = d.slots[k], m = hudRows(E.colCounts(s.req || s.target || new Array(13).fill(0)), E.colCounts(E.actualGroups(s)), true); meal = '<div class="hudmt">المقترح لـ«' + esc(mealNm(p, s)) + '»' + (m.total && m.done === m.total ? ' <span class="hudok">✔ مطابق</span>' : '') + '</div>' + (m.html || '<small>— لا حصص مقترحة —</small>'); }
     el.className = 'hud noprint' + (HUD.min ? ' hf-min' : '') + (allDone ? ' hf-done' : '');
     el.innerHTML = '<div class="hudh"><span class="hudt" title="اسحب لتحريك المؤشر • نقر مزدوج لإعادته">⠿ هدف الحصص اليوم</span><span class="huddy">' + esc(dayName(p, q.di)) + '</span><button class="hudbtn" data-a="hudToggle" aria-label="' + (HUD.min ? 'توسيع' : 'تصغير') + '">' + (HUD.min ? '▢' : '–') + '</button></div>'
       + '<div class="hudsum hs-' + (allDone ? 'ok' : 'low') + '">' + (allDone ? '✔ اكتمل اليوم' : 'اكتملت ' + day.done + ' من ' + day.total + ' مجموعة') + '</div>'

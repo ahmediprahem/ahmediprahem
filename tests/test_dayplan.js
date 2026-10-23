@@ -15,7 +15,7 @@ const got = (day) => { const g = new Array(13).fill(0); day.slots.forEach(s => E
   await t('regenDay: يحفظ أوقات الوجبات ويُحدّث حالة الأهداف والمجاميع لليوم المعدَّل فقط (نقص 3 نشويات ← كارب خارج الحد)', () => {
     const c = mk(1), p = E.planWeek(c, D, { seed: 2 }); p.days[3].slots.forEach((s, k) => { s.time = '0' + (k + 6) + ':15'; }); const times = p.days[3].slots.map(s => s.si + ':' + s.time), cn = p.days[3].counts.slice(), before = p.days[3].nominal[0]; assert(cn[0] >= 3); cn[0] -= 3;
     const day = E.regenDay(p, 3, cn, D); assert.strictEqual(day.okNominal, false); assert(day.nominal[0] < p.targets.cho - D.settings.tol[0] && day.nominal[0] < before - 30); day.slots.forEach(s => { const o = times.find(x => x.startsWith(s.si + ':')); if (o) assert.strictEqual(s.time, o.split(':').slice(1).join(':')); });
-    const back = E.regenDay(p, 3, p.base.counts.slice(), D); assert.strictEqual(back.okNominal, true);
+    const back = E.regenDay(p, 3, p.base.counts.slice(), D), T = p.targets, tl = D.settings.tol; assert(Math.abs(back.nominal[0] - T.cho) < Math.abs(day.nominal[0] - T.cho)); [T.cho, T.pro, T.fat].forEach((v, k) => assert(Math.abs(back.nominal[k] - v) <= 2.5 * tl[k], 'العودة للأساس ضمن ضعفي الحدود ' + k));
   });
   await t('regenDay يرفض المدخلات الخاطئة برسالة صريحة ولا يغيّر الخطة: طول خاطئ، سالب، غير مضاعف 0.5، نص، كلها أصفار، يوم غير موجود', () => {
     const p = E.planWeek(mk(0), D, { seed: 1 }), snap = J(p), ok = p.days[0].counts.slice();

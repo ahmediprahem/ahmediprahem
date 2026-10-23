@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """يستخرج بيانات النظام من Diet_Pro_Max.xlsx إلى src/data.json (قراءة فقط): الأصناف (مع معايرة الكميات)، بنك الوجبات، القواعد السريرية،
+بعده شغّل: node tag_foods.js (وسوم الأصناف + الأصناف والوجبات المصرية/السعودية)
 الحساسيات، جداول الإعدادات، وقوالب التركيب الأسبوعية. التشغيل:  py build_data.py [المسار\\Diet_Pro_Max.xlsx]"""
 import json, os, sys
 from openpyxl import load_workbook
