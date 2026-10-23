@@ -489,6 +489,13 @@ function tabPrefs() {
     + '<section class="card stack"><h3>صحتي</h3><p class="mut" style="font-size:14px">' + (S.p.cond.concat(S.p.allg).map(esc).join('، ') || 'لا حالات ولا حساسية') + '</p><button class="btn sm sec" data-act="healthReq">طلب تعديل الحالة الصحية</button><p class="dim">تغيير الحالة الصحية أو الحساسية يحتاج اعتماد أخصائيك قبل أن يغيّر خطتك.</p>'
     + (S.pending.length ? '<div class="banner warn">' + I('clock') + '<span>بانتظار الأخصائي: ' + S.pending.map(esc).join('، ') + '</span></div>' : '') + '</section>';
 }
+function applyThemeIcons(t) { }
+function themeCard() {
+  const cur = window.HxTheme ? HxTheme.get() : 'classic', T = [['classic', 'الحالي'], ['rose', 'وردة'], ['pulse', 'نبض']];
+  return '<section class="card stack"><h3>' + I('sparkle') + ' مظهر التطبيق</h3><div class="hx-themes" role="radiogroup" aria-label="مظهر التطبيق">'
+    + T.map((t) => '<button class="hx-th" role="radio" aria-checked="' + (cur === t[0]) + '" data-act="theme" data-v="' + t[0] + '"><span class="hx-pv" data-theme="' + t[0] + '" aria-hidden="true"><i class="h"></i><i class="k"><b></b></i><i class="k s"></i><i class="c"></i></span><span class="hx-tl">' + t[1] + (cur === t[0] ? ' ✓' : '') + '</span></button>').join('')
+    + '</div><p class="dim">خطتك وبياناتك لا تتغير، يتغير الشكل فقط. يُحفظ على هذا الجوال.</p></section>';
+}
 function tabProgress() {
   const W = S.weights.slice().sort((a, b) => a[0] - b[0]).slice(-10);
   let chart = '<p class="dim">سجّل وزنك أسبوعياً ليظهر منحناك هنا.</p>', diff = 0;
@@ -505,7 +512,7 @@ function tabProgress() {
   return '<h2>تقدّمي</h2><section class="card stack"><div class="row" style="justify-content:space-between"><h3>الوزن</h3><span class="dim">' + (W.length > 1 ? (diff <= 0 ? diff + ' كجم منذ البداية' : '+' + diff + ' كجم') : '') + '</span></div>' + chart
     + '<div class="row"><input class="inp" id="wIn" type="text" data-numf="1" autocomplete="off" inputmode="decimal" placeholder="وزن اليوم (كجم)" style="flex:1"><button class="btn sm" data-act="weigh">' + I('scale') + ' سجّل</button></div></section>'
     + '<section class="card stack"><div class="row" style="justify-content:space-between"><h3>الالتزام آخر 7 أيام</h3><span class="dim">% من الأصناف</span></div><div class="wk">' + bars + '</div></section>'
-    + '<section class="card achcard"><div class="row" style="justify-content:space-between"><h3>🏅 إنجازاتي</h3><span class="dim">' + (S.ach || []).length + ' شهادة</span></div><button class="btn sm" data-act="achs">' + I('sparkle') + ' عرض إنجازاتي وشهاداتي</button></section>' + habitsProgress() + remCard() + '<section class="card stack"><h3>الحساب</h3><p class="dim">ملفك لدى ' + esc(S.dname) + (S.code ? ' • رقم ' + esc(S.code) : '') + '. بياناتك محفوظة مشفّرة على هذا الجوال فقط.</p>' + installCard('acct') + notifCard(false) + '<div class="row"><button class="btn sm sec" data-act="lock">' + I('lock') + ' قفل التطبيق</button><button class="btn sm sec" data-act="xferNew">' + I('phone') + ' نقل حسابي</button></div><button class="link" data-act="wipe" style="color:var(--coral)">حذف بياناتي من هذا الجوال</button></section>';
+    + '<section class="card achcard"><div class="row" style="justify-content:space-between"><h3>🏅 إنجازاتي</h3><span class="dim">' + (S.ach || []).length + ' شهادة</span></div><button class="btn sm" data-act="achs">' + I('sparkle') + ' عرض إنجازاتي وشهاداتي</button></section>' + habitsProgress() + themeCard() + remCard() + '<section class="card stack"><h3>الحساب</h3><p class="dim">ملفك لدى ' + esc(S.dname) + (S.code ? ' • رقم ' + esc(S.code) : '') + '. بياناتك محفوظة مشفّرة على هذا الجوال فقط.</p>' + installCard('acct') + notifCard(false) + '<div class="row"><button class="btn sm sec" data-act="lock">' + I('lock') + ' قفل التطبيق</button><button class="btn sm sec" data-act="xferNew">' + I('phone') + ' نقل حسابي</button></div><button class="link" data-act="wipe" style="color:var(--coral)">حذف بياناتي من هذا الجوال</button></section>';
 }
 
 // ---------- التثقيف: منشورات أخصائيك (ومنشورات عامة لمراجعي «حصة» توافق عليها الإدارة) — إعجاب وتعليق
@@ -922,7 +929,7 @@ function render() {
   if (cmV) { const n = $('#cmIn'); if (n) { n.value = cmV[0]; if (cmV[1]) n.focus(); } }
   const s2 = $('.scroll'); if (s2 && key === lastKey) s2.scrollTop = top; lastKey = key;
   const th = $('#thread'); if (th) th.scrollTop = th.scrollHeight;
-  fillCerts(); if (S && S.chal && S.screen === 'app' && V.screen === '') chalCheck();
+  fillCerts(); if (window.HxMotion) HxMotion.after(); if (S && S.chal && S.screen === 'app' && V.screen === '') chalCheck();
   if (focusChat) { const c = $('#chatIn'); if (c) c.focus(); focusChat = false; }
   if (S && K) save();
 }
@@ -1101,6 +1108,7 @@ document.addEventListener('click', (e) => {
       const hh = HB(v); if (hh && !(cv != null && hh.ok(cv)) && hOkDay(v)) { if (CHEER[v]) setTimeout(() => celebrate(v), 50); else toast(hh.ic + ' أحسنت! أنجزت «' + hh.n + '» اليوم'); }
       break;
     }
+    case 'theme': if (window.HxTheme) { HxTheme.set(v, el.querySelector('.hx-pv')); document.querySelectorAll('.hx-th').forEach((b) => { const on = b.dataset.v === v; b.setAttribute('aria-checked', String(on)); const l = b.querySelector('.hx-tl'); if (l) l.textContent = l.textContent.replace(' ✓', '') + (on ? ' ✓' : ''); }); applyThemeIcons(v); } return;
     case 'tab': S.tab = v; if (v === 'feed' && now() - FD.at > 60000) fdLoad().then(render); break;
     case 'day': S.day = +v; break;
     case 'ck': { const L = dl(TODAY); L.ck[v] = !L.ck[v]; if (!L.ck[v]) delete L.ck[v]; queueLog(dkey(new Date())); break; }

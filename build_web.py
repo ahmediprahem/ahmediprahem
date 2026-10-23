@@ -21,7 +21,7 @@ open(os.path.join(H, 'index.html'), 'w', encoding='utf-8').write(user); open(os.
 # «حصتي»: تطبيق العميل ملف واحد (hissati.html)، ونسخة المحطة الوسيطة الجاهزة للصق في Cloudflare (worker/relay/dist/worker.js) وهي تقدّمه على «/»
 import re
 A = R('assets.js'); js = lambda k: json.loads('"' + re.search(k + r':"((?:[^"\\]|\\.)*)"', A).group(1) + '"')
-hx = open(os.path.join(H, 'src', 'hissati', 'template.html'), encoding='utf-8').read().replace('/*FONT*/', font_css()).replace('/*CSS*/', R('hissati/style.css')).replace('/*LOGO*/', json.dumps(js('logoSvg'), ensure_ascii=False).replace('</', '<\\/')).replace('/*HXC*/', R('hx_crypto.js')).replace('/*FORMS*/', R('forms.js')).replace('/*APP*/', R('hissati/app.js'))
+hx = open(os.path.join(H, 'src', 'hissati', 'template.html'), encoding='utf-8').read().replace('/*FONT*/', font_css()).replace('/*CSS*/', R('hissati/style.css')).replace('/*THEMES*/', R('hissati/themes.css') + R('hissati/themes_glass.css') if os.path.exists(os.path.join(H, 'src', 'hissati', 'themes_glass.css')) else R('hissati/themes.css')).replace('/*MOTION*/', R('hissati/motion.js')).replace('/*LOGO*/', json.dumps(js('logoSvg'), ensure_ascii=False).replace('</', '<\\/')).replace('/*HXC*/', R('hx_crypto.js')).replace('/*FORMS*/', R('forms.js')).replace('/*APP*/', R('hissati/app.js'))
 open(os.path.join(H, 'hissati.html'), 'w', encoding='utf-8').write(hx)
 jsstr = lambda v: json.dumps(v, ensure_ascii=False).replace('\u2028', '\\u2028').replace('\u2029', '\\u2029')
 wk = open(os.path.join(H, 'worker', 'relay', 'index.mjs'), encoding='utf-8').read()
