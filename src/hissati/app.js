@@ -87,7 +87,7 @@ async function persist() {
   try { localStorage.setItem(KEY, JSON.stringify({ v: 1, s: HXC.b64u(salt), iv: HXC.b64u(iv), c: HXC.b64u(c), dn: st.dname })); } catch (e) { toast('تعذّر الحفظ على الجهاز — المساحة ممتلئة؟'); }
 }
 let saveT = 0; const save = () => { clearTimeout(saveT); saveT = setTimeout(persist, 200); };
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') { clearTimeout(saveT); persist(); } else if (K) { TODAY = new Date().getDay(); poll(); } });
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') { clearTimeout(saveT); persist(); } else if (K) { TODAY = new Date().getDay(); poll(); almCheck(); almTick(); } });
 async function unlock(pin) {
   const r = JSON.parse(localStorage.getItem(KEY)), salt = HXC.unb64u(r.s), key = await pinKey(pin, salt);
   const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: HXC.unb64u(r.iv) }, key, HXC.unb64u(r.c));
@@ -148,7 +148,7 @@ const DEMO = window.HX_DEMO || null;                  // نسخة تجريبية
 let swReg = null;
 if (!DEMO && 'serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
   swReg = navigator.serviceWorker.register('/sw.js').catch(() => null);
-  navigator.serviceWorker.addEventListener('message', (e) => { if (e.data && e.data.t === 'rem') { if (S) toast(e.data.text); return; } if (e.data && e.data.t === 'push') { poll(); fdLoad().then(() => { if (S) render(); }); } });
+  navigator.serviceWorker.addEventListener('message', (e) => { if (e.data && e.data.t === 'rem') { if (S && e.data.items && e.data.items.length && V.screen === '') almFire(e.data.items); else if (S) toast(e.data.text); return; } if (e.data && e.data.t === 'push') { poll(); fdLoad().then(() => { if (S) render(); }); } });
 }
 function pushState() {
   if (!pushOk()) return isIOS && !standalone ? 'ios' : 'na';
@@ -663,6 +663,7 @@ function remCard() {
     + tg('adhAm', 'أذكار الصباح', 'تذكير يومي بوقتك المفضّل') + (R.adhAm ? tm('adhAmT', '06:00', 'وقت أذكار الصباح') : '')
     + tg('adhPm', 'أذكار المساء', 'تذكير يومي بوقتك المفضّل') + (R.adhPm ? tm('adhPmT', '17:30', 'وقت أذكار المساء') : '')
     + tg('med', 'موعد الدواء', 'تذكير بأوقات أدويتك أو مكمّلاتك') + meds
+    + '<label class="remrow"><span><b>صوت المنبّه</b><span class="dim">رنّة هادئة عندما يظهر التذكير على الشاشة</span></span><input type="checkbox" class="sw" data-remsound="1"' + (R.sound === false ? '' : ' checked') + '></label>'
     + (pushState() === 'on' ? '<p class="dim">تصلك والتطبيق مغلق. تُقرَّب الأوقات لأقرب ربع ساعة.</p>' : '<p class="dim">تحتاج تفعيل الإشعارات؛ يُطلب الإذن عند التشغيل.</p>') + '</section>';
 }
 // ---------- العادات: مكتبة عادات صحية يختار منها العميل ما يتابعه في «اليوم»، لكل عادة تصميم خاص، وسلسلة أيام 🔥 وأسبوع ملوّن
@@ -832,6 +833,51 @@ function adhOpen(hid) {
   });
   draw(0);
 }
+// ---------- المنبّه (0.40): التذكير يظهر على الشاشة كمنبّه بتصميم الثيم، لا إشعاراً فقط — رنّة هادئة واهتزاز و«تم» و«غفوة 10 دقائق».
+// يظهر: عند حلول الوقت والتطبيق مفتوح، أو عند لمس إشعار التذكير. (التطبيق المغلق والجوال مقفل: إشعار ثابت يهتز فقط — الرنين فوق القفل يحتاج تطبيقاً أصلياً.)
+const ALM_T = {
+  water: ['drop', 'وقت كوب ماء', 'اشرب كوباً الآن ثم سجّله بلمسة.', 'تم، شربت'], meal: ['utensils', 'حان وقت وجبتك', 'افتح خطتك وعلّم ما تأكله.', 'افتح خطتي'],
+  adhAm: ['sun', 'أذكار الصباح', 'ابدأ يومك بذكر الله.', 'ابدأ الأذكار'], adhPm: ['moon', 'أذكار المساء', 'حصّن مساءك بذكر الله.', 'ابدأ الأذكار'], med: ['pill', 'موعد دوائك', 'خذ دواءك أو مكمّلك في موعده.', 'أخذته']
+};
+const ALM = { fired: {}, snz: 0, snd: 0, ctx: null };
+const almIcon = (t) => t === 'pill' ? '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><g transform="rotate(-35 12 12)"><rect x="2" y="7.5" width="20" height="9" rx="4.5"/><path d="M12 7.5v9"/></g></svg>' : I(t);
+const hhmm = (m) => String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+function almStop() { clearInterval(ALM.snd); ALM.snd = 0; }
+function almChime() {                                  // رنّة من ثلاث نغمات هادئة (WebAudio بلا ملفات)، تتكرر كل 6 ثوانٍ حتى 5 مرات
+  if (S && S.rem && S.rem.sound === false) return; let n = 0;
+  const once = () => { try { const A = window.AudioContext || window.webkitAudioContext; if (!A) return; const c = ALM.ctx || (ALM.ctx = new A()); if (c.state === 'suspended') c.resume(); [659.25, 783.99, 987.77].forEach((f, i) => { const o = c.createOscillator(), g = c.createGain(), t = c.currentTime + i * 0.2; o.type = 'sine'; o.frequency.value = f; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.16, t + 0.04); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.7); o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + 0.75); }); } catch (e) { } if (++n >= 5) almStop(); };
+  almStop(); once(); ALM.snd = setInterval(once, 6000);
+}
+function almShow(items) {
+  items = (items || []).filter((x) => ALM_T[x.t]); if (!items.length || !S) return; const old = document.getElementById('alm'); if (old) old.remove(); almStop(); clearTimeout(ALM.snz);
+  const lead = items[0], T = ALM_T[lead.t], m = lead.m != null ? lead.m : new Date().getHours() * 60 + new Date().getMinutes(), more = items.slice(1).map((x) => ALM_T[x.t][1] + (x.label ? ' — ' + x.label : '')).join(' • ');
+  const el = document.createElement('div'); el.id = 'alm'; el.className = 'alm alm-' + lead.t; el.setAttribute('role', 'alertdialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', T[1]);
+  el._items = items;
+  el.innerHTML = '<div class="alm-rings" aria-hidden="true"><i></i><i></i><i></i></div><div class="alm-card"><div class="alm-ic" aria-hidden="true">' + almIcon(T[0]) + '</div><div class="alm-time" aria-hidden="true">' + hhmm(m) + '</div><h1>' + T[1] + (lead.label ? ' — ' + esc(lead.label) : '') + '</h1><p>' + T[2] + '</p>' + (more ? '<p class="alm-more">ومعها: ' + esc(more) + '</p>' : '')
+    + '<div class="alm-act"><button class="btn full" data-alm="done">' + T[3] + '</button><div class="alm-two"><button class="btn sec" data-alm="snooze">غفوة 10 دقائق</button><button class="btn sec" data-alm="close">لاحقاً</button></div></div></div>';
+  document.body.appendChild(el); if (navigator.vibrate) try { navigator.vibrate([300, 120, 300, 120, 500]); } catch (e) { } almChime();
+  const b = el.querySelector('[data-alm="done"]'); if (b && !('ontouchstart' in window)) try { b.focus({ preventScroll: true }); } catch (e) { }
+}
+function almDone(items) {                              // «تم»: ينفّذ فعل التذكير الأول: ماء ← كوب جديد، دواء ← عادة الدواء، أذكار ← فتحها، وجبة ← الخطة
+  const x = items[0]; if (!x || !S) return;
+  if (x.t === 'water') { const L = dl(TODAY); L.water = Math.min(24, (L.water || 0) + 1); queueLog(dkey(new Date())); save(); toast('💧 سُجّل كوب ماء'); }
+  else if (x.t === 'med') { if (!Array.isArray(S.habits)) S.habits = ['water']; if (S.habits.indexOf('meds') < 0) S.habits.push('meds'); hSet('meds', 1); save(); toast('💊 سُجّل التزامك بالدواء'); }
+  else if (x.t === 'meal') { S.tab = 'plan'; S.day = TODAY; }
+  render(); if (x.t === 'adhAm') adhOpen('adhkar'); else if (x.t === 'adhPm') adhOpen('adhkarPm');
+}
+document.addEventListener('click', (e) => {
+  const b = e.target.closest && e.target.closest('[data-alm]'); if (!b) return; const el = document.getElementById('alm'); if (!el) return; const items = el._items || [], k = b.dataset.alm;
+  almStop(); el.classList.add('alm-out'); setTimeout(() => el.remove(), 260);
+  if (k === 'done') almDone(items); else if (k === 'snooze') { clearTimeout(ALM.snz); ALM.snz = setTimeout(() => almShow(items), 10 * 60000); toast('سنذكّرك بعد 10 دقائق'); }
+});
+function almFire(items) { const fresh = items.filter((x) => { const k = x.t + '|' + x.m, last = ALM.fired[k]; if (last && now() - last < 20 * 60000) return false; ALM.fired[k] = now(); return true; }); if (fresh.length) almShow(fresh); }
+function almTick() {                                   // التطبيق مفتوح: يتحقق كل 20 ثانية من حلول وقت تذكير (لا يعتمد على وصول الإشعار)
+  if (!S || !S.cid || V.screen !== '' || document.getElementById('alm')) return; const d = new Date(), m = d.getHours() * 60 + d.getMinutes(); const hit = remItems().filter((x) => x.m === m); if (hit.length) almFire(hit.map((x) => Object.assign({ m: x.m }, x)));
+}
+async function almCheck() {                            // لُمس إشعار تذكير والتطبيق مغلق: عامل الخدمة حفظ البنود هنا، فتظهر بعد فتح الرمز
+  try { if (!('caches' in window)) return; const c = await caches.open('hissati-rem'), r = await c.match('/alarm'); if (!r) return; const j = await r.json(); await c.delete('/alarm'); if (j && j.items && now() - (j.at || 0) < 30 * 60000) almShow(j.items.map((x) => Object.assign({}, x))); } catch (e) { }
+}
+setInterval(almTick, 20000);
 // ---------- احتفال مختلف عند إنجاز كل عادة (طبقة مستقلة تُغلق باللمس أو بعد ثوانٍ)
 const CHEER = {
   adhkar: { fx: '🤍', t: 'اكتملت أذكار الصباح', m: 'كل ذكرٍ يجعلك في مقربة من ربك، وخطوةٌ تخطوها نحو الجنة. حفظك الله في يومك.' },
@@ -1051,7 +1097,7 @@ function render() {
   if (S && K) save();
 }
 let focusChat = false;
-function startLoop() { clearInterval(V.timer); V.timer = setInterval(() => { if (!document.hidden) { poll(); if (now() - FD.at > 5 * 60000) fdLoad().then(render); } }, POLL); poll(); fdLoad().then(render); pushSetup(false).then((st) => { if (st === 'on') render(); remSync(); }); }
+function startLoop() { clearInterval(V.timer); V.timer = setInterval(() => { if (!document.hidden) { poll(); if (now() - FD.at > 5 * 60000) fdLoad().then(render); } }, POLL); poll(); fdLoad().then(render); pushSetup(false).then((st) => { if (st === 'on') render(); remSync(); }); almCheck(); }
 
 // ---------- رمز الدخول: الإنشاء والفتح
 async function onPin() {
@@ -1265,6 +1311,7 @@ document.addEventListener('change', (e) => {
     const MSG = { water: 'سيصلك تذكير الماء كل ساعتين 💧', meals: 'سيصلك تذكير مواعيد وجباتك 🍽', adhAm: 'سيصلك تذكير أذكار الصباح 📿', adhPm: 'سيصلك تذكير أذكار المساء 🌙', med: 'سيصلك تذكير موعد الدواء 💊' };
     (t.checked && pushState() !== 'on' ? pushSetup(true) : Promise.resolve(pushState())).then((st) => { if (t.checked && st !== 'on') toast(st === 'denied' ? 'الإشعارات محظورة من إعدادات المتصفح — فعّلها ليصلك التذكير' : 'فعّل الإشعارات ليصلك التذكير والتطبيق مغلق'); return remSync(true); }).then(() => { if (t.checked && pushState() === 'on') toast(MSG[t.dataset.rem] || 'فُعّل التذكير'); render(); });
   }
+  if (t.dataset.remsound) { S.rem = Object.assign({ water: false, meals: false }, S.rem); S.rem.sound = t.checked; save(); if (t.checked) almChime(); else almStop(); }
   if (t.dataset.remt) { S.rem = Object.assign({ water: false, meals: false }, S.rem); S.rem[t.dataset.remt] = t.value || (t.dataset.remt === 'adhAmT' ? '06:00' : '17:30'); save(); remSync(true).then(() => { toast('حُفظ وقت التذكير'); render(); }); }
   if (t.dataset.med) { const [f, i] = t.dataset.med.split('|'), x = (S.rem && S.rem.meds || [])[+i]; if (x) { x[f] = f === 'n' ? t.value.trim().slice(0, 40) : (t.value || '08:00'); save(); remSync(true).then(() => { if (f === 't') toast('حُفظ موعد الدواء'); }); } }
   if (t.dataset.sch) { const x = sched()[+t.dataset.sch]; x.type = t.value; if (t.value === dayTypes()[0]) { x.min = 0; x.time = ''; } else if (!x.min) { x.min = 60; x.time = x.time || '17:00'; } render(); }
@@ -1284,6 +1331,6 @@ document.addEventListener('input', (e) => {
 });
 window.addEventListener('online', () => { V.online = true; poll(); });
 window.addEventListener('offline', () => { V.online = false; render(); });
-window.HissatiApp = { state: () => S, poll, flush, feed: () => FD, feedLoad: fdLoad, celebrateTest: (id) => celebrate(id) };     // للاختبارات
+window.HissatiApp = { state: () => S, poll, flush, feed: () => FD, feedLoad: fdLoad, celebrateTest: (id) => celebrate(id), alarm: (items) => almShow(items), alarmTick: almTick, alarmFire: almFire };     // للاختبارات
 boot();
 })();

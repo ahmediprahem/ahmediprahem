@@ -25,12 +25,12 @@ self.addEventListener('push', (e) => {
     const rems = kind === 'rem' ? await remText() : null; if (kind === 'rem' && !rems) return; const rem = rems ? rems[0] : null;           // تذكير أُلغي من الجوال: لا شيء
     const cl = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
     const body = rems ? rems.map(REMT).join('\n') : kind === 'feed' ? '📣 منشور تثقيفي جديد من أخصائيك' : 'لديك جديد من أخصائيك — افتح «حصتي»';
-    cl.forEach((c) => c.postMessage(rem ? { t: 'rem', text: body } : { t: 'push', kind }));          // التطبيق المفتوح يجلب الجديد فوراً (أو يعرض التذكير)
+    cl.forEach((c) => c.postMessage(rem ? { t: 'rem', text: body, items: rems } : { t: 'push', kind }));          // التطبيق المفتوح يجلب الجديد فوراً (أو يعرض التذكير)
     if (cl.some((c) => c.visibilityState === 'visible')) return;          // ظاهر أمام المستخدم: يكفي التنبيه داخل التطبيق
-    await self.registration.showNotification('حصتي', { body, icon: '/icon.png', badge: '/icon.png', tag: rem ? 'hissati-rem' : 'hissati', renotify: true, lang: 'ar', dir: 'rtl' });
+    await self.registration.showNotification(rem ? '⏰ ' + (rems.length > 1 ? 'تذكيراتك' : rem.t === 'med' ? 'موعد دوائك' : rem.t === 'adhAm' ? 'أذكار الصباح' : rem.t === 'adhPm' ? 'أذكار المساء' : rem.t === 'water' ? 'وقت الماء' : 'وقت وجبتك') : 'حصتي', Object.assign({ body, icon: '/icon.png', badge: '/icon.png', tag: rem ? 'hissati-rem' : 'hissati', renotify: true, lang: 'ar', dir: 'rtl' }, rem ? { requireInteraction: true, vibrate: [300, 120, 300, 120, 500], data: { items: rems } } : {}));
   })());
 });
 self.addEventListener('notificationclick', (e) => {
-  e.notification.close();
-  e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((cl) => { const c = cl.find((x) => 'focus' in x); return c ? c.focus() : self.clients.openWindow('/'); }));
+  e.notification.close(); const its = e.notification.data && e.notification.data.items;
+  e.waitUntil((async () => { if (its && its.length) { try { await (await caches.open('hissati-rem')).put('/alarm', new Response(JSON.stringify({ items: its, at: Date.now() }), { headers: { 'content-type': 'application/json' } })); } catch (x) { } } })().then(() =>self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((cl) => { const c = cl.find((x) => 'focus' in x); return c ? c.focus() : self.clients.openWindow('/'); })));
 });
