@@ -340,14 +340,17 @@ async function feedApi(p, method, J, me, db, env, url, bg, origin) {
   return null;
 }
 function appPage(url) {
-  const ic = /^\/(icon-192|icon-512|maskable-512|apple-180)\.png$/.exec(url.pathname);
-  if (ic && ICONS[ic[1]]) return new Response(unb64u(ICONS[ic[1]]), { headers: { 'content-type': 'image/png', 'cache-control': 'public, max-age=604800' } });
+  const ic = /^\/(icon-192|icon-512|maskable-512|apple-180)(-rose|-pulse)?\.png$/.exec(url.pathname);
+  if (ic && ICONS[ic[1] + (ic[2] || '')]) return new Response(unb64u(ICONS[ic[1] + (ic[2] || '')]), { headers: { 'content-type': 'image/png', 'cache-control': 'public, max-age=604800' } });
   if (url.pathname === '/icon.png' && ICON_B64) return new Response(unb64u(ICON_B64), { headers: { 'content-type': 'image/png', 'cache-control': 'public, max-age=86400' } });
-  if (url.pathname === '/manifest.webmanifest') return new Response(JSON.stringify({
-    id: '/', name: 'حصتي — خطتك الغذائية', short_name: 'حصتي', description: 'خطتك من أخصائي التغذية، ومتابعة يومك، والمحادثة معه — مشفّرة على جوالك.', start_url: '/', scope: '/', display: 'standalone', orientation: 'portrait', dir: 'rtl', lang: 'ar',
-    background_color: '#0c1534', theme_color: '#121c45', categories: ['health', 'food', 'lifestyle'], prefer_related_applications: false,
-    icons: ICONS['icon-192'] ? [{ src: '/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' }, { src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' }, { src: '/maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }] : ICON_B64 ? [{ src: '/icon.png', sizes: '256x256', type: 'image/png' }] : []
-  }), { headers: { 'content-type': 'application/manifest+json', 'cache-control': 'no-cache' } });
+  if (url.pathname === '/manifest.webmanifest') {              // البيان يتبع ثيم العميل (?t=rose|pulse): أيقونة وألوان؛ المعرّف id ثابت فيبقى التطبيق نفسه
+    const th = url.searchParams.get('t'), sf = th === 'rose' ? '-rose' : th === 'pulse' ? '-pulse' : '', C = { '': ['#0c1534', '#121c45'], '-rose': ['#FAF6F2', '#FAF6F2'], '-pulse': ['#0A0C0F', '#0A0C0F'] }[sf];
+    return new Response(JSON.stringify({
+      id: '/', name: 'حصتي — خطتك الغذائية', short_name: 'حصتي', description: 'خطتك من أخصائي التغذية، ومتابعة يومك، والمحادثة معه — مشفّرة على جوالك.', start_url: '/', scope: '/', display: 'standalone', orientation: 'portrait', dir: 'rtl', lang: 'ar',
+      background_color: C[0], theme_color: C[1], categories: ['health', 'food', 'lifestyle'], prefer_related_applications: false,
+      icons: ICONS['icon-192'] ? [{ src: '/icon-192' + sf + '.png', sizes: '192x192', type: 'image/png', purpose: 'any' }, { src: '/icon-512' + sf + '.png', sizes: '512x512', type: 'image/png', purpose: 'any' }, { src: '/maskable-512' + sf + '.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }] : ICON_B64 ? [{ src: '/icon.png', sizes: '256x256', type: 'image/png' }] : []
+    }), { headers: { 'content-type': 'application/manifest+json', 'cache-control': 'no-cache' } });
+  }
   if (url.pathname === '/' || url.pathname === '/index.html') return new Response(APP_HTML, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-cache', 'x-content-type-options': 'nosniff', 'referrer-policy': 'no-referrer', 'x-frame-options': 'DENY', 'content-security-policy': "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: 'self'; media-src 'self'; frame-src https://www.youtube-nocookie.com; font-src data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'" } });
   if (url.pathname === '/sw.js' && SW_JS) return new Response(SW_JS, { headers: { 'content-type': 'text/javascript; charset=utf-8', 'cache-control': 'no-cache', 'x-content-type-options': 'nosniff' } });
   if (url.pathname === '/robots.txt') return new Response('User-agent: *\nDisallow: /\n', { headers: { 'content-type': 'text/plain' } });

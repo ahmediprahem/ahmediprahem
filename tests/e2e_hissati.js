@@ -287,22 +287,27 @@ const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html'));
       await ip.click('.hx-th[data-v="' + t + '"]'); await ip.waitForFunction((x) => document.documentElement.getAttribute('data-theme') === x, t); await ip.waitForTimeout(700);
       assert.strictEqual(await ip.getAttribute('.hx-th[data-v="' + t + '"]', 'aria-checked'), 'true'); assert.strictEqual(await ip.getAttribute('meta[name="theme-color"]', 'content'), meta); assert.strictEqual(await ip.evaluate(() => localStorage.getItem('hissati_theme')), t);
       const bg = await bgOf(); assert.notStrictEqual(bg, classicBg); const rgb = bg.match(/\d+/g).map(Number); assert.strictEqual(rgb[0] + rgb[1] + rgb[2] > 600, light, 'خلفية ' + t + ' ' + bg);
-      await ip.reload(); assert.strictEqual(await ip.evaluate(() => document.documentElement.getAttribute('data-theme')), t, 'الثيم يُطبَّق قبل الرسم'); await ip.waitForSelector('.pad');
+      const lk = () => ip.evaluate(() => ['link[rel=manifest]', 'link[rel=apple-touch-icon]', 'link[rel=icon]'].map((q) => document.querySelector(q).getAttribute('href')));
+      assert.deepStrictEqual(await lk(), ['/manifest.webmanifest?t=' + t, '/apple-180-' + t + '.png', '/icon-192-' + t + '.png'], 'أيقونة التطبيق وبيانه يتبعان الثيم');
+      const mf = await (await realFetch(RELAY + '/manifest.webmanifest?t=' + t)).json(); assert.strictEqual(mf.id, '/'); assert.strictEqual(mf.theme_color, meta); assert(mf.icons.every((x) => x.src.includes('-' + t + '.png')), JSON.stringify(mf.icons));
+      const png = async (u) => Buffer.from(await (await realFetch(RELAY + u)).arrayBuffer()); const a = await png('/icon-512-' + t + '.png'), c0 = await png('/icon-512.png'); assert(a.slice(1, 4).toString() === 'PNG' && a.length > 5000 && !a.equals(c0), 'أيقونة ' + t + ' مختلفة عن الحالية'); assert.strictEqual((await realFetch(RELAY + '/apple-180-' + t + '.png')).status, 200);
+      await ip.reload(); assert.strictEqual(await ip.evaluate(() => document.documentElement.getAttribute('data-theme')), t, 'الثيم يُطبَّق قبل الرسم'); assert.deepStrictEqual(await lk(), ['/manifest.webmanifest?t=' + t, '/apple-180-' + t + '.png', '/icon-192-' + t + '.png'], 'وروابط الأيقونة قبل الرسم أيضاً'); await ip.waitForSelector('.pad');
       assert.strictEqual(await ip.evaluate(() => getComputedStyle(document.body).backgroundColor), bg, 'نفس الخلفية على شاشة القفل');
       for (const k of '5678') await ip.click('.pad [data-v="' + k + '"]'); await ip.waitForSelector('.tabbar'); await ip.click('[data-act="tab"][data-v="progress"]'); await ip.waitForSelector('.hx-themes');
     }
-    await ip.click('.hx-th[data-v="classic"]'); await ip.waitForFunction(() => !document.documentElement.hasAttribute('data-theme')); await ip.waitForTimeout(700); assert.strictEqual(await bgOf(), classicBg); assert.strictEqual(await ip.evaluate(() => localStorage.getItem('hissati_theme')), 'classic');
-    ok('الثيمات: «الحالي» افتراضي، و«وردة» و«نبض» من «تقدّمي» (معاينة حية) يغيّران الخلفية ولون شريط المتصفح ويُحفظان ويُطبَّقان قبل الرسم حتى على شاشة القفل، والرجوع للحالي يعيد كل شيء');
+    await ip.click('.hx-th[data-v="classic"]'); await ip.waitForFunction(() => !document.documentElement.hasAttribute('data-theme')); await ip.waitForTimeout(700); assert.strictEqual(await bgOf(), classicBg); assert.strictEqual(await ip.evaluate(() => localStorage.getItem('hissati_theme')), 'classic'); assert.deepStrictEqual(await ip.evaluate(() => ['link[rel=manifest]', 'link[rel=apple-touch-icon]', 'link[rel=icon]'].map((q) => document.querySelector(q).getAttribute('href'))), ['/manifest.webmanifest', '/apple-180.png', '/icon-192.png']);
+    ok('الثيمات (وأيقونة التطبيق لكل ثيم: بيان وألوان وصور PNG وروابط الصفحة تتبع الثيم): «الحالي» افتراضي، و«وردة» و«نبض» من «تقدّمي» (معاينة حية) يغيّران الخلفية ولون شريط المتصفح ويُحفظان ويُطبَّقان قبل الرسم حتى على شاشة القفل، والرجوع للحالي يعيد كل شيء');
   }
-  if (process.env.SHOTS) {      // جولة لقطات لكل شاشات «حصتي» (للتصميم فقط؛ لا شروط)
-    for (const TH of ['classic', 'rose', 'pulse']) {
-    await ip.evaluate((t) => { HxTheme.set(t); }, TH); await ip.waitForTimeout(700); const tour = async (sel, name0) => { const name = TH + '_' + name0; try { await ip.click(sel, { timeout: 3000, force: true }); await ip.waitForTimeout(500); await shot(ip, name); await ip.screenshot({ path: path.join(process.env.SHOTS, name + '_full.png'), fullPage: true }); } catch (e) { } };
-    const close = async () => { await ip.click('.sheet [data-act="close"]', { timeout: 1500 }).catch(() => { }); await ip.waitForTimeout(300); };
-    for (const [v, nm] of [['today', 't1_today'], ['plan', 't2_plan'], ['prefs', 't3_prefs'], ['feed', 't4_feed'], ['progress', 't5_progress']]) await tour('[data-act="tab"][data-v="' + v + '"]', nm);
-    await ip.click('[data-act="tab"][data-v="today"]').catch(() => { }); await tour('[data-act="habits"]', 's1_habits'); await close(); await tour('[data-act="adhkar"]', 's2_adhkar'); await close(); await tour('[data-act="breathe"]', 's3_breathe'); await close();
-    await tour('[data-act="water"]', 's4_water'); await close(); await tour('[data-act="chat"]', 's5_chat'); await ip.click('[data-act="chatClose"]', { timeout: 1500 }).catch(() => { });
-    await ip.click('[data-act="tab"][data-v="plan"]').catch(() => { }); await tour('[data-act="shop"]', 's6_shop'); await close(); await tour('[data-act="rcp"]', 's7_recipe'); await close(); await tour('[data-act="swap"]', 's8_swap'); await close();
-    await ip.click('[data-act="tab"][data-v="progress"]').catch(() => { }); await tour('[data-act="achs"]', 's9_achievements'); await close(); await tour('[data-act="weigh"]', 's10_weigh'); await close(); await tour('[data-act="set"]', 's11_settings'); await close();
+  if (process.env.SHOTS) {      // جولة لقطات لكل شاشات «حصتي» بالثيمات (للتصميم فقط؛ لا شروط). SHOT_THEMES=rose,pulse لتحديد الثيمات
+    const tour = async (th, sel, name) => { try { await ip.click(sel, { timeout: 3000, force: true }); await ip.waitForTimeout(650); await shot(ip, th + '_' + name); } catch (e) { } };
+    const close = async () => { await ip.click('#adclose', { timeout: 600 }).catch(() => { }); await ip.click('.sheet [data-act="close"]', { timeout: 800 }).catch(() => { }); await ip.click('#cel', { timeout: 400 }).catch(() => { }); await ip.waitForTimeout(450); };
+    for (const TH of (process.env.SHOT_THEMES || 'classic,rose,pulse').split(',')) {
+      await ip.evaluate((t) => { HxTheme.set(t); }, TH); await ip.waitForTimeout(800); await close();
+      for (const [v, nm] of [['today', 't1_today'], ['plan', 't2_plan'], ['prefs', 't3_prefs'], ['feed', 't4_feed'], ['progress', 't5_progress']]) await tour(TH, '[data-act="tab"][data-v="' + v + '"]', nm);
+      await ip.click('[data-act="tab"][data-v="today"]').catch(() => { }); await ip.waitForTimeout(400);
+      await tour(TH, '[data-act="habits"]', 's1_habits'); await close(); await tour(TH, '[data-act="adhkar"]', 's2_adhkar'); await close(); await tour(TH, '[data-act="chat"]', 's5_chat'); await ip.click('[data-act="chatClose"]', { timeout: 1500 }).catch(() => { });
+      await ip.click('[data-act="tab"][data-v="plan"]').catch(() => { }); await tour(TH, '[data-act="swap"]', 's8_swap'); await close();
+      await ip.click('[data-act="tab"][data-v="progress"]').catch(() => { }); await tour(TH, '[data-act="achs"]', 's9_achievements'); await close(); await ip.evaluate(() => { window.HissatiApp.celebrateTest && window.HissatiApp.celebrateTest('water'); }).catch(() => { }); await ip.waitForTimeout(900); await shot(ip, TH + '_s10_celebrate'); await close();
     }
   }
   await ictx.close(); await jctx.close();
