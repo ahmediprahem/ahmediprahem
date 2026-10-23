@@ -17,7 +17,7 @@ const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html'));
   // اعتراض ما ترسله المحطة إلى خدمة إشعارات Google (الاشتراكات في الاختبار بديلة)
   const pushes = [], realFetch = globalThis.fetch; globalThis.fetch = (u, o) => /fcm\.googleapis\.com/.test(String(u)) ? (pushes.push({ u: String(u), o }), Promise.resolve(new Response(null, { status: 201 }))) : realFetch(u, o);
   const b = await chromium.launch({ channel: 'chromium' }), dctx = await b.newContext({ viewport: { width: 1440, height: 900 } }), d = await dctx.newPage(); d.on('pageerror', (e) => errs.push('حصة: ' + e)); d.on('dialog', (x) => x.accept(x.type() === 'prompt' ? 'أرجو كتابة جرعة الدواء' : undefined));
-  const mctx = await b.newContext({ ...devices['iPhone 13'] }), m = await mctx.newPage(); m.on('pageerror', (e) => errs.push('حصتي: ' + e)); m.on('dialog', (x) => x.accept());
+  const mctx = await b.newContext({ ...devices['iPhone 13'] }); await mctx.addInitScript(() => { try { localStorage.setItem('hissati_onb', '1'); } catch (e) { } }); const m = await mctx.newPage(); m.on('pageerror', (e) => errs.push('حصتي: ' + e)); m.on('dialog', (x) => x.accept());
   const hxCheck = async () => { await d.click('main [data-a="hxCheck"]'); await d.waitForFunction(() => !window.DPApp || ![...document.querySelectorAll('.toast')].some((t) => t.textContent.includes('جارٍ التحقق')), null, { timeout: 8000 }); await d.waitForTimeout(300); };
   const shot = async (pg, name) => { if (process.env.SHOTS) await pg.screenshot({ path: path.join(process.env.SHOTS, name + '.png') }); };
   const cPoll = async () => { await m.evaluate(() => window.HissatiApp.flush()); await m.evaluate(() => window.HissatiApp.poll()); await m.waitForTimeout(200); };
@@ -159,7 +159,23 @@ const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html'));
   ok('نقل الحساب برمز (كمن سجّل في Safari ثم ثبّت التطبيق): الرمز الخطأ يُرفض، والصحيح ينقل الخطة والمحادثة برمز دخول جديد، ويُمسح الحساب من المتصفح القديم، وتصل الرسائل للجهاز الجديد');
   await d.click('.rail [data-a="hxv"]'); await d.click('main [data-a="hxInvForm"]'); await d.fill('#hxi_l', 'خالد'); await d.click('[data-a="hxInvMake"]'); await d.waitForSelector('.hxinv.made .hxlink');
   const link2 = (await d.textContent('.hxinv.made .hxlink')).trim(), jctx = await b.newContext({ ...devices['iPhone 13'] }), jp = await jctx.newPage(); jp.on('pageerror', (e) => errs.push('دعوة: ' + e));
-  await jp.goto(RELAY + '/'); await jp.fill('#invIn', 'مرحباً خالد، رابطك: ' + link2); await jp.click('[data-act="useInv"]'); await jp.waitForSelector('.invite .dr'); await shot(jp, 'c11_invite_ios'); assert((await jp.textContent('.invite')).includes('د. أحمد حامد'));
+  await jp.goto(RELAY + '/'); await jp.fill('#invIn', 'مرحباً خالد، رابطك: ' + link2); await jp.click('[data-act="useInv"]');
+  {     // شاشات المستخدم الجديد: بداية حيّة ← 3 قصص تفاعلية ← اختيار الشكل ← الدعوة؛ مرة واحدة على الجهاز
+    await jp.waitForSelector('.onb-splash'); assert(await jp.locator('.onb-logo svg').count() === 1); assert((await jp.textContent('.onb-tag')).includes('خطوة بخطوة')); assert(await jp.isVisible('[data-act="onbSkip"]')); await shot(jp, 'o1_splash');
+    await jp.waitForSelector('.onb-story.s1', { timeout: 6000 }); assert.strictEqual(await jp.locator('.onb-bars i').count(), 3); assert((await jp.textContent('.onb-txt h1')).includes('خطتك من أخصائيك'));
+    await jp.click('[data-onb="plate"]'); await jp.waitForSelector('.onb-demo.plate.open'); const a0 = await jp.textContent('.onb-meal .swp'); await jp.click('[data-onb="swap"]'); assert.notStrictEqual(await jp.textContent('.onb-meal .swp'), a0); await shot(jp, 'o2_story1');
+    const box = await jp.locator('.onb-txt').boundingBox(); await jp.mouse.move(box.x + box.width / 2, box.y + 4); await jp.mouse.down(); await jp.waitForTimeout(450); assert(await jp.locator('.onb-story.hold').count() === 1, 'الضغط المطوّل يوقف التقدّم'); await jp.mouse.up(); assert(await jp.locator('.onb-story.hold').count() === 0);
+    await jp.waitForSelector('.onb-story.s2', { timeout: 9000 });
+    for (let i = 0; i < 4; i++) await jp.click('[data-onb="cup"]'); assert((await jp.textContent('.onb-cup .oc')).trim() === '4 / 4'); assert(await jp.locator('.onb-cup.full').count() === 1); for (let i = 0; i < 4; i++) await jp.click('[data-onb="heart"]'); assert((await jp.textContent('.onb-heart .oh')).trim() === '100%'); await shot(jp, 'o3_story2');
+    const b2 = await jp.locator('.onb-art').boundingBox(); await jp.mouse.move(b2.x + 20, b2.y + 20); await jp.mouse.down(); await jp.mouse.move(b2.x + 160, b2.y + 24, { steps: 6 }); await jp.mouse.up(); await jp.waitForSelector('.onb-story.s3');
+    assert(await jp.locator('.cb.a').count() === 1 && await jp.locator('.cert').count() === 1); assert((await jp.textContent('.onb-lock')).includes('مشفّرة')); await jp.waitForTimeout(1500); await shot(jp, 'o4_story3');
+    await jp.click('.onb-foot [data-act="onbNext"]'); await jp.waitForSelector('.onb-theme'); assert.strictEqual(await jp.locator('.hx-th').count(), 3);
+    await jp.click('.hx-th[data-v="rose"]'); await jp.waitForFunction(() => document.documentElement.getAttribute('data-theme') === 'rose'); assert.strictEqual(await jp.getAttribute('link[rel=manifest]', 'href'), '/manifest.webmanifest?t=rose'); await jp.waitForTimeout(700); await shot(jp, 'o5_theme');
+    await jp.click('.onb-foot [data-act="onbFinish"]'); await jp.waitForSelector('.invite .dr'); assert.strictEqual(await jp.evaluate(() => localStorage.getItem('hissati_onb')), '1');
+    await jp.click('.hx-th, [data-act="theme"]', { timeout: 500 }).catch(() => { }); await jp.evaluate(() => HxTheme.set('classic'));
+    ok('شاشات المستخدم الجديد: بداية بشعار أبيض وخلفية حيّة ← 3 قصص تفاعلية (صحن يتحوّل لأصناف مع «بدّل»، كوب وقلب يمتلئان باللمس، محادثة وتحدٍّ وشهادة) بتقدّم تلقائي وإيقاف بالضغط المطوّل وسحب ← اختيار الشكل بمعاينة فورية ← الدعوة؛ وتُحفظ فلا تتكرر');
+  }
+  await jp.waitForSelector('.invite .dr'); await shot(jp, 'c11_invite_ios'); assert((await jp.textContent('.invite')).includes('د. أحمد حامد'));
   assert((await jp.textContent('.inst')).includes('نسخ رمز الدعوة')); assert.strictEqual(await jp.textContent('.foot .btn'), 'التسجيل هنا في Safari');
   ok('فتح التطبيق المثبّت أول مرة: يقبل لصق رسالة الدعوة أو رمزها فيبدأ التسجيل داخله؛ وعلى آيفون تشرح شاشة الدعوة «ثبّت أولاً» مع نسخ رمز الدعوة');
   await ip.evaluate(() => { const e = new Event('beforeinstallprompt', { cancelable: true }); e.prompt = () => { window.__prompted = 1; }; e.userChoice = Promise.resolve({ outcome: 'accepted' }); window.dispatchEvent(e); });
@@ -226,12 +242,29 @@ const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html'));
     const rr = env.DB._raw.prepare('SELECT mins FROM remind').get(); assert.strictEqual(JSON.parse(rr.mins).length, 6);
     const cache = await ip.evaluate(async () => (await (await caches.open('hissati-rem')).match('/rem')).json()); assert.strictEqual(cache.items.filter((x) => x.t === 'water').length, 6);
     await ip.check('[data-rem="meals"]'); assert(await remRow(7), 'أوقات الوجبات أُضيفت');
+    {     // أذكار الصباح والمساء وموعد الدواء: أوقات يختارها العميل، تصل المحطة دقائق فقط، واسم الدواء يبقى على الجوال
+      const rem0 = JSON.parse(env.DB._raw.prepare('SELECT mins FROM remind').get().mins).length, items = () => ip.evaluate(async () => (await (await caches.open('hissati-rem')).match('/rem')).json()).then((j) => j.items), off = await ip.evaluate(() => new Date().getTimezoneOffset());
+      const utc = (m) => ((m + off) % 1440 + 1440) % 1440, mins = () => JSON.parse(env.DB._raw.prepare('SELECT mins FROM remind').get().mins);
+      await ip.check('[data-rem="adhAm"]'); await ip.waitForSelector('[data-remt="adhAmT"]'); assert.strictEqual(await ip.inputValue('[data-remt="adhAmT"]'), '06:00'); await remRow(rem0 + 1);
+      assert((await items()).some((x) => x.t === 'adhAm' && x.m === 360)); assert(mins().includes(utc(360)));
+      await ip.fill('[data-remt="adhAmT"]', '07:15'); await ip.press('[data-remt="adhAmT"]', 'Tab'); await ip.waitForFunction(async () => (await (await caches.open('hissati-rem')).match('/rem').then((r) => r.json())).items.some((x) => x.t === 'adhAm' && x.m === 435));
+      await ip.check('[data-rem="adhPm"]'); await ip.waitForSelector('[data-remt="adhPmT"]'); assert.strictEqual(await ip.inputValue('[data-remt="adhPmT"]'), '17:30'); await ip.waitForFunction(async () => (await (await caches.open('hissati-rem')).match('/rem').then((r) => r.json())).items.some((x) => x.t === 'adhPm' && x.m === 1050));
+      await ip.check('[data-rem="med"]'); await ip.waitForSelector('[data-med="n|0"]'); await ip.fill('[data-med="n|0"]', 'فيتامين د'); await ip.press('[data-med="n|0"]', 'Tab'); await ip.fill('[data-med="t|0"]', '09:30'); await ip.press('[data-med="t|0"]', 'Tab');
+      await ip.waitForFunction(async () => (await (await caches.open('hissati-rem')).match('/rem').then((r) => r.json())).items.some((x) => x.t === 'med' && x.label === 'فيتامين د' && x.m === 570));
+      await ip.click('[data-act="medAdd"]'); await ip.waitForSelector('[data-med="n|1"]'); assert.strictEqual(await ip.inputValue('[data-med="t|1"]'), '20:00'); await ip.fill('[data-med="n|1"]', 'أوميغا 3'); await ip.press('[data-med="n|1"]', 'Tab');
+      await ip.waitForFunction(async () => (await (await caches.open('hissati-rem')).match('/rem').then((r) => r.json())).items.some((x) => x.t === 'med' && x.label === 'أوميغا 3' && x.m === 1200));
+      for (let i = 0; i < 4; i++) { const k = await ip.locator('[data-act="medAdd"]').count(); if (k) await ip.click('[data-act="medAdd"]'); } assert.strictEqual(await ip.locator('.medrow').count(), 4); assert.strictEqual(await ip.locator('[data-act="medAdd"]').count(), 0, 'حد 4 مواعيد');
+      const row = env.DB._raw.prepare('SELECT * FROM remind').get(); assert(!JSON.stringify(row).includes('فيتامين') && !JSON.stringify(row).includes('أوميغا'), 'المحطة لا ترى أسماء الأدوية'); assert(mins().includes(utc(570)) && mins().includes(utc(435)) && mins().includes(utc(1050)) && mins().length <= 24);
+      await ip.click('[data-act="medDel"][data-v="0"]'); await ip.waitForFunction(async () => !(await (await caches.open('hissati-rem')).match('/rem').then((r) => r.json())).items.some((x) => x.label === 'فيتامين د'));
+      await ip.uncheck('[data-rem="adhAm"]'); await ip.waitForFunction(async () => !(await (await caches.open('hissati-rem')).match('/rem').then((r) => r.json())).items.some((x) => x.t === 'adhAm'));
+      ok('تذكيرات جديدة: أذكار الصباح والمساء بوقت يختاره العميل (يُقرَّب لربع ساعة)، ومواعيد الدواء (حتى 4، باسم يبقى على الجوال، المحطة ترى الدقائق فقط)، وإيقافها يحذفها من الجوال والمحطة');
+    }
     ok('التذكيرات: الماء كل ساعتين والوجبات في أوقات الخطة — تُحفظ أوقاتها بتوقيت UTC في المحطة، ونصوصها في عامل الخدمة');
   }
   // ---- العادات: مكتبة العادات ← إضافتها لـ«اليوم» بتصاميمها ← الإنجاز والسلسلة والأسبوع ← تصل الأخصائي مع المتابعة
   {
     await ip.click('[data-act="tab"][data-v="today"]'); await ip.waitForSelector('.hb[data-hb="water"] .bottle'); assert.strictEqual(await ip.locator('.hb').count(), 1, 'الماء افتراضياً');
-    await ip.click('[data-act="habits"]'); await ip.waitForSelector('.hlib'); assert.strictEqual(await ip.locator('.hli').count(), 11);
+    await ip.click('[data-act="habits"]'); await ip.waitForSelector('.hlib'); assert.strictEqual(await ip.locator('.hli').count(), 21);
     for (const id of ['adhkar', 'steps', 'sleep', 'veg', 'sugar', 'move', 'breath', 'mindful', 'kitchen', 'coffee']) await ip.click('[data-act="htoggle"][data-v="' + id + '"]');
     await ip.click('.sheet [data-act="close"]'); assert.strictEqual(await ip.locator('.hb').count(), 11);
     const cel = async (t) => { await ip.waitForSelector('#cel h2:has-text("' + t + '")', { timeout: 3000 }); await ip.click('#cel'); await ip.waitForSelector('#cel', { state: 'detached' }); };
@@ -256,7 +289,29 @@ const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html'));
     await ip.waitForTimeout(2800); await ip.evaluate(() => window.HissatiApp.flush()); await hxCheck(); await d.click('main .tabs [data-v="hx"]').catch(() => { });
     const tx = await d.textContent('.hxday'); assert(tx.includes('✓🚶 9000 خطوة') && tx.includes('✓😴 8 س نوم') && tx.includes('✗☕ 4 كوب قهوة') && tx.includes('✓📿 أذكار الصباح'), tx.slice(0, 400));
     ok('العادات: مكتبة من 10 عادات صحية تُضاف لـ«اليوم» بتصميم لكل عادة (قارورة الماء، عدّاد الخطوات، سماء النوم، صحن الخضار، شعلة السلسلة، بطارية النشاط، جلسة تنفّس، أكواب القهوة)، والإنجاز والسلسلة والأسبوع، وتصل الأخصائي في المتابعة اليومية');
-  }
+    {     // مكتبة العصر: 10 عادات جديدة لكل منها تصميم وإنجاز واحتفال ويصل التقدّم للأخصائي
+      await ip.click('[data-act="tab"][data-v="today"]'); await ip.waitForSelector('.hb'); await ip.click('[data-act="habits"]'); await ip.waitForSelector('.hlib');
+      const NEW = ['adhkarPm', 'social', 'sunset', 'gratitude', 'sunlight', 'breaks', 'reading', 'meds', 'stretch', 'postwalk']; for (const id of NEW) await ip.click('[data-act="htoggle"][data-v="' + id + '"]');
+      await ip.click('.sheet [data-act="close"]'); assert.strictEqual(await ip.locator('.hb').count(), 21);
+      const cel2 = async (t) => { await ip.waitForSelector('#cel h2:has-text("' + t + '")', { timeout: 3000 }); await ip.click('#cel'); await ip.waitForSelector('#cel', { state: 'detached' }); };
+      await ip.click('[data-hb="social"] [data-k="1"]'); await cel2('يوم بلا تشتّت'); await ip.click('[data-hb="sunset"] [data-k="1"]'); await cel2('مساء هادئ'); await ip.click('[data-hb="meds"] [data-k="1"]'); await cel2('التزام ممتاز');
+      for (let i = 0; i < 3; i++) await ip.click('[data-hb="gratitude"] .petal >> nth=' + i); await cel2('قلب ممتنّ');
+      await ip.click('[data-hb="sunlight"] [data-k="15"]'); await cel2('صباح مُشرق'); await ip.click('[data-hb="reading"] [data-k="10"]'); await cel2('ختمتَ يومك بهدوء'); await ip.click('[data-hb="stretch"] [data-k="5"]'); await cel2('جسم مرن');
+      for (let i = 0; i < 5; i++) await ip.click('[data-hb="breaks"] .dt >> nth=' + i); await cel2('جسم نشيط'); await ip.click('[data-hb="postwalk"] .wk >> nth=0'); await cel2('خطوات بعد الأكل');
+      await ip.click('[data-hb="adhkarPm"] [data-act="adhkar"]'); await ip.waitForSelector('#adx .adk'); const tot = await ip.evaluate(() => document.querySelectorAll('#adx .adk').length); assert.strictEqual(tot, 20);
+      for (let g = 0; g < 400 && await ip.locator('#adx').count(); g++) { const b = ip.locator('#adx .adk:not(.fin)').first(); if (!(await b.count())) break; await b.click({ force: true }).catch(() => { }); }
+      await cel2('اكتملت أذكار المساء'); assert.strictEqual(await ip.locator('.hb.done').count() >= 10, true);
+      const hv = await ip.evaluate(() => { const L = window.HissatiApp.state().log, k = Object.keys(L).sort().pop(); return L[k].h; }); assert.strictEqual(hv.social, 1); assert.strictEqual(hv.gratitude, 3); assert.strictEqual(hv.sunlight, 15); assert.strictEqual(hv.breaks, 5); assert.strictEqual(hv.meds, 1); assert.strictEqual(hv.adhkarPm.c.reduce((a, x) => a + x, 0), 259);
+      ok('مكتبة العصر: 10 عادات جديدة (أذكار المساء بقلب بنفسجي من 20 ذكراً، سوشيال، شاشات قبل النوم، امتنان، شمس، حركة كل ساعة، قراءة، دواء، تمدّد، مشي بعد الوجبة) لكل منها تصميم وإنجاز واحتفال');
+    }
+
+    {     // أول إنجاز: بطاقة «اشرب أول كوب» تحلّ محلّ بطاقة التثبيت والإشعارات حتى يُنجَز، ثم احتفال وسلسلة اليوم الأول
+      await ip.evaluate(() => { const S = window.HissatiApp.state(); S.fw = 'pending'; }); await ip.click('[data-act="tab"][data-v="plan"]'); await ip.click('[data-act="tab"][data-v="today"]'); await ip.waitForSelector('.firstwin');
+      assert.strictEqual(await ip.locator('.inst, .notifc').count(), 0, 'لا تثبيت ولا إشعارات قبل أول إنجاز'); const w0 = await ip.evaluate(() => { const L = window.HissatiApp.state().log, k = Object.keys(L).sort().pop(); return L[k].water || 0; });
+      await ip.click('[data-act="firstWin"]'); await ip.waitForSelector('#cel h2:has-text("بدأت سلسلتك")'); await ip.click('#cel'); assert.strictEqual(await ip.locator('.firstwin').count(), 0);
+      const st = await ip.evaluate(() => { const S = window.HissatiApp.state(), L = S.log, k = Object.keys(L).sort().pop(); return [S.fw, L[k].water]; }); assert.strictEqual(st[0], 'done'); assert(st[1] >= Math.max(1, w0));
+      ok('أول إنجاز بعد التسجيل: «اشرب أول كوب ماء» يحلّ محلّ بطاقتي التثبيت والإشعارات، ثم احتفال «بدأت سلسلتك: يوم 1» ويُسجَّل الكوب');
+    }  }
   // ---- التحديات: قوالب 4 أسابيع في الإعدادات ← تعديل وإرسال للعميل ← بطاقة التحدي في «اليوم» ← إتمام الأسبوع ← شهادة تقدير (صورة وPDF) في «إنجازاتي» ← يصل الإنجاز للأخصائي
   {
     await d.click('.rail [data-a="settings"]'); await d.click('[data-a="setTab"][data-v="chal"]'); await d.waitForSelector('.chwk >> nth=3'); assert.strictEqual(await d.locator('.chwk').count(), 4);
@@ -278,6 +333,13 @@ const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html'));
     await ip.click('[data-act="tab"][data-v="progress"]'); await ip.click('[data-act="achs"]'); await ip.waitForSelector('.cthumb img[src^="data:image"]'); assert((await ip.textContent('.astats')).includes('شهادة'));
     await ip.click('.sheet [data-act="close"]'); await ip.evaluate(() => window.HissatiApp.flush()); await hxCheck(); await d.waitForSelector('.chrow.done'); assert((await d.textContent('.chcard')).includes('🏅 1 شهادة'));
     ok('التحديات: 4 قوالب جاهزة يعدّلها الأخصائي ويعدّل لكل عميل قبل الإرسال (أرقام عربية)، بطاقة تحدي الأسبوع في «اليوم» بالأيام والنقاط، إتمامه يولّد شهادة تقدير باسم العميل وشعار الأخصائي واسمه تُنزَّل صورة وPDF، وتظهر في «إنجازاتي»، ويصل الإنجاز للأخصائي');
+    {     // مكتبة 10 تحديات في «حصة»: تُختار ثم تُعدَّل كأي تحدٍّ
+      await d.click('[data-a="chLib"]'); await d.waitForSelector('.chlib .chlib-i >> nth=9'); assert.strictEqual(await d.locator('.chlib .chlib-i').count(), 10);
+      await d.click('[data-a="chNew"][data-v="lib:adhkar7"]'); await d.waitForSelector('.chcard [data-chf="ed.0|title"]'); assert.strictEqual(await d.locator('.chcard .chwk').count(), 1); assert.strictEqual(await d.inputValue('[data-chf="ed.0|title"]'), 'أسبوع الأذكار');
+      assert.deepStrictEqual(await d.$$eval('.chcard select[data-chf^="ed.0|h|"]', (els) => els.map((e) => e.value)), ['adhkar', 'adhkarPm']); assert.deepStrictEqual(await d.$$eval('.chcard input[data-chf^="ed.0|d|"]', (els) => els.map((e) => e.value)), ['7', '7']);
+      await d.click('[data-a="chCancelEd"]'); await d.click('[data-a="chLib"]'); await d.click('[data-a="chNew"][data-v="lib:nosugar30"]'); await d.waitForSelector('.chcard .chwk >> nth=3'); assert.strictEqual(await d.locator('.chcard .chwk').count(), 4); await d.click('[data-a="chCancelEd"]');
+      ok('مكتبة التحديات: 10 تحديات جاهزة (سوشيال ميديا، أذكار 7 أيام، نوم، ضوء الصباح، امتنان، 30 يوماً بلا سكر، مشي بعد الوجبات، قراءة، دواء، تمدّد) تُختار من ملف العميل وتُعدَّل قبل الإرسال');
+    }
   }
   {     // الثيمات: «الحالي» الافتراضي + «وردة» + «نبض» — مختار الثيم في «تقدّمي»، يُحفظ على الجهاز، ويُطبَّق قبل أول رسم (حتى على شاشة القفل)
     await ip.click('[data-act="tab"][data-v="progress"]'); await ip.waitForSelector('.hx-themes'); assert.strictEqual(await ip.locator('.hx-th').count(), 3);

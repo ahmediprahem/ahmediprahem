@@ -15,7 +15,7 @@ const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html'));
   await new Promise((r) => srv.listen(0, '127.0.0.1', r)); const RELAY = 'http://127.0.0.1:' + srv.address().port, realFetch = globalThis.fetch;
   globalThis.fetch = (u, o) => /googleapis|mozilla|apple\.com/.test(String(u)) ? Promise.resolve(new Response(null, { status: 201 })) : realFetch(u, o);
   const b = await chromium.launch(), dctx = await b.newContext({ viewport: { width: 1440, height: 900 }, acceptDownloads: true }), d = await dctx.newPage(); d.on('pageerror', (e) => errs.push('حصة: ' + e)); d.on('dialog', (x) => x.accept());
-  const mctx = await b.newContext({ ...devices['Pixel 7'] }), m = await mctx.newPage(); m.on('pageerror', (e) => errs.push('حصتي: ' + e)); m.on('dialog', (x) => x.accept());
+  const mctx = await b.newContext({ ...devices['Pixel 7'] }); await mctx.addInitScript(() => { try { localStorage.setItem('hissati_onb', '1'); } catch (e) { } }); const m = await mctx.newPage(); m.on('pageerror', (e) => errs.push('حصتي: ' + e)); m.on('dialog', (x) => x.accept());
   const hxCheck = async () => { await d.click('main [data-a="hxCheck"]'); await d.waitForTimeout(900); };
   const cPoll = async () => { await m.evaluate(() => window.HissatiApp.flush()); await m.evaluate(() => window.HissatiApp.poll()); await m.waitForTimeout(250); };
   const spec = (sys) => d.evaluate((s) => HForms.normalize((DPApp.S.settings.forms || {})[s], s), sys);
@@ -81,7 +81,7 @@ const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html'));
   ok('خطة الجرامات تصل «حصتي»: سعرات كل يوم حسب نوع التدريب، الأصناف بالجرامات، ماكروز كل وجبة، وبدائل بجرامات مكافئة؛ والتبديل والمتابعة تعود إلى «حصة»');
   // ---- 8) استبيان الحصص المعدّل يصل أيضاً
   await d.click('.rail [data-a="hxv"]'); await d.click('main [data-a="hxInvForm"]'); await d.fill('#hxi_l', 'سارة'); await d.click('[data-a="hxInvMake"]'); await d.waitForSelector('.hxinv.made .hxlink');
-  const link2 = (await d.textContent('.hxinv.made .hxlink')).trim(), j = await (await b.newContext({ ...devices['Pixel 7'] })).newPage(); j.on('pageerror', (e) => errs.push('حصص: ' + e));
+  const link2 = (await d.textContent('.hxinv.made .hxlink')).trim(), j = await (async () => { const c = await b.newContext({ ...devices['Pixel 7'] }); await c.addInitScript(() => { try { localStorage.setItem('hissati_onb', '1'); } catch (e) { } }); return c.newPage(); })(); j.on('pageerror', (e) => errs.push('حصص: ' + e));
   await j.goto(link2); await j.click('[data-act="go"][data-v="pin"]'); for (let i = 0; i < 2; i++) for (const k of '1357') await j.click(`.pad [data-v="${k}"]`); await j.waitForSelector('.prog');
   assert((await j.textContent('.hd')).includes('من 5')); await j.fill('#f_phone', '0511111111'); await j.fill('#f_age', '30'); await j.fill('#f_weight', '70'); await j.fill('#f_height', '165'); await j.click('.foot .btn');
   const h = await j.textContent('.stack'); assert(h.includes('كم مرة تأكل خارج البيت أسبوعياً؟') && h.includes('هل هناك ظروف خاصة')); assert(await j.isDisabled('.foot .btn')); await j.click('[data-act="cq1"][data-v="1–2 مرة"]'); assert(!(await j.isDisabled('.foot .btn')));

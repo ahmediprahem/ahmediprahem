@@ -10,19 +10,21 @@ self.addEventListener('fetch', (e) => {                // الشبكة أولا�
 });
 // نوع الإشعار يُسأل عنه من المحطة بعنوان الاشتراك (بلا محتوى عبر Google/Apple): تذكير ماء/وجبة، منشور تثقيفي، أو جديد من الأخصائي.
 // أوقات التذكير يحفظها التطبيق هنا (hissati-rem) فيُعرض نص التذكير الأقرب للوقت الحالي.
-async function remText() {
+async function remText() {                                   // كل البنود القريبة من الوقت الحالي (ضمن 8 دقائق من الأقرب) فيصل إشعار واحد جامع، لا إشعاران
   try {
     const r = await (await caches.open('hissati-rem')).match('/rem'); if (!r) return null; const it = (await r.json()).items || [], d = new Date(), m = d.getHours() * 60 + d.getMinutes();
-    let best = null, bd = 1e9; it.forEach((x) => { const dd = Math.min(Math.abs(x.m - m), 1440 - Math.abs(x.m - m)); if (dd < bd) { bd = dd; best = x; } }); return best && bd <= 25 ? best : null;
+    const near = it.map((x) => ({ x, d: Math.min(Math.abs(x.m - m), 1440 - Math.abs(x.m - m)) })).filter((o) => o.d <= 25).sort((a, b) => a.d - b.d); if (!near.length) return null;
+    return near.filter((o) => o.d <= near[0].d + 8).map((o) => o.x);
   } catch (e) { return null; }
 }
+const REMT = (x) => x.t === 'water' ? '💧 وقت كوب ماء — سجّله في «حصتي»' : x.t === 'adhAm' ? '📿 أذكار الصباح — ابدأ يومك بذكر الله' : x.t === 'adhPm' ? '🌙 أذكار المساء — حصّن مساءك بذكر الله' : x.t === 'med' ? '💊 موعد دوائك' + (x.label ? ' — ' + x.label : '') : '🍽 حان وقت ' + (x.label || 'وجبتك') + ' — افتح خطتك';
 self.addEventListener('push', (e) => {
   e.waitUntil((async () => {
     let kind = 'msg';
     try { const sub = await self.registration.pushManager.getSubscription(); if (sub) kind = (await (await fetch('/v1/push/last?ep=' + encodeURIComponent(sub.endpoint), { cache: 'no-store' })).json()).kind || 'msg'; } catch (x) { }
-    const rem = kind === 'rem' ? await remText() : null; if (kind === 'rem' && !rem) return;           // تذكير أُلغي من الجوال: لا شيء
+    const rems = kind === 'rem' ? await remText() : null; if (kind === 'rem' && !rems) return; const rem = rems ? rems[0] : null;           // تذكير أُلغي من الجوال: لا شيء
     const cl = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
-    const body = rem ? (rem.t === 'water' ? '💧 وقت كوب ماء — سجّله في «حصتي»' : '🍽 حان وقت ' + (rem.label || 'وجبتك') + ' — افتح خطتك') : kind === 'feed' ? '📣 منشور تثقيفي جديد من أخصائيك' : 'لديك جديد من أخصائيك — افتح «حصتي»';
+    const body = rems ? rems.map(REMT).join('\n') : kind === 'feed' ? '📣 منشور تثقيفي جديد من أخصائيك' : 'لديك جديد من أخصائيك — افتح «حصتي»';
     cl.forEach((c) => c.postMessage(rem ? { t: 'rem', text: body } : { t: 'push', kind }));          // التطبيق المفتوح يجلب الجديد فوراً (أو يعرض التذكير)
     if (cl.some((c) => c.visibilityState === 'visible')) return;          // ظاهر أمام المستخدم: يكفي التنبيه داخل التطبيق
     await self.registration.showNotification('حصتي', { body, icon: '/icon.png', badge: '/icon.png', tag: rem ? 'hissati-rem' : 'hissati', renotify: true, lang: 'ar', dir: 'rtl' });
