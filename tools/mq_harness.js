@@ -5,13 +5,13 @@ const R = path.join(__dirname, '..'), MQ = path.join(R, 'design/training_kit/del
 async function sheet(items, out, opt) {   // items: [{label, pose, props, pin, cam:{yaw,pitch,dist,zoom,target}, theme}]
   opt = opt || {}; const b = await chromium.launch(), p = await b.newPage({ viewport: { width: opt.w || 1400, height: 900 }, deviceScaleFactor: 1 });
   const cw = opt.cw || 280, ch = opt.ch || 340;
-  const html = '<!doctype html><meta charset=utf-8><style>' + fs.readFileSync(MQ + '/mannequin.css', 'utf8') + 'body{margin:0;background:#eef1f7;font:12px sans-serif}.g{display:flex;flex-wrap:wrap;gap:4px;padding:4px}.c{width:' + cw + 'px;background:#fff;border:1px solid #cdd3e3}.c canvas{width:' + cw + 'px;height:' + ch + 'px;display:block}.c b{display:block;padding:2px 6px;background:#253464;color:#fff;direction:rtl;font-size:11px}</style><div class=g id=g></div><script>' + fs.readFileSync(MQ + '/mannequin.js', 'utf8').replace('get rig() { return I.rig; },', 'get rig() { return I.rig; }, get _I() { return I; },') + '</script>';
+  const html = '<!doctype html><meta charset=utf-8><style>' + fs.readFileSync(MQ + (process.env.MQV === '2' ? '/mannequin2.css' : '/mannequin.css'), 'utf8') + 'body{margin:0;background:#eef1f7;font:12px sans-serif}.g{display:flex;flex-wrap:wrap;gap:4px;padding:4px}.c{width:' + cw + 'px;background:#fff;border:1px solid #cdd3e3}.c canvas{width:' + cw + 'px;height:' + ch + 'px;display:block}.c b{display:block;padding:2px 6px;background:#253464;color:#fff;direction:rtl;font-size:11px}</style><div class=g id=g></div><script>' + fs.readFileSync(MQ + (process.env.MQV === '2' ? '/mannequin2.js' : '/mannequin.js'), 'utf8').replace('get rig() { return I.rig; },', 'get rig() { return I.rig; }, get _I() { return I; },') + '</script>';
   await p.setContent(html);
   const res = await p.evaluate(({ items, cw, ch }) => {
     const g = document.getElementById('g'), warns = [];
     items.forEach((it, i) => {
       const d = document.createElement('div'); d.className = 'c'; d.innerHTML = '<b>' + it.label + '</b><div class="hx-mq-host"><canvas></canvas></div>'; g.appendChild(d);
-      const cv = d.querySelector('canvas'), o = { theme: it.theme || 'classic', pinFeet: it.pinFeet ? (it.pinFeet === true ? true : it.pinFeet) : false, pinHands: !!it.pinHands };
+      const cv = d.querySelector('canvas'), o = { theme: it.theme || 'classic', build: it.build || 'medium', height: it.height || 170, pinFeet: it.pinFeet ? (it.pinFeet === true ? true : it.pinFeet) : false, pinHands: !!it.pinHands };
       cv.style.width = cw + 'px'; cv.style.height = ch + 'px';
       const m = Mannequin.create(cv, o); m.props([{ type: 'floor' }].concat(it.props || [])); m.setPose(it.pose); m.camera(Object.assign({ instant: true }, it.cam || { preset: 'front' }));
       if (it.hl) m.highlight(it.hl);
@@ -25,7 +25,7 @@ module.exports = { sheet };
 if (require.main === module) {
   (async () => {
     const poses = require(path.resolve(process.argv[2])), id = process.argv[3] || '*', out = process.argv[4] || '/tmp/mq.png', list = id === '*' ? Object.keys(poses.EX) : id.split(',');
-    const items = []; list.forEach((k) => { const e = poses.EX[k]; ['a', 'b', 'c'].forEach((s) => { if (!e[s]) return; ['front', 'side'].forEach((v) => items.push({ label: k + ' ' + s + ' ' + v, pose: e[s], props: e.props, pinFeet: e.pinHands ? false : !!e.pinFeet, pinHands: e.pinHands, cam: Object.assign({ preset: v }, e.cam && e.cam[v]) , hl: e.hl })); }); });
+    const items = []; list.forEach((k) => { const e = poses.EX[k]; const EQ = process.env.EQ ? require(path.join(R, 'design/training_kit/program/equip.json')) : {}; ['a', 'b', 'c'].forEach((s) => { if (!e[s]) return; (process.env.MQVIEWS ? process.env.MQVIEWS.split(',') : ['front', 'side']).forEach((v) => items.push({ label: k + ' ' + s + ' ' + v, pose: e[s], props: EQ[k] || e.props, pinFeet: e.pinHands ? false : !!e.pinFeet, pinHands: e.pinHands, build: process.env.MQB || 'medium', theme: process.env.MQT || 'classic', cam: Object.assign({ preset: v }, e.cam && e.cam[v]) , hl: e.hl })); }); });
     const w = await sheet(items, out, { cw: 230, ch: 300, w: 1400 }); console.log('warnings:', w.length ? '\n' + w.join('\n') : 'none');
   })();
 }

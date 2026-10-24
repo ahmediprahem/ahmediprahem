@@ -1,0 +1,15 @@
+/* مجسّم 2.0: ألوان الأشكال (anatomy/classic/rose/pulse) + الجلد والخطوط والشعر والأجهزة. الأسماء --hx-mq-* تُقرأ بـgetComputedStyle */
+.hx-mq{display:block;width:100%;height:100%;touch-action:pan-y;outline:none;
+ --hx-mq-body:#b4b0aa;--hx-mq-hi:#f2f1ee;--hx-mq-lo:#5c5c66;--hx-mq-rim:#2f3038;--hx-mq-joint:#b4b0aa;--hx-mq-glow:#ff8a2b;--hx-mq-floor:#3a2d27;--hx-mq-shadow:#000;--hx-mq-bg:transparent;
+ --hx-mq-line:#2b2c35;--hx-mq-hair:#2a2724;--hx-mq-eye:#1c1c22;--hx-mq-lip:#7a5a56;
+ --hx-mq-prop:#6a727f;--hx-mq-prop-hi:#a4adbb;--hx-mq-prop-lo:#353b46;--hx-mq-metal:#8d96a3;--hx-mq-metal-hi:#e1e6ee;--hx-mq-metal-lo:#444b57;
+ --hx-mq-pad:#23262d;--hx-mq-pad-hi:#4a4f5b;--hx-mq-pad-lo:#101216;--hx-mq-plate:#2b2e36;--hx-mq-plate-hi:#5a6070;--hx-mq-plate-lo:#14161b;--hx-mq-rubber:#1b1c20}
+.hx-mq[data-theme="classic"]{--hx-mq-body:#c3cde2;--hx-mq-hi:#f1f5ff;--hx-mq-lo:#8593b3;--hx-mq-rim:#56627f;--hx-mq-joint:#a9b6d4;--hx-mq-glow:#2ee59d;--hx-mq-floor:#27406f;--hx-mq-line:#3d4a6e;--hx-mq-hair:#3a4565;--hx-mq-eye:#2c3656;--hx-mq-lip:#7886a8}
+.hx-mq[data-theme="rose"]{--hx-mq-body:#ecc9d0;--hx-mq-hi:#fff5f3;--hx-mq-lo:#c496a3;--hx-mq-rim:#9c6d7d;--hx-mq-joint:#f3dade;--hx-mq-glow:#d6417a;--hx-mq-floor:#e6cfc9;--hx-mq-shadow:#5b3b46;--hx-mq-line:#8a5a6a;--hx-mq-hair:#5a3a3f;--hx-mq-eye:#3b2a2e;--hx-mq-lip:#b5606f;--hx-mq-prop:#a98b94;--hx-mq-prop-hi:#d3b9c0;--hx-mq-prop-lo:#7a6068;--hx-mq-metal:#b8a2a8;--hx-mq-metal-hi:#f4e6e8;--hx-mq-metal-lo:#7a6068}
+.hx-mq[data-theme="pulse"]{--hx-mq-body:#3a4353;--hx-mq-hi:#6b788f;--hx-mq-lo:#1a2029;--hx-mq-rim:#0b0e13;--hx-mq-joint:#4a566a;--hx-mq-glow:#d2ff3a;--hx-mq-floor:#222c3c;--hx-mq-line:#0a0d12;--hx-mq-hair:#0b0d11;--hx-mq-eye:#d2ff3a;--hx-mq-lip:#2a3240;--hx-mq-prop:#46515f;--hx-mq-prop-hi:#7a879a;--hx-mq-prop-lo:#232a35}
+.hx-mq-host{position:relative}
+.hx-mq-status,.hx-mq-steps{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.hx-mq-tip{position:absolute;transform:translateX(-50%);background:rgba(20,26,40,.92);color:#fff;border-radius:10px;padding:5px 10px;font-size:13px;pointer-events:none;z-index:3}
+.hx-mq-tools{position:absolute;inset-inline:8px;bottom:8px;display:flex;gap:6px;flex-wrap:wrap;justify-content:center;z-index:2}
+.hx-mq-btn{min-width:44px;min-height:44px;padding:0 12px;border-radius:12px;border:1px solid rgba(255,255,255,.18);background:rgba(20,26,40,.78);color:#fff;font:inherit;font-size:13px;cursor:pointer}
+.hx-mq-btn:focus-visible,.hx-mq:focus-visible{outline:3px solid var(--hx-mq-glow);outline-offset:2px}
