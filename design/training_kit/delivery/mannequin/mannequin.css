@@ -1,0 +1,11 @@
+/* ألوان المجسّم لثيمات «حصتي» الثلاثة (تُقرأ بـgetComputedStyle من أنماط --hx-mq-*) + عناصر الواجهة الصغيرة */
+.hx-mq{display:block;width:100%;height:100%;touch-action:pan-y;outline:none;--hx-mq-body:#c3cde2;--hx-mq-hi:#f1f5ff;--hx-mq-lo:#8593b3;--hx-mq-rim:#56627f;--hx-mq-joint:#a9b6d4;--hx-mq-glow:#2ee59d;--hx-mq-floor:#27406f;--hx-mq-prop:#5d6e92;--hx-mq-prop-hi:#8d9cc0;--hx-mq-prop-lo:#364367;--hx-mq-shadow:#000;--hx-mq-bg:transparent}
+.hx-mq[data-theme="rose"]{--hx-mq-body:#ecc9d0;--hx-mq-hi:#fff5f3;--hx-mq-lo:#c496a3;--hx-mq-rim:#9c6d7d;--hx-mq-joint:#f3dade;--hx-mq-glow:#d6417a;--hx-mq-floor:#e6cfc9;--hx-mq-prop:#a98b94;--hx-mq-prop-hi:#d3b9c0;--hx-mq-prop-lo:#7a6068;--hx-mq-shadow:#5b3b46}
+.hx-mq[data-theme="pulse"]{--hx-mq-body:#3a4353;--hx-mq-hi:#6b788f;--hx-mq-lo:#1a2029;--hx-mq-rim:#0b0e13;--hx-mq-joint:#4a566a;--hx-mq-glow:#d2ff3a;--hx-mq-floor:#222c3c;--hx-mq-prop:#46515f;--hx-mq-prop-hi:#7a879a;--hx-mq-prop-lo:#232a35;--hx-mq-shadow:#000}
+.hx-mq-host{position:relative}
+.hx-mq-status,.hx-mq-steps{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.hx-mq-tip{position:absolute;transform:translateX(-50%);background:rgba(20,26,40,.92);color:#fff;border-radius:10px;padding:5px 10px;font-size:13px;pointer-events:none;z-index:3}
+.hx-mq-tools{position:absolute;inset-inline:8px;bottom:8px;display:flex;gap:6px;flex-wrap:wrap;justify-content:center;z-index:2}
+.hx-mq-btn{min-width:44px;min-height:44px;padding:0 12px;border-radius:12px;border:1px solid rgba(255,255,255,.18);background:rgba(20,26,40,.78);color:#fff;font:inherit;font-size:13px;cursor:pointer}
+.hx-mq-btn[aria-pressed="true"]{background:var(--hx-mq-glow);color:#0b1020}
+.hx-mq-btn:focus-visible,.hx-mq:focus-visible{outline:3px solid var(--hx-mq-glow);outline-offset:2px}
