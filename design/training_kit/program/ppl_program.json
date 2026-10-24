@@ -1,0 +1,886 @@
+{
+ "id": "ppl6",
+ "nameAr": "دفع / سحب / أرجل — 6 أيام",
+ "nameEn": "Push / Pull / Legs (6-day)",
+ "status": "مسودة تجريبية للمجسّم — تحتاج مراجعة المختص قبل أي استعمال مع عملاء",
+ "level": "متوسط",
+ "goal": "تضخيم عضلي (hypertrophy)",
+ "weekDays": [
+  [
+   "السبت",
+   "push_a"
+  ],
+  [
+   "الأحد",
+   "pull_a"
+  ],
+  [
+   "الاثنين",
+   "legs_a"
+  ],
+  [
+   "الثلاثاء",
+   "push_b"
+  ],
+  [
+   "الأربعاء",
+   "pull_b"
+  ],
+  [
+   "الخميس",
+   "legs_b"
+  ],
+  [
+   "الجمعة",
+   "راحة"
+  ]
+ ],
+ "sessionMin": "60-75",
+ "warmup": [
+  "5 دقائق كارديو خفيف",
+  "مجموعة تسخين بنصف الوزن للتمرين الأول",
+  "تحريك المفاصل المعنية"
+ ],
+ "progression": "عند إتمام أعلى نطاق للتكرار في كل المجموعات بتقنية سليمة زد الوزن 2.5–5%",
+ "safety": [
+  "توقف عند الألم الحاد أو غير المعتاد وأبلغ الأخصائي",
+  "لا فشل عضلي في التمارين الثقيلة المركبة",
+  "يُعدَّل البرنامج حسب الإصابات والخبرة قبل الإسناد"
+ ],
+ "days": [
+  {
+   "id": "push_a",
+   "ar": "الدفع (أ)",
+   "en": "Push A",
+   "exercises": [
+    {
+     "id": "bench_press",
+     "ar": "ضغط بنش بالبار",
+     "en": "Barbell Bench Press",
+     "muscles": [
+      "chest",
+      "delts",
+      "triceps"
+     ],
+     "equipment": [
+      "bar",
+      "bench"
+     ],
+     "sets": 4,
+     "reps": "6-8",
+     "restSec": 150,
+     "tempo": "2-1-1",
+     "cues": [
+      "كتفاك للخلف وللأسفل",
+      "البار ينزل لمنتصف الصدر",
+      "ادفع بقدميك في الأرض"
+     ],
+     "note": "",
+     "poses": "TODO"
+    },
+    {
+     "id": "ohp",
+     "ar": "ضغط كتف واقفاً",
+     "en": "Overhead Press",
+     "muscles": [
+      "delts",
+      "triceps",
+      "abs"
+     ],
+     "equipment": [
+      "bar"
+     ],
+     "sets": 3,
+     "reps": "6-10",
+     "restSec": 120,
+     "tempo": "2-0-1",
+     "cues": [
+      "شدّ البطن والأرداف",
+      "البار فوق منتصف القدم عند القمة"
+     ],
+     "note": "",
+     "poses": "TODO"
+    },
+    {
+     "id": "incline_db_press",
+     "ar": "ضغط دمبل مائل",
+     "en": "Incline Dumbbell Press",
+     "muscles": [
+      "chest",
+      "delts",
+      "triceps"
+     ],
+     "equipment": [
+      "dumbbell",
+      "bench"
+     ],
+     "sets": 3,
+     "reps": "8-12",
+     "restSec": 90,
+     "tempo": "2-1-1",
+     "cues": [
+      "ميل المقعد نحو 30°",
+      "المرفقان بزاوية 45° عن الجسم"
+     ],
+     "note": "",
+     "poses": "TODO"
+    },
+    {
+     "id": "lateral_raise",
+     "ar": "رفرفة جانبية",
+     "en": "Dumbbell Lateral Raise",
+     "muscles": [
+      "delts"
+     ],
+     "equipment": [
+      "dumbbell"
+     ],
+     "sets": 3,
+     "reps": "12-15",
+     "restSec": 60,
+     "tempo": "2-0-2",
+     "cues": [
+      "قُد الحركة بالمرفقين",
+      "توقّف عند مستوى الكتف"
+     ],
+     "note": "",
+     "poses": "TODO"
+    },
+    {
+     "id": "pushdown",
+     "ar": "سحب ترايسبس بالكابل",
+     "en": "Triceps Pushdown",
+     "muscles": [
+      "triceps"
+     ],
+     "equipment": [
+      "cable"
+     ],
+     "sets": 3,
+     "reps": "10-15",
+     "restSec": 60,
+     "tempo": "2-0-1",
+     "cues": [
+      "ثبّت المرفقين بجانبك"
+     ],
+     "note": "",
+     "poses": "TODO"
+    },
+    {
+     "id": "overhead_tri_ext",
+     "ar": "ترايسبس خلف الرأس",
+     "en": "Overhead Triceps Extension",
+     "muscles": [
+      "triceps"
+     ],
+     "equipment": [
+      "dumbbell"
+     ],
+     "sets": 3,
+     "reps": "10-12",
+     "restSec": 60,
+     "tempo": "3-0-1",
+     "cues": [
+      "المرفقان للأمام ثابتان"
+     ],
+     "note": "",
+     "poses": "TODO"
+    }
+   ]
+  },
+  {
+   "id": "pull_a",
+   "ar": "السحب (أ)",
+   "en": "Pull A",
+   "exercises": [
+    {
+     "id": "deadlift",
+     "ar": "رفعة ميتة",
+     "en": "Conventional Deadlift",
+     "muscles": [
+      "hamstrings",
+      "glutes",
+      "lowerBack",
+      "traps",
+      "lats"
+     ],
+     "equipment": [
+      "bar"
+     ],
+     "sets": 3,
+     "reps": "4-6",
+     "restSec": 180,
+     "tempo": "2-0-1",
+     "cues": [
+      "ظهر محايد",
+      "ادفع الأرض بعيداً",
+      "البار ملاصق للساقين"
+     ],
+     "note": "ثقيلة: لا تُعطى للمبتدئ قبل تقييم الأداء",
+     "poses": "TODO"
+    },
+    {
+     "id": "pullup",
+     "ar": "عقلة",
+     "en": "Pull-Up",
+     "muscles": [
+      "lats",
+      "biceps",
+      "upperBack"
+     ],
+     "equipment": [
+      "pullupbar"
+     ],
+     "sets": 4,
+     "reps": "6-10",
+     "restSec": 120,
+     "tempo": "2-0-1",
+     "cues": [
+      "ابدأ بشدّ الكتفين للأسفل",
+      "الصدر نحو العقلة"
+     ],
+     "note": "بديل أسهل: سحب علوي بالكابل أو عقلة بشريط",
+     "poses": "TODO"
+    },
+    {
+     "id": "barbell_row",
+     "ar": "تجديف بالبار",
+     "en": "Barbell Row",
+     "muscles": [
+      "lats",
+      "upperBack",
+      "biceps"
+     ],
+     "equipment": [
+      "bar"
+     ],
+     "sets": 3,
+     "reps": "8-10",
+     "restSec": 120,
+     "tempo": "2-1-1",
+     "cues": [
+      "ميل الجذع نحو 45°",
+      "اسحب نحو أسفل البطن"
+     ],
+     "note": "",
+     "poses": "TODO"
+    },
+    {
+     "id": "face_pull",
+     "ar": "سحب للوجه",
+     "en": "Face Pull",
+     "muscles": [
+      "delts",
+      "upperBack",
+      "traps"
+     ],
+     "equipment": [
+      "cable"
+     ],
+     "sets": 3,
+     "reps": "12-15",
+     "restSec": 60,
+     "tempo": "2-1-1",
+     "cues": [
+      "المرفقان عاليان",
+      "افصل اليدين عند نهاية الحركة"
+     ],
+     "note": "",
+     "poses": "TODO"
+    },
+    {
+     "id": "barbell_curl",
+     "ar": "تبادل بايسبس بالبار",
+     "en": "Barbell Curl",
+     "muscles": [
+      "biceps",
+      "forearms"
+     ],
+     "equipment": [
+      "bar"
+     ],
+     "sets": 3,
+     "reps": "8-12",
+     "restSec": 60,
+     "tempo": "2-0-2",
+     "cues": [
+      "المرفقان ثابتان بجانب الجسم"
+     ],
+     "note": "",
+     "poses": "TODO"
+    },
+    {
+     "id": "hammer_curl",
+     "ar": "هامر كيرل",
+     "en": "Hammer Curl",
+     "muscles": [
+      "biceps",
+      "forearms"
+     ],
+     "equipment": [
+      "dumbbell"
+     ],
+     "sets": 3,
+     "reps": "10-12",
+     "restSec": 60,
+     "tempo": "2-0-1",
+     "cues": [
+      "قبضة محايدة"
+     ],
+     "note": "",
+     "poses": "TODO"
+    }
+   ]
+  },
+  {
+   "id": "legs_a",
+   "ar": "الأرجل (أ)",
+   "en": "Legs A",
+   "exercises": [
+    {
+     "id": "squat",
+     "ar": "قرفصاء بالبار",
+     "en": "Back Squat",
+     "muscles": [
+      "quads",
+      "glutes",
+      "adductors",
+      "lowerBack"
+     ],
+     "equipment": [
+      "bar",
+      "rack"
+     ],
+     "sets": 4,
+     "reps": "5-8",
+     "restSec": 180,
+     "tempo": "3-1-1",
+     "cues": [
+      "الركبتان باتجاه القدمين",
+      "انزل حتى توازي الفخذين",
+      "صدرك مرفوع"
+     ],
+     "note": "",
+     "poses": "TODO"
+    },
+    {
+     "id": "rdl",
+     "ar": "رفعة رومانية",
+     "en": "Romanian Deadlift",
+     "muscles": [
+      "hamstrings",
+      "glutes",
+      "lowerBack"
+     ],
+     "equipment": [
+      "bar"
+     ],
+     "sets": 3,
+     "reps": "8-10",
+     "restSec": 120,
+     "tempo": "3-0-1",
+     "cues": [
+      "أرجح الحوض للخلف",
+      "الظهر مستقيم"
+     ],
+     "note": "",
+     "poses": "TODO"
+    },
+    {
+     "id": "leg_press",
+     "ar": "ضغط الأرجل بالجهاز",
+     "en": "Leg Press",
+     "muscles": [
+      "quads",
+      "glutes"
+     ],
+     "equipment": [
+      "machine"
+     ],
+     "sets": 3,
+     "reps": "10-12",
+     "restSec": 90,
+     "tempo": "2-1-1",
+     "cues": [
+      "لا تقفل الركبتين في القمة"
+     ],
+     "note": "",
+     "poses": "TODO"
+    },
+    {
+     "id": "leg_curl",
+     "ar": "ثني الأرجل (هامسترينغ)",
+     "en": "Seated/Lying Leg Curl",
+     "muscles": [
+      "hamstrings"
+     ],
+     "equipment": [
+      "machine"
+     ],
+     "sets": 3,
+     "reps": "10-12",
+     "restSec": 60,
+     "tempo": "2-1-2",
+     "cues": [
+      "حركة بطيئة عند العودة"
+     ],
+     "note": "",
+     "poses": "TODO"
+    },
+    {
+     "id": "standing_calf",
+     "ar": "سمانة واقفاً",
+     "en": "Standing Calf Raise",
+     "muscles": [
+      "calves"
+     ],
+     "equipment": [
+      "machine"
+     ],
+     "sets": 4,
+     "reps": "10-15",
+     "restSec": 60,
+     "tempo": "2-1-1",
+     "cues": [
+      "مدى حركة كامل"
+     ],
+     "note": "",
+     "poses": "TODO"
+    },
+    {
+     "id": "plank",
+     "ar": "بلانك",
+     "en": "Plank",
+     "muscles": [
+      "abs",
+      "obliques"
+     ],
+     "equipment": [
+      "mat"
+     ],
+     "sets": 3,
+     "reps": "30-45 ثانية",
+     "restSec": 45,
+     "tempo": "—",
+     "cues": [
+      "كتفاك فوق مرفقيك",
+      "جسم مستقيم"
+     ],
+     "note": "",
+     "poses": "TODO"
+    }
+   ]
+  },
+  {
+   "id": "push_b",
+   "ar": "الدفع (ب)",
+   "en": "Push B",
+   "exercises": [
+    {
+     "id": "db_bench",
+     "ar": "ضغط دمبل مسطح",
+     "en": "Dumbbell Bench Press",
+     "muscles": [
+      "chest",
+      "delts",
+      "triceps"
+     ],
+     "equipment": [
+      "dumbbell",
+      "bench"
+     ],
+     "sets": 4,
+     "reps": "8-12",
+     "restSec": 120,
+     "tempo": "2-1-1",
+     "cues": [
+      "مدى حركة أكبر من البار"
+     ],
+     "note": "",
+     "poses": "TODO"
+    },
+    {
+     "id": "arnold_press",
+     "ar": "أرنولد برس",
+     "en": "Arnold Press",
+     "muscles": [
+      "delts",
+      "triceps"
+     ],
+     "equipment": [
+      "dumbbell"
+     ],
+     "sets": 3,
+     "reps": "8-12",
+     "restSec": 90,
+     "tempo": "2-0-1",
+     "cues": [
+      "دوّر الكفين أثناء الدفع"
+     ],
+     "note": "",
+     "poses": "TODO"
+    },
+    {
+     "id": "cable_fly",
+     "ar": "تجميع صدر بالكابل",
+     "en": "Cable Fly",
+     "muscles": [
+      "chest"
+     ],
+     "equipment": [
+      "cable"
+     ],
+     "sets": 3,
+     "reps": "12-15",
+     "restSec": 60,
+     "tempo": "2-1-2",
+     "cues": [
+      "قوس خفيف ثابت في المرفقين"
+     ],
+     "note": "",
+     "poses": "TODO"
+    },
+    {
+     "id": "pushup",
+     "ar": "ضغط أرضي",
+     "en": "Push-Up",
+     "muscles": [
+      "chest",
+      "triceps",
+      "delts",
+      "abs"
+     ],
+     "equipment": [
+      "bodyweight"
+     ],
+     "sets": 3,
+     "reps": "حتى قرب الفشل",
+     "restSec": 60,
+     "tempo": "2-0-1",
+     "cues": [
+      "جسم مستقيم",
+      "الصدر قرب الأرض"
+     ],
+     "note": "بديل أسهل: على الركبتين",
+     "poses": "TODO"
+    },
+    {
+     "id": "rear_delt_fly",
+     "ar": "رفرفة خلفية",
+     "en": "Rear Delt Fly",
+     "muscles": [
+      "delts",
+      "upperBack"
+     ],
+     "equipment": [
+      "dumbbell"
+     ],
+     "sets": 3,
+     "reps": "12-15",
+     "restSec": 60,
+     "tempo": "2-1-2",
+     "cues": [
+      "جذع مائل",
+      "قيادة بالمرفقين"
+     ],
+     "note": "",
+     "poses": "TODO"
+    },
+    {
+     "id": "skullcrusher",
+     "ar": "سكل كراشر",
+     "en": "Lying Triceps Extension",
+     "muscles": [
+      "triceps"
+     ],
+     "equipment": [
+      "bar",
+      "bench"
+     ],
+     "sets": 3,
+     "reps": "8-12",
+     "restSec": 75,
+     "tempo": "3-0-1",
+     "cues": [
+      "المرفقان ثابتان"
+     ],
+     "note": "",
+     "poses": "TODO"
+    }
+   ]
+  },
+  {
+   "id": "pull_b",
+   "ar": "السحب (ب)",
+   "en": "Pull B",
+   "exercises": [
+    {
+     "id": "lat_pulldown",
+     "ar": "سحب علوي",
+     "en": "Lat Pulldown",
+     "muscles": [
+      "lats",
+      "biceps"
+     ],
+     "equipment": [
+      "cable"
+     ],
+     "sets": 4,
+     "reps": "8-12",
+     "restSec": 90,
+     "tempo": "2-1-1",
+     "cues": [
+      "اسحب نحو الترقوة",
+      "لا تتأرجح"
+     ],
+     "note": "",
+     "poses": "TODO"
+    },
+    {
+     "id": "seated_row",
+     "ar": "تجديف جلوس بالكابل",
+     "en": "Seated Cable Row",
+     "muscles": [
+      "upperBack",
+      "lats",
+      "biceps"
+     ],
+     "equipment": [
+      "cable"
+     ],
+     "sets": 3,
+     "reps": "10-12",
+     "restSec": 90,
+     "tempo": "2-1-1",
+     "cues": [
+      "صدر مرفوع",
+      "اضغط لوحي الكتف"
+     ],
+     "note": "",
+     "poses": "TODO"
+    },
+    {
+     "id": "db_row",
+     "ar": "تجديف دمبل بيد واحدة",
+     "en": "One-Arm Dumbbell Row",
+     "muscles": [
+      "lats",
+      "upperBack"
+     ],
+     "equipment": [
+      "dumbbell",
+      "bench"
+     ],
+     "sets": 3,
+     "reps": "10-12",
+     "restSec": 75,
+     "tempo": "2-1-1",
+     "cues": [
+      "ظهر مستقيم"
+     ],
+     "note": "",
+     "poses": "TODO"
+    },
+    {
+     "id": "shrug",
+     "ar": "رفع الكتفين",
+     "en": "Dumbbell Shrug",
+     "muscles": [
+      "traps"
+     ],
+     "equipment": [
+      "dumbbell"
+     ],
+     "sets": 3,
+     "reps": "12-15",
+     "restSec": 60,
+     "tempo": "1-2-1",
+     "cues": [
+      "اصعد عمودياً بلا دوران"
+     ],
+     "note": "",
+     "poses": "TODO"
+    },
+    {
+     "id": "incline_curl",
+     "ar": "بايسبس على مقعد مائل",
+     "en": "Incline Dumbbell Curl",
+     "muscles": [
+      "biceps"
+     ],
+     "equipment": [
+      "dumbbell",
+      "bench"
+     ],
+     "sets": 3,
+     "reps": "10-12",
+     "restSec": 60,
+     "tempo": "3-0-1",
+     "cues": [
+      "تمدد كامل عند الأسفل"
+     ],
+     "note": "",
+     "poses": "TODO"
+    },
+    {
+     "id": "reverse_curl",
+     "ar": "ريفرس كيرل",
+     "en": "Reverse Curl",
+     "muscles": [
+      "forearms",
+      "biceps"
+     ],
+     "equipment": [
+      "bar"
+     ],
+     "sets": 2,
+     "reps": "12-15",
+     "restSec": 45,
+     "tempo": "2-0-1",
+     "cues": [
+      "كوعان ثابتان"
+     ],
+     "note": "",
+     "poses": "TODO"
+    }
+   ]
+  },
+  {
+   "id": "legs_b",
+   "ar": "الأرجل (ب)",
+   "en": "Legs B",
+   "exercises": [
+    {
+     "id": "front_squat",
+     "ar": "قرفصاء أمامية",
+     "en": "Front Squat",
+     "muscles": [
+      "quads",
+      "abs"
+     ],
+     "equipment": [
+      "bar",
+      "rack"
+     ],
+     "sets": 3,
+     "reps": "6-8",
+     "restSec": 150,
+     "tempo": "3-0-1",
+     "cues": [
+      "مرفقان عاليان",
+      "جذع منتصب"
+     ],
+     "note": "بديل: قرفصاء كأس بالدمبل",
+     "poses": "TODO"
+    },
+    {
+     "id": "walking_lunge",
+     "ar": "اندفاع بالمشي",
+     "en": "Walking Lunge",
+     "muscles": [
+      "quads",
+      "glutes",
+      "adductors"
+     ],
+     "equipment": [
+      "dumbbell"
+     ],
+     "sets": 3,
+     "reps": "10 لكل رجل",
+     "restSec": 90,
+     "tempo": "2-0-1",
+     "cues": [
+      "خطوة طويلة",
+      "جذع منتصب"
+     ],
+     "note": "",
+     "poses": "TODO"
+    },
+    {
+     "id": "hip_thrust",
+     "ar": "دفع الحوض",
+     "en": "Barbell Hip Thrust",
+     "muscles": [
+      "glutes",
+      "hamstrings"
+     ],
+     "equipment": [
+      "bar",
+      "bench"
+     ],
+     "sets": 3,
+     "reps": "8-12",
+     "restSec": 90,
+     "tempo": "2-1-1",
+     "cues": [
+      "ذقن للصدر",
+      "اضغط الأرداف عند القمة"
+     ],
+     "note": "",
+     "poses": "TODO"
+    },
+    {
+     "id": "leg_extension",
+     "ar": "فرد الأرجل",
+     "en": "Leg Extension",
+     "muscles": [
+      "quads"
+     ],
+     "equipment": [
+      "machine"
+     ],
+     "sets": 3,
+     "reps": "12-15",
+     "restSec": 60,
+     "tempo": "2-1-2",
+     "cues": [
+      "حركة بطيئة"
+     ],
+     "note": "",
+     "poses": "TODO"
+    },
+    {
+     "id": "seated_calf",
+     "ar": "سمانة جلوس",
+     "en": "Seated Calf Raise",
+     "muscles": [
+      "calves"
+     ],
+     "equipment": [
+      "machine"
+     ],
+     "sets": 4,
+     "reps": "12-15",
+     "restSec": 45,
+     "tempo": "2-1-1",
+     "cues": [
+      "مدى كامل"
+     ],
+     "note": "",
+     "poses": "TODO"
+    },
+    {
+     "id": "hanging_knee_raise",
+     "ar": "رفع الركبتين معلقاً",
+     "en": "Hanging Knee Raise",
+     "muscles": [
+      "abs",
+      "obliques"
+     ],
+     "equipment": [
+      "pullupbar"
+     ],
+     "sets": 3,
+     "reps": "10-15",
+     "restSec": 45,
+     "tempo": "2-0-2",
+     "cues": [
+      "لا تتأرجح"
+     ],
+     "note": "",
+     "poses": "TODO"
+    }
+   ]
+  }
+ ]
+}
