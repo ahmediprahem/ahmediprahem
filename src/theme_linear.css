@@ -203,3 +203,15 @@ html:is([data-theme="linear"],[data-theme="glass"]) .phgrid figure{border-color:
 html:is([data-theme="linear"],[data-theme="glass"]) .phgrid small{color:var(--lmut)}html:is([data-theme="linear"],[data-theme="glass"]) .phcm{color:#6fe3a9}html:is([data-theme="linear"],[data-theme="glass"]) .bkact .rcon{outline-color:var(--lacc)}
 html:is([data-theme="linear"],[data-theme="glass"]) .chwk,html:is([data-theme="linear"],[data-theme="glass"]) .chrow{border-color:var(--lline)}html:is([data-theme="linear"],[data-theme="glass"]) .chg th{color:var(--lmut)}
 html:is([data-theme="linear"],[data-theme="glass"]) .chrow em{background:var(--lpanel2)}html:is([data-theme="linear"],[data-theme="glass"]) .chrow em.ok{background:rgba(111,227,169,.16);color:#6fe3a9}html:is([data-theme="linear"],[data-theme="glass"]) .chrow.cur{border-color:#ffd27a}html:is([data-theme="linear"],[data-theme="glass"]) .chrow.done{border-color:var(--lacc);background:rgba(111,227,169,.06)}
+/* مكتبة الأخصائي والصندوق الغذائي (0.41) في الثيم الداكن */
+html:is([data-theme="linear"],[data-theme="glass"]) .dxc{background:var(--lpanel);border-color:var(--lline)}
+html:is([data-theme="linear"],[data-theme="glass"]) .dxh{background:linear-gradient(90deg,rgba(59,130,246,.16),transparent);color:#fff}
+html:is([data-theme="linear"],[data-theme="glass"]) .dxs,html:is([data-theme="linear"],[data-theme="glass"]) .dxd ul,html:is([data-theme="linear"],[data-theme="glass"]) .dxcl small{color:var(--ltext,#e6ecff)}
+html:is([data-theme="linear"],[data-theme="glass"]) .dxd h4{color:#cfdaf6}
+html:is([data-theme="linear"],[data-theme="glass"]) .dxd{border-top-color:var(--lline)}
+html:is([data-theme="linear"],[data-theme="glass"]) .dxb{background:var(--lpanel2);color:#cfdaf6}
+html:is([data-theme="linear"],[data-theme="glass"]) .dxb.gstrong{background:rgba(34,197,94,.18);color:#bbf7d0}
+html:is([data-theme="linear"],[data-theme="glass"]) .dxb.gmid{background:rgba(245,158,11,.16);color:#fde68a}
+html:is([data-theme="linear"],[data-theme="glass"]) .dxb.gweak{background:rgba(248,113,113,.16);color:#fecaca}
+html:is([data-theme="linear"],[data-theme="glass"]) .dxbox,html:is([data-theme="linear"],[data-theme="glass"]) .dxfix{background:var(--lpanel);border-color:var(--lline);color:#e6ecff}
+html:is([data-theme="linear"],[data-theme="glass"]) .dxconf{background:rgba(245,158,11,.10);border-color:rgba(245,158,11,.4);color:var(--lwarn)}

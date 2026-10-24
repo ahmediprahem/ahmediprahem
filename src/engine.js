@@ -113,6 +113,7 @@
     (client.keywords || []).forEach(function (k) { if (k) kws.push(k); });
     var excl = {}; (client.excludedFoods || []).forEach(function (n) { excl[n] = 1; });
     var love = {}, avoid = {}; (client.love || []).forEach(function (n) { love[n] = 1; }); (client.avoid || []).forEach(function (n) { avoid[n] = 1; });
+    if (client.diet && E.dietRule) D.foods.forEach(function (f) { var r = E.dietRule(client.diet.id, f); if (r === 'avoid' && !love[f.n]) avoid[f.n] = 1; else if (r === 'love' && !avoid[f.n]) love[f.n] = 1; });      // النظام الغذائي (0.41): تجنّب/تفضيل أصناف
     var cs = {}; (client.conditions || []).forEach(function (c) { cs[c] = 1; });
     var rules = D.rules.filter(function (r) { return cs[r.cond] || (r.cond === 'سكر (مشترك)' && diab); });
     var byName = {}; D.foods.forEach(function (f) { byName[f.n] = f; });
@@ -275,7 +276,7 @@
       var R = P - got, room = function () { return 5 * rem[11] + (st.fatDebt || 0) + (Fp - gotFat); };
       if (R >= 0.5 && nProt < 2) {
         var pc = pool([2, 3, 4, 5], E.PROT).filter(function (f) { return !has[E.fmeta(f).r]; });
-        var ps = function (f) { var m = E.fmeta(f), e = Math.min(R, cap(f, R)), fat = e * X[f.g][2], want = Fp * R / P, s = base(f, 2) + (PR[m.r] || 0) + (m.r === 'fish' && t !== 'L' ? (m.prep === 0 ? (t === 'B' ? -2 : -0.5) : (t === 'B' ? -6 : -3)) : 0) - 0.6 * Math.abs(want - fat) - 4 * Math.max(0, R - e) - (used[f.n] ? 8 : 0) - 1.5 * (dayRole[m.r] || 0) - 2.5 * Math.max(0, (st.useCount[f.n] || 0) - 2); var rm = room(); if (fat - want > rm) s -= 1.2 * (fat - want - rm); return s; };
+        var ps = function (f) { var m = E.fmeta(f), e = Math.min(R, cap(f, R)), fat = e * X[f.g][2], want = Fp * R / P, s = base(f, 2) + (PR[m.r] || 0) + (client.diet && E.dietBoost ? E.dietBoost(client.diet, d, t, m.r) : 0) + (m.r === 'fish' && t !== 'L' ? (m.prep === 0 ? (t === 'B' ? -2 : -0.5) : (t === 'B' ? -6 : -3)) : 0) - 0.6 * Math.abs(want - fat) - 4 * Math.max(0, R - e) - (used[f.n] ? 8 : 0) - 1.5 * (dayRole[m.r] || 0) - 2.5 * Math.max(0, (st.useCount[f.n] || 0) - 2); var rm = room(); if (fat - want > rm) s -= 1.2 * (fat - want - rm); return s; };
         var best = pick(pc, ps), bestS = best ? ps(best) : -1e9, pair = null;
         if ((t === 'B' || t === 'D') && !nProt && R >= 1.5 && !(st.compact && R < 3)) {                 // بيض + جبن: أفضل زوج بمراعاة دهون الحصص المطلوبة
           var eggs = pc.filter(function (f) { return E.fmeta(f).r === 'egg'; }), chs = pc.filter(function (f) { return E.fmeta(f).r === 'cheese'; });
@@ -450,7 +451,7 @@
     return { si: sl.i, name: sl.name, type: sl.type, pct: sl.pct, kcal: Math.round(T.kcal * sl.pct), target: tg, meal: mealName, lines: lines, time: D.times ? D.times[sl.i] : '' };
   };
   E.baseSuggestion = function (client, D) {
-    var st = E.state(client, D, {}), sc = E.capScale(st.T.kcal, st.T), cap = E.capTotals(0, st.meals, D, sc); return E.solveDay(st.T, { cap: cap, sweets: st.sweets, share: E.PREF.share }, D);
+    var st = E.state(client, D, {}), sc = E.capScale(st.T.kcal, st.T), cap = E.capTotals(0, st.meals, D, sc); return E.solveDay(st.T, { cap: cap, sweets: st.sweets, share: E.PREF.share, base: client.diet && E.dietBase ? E.dietBase(client.diet) : undefined }, D);
   };
   E.planWeek = function (client, D, opt) {
     opt = opt || {}; var st = E.state(client, D, opt), T = st.T, meals = st.meals, days = [], manual = client.baseCounts && client.baseCounts.length === 13 && client.baseCounts.some(function (x) { return +x > 0; });
@@ -459,7 +460,8 @@
       var mk = function (cn) { var ach = [0, 0, 0]; for (var g = 0; g < 13; g++) for (var k = 0; k < 3; k++) ach[k] += cn[g] * D.EX[g][k]; return { counts: cn, err: [ach[0] - T.cho, ach[1] - T.pro, ach[2] - T.fat], ok: null, score: 0, kcal: ach[0] * 4 + ach[1] * 4 + ach[2] * 9, manual: true }; },
         dco = client.dayCounts && client.dayCounts[d] && client.dayCounts[d].length === 13 && client.dayCounts[d].some(function (x) { return +x > 0; }) ? client.dayCounts[d].map(Number) : null;      // توزيع خاص بهذا اليوم (يتقدّم على الأساسي)
       if (dco) { sol = mk(dco); sol.day = true; } else if (manual) sol = mk(client.baseCounts.map(Number));
-      else sol = E.solveDay(T, { cap: cap, sweets: st.sweets, share: E.PREF.share }, D);
+      else sol = E.solveDay(T, { cap: cap, sweets: st.sweets, share: E.PREF.share, base: client.diet && E.dietBase ? E.dietBase(client.diet) : undefined }, D);
+      if (!dco && !manual && client.diet && E.dietShape) sol = E.dietShape(client.diet, d, sol, D) || sol;
       st.keepGroups = !!(dco || manual); var al = E.allocateDay(sol.counts, d, meals, D, sc), slots = E.buildDay(st, d, al), dy = { day: d, name: D.days[d], solver: sol, counts: sol.counts, short: al.short, slots: slots };
       if (!st.keepGroups) E.syncCounts(dy); st.keepGroups = false;
       days.push(E.dayStats(dy, T, D));

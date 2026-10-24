@@ -5,8 +5,8 @@
 // القوالب في الإعدادات (S.settings.tpls) فتدخل النسخ الاحتياطي والمزامنة؛ والمواعيد داخل سجل العميل (c.appts).
 var WK = { pick: false, rem: {}, told: '', all: false, form: null };
 var WK_TYPES = ['متابعة', 'أول زيارة', 'قياس وتحاليل', 'استشارة أونلاين'];
-var WK_RX = { ex: ['kcalManual', 'macroMode', 'proGkg', 'proGkgOb', 'proRef', 'fatPct', 'choPct', 'proPct', 'meals', 'favMeals', 'excludedMeals', 'noBank', 'cuisine', 'budget', 'life', 'exotic', 'baseCounts', 'dayCounts'],
-  athlete: ['phase', 'carbMethod', 'schedule', 'athMeals', 'macroMode', 'pBase', 'pMode', 'pVal', 'fMode', 'fVal', 'kcalMode', 'kcalAdj', 'kcalTrain', 'kcalRest'] };
+var WK_RX = { ex: ['kcalManual', 'macroMode', 'proGkg', 'proGkgOb', 'proRef', 'fatPct', 'choPct', 'proPct', 'meals', 'favMeals', 'excludedMeals', 'noBank', 'cuisine', 'budget', 'life', 'exotic', 'baseCounts', 'dayCounts', 'diet'],
+  athlete: ['phase', 'carbMethod', 'schedule', 'athMeals', 'macroMode', 'pBase', 'pMode', 'pVal', 'fMode', 'fVal', 'kcalMode', 'kcalAdj', 'kcalTrain', 'kcalRest', 'diet'] };
 function wkKind(c) { return c.kind === 'athlete' ? 'athlete' : 'ex'; }
 function wkClone(o) { return o == null ? o : JSON.parse(JSON.stringify(o)); }
 function wkKcal(p) { if (!p) return 0; if (p.targets) return Math.round(p.targets.kcal || 0); var d = p.T && p.T.days || []; return d.length ? Math.round(d.reduce(function (a, x) { return a + (x.kcal || 0); }, 0) / d.length) : 0; }
