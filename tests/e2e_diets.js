@@ -1,4 +1,4 @@
-// مكتبة الأخصائي والأنظمة الغذائية (0.41): تبويب الأنظمة (10) والمشاكل (10)، تطبيق نظام تلقائياً على عميل حصص وعميل جرامات، الموانع، وبقاء كل شيء قابلاً للتعديل.
+// مكتبة الأخصائي والأنظمة الغذائية (0.41؛ تبويب في «الخطط الجاهزة» منذ 0.46): تبويب الأنظمة (10) والمشاكل (10)، تطبيق نظام تلقائياً على عميل حصص وعميل جرامات، الموانع، وبقاء كل شيء قابلاً للتعديل.
 const { fileUrl } = require('./_tmp.js');
 const { chromium } = require('playwright'); const assert = require('assert'), path = require('path'), login = require('./auth_helper');
 let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
@@ -10,7 +10,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   await p.waitForSelector('.dxbox'); assert(/لم يُختر نظام/.test(await p.textContent('.dxbox')));
   ok('بيانات العميل: صندوق «النظام الغذائي» يظهر ويطلب اختيار نظام');
   await p.click('.dxbox [data-a="dxFor"]'); await p.waitForSelector('.dxl'); assert.strictEqual(await p.locator('.dxc').count(), 10, 'عشرة أنظمة');
-  assert(/مكتبة الأخصائي/.test(await p.textContent('.dxl h2'))); assert.strictEqual(await p.inputValue('[data-dxcl]'), (await C()).code);
+  assert(/الخطط الجاهزة/.test(await p.textContent('.rdl h2')) && /مكتبة الأخصائي/.test(await p.textContent('.dxl h3'))); assert(await p.locator('[data-a="rdTab"][data-v="lib"].on').count() === 1, 'مكتبة الأخصائي تبويب في «الخطط الجاهزة»'); assert.strictEqual(await p.inputValue('[data-dxcl]'), (await C()).code);
   ok('مكتبة الأخصائي: تبويب الأنظمة بعشرة أنظمة، والعميل الحالي محدد');
   await p.click('[data-a="dxOpen"][data-v="mideast"]'); await p.waitForSelector('.dxc.open .dxd'); const det = await p.textContent('.dxc.open .dxd');
   for (const w of ['متى يُفضَّل', 'مميزاته', 'عيوبه', 'في مصر', 'في السعودية', 'المراجع', 'الإعدادات']) assert(det.includes(w), w);
@@ -25,7 +25,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   await p.click('[data-a="tab"][data-v="client"]'); await p.fill('[data-f="kcalManual"]', '1650'); await p.press('[data-f="kcalManual"]', 'Tab'); await p.waitForTimeout(150); await p.click('[data-a="tab"][data-v="plan"]'); await p.evaluate(() => { const c = DPApp.S.clients.find((x) => x.code === DPApp.S.cur); if (c && c.kind !== 'athlete') { c.goal = c.goal || DATA.settings.goals[2][0]; c.activity = c.activity || DATA.settings.activity[2][0]; } if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); }).then(() => p.click('[data-a="gen"]')); await p.waitForTimeout(300);
   c = await C(); assert.strictEqual(c.diet.id, 'mideast'); assert(Math.abs(c.plan.targets.kcal - 1650) < 2); assert(c.plan.diet);
   ok('كل شيء قابل للتعديل: تعديل السعرات يدوياً وإعادة التوليد يبقيان النظام ويطبقان الرقم الجديد');
-  await p.click('.rail [data-a="lib"]'); await p.click('[data-a="dxOpen"][data-v="keto"]'); await p.waitForSelector('.dxstop'); assert(/الجرامات/.test(await p.textContent('.dxstop')));
+  await p.click('.rail [data-a="ready"]'); await p.click('[data-a="rdTab"][data-v="lib"]'); await p.click('[data-a="dxOpen"][data-v="keto"]'); await p.waitForSelector('.dxstop'); assert(/الجرامات/.test(await p.textContent('.dxstop')));
   assert(await p.isDisabled('.dxc.open [data-a="dxApply"]'), 'زر التطبيق معطّل'); ok('الكيتو على عميل حصص: يُمنع برسالة واضحة ويُعطَّل زر التطبيق');
   await p.click('.rail [data-a="new"][data-v="ath"]'); await p.fill('[data-f="name"]', 'سامر'); await p.fill('[data-f="weight"]', '96'); await p.fill('[data-f="height"]', '178'); await p.fill('[data-f="age"]', '38'); await p.press('[data-f="age"]', 'Tab'); await p.waitForTimeout(200);
   await p.click('.dxbox [data-a="dxFor"]'); if ((await p.evaluate(() => DPApp.DXS.open)) !== 'keto') await p.click('[data-a="dxOpen"][data-v="keto"]'); await p.waitForSelector('.dxconf'); assert(await p.isDisabled('.dxc.open [data-a="dxApply"]'), 'مغلق قبل التأكيد');
@@ -35,7 +35,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   assert.strictEqual(c.kind, 'athlete'); assert.strictEqual(c.diet.id, 'keto'); assert(c.plan.days.every((d) => d.got.c <= 55), 'كارب'); assert(c.plan.days.every((d) => d.meals.every((m) => m.items.length >= 1 && m.items.length <= 5)));
   const bad = await p.evaluate(() => { const c = DPApp.S.clients.find((x) => x.code === DPApp.S.cur); return window.DX.check(c.plan, c, DATA, ATHLETE, DPEngine, Ath).filter((x) => x.lvl === 'bad').length; }); assert.strictEqual(bad, 0);
   ok('كيتو (جرامات): خطة أسبوع بكارب ≤ الحد ووجبات بأصناف معقولة بلا مخالفات صارمة');
-  await p.click('.rail [data-a="lib"]'); await p.click('[data-a="dxTab"][data-v="problems"]'); assert.strictEqual(await p.locator('.dxc').count(), 10, 'عشر مشاكل');
+  await p.click('.rail [data-a="ready"]'); await p.click('[data-a="rdTab"][data-v="lib"]'); await p.click('[data-a="dxTab"][data-v="problems"]'); assert.strictEqual(await p.locator('.dxc').count(), 10, 'عشر مشاكل');
   await p.click('[data-a="probOpen"][data-v="plateau"]'); await p.waitForSelector('.dxfix'); const fx = await p.textContent('.dxfix'); assert(/عالي البروتين/.test(fx)); assert(/اسأل العميل/.test(await p.textContent('.dxc.open')));
   assert(await p.isDisabled('.dxfix [data-a="probApply"]'), 'يتطلب تأكيد الموانع'); await p.check('.dxfix [data-dxk="0"]'); await p.click('.dxfix [data-a="probApply"]'); await p.waitForSelector('.dxbox b:has-text("عالي البروتين")', { timeout: 30000 }); c = await C(); assert.strictEqual(c.diet.id, 'highpro');
   ok('مشاكل الأخصائي: «ثبات الوزن» تعرض الأسئلة والخطوات وتقترح «عالي البروتين» وتطبقه تلقائياً على الخطة');

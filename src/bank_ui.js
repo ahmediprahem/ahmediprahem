@@ -54,7 +54,7 @@ function bkBuilder() {
   return h + '</div></div>';
 }
 function bankPage() {
-  var bank = D.bank, on = bank.filter(function (b) { return b.on; }).length, h = '<div class="bank"><h2>📖 محرر الحصص</h2><p class="small">بنك الوجبات الذي يستعمله المولّد عند بناء الخطة. التشغيل والإيقاف والتحرير والنقل بين الأقسام تؤثر على الخطط التي <b>تُولَّد أو يُعاد توليدها بعد الآن</b> لأي عميل، ولا تغيّر خطة محفوظة.'
+  var bank = D.bank, on = bank.filter(function (b) { return b.on; }).length, h = '<div class="bank"><h2>📖 بنك الوجبات</h2><p class="small">بنك الوجبات الذي يستعمله المولّد عند بناء الخطة. التشغيل والإيقاف والتحرير والنقل بين الأقسام تؤثر على الخطط التي <b>تُولَّد أو يُعاد توليدها بعد الآن</b> لأي عميل، ولا تغيّر خطة محفوظة.'
     + (S.mode === 'admin' ? ' تعديلاتك هنا تنتقل إلى المستخدمين مع «تصدير نسخة المستخدمين».' : ' تعديلاتك تبقى عندك، وتعديلات المدير تصلك مع ملفك، وتقدَّم تعديلاتك على تعديلاته.') + '</p>'
     + '<div class="bkbar"><input id="bq" placeholder="ابحث باسم الوجبة أو أحد مكوّناتها…" value="' + esc(BK.q) + '"><span class="small">' + bank.length + ' وجبة • مفعّلة ' + on + '</span><button class="sec sm" data-a="bkCheck">🔍 فحص جودة التوليد</button><span id="bkres" class="small" role="status"></span></div>';
   if (D._mealIssues && D._mealIssues.length) h += '<div class="warn">⚠ تعديلات وجبات مرفوضة (' + D._mealIssues.length + '): ' + esc(D._mealIssues.slice(0, 3).map(function (i) { return i.msg; }).join('، ')) + '</div>';

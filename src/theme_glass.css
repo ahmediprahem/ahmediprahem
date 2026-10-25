@@ -121,6 +121,7 @@ html[data-theme="glass"] .ghome .stats div{padding:14px 18px;border-radius:var(-
 html[data-theme="glass"] .ghome .stats b{display:block;font-size:28px;color:#fff}
 html[data-theme="glass"] .ghome .stats small{color:var(--lmut)}
 html[data-theme="glass"] .ghome .qgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:18px}
+@media (min-width:900px){html[data-theme="glass"] .ghome .qgrid{grid-template-columns:repeat(4,1fr)}}   /* 0.46: ثماني بلاطات 4+4 */
 html[data-theme="glass"] .ghome .qa{display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:right;padding:16px;border-radius:var(--r2);background:var(--lpanel);border:1px solid var(--lline);color:#fff;box-shadow:var(--ghi);font-weight:500}
 html[data-theme="glass"] .ghome .qa:hover{background:rgba(255,255,255,.12);border-color:var(--lline2);filter:none}
 html[data-theme="glass"] .ghome .qa .qai{display:grid;place-items:center;width:42px;height:42px;border-radius:13px;background:#6fdba5 linear-gradient(145deg,#8ff0bf,#4fc48d);color:#04261a;box-shadow:0 6px 16px rgba(95,212,155,.3),inset 0 1px 0 rgba(255,255,255,.6)}
@@ -270,3 +271,5 @@ html[data-theme="glass"] *{scrollbar-width:thin;scrollbar-color:rgba(255,255,255
   html[data-theme="glass"] .gcard{background:rgba(24,36,82,.94)}
 }
 }
+html[data-theme="glass"] .stg .tabs{margin-bottom:0}
+@media (max-width:760px){html[data-theme="glass"] .stg .tabs{display:flex;max-width:100%;overflow-x:auto;flex-wrap:nowrap}}

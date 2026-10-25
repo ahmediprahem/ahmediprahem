@@ -48,14 +48,14 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   await cPoll(); const raw = env.DB._raw.prepare("SELECT body FROM msgs WHERE kind = 'e'").all(); assert(raw.every((r) => !r.body.includes('lowcarb') && !r.body.includes(pickId)), 'الاختيار يجب أن يصل مشفّراً');
   ok('اختيار النظام يُرسل مشفّراً إلى الأخصائي (المحطة لا ترى الإجابات ولا الاختيار)، وتتحول البطاقة إلى «أرسلت اختياراتك» مع إمكانية التعديل');
   // ---- 2) «حصة»: الاعتماد ثم اختيار العميل ثم الإرسال
-  await hxCheck(); await d.waitForSelector('.hxreq:not(.wait)'); const rq = await d.textContent('.hxreq .hxqz'); assert(/اختار من البنك/.test(rq) && /اللو كارب/.test(rq) && /ولّد خطة من البنك/.test(rq), rq);
+  await hxCheck(); await d.waitForSelector('.hxreq:not(.wait)'); const rq = await d.textContent('.hxreq .hxqz'); assert(/اختار من البنك/.test(rq) && /اللو كارب/.test(rq) && /اختر خطة جاهزة/.test(rq), rq);
   ok('«طلبات حصتي»: بطاقة الطلب تعرض اختيار العميل من البنك وما يفعله الأخصائي بعد الاعتماد');
   await d.click('[data-a="hxOk"]'); await d.waitForSelector('.rdqn'); const note = await d.textContent('.rdqn'); assert(/أجاب العميل على أسئلة الاختيار/.test(note) && /اللو كارب/.test(note), note);
   const q = await d.evaluate(() => DPApp.S.clients.find((x) => x.code === DPApp.S.cur).hx.quiz); assert.strictEqual(q.pick, pickId); assert.deepStrictEqual(q.ans.cond, ['ir']); assert.strictEqual(q.ans.style, 'lowcarb'); assert.strictEqual(q.top.length, 3);
   ok('عند الاعتماد: إجابات العميل واختياره تنتقل لملفه، وتظهر ملاحظة فوق زرّي التوليد');
   await d.evaluate(() => { const c = DPApp.S.clients.find((x) => x.code === DPApp.S.cur); if (c && c.kind !== 'athlete') { c.goal = c.goal || DATA.settings.goals[2][0]; c.activity = c.activity || DATA.settings.activity[2][0]; } if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); }).then(() => d.click('main [data-a="genBank"]')); await d.waitForSelector('.rdbank'); assert.strictEqual(await d.inputValue('[data-rdq="style"]'), 'lowcarb'); assert(/اللو كارب/.test(await d.textContent('.rdopt.best')));
   const pk = d.locator('.rdopt', { hasText: '📲 اختيار العميل' }); assert.strictEqual(await pk.count(), 1, 'اختيار العميل مميَّز بين الخيارات'); assert(await d.locator('.rdopt').count() >= 5);
-  ok('«ولّد خطة من البنك» يبدأ من إجابات العميل نفسها، واختياره مميَّز «📲 اختيار العميل» بين حتى 7 خيارات');
+  ok('«اختر خطة جاهزة» يبدأ من إجابات العميل نفسها، واختياره مميَّز «📲 اختيار العميل» بين حتى 7 خيارات');
   await pk.locator('[data-a="rdApprove"]').click(); await d.waitForSelector('.rdplan [data-a="hxSendPlan"]');
   let c = await d.evaluate(() => JSON.parse(JSON.stringify(DPApp.S.clients[0]))); assert.strictEqual(c.ready.id, pickId); assert.strictEqual(c.planSrc, 'ready');
   await d.click('.rdplan [data-a="hxSendPlan"]'); await d.waitForFunction(() => DPApp.S.clients[0].ready.sentV === 1, null, { timeout: 15000 });

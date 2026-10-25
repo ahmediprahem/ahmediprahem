@@ -17,7 +17,7 @@ const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html'));
   assert(ic.n > 0 && ic.glyphKept, JSON.stringify(ic)); assert(ic.lockText.includes('🔒') && ic.lockText.includes('قفل')); assert(await vis('header [data-a="lock"] svg.ico'));
   assert.strictEqual(await p.locator('.rail .sidebtn svg.ico').count() >= 6, true); ok('الإيموجي في الواجهة يُستبدل بأيقونات SVG خطية، ويبقى الرمز الأصلي مخفياً في النص (البحث والنسخ لا يتأثران)');
   // ---- 3) الرئيسية وعمود العملاء
-  assert(await vis('.ghome .hero')); assert(await vis('aside .clients #q')); assert.strictEqual(await p.evaluate(() => document.body.classList.contains('clx')), false);
+  assert(await vis('.ghome .hero')); if (await p.evaluate(() => DPApp.S.clients.length)) { assert(await vis('aside .clients #q')); assert.strictEqual(await p.evaluate(() => document.body.classList.contains('clx')), false); } else { assert(!(await vis('aside .clients #q'))); assert.strictEqual(await p.evaluate(() => document.body.classList.contains('clx')), true, '0.46: لا عمود عملاء فارغ'); }
   await p.click('.rail [data-a="new"][data-v="ex"]'); await p.fill('[data-f="name"]', 'سارة الزجاجية'); await p.press('[data-f="name"]', 'Tab');
   assert.strictEqual(await p.evaluate(() => document.body.classList.contains('clx')), true); assert.strictEqual(await vis('aside .clients'), false); assert(await vis('.rail [data-a="clToggle"]'));
   await p.click('.rail [data-a="clToggle"]'); assert(await vis('aside .clients .cl.on')); assert((await p.textContent('aside .clients .cl.on')).includes('سارة')); assert.strictEqual(await p.textContent('aside .clients .cl.on .cav'), 'س');

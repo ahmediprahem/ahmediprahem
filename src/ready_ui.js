@@ -107,10 +107,11 @@ function rdGuideTab() {
 function rdPage() {
   if (!window.RL || !RL.idx) return '<p>مكتبة الأنظمة غير متاحة في هذه النسخة.</p>';
   var cl = S.clients.slice().sort(function (a, b) { return (b.updated || b.created || 0) - (a.updated || a.created || 0); }), c = rdClient();
-  var h = '<div class="dxl rdl"><h2>📗 مكتبة الأنظمة الجاهزة</h2><p class="small">' + RL.idx.plans.length + ' نظاماً أسبوعياً جاهزاً من مكتبتك (أكلات مصرية وسعودية، بالحصص والجرامات). السيستم يختار للعميل الأمثل + بديلين مع المتوقع من كل نظام، وأنت تعتمد أو تختار غيره أو تنشئ نظاماً جديداً. (أنظمة المنتجات غير مستخدمة.)</p>'
-    + '<div class="tabs"><button class="' + (RDS.tab === 'auto' ? 'on' : '') + '" data-a="rdTab" data-v="auto">اختيار تلقائي للعميل</button><button class="' + (RDS.tab === 'browse' ? 'on' : '') + '" data-a="rdTab" data-v="browse">تصفّح المكتبة</button><button class="' + (RDS.tab === 'guide' ? 'on' : '') + '" data-a="rdTab" data-v="guide">دليل العائلات</button></div>'
+  var h = '<div class="dxl rdl"><h2>📗 الخطط الجاهزة</h2><p class="small">' + RL.idx.plans.length + ' نظاماً أسبوعياً جاهزاً من مكتبتك (أكلات مصرية وسعودية، بالحصص والجرامات). السيستم يختار للعميل الأمثل + بديلين مع المتوقع من كل نظام، وأنت تعتمد أو تختار غيره أو تنشئ نظاماً جديداً. (أنظمة المنتجات غير مستخدمة.)</p>'
+    + '<div class="tabs"><button class="' + (RDS.tab === 'auto' ? 'on' : '') + '" data-a="rdTab" data-v="auto">اختيار تلقائي للعميل</button><button class="' + (RDS.tab === 'browse' ? 'on' : '') + '" data-a="rdTab" data-v="browse">تصفّح المكتبة</button><button class="' + (RDS.tab === 'guide' ? 'on' : '') + '" data-a="rdTab" data-v="guide">دليل العائلات</button>' + (window.DX ? '<button class="' + (RDS.tab === 'lib' ? 'on' : '') + '" data-a="rdTab" data-v="lib">📚 مكتبة الأخصائي</button>' : '') + '</div>'
     + '<div class="dxcl"><label>العميل</label><select data-rdcl><option value="">— اختر عميلاً —</option>' + cl.map(function (x) { return '<option value="' + esc(x.code) + '"' + (c && c.code === x.code ? ' selected' : '') + '>' + esc(x.name || '(بلا اسم)') + ' — ' + x.code + (x.hx && x.hx.quiz ? ' 📲' : '') + '</option>'; }).join('') + '</select>'
     + (c && c.ready ? '<small>النظام المعتمد: ' + esc(c.ready.label) + '</small>' : '') + '</div>';
+  if (RDS.tab === 'lib' && window.DX) return h.replace(/<div class="dxcl">[\s\S]*$/, '') + dxLibPage().replace(/<h2>[^<]*<\/h2>/, '<h3>📚 مكتبة الأخصائي — الأنظمة العلمية ومشاكل الأخصائي</h3>') + '</div>';   // 0.46: مكتبة الأخصائي تبويب داخل «الخطط الجاهزة»
   h += RDS.tab === 'auto' ? rdAutoTab(c) : RDS.tab === 'browse' ? rdBrowseTab(c) : rdGuideTab();
   return h + '</div>';
 }
@@ -130,11 +131,11 @@ function rdUse(c, id, quiet) {
 function rdQuizNote(c) {                                                // ما اختاره العميل في «حصتي» قبل الاعتماد
   var q = c.hx && c.hx.quiz, pk = q && q.pick && RL.plan(q.pick);
   if (!q) return '';
-  return '<div class="ok rdqn">📲 أجاب العميل على أسئلة الاختيار في «حصتي»' + (pk ? ' واختار: <b>' + esc(RL.label(pk)) + '</b>' : ' وترك الاختيار لك') + (c.planSrc === 'ready' && c.ready && pk && c.ready.id === q.pick ? ' — مطبَّقة ✓' : ' — افتح «ولّد خطة من البنك» لترى اختياره مع الخيارات الأنسب') + '</div>';
+  return '<div class="ok rdqn">📲 أجاب العميل على أسئلة الاختيار في «حصتي»' + (pk ? ' واختار: <b>' + esc(RL.label(pk)) + '</b>' : ' وترك الاختيار لك') + (c.planSrc === 'ready' && c.ready && pk && c.ready.id === q.pick ? ' — مطبَّقة ✓' : ' — افتح «📗 اختر خطة جاهزة» لترى اختياره مع الخيارات الأنسب') + '</div>';
 }
 function rdGenBtns(c) {                                                 // أسفل «بيانات العميل»: من البنك أو جديدة بالمحرك
   if (!window.RL || !RL.idx) return '<button class="o" data-a="gen">ولّد خطة جديدة ←</button>';
-  return rdQuizNote(c) + '<span class="rdgen"><button class="o" data-a="genBank">📗 ولّد خطة من البنك</button> <button class="sec" data-a="gen">⚙ ولّد خطة جديدة</button></span>';
+  return rdQuizNote(c) + '<span class="rdgen"><button class="o" data-a="genBank">📗 اختر خطة جاهزة</button> <button class="sec" data-a="gen">⚙ ولّد خطة جديدة</button></span>';
 }
 function rdMany(q, a, P) {                                              // اختيار متعدد في قائمة منسدلة مضغوطة
   var v = a[q.id] || [], opts = RL.optsOf(q, a, P), n = v.length;
@@ -245,7 +246,7 @@ function rdPlanTab(c) {                                                 // يس�
   if (!window.RL || !RL.idx || !c) return '';
   if (RDS.bank[c.code]) return rdBankPanel(c);
   if (c.planSrc === 'ready' && c.ready && c.readyDoc) return rdPlanView(c);
-  if (!c.plan) return '<p>لم تُولَّد خطة بعد.</p>' + rdQuizNote(c) + '<p class="rdgen"><button class="o" data-a="genBank">📗 ولّد خطة من البنك</button> <button class="sec" data-a="gen">⚙ ولّد خطة جديدة</button></p>';
+  if (!c.plan) return '<p>لم تُولَّد خطة بعد.</p>' + rdQuizNote(c) + '<p class="rdgen"><button class="o" data-a="genBank">📗 اختر خطة جاهزة</button> <button class="sec" data-a="gen">⚙ ولّد خطة جديدة</button></p>';
   return '';
 }
 Object.assign(A, {
@@ -334,3 +335,6 @@ function gaStop(c) {
     return (c.planSrc === 'ready' ? '<p class="small">الخطة المعروضة الآن من البنك: «حفظ إصدار» يحفظها بتعديلاتها.</p>' : '') + h;
   };
 })(A.ver, A.vopen, verTab);
+// ---- 0.46: «مكتبة الأخصائي» صارت تبويباً في «الخطط الجاهزة» (زر «lib» القديم يفتح التبويب)
+A.lib = function () { var on = S.view === 'ready' && RDS.tab === 'lib'; S.view = on ? 'client' : 'ready'; RDS.tab = 'lib'; render(); window.scrollTo(0, 0); };
+A.dxFor = function (v) { DXS.client = v; DXS.tab = 'diets'; RDS.tab = 'lib'; S.view = 'ready'; render(); window.scrollTo(0, 0); };
