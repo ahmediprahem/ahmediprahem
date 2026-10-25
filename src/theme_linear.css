@@ -224,3 +224,4 @@ html:is([data-theme="linear"],[data-theme="glass"]) .rdot small,html:is([data-th
 html:is([data-theme="linear"],[data-theme="glass"]) .rdcaut{color:var(--lwarn,#fde68a)}
 html:is([data-theme="linear"],[data-theme="glass"]) .rdn{background:#cfdaf6;color:#13204a}
 html:is([data-theme="linear"],[data-theme="glass"]) .fold>summary{color:#cfdaf6}
+html:is([data-theme="linear"],[data-theme="glass"]) .needb{background:rgba(245,158,11,.18);color:#fde68a}

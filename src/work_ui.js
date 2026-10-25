@@ -20,7 +20,7 @@ function wkDate(d) { var x = new Date(d + 'T12:00'); return D.days[x.getDay()] +
 function wkNum(v) { return String(v || '').replace(/[٠-٩]/g, function (d) { return d.charCodeAt(0) - 0x660; }); }
 // ---------- 1) القوالب ونسخ الخطة
 function wkBar(c) {
-  if (c.planSrc === 'ready' || (window.RDS && RDS.bank && RDS.bank[c.code])) return '';            // خطة البنك/منتقيها: لا قوالب
+  if (c.planSrc === 'ready' || (typeof RDS !== 'undefined' && RDS.bank[c.code])) return '';            // خطة البنك/منتقيها: لا قوالب
   var kind = wkKind(c), tp = wkTpls().filter(function (t) { return t.kind === kind; }), others = S.clients.filter(function (x) { return x !== c && x.plan && wkKind(x) === kind; });
   var bar = '<div class="noprint wkbar">' + (c.plan ? '<button class="sec sm" data-a="wkSaveTpl">💾 حفظ كقالب</button> ' : '') + '<button class="sec sm" data-a="wkPick">📋 ' + (c.plan ? 'استبدال من' : 'ابدأ من') + ' قالب أو عميل آخر' + (tp.length ? ' (' + tp.length + ' قالب)' : '') + '</button></div>';
   if (!WK.pick) return bar;

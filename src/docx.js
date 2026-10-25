@@ -75,7 +75,7 @@
     rows.push(tr([cell(2.0, 'الوجبة', C.n, C.w, 10.5, true, { vm: 'r' }), cell(10.23, 'المجموعات الغذائية', C.n, C.w, 10.5, true, { span: 11 }), cell(6.37, 'مكونات الوجبة', C.n, C.w, 10.5, true, { vm: 'r' })], 0.6));
     rows.push(tr([tc(2.0, par(''), { vm: 'c', fill: C.n }), cl(0.93, 'نشويات', 'starch', 7.5, { vm: 'r' }), cl(0.93, 'بقوليات', 'legumes', 7.5, { vm: 'r' }), cl(3.72, 'لحوم (حسب نسبة الدهون)', 'meat', 8, { span: 4 }), cl(0.93, 'ألبان', 'milk', 7.5, { vm: 'r' }), cl(0.93, 'خضار', 'veg', 7.5, { vm: 'r' }), cl(0.93, 'فاكهة', 'fruit', 7.5, { vm: 'r' }), cl(0.93, 'أخرى', 'other', 7.5, { vm: 'r' }), cl(0.93, 'دهون', 'fat', 7.5, { vm: 'r' }), tc(6.37, par(''), { vm: 'c', fill: C.n })], 0.6));
     rows.push(tr([tc(2.0, par(''), { vm: 'c', fill: C.n }), tc(0.93, par(''), { vm: 'c', fill: K('starch') }), tc(0.93, par(''), { vm: 'c', fill: K('legumes') })].concat(sub.map(function (x) { return cl(0.93, x, 'meat', 6.5); }), [tc(0.93, par(''), { vm: 'c', fill: K('milk') }), tc(0.93, par(''), { vm: 'c', fill: K('veg') }), tc(0.93, par(''), { vm: 'c', fill: K('fruit') }), tc(0.93, par(''), { vm: 'c', fill: K('other') }), tc(0.93, par(''), { vm: 'c', fill: K('fat') }), tc(6.37, par(''), { vm: 'c', fill: C.n })]), 0.5));
-    rows.push(tr([cell(2.0, 'الإجمالي', C.g, C.w, 9.5)].concat(c11.map(function (x) { return cell(0.93, x ? num(x) : '', C.y, C.n, 10, true, { mt: 30 }); }), [cell(6.37, 'مجموع اليوم: ' + Math.round(d.nominal[0] * 4 + d.nominal[1] * 4 + d.nominal[2] * 9) + ' سعرة', C.g, C.w, 9)]), 0.6));
+    rows.push(tr([cell(2.0, 'الإجمالي', C.g, C.w, 9.5)].concat(c11.map(function (x) { return cell(0.93, x ? num(x) : '', C.y, C.n, 10, true, { mt: 30 }); }), [cell(6.37, 'المحقق اليوم: ' + Math.round(d.nominal[0] * 4 + d.nominal[1] * 4 + d.nominal[2] * 9) + ' سعرة', C.g, C.w, 9)]), 0.6));
     var pre = 0; d.slots.forEach(function (s) { pre += Math.max(1.2, 0.42 * (s.lines.length + ((s.mealLabel || s.meal) ? 1 : 0)) + 0.15); });
     var lvl = pre <= 11 ? 0 : (pre <= 14 ? 1 : 2), CF = [8.5, 8, 7.5][lvl], CL = [11, 10, 9][lvl], RF = [0.42, 0.37, 0.33][lvl];          // تكثيف تلقائي للأيام ذات الأسطر الكثيرة
     d.slots.forEach(function (s) {
@@ -91,7 +91,8 @@
         alt += tbl([6.2, 6.2, 6.2], r2) + gap(3);
       }
     }
-    return header(dayName(p, di, D), 'اليوم ' + (di + 1) + ' من 7  •  ' + Math.round(T.kcal) + ' سعرة حرارية', ph[0], br) + gap(3) + '' + tbl(W, rows) + gap(3) + tip(ph[1]) + gap(3) + alt;
+    var ach = Math.round(d.nominal[0] * 4 + d.nominal[1] * 4 + d.nominal[2] * 9), dv = ach - Math.round(T.kcal);
+    return header(dayName(p, di, D), 'اليوم ' + (di + 1) + ' من 7  •  الهدف ' + Math.round(T.kcal) + '  •  المحقق ' + ach + ' سعرة (' + (dv > 0 ? '+' : '') + dv + ')', ph[0], br) + gap(3) + '' + tbl(W, rows) + gap(3) + tip(ph[1]) + gap(3) + alt;
   }
   // ---------------- خطة البنك (0.44): نفس صفحات خطة المحرك — الملخص، تقسيم الحصص، 7 أيام بجدول المجموعات، جدول البدائل
   function readyBody(c, R, d, E, br, X) {

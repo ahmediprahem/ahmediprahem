@@ -200,7 +200,7 @@ function rdPgGrp(c, R, d) {
     return h + '<tr class="sum"><td class="s0" colspan="2">الإجمالي</td><td>' + (tot[1] || '') + '</td><td>' + (tot[2] || '') + '</td><td>' + (tot[3] || '') + '</td><td>' + (tot[4] || '') + '</td><td>' + (tot[5] || '') + '</td></tr></table>' + ob(false, +tot[5] || 0) + '</div>';
   }).join('');
 }
-function rdItem(t, ed, ds) { var p = String(t).split(' ◂ '); return esc(p[0]) + (p[1] ? ' <small class="rdnote">◂ ' + esc(p[1]) + '</small>' : '') + (ed ? ' <button class="sec sm noprint" data-a="rdAlt" data-v="' + ds + '">بدّل</button> <button class="sec sm noprint" data-a="rdEdIt" data-v="' + ds + '">✎</button>' : ''); }
+function rdItem(t, ed, ds, w) { var p = String(t).split(' ◂ '); return (w ? '<b class="rdw" title="صنف من مجموعة أخرى — راجع الحصص">⚠</b> ' : '') + esc(p[0]) + (p[1] ? ' <small class="rdnote">◂ ' + esc(p[1]) + '</small>' : '') + (ed ? ' <button class="sec sm noprint" data-a="rdAlt" data-v="' + ds + '">بدّل</button> <button class="sec sm noprint" data-a="rdEdIt" data-v="' + ds + '">✎</button>' : ''); }
 function rdPgDay(c, R, d, di, edit) {
   var y = d.days[di], G = rdIsG(d), dn = D.days || [], by = rdByGroup(d), g = rdDayGroups(y), mk = function (m) { var x = m[2] || {}; return RGK.map(function (q) { return x[q[0]] ? num(x[q[0]]) : ''; }); };
   var h = '<div class="pg">' + hdr(dn[di] || ('اليوم ' + (di + 1)), 'اليوم ' + (di + 1) + ' من ' + d.days.length + ' • ' + rdDayType(y) + (y.k ? ' • ' + y.k + ' سعرة حرارية' : ''), '');
@@ -208,11 +208,11 @@ function rdPgDay(c, R, d, di, edit) {
     h += '<table class="dt"><tr><th class="th-n">الوجبة</th><th class="th-n" style="width:58%">مكونات الوجبة</th><th style="background:' + colors().meat + '">بروتين</th><th style="background:' + colors().starch + '">كارب</th><th style="background:' + colors().fat + '">دهون</th><th class="th-n">سعرات</th></tr>';
     var sm = [0, 0, 0, 0]; y.m.forEach(function (m) { var x = m[2] || {}; sm[0] += +x.p || 0; sm[1] += +x.c || 0; sm[2] += +x.f || 0; sm[3] += +x.k || 0; });
     h += '<tr class="sum"><td class="s0">الإجمالي</td><td class="s0">مجموع اليوم</td><td>' + Math.round(sm[0]) + '</td><td>' + Math.round(sm[1]) + '</td><td>' + Math.round(sm[2]) + '</td><td>' + Math.round(sm[3]) + '</td></tr>';
-    y.m.forEach(function (m, mi) { var x = m[2] || {}; h += '<tr><td class="o">' + esc(m[0]) + '</td><td class="f">' + m[1].map(function (t, li) { return '• ' + rdItem(t, edit, di + ',' + mi + ',' + li) + rdAltBox(d, di, mi, li, by); }).join('<br>') + '</td><td class="v">' + Math.round(x.p || 0) + '</td><td class="v">' + Math.round(x.c || 0) + '</td><td class="v">' + Math.round(x.f || 0) + '</td><td class="v">' + Math.round(x.k || 0) + '</td></tr>'; });
+    y.m.forEach(function (m, mi) { var x = m[2] || {}; h += '<tr><td class="o">' + esc(m[0]) + '</td><td class="f">' + m[1].map(function (t, li) { return '• ' + rdItem(t, edit, di + ',' + mi + ',' + li, (d.warn || {})[di + ',' + mi + ',' + li]) + rdAltBox(d, di, mi, li, by); }).join('<br>') + '</td><td class="v">' + Math.round(x.p || 0) + '</td><td class="v">' + Math.round(x.c || 0) + '</td><td class="v">' + Math.round(x.f || 0) + '</td><td class="v">' + Math.round(x.k || 0) + '</td></tr>'; });
   } else {
     h += '<table class="dt"><tr><th class="th-n" rowspan="2">الوجبة</th><th class="th-n" colspan="8">المجموعات الغذائية</th><th class="th-n" rowspan="2" style="width:40%">مكونات الوجبة</th></tr><tr>' + RGK.map(function (q) { return '<th style="background:' + colors()[q[1]] + ';font-size:11px">' + q[2] + '</th>'; }).join('') + '</tr>';
     h += '<tr class="sum"><td class="s0">الإجمالي</td>' + RGK.map(function (q) { return '<td>' + (g[q[0]] ? num(g[q[0]]) : '') + '</td>'; }).join('') + '<td class="s0">مجموع اليوم: ' + (y.k || '—') + ' سعرة</td></tr>';
-    y.m.forEach(function (m, mi) { h += '<tr><td class="o">' + esc(m[0]) + '</td>' + mk(m).map(function (v) { return '<td class="v">' + v + '</td>'; }).join('') + '<td class="f">' + m[1].map(function (t, li) { return '• <i class="dot" style="background:' + colors()[rdItemKey(t)] + '"></i>' + rdItem(t, edit, di + ',' + mi + ',' + li) + rdAltBox(d, di, mi, li, by); }).join('<br>') + '</td></tr>'; });
+    y.m.forEach(function (m, mi) { h += '<tr><td class="o">' + esc(m[0]) + '</td>' + mk(m).map(function (v) { return '<td class="v">' + v + '</td>'; }).join('') + '<td class="f">' + m[1].map(function (t, li) { return '• <i class="dot" style="background:' + colors()[rdItemKey(t)] + '"></i>' + rdItem(t, edit, di + ',' + mi + ',' + li, (d.warn || {})[di + ',' + mi + ',' + li]) + rdAltBox(d, di, mi, li, by); }).join('<br>') + '</td></tr>'; });
   }
   h += '</table>' + ((y.tp || []).length ? '<div class="tipb">' + y.tp.map(esc).join(' • ') + '</div>' : '');
   return h + rdSubsGrid(d, edit) + '</div>';
@@ -262,8 +262,8 @@ Object.assign(A, {
   rdSend: function () { if (A.hxSendPlan) A.hxSendPlan(); },
   rdPage: function (v) { var c = cur(); if (!c) return; RDS.page[c.code] = v; RDS.alt = ''; main(); },
   rdAlt: function (v) { RDS.alt = RDS.alt === v ? '' : v; main(); },
-  rdSwap: function (v) { var c = cur(), d = c && c.readyDoc, k = v.split(',').map(Number); if (!d) return; var arr = d.days[k[0]].m[k[1]][1], old = arr[k[2]], nw = d.subs[k[3]][1][k[4]]; arr[k[2]] = nw; d.edited = true; RDS.alt = ''; persist(c).then(main); toast('بُدّل «' + old.split(' ◂ ')[0] + '» بـ«' + nw + '»'); },
-  rdEdIt: function (v) { var c = cur(), d = c && c.readyDoc, k = v.split(',').map(Number); if (!d) return; var arr = d.days[k[0]].m[k[1]][1], t = prompt('عدّل الصنف (الاسم والكمية):', arr[k[2]].split(' ◂ ')[0]); if (t == null || !t.trim()) return; var note = arr[k[2]].split(' ◂ ')[1]; arr[k[2]] = t.trim() + (note ? ' ◂ ' + note : ''); d.edited = true; persist(c).then(main); },
+  rdSwap: function (v) { var c = cur(), d = c && c.readyDoc, k = v.split(',').map(Number); if (!d) return; var arr = d.days[k[0]].m[k[1]][1], old = arr[k[2]], nw = d.subs[k[3]][1][k[4]]; arr[k[2]] = nw; d.edited = true; if (d.warn) delete d.warn[k.slice(0, 3).join(',')]; RDS.alt = ''; persist(c).then(main); toast('بُدّل «' + old.split(' ◂ ')[0] + '» بـ«' + nw + '»'); },
+  rdEdIt: function (v) { var c = cur(), d = c && c.readyDoc, k = v.split(',').map(Number); if (!d) return; var arr = d.days[k[0]].m[k[1]][1], t = prompt('عدّل الصنف (الاسم والكمية):', arr[k[2]].split(' ◂ ')[0]); if (t == null || !t.trim()) return; var note = arr[k[2]].split(' ◂ ')[1], g0 = RL.groupOf(arr[k[2]].split(' ◂ ')[0]), g1 = RL.groupOf(t.trim()); arr[k[2]] = t.trim() + (note ? ' ◂ ' + note : ''); d.edited = true; d.warn = d.warn || {}; if (g1 !== g0 && g1 !== 7) { d.warn[v] = 1; toast('⚠ الصنف الجديد من مجموعة أخرى — راجع عدد الحصص في الوجبة'); } else delete d.warn[v]; persist(c).then(main); },
   rdSubEd: function (v) { var c = cur(), d = c && c.readyDoc, k = v.split(',').map(Number); if (!d) return; var t = prompt('عدّل البديل:', d.subs[k[0]][1][k[1]]); if (t == null || !t.trim()) return; d.subs[k[0]][1][k[1]] = t.trim(); d.edited = true; persist(c).then(main); },
   rdSubDel: function (v) { var c = cur(), d = c && c.readyDoc, k = v.split(',').map(Number); if (!d || !confirm('حذف البديل «' + d.subs[k[0]][1][k[1]] + '»؟')) return; d.subs[k[0]][1].splice(k[1], 1); d.edited = true; persist(c).then(main); },
   rdSubAdd: function (v) { var c = cur(), d = c && c.readyDoc; if (!d) return; var t = prompt('بديل جديد في «' + d.subs[+v][0] + '» (يساوي حصة واحدة):', ''); if (t == null || !t.trim()) return; d.subs[+v][1].push(t.trim()); d.edited = true; persist(c).then(main); },
@@ -306,3 +306,31 @@ document.addEventListener('toggle', function (e) {                       // تذ
 }, true);
 document.addEventListener('click', function (e) { if (!e.target.closest || e.target.closest('details.rddd')) return; document.querySelectorAll('details.rddd[open]').forEach(function (x) { x.open = false; }); });
 setTimeout(function () { document.querySelectorAll('details.rddd').forEach(ddSum); }, 0);
+// ---- سلامة الخطة (0.45): لا توليد لعميل حصص قبل تحديد الهدف ومستوى النشاط (كانا يُعبّآن تلقائياً بـ«ثبات» و«متوسط»)
+function needGA(c) { return !!c && c.kind !== 'athlete' && (!c.goal || !c.activity); }
+function gaStop(c) {
+  if (!needGA(c)) return false;
+  var miss = [!c.goal ? 'الهدف' : '', !c.activity ? 'مستوى النشاط' : ''].filter(Boolean).join(' و');
+  toast('حدّد ' + miss + ' أولاً — الخطة تُحسب منهما'); S.view = 'client'; S.tab = 'client'; render();
+  var f = document.querySelector('[data-f="' + (!c.goal ? 'goal' : 'activity') + '"]'); if (f) { f.focus(); f.scrollIntoView({ block: 'center' }); }
+  return true;
+}
+['gen', 'genBank', 'dxApply', 'probApply'].forEach(function (k) { var f = A[k]; if (f) A[k] = function () { var c = k === 'gen' || k === 'genBank' ? cur() : (typeof dxClient === 'function' ? dxClient() : cur()); if (gaStop(c)) return; return f.apply(this, arguments); }; });
+(function (tb) { targetsBox = function (c) { return (needGA(c) ? '<div class="warn needw">⚠ لم يُحدَّد ' + [!c.goal ? 'الهدف' : '', !c.activity ? 'مستوى النشاط' : ''].filter(Boolean).join(' و') + ' — الأرقام أدناه مبدئية ولن تُولَّد خطة قبل تحديدهما.</div>' : '') + tb(c); }; })(targetsBox);
+// ---- إصدارات خطة البنك (0.45): «حفظ إصدار» يحفظ الخطة المعروضة (بنك أو محرك)، والاسترجاع يعيدها كما كانت
+(function (ver0, vopen0, vt0) {
+  A.ver = function () {
+    var c = cur(); if (!c || c.planSrc !== 'ready' || !c.readyDoc) return ver0.apply(this, arguments);
+    var note = prompt('ملاحظة الإصدار (اختياري):', '') || '';
+    dbPut('versions', { code: c.code, at: Date.now(), note: note, src: 'ready', ready: JSON.parse(JSON.stringify(c.ready)), readyDoc: JSON.parse(JSON.stringify(c.readyDoc)), plan: c.plan || null, client: ec(c) }).then(loadVersions).then(function () { toast('تم حفظ إصدار من خطة البنك'); main(); });
+  };
+  A.vopen = function (v) {
+    var x = S.versions.filter(function (q) { return q.id == v; })[0], c = cur(); if (!x || !c || x.src !== 'ready') return vopen0.apply(this, arguments);
+    c.ready = x.ready; c.readyDoc = x.readyDoc; c.planSrc = 'ready'; RDS.bank[c.code] = false; save(); S.tab = 'plan'; render(); toast('تم استرجاع إصدار خطة البنك');
+  };
+  verTab = function (c) {
+    var h = vt0(c); if (!S.versions.some(function (v) { return v.src === 'ready'; }) && c.planSrc !== 'ready') return h;
+    S.versions.forEach(function (v) { h = h.replace('data-a="vopen" data-v="' + v.id + '"', 'data-a="vopen" data-v="' + v.id + '" title="' + (v.src === 'ready' ? 'خطة بنك' : 'خطة محرك') + '"').replace('<td>' + esc(v.note) + '</td><td><button class="sec sm" data-a="vopen" data-v="' + v.id + '"', '<td>' + (v.src === 'ready' ? '<span class="dxb">📗 ' + esc(v.ready.label) + '</span> ' : '<span class="dxb">⚙ المحرك</span> ') + esc(v.note) + '</td><td><button class="sec sm" data-a="vopen" data-v="' + v.id + '"'); });
+    return (c.planSrc === 'ready' ? '<p class="small">الخطة المعروضة الآن من البنك: «حفظ إصدار» يحفظها بتعديلاتها.</p>' : '') + h;
+  };
+})(A.ver, A.vopen, verTab);

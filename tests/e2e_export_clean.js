@@ -12,7 +12,7 @@ const htmlText = (f) => fs.readFileSync(f, 'utf8').replace(/<style[\s\S]*?<\/sty
   const out = {};
   for (const kind of ['exchange', 'athlete']) {
     if (kind === 'exchange') { await p.click('button:has-text("عميل جديد")'); await p.fill('[data-f="name"]', 'سارة'); await p.press('[data-f="name"]', 'Tab'); } else { await p.click('button:has-text("عميل جديد — الجرامات")'); await p.waitForSelector('#atg'); await p.fill('[data-f="name"]', 'أحمد'); await p.press('[data-f="name"]', 'Tab'); }
-    await p.click('button:has-text("ولّد خطة جديدة")'); await p.waitForSelector('.pnav button');
+    await p.evaluate(() => { const c = DPApp.S.clients.find((x) => x.code === DPApp.S.cur); if (c && c.kind !== 'athlete') { c.goal = c.goal || DATA.settings.goals[2][0]; c.activity = c.activity || DATA.settings.activity[2][0]; } if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); }).then(() => p.click('button:has-text("ولّد خطة جديدة")')); await p.waitForSelector('.pnav button');
     const [w] = await Promise.all([p.waitForEvent('download'), p.click('button:has-text("تصدير Word")')]); await w.saveAs(TMP + '/ec_' + kind + '.docx'); const [h] = await Promise.all([p.waitForEvent('download'), p.click('button:has-text("صفحة HTML للعميل")')]); await h.saveAs(TMP + '/ec_' + kind + '.html');
     out[kind] = { word: wordText(TMP + '/ec_' + kind + '.docx'), html: htmlText(TMP + '/ec_' + kind + '.html') };
   }

@@ -26,7 +26,7 @@ const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html')); let n = 0; cons
   await p.selectOption('[data-f="kcalMode"]', 'adj'); await p.waitForSelector('[data-f="kcalAdj"]'); assert.strictEqual(await p.inputValue('[data-f="kcalAdj"]'), '-20');
   await p.fill('[data-f="kcalAdj"]', '-12'); await p.press('[data-f="kcalAdj"]', 'Tab'); assert((await p.textContent('#atg')).includes('-12%'));
   ok('السعرات يدوياً: ثابتة لأيام التدريب والراحة (تُملأ أولاً بالقيم الحالية) أو بنسبة تعديل (تبدأ بنسبة المرحلة −20%)');
-  await p.click('button:has-text("ولّد خطة جديدة")'); await p.waitForSelector('.pnav button'); const sum = await p.textContent('main');
+  await p.evaluate(() => { const c = DPApp.S.clients.find((x) => x.code === DPApp.S.cur); if (c && c.kind !== 'athlete') { c.goal = c.goal || DATA.settings.goals[2][0]; c.activity = c.activity || DATA.settings.activity[2][0]; } if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); }).then(() => p.click('button:has-text("ولّد خطة جديدة")')); await p.waitForSelector('.pnav button'); const sum = await p.textContent('main');
   assert(sum.includes('الماكروز') && sum.includes('2.5 جم/كجم كتلة خالية') && sum.includes('سعرات -12%'), sum.slice(0, 600));
   ok('ملخص الخطة يذكر الطريقة اليدوية والبروتين لكل كجم وزن ولكل كجم كتلة خالية');
   await p.click('main .tabs [data-v="client"]'); await p.selectOption('[data-f="macroMode"]', 'phase'); assert.strictEqual(await p.locator('[data-f="pVal"]').count(), 0); assert((await p.textContent('#atg')).includes('حسب المرحلة'));

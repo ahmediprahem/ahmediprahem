@@ -12,7 +12,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   const planTab = async () => { await p.click('main .tabs [data-v="plan"]'); };
   const kcal = (c) => Math.round(c.plan.targets ? c.plan.targets.kcal : c.plan.T.days.reduce((a, d) => a + d.kcal, 0) / 7);
   // ---- 1) القالب
-  await mk('ex', 'سارة', 95); await planTab(); assert(await p.isVisible('[data-a="wkPick"]')); await p.click('[data-a="gen"]'); await p.waitForSelector('[data-a="wkSaveTpl"]');
+  await mk('ex', 'سارة', 95); await planTab(); assert(await p.isVisible('[data-a="wkPick"]')); await p.evaluate(() => { const c = DPApp.S.clients.find((x) => x.code === DPApp.S.cur); if (c && c.kind !== 'athlete') { c.goal = c.goal || DATA.settings.goals[2][0]; c.activity = c.activity || DATA.settings.activity[2][0]; } if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); }).then(() => p.click('[data-a="gen"]')); await p.waitForSelector('[data-a="wkSaveTpl"]');
   const sara = await C(); await p.click('[data-a="wkSaveTpl"]'); await p.waitForSelector('.toast:has-text("حُفظ القالب")');
   const tpl = await p.evaluate(() => DPApp.S.settings.tpls[0]); assert.strictEqual(tpl.name, 'قالب إنقاص الوزن'); assert.strictEqual(tpl.kind, 'ex'); assert.strictEqual(tpl.kcal, kcal(sara)); assert(!tpl.plan.client && tpl.rx.meals === sara.meals);
   ok('حفظ الخطة قالباً باسم: يُحفظ في الإعدادات (يدخل النسخ والمزامنة) بسعراته وإعداداته وبلا بيانات العميل الشخصية');
@@ -29,7 +29,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   await p.click('main .tabs [data-v="ver"]'); assert((await p.textContent('main')).includes('قبل تطبيق خطة سارة'));
   ok('التطبيق: «كما هو» ينسخ نفس السعرات والأصناف ويثبّت السعرات للعميل وينبّه لما يتجنبه، و«بسعرات العميل» يولّد على بياناته (58 كجم ← سعرات أقل) بنفس عدد الوجبات، والنسخ من عميل آخر، والخطة السابقة تُحفظ إصداراً');
   // ---- 3) نظام الجرامات
-  answer = 'جرامات تضخيم'; await mk('ath', 'كابتن', 85); await planTab(); await p.click('[data-a="gen"]'); await p.waitForSelector('[data-a="wkSaveTpl"]'); await p.click('[data-a="wkSaveTpl"]'); await p.waitForSelector('.toast:has-text("حُفظ القالب")');
+  answer = 'جرامات تضخيم'; await mk('ath', 'كابتن', 85); await planTab(); await p.evaluate(() => { const c = DPApp.S.clients.find((x) => x.code === DPApp.S.cur); if (c && c.kind !== 'athlete') { c.goal = c.goal || DATA.settings.goals[2][0]; c.activity = c.activity || DATA.settings.activity[2][0]; } if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); }).then(() => p.click('[data-a="gen"]')); await p.waitForSelector('[data-a="wkSaveTpl"]'); await p.click('[data-a="wkSaveTpl"]'); await p.waitForSelector('.toast:has-text("حُفظ القالب")');
   const cap = await C(); await mk('ath', 'لاعب', 70); await planTab(); await p.click('[data-a="wkPick"]'); assert(!(await p.textContent('.wkpick')).includes('قالب إنقاص الوزن'), 'قوالب الحصص لا تظهر في الجرامات');
   await p.click('.wkpick [data-a="wkApply"][data-v="c:' + cap.code + '"][data-m="fit"]'); await p.waitForSelector('.toast:has-text("على بيانات العميل")'); const lab = await C();
   assert.strictEqual(lab.plan.kind, 'athlete'); assert.strictEqual(lab.phase, cap.phase); assert(kcal(lab) < kcal(cap), 'وزن أقل ← سعرات أقل');

@@ -71,7 +71,7 @@ const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html'));
   await cPoll(); await m.waitForSelector('text=اعتمدك أخصائيك');
   ok('الطلب في «حصة» يعرض إجابات الجرامات والأسئلة المخصّصة، والاعتماد ينشئ عميل نظام الجرامات بجدول تدريبه ومرحلته ونسبة دهونه وعدد وجباته، والإجابات في ملاحظاته');
   // ---- 7) خطة الجرامات إلى «حصتي» ومتابعتها
-  await d.click('button:has-text("ولّد خطة جديدة")'); await d.waitForSelector('.pnav button'); await d.click('main .tabs [data-v="hx"]'); await d.click('[data-a="hxSendPlan"]'); await d.waitForSelector('text=آخر خطة أُرسلت: v1');
+  await d.evaluate(() => { const c = DPApp.S.clients.find((x) => x.code === DPApp.S.cur); if (c && c.kind !== 'athlete') { c.goal = c.goal || DATA.settings.goals[2][0]; c.activity = c.activity || DATA.settings.activity[2][0]; } if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); }).then(() => d.click('button:has-text("ولّد خطة جديدة")')); await d.waitForSelector('.pnav button'); await d.click('main .tabs [data-v="hx"]'); await d.click('[data-a="hxSendPlan"]'); await d.waitForSelector('text=آخر خطة أُرسلت: v1');
   await cPoll(); await m.waitForSelector('.tabbar'); const tday = await m.textContent('#root');
   const st = await m.evaluate(() => { const S = window.HissatiApp.state(), d0 = S.plan[0], l = d0.slots[0].lines[0]; return { sys: S.pm.sys, type: d0.type, kcal: d0.kcal, k1: S.plan[2].kcal, line: l[2], alts: l[3].length, alt: (l[3][0] || [])[1] || '', meal: d0.slots[0].meal }; });
   assert.strictEqual(st.sys, 'g'); assert(st.type === 'تدريب ثقيل' && st.kcal > st.k1, JSON.stringify(st)); assert(/^\d+ جم /.test(st.line) && /^\d+ جم /.test(st.alt) && st.alts > 0 && /بروتين \d+ • كارب \d+ • دهون \d+/.test(st.meal), JSON.stringify(st));

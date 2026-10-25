@@ -316,3 +316,5 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .rdplan .rdph{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:flex-start}.rdday{margin:10px 0}.rdday h3{margin:6px 0}.printonly{display:none}@media print{.printonly{display:block}.rdday{break-inside:avoid}}
 .fold{margin:6px 0 10px}.fold>summary{cursor:pointer;font-size:13.5px;color:#253464;padding:4px 0}.schc .sch td{padding:2px 4px}.schc .sch input,.schc .sch select{min-height:32px;height:32px;padding:2px 8px}
 textarea[data-f="notes"]{min-height:44px;height:44px}
+.need select{border-color:#d9822b;box-shadow:0 0 0 2px rgba(217,130,43,.25)}.needb{font-size:11px;color:#b45309;background:#fff1dc;border-radius:8px;padding:0 6px;margin-inline-start:4px}.needw{margin:6px 0}
+.rdw{color:#b45309}

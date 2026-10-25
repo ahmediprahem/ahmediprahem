@@ -17,7 +17,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   await p.selectOption('[data-f="cuisine"]', 'eg'); await p.selectOption('[data-f="budget"]', '1'); await p.selectOption('[data-f="life"]', 'quick'); if (!(await p.isVisible('[data-nb="S"]'))) await p.click('details.rddd:has([data-bf]) > summary'); await p.check('[data-nb="S"]'); await p.check('[data-nb="B"]'); await p.check('[data-nb="L"]'); await p.check('[data-nb="D"]');
   c = await C(); assert.strictEqual(c.cuisine, 'eg'); assert.strictEqual(String(c.budget), '1'); assert.strictEqual(c.life, 'quick'); assert(c.noBank.S && c.noBank.B && c.noBank.L && c.noBank.D); assert(!c.exotic);
   ok('خيارات نمط الوجبات تُحفظ للعميل: مصري، ميزانية محدودة، تحضير سريع، والسناك بأصناف القاعدة فقط');
-  await p.click('[data-a="gen"]'); await p.waitForSelector('#qbox'); c = await C();
+  await p.evaluate(() => { const c = DPApp.S.clients.find((x) => x.code === DPApp.S.cur); if (c && c.kind !== 'athlete') { c.goal = c.goal || DATA.settings.goals[2][0]; c.activity = c.activity || DATA.settings.activity[2][0]; } if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); }).then(() => p.click('[data-a="gen"]')); await p.waitForSelector('#qbox'); c = await C();
   const sum = await p.textContent('#qbox summary'); assert(/جودة الخطة/.test(sum), sum);
   assert(c.plan.days.every((d) => d.slots.every((s) => !s.meal)), 'لا وجبات بنك مع الإيقاف الكامل');
   const by = await p.evaluate(() => { const m = {}; DATA.foods.forEach((f) => { m[f.n] = { r: f.r, cost: f.cost, prep: f.prep, x: f.x, cz: f.cz }; }); return m; });
