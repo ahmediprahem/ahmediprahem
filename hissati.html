@@ -1758,6 +1758,13 @@ html.hx-theming,html.hx-theming *,html.hx-theming *::before,html.hx-theming *::a
   };
   // ---- الترشيح: الأمثل + بديلان
   RL.recommend = function (a, base) {
+    if (a && a.region === 'mix') {                     // مطبخ مختلط: أكلات مصرية وسعودية تتنافس بلا ترجيح
+      var r1 = RL.recommend(Object.assign({}, a, { region: 'eg', limit: 14 }), base), r2 = RL.recommend(Object.assign({}, a, { region: 'sa', limit: 14 }), base), lim = a.limit || 3, all = r1.top.concat(r2.top).sort(function (x, y) { return y.score - x.score; }), kinds = {}, seen = {}, top = [];
+      var bs = {}; all.forEach(function (x) { var b0 = RL.fam(x.fk).b; if (top.length < lim && !seen[x.id] && !bs[b0] && x.score > 0) { seen[x.id] = kinds[x.fam] = bs[b0] = 1; top.push(x); } });
+      all.forEach(function (x) { if (top.length < lim && !seen[x.id] && !kinds[x.fam]) { seen[x.id] = kinds[x.fam] = 1; top.push(x); } });
+      all.forEach(function (x) { if (top.length < lim && !seen[x.id] && !top.some(function (t) { return t.fam === x.fam && t.e.fo === x.e.fo; })) { seen[x.id] = 1; top.push(x); } });
+      top.sort(function (x, y) { return y.score - x.score; }); r1.top = top; r1.warn = r1.warn.concat(r2.warn.filter(function (w) { return r1.warn.indexOf(w) < 0; })).filter(function (w) { return !/لا خطط/.test(w) || !top.length; }); return r1;
+    }
     a = a || {}; var P = norm(base || {}, a), en = RL.energy(P), out = { P: P, en: en, top: [], refer: [], warn: [] }, rg = a.region || 'eg';
     var cond = a.cond || [], goal = a.goal || 'lose';
     if (!RL.idx) { out.refer.push('المكتبة غير محمّلة'); return out; }
@@ -1803,7 +1810,7 @@ html.hx-theming,html.hx-theming *,html.hx-theming *::before,html.hx-theming *::a
       // العجز المحسوب (سعودي فقط): الشكل حسب الأسلوب
       var dsb = { protein: 'protein', volume: 'volume', med: 'med' }[st] || 'balanced';
       var fd = famKey('deficit', rg), DW = { balanced: 'سعرات ثابتة بعجز محسوب، وكل المجموعات الغذائية', protein: 'بروتين أعلى للشبع وحفظ العضل', volume: 'كميات كبيرة بسعرات قليلة (خضار وشوربة)', med: 'نمط متوسطي: سمك وبقوليات وزيت زيتون' };
-      ['balanced', 'protein', 'volume', 'med'].forEach(function (sb) { if (kd && sb === 'protein') return; add(fd, choose(fd, tgt, a, { sb: sb, fo: null }), (sb === dsb ? 60 + (st === dsb || (st === 'fixed' && dsb === 'balanced') ? 35 : 0) : 22) - (rg === 'eg' ? 12 : 0), [DW[sb]].concat(rg === 'eg' ? ['أكلاته سعودية وخليجية (متوفرة غالباً في مصر)'] : [])); });
+      ['balanced', 'protein', 'volume', 'med'].forEach(function (sb) { if (kd && sb === 'protein') return; add(fd, choose(fd, tgt, a, { sb: sb, fo: null }), (sb === dsb ? 60 + (st === dsb || (st === 'fixed' && dsb === 'balanced') ? 35 : 0) : 22) - (rg === 'eg' ? 12 : 0) - (ir ? 15 : 0), [DW[sb]].concat(rg === 'eg' ? ['أكلاته سعودية وخليجية (متوفرة غالباً في مصر)'] : [])); });
       if (!ed) {
         var fz = famKey('zigzag', rg); add(fz, choose(fz, tgt, a, { filter: function (e) { return !(dm && e.fo === 'twomeals'); } }), 30 + (st === 'vary' ? 45 : 0) - (dm ? 25 : 0), ['أيام منخفضة وأيام مرتفعة بنفس المتوسط الأسبوعي'], dm ? ['السكري على الأدوية: الأفضل نظام ثابت الكارب'] : []);
         var fc = famKey('carbcycle', rg); add(fc, choose(fc, tgt, a), 30 + (st === 'vary' ? 40 : 0) + (a.routine === 'weekend' ? 15 : 0) - (dm ? 30 : 0), ['البروتين ثابت والكارب يتغير حسب اليوم'], dm ? ['تغير الكارب بين الأيام يغيّر السكر؛ تنسيق مع الطبيب'] : []);
@@ -1868,7 +1875,8 @@ html.hx-theming,html.hx-theming *,html.hx-theming *::before,html.hx-theming *::a
     cands.sort(function (x, y) { return y.score - x.score; });
     var seen = {}, kinds = {}, top = [];
     var take = function (c) { var F = RL.fam(c.fk); seen[c.e.i] = 1; kinds[F.b + (c.e.sb || '')] = 1; top.push({ id: c.e.i, e: c.e, fam: F.b + (c.e.sb || ''), fk: c.fk, name: F.n, label: RL.label(c.e), region: RL.regionTxt(F.rg), sys: F.sys, who: F.who, note: F.note, when: RL.bestWhen(c.e), why: c.why, caut: c.caut, expect: RL.expect(c.e, P, en, a), score: c.score }); };
-    cands.forEach(function (c) { if (top.length < lim && !seen[c.e.i] && !kinds[RL.fam(c.fk).b + (c.e.sb || '')]) take(c); });       // أولاً: أنواع مختلفة
+    var bases = {}; cands.forEach(function (c) { var b0 = RL.fam(c.fk).b; if (top.length < lim && !seen[c.e.i] && !bases[b0] && c.score > 0) { bases[b0] = 1; take(c); } });   // أولاً: عائلات مختلفة
+    cands.forEach(function (c) { if (top.length < lim && !seen[c.e.i] && !kinds[RL.fam(c.fk).b + (c.e.sb || '')]) take(c); });       // ثم: أنواع مختلفة داخل العائلة
     cands.forEach(function (c) { if (top.length < lim && !seen[c.e.i] && !top.some(function (t) { return t.fk === c.fk && t.e.fo === c.e.fo && t.e.sb === c.e.sb; })) take(c); });
     top.sort(function (x, y) { return y.score - x.score; });
     out.top = top; return out;

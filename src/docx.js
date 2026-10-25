@@ -93,6 +93,62 @@
     }
     return header(dayName(p, di, D), 'اليوم ' + (di + 1) + ' من 7  •  ' + Math.round(T.kcal) + ' سعرة حرارية', ph[0], br) + gap(3) + '' + tbl(W, rows) + gap(3) + tip(ph[1]) + gap(3) + alt;
   }
+  // ---------------- خطة البنك (0.44): نفس صفحات خطة المحرك — الملخص، تقسيم الحصص، 7 أيام بجدول المجموعات، جدول البدائل
+  function readyBody(c, R, d, E, br, X) {
+    var G = d.days[0].m.some(function (m) { return m[2] && m[2].k; }), K = function (k) { return colOf(E, br, k); }, dn = X.days || [];
+    var bmi = c.weight && c.height ? (c.weight / Math.pow(c.height / 100, 2)).toFixed(1) : '—', f = [['الاسم', c.name, 'الكود', c.code], ['العمر', c.age, 'الجنس', c.sex], ['الوزن (كجم)', c.weight, 'الطول (سم)', c.height], ['مؤشر كتلة الجسم', bmi, 'مستوى النشاط', c.activity], ['الهدف', c.goal, 'الحالة الصحية', (c.conditions || []).join('، ') || 'جيدة']];
+    var h = header('نظامك الغذائي', R.label, R.when || '', br, true) + gap(4) + sect('بيانات العميل');
+    h += tbl([3.5, 5.8, 3.5, 5.8], f.map(function (r) { return tr([cell(3.5, r[0], C.g, C.w, 9.5), cell(5.8, String(r[1] == null ? '' : r[1]), C.w, C.n, 10, true, { bc: C.g, bsz: 6 }), cell(3.5, r[2], C.g, C.w, 9.5), cell(5.8, String(r[3] == null ? '' : r[3]), C.w, C.n, 10, true, { bc: C.g, bsz: 6 })], 0.58); }));
+    var mac = [];
+    if (G) { var t = [0, 0, 0, 0]; d.days.forEach(function (y) { y.m.forEach(function (m) { var x = m[2] || {}; t[0] += +x.c || 0; t[1] += +x.p || 0; t[2] += +x.f || 0; t[3] += +x.k || 0; }); }); var n = d.days.length || 1; mac.push(['متوسط الأسبوع', t[3] / n, t[0] / n, t[1] / n, t[2] / n]); }
+    else (d.ex || []).forEach(function (e, i) { var T = e.r[e.r.length - 1] || []; if (/Total/i.test(T[0])) mac.push([X.exTitle(e.t, i), +T[5], +T[2], +T[3], +T[4]]); });
+    if (mac.length) h += gap(3) + sect('الماكروز اليومية') + tbl([4.6, 3.5, 3.5, 3.5, 3.5], [tr([cell(4.6, 'نوع اليوم', C.o, C.w, 10), cell(3.5, 'السعرات', C.n, C.w, 10), cell(3.5, 'كربوهيدرات', C.y, C.n, 10), cell(3.5, 'بروتين', C.y, C.n, 10), cell(3.5, 'دهون', C.y, C.n, 10)], 0.52)].concat(mac.map(function (M) { return tr([cell(4.6, M[0], C.o, C.w, 10), cell(3.5, String(Math.round(M[1])), C.w, C.n, 10, true, { bc: C.n, bsz: 6 }), cell(3.5, Math.round(M[2]) + ' جم', C.w, C.n, 10, true, { bc: C.n, bsz: 6 }), cell(3.5, Math.round(M[3]) + ' جم', C.w, C.n, 10, true, { bc: C.n, bsz: 6 }), cell(3.5, Math.round(M[4]) + ' جم', C.w, C.n, 10, true, { bc: C.n, bsz: 6 })], 0.5); })));
+    var cols = G ? ['بروتين', 'كارب', 'دهون'] : X.gk.map(function (q) { return q[2]; }), wc = (18.6 - 2.4 - 3.0 - 1.6) / cols.length;
+    h += gap(3) + sect(G ? 'السعرات والماكروز على أيام الأسبوع' : 'تقسيم الحصص على أيام الأسبوع') + tbl([2.4, 3.0, 1.6].concat(cols.map(function () { return wc; })), [tr([cell(2.4, 'اليوم', C.o, C.w, 9.5), cell(3.0, 'نوع اليوم', C.n, C.w, 9.5), cell(1.6, 'سعرات', C.n, C.w, 9)].concat(cols.map(function (x) { return cell(wc, x, C.y, C.n, 9); })), 0.5)].concat(d.days.map(function (y, i) {
+      var v; if (G) { var sm = [0, 0, 0]; y.m.forEach(function (m) { var x = m[2] || {}; sm[0] += +x.p || 0; sm[1] += +x.c || 0; sm[2] += +x.f || 0; }); v = sm.map(function (x) { return String(Math.round(x)); }); }
+      else { var g = {}; y.m.forEach(function (m) { Object.keys(m[2] || {}).forEach(function (k) { g[k] = (g[k] || 0) + (+m[2][k] || 0); }); }); v = X.gk.map(function (q) { return g[q[0]] ? num(g[q[0]]) : ''; }); }
+      return tr([cell(2.4, dn[i] || String(i + 1), C.g, C.w, 9.5), cell(3.0, X.dayType(y), C.w, C.n, 9, true, { bc: C.n, bsz: 6 }), cell(1.6, String(y.k || ''), C.w, C.n, 9.5, true, { bc: C.n, bsz: 6 })].concat(v.map(function (x) { return cell(wc, x, C.w, C.n, 10, true, { bc: C.n, bsz: 6 }); })), 0.5);
+    })));
+    h += gap(3) + orange(false, 0) + (R.ex && R.ex.head ? gap(3) + tip('المتوقع: ' + R.ex.head) : '');
+    if (!G) (d.ex || []).forEach(function (e, ei) {                    // تقسيم الحصص من ملف المكتبة
+      var rows = [tr([cell(7.4, 'المجموعات الغذائية', C.n, C.w, 10.5, true, { span: 2 }), cell(2.2, 'عدد الحصص', C.y, C.n, 10), cell(2.6, 'كربوهيدرات', C.g, C.w, 10), cell(2.0, 'بروتين', C.g, C.w, 10), cell(2.0, 'دهون', C.g, C.w, 10), cell(2.4, 'السعرات', C.n, C.w, 10)], 0.6)];
+      e.r.slice(0, 13).forEach(function (r, i) {
+        var L = X.exRow[i], gc = K(X.exKey[i]), cs = [], inG = i >= 2 && i <= 8, first = i === 2 || i === 6;
+        if (L[1]) { cs.push(first ? cell(3.1, L[0], gc, C.w, 11, true, { vm: 'r' }) : tc(3.1, par(''), { vm: 'c', fill: gc })); cs.push(cell(4.3, L[1], C.g, C.w, 9.5)); } else cs.push(cell(7.4, L[0], gc, C.w, 11, true, { span: 2 }));
+        cs.push(cell(2.2, r[1] || '', C.y, C.n, 11)); cs.push(cell(2.6, inG ? (first ? r[2] : '') : (r[1] ? r[2] : ''), C.w, C.n, 10, false, { bc: C.n, bsz: 6 })); cs.push(cell(2.0, inG ? (first ? r[3] : '') : (r[1] ? r[3] : ''), C.w, C.n, 10, false, { bc: C.n, bsz: 6 }));
+        cs.push(cell(2.0, r[1] ? r[4] : '', C.w, C.n, 10, false, { bc: C.n, bsz: 6 })); cs.push(cell(2.4, r[5] || '', C.w, C.n, 10, false, { bc: C.n, bsz: 6 })); rows.push(tr(cs, 0.55));
+      });
+      var T = e.r[13] || []; rows.push(tr([cell(7.4, 'الإجمالي', C.n, C.w, 11, true, { span: 2 }), cell(2.2, T[1] || '', C.n, C.w, 11), cell(2.6, T[2] || '', C.n, C.w, 11), cell(2.0, T[3] || '', C.n, C.w, 11), cell(2.0, T[4] || '', C.n, C.w, 11), cell(2.4, T[5] || '', C.n, C.w, 11)], 0.6));
+      h += header('تقسيم الحصص', X.exTitle(e.t, ei) + (T[5] ? '  •  ' + T[5] + ' سعرة حرارية يومياً' : ''), '', br) + gap(4) + tbl([3.1, 4.3, 2.2, 2.6, 2.0, 2.0, 2.4], rows) + gap(3) + orange(false, 0);
+    });
+    d.days.forEach(function (y, di) {
+      var rows = [], line = function (t) { var p = String(t).split(' ◂ '); return par(run('•  ' + p[0] + (p[1] ? '  ◂ ' + p[1] : ''), { sz: 8.5, b: !p[1] ? 1 : 0, c: C.n }), { line: 11 }); };
+      if (G) {
+        var W = [2.2, 9.6, 1.7, 1.7, 1.7, 1.7];
+        rows.push(tr([cell(2.2, 'الوجبة', C.n, C.w, 10.5), cell(9.6, 'مكونات الوجبة', C.n, C.w, 10.5), cell(1.7, 'بروتين', K('meat'), C.w, 9), cell(1.7, 'كارب', K('starch'), C.w, 9), cell(1.7, 'دهون', K('fat'), C.w, 9), cell(1.7, 'سعرات', C.n, C.w, 9)], 0.6));
+        y.m.forEach(function (m) { var x = m[2] || {}; rows.push(tr([cell(2.2, m[0], C.o, C.w, 10)].concat([tc(9.6, m[1].map(line).join(''), { bc: C.n, bsz: 6, va: 'top' })], [x.p, x.c, x.f, x.k].map(function (v) { return cell(1.7, String(Math.round(+v || 0)), C.w, C.n, 10, true, { bc: C.n, bsz: 6 }); })))); });
+        h += header(dn[di] || String(di + 1), 'اليوم ' + (di + 1) + ' من ' + d.days.length + '  •  ' + X.dayType(y) + (y.k ? '  •  ' + y.k + ' سعرة حرارية' : ''), '', br) + gap(3) + tbl(W, rows);
+      } else {
+        var W2 = [2.0].concat(new Array(8).fill(0.95), [9.0]);
+        rows.push(tr([cell(2.0, 'الوجبة', C.n, C.w, 10.5)].concat(X.gk.map(function (q) { return cell(0.95, q[2], K(q[1]), C.w, 7.5); }), [cell(9.0, 'مكونات الوجبة', C.n, C.w, 10.5)]), 0.7));
+        var g = {}; y.m.forEach(function (m) { Object.keys(m[2] || {}).forEach(function (k) { g[k] = (g[k] || 0) + (+m[2][k] || 0); }); });
+        rows.push(tr([cell(2.0, 'الإجمالي', C.g, C.w, 9.5)].concat(X.gk.map(function (q) { return cell(0.95, g[q[0]] ? num(g[q[0]]) : '', C.y, C.n, 10); }), [cell(9.0, 'مجموع اليوم: ' + (y.k || '—') + ' سعرة', C.g, C.w, 9.5)])));
+        y.m.forEach(function (m) { var x = m[2] || {}; rows.push(tr([cell(2.0, m[0], C.o, C.w, 10)].concat(X.gk.map(function (q) { return cell(0.95, x[q[0]] ? num(x[q[0]]) : '', C.w, C.n, 10, true, { bc: C.n, bsz: 6 }); }), [tc(9.0, m[1].map(line).join(''), { bc: C.n, bsz: 6, va: 'top' })]))); });
+        h += header(dn[di] || String(di + 1), 'اليوم ' + (di + 1) + ' من ' + d.days.length + '  •  ' + X.dayType(y) + (y.k ? '  •  ' + y.k + ' سعرة حرارية' : ''), '', br) + gap(3) + tbl(W2, rows);
+      }
+      if ((y.tp || []).length) h += gap(3) + tip(y.tp.join('  •  '));
+      var subs = (d.subs || []).filter(function (s2) { return (s2[1] || []).length; });
+      if (subs.length) {
+        h += sect('جدول البدائل — كل بديل يساوي حصة واحدة');
+        for (var b = 0; b < subs.length; b += 4) {                    // 4 أعمدة × 5 بدائل كحد أقصى: يبقى اليوم في صفحة واحدة
+          var part = subs.slice(b, b + 4), ix = [0, 1, 2, 3], nr = Math.min(5, Math.max.apply(null, part.map(function (x) { return x[1].length; }))), r2 = [tr(ix.map(function (ci) { return part[ci] ? cell(4.65, part[ci][0], K(X.subKey(part[ci][0])), C.w, 7.5) : cell(4.65, '', C.w, C.n, 7.5); }), 0.42)];
+          for (var ri = 0; ri < nr; ri++) r2.push(tr(ix.map(function (ci) { return part[ci] ? cell(4.65, part[ci][1][ri] || '', C.w, C.n, 7, false, { bc: C.n, bsz: 6, mt: 20 }) : cell(4.65, '', C.w, C.n, 7, false, { mt: 20 }); })));
+          h += tbl([4.65, 4.65, 4.65, 4.65], r2) + gap(2);
+        }
+      }
+    });
+    return h;
+  }
   // ---------------- ZIP بلا ضغط
   var CT = (function () { var t = new Uint32Array(256); for (var i = 0; i < 256; i++) { var c = i; for (var k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[i] = c >>> 0; } return t; })();
   function crc32(u8) { var c = 0xFFFFFFFF; for (var i = 0; i < u8.length; i++) c = CT[(c ^ u8[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
@@ -162,6 +218,7 @@
     // نسخ غير متزامنة بضغط deflate (حجم الملف ~12 مرة أصغر: مناسب للمشاركة عبر الجوال)
     zipAsync: function (files) { return finish(files); },   // ZIP عام (مضغوط): يستعمله تصدير «موقع للنشر»
     buildAsync: function (c, p, D, E, br) { br = prep(br || {}); picN = 0; var body = pgSum(c, p, D, E, br) + pgGrp(c, p, D, E, br); for (var i = 0; i < 7; i++) body += pgDay(c, p, i, D, E, br); return finish(assemble(body, br)); },
+    buildReadyAsync: function (c, R, d, E, br, X) { br = prep(br || {}); picN = 0; return finish(assemble(readyBody(c, R, d, E, br, X), br)); },
     buildAthleteAsync: function (c, p, AD, br) { br = prep(br || {}); picN = 0; var body = athSum(c, p, AD, br); for (var i = 0; i < 7; i++) body += athDay(c, p, i, AD, br); return finish(assemble(body, br)); }
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = root.DPDocx;
