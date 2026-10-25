@@ -26,7 +26,7 @@ function tabbar() {                                                // شريط �
 }
 function firstName() { return String(CFG.userLabel || '').replace(/^المدير:\s*/, '').trim(); }
 function homeGlass() {
-  var cs = S.clients.slice().sort(function (a, b) { return (b.updated || b.created) - (a.updated || a.created); }), withPlan = cs.filter(function (c) { return c.plan; }).length, ath = cs.filter(function (c) { return c.kind === 'athlete'; }).length;
+  var cs = S.clients.slice().sort(function (a, b) { return (b.updated || b.created) - (a.updated || a.created); }), withPlan = cs.filter(function (c) { return c.plan || c.planSrc === 'ready'; }).length, ath = cs.filter(function (c) { return c.kind === 'athlete'; }).length;
   var tile = function (a, v, icon, t, d) { return '<button class="qa" data-a="' + a + '"' + (v ? ' data-v="' + v + '"' : '') + '><span class="qai">' + IC(icon) + '</span><b>' + t + '</b><small>' + d + '</small></button>'; };
   var recent = cs.slice(0, 6).map(function (c) { return '<div class="cl" data-a="pick" data-v="' + c.code + '"><span class="cav">' + esc(initial(c.name)) + '</span><b>' + esc(c.name || '(بلا اسم)') + '</b><small>' + c.code + (c.phone ? ' • ' + esc(c.phone) : '') + (c.plan ? ' • له خطة' : '') + '</small></div>'; }).join('');
   return '<div class="home ghome">'

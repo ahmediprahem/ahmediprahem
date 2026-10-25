@@ -4,7 +4,7 @@ const { chromium, devices } = require('playwright'); const fs = require('fs'), a
 let n = 0; const ok = (m) => { n++; console.log('✔', m); };
 (async () => {
   const b = await chromium.launch(), S = await setup(b), A = S.A, errs = []; A.on('pageerror', e => errs.push(String(e)));
-  await A.click('button:has-text("عميل جديد")'); await A.fill('[data-f="name"]', 'عميلة البنك'); await A.press('[data-f="name"]', 'Tab'); await A.click('button:has-text("ولّد الخطة")'); await A.waitForSelector('.pnav button');
+  await A.click('button:has-text("عميل جديد")'); await A.fill('[data-f="name"]', 'عميلة البنك'); await A.press('[data-f="name"]', 'Tab'); await A.click('button:has-text("ولّد خطة جديدة")'); await A.waitForSelector('.pnav button');
   const planJson = () => A.evaluate(() => JSON.stringify(HApp.state.clients[0].plan)), counts = () => A.evaluate(() => [0, 1, 2, 3].map(i => { const l = DATA.bank.filter(b => b.m[i]); return [l.length, l.filter(b => b.on).length]; }));
   const plan0 = await planJson(); await A.click('.pnav button[data-v="0"]'); await A.waitForSelector('#hud');
   await A.click('[data-a="bank"]'); await A.waitForSelector('.bank .bk'); assert.strictEqual(await A.evaluate(() => { const h = document.getElementById('hud'); return !h || getComputedStyle(h).display === 'none'; }), true); ok('زر «📖 محرر الحصص» في الشريط الجانبي يفتح الصفحة، ومؤشر الحصص يختفي منها');

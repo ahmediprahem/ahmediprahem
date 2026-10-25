@@ -65,7 +65,7 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
   await cPoll(); await m.waitForSelector('text=اعتمدك أخصائيك'); assert((await m.textContent('.tl')).includes(c.code));
   ok('«حصة»: طلب العميل يظهر بكل بياناته مع شارة، والاعتماد ينشئ عميلاً جديداً مملوءاً (الأكلات المكروهة في «يتجنبها»)، ويصل الاعتماد ورقم الملف إلى «حصتي»');
   // ---- 6) الخطة ← «حصتي»
-  await d.click('main .tabs [data-v="plan"]'); await d.click('button:has-text("ولّد الخطة")'); await d.waitForSelector('.pnav button');
+  await d.click('main .tabs [data-v="plan"]'); await d.click('button:has-text("ولّد خطة جديدة")'); await d.waitForSelector('.pnav button');
   const planHas = await d.evaluate((f) => { const c = DPApp.S.clients.filter((x) => x.code === DPApp.S.cur)[0]; return c.plan.days.some((d) => d.slots.some((s) => s.lines.some((l) => l.name === f))); }, hate); assert.strictEqual(planHas, false, 'المحرك تجاهل «يتجنبها»');
   await d.click('main .tabs [data-v="hx"]'); await d.click('[data-a="hxSendPlan"]'); await d.waitForSelector('text=آخر خطة أُرسلت: v1');
   await cPoll(); await m.waitForSelector('.tabbar'); const meals = await m.locator('.card.meal').count(); assert(meals >= 3, String(meals));

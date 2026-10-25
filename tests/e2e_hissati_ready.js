@@ -48,17 +48,18 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   await cPoll(); const raw = env.DB._raw.prepare("SELECT body FROM msgs WHERE kind = 'e'").all(); assert(raw.every((r) => !r.body.includes('lowcarb') && !r.body.includes(pickId)), 'الاختيار يجب أن يصل مشفّراً');
   ok('اختيار النظام يُرسل مشفّراً إلى الأخصائي (المحطة لا ترى الإجابات ولا الاختيار)، وتتحول البطاقة إلى «أرسلت اختياراتك» مع إمكانية التعديل');
   // ---- 2) «حصة»: الاعتماد ثم اختيار العميل ثم الإرسال
-  await hxCheck(); await d.waitForSelector('.hxreq:not(.wait)'); await d.click('[data-a="hxOk"]'); await d.waitForSelector('.rdbox');
-  const box = await d.textContent('.rdbox'); assert(/العميل اختار من «حصتي»/.test(box) && /اللو كارب/.test(box), box);
+  await hxCheck(); await d.waitForSelector('.hxreq:not(.wait)'); const rq = await d.textContent('.hxreq .hxqz'); assert(/اختار من البنك/.test(rq) && /اللو كارب/.test(rq) && /ولّد خطة من البنك/.test(rq), rq);
+  ok('«طلبات حصتي»: بطاقة الطلب تعرض اختيار العميل من البنك وما يفعله الأخصائي بعد الاعتماد');
+  await d.click('[data-a="hxOk"]'); await d.waitForSelector('.rdqn'); const note = await d.textContent('.rdqn'); assert(/أجاب العميل على أسئلة الاختيار/.test(note) && /اللو كارب/.test(note), note);
   const q = await d.evaluate(() => DPApp.S.clients.find((x) => x.code === DPApp.S.cur).hx.quiz); assert.strictEqual(q.pick, pickId); assert.deepStrictEqual(q.ans.cond, ['ir']); assert.strictEqual(q.ans.style, 'lowcarb'); assert.strictEqual(q.top.length, 3);
-  ok('«حصة»: إجابات العميل واختياره تصل مع طلبه وتنتقل لملفه عند الاعتماد، وصندوق المكتبة يعرض «العميل اختار من «حصتي»»');
-  await d.click('.rdbox [data-a="rdFor"] >> nth=-1'); await d.waitForSelector('.rdl .rdcard'); assert(/أجاب العميل على أسئلة الاختيار/.test(await d.textContent('.rdl'))); assert.strictEqual(await d.inputValue('[data-rdq="style"]'), 'lowcarb');
-  assert(/اللو كارب/.test(await d.textContent('.rdcard.best .rdh')));
-  ok('مراجعة البدائل في «حصة» تبدأ من إجابات العميل نفسها (نفس الأمثل)');
-  await d.click('.rail [data-a="ready"]'); await d.click('main .tabs [data-v="client"]'); await d.waitForSelector('.rdbox [data-a="rdApprove"]'); await d.click('.rdbox [data-a="rdApprove"]'); await d.waitForSelector('.rdbox [data-a="rdSend"]');
-  let c = await d.evaluate(() => JSON.parse(JSON.stringify(DPApp.S.clients[0]))); assert.strictEqual(c.ready.id, pickId);
-  await d.click('.rdbox [data-a="rdSend"]'); await d.waitForFunction(() => DPApp.S.clients[0].ready.sentV === 1, null, { timeout: 15000 });
-  ok('الأخصائي يعتمد اختيار العميل بضغطة، ثم «أرسل إلى «حصتي»» يرسل النظام الجاهز من المكتبة');
+  ok('عند الاعتماد: إجابات العميل واختياره تنتقل لملفه، وتظهر ملاحظة فوق زرّي التوليد');
+  await d.click('main [data-a="genBank"]'); await d.waitForSelector('.rdbank'); assert.strictEqual(await d.inputValue('[data-rdq="style"]'), 'lowcarb'); assert(/اللو كارب/.test(await d.textContent('.rdopt.best')));
+  const pk = d.locator('.rdopt', { hasText: '📲 اختيار العميل' }); assert.strictEqual(await pk.count(), 1, 'اختيار العميل مميَّز بين الخيارات'); assert(await d.locator('.rdopt').count() >= 5);
+  ok('«ولّد خطة من البنك» يبدأ من إجابات العميل نفسها، واختياره مميَّز «📲 اختيار العميل» بين حتى 7 خيارات');
+  await pk.locator('[data-a="rdApprove"]').click(); await d.waitForSelector('.rdplan [data-a="hxSendPlan"]');
+  let c = await d.evaluate(() => JSON.parse(JSON.stringify(DPApp.S.clients[0]))); assert.strictEqual(c.ready.id, pickId); assert.strictEqual(c.planSrc, 'ready');
+  await d.click('.rdplan [data-a="hxSendPlan"]'); await d.waitForFunction(() => DPApp.S.clients[0].ready.sentV === 1, null, { timeout: 15000 });
+  ok('الأخصائي يطبّق اختيار العميل بضغطة فيصير خطته في «الخطة»، و«أرسل إلى «حصتي»» يرسلها');
   // ---- 3) «حصتي» تستقبل الخطة الجاهزة
   await cPoll(); await m.waitForSelector('.tabbar', { timeout: 10000 }); const st = await m.evaluate(() => { const S = window.HissatiApp.state(); return { days: S.plan.length, ready: S.pm.ready, slots: S.plan[0].slots.length, lines: S.plan[0].slots[0].lines.length, alts: S.plan.some((d) => d.slots.some((s) => s.lines.some((l) => l[3].length))) }; });
   assert.strictEqual(st.days, 7); assert.strictEqual(st.ready.id, pickId); assert(st.slots >= 3 && st.lines >= 1 && st.alts, JSON.stringify(st));

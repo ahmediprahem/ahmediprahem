@@ -277,6 +277,7 @@ function hxReqCard(q) {
   var p = q.intake || {}, ml = function (o) { return ['B', 'L', 'D', 'S'].reduce(function (a, k) { return a.concat((o || {})[k] || []); }, []); }, food = p.food || {}, lv = Object.keys(food).filter(function (f) { return food[f] === 'love'; }), no = Object.keys(food).filter(function (f) { return food[f] === 'no'; });
   var act = (D.settings.activity[+p.act] || [''])[0], goal = (D.settings.goals[+p.goal] || [''])[0], bmi = p.weight && p.height ? (p.weight / Math.pow(p.height / 100, 2)).toFixed(1) : '—';
   var qa = hxQA(p), qaH = qa.length ? '<dt>إجابات الاستبيان</dt><dd>' + qa.map(function (x) { return '<div><b>' + esc(x[0]) + ':</b> ' + esc(x[1]) + '</div>'; }).join('') + '</dd>' : '';
+  var qz = q.quiz, qpk = qz && qz.pick && window.RL && RL.idx && RL.plan(qz.pick); if (qz) qaH += '<dt>اختيار النظام</dt><dd class="hxqz">📲 ' + (qpk ? 'اختار من البنك: <b>' + esc(RL.label(qpk)) + '</b>' : 'أجاب الأسئلة وترك الاختيار لك') + '<br><small>بعد الاعتماد: «📗 ولّد خطة من البنك» يعرض اختياره مع الخطط الأنسب له</small></dd>';
   if (p.sys === 'g' && q.st !== 'join') {
     var tr = (p.sched || []).map(function (x, i) { return x && x.type && x.type !== 'راحة' ? D.days[i] + ': ' + x.type + (x.min ? ' ' + x.min + 'د' : '') + (x.time ? ' ' + x.time : '') : ''; }).filter(Boolean);
     return '<div class="ucard hxreq' + (q.st === 'changes' ? ' wait' : '') + '"><div class="hxrh"><span class="cav">' + esc(initial(p.name)) + '</span><div><b>' + esc(p.name) + '</b><small>' + (q.st === 'changes' ? 'طلبتَ تعديلاً — بانتظار العميل' : 'طلب جديد ' + hxAgo(q.at)) + ' • نظام الجرامات • دعوة «' + esc(q.label) + '»</small></div></div>'
@@ -324,7 +325,7 @@ function hxTab(c) {                                                // تبويب
     return '<div class="hxday"><b>' + esc((D.days[l.dow] || '') + ' ' + k.slice(5)) + '</b><span class="hxbar"><i style="width:' + pct + '%"></i></span><span>' + pct + '%</span><small>💧 ' + (l.water * 0.25).toFixed(2).replace(/\.?0+$/, '') + ' ل</small>' + (extra.length ? '<small class="hxex">' + esc(extra.join(' • ')) + '</small>' : '') + '</div>';
   }).join('');
   return '<div class="hxtab"><div class="ucard"><div class="hxtop"><h3>📲 «حصتي» <small>مرتبط منذ ' + new Date(x.since || Date.now()).toLocaleDateString('ar') + ' • آخر تحقق ' + hxAgo(HX.last) + '</small></h3><button class="sec sm" data-a="hxCheck">↻ تحقق الآن</button></div>'
-    + (!c.plan ? '<p class="small">ولّد الخطة من تبويب «الخطة» ثم أرسلها من هنا.</p>' : '<p>' + (x.planV ? 'آخر خطة أُرسلت: v' + x.planV + ' ' + hxAgo(x.sentAt) + '. ' : '') + '<button data-a="hxSendPlan">' + (x.planV ? '↻ أرسل الخطة المحدَّثة إلى «حصتي»' : '➤ أرسل الخطة إلى «حصتي»') + '</button></p><p class="small">' + (ath ? 'تصل الخطة بالجرامات لكل يوم (حسب نوع التدريب) مع ماكروز كل وجبة وبدائل كل صنف بجرامات تعادل الماكرو الرئيسي.' : 'تصل الخطة بكل أيامها ووجباتها مع بدائل كل صنف من نفس المجموعة.') + ' ما لا يحبه العميل يُستبدل تلقائياً في جواله.</p>')
+    + (!c.plan && c.planSrc !== 'ready' ? '<p class="small">ولّد الخطة (من البنك أو جديدة) من «بيانات العميل» ثم أرسلها من هنا.</p>' : '<p>' + (x.planV ? 'آخر خطة أُرسلت: v' + x.planV + ' ' + hxAgo(x.sentAt) + '. ' : '') + '<button data-a="hxSendPlan">' + (x.planV ? '↻ أرسل الخطة المحدَّثة إلى «حصتي»' : '➤ أرسل الخطة إلى «حصتي»') + '</button></p><p class="small">' + (ath ? 'تصل الخطة بالجرامات لكل يوم (حسب نوع التدريب) مع ماكروز كل وجبة وبدائل كل صنف بجرامات تعادل الماكرو الرئيسي.' : 'تصل الخطة بكل أيامها ووجباتها مع بدائل كل صنف من نفس المجموعة.') + ' ما لا يحبه العميل يُستبدل تلقائياً في جواله.</p>')
     + '</div>'
     + (x.health ? '<div class="warn">🩺 يطلب العميل تعديل حالته الصحية إلى: <b>' + (esc(x.health.cond.concat(x.health.allg).join('، ')) || 'لا حالات') + '</b>' + (x.health.note ? ' — ' + esc(x.health.note) : '') + '<p class="two"><button class="sm" data-a="hxHealthOk">اعتماد وتحديث ملفه</button><button class="sec sm" data-a="hxHealthNo">رفض</button></p></div>' : '')
     + '<div class="hxgrid"><div class="ucard"><h3>💬 المحادثة</h3>' + (hxThread(x.msgs).replace('<div class="hxthread"></div>', '<p class="small">لا رسائل بعد. ما يكتبه العميل من «راسل الأخصائي» يظهر هنا مع إشعار.</p>')) + '<div class="hxcomp"><textarea id="hxMsg" rows="2" placeholder="اكتب رسالة للعميل…"></textarea><button data-a="hxSendMsg">إرسال</button></div></div>'
@@ -374,10 +375,10 @@ Object.assign(A, {
     var ts = Date.now(); hxSendTo(cid, q.encPub, HX.st.inv[q.h].tok, { t: 'msg', text: t.slice(0, 2000), ts: ts }).then(function () { q.msgs = (q.msgs || []).concat([{ from: 'd', t: t, ts: ts }]); q.unread = 0; return hxSave(); }).then(main).catch(hxErr);
   },
   hxSendPlan: function () {
-    var c = cur(); if (!c || !c.hx || !c.plan) return; var snap;
-    try { snap = c.kind === 'athlete' ? hxSnapG(c) : hxSnap(c); } catch (e) { toast('تعذّر تجهيز الخطة: ' + e.message); return; }
+    var c = cur(), rd = c && c.planSrc === 'ready' && c.ready && c.readyDoc && window.RL; if (!c || !c.hx || !(c.plan || rd)) return; var snap;
+    try { snap = rd ? RL.toHissati(c.readyDoc, RL.plan(c.ready.id)) : c.kind === 'athlete' ? hxSnapG(c) : hxSnap(c); } catch (e) { toast('تعذّر تجهيز الخطة: ' + e.message); return; }
     var v = (c.hx.planV || 0) + 1; toast('جارٍ الإرسال…');
-    hxSend(c, { t: 'plan', v: v, plan: snap, note: '' }).then(function () { c.hx.planV = v; c.hx.sentAt = Date.now(); persist(c); main(); toast('✓ وصلت الخطة v' + v + ' إلى «حصتي» مع إشعار للعميل'); }).catch(hxErr);
+    hxSend(c, { t: 'plan', v: v, plan: snap, note: '' }).then(function () { c.hx.planV = v; c.hx.sentAt = Date.now(); if (rd) c.ready.sentV = v; persist(c); main(); toast('✓ وصلت الخطة v' + v + ' إلى «حصتي» مع إشعار للعميل'); }).catch(hxErr);
   },
   hxSendMsg: function () {
     var c = cur(), ta = $('#hxMsg'), t = ta && ta.value.trim(); if (!c || !t) return;

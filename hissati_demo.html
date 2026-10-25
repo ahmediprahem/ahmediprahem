@@ -1773,7 +1773,7 @@ html.hx-theming,html.hx-theming *,html.hx-theming *::before,html.hx-theming *::a
       if (!L.length) L = plansOf(fk0, function (e) { return e.sx === sx && band(e); });
       var forms = []; L.forEach(function (e) { if (forms.indexOf(e.fo) < 0) forms.push(e.fo); });
       var first = pickForm(L, a.routine); forms.sort(function (x, y) { return (x === first ? -1 : 0) - (y === first ? -1 : 0); });
-      forms.slice(0, 3).forEach(function (fo, i) { var e = L.filter(function (x) { return x.fo === fo; })[0]; add(fk0, e, 100 - i, [i === 0 ? 'يناسب العمر والجنس' + (kid ? '' : ' ومستوى النشاط') + ' ونمط اليوم' : 'شكل آخر بنفس السعرات']); });
+      forms.slice(0, 7).forEach(function (fo, i) { var e = L.filter(function (x) { return x.fo === fo; })[0]; add(fk0, e, 100 - i, [i === 0 ? 'يناسب العمر والجنس' + (kid ? '' : ' ومستوى النشاط') + ' ونمط اليوم' : 'شكل آخر بنفس السعرات']); });
       if (a.goal && a.goal !== 'lose') out.warn.push('أنظمة الأطفال والمراهقين في المكتبة لنزول الوزن فقط؛ الأهداف الأخرى يحددها الأخصائي.');
       return finish(out, cands, P, en, a);
     }
@@ -1793,16 +1793,17 @@ html.hx-theming,html.hx-theming *,html.hx-theming *::before,html.hx-theming *::a
         add(fg, choose(fg, lv, a), 300, ['مصمّم لمرحلة الجرعة الثابتة من أدوية GLP-1', 'المستوى حسب الوزن المعدّل (' + en.adj + ' كجم) لهدف بروتين 1.2–1.5 جم/كجم']);
         var f2 = famKey('glp1', rg), alt = plansOf(f2, function (e) { return e.l === lv && e.fo !== (cands[0] && cands[0].e.fo) && !e.mx; });
         if (alt[0]) add(f2, alt[0], 150, ['شكل آخر من نظام GLP-1 بنفس المستوى']);
-        if (alt[1]) add(f2, alt[1], 140, ['شكل ثالث من نظام GLP-1']);
+        alt.slice(1, 6).forEach(function (e, i) { add(f2, e, 140 - i, ['شكل آخر من نظام GLP-1 بنفس المستوى']); });
         return finish(out, cands, P, en, a);
       }
-      if (veg) { var fv = famKey('veg', rg); add(fv, choose(fv, tgt, a), 300, ['بدون لحوم ولا دواجن ولا أسماك ولا بيض، مع الألبان والبقوليات']); var vs = plansOf(fv, function (e) { return cands[0] && e.l === cands[0].e.l && e.fo !== cands[0].e.fo; }); if (vs[0]) add(fv, vs[0], 120, ['شكل آخر نباتي بنفس المستوى']); if (vs[1]) add(fv, vs[1], 110, ['شكل نباتي ثالث']); return finish(out, cands, P, en, a); }
+      if (veg) { var fv = famKey('veg', rg); add(fv, choose(fv, tgt, a), 300, ['بدون لحوم ولا دواجن ولا أسماك ولا بيض، مع الألبان والبقوليات']); var vs = plansOf(fv, function (e) { return cands[0] && e.l === cands[0].e.l && e.fo !== cands[0].e.fo; }); if (vs[0]) add(fv, vs[0], 120, ['شكل آخر نباتي بنفس المستوى']); vs.slice(1, 6).forEach(function (e, i) { add(fv, e, 110 - i, ['شكل نباتي آخر']); }); return finish(out, cands, P, en, a); }
       if (has(cond, 'ibs')) { var ff = famKey('fodmap', rg); add(ff, choose(ff, tgt, a), 250, ['منخفض الفودماب لمرحلة الحذف (2–6 أسابيع) مع عجز معتدل', 'للقولون العصبي المشخّص من طبيب']); var fgi = plansOf(ff, function (e) { return e.fo === 'gi' && cands[0] && e.l === cands[0].e.l; })[0]; if (fgi && cands[0] && cands[0].e !== fgi) add(ff, fgi, 140, ['شكل بألياف ذائبة أكثر للإمساك أو الإسهال']); }
-      if (P.sex === 'f' && a.concern === 'hair') { var fh = famKey('hair', rg); add(fh, choose(fh, Math.min(tgt, 1700), a, { floor: 1200 }), 200, ['نزول وزن مع تغطية الحديد والبروتين والزنك المرتبطة بالشعر']); }
-      if (P.sex === 'f' && a.concern === 'skin') { var fs = famKey('skin', rg); add(fs, choose(fs, Math.min(tgt, 1700), a, { floor: 1200 }), 200, ['كارب بطيء الامتصاص وبلا سكر مضاف لدعم البشرة']); }
+      if (P.sex === 'f') { var fh = famKey('hair', rg); add(fh, choose(fh, Math.min(tgt, 1700), a, { floor: 1200 }), a.concern === 'hair' ? 200 : 12, ['نزول وزن مع تغطية الحديد والبروتين والزنك المرتبطة بالشعر']); }
+      if (P.sex === 'f') { var fs = famKey('skin', rg); add(fs, choose(fs, Math.min(tgt, 1700), a, { floor: 1200 }), a.concern === 'skin' ? 200 : 10, ['كارب بطيء الامتصاص وبلا سكر مضاف لدعم البشرة']); }
       // العجز المحسوب (سعودي فقط): الشكل حسب الأسلوب
       var dsb = { protein: 'protein', volume: 'volume', med: 'med' }[st] || 'balanced';
-      if (!(kd && dsb === 'protein')) { var fd = famKey('deficit', rg); add(fd, choose(fd, tgt, a, { sb: dsb, fo: null }), 60 + (st === dsb || (st === 'fixed' && dsb === 'balanced') ? 35 : 0) - (rg === 'eg' ? 12 : 0), ['سعرات ثابتة بعجز محسوب، وكل المجموعات الغذائية'].concat(rg === 'eg' ? ['أكلاته سعودية وخليجية (متوفرة غالباً في مصر)'] : [])); }
+      var fd = famKey('deficit', rg), DW = { balanced: 'سعرات ثابتة بعجز محسوب، وكل المجموعات الغذائية', protein: 'بروتين أعلى للشبع وحفظ العضل', volume: 'كميات كبيرة بسعرات قليلة (خضار وشوربة)', med: 'نمط متوسطي: سمك وبقوليات وزيت زيتون' };
+      ['balanced', 'protein', 'volume', 'med'].forEach(function (sb) { if (kd && sb === 'protein') return; add(fd, choose(fd, tgt, a, { sb: sb, fo: null }), (sb === dsb ? 60 + (st === dsb || (st === 'fixed' && dsb === 'balanced') ? 35 : 0) : 22) - (rg === 'eg' ? 12 : 0), [DW[sb]].concat(rg === 'eg' ? ['أكلاته سعودية وخليجية (متوفرة غالباً في مصر)'] : [])); });
       if (!ed) {
         var fz = famKey('zigzag', rg); add(fz, choose(fz, tgt, a, { filter: function (e) { return !(dm && e.fo === 'twomeals'); } }), 30 + (st === 'vary' ? 45 : 0) - (dm ? 25 : 0), ['أيام منخفضة وأيام مرتفعة بنفس المتوسط الأسبوعي'], dm ? ['السكري على الأدوية: الأفضل نظام ثابت الكارب'] : []);
         var fc = famKey('carbcycle', rg); add(fc, choose(fc, tgt, a), 30 + (st === 'vary' ? 40 : 0) + (a.routine === 'weekend' ? 15 : 0) - (dm ? 30 : 0), ['البروتين ثابت والكارب يتغير حسب اليوم'], dm ? ['تغير الكارب بين الأيام يغيّر السكر؛ تنسيق مع الطبيب'] : []);
@@ -1810,6 +1811,7 @@ html.hx-theming,html.hx-theming *,html.hx-theming *::before,html.hx-theming *::a
       var fl = famKey('lowcarb', rg), lsb = (st === 'lowcarb' && (ir || !dm)) ? (ir ? 'strict' : 'moderate') : 'moderate';
       if (st === 'lowcarb' && !ir && !dm) lsb = 'moderate';
       add(fl, choose(fl, tgt, a, { sb: lsb, fo: ir ? 'ir' : undefined }), 35 + (ir ? 55 : 0) + (st === 'lowcarb' ? 45 : 0), ['كارب أقل ' + (lsb === 'strict' ? '(قوي)' : '(معتدل 25–35%)')].concat(ir ? ['شكل خاص لمقاومة الأنسولين وما قبل السكري'] : []), dm ? ['أدوية السكر: تنسيق مع الطبيب قبل البدء'] : []);
+      var lsb2 = lsb === 'strict' ? 'moderate' : 'strict'; if (!(dm && lsb2 === 'strict') && !ed) add(fl, choose(fl, tgt, a, { sb: lsb2, fo: ir ? 'ir' : undefined }), 20 + (ir ? 20 : 0), ['كارب أقل ' + (lsb2 === 'strict' ? '(قوي) لفترة 3–6 أشهر' : '(معتدل 25–35%)')]);
       if (!dm && !kd && !ed) { var fk = famKey('keto', rg); add(fk, choose(fk, tgt, a, { fo: null }), 5 + (st === 'keto' ? 80 : 0) - (rg === 'eg' ? 8 : 0), ['كارب 20–30 جم يومياً ودهون عالية لمدة 8–12 أسبوعاً'], ['افحص دهون الدم قبل البدء وبعد 3 أشهر', 'لا يناسب الحمل وأمراض الكلى والكبد والمرارة']); }
       return finish(out, cands, P, en, a);
     }
@@ -1817,14 +1819,14 @@ html.hx-theming,html.hx-theming *,html.hx-theming *::before,html.hx-theming *::a
       if (en.bmi >= 25) out.warn.push('مؤشر كتلة الجسم ' + en.bmi + ': زيادة الوزن غير مناسبة غالباً؛ راجع الهدف مع أخصائيك.');
       var fgn = famKey('gain', rg), gt = en.tdee + 400, e0 = choose(fgn, gt, a, { floor: en.tdee + (a.routine === 'sixmeals' ? 200 : 300) });
       add(fgn, e0, 100, ['فائض نحو 300–500 سعرة بأطعمة مركزة وحجم صغير']);
-      plansOf(fgn, function (e) { return e0 && e.l === e0.l && e.fo !== e0.fo; }).slice(0, 2).forEach(function (e, i) { add(fgn, e, 60 - i, ['شكل آخر بنفس المستوى']); });
+      plansOf(fgn, function (e) { return e0 && e.l === e0.l && e.fo !== e0.fo; }).slice(0, 6).forEach(function (e, i) { add(fgn, e, 60 - i, ['شكل آخر بنفس المستوى']); });
       out.target = gt; out.warn.push('قبل البدء: استبعاد الأسباب الطبية للنحافة (الغدة، السكري، القولون…).');
       return finish(out, cands, P, en, a);
     }
     if (goal === 'bulk') {
       var fb = famKey('bulk', rg), bt = en.tdee * 1.1, want = a.routine === 'sixmeals' ? 'sixmeals' : a.routine === 'office' ? 'office' : a.train === 'morning' ? 'morning' : 'evening', b0 = choose(fb, bt, a, { fo: want });
       add(fb, b0, 100, ['فائض صغير نحو 10% وبروتين 1.6–2.2 جم/كجم', 'النظام بالجرام: يوم تمرين ويوم راحة']);
-      plansOf(fb, function (e) { return b0 && e.l === b0.l && e.fo !== b0.fo; }).slice(0, 2).forEach(function (e, i) { add(fb, e, 60 - i, ['شكل آخر بنفس المستوى']); });
+      plansOf(fb, function (e) { return b0 && e.l === b0.l && e.fo !== b0.fo; }).slice(0, 6).forEach(function (e, i) { add(fb, e, 60 - i, ['شكل آخر بنفس المستوى']); });
       out.target = Math.round(bt); return finish(out, cands, P, en, a);
     }
     if (goal === 'cut') {
@@ -1835,6 +1837,7 @@ html.hx-theming,html.hx-theming *,html.hx-theming *::before,html.hx-theming *::a
       add(fa, c1, md === 'cycle' ? 70 : 100, [md === 'recomp' ? 'إعادة تشكيل بعجز صغير وبروتين عالٍ' : 'تنشيف بعجز يحفظ العضل (0.5–1% من الوزن أسبوعياً)']);
       add(fcc, c2x, md === 'cycle' ? 100 : 75, ['الكارب يتبع حجم التمرين: يوم عالٍ ومتوسط ومنخفض']);
       add(fa, c3, 60, [md === 'recomp' ? 'تنشيف أسرع إن كان الهدف نزول الدهون' : 'إعادة تشكيل بعجز أصغر']);
+      [fa, fcc].forEach(function (fk2, j) { plansOf(fk2, function (e) { return c1 && e.l === (j ? c2x : c1).l && e.fo !== 'recomp'; }).forEach(function (e) { add(fk2, e, 30 - j * 5, ['شكل آخر بنفس المستوى']); }); });
       out.target = Math.round(ct); return finish(out, cands, P, en, a);
     }
     if (goal === 'maintain') {
@@ -1843,7 +1846,7 @@ html.hx-theming,html.hx-theming *,html.hx-theming *::before,html.hx-theming *::a
       W.sort(function (x, y) { return x.wk - y.wk; });
       var st0 = W.filter(function (e) { return e.k >= last && e.k <= last + 150; })[0] || nearest(W, last + 50, function (e) { return e.k; });
       add(fm, st0, 100, ['بروتوكول ' + RL.fam(fm).subs[pv] + ': ابدأ من الأسبوع الأقرب لسعرات حميتك الأخيرة', 'رفع تدريجي للسعرات حتى نقطة التثبيت']);
-      ['regular', 'glp1', 'sleeve', 'vlc'].filter(function (k) { return k !== pv; }).slice(0, 2).forEach(function (k, i) { var Wk = plansOf(fm, function (e) { return e.sb === k && !e.lc; }); var s = Wk.filter(function (e) { return e.k >= last; }).sort(function (x, y) { return x.wk - y.wk; })[0] || nearest(Wk, last); add(fm, s, 40 - i, ['بروتوكول بديل: ' + RL.fam(fm).subs[k]]); });
+      ['regular', 'glp1', 'sleeve', 'vlc'].filter(function (k) { return k !== pv; }).forEach(function (k, i) { var Wk = plansOf(fm, function (e) { return e.sb === k && !e.lc; }); var s = Wk.filter(function (e) { return e.k >= last; }).sort(function (x, y) { return x.wk - y.wk; })[0] || nearest(Wk, last); add(fm, s, 40 - i, ['بروتوكول بديل: ' + RL.fam(fm).subs[k]]); });
       return finish(out, cands, P, en, a);
     }
     if (goal === 'plateau') {
@@ -1857,16 +1860,30 @@ html.hx-theming,html.hx-theming *,html.hx-theming *::before,html.hx-theming *::a
     return finish(out, cands, P, en, a);
   };
   function finish(out, cands, P, en, a) {
+    var lim = a.limit || 3, F0 = RL.idx.fams;
+    if (a.sys) {                                               // نظام العميل في «حصة»: حصص أو جرامات
+      var same = cands.filter(function (c) { return F0[c.fk].sys === a.sys; });
+      if (same.length) cands = same; else if (cands.length) out.warn.push('لا خطط ' + (a.sys === 'g' ? 'بالجرامات' : 'بالحصص') + ' لهذا الهدف في المكتبة؛ المعروض بالنظام الآخر.');
+    }
     cands.sort(function (x, y) { return y.score - x.score; });
-    var seen = {}, top = [];
-    cands.forEach(function (c) {
-      if (top.length >= 3 || seen[c.e.i]) return; var F = RL.fam(c.fk);
-      var fam = F.b + (c.e.sb || '');           // بديلان من عائلتين مختلفتين متى أمكن
-      if (top.length && top.some(function (t) { return t.fam === fam && t.e.fo === c.e.fo; })) return;
-      seen[c.e.i] = 1; top.push({ id: c.e.i, e: c.e, fam: fam, fk: c.fk, name: F.n, label: RL.label(c.e), region: RL.regionTxt(F.rg), sys: F.sys, who: F.who, note: F.note, why: c.why, caut: c.caut, expect: RL.expect(c.e, P, en, a), score: c.score });
-    });
+    var seen = {}, kinds = {}, top = [];
+    var take = function (c) { var F = RL.fam(c.fk); seen[c.e.i] = 1; kinds[F.b + (c.e.sb || '')] = 1; top.push({ id: c.e.i, e: c.e, fam: F.b + (c.e.sb || ''), fk: c.fk, name: F.n, label: RL.label(c.e), region: RL.regionTxt(F.rg), sys: F.sys, who: F.who, note: F.note, when: RL.bestWhen(c.e), why: c.why, caut: c.caut, expect: RL.expect(c.e, P, en, a), score: c.score }); };
+    cands.forEach(function (c) { if (top.length < lim && !seen[c.e.i] && !kinds[RL.fam(c.fk).b + (c.e.sb || '')]) take(c); });       // أولاً: أنواع مختلفة
+    cands.forEach(function (c) { if (top.length < lim && !seen[c.e.i] && !top.some(function (t) { return t.fk === c.fk && t.e.fo === c.e.fo && t.e.sb === c.e.sb; })) take(c); });
+    top.sort(function (x, y) { return y.score - x.score; });
     out.top = top; return out;
   }
+  // «الأنسب إذا…»: جملة للأخصائي لكل خيار (العائلة/النوع + شكل اليوم) — مسودة من أدلة المكتبة
+  var WHEN = { deficit: 'يبدأ أول مرة أو يريد نظاماً ثابتاً كل يوم بكل المجموعات الغذائية', zigzag: 'ملّ النظام الثابت أو ثبت وزنه 3 أسابيع مع التزام موثّق', carbcycle: 'يحب التنوع ولديه عزائم أو أيام نشاط ثابتة', keto: 'يريد شبعاً أكبر بلا رز ولا خبز لفترة محدودة (8–12 أسبوعاً) وليس على أدوية سكر', glp1: 'يأخذ إبر GLP-1 بجرعة ثابتة وشهيته منخفضة', hair: 'تعاني تساقط الشعر مع الحمية أو بعدها', skin: 'تعاني حب شباب خفيفاً إلى متوسط', fodmap: 'لديه قولون عصبي مشخّص مع انتفاخ أو ألم', veg: 'نباتياً لا يأكل اللحوم ولا البيض ويأكل الألبان', gain: 'نحيفاً أو ضعيف الشهية ويريد زيادة وزن صحية', bulk: 'يتمرن مقاومة بانتظام ويريد زيادة عضلية بأقل دهون', acut: 'رياضياً يريد نزول الدهون مع حفظ العضل', acc: 'رياضياً تختلف شدة تمرينه بين الأيام', kids: 'طفلاً 6–12 سنة بوزن زائد (النظام للأسرة كلها)', teen: 'مراهقاً 12–18 سنة بوزن زائد', maint: 'أنهى التنحيف ويريد تثبيت وزنه', plateau: 'ثبت وزنه رغم الالتزام' };
+  var WHEN_SB = { balanced: 'يبدأ أول مرة أو يريد نظاماً متوازناً ثابتاً بلا حرمان من الرز والخبز', protein: 'يجوع كثيراً أو يتمرن ويحتاج حفظ العضل', volume: 'يحب الكميات الكبيرة ويجوع بسرعة', med: 'يحب السمك والبقوليات وزيت الزيتون', moderate: 'يفضّل نشويات أقل باعتدال (الخيار الافتراضي للو كارب)', strict: 'لديه مقاومة أنسولين واضحة أو يفضّل كارباً أقل ويستطيع الالتزام 3–6 أشهر', regular: 'أنهى حمية عادية', glp1: 'أوقف إبر GLP-1 أو خفّض جرعتها', sleeve: 'بعد عملية تكميم وانتهاء مرحلة النزول السريع', vlc: 'خرج من حمية قاسية جداً (أقل من 1000 سعرة)', 'break': 'متعباً وجائعاً وملّ بعد 8–12 أسبوع حمية', refeed: 'يتمرن ويريد استمرار العجز', recalc: 'نزل وزناً كبيراً منذ آخر حساب أو زادت كمياته', water: 'ثباته مع انتفاخ أو تورّم أو قبل الدورة أو أكل مملّح' };
+  var WHEN_FO = { classic: 'ويأكل أكل البيت التقليدي', office: 'ويعمل ووقته ضيق ويحتاج أكلاً سريعاً', family: 'ويأكل مع الأسرة ويحب المشويات', fish: 'ويحب السمك والمشويات', budget: 'وميزانيته محدودة', twomeals: 'ولا يحب الفطور أو السناك (وجبتان فقط)', weekend: 'وعزائمه وخروجاته في نهاية الأسبوع', ir: 'ولديه مقاومة أنسولين أو ما قبل السكري', gi: 'ويعاني إمساكاً أو إسهالاً', eatout: 'ويأكل خارج البيت كثيراً', sixmeals: 'وشهيته ضعيفة فيأكل وجبات صغيرة كثيرة', lunchbox: 'ويأخذ علبة أكل للمدرسة', picky: 'وانتقائي في الأكل', athletic: 'ويمارس رياضة', outside: 'ويأكل خارج البيت كثيراً', evening: 'ويتمرن مساءً', morning: 'ويتمرن صباحاً', '3days': 'ويتمرن 3 أيام فقط أسبوعياً', recomp: 'ووزنه قريب من الطبيعي ويريد عضلاً أكثر ودهوناً أقل ببطء' };
+  RL.bestWhen = function (e) {
+    var F = RL.fam(e.f), b = F.b, t = (e.sb && WHEN_SB[e.sb] && b !== 'deficit' || b === 'deficit') && WHEN_SB[e.sb] ? WHEN_SB[e.sb] : WHEN[b] || '';
+    if (b === 'lowcarb') t = WHEN_SB[e.sb] || t; var fo = e.fo && WHEN_FO[e.fo];
+    if (e.lc) fo = (fo ? fo + ' ' : '') + 'وميزانيته محدودة';
+    var fem = b === 'hair' || b === 'skin'; if (fem && fo) fo = fo.replace('ويأكل', 'وتأكل').replace('ويعمل ووقته ضيق ويحتاج', 'وتعمل ووقتها ضيق وتحتاج').replace('وميزانيته', 'وميزانيتها');
+    return (fem ? 'الأنسب إذا كانت العميلة ' : 'الأنسب إذا كان العميل ') + t + (fo ? ' ' + fo : '') + '.';
+  };
   // ---- تحويل خطة المكتبة إلى شكل خطة «حصتي» (أيام ← وجبات ← أسطر [مجموعة، صنف، نص، بدائل])
   var GR = ['نشويات', 'بقوليات', 'لحوم وبروتين', 'ألبان', 'خضار', 'فاكهة', 'دهون', 'أخرى'];
   var KW = [[2, 'دجاج|فراخ|صدر|لحم|كفتة|سمك|تونة|سلمون|جمبري|بيض|بياض|عجة|كبدة|ديك رومي|سردين|بلطي|بوري|جبن|جبنة|قريش|لبنة|واي بروتين|بروتين|شاورما|برجر|كباب|حبار|كاليماري|روبيان|مرق'], [3, 'حليب|لبن|زبادي|رايب|كفير'], [1, 'فول|حمص|عدس|لوبيا|فاصوليا بيضاء|فاصوليا حمراء|فاصوليا|بليلة|ترمس|فلافل|طعمية|بيصارة'], [6, 'زيت|زبدة|سمن|سوداني|طحينة|أفوكادو|زيتون|لوز|جوز|عين جمل|فستق|كاجو|مكسرات|بذور|شيا|كتان|مايونيز|قشطة|كريمة'], [5, 'تفاح|برتقال|موز|جوافة|كمثرى|خوخ|عنب|بطيخ|شمام|فراولة|تمر|بلح|مانجو|مانجة|كيوي|يوسفي|رمان|فاكهة|ثمرة تين|حبات تين|مشمش|أناناس|توت|زبيب|برقوق|كنتالوب'], [4, 'خس|خيار|طماطم|جرجير|سلطة|خضار|كوسة|بروكلي|فلفل|جزر|سبانخ|كرنب|ملوخية|بامية|باذنجان|كرفس|قرنبيط|فطر|مشروم|بنجر|لفت|بصل|فاصوليا خضراء|بسلة خضراء'], [0, 'خبز|عيش|رغيف|توست|رز|أرز|مكرونة|معكرونة|شوفان|بطاطس|بطاطا|فريك|برغل|كينوا|ذرة|فشار|صاج|شابورة|بقسماط|كورن|جريش|مرقوق|قرصان|كشري|بسكويت|كعك|عسل|سكر|شوكولاتة|حلاوة|مهلبية|أرز باللبن|بسبوسة|كيك']];
@@ -1877,7 +1894,7 @@ html.hx-theming,html.hx-theming *,html.hx-theming *::before,html.hx-theming *::a
     return best;
   };
   RL.toHissati = function (doc, e) {
-    var F = RL.fam(e.f), subs = (doc.subsArr || []), byG = {};
+    var F = RL.fam(e.f), subs = doc.subsArr || (Array.isArray(doc.subs) ? doc.subs : []), byG = {};
     subs.forEach(function (s) { var g = RL.groupOf(s[0]); if (/نشويات/.test(s[0])) g = 0; else if (/بقوليات/.test(s[0])) g = 1; else if (/لحوم|بروتين/.test(s[0])) g = 2; else if (/حليب|ألبان/.test(s[0])) g = 3; else if (/خضار/.test(s[0])) g = 4; else if (/فاكهة/.test(s[0])) g = 5; else if (/دهون/.test(s[0])) g = 6; (byG[g] = byG[g] || []).push.apply(byG[g], s[1] || []); });
     var days = doc.days.map(function (d) {
       return { type: d.t.replace(/^[^-–]*[-–]\s*/, '').replace(/\s*\(.*$/, ''), kcal: d.k, tips: d.tp || [], slots: d.m.map(function (m) {

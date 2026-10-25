@@ -24,7 +24,7 @@ const adminLogin = require('./auth_helper'); const URL = fileUrl(path.resolve(__
   // حذف نهائي للصنف المضاف ثم إعادته للاختبار اللاحق
   // انعكاس في التخطيط: عميل يفضّل الصنف الجديد
   await p.click('button:has-text("عميل جديد")'); await p.fill('[data-f="name"]', 'عميلة الإعدادات'); await p.fill('[data-add="love"]', 'خبز الصاج المنزلي'); await p.press('[data-add="love"]', 'Enter'); await p.waitForSelector('#ch_love span');
-  await p.click('button:has-text("ولّد الخطة ←")'); await p.waitForSelector('.pnav button'); await p.click('.pnav button:text-is("كل الصفحات")'); const all = await p.textContent('main'); assert(all.includes('خبز الصاج المنزلي')); ok('البديل المضاف يدخل الخطة الجديدة عند تفضيله');
+  await p.click('button:has-text("ولّد خطة جديدة")'); await p.waitForSelector('.pnav button'); await p.click('.pnav button:text-is("كل الصفحات")'); const all = await p.textContent('main'); assert(all.includes('خبز الصاج المنزلي')); ok('البديل المضاف يدخل الخطة الجديدة عند تفضيله');
   const dots = await p.locator('.pg i.dot').count(); assert(dots > 20); const h4 = await p.locator('.gbox h4').first().evaluate(e => getComputedStyle(e).backgroundColor); assert(h4.startsWith('rgb')); ok('ألوان الأنواع في سطور المكونات (' + dots + ' نقطة) وجدول البدائل');
   // الخطة بدون الصنف المحذوف
   await p.click('button:has-text("إعدادات النظام")'); await p.waitForSelector('details.fg'); const target = p.locator('details.fg[data-og="9"]'); await target.locator('summary').click(); const veg = (await target.locator('tr b').first().textContent()).trim(); await target.locator('tr').first().locator('button:has-text("حذف")').click(); await p.waitForSelector('.toast:has-text("تم الحذف")');

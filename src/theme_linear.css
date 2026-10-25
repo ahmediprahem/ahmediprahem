@@ -218,3 +218,9 @@ html:is([data-theme="linear"],[data-theme="glass"]) .dxconf{background:rgba(245,
 html:is([data-theme="linear"],[data-theme="glass"]) .rdtbl th{color:#cfdaf6}
 html:is([data-theme="linear"],[data-theme="glass"]) .rdtbl th,html:is([data-theme="linear"],[data-theme="glass"]) .rdtbl td,html:is([data-theme="linear"],[data-theme="glass"]) .rdrow,html:is([data-theme="linear"],[data-theme="glass"]) .rdlist{border-color:var(--lline)}
 html:is([data-theme="linear"],[data-theme="glass"]) .rdrow small,html:is([data-theme="linear"],[data-theme="glass"]) .rdnote{color:#b9c6e8}
+html:is([data-theme="linear"],[data-theme="glass"]) .rdopt,html:is([data-theme="linear"],[data-theme="glass"]) .rddd>summary,html:is([data-theme="linear"],[data-theme="glass"]) .rdddb{background:var(--lpanel);border-color:var(--lline);color:#e6ecff}
+html:is([data-theme="linear"],[data-theme="glass"]) .rdddb{background:#1b2550}
+html:is([data-theme="linear"],[data-theme="glass"]) .rdot small,html:is([data-theme="linear"],[data-theme="glass"]) .rdexp1{color:#c9d4f2}
+html:is([data-theme="linear"],[data-theme="glass"]) .rdcaut{color:var(--lwarn,#fde68a)}
+html:is([data-theme="linear"],[data-theme="glass"]) .rdn{background:#cfdaf6;color:#13204a}
+html:is([data-theme="linear"],[data-theme="glass"]) .fold>summary{color:#cfdaf6}

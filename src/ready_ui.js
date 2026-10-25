@@ -1,7 +1,7 @@
 // ================= مكتبة الأنظمة الجاهزة (0.42): قسم في «حصة» (يُدمج داخل app.js عند /*READYUI*/)
 // ثلاث طرق: اختيار تلقائي من بيانات العميل (الأمثل + بديلان + المتوقع) • تصفّح المكتبة واختيار يدوي • إنشاء نظام جديد بمحرك «حصة».
 // المنطق في src/readylib.js (RL)؛ محتوى الخطط مضغوط داخل الصفحة ويُفك عند أول معاينة. مكتبة المنتجات مستبعدة.
-var RDS = { tab: 'auto', client: '', ans: {}, open: '', fam: '', rg: '', lvl: '', guide: '', blob: null, loading: false, err: '' };
+var RDS = { tab: 'auto', client: '', ans: {}, open: '', fam: '', rg: '', lvl: '', guide: '', blob: null, loading: false, err: '', bank: {} };
 if (window.DPApp) window.DPApp.RDS = RDS;
 if (window.RL && window.READYLIB_INDEX) RL.use(window.READYLIB_INDEX);
 function rdClient() { var code = RDS.client || S.cur; return S.clients.filter(function (c) { return c.code === code; })[0] || null; }
@@ -10,7 +10,7 @@ function rdLoad() {                                                     // فك 
   RDS.p = new Promise(function (res) {
     try {
       var bin = atob(window.READYLIB_GZ || ''), u = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
-      new Response(new Blob([u]).stream().pipeThrough(new DecompressionStream('gzip'))).text().then(function (t) { RDS.blob = JSON.parse(t); RDS.loading = false; res(RDS.blob); if (S.view === 'ready') main(); })
+      new Response(new Blob([u]).stream().pipeThrough(new DecompressionStream('gzip'))).text().then(function (t) { RDS.blob = JSON.parse(t); RDS.loading = false; res(RDS.blob); if (S.view === 'ready' || RDS.open) main(); })
         .catch(function (e) { RDS.loading = false; RDS.err = 'تعذّر فتح محتوى المكتبة: ' + e.message; res(null); main(); });
     } catch (e) { RDS.loading = false; RDS.err = 'المتصفح لا يدعم فك الضغط؛ استعمل Chrome أو Edge أو Safari حديثاً.'; res(null); }
   });
@@ -25,9 +25,11 @@ function rdAnswers(c) {
   if (!q) {
     var g = String(c.goal || ''), bmi = c.weight && c.height ? c.weight / Math.pow(c.height / 100, 2) : 25;   // «ثبات» هو الافتراضي في ملف العميل فلا يعني «ما بعد التنحيف»
     a.goal = /خسارة/.test(g) ? 'lose' : /زيادة/.test(g) ? 'gain' : c.kind === 'athlete' ? 'cut' : bmi < 18.5 ? 'gain' : 'lose';
-    a.region = 'eg'; a.cond = []; if (cond.some(function (x) { return /مقاومة/.test(x); })) a.cond.push('ir'); if (cond.some(function (x) { return /سكري/.test(x); })) a.cond.push('diab');
-    a.routine = 'classic';
+    a.region = c.cuisine === 'sa' ? 'sa' : 'eg'; a.cond = []; if (cond.some(function (x) { return /مقاومة/.test(x); })) a.cond.push('ir'); if (cond.some(function (x) { return /^سكري/.test(x); })) a.cond.push('diab');      // «ما قبل السكري» ليس سكرياً على دواء
+    a.routine = String(c.budget) === '1' ? 'budget' : c.life === 'quick' || c.life === 'travel' ? 'office' : 'classic';     // من «نمط الوجبات» في بيانات العميل
+    if (c.kind === 'athlete' && /زيادة/.test(g)) a.goal = 'bulk';
   }
+  a.sys = c.kind === 'athlete' ? 'g' : 'ex'; a.limit = 7;
   RDS.ans[c.code] = a; return a;
 }
 function rdQField(q, a, P) {
@@ -109,14 +111,72 @@ function rdPage() {
   h += RDS.tab === 'auto' ? rdAutoTab(c) : RDS.tab === 'browse' ? rdBrowseTab(c) : rdGuideTab();
   return h + '</div>';
 }
-function rdClientBox(c) {                                             // في صفحة العميل: النظام الجاهز المعتمد أو دعوة للاختيار
-  if (!window.RL || !RL.idx) return '';
+// ---- خطة من البنك: يعتمدها الأخصائي فتصير خطة العميل في تبويب «الخطة» والطباعة و«حصتي»
+function rdUse(c, id) {
+  var e = RL.plan(id); if (!c || !e) { toast('اختر عميلاً أولاً'); return; }
+  if (c.plan && c.planSrc !== 'ready' && !confirm('سيُستبدل عرض الخطة الحالية بخطة البنك «' + RL.label(e) + '» (تبقى خطة المحرك محفوظة ويمكنك العودة لها بـ«ولّد خطة جديدة»). المتابعة؟')) return;
+  toast('جارٍ التجهيز…');
+  rdLoad().then(function (B) {
+    var d = B && rdDoc(id); if (!d) { toast(RDS.err || 'تعذّر فتح المكتبة'); return; }
+    c.ready = { id: e.i, label: RL.label(e), name: RL.fam(e.f).n, when: RL.bestWhen(e), at: Date.now(), ans: RDS.ans[c.code] || (c.hx && c.hx.quiz && c.hx.quiz.ans) || null };
+    c.readyDoc = { days: d.days, subs: d.subsArr, guide: d.secsArr.filter(function (x) { return x.p.length && x.t && !/^(اليوم|يوم)/.test(x.t); }).map(function (x) { return { t: x.t, p: x.p }; }) };
+    c.planSrc = 'ready'; RDS.bank[c.code] = false; RDS.open = ''; S.view = 'client'; S.cur = c.code; S.tab = 'plan';
+    return persist(c).then(function () { render(); window.scrollTo(0, 0); toast('✓ طُبّقت خطة البنك «' + c.ready.label + '» على ' + (c.name || c.code)); });
+  });
+}
+function rdQuizNote(c) {                                                // ما اختاره العميل في «حصتي» قبل الاعتماد
   var q = c.hx && c.hx.quiz, pk = q && q.pick && RL.plan(q.pick);
-  var h = '<div class="dxbox noprint rdbox"><b>📗 مكتبة الأنظمة الجاهزة</b> ';
-  if (c.ready) h += '<span class="dxb">' + esc(c.ready.label) + '</span> <button class="sm" data-a="rdFor" data-v="' + esc(c.code) + '">غيّر</button>' + (c.hx ? ' <button class="sm" data-a="rdSend">أرسل إلى «حصتي»' + (c.ready.sentV ? ' (أُرسل v' + c.ready.sentV + ')' : '') + '</button>' : '') + ' <button class="sm sec" data-a="rdClear">إزالة</button>';
-  else h += '<small>لم يُعتمد نظام جاهز.</small> <button class="sm" data-a="rdFor" data-v="' + esc(c.code) + '">اختر الأنسب تلقائياً</button>';
-  if (pk && (!c.ready || c.ready.id !== q.pick)) h += '<div class="ok">📲 العميل اختار من «حصتي»: <b>' + esc(RL.label(pk)) + '</b> <button class="sm" data-a="rdApprove" data-v="' + esc(q.pick) + '" data-c="' + esc(c.code) + '">اعتمد اختياره</button> <button class="sm sec" data-a="rdFor" data-v="' + esc(c.code) + '">راجع البدائل</button></div>';
+  if (!q) return '';
+  return '<div class="ok rdqn">📲 أجاب العميل على أسئلة الاختيار في «حصتي»' + (pk ? ' واختار: <b>' + esc(RL.label(pk)) + '</b>' : ' وترك الاختيار لك') + (c.planSrc === 'ready' && c.ready && pk && c.ready.id === q.pick ? ' — مطبَّقة ✓' : ' — افتح «ولّد خطة من البنك» لترى اختياره مع الخيارات الأنسب') + '</div>';
+}
+function rdGenBtns(c) {                                                 // أسفل «بيانات العميل»: من البنك أو جديدة بالمحرك
+  if (!window.RL || !RL.idx) return '<button class="o" data-a="gen">ولّد خطة جديدة ←</button>';
+  return rdQuizNote(c) + '<span class="rdgen"><button class="o" data-a="genBank">📗 ولّد خطة من البنك</button> <button class="sec" data-a="gen">⚙ ولّد خطة جديدة</button></span>';
+}
+function rdMany(q, a, P) {                                              // اختيار متعدد في قائمة منسدلة مضغوطة
+  var v = a[q.id] || [], opts = RL.optsOf(q, a, P), n = v.length;
+  return '<div class="rdmany"><label>' + esc(q.q) + '</label><details class="rddd"><summary>' + (n ? opts.filter(function (o) { return v.indexOf(o[0]) >= 0; }).map(function (o) { return esc(o[1]); }).join('، ') : 'لا شيء') + '</summary><div class="rdddb">' + opts.map(function (o) { return '<label class="chk"><input type="checkbox" data-rdm="' + q.id + '" value="' + o[0] + '"' + (v.indexOf(o[0]) >= 0 ? ' checked' : '') + '>' + esc(o[1]) + '</label>'; }).join('') + '</div></details></div>';
+}
+function rdOpt(x, i, c, pick) {                                         // بطاقة خيار في منتقي البنك
+  var isPick = pick === x.id;
+  return '<section class="rdopt' + (i === 0 ? ' best' : '') + '"><div class="rdoh"><span class="rdn">' + (i + 1) + '</span><div class="rdot"><b>' + esc(x.name) + '</b>' + (i === 0 ? ' <span class="dxb gstrong">⭐ الأنسب</span>' : '') + (isPick ? ' <span class="dxb">📲 اختيار العميل</span>' : '') + '<small>' + esc(x.label) + ' • ' + esc(x.region) + ' • ' + (x.sys === 'g' ? 'بالجرامات' : 'بالحصص') + '</small></div>'
+    + '<div class="rdob"><button class="sm sec" data-a="rdOpen" data-v="' + esc(x.id) + '">' + (RDS.open === x.id ? 'إخفاء' : 'معاينة') + '</button> <button class="sm" data-a="rdApprove" data-v="' + esc(x.id) + '" data-c="' + esc(c.code) + '">اختر هذه الخطة</button></div></div>'
+    + '<p class="rdwhen">💡 ' + esc(x.when) + '</p><p class="rdexp1"><b>المتوقع:</b> ' + esc(x.expect.head || '') + (x.caut.length ? ' <span class="rdcaut">⚠ ' + x.caut.map(esc).join(' • ') + '</span>' : '') + '</p>'
+    + (RDS.open === x.id ? rdPreview(x.id) : '') + '</section>';
+}
+function rdBankPanel(c) {
+  var a = rdAnswers(c), base = rdBase(c), P = RL.norm(base, a), qs = RL.questions(a, base).filter(function (q) { return q.type !== 'num' && q.id !== 'sex'; }), r = RL.recommend(a, base), q = c.hx && c.hx.quiz;
+  var pick = q && q.pick; if (pick && RL.plan(pick) && !r.top.some(function (x) { return x.id === pick; })) { var e = RL.plan(pick), F = RL.fam(e.f); r.top = r.top.slice(0, 6).concat([{ id: e.i, e: e, fk: e.f, name: F.n, label: RL.label(e), region: RL.regionTxt(F.rg), sys: F.sys, when: RL.bestWhen(e), why: [], caut: [], expect: RL.expect(e, P, r.en, a) }]); }
+  var h = '<div class="rdbank"><div class="rdbh"><h3>📗 خطط البنك الأنسب لـ' + esc(c.name || c.code) + '</h3><button class="sm sec noprint" data-a="rdBankClose">إغلاق</button></div>'
+    + rdQuizNote(c) + '<div class="row rdq">' + qs.map(function (x) { return x.type === 'many' ? rdMany(x, a, P) : rdQField(x, a, P); }).join('') + '</div>'
+    + '<p class="small">الاحتياج التقديري ' + r.en.tdee + ' سعرة • مؤشر الكتلة ' + (r.en.bmi || '—') + (r.target ? ' • المستهدف نحو ' + r.target + ' سعرة' : '') + ' • ' + r.top.length + ' ' + (r.top.length > 2 ? 'خطط' : 'خطة') + ' بأنواع مختلفة (حتى 7)</p>';
+  r.refer.forEach(function (t) { h += '<div class="warn dxstop">⛔ ' + esc(t) + '</div>'; });
+  r.warn.forEach(function (t) { h += '<div class="warn">⚠ ' + esc(t) + '</div>'; });
+  h += r.top.map(function (x, i) { return rdOpt(x, i, c, pick); }).join('');
+  h += '<p class="rdfoot"><button class="sec" data-a="gen">⚙ لا يناسب؟ ولّد خطة جديدة بالمحرك</button> <button class="sec" data-a="rdFor" data-v="' + esc(c.code) + '">📚 تصفّح المكتبة كاملة</button></p><p class="small">«الأنسب إذا…» والمتوقع مسودة من أدلة المكتبة؛ قرار الاختيار للأخصائي.</p>';
   return h + '</div>';
+}
+function rdPlanView(c) {                                                // خطة البنك المطبَّقة: تبويب «الخطة» + الطباعة
+  var R = c.ready, d = c.readyDoc, e = RL.plan(R.id), ex = e ? RL.expect(e, RL.norm(rdBase(c), R.ans || {}), RL.energy(RL.norm(rdBase(c), R.ans || {})), R.ans || {}) : null;
+  var h = '<div class="rdplan"><div class="dxbox rdph"><div><b>📗 ' + esc(R.name) + '</b> <span class="dxb">من البنك</span><br><small>' + esc(R.label) + '</small>' + (R.when ? '<p class="small">💡 ' + esc(R.when) + '</p>' : '') + (ex ? '<p class="small"><b>المتوقع:</b> ' + esc(ex.head || '') + '</p>' : '') + '</div>'
+    + '<p class="noprint"><button class="sm" onclick="window.print()">🖨 طباعة</button> ' + (c.hx ? '<button class="sm" data-a="hxSendPlan">📲 أرسل إلى «حصتي»' + (R.sentV ? ' (أُرسل v' + R.sentV + ')' : '') + '</button> ' : '') + '<button class="sm sec" data-a="genBank">📗 اختر خطة أخرى من البنك</button> <button class="sm sec" data-a="gen">⚙ ولّد خطة جديدة</button></p></div>';
+  h += '<h2 class="printonly">' + esc(c.name || '') + ' — ' + esc(R.label) + '</h2>';
+  h += d.days.map(function (y, di) {
+    return '<section class="rdday"><h3>' + esc((D.days || [])[di] || '') + ' — ' + esc(y.t.replace(/^اليوم [^-–]*[-–]\s*/, '')) + '</h3><table class="rdtbl"><tbody>' + y.m.map(function (m) {
+      var mac = m[2] && m[2].k ? '<br><small>بروتين ' + Math.round(m[2].p) + ' • كارب ' + Math.round(m[2].c) + ' • دهون ' + Math.round(m[2].f) + ' • ' + Math.round(m[2].k) + ' سعرة</small>' : '';
+      return '<tr><th>' + esc(m[0]) + mac + '</th><td>' + m[1].map(function (t) { var p = t.split(' ◂ '); return esc(p[0]) + (p[1] ? ' <small class="rdnote">◂ ' + esc(p[1]) + '</small>' : ''); }).join('<br>') + '</td></tr>';
+    }).join('') + '</tbody></table>' + ((y.tp || []).length ? '<p class="small">💡 ' + y.tp.map(esc).join(' • ') + '</p>' : '') + '</section>';
+  }).join('');
+  if ((d.subs || []).length) h += '<section class="rdday"><h3>البدائل</h3><table class="rdtbl"><tbody>' + d.subs.map(function (x) { return '<tr><th>' + esc(x[0]) + '</th><td>' + x[1].map(esc).join(' • ') + '</td></tr>'; }).join('') + '</tbody></table></section>';
+  if ((d.guide || []).length) h += '<details class="rdday"><summary><b>شرح النظام وإرشاداته</b></summary>' + d.guide.map(function (x) { return '<h4>' + esc(x.t) + '</h4><ul>' + x.p.map(function (p) { return '<li>' + esc(p) + '</li>'; }).join('') + '</ul>'; }).join('') + '</details>';
+  return h + '</div>';
+}
+function rdPlanTab(c) {                                                 // يسبق تبويب الخطة: المنتقي ← خطة البنك ← (لا خطة) زرّان
+  if (!window.RL || !RL.idx || !c) return '';
+  if (RDS.bank[c.code]) return rdBankPanel(c);
+  if (c.planSrc === 'ready' && c.ready && c.readyDoc) return rdPlanView(c);
+  if (!c.plan) return '<p>لم تُولَّد خطة بعد.</p>' + rdQuizNote(c) + '<p class="rdgen"><button class="o" data-a="genBank">📗 ولّد خطة من البنك</button> <button class="sec" data-a="gen">⚙ ولّد خطة جديدة</button></p>';
+  return '';
 }
 Object.assign(A, {
   ready: function () { S.view = S.view === 'ready' ? 'client' : 'ready'; render(); window.scrollTo(0, 0); },
@@ -124,28 +184,39 @@ Object.assign(A, {
   rdOpen: function (v) { RDS.open = RDS.open === v ? '' : v; main(); },
   rdGuide: function (v) { RDS.guide = RDS.guide === v ? '' : v; main(); },
   rdFor: function (v) { RDS.client = v; RDS.tab = 'auto'; S.view = 'ready'; render(); window.scrollTo(0, 0); },
-  rdApprove: function (v, el) {
-    var code = el && el.getAttribute && el.getAttribute('data-c'), c = code ? S.clients.filter(function (x) { return x.code === code; })[0] : rdClient(), e = RL.plan(v); if (!c || !e) { toast('اختر عميلاً أولاً'); return; }
-    c.ready = { id: e.i, label: RL.label(e), name: RL.fam(e.f).n, at: Date.now(), ans: RDS.ans[c.code] || (c.hx && c.hx.quiz && c.hx.quiz.ans) || null };
-    persist(c).then(function () { render(); toast('✓ اعتُمد «' + RL.label(e) + '» لـ' + (c.name || c.code) + (c.hx ? ' — أرسله إلى «حصتي» من صفحة العميل أو من هنا' : '')); });
-  },
-  rdClear: function () { var c = cur(); if (!c || !c.ready) return; if (!confirm('إزالة النظام الجاهز من العميل؟')) return; delete c.ready; persist(c).then(main); },
+  rdApprove: function (v, el) { var code = el && el.getAttribute && el.getAttribute('data-c'), c = code ? S.clients.filter(function (x) { return x.code === code; })[0] : rdClient(); rdUse(c, v); },
+  rdClear: function () { var c = cur(); if (!c || !c.ready) return; if (!confirm('إزالة خطة البنك من العميل؟')) return; delete c.ready; delete c.readyDoc; c.planSrc = 'engine'; persist(c).then(main); },
+  genBank: function () { var c = cur(); if (!c) return; if (!c.name) { toast('اكتب اسم العميل أولاً'); return; } RDS.bank[c.code] = true; RDS.open = ''; S.tab = 'plan'; rdLoad(); render(); window.scrollTo(0, 0); },
+  rdBankClose: function () { var c = cur(); if (c) RDS.bank[c.code] = false; RDS.open = ''; main(); },
   rdNew: function () { var c = rdClient(); if (!c) return; S.view = 'client'; S.cur = c.code; (A.pick ? A.pick(c.code) : Promise.resolve()).then(function () { S.tab = 'plan'; S.page = 'sum'; render(); toast('أنشئ النظام الجديد من تبويب الخطة («ولّد الخطة») أو من «مكتبة الأخصائي»'); }); },
-  rdSend: function () {
-    var c = cur() || rdClient(); if (!c || !c.ready || !c.hx) return; toast('جارٍ التجهيز…');
-    rdLoad().then(function (B) {
-      if (!B) { toast(RDS.err || 'تعذّر فتح المكتبة'); return; }
-      var e = RL.plan(c.ready.id), d = rdDoc(c.ready.id); if (!e || !d) { toast('النظام غير موجود في المكتبة'); return; }
-      var snap = RL.toHissati(d, e), v = (c.hx.planV || 0) + 1;
-      return hxSend(c, { t: 'plan', v: v, plan: snap, note: '' }).then(function () { c.hx.planV = v; c.hx.sentAt = Date.now(); c.ready.sentV = v; persist(c); main(); toast('✓ وصل «' + c.ready.label + '» إلى «حصتي» (v' + v + ')'); });
-    }).catch(hxErr);
-  }
+  rdSend: function () { if (A.hxSendPlan) A.hxSendPlan(); }
 });
+(function (g0) {                                                       // «ولّد خطة جديدة» = محرك «حصة»؛ تبقى خطة البنك محفوظة للرجوع إليها
+  A.gen = function () { var c = cur(), prev = c && c.planSrc; if (c) { c.planSrc = 'engine'; RDS.bank[c.code] = false; } var r = g0.apply(this, arguments); if (c && !c.plan) c.planSrc = prev; return r; };
+})(A.gen);
 document.addEventListener('change', function (e) {
-  var t = e.target; if (!t || !t.dataset || S.view !== 'ready') return;
+  var t = e.target; if (!t || !t.dataset || (S.view !== 'ready' && !(t.closest && t.closest('.rdbank')))) return;
   if (t.hasAttribute('data-rdcl')) { RDS.client = t.value; RDS.open = ''; main(); return; }
   if (t.dataset.rdf) { RDS[t.dataset.rdf] = t.value; RDS.open = ''; main(); return; }
-  var c = rdClient(); if (!c) return; var a = rdAnswers(c);
+  var c = S.view === 'ready' ? rdClient() : cur(); if (!c) return; var a = rdAnswers(c);
   if (t.dataset.rdq) { a[t.dataset.rdq] = t.type === 'number' ? (+t.value || '') : t.value; RDS.open = ''; main(); return; }
   if (t.dataset.rdm) { var k = t.dataset.rdm, arr = (a[k] || []).filter(function (x) { return x !== t.value; }); if (t.checked) arr.push(t.value); a[k] = arr; RDS.open = ''; main(); }
 });
+// ---- قوائم منسدلة مضغوطة لصفحة «بيانات العميل» (اختيار متعدد بنفس مفاتيح data-ck/data-bf/data-nb فلا يتغير الحفظ)
+function ddChecks(k, label, all, vals) {
+  vals = vals || []; var on = all.filter(function (a) { return vals.indexOf(a) >= 0; });
+  return '<div><label>' + esc(label) + '</label><details class="rddd"><summary data-none="لا شيء">' + (on.length ? esc(on.join('، ')) : 'لا شيء') + '</summary><div class="rdddb">' + checks(k, all, vals) + '</div></details></div>';
+}
+function ddBox(label, inner) { return '<div><label>' + esc(label) + '</label><details class="rddd"><summary data-none="الافتراضي">' + 'الافتراضي' + '</summary><div class="rdddb">' + inner + '</div></details></div>'; }
+function ddSum(d) {                                                     // نص الملخص = ما اختير
+  var sm = d.querySelector('summary'), on = [].slice.call(d.querySelectorAll('input:checked')).map(function (i) { return i.parentNode.textContent.trim(); });
+  if (sm && !d.closest('.rdbank')) sm.textContent = on.length ? on.join('، ') : sm.getAttribute('data-none') || 'لا شيء';
+}
+document.addEventListener('change', function (e) { var d = e.target && e.target.closest && e.target.closest('.rddd'); if (d) ddSum(d); });
+document.addEventListener('toggle', function (e) {                       // تذكّر الطيّ، وقائمة واحدة مفتوحة
+  var d = e.target; if (!d || !d.matches) return;
+  if (d.matches('details.fold') && d.dataset.fold) S[d.dataset.fold] = d.open;
+  if (d.matches('details.rddd') && d.open) document.querySelectorAll('details.rddd[open]').forEach(function (x) { if (x !== d) x.open = false; });
+}, true);
+document.addEventListener('click', function (e) { if (!e.target.closest || e.target.closest('details.rddd')) return; document.querySelectorAll('details.rddd[open]').forEach(function (x) { x.open = false; }); });
+setTimeout(function () { document.querySelectorAll('details.rddd').forEach(ddSum); }, 0);
