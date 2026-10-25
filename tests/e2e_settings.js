@@ -34,6 +34,6 @@ const adminLogin = require('./auth_helper'); const URL = fileUrl(path.resolve(__
   // نسخة احتياطية تشمل الإعدادات
   const [bk] = await Promise.all([p.waitForEvent('download'), p.click('button:has-text("نسخة احتياطية")')]); const bj = JSON.parse(fs.readFileSync(await bk.path(), 'utf8')); assert(bj.settings && bj.settings.custom.length === 1 && bj.settings.colors.meat === '#112233' && bj.settings.deleted.length >= 1); ok('النسخة الاحتياطية تشمل الإعدادات (ألوان، أصناف مضافة، محذوفات)');
   // تصدير Word بألوان الأنواع
-  await showClients(p); await p.click('.cl:has-text("عميلة الإعدادات")'); await p.click('.tabs button:has-text("الخطة")'); const [dx] = await Promise.all([p.waitForEvent('download'), p.click('button:has-text("تصدير Word")')]); await dx.saveAs(TMP + '/web_settings.docx'); ok('تصدير Word بعد تعديل الإعدادات');
+  await showClients(p); await p.click('.cl:has-text("عميلة الإعدادات")'); await p.click('.tabs button:has-text("الخطة")'); const [dx] = await Promise.all([p.waitForEvent('download'), p.evaluate(() => document.querySelectorAll('details.tbm').forEach((d) => { d.open = true; })).then(() => p.click('button:has-text("تصدير Word")'))]); await dx.saveAs(TMP + '/web_settings.docx'); ok('تصدير Word بعد تعديل الإعدادات');
   assert.deepStrictEqual(errs, [], 'أخطاء: ' + errs.join(' | ')); ok('لا أخطاء في وحدة التحكم'); console.log('\nنجح', n, 'اختبارات واجهة للإعدادات'); await b.close();
 })().catch(e => { console.log('✘', String(e).slice(0, 800)); process.exit(1); });

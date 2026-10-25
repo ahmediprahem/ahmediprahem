@@ -225,3 +225,8 @@ html:is([data-theme="linear"],[data-theme="glass"]) .rdcaut{color:var(--lwarn,#f
 html:is([data-theme="linear"],[data-theme="glass"]) .rdn{background:#cfdaf6;color:#13204a}
 html:is([data-theme="linear"],[data-theme="glass"]) .fold>summary{color:#cfdaf6}
 html:is([data-theme="linear"],[data-theme="glass"]) .needb{background:rgba(245,158,11,.18);color:#fde68a}
+/* 0.47: قوائم شريط الخطة و«⋯» للصنف */
+html:is([data-theme="linear"],[data-theme="glass"]) details.tbm>summary,html:is([data-theme="linear"],[data-theme="glass"]) details.im>summary{background:var(--lpanel2);color:#e4eaf9;border:1px solid var(--lline)}
+html:is([data-theme="linear"],[data-theme="glass"]) details.tbm>summary.o{background:rgba(249,115,22,.16);color:#fdba74;border:1px solid rgba(249,115,22,.4)}
+html:is([data-theme="linear"],[data-theme="glass"]) .tbp,html:is([data-theme="linear"],[data-theme="glass"]) .imx{background:#141d3d;border:1px solid var(--lline);color:#e8ecf8}
+html:is([data-theme="linear"],[data-theme="glass"]) .tbp small{color:#c5cde3;opacity:1}

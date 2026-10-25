@@ -321,3 +321,20 @@ textarea[data-f="notes"]{min-height:44px;height:44px}
 /* 0.46: أقسام الإعدادات */
 .stgs{display:flex;flex-wrap:wrap;gap:6px 18px;margin:0 0 12px}.stg{display:flex;flex-direction:column;gap:3px}.stg>small{opacity:.7;font-size:12px}.stg .tabs{margin:0}
 @media (max-width:760px){.stgs{display:block}.stg{min-width:0;max-width:100%}.stg .tabs{max-width:100%;overflow-x:auto;flex-wrap:nowrap}}
+/* 0.47: شريط الخطة بإجراء أساسي وقوائم، و«⋯» للصنف، وأزرار الملفات */
+.pbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 10px}
+details.tbm,details.im{position:relative;display:inline-block}
+details.tbm>summary,details.im>summary{list-style:none;cursor:pointer;display:inline-block}
+details.tbm>summary::-webkit-details-marker,details.im>summary::-webkit-details-marker{display:none}
+details.tbm>summary{padding:5px 12px;border-radius:8px;background:#e8ecef;color:var(--n);font-size:13px}
+details.tbm>summary.o{background:var(--n);color:#fff}
+.tbp,.imx{position:absolute;z-index:30;top:100%;inset-inline-start:0;margin-top:4px;display:flex;flex-direction:column;gap:4px;min-width:200px;padding:8px;border-radius:10px;background:#fff;box-shadow:0 8px 24px rgba(0,0,0,.18)}
+.tbp button,.imx button{text-align:start;width:100%}.tbp small{opacity:.7;font-size:11px}
+.imx{min-width:140px}
+details.im>summary{padding:0 7px;border-radius:6px;background:#e8ecef;font-weight:700;line-height:22px}
+.iln{display:inline}.leq{display:inline-flex;align-items:center;gap:3px;font-size:12px;opacity:.85}.leq input.le{width:52px}
+.fpki{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;overflow:hidden;pointer-events:none}
+.fpk{display:inline-flex;align-items:center;gap:8px;margin:4px 0}.fpkn{opacity:.75}
+.brrow{margin-top:10px}
+details.tbm:not([open])>.tbp,details.im:not([open])>.imx{display:none}
+@media (min-width:761px){table.dt td.f{min-width:180px}table.dt td.v input.n{width:32px}}

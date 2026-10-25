@@ -59,3 +59,24 @@ document.addEventListener('input', function (e) {                // بحث ال�
 ['pick', 'new', 'users'].forEach(function (k) {                // على الجوال: اختيار عميل أو صفحة يغلق درج القائمة فيظهر المحتوى مباشرة
   var f = A[k]; if (f) A[k] = function () { if (isGlass()) { document.body.classList.remove('menu'); window.scrollTo(0, 0); } return f.apply(this, arguments); };
 });
+// ---- 0.47: قوائم شريط الخطة وقائمة «⋯» للصنف: تُغلق بعد الاختيار أو بالنقر خارجها
+document.addEventListener('click', function (e) {
+  var t = e.target, own = t.closest ? t.closest('details.tbm, details.im') : null;
+  [].forEach.call(document.querySelectorAll('details.tbm[open], details.im[open]'), function (d) { if (d !== own) d.open = false; });
+  if (own && t.closest('.tbp, .imx') && t.closest('button')) setTimeout(function () { own.open = false; }, 0);
+}, true);
+// ---- 0.47: أزرار رفع ملفات بالعربية بدل «Choose File / No file chosen» (الحقل الأصلي يبقى ويُخفى)
+function fpkLabel(i) { var a = i.getAttribute('accept') || ''; return /^image/.test(a) ? '🖼 اختر صورة' : /^video/.test(a) ? '🎬 اختر فيديو' : '📎 اختر ملفاً'; }
+function fpkWrap() {
+  [].forEach.call(document.querySelectorAll('input[type=file]:not([hidden]):not(.hide):not([data-fpk])'), function (i) {
+    var s = document.createElement('span'); i.setAttribute('data-fpk', '1'); i.classList.add('fpki'); s.className = 'fpk';
+    s.innerHTML = '<button type="button" class="sec sm" data-fpkb>' + fpkLabel(i) + '</button> <small class="fpkn">لم يُختر ملف</small>';
+    i.parentNode.insertBefore(s, i.nextSibling);
+  });
+}
+if (window.MutationObserver && document.body) new MutationObserver(fpkWrap).observe(document.body, { childList: true, subtree: true });
+document.addEventListener('click', function (e) { var b = e.target.closest && e.target.closest('[data-fpkb]'), i = b && b.parentNode.previousSibling; if (i && i.click) i.click(); });
+document.addEventListener('change', function (e) {
+  var i = e.target, n = i.getAttribute && i.getAttribute('data-fpk') && i.nextSibling && i.nextSibling.querySelector && i.nextSibling.querySelector('.fpkn');
+  if (n) n.textContent = i.files && i.files.length ? (i.files.length > 1 ? i.files.length + ' ملفات' : i.files[0].name) : 'لم يُختر ملف';
+}, true);

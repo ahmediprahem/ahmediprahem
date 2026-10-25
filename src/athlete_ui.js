@@ -73,7 +73,7 @@ function athPlanTab(c) {
   var p = c.plan; if (!p || p.kind !== 'athlete') return '<p>لم تُولَّد خطة بعد.</p><p><button class="o" data-a="gen">ولّد الخطة</button></p>';
   var pg = S.page === 'grp' ? 'sum' : S.page, nav = '<div class="pnav noprint"><button class="' + (pg === 'sum' ? 'on' : '') + '" data-a="page" data-v="sum">الملخص</button>' + AD.days.map(function (n, i) { return '<button class="' + (pg === i ? 'on' : '') + '" data-a="page" data-v="' + i + '">' + esc(dayName(p, i)) + '</button>'; }).join('') + '<button class="' + (pg === 'all' ? 'on' : '') + '" data-a="page" data-v="all">كل الصفحات</button></div>';
   var body = pg === 'sum' ? athPgSum(c, p) : pg === 'all' ? athAll(c, p, false) : athPgDay(c, p, pg, true);
-  return '<div class="noprint"><button class="sec sm" data-a="gen">إعادة توليد</button> <button class="sm" data-a="newPhr">عبارات جديدة</button> <button class="sm" data-a="ver">حفظ إصدار</button> <button class="o sm" data-a="docx">تصدير Word (.docx)</button> <button class="o sm" data-a="print">تصدير PDF</button> <button class="sm" data-a="html">صفحة HTML للعميل</button> <span class="small">العيادة: <input id="br_c" style="width:130px" placeholder="اسم العيادة" value="' + esc(BR().clinic || '') + '"> <input id="br_s" style="width:130px" placeholder="الأخصائي" value="' + esc(BR().specialist || '') + '"></span></div>' + nav + body;
+  return planBar(c) + nav + body;
 }
 function athFoodByName(n) { return AD.foods.filter(function (f) { return f.n === n; })[0]; }
 
