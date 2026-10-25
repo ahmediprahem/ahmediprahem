@@ -232,7 +232,7 @@ function handle(p) {
     return true;
   }
   if (p.t === 'plan' && p.plan && Array.isArray(p.plan.days) && p.plan.days.length) {
-    const pl = p.plan; S.pm = { sys: pl.sys || 'ex', kcal: pl.kcal, pro: pl.pro, cho: pl.cho, fat: pl.fat, water: pl.water, dayNames: pl.dayNames, groups: pl.groups, recipes: pl.recipes && typeof pl.recipes === 'object' ? pl.recipes : {} };
+    const pl = p.plan; S.pm = { sys: pl.sys || 'ex', kcal: pl.kcal, pro: pl.pro, cho: pl.cho, fat: pl.fat, water: pl.water, dayNames: pl.dayNames, groups: pl.groups, recipes: pl.recipes && typeof pl.recipes === 'object' ? pl.recipes : {}, ready: pl.ready && typeof pl.ready === 'object' ? { id: String(pl.ready.id || ''), name: String(pl.ready.name || '').slice(0, 80) } : null };
     S.plan = JSON.parse(JSON.stringify(pl.days)); S.pv = +p.v || 1; mkData(); if (S.req !== 'approved') S.req = 'approved';
     foodsOf('no').forEach((f) => { if (foodInPlan(f)) applyDislike(f); });
     const first = S.screen !== 'app'; S.screen = 'app'; if (first) S.tab = 'today'; remSync();
@@ -473,6 +473,50 @@ function scrReview() {
     + '</div></div><div class="foot"><button class="btn full" data-act="submit" ' + (S.consent && !V.busy ? '' : 'disabled') + '>' + I('send') + (V.busy ? ' جارٍ الإرسال…' : ' أرسل إلى أخصائيك') + '</button></div></div>';
 }
 function intakeQA() { mkForm(); const out = []; FS.forEach((st) => vq(st).forEach((q) => { if (q.b) return; const t = HForms.answerText(q, (S.p.cq || {})[q.id]); if (t) out.push([q.label, t]); })); return out; }
+// ---------- «اختيار نظامي» (0.42): أسئلة قصيرة — سؤال واحد في كل صفحة — ثم الأمثل + بديلان من مكتبة أخصائيك مع المتوقع
+if (window.RL && window.READYLIB_INDEX) RL.use(window.READYLIB_INDEX);
+const rqBase = () => ({ sex: S.p.sex, age: +numOnly(String(S.p.age || '')) || 0, weight: +numOnly(String(S.p.weight || '')) || 0, height: +numOnly(String(S.p.height || '')) || 0, act: S.p.act != null && S.p.act !== '' ? +S.p.act : null });
+const rqQs = () => RL.questions(S.rq.a, rqBase());
+function rqCard(compact) {
+  if (!window.RL || !RL.idx) return '';
+  const rq = S.rq, pk = rq && rq.pick && RL.plan(rq.pick);
+  if (rq && rq.sentAt) return '<section class="card rqcard"><b>' + I('check') + ' أرسلت اختياراتك لأخصائيك</b><p class="dim">' + (pk ? 'اخترت: ' + esc(RL.label(pk)) : 'سيختار لك أخصائيك النظام الأنسب') + '</p><button class="link" data-act="rqStart">تعديل الإجابات</button></section>';
+  return '<section class="card rqcard"><b>🧭 ساعد أخصائيك يختار نظامك</b><p class="dim">' + (compact ? 'أسئلة قصيرة (دقيقة واحدة) نقترح بعدها النظام الأنسب لك من مكتبة أخصائيك.' : 'أجب أسئلة قصيرة — سؤال في كل صفحة — ونقترح لك الأمثل وبديلين مع النتيجة المتوقعة، ثم يعتمد أخصائيك.') + '</p><button class="btn sm" data-act="rqStart">ابدأ (دقيقة واحدة)</button></section>';
+}
+function scrQuiz() {
+  const rq = S.rq, qs = rqQs();
+  if (rq.i >= qs.length) return scrQuizRes();
+  const q = qs[rq.i], P = RL.norm(rqBase(), rq.a), v = rq.a[q.id], opts = q.type === 'num' ? [] : RL.optsOf(q, rq.a, rqBase());
+  const pct = Math.round(rq.i / qs.length * 100);
+  let body;
+  if (q.type === 'num') body = '<div class="rqnum"><input class="inp" id="rqIn" type="number" inputmode="decimal" min="' + q.min + '" max="' + q.max + '" value="' + esc(v || '') + '" aria-label="' + esc(q.q) + '"><span>' + esc(q.unit || '') + '</span></div>';
+  else body = '<div class="rqopts" role="' + (q.type === 'many' ? 'group' : 'radiogroup') + '">' + opts.map((o) => { const on = q.type === 'many' ? (v || []).includes(o[0]) : String(v) === o[0]; return '<button class="rqo' + (on ? ' on' : '') + '" role="' + (q.type === 'many' ? 'checkbox' : 'radio') + '" aria-checked="' + on + '" data-act="rqOpt" data-v="' + esc(o[0]) + '">' + (o[2] ? '<span class="rqi" aria-hidden="true">' + o[2] + '</span>' : '') + '<span>' + esc(o[1]) + '</span>' + (on ? I('check') : '') + '</button>'; }).join('')
+    + (q.type === 'many' ? '<button class="rqo none' + (v && !v.length ? ' on' : '') + '" role="checkbox" aria-checked="' + !!(v && !v.length) + '" data-act="rqOpt" data-v="__none"><span>' + esc(q.none || 'لا شيء') + '</span></button>' : '') + '</div>';
+  const can = q.type === 'num' ? +v >= q.min && +v <= q.max : q.type === 'many' ? Array.isArray(v) : v != null && v !== '';
+  return '<div class="scr rq">' + head(esc(q.q), 'rqBack', '', 'سؤال ' + (rq.i + 1) + ' من ' + qs.length) + '<div class="rqbar" aria-hidden="true"><i style="width:' + pct + '%"></i></div>'
+    + '<div class="scroll"><div class="stack">' + (q.sub ? '<p class="mut">' + esc(q.sub) + '</p>' : '') + body + '</div></div>'
+    + (q.type === 'one' ? '' : '<div class="foot"><button class="btn full" data-act="rqNext" ' + (can ? '' : 'disabled') + '>التالي</button></div>') + '</div>';
+}
+function scrQuizRes() {
+  const r = RL.recommend(S.rq.a, rqBase()), li = (a) => a.map((t) => '<li>' + esc(t) + '</li>').join('');
+  const cards = r.top.map((x, i) => '<section class="card rqres' + (i === 0 ? ' best' : '') + '"><div class="rqh"><span class="tag">' + (i === 0 ? '⭐ الأنسب لك' : 'بديل ' + i) + '</span><b>' + esc(x.name) + '</b></div><p class="dim">' + esc(x.label) + ' • ' + esc(x.region) + '</p>'
+    + '<div class="banner ok">' + I('trend') + '<span><b>المتوقع:</b> ' + esc(x.expect.head || '') + '</span></div><ul class="rqli">' + li(x.expect.lines.slice(0, -1)) + li(x.why) + '</ul>' + (x.caut.length ? '<div class="banner warn">' + I('alert') + '<span>' + x.caut.map(esc).join(' • ') + '</span></div>' : '')
+    + '<button class="btn ' + (i === 0 ? '' : 'sec ') + 'full" data-act="rqPick" data-v="' + esc(x.id) + '">' + (S.rq.pick === x.id ? I('check') + ' اخترته' : 'أختار هذا النظام') + '</button></section>').join('');
+  return '<div class="scr rq">' + head('نظامك المقترح', 'rqBack', '', 'من مكتبة أخصائيك') + '<div class="scroll"><div class="stack">'
+    + r.refer.map((t) => '<div class="banner warn">' + I('alert') + '<span>' + esc(t) + '</span></div>').join('') + r.warn.map((t) => '<div class="banner info">' + I('alert') + '<span>' + esc(t) + '</span></div>').join('')
+    + cards + '<p class="dim small">الأرقام تقديرية للاسترشاد؛ أخصائيك يراجع اختيارك ويعتمده أو يعدّله، ثم تصلك خطتك هنا.</p>'
+    + '<button class="btn sec full" data-act="rqPick" data-v="">لا أعرف — خلّي أخصائيي يختار</button><button class="link" data-act="rqRestart">إعادة الأسئلة</button></div></div></div>';
+}
+function rqSend(pick) {
+  const r = RL.recommend(S.rq.a, rqBase()); S.rq.pick = pick; S.rq.sentAt = now(); S.rqOpen = false;
+  send({ t: 'rq', ans: S.rq.a, pick: pick || '', top: r.top.map((x) => x.id), ts: now() });
+  toast(pick ? 'أُرسل اختيارك لأخصائيك ليعتمده' : 'أُرسلت إجاباتك لأخصائيك');
+}
+function rqOpt(v) {
+  const qs = rqQs(), q = qs[S.rq.i]; if (!q) return;
+  if (q.type === 'many') { const cur = Array.isArray(S.rq.a[q.id]) ? S.rq.a[q.id] : []; S.rq.a[q.id] = v === '__none' ? [] : cur.includes(v) ? cur.filter((x) => x !== v) : cur.concat([v]); render(); return; }
+  S.rq.a[q.id] = v; render(); setTimeout(() => { if (S.rqOpen && rqQs()[S.rq.i] && rqQs()[S.rq.i].id === q.id) { S.rq.i++; render(); } }, RM ? 0 : 220);
+}
 function scrSent() {
   const st = S.req, ch = st === 'changes', ok = st === 'approved';
   if (st === 'rejected' || S.removed) return '<div class="scr"><div class="scroll"><div class="stack" style="padding-top:26px"><div class="empty"><div class="ei" style="color:var(--coral)">' + I('alert') + '</div><h1>توقف الربط مع أخصائيك</h1><p class="mut">لا يمكن إرسال بيانات جديدة من هذا الحساب. تواصل مع أخصائيك إن كان ذلك خطأ، وسيرسل لك رابطاً جديداً.</p></div><button class="btn sec full" data-act="wipe">حذف بياناتي من هذا الجوال</button></div></div></div>';
@@ -483,7 +527,7 @@ function scrSent() {
     + '<div class="card tl">' + step('ok', 'أُرسلت بياناتك', 'مشفّرة إلى ' + esc(S.dname))
     + step(ok ? 'ok' : 'now', ok ? 'اعتمدك أخصائيك' : 'قيد المراجعة', ok ? 'رقم ملفك ' + esc(S.code) : 'عادة خلال يوم عمل')
     + step(ok ? 'now' : '', 'خطتك الأولى', 'تظهر هنا يوماً بيوم') + '</div>'
-    + installCard('sent') + notifCard(false) + '<p class="sync">' + (S.outbox.length ? 'بانتظار الإنترنت لإرسال ' + S.outbox.length + ' عنصر…' : 'يُتحقق من الجديد تلقائياً كل نصف دقيقة') + '</p>'
+    + rqCard(true) + installCard('sent') + notifCard(false) + '<p class="sync">' + (S.outbox.length ? 'بانتظار الإنترنت لإرسال ' + S.outbox.length + ' عنصر…' : 'يُتحقق من الجديد تلقائياً كل نصف دقيقة') + '</p>'
     + '<button class="btn sec full" data-act="chat" style="position:relative">' + I('msg') + ' راسل أخصائيك' + (S.unreadC ? '<span class="nb" style="position:absolute;top:-6px;left:-6px;min-width:20px;height:20px;border-radius:10px;background:var(--coral);color:#3a0d05;font-size:11px;display:grid;place-items:center">' + S.unreadC + '</span>' : '') + '</button>'
     + '<button class="btn sec full" data-act="refresh">' + I('reset') + ' تحقق الآن</button>'
     + '</div></div></div>';
@@ -518,16 +562,16 @@ function mealCard(d, si, s, live) {
   }).join('');
   const meal = s.meal ? '<div class="dim">' + esc(s.meal) + '</div>' : '', rec = s.meal && S.pm && S.pm.recipes && S.pm.recipes[s.meal];
   const rbtn = rec ? '<button class="btn sm sec" data-act="rcp" data-v="' + d + '_' + si + '">' + I('book') + ' الوصفة</button>' : '';
-  if (!live) return '<section class="card"><div class="row" style="justify-content:space-between"><h3>' + esc(s.name) + '</h3><span class="dim">' + esc(s.time) + ' • ' + s.kcal + ' سعرة</span></div>' + meal + '<ul class="plist" style="margin-top:8px">' + items + '</ul>' + (rbtn ? '<div class="macts">' + rbtn + '</div>' : '') + '</section>';
-  return '<section class="card meal' + (all ? ' done' : '') + (skip ? ' skip' : '') + '"><div class="mt"><span class="tm">' + esc(s.time) + '</span><div style="flex:1;min-width:0"><h3>' + esc(s.name) + '</h3>' + meal + '</div><span class="pc">' + s.kcal + ' سعرة</span></div><div class="items">' + items + '</div>'
+  if (!live) return '<section class="card"><div class="row" style="justify-content:space-between"><h3>' + esc(s.name) + '</h3><span class="dim">' + esc(s.time) + (s.kcal ? ' • ' + s.kcal + ' سعرة' : '') + '</span></div>' + meal + '<ul class="plist" style="margin-top:8px">' + items + '</ul>' + (rbtn ? '<div class="macts">' + rbtn + '</div>' : '') + '</section>';
+  return '<section class="card meal' + (all ? ' done' : '') + (skip ? ' skip' : '') + '"><div class="mt"><span class="tm">' + esc(s.time) + '</span><div style="flex:1;min-width:0"><h3>' + esc(s.name) + '</h3>' + meal + '</div>' + (s.kcal ? '<span class="pc">' + s.kcal + ' سعرة</span>' : '') + '</div><div class="items">' + items + '</div>'
     + (L.note[si] ? '<div class="note">' + I('edit') + ' ' + esc(L.note[si]) + '</div>' : '') + phStrip(si)
     + '<div class="macts"><button class="btn sm sec" data-act="whole" data-v="' + si + '">' + I('check') + (all ? ' تمّت' : ' أكلتها كاملة') + '</button><button class="btn sm sec" data-act="note" data-v="' + si + '">' + I('edit') + ' أضفت / ملاحظة</button><button class="btn sm sec" data-act="skip" data-v="' + si + '">' + (skip ? 'تراجع' : 'لم آكلها') + '</button><button class="btn sm sec" data-act="ask" data-v="' + si + '">' + I('msg') + ' اسأل عنها</button><button class="btn sm sec" data-act="photo" data-v="' + si + '">' + I('camera') + ' صوّر وجبتك</button>' + rbtn + '</div></section>';
 }
 function tabPlan() {
   const chips = DATA.dayNames.map((n, i) => { const [a, b] = itemsOfDay(i); return '<button class="' + (S.day === i ? 'on' : '') + (i === TODAY ? ' today' : '') + '" data-act="day" data-v="' + i + '"><b>' + esc(String(n).replace('ال', '')) + '</b><span>' + (b && i <= TODAY ? Math.round(a / b * 100) + '%' : '—') + '</span></button>'; }).join('');
   return '<div class="row" style="justify-content:space-between"><h2>خطتي</h2><button class="btn sm sec" data-act="shop">' + I('cart') + ' قائمة التسوّق</button></div>'
-    + '<div class="dim">من ' + esc(S.dname) + ' • ' + (S.pm && S.pm.sys === 'g' ? 'نظام الجرامات: السعرات حسب نوع كل يوم' : DATA.kcal + ' سعرة يومياً') + ' • الإصدار ' + S.pv + '</div>'
-    + '<div class="daychips">' + chips + '</div>' + (dayPlan(S.day).type ? '<div class="banner info">' + I('dumbbell') + '<span><b>' + esc(dayPlan(S.day).type) + '</b> • ' + dayPlan(S.day).kcal + ' سعرة • بروتين ' + dayPlan(S.day).p + ' • كارب ' + dayPlan(S.day).c + ' • دهون ' + dayPlan(S.day).f + ' جم</span></div>' : '') + dayPlan(S.day).slots.map((s, si) => mealCard(S.day, si, s, false)).join('');
+    + '<div class="dim">من ' + esc(S.dname) + ' • ' + (S.pm && S.pm.sys === 'g' ? 'نظام الجرامات: السعرات حسب نوع كل يوم' : S.pm && S.pm.ready ? esc(S.pm.ready.name) + ' • متوسط ' + DATA.kcal + ' سعرة' : DATA.kcal + ' سعرة يومياً') + ' • الإصدار ' + S.pv + '</div>'
+    + '<div class="daychips">' + chips + '</div>' + (dayPlan(S.day).type ? '<div class="banner info">' + I('dumbbell') + '<span><b>' + esc(dayPlan(S.day).type) + '</b> • ' + dayPlan(S.day).kcal + ' سعرة' + (dayPlan(S.day).p != null ? ' • بروتين ' + dayPlan(S.day).p + ' • كارب ' + dayPlan(S.day).c + ' • دهون ' + dayPlan(S.day).f + ' جم' : '') + '</span></div>' : '') + dayPlan(S.day).slots.map((s, si) => mealCard(S.day, si, s, false)).join('') + ((dayPlan(S.day).tips || []).length ? '<div class="banner info">' + I('sparkle') + '<span>' + dayPlan(S.day).tips.map(esc).join(' • ') + '</span></div>' : '') + rqCard(false);
 }
 function tabPrefs() {
   const lv = foodsOf('love').length, no = foodsOf('no').length;
@@ -1084,7 +1128,7 @@ function render() {
   const sc = $('.scroll'), key = (S ? S.screen + S.step + S.tab + (S.chat ? 'c' : '') : '') + V.screen, top = sc ? sc.scrollTop : 0;
   let scr;
   if (V.screen === 'boot') scr = scrBoot(); else if (V.screen === 'bad') scr = scrBad(); else if (V.screen === 'start') scr = scrStart(); else if (V.screen === 'moved') scr = scrMoved(); else if (V.screen === 'lock') scr = scrLock(); else if (V.screen === 'pin') scr = scrPin(); else if (V.screen === 'onb') scr = scrOnb();
-  else scr = S.chat ? scrChat() : S.plan && S.screen === 'app' ? scrApp() : { invite: scrInvite, wizard: scrWizard, review: scrReview, sent: scrSent, app: scrSent }[S.screen]();
+  else scr = S.rqOpen && window.RL && RL.idx ? scrQuiz() : S.chat ? scrChat() : S.plan && S.screen === 'app' ? scrApp() : { invite: scrInvite, wizard: scrWizard, review: scrReview, sent: scrSent, app: scrSent }[S.screen]();
   const keep = {}; document.querySelectorAll('video[data-keep]').forEach((n) => { keep[n.dataset.keep] = n; });
   const cmI = $('#cmIn'), cmV = cmI ? [cmI.value, document.activeElement === cmI] : null;          // مسودة التعليق تبقى عند إعادة الرسم (وصول التعليقات مثلاً)
   $('#root').innerHTML = '<div class="stage"><div class="device">' + (V.online ? '' : '<div class="offline">بلا اتصال — تُرسل بياناتك عند عودة الإنترنت</div>') + scr + (S ? sheetHtml() : '') + (toastMsg ? '<div class="toast" role="status">' + I('check') + '<span>' + esc(toastMsg) + '</span></div>' : '') + '</div></div>';
@@ -1199,6 +1243,12 @@ document.addEventListener('click', (e) => {
       if (S && S.ident && S.cid && !S.__tmp) unsub.then(() => api('POST', '/v1/clients/remove', {})).catch(() => { }).then(done); else unsub.then(done); return;
     }
     case 'chat': S.chat = true; sheet = null; focusChat = true; break;
+    case 'rqStart': S.rq = S.rq && !S.rq.sentAt ? S.rq : { a: S.rq ? S.rq.a : {}, i: 0 }; S.rq.i = 0; delete S.rq.sentAt; S.rqOpen = true; sheet = null; break;
+    case 'rqOpt': rqOpt(v); return;
+    case 'rqNext': { const q = rqQs()[S.rq.i]; if (q && q.type === 'num') { const n = +numOnly(($('#rqIn') || {}).value || ''); if (!(n >= q.min && n <= q.max)) { toast('اكتب رقماً بين ' + q.min + ' و' + q.max); return; } S.rq.a[q.id] = n; } S.rq.i++; break; }
+    case 'rqBack': if (S.rq.i > 0) S.rq.i--; else S.rqOpen = false; break;
+    case 'rqRestart': S.rq = { a: {}, i: 0 }; break;
+    case 'rqPick': rqSend(v); break;
     case 'chatClose': S.chat = false; break;
     case 'ask': { const sl = dayPlan(TODAY).slots[+v]; S.ctx = sl.name + (sl.meal ? ' (' + sl.meal + ')' : ''); S.chat = true; focusChat = true; break; }
     case 'ctxClear': S.ctx = ''; break;

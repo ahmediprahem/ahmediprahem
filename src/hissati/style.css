@@ -474,3 +474,9 @@ html[data-theme="rose"] .alm{background:radial-gradient(70% 50% at 50% 28%,rgba(
 html[data-theme="pulse"] .alm{background:radial-gradient(70% 50% at 50% 30%,rgba(210,255,58,.18),transparent 70%),rgba(8,10,12,.92)}html[data-theme="pulse"] .alm-time{font-size:58px;color:var(--mint)}html[data-theme="pulse"] .alm-ic{border-radius:22px}html[data-theme="pulse"] .alm-rings i{border-radius:0;border-width:1px}
 @media (prefers-reduced-motion:reduce){.alm,.alm-ic,.alm-rings i{animation:none!important}.alm-rings i{opacity:.25;transform:scale(1.4)}}
 @media (prefers-reduced-transparency:reduce){.alm{-webkit-backdrop-filter:none;backdrop-filter:none}}
+/* «اختيار نظامي» (0.42): سؤال في كل صفحة */
+.rqbar{height:4px;margin:0 18px 6px;border-radius:2px;background:var(--line);overflow:hidden}.rqbar i{display:block;height:100%;background:var(--mint);transition:width .3s}
+.rqopts{display:flex;flex-direction:column;gap:10px}.rqo{display:flex;align-items:center;gap:12px;min-height:58px;padding:10px 16px;border-radius:18px;background:var(--glass);border:1px solid var(--line);color:var(--text);font-size:16px;font-weight:600;text-align:right}
+.rqo>span:nth-last-child(1),.rqo>span:nth-child(2){flex:1}.rqo .rqi{font-size:24px;flex:none;width:32px;text-align:center}.rqo.on{border-color:var(--mint);background:rgba(111,227,169,.14)}.rqo .ico{color:var(--mint)}.rqo.none{justify-content:center;font-weight:500;color:var(--mut)}
+.rqnum{display:flex;align-items:center;gap:10px}.rqnum .inp{font-size:22px;text-align:center;min-height:58px}.rqnum span{color:var(--mut);font-size:16px}
+.rqres .rqh{display:flex;align-items:center;gap:8px;margin-bottom:4px}.rqres .rqh b{font-size:17px}.rqres.best{border-color:var(--mint)}.rqli{margin:8px 0;padding-right:18px;line-height:1.8;font-size:14px;color:var(--mut)}.rqres .btn{margin-top:6px}.rqcard b{display:flex;align-items:center;gap:6px}.rqcard .btn{margin-top:8px}

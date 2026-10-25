@@ -7,7 +7,7 @@ function glassSide() {
   var home = S.view === 'client' && !S.cur, admin = S.mode === 'admin';
   var clx = !home && !S.clOpen; document.body.classList.toggle('clx', clx);        // عمود العملاء يُطوى تلقائياً خارج الرئيسية ليتسع المحتوى (الخطة والجداول)، ويُفتح من «العملاء»
   var rail = '<nav class="rail" aria-label="التنقل"><p class="two newc"><button data-a="new" data-v="ex" title="عميل جديد بنظام الحصص">+ عميل جديد — الحصص</button><button class="o" data-a="new" data-v="ath" title="عميل جديد بنظام الجرامات">+ عميل جديد — الجرامات</button></p>'
-    + railBtn('home', 'home', 'الرئيسية', home) + (home ? '' : '<button class="sec sidebtn cltog' + (clx ? '' : ' on') + '" data-a="clToggle" aria-expanded="' + (!clx) + '">' + IC('users') + '<span>العملاء</span><em>' + S.clients.length + '</em></button>') + railBtn('bank', 'book', 'محرر الحصص', S.view === 'bank') + railBtn('lib', 'book', 'مكتبة الأخصائي', S.view === 'lib') + railBtn('hxv', 'phone', 'طلبات حصتي', S.view === 'hx').replace('</span></button>', '</span><em class="hxnb"></em></button>') + railBtn('appts', 'calendar', 'المواعيد', S.view === 'appts').replace('</span></button>', '</span><em class="hxnb"></em></button>') + railBtn('feed', 'megaphone', 'التثقيف', S.view === 'feed').replace('</span></button>', '</span><em class="hxnb"></em></button>') + railBtn('settings', 'settings', 'إعدادات النظام', S.view === 'settings')
+    + railBtn('home', 'home', 'الرئيسية', home) + (home ? '' : '<button class="sec sidebtn cltog' + (clx ? '' : ' on') + '" data-a="clToggle" aria-expanded="' + (!clx) + '">' + IC('users') + '<span>العملاء</span><em>' + S.clients.length + '</em></button>') + railBtn('bank', 'book', 'محرر الحصص', S.view === 'bank') + railBtn('lib', 'book', 'مكتبة الأخصائي', S.view === 'lib') + railBtn('ready', 'package', 'مكتبة الأنظمة الجاهزة', S.view === 'ready') + railBtn('hxv', 'phone', 'طلبات حصتي', S.view === 'hx').replace('</span></button>', '</span><em class="hxnb"></em></button>') + railBtn('appts', 'calendar', 'المواعيد', S.view === 'appts').replace('</span></button>', '</span><em class="hxnb"></em></button>') + railBtn('feed', 'megaphone', 'التثقيف', S.view === 'feed').replace('</span></button>', '</span><em class="hxnb"></em></button>') + railBtn('settings', 'settings', 'إعدادات النظام', S.view === 'settings')
     + (admin ? '<div class="sbg' + sbc('tools') + '" data-g="tools"><button class="sbh" data-a="sbg" data-v="tools" aria-expanded="' + (SBG.tools === 0 ? 'false' : 'true') + '">أدوات الإدارة <i>' + IC('chevron') + '</i></button><div class="sbb">'
       + railBtn('users', 'users', 'المستخدمون والأجهزة', S.view === 'users') + railBtn('exportUsers', 'package', 'تصدير نسخة المستخدمين') + railBtn('exportSite', 'globe', 'تصدير موقع للنشر (ZIP)') + '</div></div>' : '')
     + '<div class="sbg' + sbc('bak') + '" data-g="bak"><button class="sbh" data-a="sbg" data-v="bak" aria-expanded="' + (SBG.bak === 0 ? 'false' : 'true') + '">النسخ الاحتياطي <i>' + IC('chevron') + '</i></button><div class="sbb">'
@@ -48,6 +48,7 @@ Object.assign(A, {
     if (v === 'settings') { S.view = 'settings'; render(); }
     else if (v === 'bank') A.bank();
     else if (v === 'lib') A.lib();
+    else if (v === 'ready') A.ready();
     window.scrollTo(0, 0);
   }
 });

@@ -138,7 +138,15 @@ function hxReq(req, p, enc) {                                     // قبل ال
     });
   }
   if (p.t === 'msg' && p.text) { req.msgs = (req.msgs || []).concat([{ from: 'c', t: String(p.text).slice(0, 2000), ts: p.ts, ctx: p.ctx || '' }]).slice(-200); req.unread = (req.unread || 0) + 1; toast('💬 ' + (req.intake ? req.intake.name : req.label) + ': ' + String(p.text).slice(0, 60)); return 1; }
+  if (p.t === 'rq') { var q0 = hxQuiz(p); if (!q0) return 0; req.quiz = q0; toast('🧭 ' + ((req.intake || {}).name || req.label) + ' أجاب على أسئلة اختيار النظام'); return 1; }
   return 0;
+}
+// إجابات «اختيار النظام» من «حصتي»: تُنقّى المفاتيح، ويُقبل الاختيار فقط إن كان نظاماً موجوداً في المكتبة
+function hxQuiz(p) {
+  if (!p.ans || typeof p.ans !== 'object') return null; var a = {}, keys = ['goal', 'region', 'cond', 'concern', 'veg', 'style', 'cut', 'train', 'why', 'prev', 'last', 'act', 'routine', 'sex', 'age', 'wt', 'ht'];
+  keys.forEach(function (k) { var v = p.ans[k]; if (v == null) return; a[k] = Array.isArray(v) ? v.map(String).slice(0, 10) : typeof v === 'number' ? v : String(v).slice(0, 20); });
+  var ok = function (id) { return id && (!window.RL || !RL.idx || RL.plan(id)); };
+  return { ans: a, pick: ok(p.pick) ? String(p.pick) : '', top: (p.top || []).filter(ok).slice(0, 3), at: p.ts || Date.now() };
 }
 function hxIn(c, p) {                                              // بعد الاعتماد: المتابعة اليومية، الوزن، التفضيلات، الصحة، المحادثة
   var x = c.hx, nm = c.name || x.label || '';
@@ -159,6 +167,7 @@ function hxIn(c, p) {                                              // بعد ا�
   if (p.t === 'health') { x.health = { cond: (p.cond || []).filter(function (k) { return D.conditions.indexOf(k) >= 0; }), allg: p.allg || [], note: String(p.note || '').slice(0, 500), at: p.ts }; toast('🩺 ' + nm + ' يطلب تعديل حالته الصحية'); return 1; }
   if (p.t === 'msg' && p.text) { x.msgs = (x.msgs || []).concat([{ from: 'c', t: String(p.text).slice(0, 2000), ts: p.ts, ctx: String(p.ctx || '').slice(0, 120) }]).slice(-300); x.unread = (x.unread || 0) + 1; toast('💬 ' + nm + ': ' + String(p.text).slice(0, 60)); return 1; }
   if (p.t === 'read') { (x.msgs || []).forEach(function (q) { if (q.from === 'd' && q.ts <= p.upTo) q.read = 1; }); return 0; }
+  if (p.t === 'rq') { var q = hxQuiz(p); if (!q) return 0; x.quiz = q; if (RDS && RDS.ans) delete RDS.ans[c.code]; toast('🧭 ' + nm + (q.pick && window.RL ? ' اختار من المكتبة: ' + RL.label(RL.plan(q.pick)) : ' أجاب على أسئلة اختيار النظام')); return 1; }
   return 0;
 }
 // عادات العميل من «حصتي» (ملخص اليوم في المتابعة): ✓ ما أنجزه من العادات التي يتابعها
@@ -198,7 +207,7 @@ function hxApprove(cid) {
   var g = req.intake.sys === 'g', c = newClient(g ? 'ath' : ''); Object.assign(c, g ? hxMapG(req.intake) : hxMap(req.intake));
   if (g && +req.intake.nmeals >= 2 && typeof athSetMealCount === 'function') athSetMealCount(c, Math.min(8, +req.intake.nmeals));
   if (!g && hxQA(req.intake).length) c.notes += '\nإجابات الاستبيان:\n' + hxQA(req.intake).map(function (x) { return '• ' + x[0] + ': ' + x[1]; }).join('\n');
-  c.hx = { cid: cid, enc: req.encPub, tok: HX.st.inv[req.h].tok, label: req.label, msgs: req.msgs || [], unread: req.unread || 0, logs: {}, weights: [[Date.now(), c.weight]], prefLog: [], prefs: { food: req.intake.food || {}, like: req.intake.like || {}, nope: req.intake.nope || {} }, intake: req.intake, planV: 0, since: Date.now() };
+  c.hx = { cid: cid, enc: req.encPub, tok: HX.st.inv[req.h].tok, label: req.label, msgs: req.msgs || [], unread: req.unread || 0, logs: {}, weights: [[Date.now(), c.weight]], prefLog: [], prefs: { food: req.intake.food || {}, like: req.intake.like || {}, nope: req.intake.nope || {} }, intake: req.intake, planV: 0, since: Date.now(), quiz: req.quiz || null };
   S.clients.push(c);
   return persist(c).then(function () { return hxSend(c, { t: 'status', st: 'approved', code: c.code, dname: HX.st.name }); }).then(function () {
     delete HX.st.reqs[cid]; delete HX.st.inv[req.h]; return hxSave();
