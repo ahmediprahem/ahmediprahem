@@ -230,3 +230,4 @@ html:is([data-theme="linear"],[data-theme="glass"]) details.tbm>summary,html:is(
 html:is([data-theme="linear"],[data-theme="glass"]) details.tbm>summary.o{background:rgba(249,115,22,.16);color:#fdba74;border:1px solid rgba(249,115,22,.4)}
 html:is([data-theme="linear"],[data-theme="glass"]) .tbp,html:is([data-theme="linear"],[data-theme="glass"]) .imx{background:#141d3d;border:1px solid var(--lline);color:#e8ecf8}
 html:is([data-theme="linear"],[data-theme="glass"]) .tbp small{color:#c5cde3;opacity:1}
+html:is([data-theme="linear"],[data-theme="glass"]) .bakrem b{color:#fbbf6a}html:is([data-theme="linear"],[data-theme="glass"]) .bakrem{border-color:rgba(245,166,35,.55)}

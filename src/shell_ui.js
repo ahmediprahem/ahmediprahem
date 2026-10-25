@@ -35,7 +35,7 @@ function homeGlass() {
     + '<div class="qgrid">' + tile('new', 'ex', 'userPlus', 'نظام الحصص', 'عميل جديد: خطة بالحصص والبدائل') + tile('new', 'ath', 'dumbbell', 'نظام الجرامات', 'عميل جديد: خطة بالجرام والماكروز') + tile('bank', '', 'book', 'بنك الوجبات', 'وجبات المولّد وابتكار وجبة') + tile('ready', '', 'package', 'الخطط الجاهزة', 'خطط أسبوعية من مكتبتك + مكتبة الأخصائي') + tile('appts', '', 'calendar', 'المواعيد', 'مواعيد اليوم والأسبوع والمتابعات') + tile('hxv', '', 'phone', 'حصتي', 'ادعُ عميلاً برابط واتساب واستقبل طلباته') + tile('feed', '', 'megaphone', 'التثقيف', 'انشر نصائح وفيديوهات لمراجعيك') + tile('settings', '', 'settings', 'إعدادات النظام', 'الألوان والبدائل والشعار والمظهر') + '</div>'
     + (recent ? '<h3>آخر العملاء</h3><div class="recent">' + recent + '</div>' : '<p class="small">لا عملاء بعد — ابدأ بـ«عميل جديد».</p>')
     + '<p class="two mobonly"><button data-a="new" data-v="ex">+ عميل جديد — الحصص</button><button class="o" data-a="new" data-v="ath">+ عميل جديد — الجرامات</button></p>'
-    + vtHomeCard() + appCard() + '</div>';
+    + bakCard() + vtHomeCard() + appCard() + '</div>';
 }
 function initial(n) { n = String(n || '').trim(); return n ? n.charAt(0) : '؟'; }
 Object.assign(A, {
@@ -80,3 +80,12 @@ document.addEventListener('change', function (e) {
   var i = e.target, n = i.getAttribute && i.getAttribute('data-fpk') && i.nextSibling && i.nextSibling.querySelector && i.nextSibling.querySelector('.fpkn');
   if (n) n.textContent = i.files && i.files.length ? (i.files.length > 1 ? i.files.length + ' ملفات' : i.files[0].name) : 'لم يُختر ملف';
 }, true);
+// ---- 0.48: تذكير النسخة الاحتياطية في الرئيسية (للبيانات المحفوظة في المتصفح فقط، ويختفي مع النسخ التلقائي المفعّل)
+function bakAge() { var t = 0; try { t = +localStorage.getItem('hissa_lastbak') || 0; } catch (e) { } return t ? Math.floor((Date.now() - t) / 864e5) : -1; }
+function bakCard() {
+  var d = bakAge(), snz = 0; try { snz = +localStorage.getItem('hissa_baksnooze') || 0; } catch (e) { }
+  if (!S.clients.length || (typeof VT !== 'undefined' && VT.st && VT.st.on) || (d >= 0 && d < 7) || snz > Date.now()) return '';
+  return '<div class="ucard bakrem"><b>💾 ' + (d < 0 ? 'لم تأخذ نسخة احتياطية بعد' : 'آخر نسخة احتياطية منذ ' + d + ' يوماً') + '</b><p class="small">بيانات ' + S.clients.length + ' عميل محفوظة في هذا المتصفح فقط؛ مسح بيانات المتصفح يضيّعها.</p><p><button class="sm" data-a="export">نسخة احتياطية الآن</button> <button class="sec sm" data-a="bakLater">ذكّرني بعد 3 أيام</button></p></div>';
+}
+A.bakLater = function () { try { localStorage.setItem('hissa_baksnooze', String(Date.now() + 3 * 864e5)); } catch (e) { } main(); };
+(function (f) { A.export = function () { var r = f.apply(this, arguments); setTimeout(function () { if (S.view === 'client' && !S.cur) main(); }, 300); return r; }; })(A.export);

@@ -338,3 +338,6 @@ details.im>summary{padding:0 7px;border-radius:6px;background:#e8ecef;font-weigh
 .brrow{margin-top:10px}
 details.tbm:not([open])>.tbp,details.im:not([open])>.imx{display:none}
 @media (min-width:761px){table.dt td.f{min-width:180px}table.dt td.v input.n{width:32px}}
+/* 0.48: الجوال — تبويبات العميل في سطرين بدل تمرير خفي، وزر «المساعد» صغير فوق الشريط السفلي، وتذكير النسخ */
+@media screen and (max-width:820px){.tabs.ctabs{flex-wrap:wrap!important;overflow:visible}.tabs.ctabs button{flex:1 1 30%}}
+.bakrem{border-color:#e8a33c}.bakrem b{color:#b06a00}

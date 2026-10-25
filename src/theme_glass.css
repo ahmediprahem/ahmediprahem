@@ -273,3 +273,6 @@ html[data-theme="glass"] *{scrollbar-width:thin;scrollbar-color:rgba(255,255,255
 }
 html[data-theme="glass"] .stg .tabs{margin-bottom:0}
 @media (max-width:760px){html[data-theme="glass"] .stg .tabs{display:flex;max-width:100%;overflow-x:auto;flex-wrap:nowrap}}
+@media (max-width:900px){html[data-theme="glass"] .tabs.ctabs{display:flex;flex-wrap:wrap;overflow:visible}html[data-theme="glass"] .tabs.ctabs button{flex:1 1 30%}
+  html[data-theme="glass"] .dtfab{padding:3px 10px 3px 3px;border-radius:20px;gap:6px;font-size:12px;opacity:.92}html[data-theme="glass"] .dtfab span{display:inline}html[data-theme="glass"] .dtfab .dtav{width:28px;height:28px}}
+html[data-theme="glass"] .bakrem{border-color:rgba(245,166,35,.55)}html[data-theme="glass"] .bakrem b{color:#fbbf6a}
