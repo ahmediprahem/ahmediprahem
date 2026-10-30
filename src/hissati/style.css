@@ -488,3 +488,6 @@ html[data-theme="pulse"] .alm{background:radial-gradient(70% 50% at 50% 30%,rgba
 .gatec{text-align:center;align-items:center}.gatec .gl{font-size:40px}.gatec h2{margin:0}
 .wmk{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;display:flex;flex-wrap:wrap;align-content:space-around;justify-content:space-around;gap:40px 30px;transform:rotate(-24deg) scale(1.4);opacity:.045;font-size:15px;font-weight:700;color:#fff;user-select:none}
 .scr.hasTabs>.scroll{position:relative;z-index:1}
+/* 0.52: المتوفر عندي + أكمل ملفك */
+.food.can{background:rgba(255,210,122,.14);border-color:rgba(255,210,122,.55);color:#ffe7b8}
+.pancard h3{margin:0}

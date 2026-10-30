@@ -188,7 +188,8 @@
       else if (id === 'lowcarb') { fVal = Math.max(18, Math.round((100 - cho - (pv * w * 4 / K * 100)) * 10) / 10); }
       else if (id === 'cycle') {
         fMode = 'gkg'; fVal = P.fat; var hd = P.hiDays, loD = 7 - hd, h2 = Math.min(P.hi / 100, 8.75 / (7 + 0.25 * hd)), kl = Math.round((7 * K - hd * K * h2) / loD / 10) * 10; hi = Math.round(K * h2 / 10) * 10; lo = kl;
-        var order = hd === 3 ? [0, 2, 4] : hd === 2 ? [1, 4] : [2]; types = []; for (var j = 0; j < 7; j++) types.push(order.indexOf(j) >= 0 ? hiT : loT);
+        var order = hd === 3 ? [0, 2, 4] : hd === 2 ? [1, 4] : [2], tr = sched.map(function (x, ix) { return [ix, +(x && x.min) || 0]; }).filter(function (q) { return q[1] > 0; }).sort(function (a, b) { return b[1] - a[1] || a[0] - b[0]; }).slice(0, hd).map(function (q) { return q[0]; }).sort(); types = [];
+        if (tr.length === hd) { order = tr; out.notes.push('الأيام المرتفعة على أيام التمرين الأطول: ' + tr.map(function (ix) { return DN[ix]; }).join('، ')); }   // 0.52 for (var j = 0; j < 7; j++) types.push(order.indexOf(j) >= 0 ? hiT : loT);
         out.notes.push('أيام مرتفعة ' + hi + ' سعرة (' + hd + ' أيام)، ومنخفضة ' + lo + ' سعرة؛ متوسط الأسبوع ' + Math.round((hd * hi + loD * lo) / 7) + ' سعرة');
       } else { fVal = fat; }
       if (id === 'if' && P.pat === '52') { fastDays.forEach(function (ix) { types[ix] = fT; }); hi = K; lo = fastK; }

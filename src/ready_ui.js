@@ -124,8 +124,10 @@ function rdUse(c, id, quiet) {
     var d = B && rdDoc(id); if (!d) { toast(RDS.err || 'تعذّر فتح المكتبة'); return; }
     c.ready = { id: e.i, label: RL.label(e), name: RL.fam(e.f).n, when: RL.bestWhen(e), at: Date.now(), ans: RDS.ans[c.code] || (c.hx && c.hx.quiz && c.hx.quiz.ans) || null };
     c.readyDoc = { days: d.days, subs: d.subsArr, ex: d.ex || [], guide: d.secsArr.filter(function (x) { return x.p.length && x.t && !/^(اليوم|يوم)/.test(x.t); }).map(function (x) { return { t: x.t, p: x.p }; }) };
+    var td = typeof trainDays === 'function' ? trainDays(c) : [], al = typeof alignCarb === 'function' && alignCarb(c.readyDoc.days, td);   // 0.52: الكارب العالي على أيام التمرين
+    if (al) { c.readyDoc.days = al; c.readyDoc.aligned = td; }
     c.planSrc = 'ready'; RDS.bank[c.code] = false; RDS.open = ''; RDS.page[c.code] = 'sum'; S.view = 'client'; S.cur = c.code; S.tab = 'plan';
-    return persist(c).then(function () { render(); window.scrollTo(0, 0); toast('✓ طُبّقت خطة البنك «' + c.ready.label + '» على ' + (c.name || c.code)); });
+    return persist(c).then(function () { render(); window.scrollTo(0, 0); toast('✓ طُبّقت خطة البنك «' + c.ready.label + '» على ' + (c.name || c.code) + (al ? ' — أيام الكارب العالي على أيام تمرينه' : '')); });
   });
 }
 function rdQuizNote(c) {                                                // ما اختاره العميل في «حصتي» قبل الاعتماد

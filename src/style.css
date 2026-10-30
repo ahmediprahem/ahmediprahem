@@ -351,3 +351,6 @@ details.tbm:not([open])>.tbp,details.im:not([open])>.imx{display:none}
 .ciflash{outline:3px solid #f5a623;outline-offset:3px;border-radius:10px}
 @media (max-width:760px){.cid{grid-template-columns:1fr 60px 56px}.cid b{grid-column:1/-1}}
 .pwm{color:#8a8f9c;font-size:10px}
+/* 0.52: المتوفر والملف من حصتي */
+.panbox summary{cursor:pointer;font-weight:700}.panbox ul{margin:8px 0;padding-inline-start:18px;line-height:1.8}
+.cidl{display:grid;grid-template-columns:max-content 1fr;gap:4px 14px;margin:0}.cidl dt{color:#667}.cidl dd{margin:0;font-weight:600}

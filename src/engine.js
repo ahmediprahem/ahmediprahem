@@ -107,7 +107,14 @@
   // ================================================ قيود العميل: الحساسية/الكلمات والقواعد السريرية
   var TIER = { 'تجنّب': 3, 'قلّل / وقّت': 2, 'داعم': 1 }, FOOD_CAT = [0, 0, 2, 2, 2, 2, 3, 3, 3, 4, 5, 6, 7];            // مجموعة ← فئة مدمجة: نشويات/لحوم/ألبان/خضار/فواكه/دهون/أخرى
   E.CATS = ['starch', null, 'meat', 'milk', 'veg', 'fruit', 'fat', 'other'];
-  E.ctx = function (client, D) {
+  // ---- 0.52: «المتوفر عندي» من «حصتي» لكل وجبة: ما عنده (h) يُفضَّل بقوة، وما يقدر يوفّره (c) أقل، والغائب من مجموعة اختار منها يتأخر
+E.panOf = function (client, D) {
+  var P = client && client.pantry; if (!P || client.panUse === false) return null; var out = {}, gOf = {}; (D.foods || []).forEach(function (f) { gOf[f.n] = f.g; });
+  ['B', 'L', 'D', 'S'].forEach(function (t) { var m = P[t] || {}, o = { f: {}, g: {} }; Object.keys(m).forEach(function (n) { if (m[n] !== 'h' && m[n] !== 'c') return; o.f[n] = m[n]; if (gOf[n] != null) o.g[gOf[n]] = (o.g[gOf[n]] || 0) + 1; }); out[t] = o; });
+  return out;
+};
+E.panS = function (cx, f, t) { var p = cx && cx.pan && cx.pan[t]; if (!p) return 0; var v = p.f[f.n]; return v === 'h' ? 6 : v === 'c' ? 4 : (p.g[f.g] || 0) >= 2 ? -5 : 0; };
+E.ctx = function (client, D) {
     var kws = [], diab = (client.conditions || []).some(function (c) { return c === 'سكري النوع الثاني' || c === 'مقاومة الإنسولين / ما قبل السكري'; });
     (client.allergens || []).forEach(function (lab) { var a = D.allergens.filter(function (x) { return x.label === lab; })[0]; if (a) kws = kws.concat(a.kw); });
     (client.keywords || []).forEach(function (k) { if (k) kws.push(k); });
@@ -118,7 +125,7 @@
     var rules = D.rules.filter(function (r) { return cs[r.cond] || (r.cond === 'سكر (مشترك)' && diab); });
     var byName = {}; D.foods.forEach(function (f) { byName[f.n] = f; });
     var cx = {
-      D: D, client: client, diab: diab, byName: byName, love: love, avoid: avoid,
+      D: D, client: client, diab: diab, byName: byName, love: love, avoid: avoid, pan: E.panOf(client, D),
       isExcluded: function (n) { return !!excl[n] || kws.some(function (k) { return n.indexOf(k) >= 0; }); },
       tierOf: function (n) { var t = 0, p = ' ' + n + ' '; rules.forEach(function (r) { if (p.indexOf(r.kw) >= 0) { var v = TIER[r.tier] || 0; if (v > t) t = v; } }); return t; },
       keywordsMatch: function (n) { return kws.some(function (k) { return n.indexOf(k) >= 0; }); }
@@ -231,7 +238,7 @@
       return (st.useCount[f.n] || 0) < 12;
     };
     var base = function (f, k) {
-      var m = E.fmeta(f), s = (cx.love[f.n] ? 4 : 0) - 0.0005 * f.o - 3 * (used[f.n] || 0) - 0.35 * (st.useCount[f.n] || 0) + 1.6 * jit(f, k);
+      var m = E.fmeta(f), s = (cx.love[f.n] ? 4 : 0) + E.panS(cx, f, t) - 0.0005 * f.o - 3 * (used[f.n] || 0) - 0.35 * (st.useCount[f.n] || 0) + 1.6 * jit(f, k);
       if (cz) s += m.cz === cz ? 1.5 : m.cz === 'both' ? 0.5 : m.cz === 'intl' ? -1 : -3;
       if (bud === 1) s -= (m.cost - 1) * 1.2; else if (bud === 2 && m.cost >= 3) s -= 1.5; else if (bud === 3 && m.cost >= 3) s += 0.3;
       if (life === 'quick') s -= m.prep * 0.8; else if (life === 'travel') s -= m.prep * 1.5; else if (life === 'home' && t === 'L' && m.prep === 2) s += 0.5;
@@ -415,7 +422,7 @@
           if (sl.type === 'L' && (nMeat > 1 || proc)) return;                                                   // الغداء: صنف لحم واحد وغير مصنّع
           if (sl.type === 'B' || sl.type === 'D') { var bds = protN ? bdN / protN : 1; sc += E.PREF.bdBank * bds - E.PREF.bdBank * 0.6 * (1 - bds); if (proc) sc -= 6; }                // فطور/عشاء: وجبات بيض وأجبان وألبان أولاً
           if (sl.type === 'S') { if (allS) sc += 2.5; if (anyMain) sc -= 2; }
-          x.ings.forEach(function (ig) { if (cx.love[ig.f.n]) sc += 0.4; if (used[ig.f.n]) sc -= 2; });
+          x.ings.forEach(function (ig) { if (cx.love[ig.f.n]) sc += 0.4; if (used[ig.f.n]) sc -= 2; sc += E.panS(cx, ig.f, sl.type); });
           if (!bestB || sc > bestB.sc) bestB = { x: x, sc: sc };
         });
         if (bestB) {
@@ -432,7 +439,7 @@
           if (!cands.length) cands = D.foods.filter(function (f) { return f.g === g && cx.ok(f) && !cx.avoid[f.n]; });          // احتياطي: تجاهل ملاءمة نوع الوجبة
           cands.forEach(function (f) {
             var pref = 0; if (g >= 2 && g <= 8) { if (sl.type === 'B' || sl.type === 'D') { if (R_BD.test(f.n)) pref = 8; else if (g <= 5 && R_MEAT.test(f.n)) pref = -4; if (R_PROC.test(f.n)) pref -= 6; } else if (sl.type === 'L' && g <= 5 && R_PROC.test(f.n)) pref = -12; }
-            f._s = pref + (cx.love[f.n] ? 4 : 0) - 0.0005 * f.o - 3 * (used[f.n] || 0) - 0.35 * (st.useCount[f.n] || 0) + 1.5 * ((hash(f.n) ^ Math.imul(d * 7 + si * 3 + g, 2654435761)) >>> 0) % 1000 / 1000;
+            f._s = pref + (cx.love[f.n] ? 4 : 0) + E.panS(cx, f, sl.type) - 0.0005 * f.o - 3 * (used[f.n] || 0) - 0.35 * (st.useCount[f.n] || 0) + 1.5 * ((hash(f.n) ^ Math.imul(d * 7 + si * 3 + g, 2654435761)) >>> 0) % 1000 / 1000;
           });
           cands.sort(function (p, q) { return q._s - p._s; });
           if (!cands.length) {

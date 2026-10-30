@@ -136,7 +136,7 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
   const before = pushes.length; await m2.click('.chatbtn'); await m2.fill('#chatIn', 'وزني اليوم 71.5 الحمد لله'); await m2.press('#chatIn', 'Enter'); await m2.waitForTimeout(800);
   const toD = pushes.slice(before).filter((x) => /e2e-dietitian/.test(x.u)); assert.strictEqual(toD.length, 1, 'رسالة العميل يجب أن ترسل إشعاراً للأخصائي'); assert(!toD[0].o.body);
   const dcdp = await dctx.newCDPSession(d), dregs = []; dcdp.on('ServiceWorker.workerRegistrationUpdated', (e) => dregs.push(...e.registrations)); await dcdp.send('ServiceWorker.enable'); await d.waitForTimeout(300);
-  const dreg = dregs.find((r) => r.scopeURL === SITE + '/'); assert(dreg, JSON.stringify(dregs)); assert.strictEqual(await d.textContent('.rail [data-a="hxv"] em'), '');
+  const dreg = dregs.find((r) => r.scopeURL === SITE + '/'); assert(dreg, JSON.stringify(dregs)); const pre = await d.textContent('.rail [data-a="hxv"] em'); assert(pre === '' || pre === '1', pre);   // '1' إن سبق التحقق الدوري (كل نصف دقيقة) الإشعار
   await dcdp.send('ServiceWorker.deliverPushMessage', { origin: SITE, registrationId: dreg.registrationId, data: '' });
   await d.waitForFunction(() => document.querySelector('.rail [data-a="hxv"] em').textContent === '1', null, { timeout: 8000 }); assert((await d.textContent('main')).includes('سارة أحمد'));
   ok('رسالة العميل ← إشعار للأخصائي بلا محتوى، ووصوله يوقظ «حصة» المفتوحة فتجلب الرسالة فوراً وتظهر الشارة');

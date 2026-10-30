@@ -156,6 +156,16 @@ function hxIn(c, p) {                                              // بعد ا�
     var ks = Object.keys(x.logs).sort(); if (ks.length > 90) ks.slice(0, ks.length - 90).forEach(function (k) { delete x.logs[k]; });
     return 0;                                                       // المتابعة تُحدَّث بصمت (بلا إشعار لكل لمسة)
   }
+  if (p.t === 'pantry' && p.p && typeof p.p === 'object') {     // 0.52: «المتوفر عندي» لكل وجبة
+    var pn = { at: +p.at || Date.now(), noS: !!p.noS }; ['B', 'L', 'D', 'S'].forEach(function (k) { var m = p.p[k] || {}, o = {}; Object.keys(m).slice(0, 300).forEach(function (n) { if ((m[n] === 'h' || m[n] === 'c') && n.length <= 80) o[n] = m[n]; }); pn[k] = o; });
+    c.pantry = pn; if (c.panUse == null) c.panUse = true; toast('🛒 ' + nm + ' أرسل قائمة المتوفر عنده'); return 1;
+  }
+  if (p.t === 'prof' && p.ans && typeof p.ans === 'object') {       // 0.52: «أكمل ملفك» (المرحلة الثانية من الاستمارة)
+    var a = {}, S1 = function (v) { return String(v == null ? '' : v).slice(0, 80); }, AR = function (v) { return Array.isArray(v) ? v.slice(0, 10).map(S1) : []; };
+    ['job', 'nat', 'natT', 'mar', 'vitT', 'tr', 'trM', 'fol'].forEach(function (k) { if (p.ans[k]) a[k] = S1(p.ans[k]); }); ['vit', 'trT', 'ch'].forEach(function (k) { if (p.ans[k]) a[k] = AR(p.ans[k]); });
+    if (Array.isArray(p.ans.trD)) a.trD = p.ans.trD.filter(function (d) { return d >= 0 && d <= 6; }).map(Number); if (+p.ans.waist > 30 && +p.ans.waist < 300) a.waist = +p.ans.waist;
+    c.prof = Object.assign({ at: Date.now() }, a); if (a.trD && a.trD.length) c.wdays = a.trD.slice(); toast('📋 ' + nm + ' أكمل ملفه'); return 1;
+  }
   if (p.t === 'weight' && +p.w > 20 && +p.w < 400) { x.weights = (x.weights || []).concat([[p.ts || Date.now(), Math.round(+p.w * 10) / 10]]).slice(-200); c.weight = Math.round(+p.w * 10) / 10; toast('⚖ ' + nm + ' سجّل وزنه: ' + c.weight + ' كجم'); return 1; }
   if (p.t === 'prefs' && p.food) {                                  // ما لا يحبه العميل يُضاف تلقائياً إلى «يتجنبها»، وما يحبه إلى «المفضلة»
     var no = [], lv = []; Object.keys(p.food).forEach(function (f) { if (p.food[f] === 'no') no.push(f); else if (p.food[f] === 'love') lv.push(f); });
@@ -188,6 +198,7 @@ function hxMap(q) {
   var notes = [q.meds ? 'الأدوية والمكملات: ' + q.meds : '', q.notes ? 'ملاحظات العميل: ' + q.notes : '', 'الاستيقاظ ' + (q.wake || '—') + ' • النوم ' + (q.sleep || '—') + (q.wdays && q.wdays.length ? ' • التمرين: ' + q.wdays.map(function (i) { return D.days[i]; }).join('، ') : ''), 'سُجّل من «حصتي» ' + new Date().toLocaleDateString('ar')].filter(Boolean).join('\n');
   return {
     name: String(q.name || '').trim().slice(0, 80), phone: String(q.phone || '').slice(0, 30), sex: q.sex === 'أنثى' ? 'أنثى' : 'ذكر', age: nums(q.age, 5, 110, 30), weight: nums(q.weight, 20, 400, 80), height: nums(q.height, 80, 250, 170),
+    wdays: Array.isArray(q.wdays) ? q.wdays.filter(function (d) { return d >= 0 && d <= 6; }).map(Number) : [],
     activity: act[0], goal: goal[0], meals: nums(q.nmeals, 3, 6, 5), conditions: (q.cond || []).filter(function (k) { return D.conditions.indexOf(k) >= 0; }), allergens: (q.allg || []).filter(function (k) { return al.indexOf(k) >= 0; }),
     love: Object.keys(food).filter(function (f) { return food[f] === 'love'; }), avoid: Object.keys(food).filter(function (f) { return food[f] === 'no'; }), favMeals: flat(q.like), excludedMeals: flat(q.nope), notes: notes
   };
