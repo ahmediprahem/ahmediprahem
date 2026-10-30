@@ -104,3 +104,41 @@ function ciProgress(c) {
 (function (f) { ciTab = function (c) { var h = f.apply(this, arguments); if (c.hx) { c.hx.wkNew = 0; c.hx.bdNew = 0; } return h.replace("<section class=\"ucard\"><h3>⚖ الوزن</h3>", ciProgress(c) + "<section class=\"ucard\"><h3>⚖ الوزن</h3>"); }; })(ciTab);
 (function (f) { wkItems = function () { var out = f.apply(this, arguments), hid = wkHidden(); S.clients.forEach(function (c) { var x = c.hx; if (!x) return; if (x.wkNew && !hid[c.code + ':wk']) out.push({ c: c, pri: 1, ic: '⚖', txt: 'قياس أسبوعي جديد من «حصتي»', tab: 'ci', key: c.code + ':wk' }); if (x.bdNew && !hid[c.code + ':bd']) out.push({ c: c, pri: 2, ic: '📸', txt: 'صورة تقدم جديدة', tab: 'ci', key: c.code + ':bd' }); }); return out.sort(function (a, b) { return a.pri - b.pri; }); }; })(wkItems);
 Object.assign(A, { ciZoom: function (v, el) { var o = document.createElement('div'); o.className = 'cizoom'; o.innerHTML = '<img alt="" src="' + el.getAttribute('src') + '">'; o.onclick = function () { o.remove(); }; document.body.appendChild(o); } });
+
+// ---- 0.54: متابعة أسبوعية ثابتة (تُنشئ مواعيد 4 أسابيع)، ووقت الرد اليومي، وتأكيد العميل قبل الموعد بيوم — كلها تصل «حصتي»
+var AP_MODES = ['في العيادة', 'مكالمة', 'فيديو', 'شات'];
+function apUp(c) { var now = Date.now(); return (c.appts || []).filter(function (a) { return !a.st && wkAt(a) >= now - 3600000; }).sort(function (a, b) { return wkAt(a) - wkAt(b); }).slice(0, 8); }
+function hxApptSync(c, force) {
+  if (!c || !c.hx || typeof hxSend !== 'function') return Promise.resolve();
+  var list = apUp(c).map(function (a) { return { id: a.id, d: a.d, t: a.t, type: a.type || 'متابعة', mode: a.mode || '', conf: a.conf || '' }; }), reply = (HX.st && HX.st.replyAt) || '', sig = JSON.stringify(list) + reply;
+  if (!force && c.hx.apSig === sig) return Promise.resolve(); c.hx.apSig = sig; persist(c);
+  return hxSend(c, { t: 'appt', list: list, reply: reply }).catch(function () { c.hx.apSig = ''; });
+}
+function hxApptSyncAll(force) { S.clients.forEach(function (c) { if (c.hx && c.hx.planV) hxApptSync(c, force); }); }
+['wkAdd', 'wkDel', 'wkSt'].forEach(function (k) { var f = A[k]; if (f) A[k] = function () { var r = f.apply(this, arguments); setTimeout(function () { hxApptSyncAll(); }, 50); return r; }; });
+(function (f) { wkApptTab = function (c) {
+  var w = c.weekly || {}, h = f.apply(this, arguments);
+  var card = '<div class="ucard wkweekly"><h3>🔁 متابعة أسبوعية ثابتة</h3><p class="small">موعد إلزامي كل أسبوع تتفقان عليه؛ يُنشئ مواعيد الأسابيع الأربعة القادمة، ويصل العميل في «حصتي» مع تذكير وتأكيد قبله بيوم.</p><div class="row"><div><label>اليوم</label><select id="ww_d">' + D.days.map(function (n, i) { return '<option value="' + i + '"' + (+w.dow === i ? ' selected' : '') + '>' + esc(n) + '</option>'; }).join('') + '</select></div><div><label>الساعة</label><input id="ww_t" type="time" value="' + esc(w.t || '18:00') + '"></div><div><label>الطريقة</label><select id="ww_m">' + AP_MODES.map(function (m) { return '<option' + (w.mode === m ? ' selected' : '') + '>' + m + '</option>'; }).join('') + '</select></div></div><p><button data-a="wkWeekly">' + (c.weekly ? 'تحديث وإنشاء مواعيد 4 أسابيع' : 'حفظ وإنشاء مواعيد 4 أسابيع') + '</button>' + (c.weekly ? ' <span class="small">الحالي: كل ' + esc(D.days[w.dow]) + ' ' + esc(w.t) + ' • ' + esc(w.mode) + '</span>' : '') + '</p></div>';
+  return h.replace('<div class="wktab">', '<div class="wktab">' + card);
+}; })(wkApptTab);
+(function (f) { wkRowHtml = function (c, a) { var h = f.apply(this, arguments); if (!a.conf) return h; var b = a.conf === 'ok' ? '<span class="apconf ok">✓ أكّد العميل</span>' : '<span class="apconf chg">✏️ يطلب تغيير' + (a.confNote ? ': ' + esc(a.confNote) : '') + '</span>'; return h.replace('</span><span class="wka">', b + '</span><span class="wka">'); }; })(wkRowHtml);
+(function (f) { hxIn = function (c, p) {
+  if (p.t === 'apc' && p.id) {
+    var a = (c.appts || []).filter(function (q) { return q.id === p.id; })[0]; if (!a) return 0;
+    a.conf = p.ok ? 'ok' : 'chg'; a.confNote = String(p.note || '').slice(0, 200); c.hx.apSig = '';
+    toast((p.ok ? '✓ ' : '✏️ ') + (c.name || '') + (p.ok ? ' أكّد موعد ' : ' يطلب تغيير موعد ') + wkDate(a.d) + ' ' + a.t); return 1;
+  }
+  return f.apply(this, arguments);
+}; })(hxIn);
+(function (f) { wkItems = function () { var out = f.apply(this, arguments), hid = wkHidden(); S.clients.forEach(function (c) { apUp(c).forEach(function (a) { if (a.conf === 'chg' && !hid[c.code + ':chg' + a.id]) out.push({ c: c, pri: 0, ic: '📅', txt: 'يطلب تغيير موعد ' + wkDate(a.d) + ' ' + a.t + (a.confNote ? ': ' + a.confNote : ''), tab: 'appt', key: c.code + ':chg' + a.id }); }); }); return out.sort(function (a, b) { return a.pri - b.pri; }); }; })(wkItems);
+(function (f) { hxSetPage = function () { var h = f.apply(this, arguments); return h + '<div class="ucard"><h3>⏰ وقت الرد اليومي</h3><p class="small">يرى عملاؤك في «حصتي»: «يرد أخصائيك على الرسائل يومياً الساعة …». يرسلون متى شاؤوا، وتردّ أنت مرة واحدة في وقتك.</p><label>أرد على الرسائل يومياً الساعة <input type="time" id="hx_reply" data-hxreply value="' + esc((HX.st && HX.st.replyAt) || '') + '"></label></div>'; }; })(hxSetPage);
+Object.assign(A, {
+  wkWeekly: function () {
+    var c = cur(); if (!c) return; var dow = +$('#ww_d').value, t = $('#ww_t').value || '18:00', mode = $('#ww_m').value; c.weekly = { dow: dow, t: t, mode: mode }; c.appts = c.appts || [];
+    var n = 0; for (var i = 1; n < 4 && i <= 35; i++) { var x = new Date(); x.setDate(x.getDate() + i); if (x.getDay() !== dow) continue; var d = x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0'); n++;
+      var ex = c.appts.filter(function (a) { return a.d === d && !a.st; })[0]; if (ex) { ex.t = t; ex.mode = mode; ex.type = 'متابعة أسبوعية'; continue; }
+      c.appts.push({ id: 'w' + Date.now().toString(36) + i, d: d, t: t, type: 'متابعة أسبوعية', mode: mode, note: mode, at: Date.now() }); }
+    persist(c).then(function () { return hxApptSync(c, true); }).then(function () { toast('🔁 مواعيد المتابعة الأسبوعية: كل ' + D.days[dow] + ' ' + t + (c.hx ? ' — وصلت «حصتي»' : '')); main(); if (typeof wkRail === 'function') wkRail(); });
+  }
+});
+document.addEventListener('change', function (e) { var t = e.target; if (!t.hasAttribute || !t.hasAttribute('data-hxreply') || !HX.st) return; HX.st.replyAt = t.value || ''; hxSave().then(function () { hxApptSyncAll(true); toast(t.value ? '⏰ يرى عملاؤك أنك ترد يومياً الساعة ' + t.value : 'أُلغي وقت الرد اليومي'); }); });

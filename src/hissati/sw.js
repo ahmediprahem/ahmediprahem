@@ -12,12 +12,12 @@ self.addEventListener('fetch', (e) => {                // الشبكة أولا�
 // أوقات التذكير يحفظها التطبيق هنا (hissati-rem) فيُعرض نص التذكير الأقرب للوقت الحالي.
 async function remText() {                                   // كل البنود القريبة من الوقت الحالي (ضمن 8 دقائق من الأقرب) فيصل إشعار واحد جامع، لا إشعاران
   try {
-    const r = await (await caches.open('hissati-rem')).match('/rem'); if (!r) return null; const it = (await r.json()).items || [], d = new Date(), m = d.getHours() * 60 + d.getMinutes();
+    const r = await (await caches.open('hissati-rem')).match('/rem'); if (!r) return null; const d = new Date(), dk = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'), it = ((await r.json()).items || []).filter((x) => !x.d || x.d === dk), m = d.getHours() * 60 + d.getMinutes();
     const near = it.map((x) => ({ x, d: Math.min(Math.abs(x.m - m), 1440 - Math.abs(x.m - m)) })).filter((o) => o.d <= 25).sort((a, b) => a.d - b.d); if (!near.length) return null;
     return near.filter((o) => o.d <= near[0].d + 8).map((o) => o.x);
   } catch (e) { return null; }
 }
-const REMT = (x) => x.t === 'water' ? '💧 وقت كوب ماء — سجّله في «حصتي»' : x.t === 'adhAm' ? '📿 أذكار الصباح — ابدأ يومك بذكر الله' : x.t === 'adhPm' ? '🌙 أذكار المساء — حصّن مساءك بذكر الله' : x.t === 'med' ? '💊 موعد دوائك' + (x.label ? ' — ' + x.label : '') : '🍽 حان وقت ' + (x.label || 'وجبتك') + ' — افتح خطتك';
+const REMT = (x) => x.t === 'appt' ? '📅 غداً موعد متابعتك ' + (x.label || '') + ' — أكّده من «حصتي»' : x.t === 'wk' ? '⚖ غداً موعد قياسك الأسبوعي — على الريق بعد دخول الحمام' : x.t === 'water' ? '💧 وقت كوب ماء — سجّله في «حصتي»' : x.t === 'adhAm' ? '📿 أذكار الصباح — ابدأ يومك بذكر الله' : x.t === 'adhPm' ? '🌙 أذكار المساء — حصّن مساءك بذكر الله' : x.t === 'med' ? '💊 موعد دوائك' + (x.label ? ' — ' + x.label : '') : '🍽 حان وقت ' + (x.label || 'وجبتك') + ' — افتح خطتك';
 self.addEventListener('push', (e) => {
   e.waitUntil((async () => {
     let kind = 'msg';
