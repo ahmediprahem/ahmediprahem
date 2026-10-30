@@ -496,6 +496,12 @@ html[data-theme="pulse"] .alm{background:radial-gradient(70% 50% at 50% 30%,rgba
 /* 0.52: المتوفر عندي + أكمل ملفك */
 .food.can{background:rgba(255,210,122,.14);border-color:rgba(255,210,122,.55);color:#ffe7b8}
 .pancard h3{margin:0}
+/* 0.53: قياس الأسبوع، صورة التقدم، صفحتي الصحية */
+.wkc h3{margin:0}.wkph .btn{flex:1}.wkth{width:84px;height:84px;object-fit:cover;border-radius:12px;border:1px solid var(--line)}
+.bdpv{width:100%;max-height:340px;object-fit:contain;border-radius:14px;background:rgba(0,0,0,.25)}
+.hp h2{margin:0}.hpav{width:64px;height:64px;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:rgba(255,255,255,.08);border:1px solid var(--line);flex:none}.hpav img{width:100%;height:100%;object-fit:cover}
+.hpr{display:grid;grid-template-columns:1fr auto 56px 70px;gap:8px;align-items:center;padding:6px 0;border-top:1px solid var(--line)}.hpr .dn{color:var(--mint);font-weight:700}.hpr .up{color:var(--coral);font-weight:700}
+.hpb{flex-wrap:wrap;gap:8px}.hpb img{width:72px;height:96px;object-fit:cover;border-radius:10px}
 
 /* ==========================================================================
    «حصتي» — themes.css  •  ثيم «وردة» (data-theme="rose") وثيم «نبض» (data-theme="pulse")
@@ -2501,6 +2507,51 @@ function scrProf() {
 }
 function pfKeep() { const a = V.pfA, n = $('#pfNum'), o = $('#pfOther'), qs = pfQs(a), q = qs[Math.min(V.pf, qs.length - 1)]; if (n) { const x = parseFloat(numOnly(n.value)); if (x > 30 && x < 300) a[q.k] = Math.round(x * 2) / 2; else delete a[q.k]; } if (o && q.other) a[q.other] = o.value.trim().slice(0, 80); }
 
+// ---- 0.53: قياس الأسبوع (الوزن والخصر وصورة الإنبودي والتحاليل)، وصورة التقدم كل أسبوعين بموافقة منفصلة للنشر، و«صفحتي الصحية»
+const WKD = 7 * 864e5, BDD = 14 * 864e5;
+const lastOf = (a) => (a && a.length ? a[a.length - 1].ts : 0);
+function wkBase() { return lastOf(S.checks) || S.planAt || 0; }
+function wkCard() {
+  if (!S.plan || !S.planAt) return ''; const due = now() - wkBase() >= WKD - 12 * 36e5, soon = !due && now() - wkBase() >= WKD - 36 * 36e5;
+  if (soon) return '<section class="card stack wkc"><h3>⏰ غداً موعد قياسك الأسبوعي</h3><p class="mut">قِس على الريق بعد دخول الحمام، بنفس الميزان، وجهّز شريط القياس للخصر.</p></section>';
+  return due ? '<section class="card stack wkc"><h3>⚖ قياس الأسبوع</h3><p class="mut">الوزن والخصر، وصورة الإنبودي أو التحاليل إن وُجدت. دقيقة واحدة.</p><button class="btn full" data-act="wkGo">سجّل قياس الأسبوع</button></section>' : '';
+}
+function bdCard() {
+  if (!S.plan || !S.planAt || now() - (lastOf(S.bodies) || S.planAt - BDD) < BDD || (S.bdSnooze && now() - S.bdSnooze < 3 * 864e5)) return '';
+  const first = !(S.bodies || []).length;
+  return '<section class="card stack wkc"><h3>📸 ' + (first ? 'صورة البداية' : 'صورة التقدم') + '</h3><p class="mut">' + (first ? 'صورة «قبل» الآن تقارنها بعد أسابيع بالفرق الذي لا يظهر في الميزان.' : 'صورة كل أسبوعين تريك الفرق الذي لا يظهر في الميزان.') + ' اختيارية، وتصل أخصائيك وحده مشفّرة.</p><div class="row"><button class="btn sec" data-act="bdGo">التقط صورة</button><button class="btn sm sec" data-act="bdLater">ليس الآن</button></div></section>';
+}
+function scrWk() {
+  const x = V.wkD;
+  return '<div class="scr"><div class="scroll"><div class="stack"><div class="row" style="justify-content:space-between"><h2>⚖ قياس الأسبوع</h2><button class="btn sm sec" data-act="wkX">إغلاق</button></div>'
+    + '<div class="banner info">' + I('check') + '<span>لقراءة صادقة: نفس اليوم والساعة كل أسبوع، على الريق بعد دخول الحمام، وبملابس خفيفة. الخصر عند مستوى السُّرة بعد الزفير.</span></div>'
+    + '<div class="field"><label for="wkW">الوزن (كجم) <span class="req">*</span></label><input class="inp" id="wkW" inputmode="decimal" data-numf="1" placeholder="مثال: 84.5" value="' + esc(x.w || '') + '"></div>'
+    + '<div class="field"><label for="wkWs">الخصر (سم) — اختياري</label><input class="inp" id="wkWs" inputmode="decimal" data-numf="1" placeholder="مثال: 92" value="' + esc(x.waist || '') + '"></div>'
+    + '<div class="row wkph"><button class="btn sec" data-act="wkPic" data-v="inb">' + I('camera') + (x.inb ? ' ✓ صورة الإنبودي' : ' صورة الإنبودي') + '</button><button class="btn sec" data-act="wkPic" data-v="lab">' + I('camera') + (x.lab ? ' ✓ صورة التحاليل' : ' صورة التحاليل') + '</button></div>'
+    + (x.inb || x.lab ? '<div class="row">' + ['inb', 'lab'].filter((k) => x[k]).map((k) => '<img class="wkth" alt="" src="' + x[k].th + '">').join('') + '</div>' : '') + '</div></div>'
+    + '<div class="foot"><button class="btn" data-act="wkSend">أرسل لأخصائيك</button></div></div>';
+}
+function scrBody() {
+  const x = V.bdD;
+  return '<div class="scr"><div class="scroll"><div class="stack"><div class="row" style="justify-content:space-between"><h2>📸 صورة التقدم</h2><button class="btn sm sec" data-act="bdX">إغلاق</button></div>'
+    + '<div class="banner info">' + I('lock') + '<span>نفس المكان والإضاءة والملابس في كل مرة، من الأمام. تُشفَّر على جوالك وتصل أخصائيك وحده.</span></div>'
+    + '<button class="btn sec full" data-act="bdPic">' + I('camera') + (x.img ? ' غيّر الصورة' : ' التقط أو اختر صورة') + '</button>' + (x.img ? '<img class="bdpv" alt="" src="' + x.th + '">' : '')
+    + '<label class="consent"><input type="checkbox" id="bdPub"' + (x.pub ? ' checked' : '') + '><span>أوافق أن ينشرها أخصائيي كقصة نجاح <b>بعد إخفاء الوجه وأي بيانات تدل عليّ</b> (اختياري، ويمكنني سحب الموافقة لاحقاً).</span></label></div></div>'
+    + '<div class="foot"><button class="btn" data-act="bdSend"' + (x.img ? '' : ' disabled') + '>أرسل لأخصائيك</button></div></div>';
+}
+function hpTop() {                                   // «صفحتي الصحية»: صورتي، بياناتي، آخر القياسات وصور التقدم
+  const p = S.p, ch = (S.checks || []).slice(-6), bd = (S.bodies || []).slice(-6), a = (S.prof || {}).a || {};
+  const facts = [p.age ? p.age + ' سنة' : '', p.height ? p.height + ' سم' : '', (p.cond || []).join('، '), (p.allg || []).length ? 'حساسية: ' + p.allg.join('، ') : '', a.job || '', a.tr === 'نعم' ? 'أتمرن ' + (a.trD || []).length + ' أيام' : ''].filter(Boolean);
+  const rows = ch.map((c, i) => { const prev = i ? ch[i - 1].w : null, d = prev != null ? Math.round((c.w - prev) * 10) / 10 : null; return '<div class="hpr"><span>' + new Date(c.ts).toLocaleDateString('ar', { day: 'numeric', month: 'short' }) + '</span><b>' + c.w + ' كجم</b>' + (d != null ? '<span class="' + (d <= 0 ? 'dn' : 'up') + '">' + (d <= 0 ? '↓ ' : '↑ ') + Math.abs(d) + '</span>' : '<span></span>') + '<span class="dim">' + (c.waist ? 'خصر ' + c.waist : '') + '</span></div>'; }).join('');
+  const nxt = S.planAt ? new Date(wkBase() + WKD).toLocaleDateString('ar', { weekday: 'long', day: 'numeric', month: 'short' }) : '';
+  return '<section class="card stack hp"><div class="row"><button class="hpav" data-act="avPic" aria-label="صورتي">' + (S.avatar ? '<img alt="" src="' + S.avatar + '">' : I('user')) + '</button><div style="flex:1"><h2>صفحتي الصحية</h2><div class="dim">' + esc(facts.join(' • ') || 'بياناتي') + '</div></div></div>'
+    + (rows ? '<h3>قياساتي الأسبوعية</h3>' + rows : '<p class="dim">قياسك الأسبوعي يظهر هنا.</p>') + (nxt ? '<p class="dim">موعد القياس القادم: ' + esc(nxt) + '</p>' : '')
+    + (bd.length ? '<h3>صور التقدم</h3><div class="row hpb">' + bd.map((b) => '<img alt="" src="' + b.th + '">').join('') + '</div>' : '') + '</section>';
+}
+function picFile(cb) { const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'; inp.style.display = 'none'; document.body.appendChild(inp); inp.onchange = () => { const f = inp.files && inp.files[0]; inp.remove(); if (f) cb(f); }; inp.click(); }
+async function picPrep(file) { const [a, b, c, th] = await shrink(file, [[1280, 0.72], [1024, 0.62], [800, 0.55], [240, 0.6]]); return { img: [a, b, c].find((x) => x.length < 165000) || c, th }; }
+const pid = () => 'p' + now().toString(36) + Math.random().toString(36).slice(2, 5);
+
 // ---------- مساعدات
 function toast(m) { toastMsg = m; clearTimeout(toastT); toastT = setTimeout(() => { toastMsg = ''; render(); }, 3400); render(); }
 function bmi() { const w = +S.p.weight, h = +S.p.height / 100; return w && h ? (w / (h * h)).toFixed(1) : '—'; }
@@ -2779,7 +2830,7 @@ function scrApp() {
 function tabToday() {
   const d = TODAY, L = dl(d), [done, n] = itemsOfDay(d), pct = n ? Math.round(done / n * 100) : 0, C = 2 * Math.PI * 40;
   const first = (S.p.name || '').trim().split(/\s+/)[0] || '';
-  let out = (S.fw === 'pending' ? firstWinCard() : installState() === 'done' || installState() === 'desktop' ? notifCard(true) : installCard('today')) + '<div class="hello"><div class="av sm">' + esc(first.charAt(0) || '؟') + '</div><div style="flex:1"><div class="dim">' + esc(DATA.dayNames[d] || '') + '</div><h2>أهلاً ' + esc(first) + '</h2></div>' + chatBtn() + '</div>' + chalCard() + panCard() + pfCard();
+  let out = (S.fw === 'pending' ? firstWinCard() : installState() === 'done' || installState() === 'desktop' ? notifCard(true) : installCard('today')) + '<div class="hello"><div class="av sm">' + esc(first.charAt(0) || '؟') + '</div><div style="flex:1"><div class="dim">' + esc(DATA.dayNames[d] || '') + '</div><h2>أهلاً ' + esc(first) + '</h2></div>' + chatBtn() + '</div>' + chalCard() + wkCard() + bdCard() + panCard() + pfCard();
   out += '<section class="card ring"><svg viewBox="0 0 100 100" role="img" aria-label="التزام اليوم ' + pct + '%"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="10"/><circle cx="50" cy="50" r="40" fill="none" stroke="#6fe3a9" stroke-width="10" stroke-linecap="round" stroke-dasharray="' + C + '" stroke-dashoffset="' + (C * (1 - pct / 100)) + '"/></svg><div style="flex:1"><div class="num">' + pct + '%</div><div class="mut">' + done + ' من ' + n + ' أصناف اليوم</div>'
     + (pct === 100 ? '<div class="dim" style="color:var(--mint)">يوم كامل، أحسنت!</div>' : '<div class="dim">علّم ما أكلته باللمس.</div>') + '</div></section>';
   const dp = dayPlan(d), kc = dp.kcal || DATA.kcal, pr = dp.p || DATA.pro, wt = +(dp.water || DATA.water), cups = Math.max(4, Math.min(16, Math.round(wt / CUP)));
@@ -2842,7 +2893,7 @@ function tabProgress() {
     chart = '<svg class="chart" viewBox="0 0 310 160" role="img" aria-label="منحنى الوزن">' + ticks + '<polyline points="' + W.map((w, i) => X(i) + ',' + Y(w[1])).join(' ') + '" fill="none" stroke="#9dbbff" stroke-width="2.5" stroke-linejoin="round"/>' + dots + lbl + '</svg>';
   }
   const bars = [6, 5, 4, 3, 2, 1, 0].map((back) => { const dt = new Date(now() - back * 86400000), n = DATA.dayNames[dt.getDay()] || '', v = adhBack(back); return '<div><b>' + (v == null ? '' : Math.round(v * 100)) + '</b><i class="' + (v == null ? 'na' : v < .6 ? 'lo' : '') + '" style="height:' + (v == null ? 6 : Math.max(6, v * 80)) + 'px"></i><small>' + esc(String(n).replace('ال', '').slice(0, 3)) + '</small></div>'; }).join('');
-  return '<h2>تقدّمي</h2><section class="card stack"><div class="row" style="justify-content:space-between"><h3>الوزن</h3><span class="dim">' + (W.length > 1 ? (diff <= 0 ? diff + ' كجم منذ البداية' : '+' + diff + ' كجم') : '') + '</span></div>' + chart
+  return hpTop() + '<h2>تقدّمي</h2><section class="card stack"><div class="row" style="justify-content:space-between"><h3>الوزن</h3><span class="dim">' + (W.length > 1 ? (diff <= 0 ? diff + ' كجم منذ البداية' : '+' + diff + ' كجم') : '') + '</span></div>' + chart
     + '<div class="row"><input class="inp" id="wIn" type="text" data-numf="1" autocomplete="off" inputmode="decimal" placeholder="وزن اليوم (كجم)" style="flex:1"><button class="btn sm" data-act="weigh">' + I('scale') + ' سجّل</button></div></section>'
     + '<section class="card stack"><div class="row" style="justify-content:space-between"><h3>الالتزام آخر 7 أيام</h3><span class="dim">% من الأصناف</span></div><div class="wk">' + bars + '</div></section>'
     + '<section class="card achcard"><div class="row" style="justify-content:space-between"><h3>🏅 إنجازاتي</h3><span class="dim">' + (S.ach || []).length + ' شهادة</span></div><button class="btn sm" data-act="achs">' + I('sparkle') + ' عرض إنجازاتي وشهاداتي</button></section>' + habitsProgress() + themeCard() + remCard() + '<section class="card stack"><h3>الحساب</h3><p class="dim">ملفك لدى ' + esc(S.dname) + (S.code ? ' • رقم ' + esc(S.code) : '') + '. بياناتك محفوظة مشفّرة على هذا الجوال فقط.</p>' + installCard('acct') + notifCard(false) + '<div class="row"><button class="btn sm sec" data-act="lock">' + I('lock') + ' قفل التطبيق</button><button class="btn sm sec" data-act="xferNew">' + I('phone') + ' نقل حسابي</button></div><button class="link" data-act="wipe" style="color:var(--coral)">حذف بياناتي من هذا الجوال</button></section>';
@@ -3366,7 +3417,7 @@ function render() {
   const sc = $('.scroll'), key = (S ? S.screen + S.step + S.tab + (S.chat ? 'c' : '') : '') + V.screen, top = sc ? sc.scrollTop : 0;
   let scr;
   if (V.screen === 'boot') scr = scrBoot(); else if (V.screen === 'bad') scr = scrBad(); else if (V.screen === 'start') scr = scrStart(); else if (V.screen === 'moved') scr = scrMoved(); else if (V.screen === 'lock') scr = scrLock(); else if (V.screen === 'pin') scr = scrPin(); else if (V.screen === 'onb') scr = scrOnb();
-  else scr = V.pan != null ? scrPantry() : V.pf != null ? scrProf() : S.rqOpen && window.RL && RL.idx ? scrQuiz() : S.chat ? scrChat() : S.plan && S.screen === 'app' ? scrApp() : { invite: scrInvite, wizard: scrWizard, review: scrReview, sent: scrSent, app: scrSent }[S.screen]();
+  else scr = V.wk ? scrWk() : V.bd ? scrBody() : V.pan != null ? scrPantry() : V.pf != null ? scrProf() : S.rqOpen && window.RL && RL.idx ? scrQuiz() : S.chat ? scrChat() : S.plan && S.screen === 'app' ? scrApp() : { invite: scrInvite, wizard: scrWizard, review: scrReview, sent: scrSent, app: scrSent }[S.screen]();
   const keep = {}; document.querySelectorAll('video[data-keep]').forEach((n) => { keep[n.dataset.keep] = n; });
   const cmI = $('#cmIn'), cmV = cmI ? [cmI.value, document.activeElement === cmI] : null;          // مسودة التعليق تبقى عند إعادة الرسم (وصول التعليقات مثلاً)
   $('#root').innerHTML = '<div class="stage"><div class="device">' + (V.online ? '' : '<div class="offline">بلا اتصال — تُرسل بياناتك عند عودة الإنترنت</div>') + scr + (S ? sheetHtml() : '') + (toastMsg ? '<div class="toast" role="status">' + I('check') + '<span>' + esc(toastMsg) + '</span></div>' : '') + '</div></div>';
@@ -3596,6 +3647,22 @@ document.addEventListener('click', (e) => {
     case 'pfDay': { const arr = V.pfA.trD = V.pfA.trD || [], j = arr.indexOf(+v); j < 0 ? arr.push(+v) : arr.splice(j, 1); arr.sort(); break; }
     case 'pfB': pfKeep(); V.pf = Math.max(0, V.pf - 1); break;
     case 'pfN': { pfKeep(); if (V.pf < pfQs(V.pfA).length - 1) { V.pf++; break; } const a = V.pfA; S.prof = { at: now(), a }; V.pf = null; send({ t: 'prof', ans: a }); save(); toast('شكراً! وصل ملفك لأخصائيك ✓'); break; }
+    case 'wkGo': V.wk = 1; V.wkD = {}; break;
+    case 'wkX': V.wk = 0; break;
+    case 'wkPic': { const kind = v; V.wkD.w = $('#wkW').value; V.wkD.waist = $('#wkWs').value; picFile(async (f) => { try { V.wkD[kind] = await picPrep(f); render(); } catch (e) { toast(e.message); } }); break; }
+    case 'wkSend': {
+      const w = parseFloat(numOnly($('#wkW').value)), ws = parseFloat(numOnly($('#wkWs').value)); if (!(w > 20 && w < 400)) { toast('اكتب وزنك بالكيلو'); break; }
+      const c = { ts: now(), w: Math.round(w * 10) / 10 }; if (ws > 30 && ws < 300) c.waist = Math.round(ws * 2) / 2; const x = V.wkD;
+      S.checks = (S.checks || []).concat([c]).slice(-60); S.weights.push([c.ts, c.w]); send({ t: 'wk', w: c.w, waist: c.waist || 0, ts: c.ts });
+      ['inb', 'lab'].forEach((k) => { if (x[k]) send({ t: 'wkimg', id: pid(), kind: k, img: x[k].img.split(',')[1], ts: c.ts }); });
+      V.wk = 0; save(); toast('وصل قياس الأسبوع لأخصائيك ✓'); break;
+    }
+    case 'bdGo': V.bd = 1; V.bdD = {}; break;
+    case 'bdX': V.bd = 0; break;
+    case 'bdLater': S.bdSnooze = now(); save(); break;
+    case 'bdPic': picFile(async (f) => { try { Object.assign(V.bdD, await picPrep(f)); render(); } catch (e) { toast(e.message); } }); break;
+    case 'bdSend': { const x = V.bdD; if (!x.img) break; x.pub = !!($('#bdPub') || {}).checked; const id = pid(); S.bodies = (S.bodies || []).concat([{ id, ts: now(), th: x.th, pub: x.pub }]).slice(-24); send({ t: 'body', id, img: x.img.split(',')[1], pub: x.pub, ts: now() }); V.bd = 0; save(); toast('وصلت صورة التقدم لأخصائيك ✓'); break; }
+    case 'avPic': picFile(async (f) => { try { const [th] = await shrink(f, [[200, 0.7]]); S.avatar = th; save(); render(); } catch (e) { toast(e.message); } }); break;
     case 'subDay': { const L = dl(TODAY), t = $('#offT'); if (t) L.offT = t.value.trim().slice(0, 500); L.sub = Date.now(); logNow(TODAY); toast('وصل تسجيل اليوم لأخصائيك ✓'); break; }
     case 'qnote': { const t = $('#noteIn'); t.value = (t.value ? t.value + ' • ' : '') + v; t.focus(); return; }
     case 'savenote': { const t = $('#noteIn').value.trim().slice(0, 500), L = dl(TODAY); if (t) L.note[sheet.si] = t; else delete L.note[sheet.si]; sheet = null; queueLog(dkey(new Date())); toast('حُفظت الملاحظة وتصل أخصائيك.'); break; }

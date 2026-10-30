@@ -73,3 +73,34 @@ function alignCarb(days, td) {                                      // أيام 
 }
 Object.assign(A, { panNoSnack: function () { var c = cur(); if (!c) return; c.meals = 3; persist(c).then(function () { toast('صارت الوجبات 3 بلا سناك — أعد التوليد'); main(); }); } });
 document.addEventListener('change', function (e) { var t = e.target, c; if (!t.hasAttribute || !t.hasAttribute('data-panuse') || !(c = cur())) return; c.panUse = t.checked; persist(c).then(main); });
+
+// ---- 0.53: قياس الأسبوع وصور الإنبودي والتحاليل وصور التقدم من «حصتي»
+(function (f) { hxIn = function (c, p) {
+  var x = c.hx, nm = c.name || x.label || '', okImg = function (s) { return typeof s === 'string' && s.length < 300000 && /^[A-Za-z0-9+/=]+$/.test(s); };
+  if (p.t === 'wk' && +p.w > 20 && +p.w < 400) {
+    var w = Math.round(+p.w * 10) / 10, ws = +p.waist > 30 && +p.waist < 300 ? +p.waist : null, ts = +p.ts || Date.now(), d = new Date(ts), dk = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    x.weights = (x.weights || []).concat([[ts, w]]).slice(-200); x.checks = (x.checks || []).concat([{ ts: ts, w: w, waist: ws }]).slice(-60); c.weight = w;
+    var m = c.med = c.med || {}; m.visits = m.visits || []; var v = { id: 'h' + ts, d: dk, w: w, note: 'قياس أسبوعي من «حصتي»' }; if (ws) v.waist = ws; m.visits.push(v);
+    x.wkNew = (x.wkNew || 0) + 1; toast('⚖ ' + nm + ' سجّل قياس الأسبوع: ' + w + ' كجم' + (ws ? ' • خصر ' + ws : '')); return 1;
+  }
+  if (p.t === 'wkimg' && okImg(p.img) && p.id && (p.kind === 'inb' || p.kind === 'lab')) {
+    if ((x.wkimgs || []).some(function (q) { return q.id === p.id; })) return 0;
+    x.wkimgs = (x.wkimgs || []).concat([{ id: String(p.id).slice(0, 24), kind: p.kind, ts: +p.ts || Date.now(), img: 'data:image/jpeg;base64,' + p.img }]).slice(-40); return 1;
+  }
+  if (p.t === 'body' && okImg(p.img) && p.id) {
+    if ((x.bodies || []).some(function (q) { return q.id === p.id; })) return 0;
+    x.bodies = (x.bodies || []).concat([{ id: String(p.id).slice(0, 24), ts: +p.ts || Date.now(), pub: !!p.pub, img: 'data:image/jpeg;base64,' + p.img }]).slice(-30); x.bdNew = (x.bdNew || 0) + 1;
+    toast('📸 ' + nm + ' أرسل صورة تقدم' + (p.pub ? ' (يوافق على النشر بلا وجه)' : '')); return 1;
+  }
+  return f.apply(this, arguments);
+}; })(hxIn);
+function ciProgress(c) {
+  var x = c.hx || {}, ch = (x.checks || []).slice(-6), im = (x.wkimgs || []).slice(-6).reverse(), bd = x.bodies || [], h = '';
+  if (ch.length) h += '<section class="ucard"><h3>⚖ قياسات «حصتي» الأسبوعية</h3><div class="ciws">' + ch.map(function (q, i) { var dd = i ? q.w - ch[i - 1].w : 0; return '<span class="ciw">' + new Date(q.ts).toLocaleDateString('ar', { day: 'numeric', month: 'short' }) + ' <b>' + num(q.w) + '</b>' + (i ? ' ' + ciArrow(dd) : '') + (q.waist ? ' • خصر ' + num(q.waist) : '') + '</span>'; }).join('') + '</div>'
+    + (im.length ? '<div class="ciimgs">' + im.map(function (q) { return '<figure><img alt="" src="' + q.img + '" data-a="ciZoom"><figcaption>' + (q.kind === 'inb' ? 'إنبودي' : 'تحاليل') + ' • ' + new Date(q.ts).toLocaleDateString('ar') + '</figcaption></figure>'; }).join('') + '</div>' : '') + '</section>';
+  if (bd.length) { var a = bd[0], b = bd[bd.length - 1]; h += '<section class="ucard"><h3>📸 قبل وبعد</h3><div class="cibd"><figure><img alt="" src="' + a.img + '" data-a="ciZoom"><figcaption>البداية • ' + new Date(a.ts).toLocaleDateString('ar') + '</figcaption></figure>' + (bd.length > 1 ? '<figure><img alt="" src="' + b.img + '" data-a="ciZoom"><figcaption>الآن • ' + new Date(b.ts).toLocaleDateString('ar') + '</figcaption></figure>' : '') + '</div><p class="small">' + bd.length + ' صور • ' + (b.pub ? '✓ يوافق على نشر الأخيرة بعد إخفاء الوجه وأي بيانات' : 'لا يوافق على النشر — للمتابعة فقط') + '</p></section>'; }
+  return h;
+}
+(function (f) { ciTab = function (c) { var h = f.apply(this, arguments); if (c.hx) { c.hx.wkNew = 0; c.hx.bdNew = 0; } return h.replace("<section class=\"ucard\"><h3>⚖ الوزن</h3>", ciProgress(c) + "<section class=\"ucard\"><h3>⚖ الوزن</h3>"); }; })(ciTab);
+(function (f) { wkItems = function () { var out = f.apply(this, arguments), hid = wkHidden(); S.clients.forEach(function (c) { var x = c.hx; if (!x) return; if (x.wkNew && !hid[c.code + ':wk']) out.push({ c: c, pri: 1, ic: '⚖', txt: 'قياس أسبوعي جديد من «حصتي»', tab: 'ci', key: c.code + ':wk' }); if (x.bdNew && !hid[c.code + ':bd']) out.push({ c: c, pri: 2, ic: '📸', txt: 'صورة تقدم جديدة', tab: 'ci', key: c.code + ':bd' }); }); return out.sort(function (a, b) { return a.pri - b.pri; }); }; })(wkItems);
+Object.assign(A, { ciZoom: function (v, el) { var o = document.createElement('div'); o.className = 'cizoom'; o.innerHTML = '<img alt="" src="' + el.getAttribute('src') + '">'; o.onclick = function () { o.remove(); }; document.body.appendChild(o); } });

@@ -354,3 +354,5 @@ details.tbm:not([open])>.tbp,details.im:not([open])>.imx{display:none}
 /* 0.52: المتوفر والملف من حصتي */
 .panbox summary{cursor:pointer;font-weight:700}.panbox ul{margin:8px 0;padding-inline-start:18px;line-height:1.8}
 .cidl{display:grid;grid-template-columns:max-content 1fr;gap:4px 14px;margin:0}.cidl dt{color:#667}.cidl dd{margin:0;font-weight:600}
+.ciimgs,.cibd{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}.ciimgs figure,.cibd figure{margin:0}.ciimgs img{width:110px;height:110px;object-fit:cover;border-radius:10px;cursor:zoom-in}.cibd img{width:180px;height:240px;object-fit:cover;border-radius:12px;cursor:zoom-in}.ciimgs figcaption,.cibd figcaption{font-size:11px;color:#667;text-align:center}
+.cizoom{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.82);display:grid;place-items:center;cursor:zoom-out}.cizoom img{max-width:92vw;max-height:92vh;border-radius:12px}

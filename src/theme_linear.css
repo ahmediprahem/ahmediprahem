@@ -235,3 +235,4 @@ html:is([data-theme="linear"],[data-theme="glass"]) .hudhl{background:rgba(255,1
 html:is([data-theme="linear"],[data-theme="glass"]) .cikpi small,html:is([data-theme="linear"],[data-theme="glass"]) .cid .ciex{color:#c5cde3}
 html:is([data-theme="linear"],[data-theme="glass"]) .ciup.good{color:#6fe3a9}html:is([data-theme="linear"],[data-theme="glass"]) .ciup.bad{color:#ff9d88}html:is([data-theme="linear"],[data-theme="glass"]) .cihl{color:#ffc9c9}html:is([data-theme="linear"],[data-theme="glass"]) .cid.off .ciex{color:#fbbf6a}html:is([data-theme="linear"],[data-theme="glass"]) .cid.low span:nth-child(3){color:#ff9d88}
 html:is([data-theme="linear"],[data-theme="glass"]) .cidl dt{color:#c5cde3}
+html:is([data-theme="linear"],[data-theme="glass"]) .ciimgs figcaption,html:is([data-theme="linear"],[data-theme="glass"]) .cibd figcaption{color:#c5cde3}
