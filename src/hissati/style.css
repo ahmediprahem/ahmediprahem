@@ -503,3 +503,5 @@ html[data-theme="pulse"] .alm{background:radial-gradient(70% 50% at 50% 30%,rgba
 /* 0.55: النقاط والدعوة */
 .pts h3,.ref h3{margin:0}.ptn{font-size:30px;color:var(--mint)}.refc{font-size:22px;letter-spacing:2px;flex:1}.rcpyt{margin:8px 0}
 .supi{padding:8px 0;border-top:1px solid var(--line)}
+/* 0.57: مواقيت الصلاة */
+.prc h3{margin:0}.prrow{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:10px;text-align:center}.prrow>div{padding:8px 2px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid var(--line)}.prrow>div.on{border-color:rgba(111,227,169,.7);background:rgba(111,227,169,.12)}.prrow small{display:block;color:var(--mut);font-size:11px}.prrow b{font-size:13px}

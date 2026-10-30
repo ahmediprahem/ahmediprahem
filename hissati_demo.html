@@ -508,6 +508,8 @@ html[data-theme="pulse"] .alm{background:radial-gradient(70% 50% at 50% 30%,rgba
 /* 0.55: النقاط والدعوة */
 .pts h3,.ref h3{margin:0}.ptn{font-size:30px;color:var(--mint)}.refc{font-size:22px;letter-spacing:2px;flex:1}.rcpyt{margin:8px 0}
 .supi{padding:8px 0;border-top:1px solid var(--line)}
+/* 0.57: مواقيت الصلاة */
+.prc h3{margin:0}.prrow{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:10px;text-align:center}.prrow>div{padding:8px 2px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid var(--line)}.prrow>div.on{border-color:rgba(111,227,169,.7);background:rgba(111,227,169,.12)}.prrow small{display:block;color:var(--mut);font-size:11px}.prrow b{font-size:13px}
 
 /* ==========================================================================
    «حصتي» — themes.css  •  ثيم «وردة» (data-theme="rose") وثيم «نبض» (data-theme="pulse")
@@ -2588,6 +2590,29 @@ function ptsCard() {
 // ---- 0.56: ما رشّحه الأخصائي من مكملات وأعشاب (مع الجرعة والتنبيه)
 function suppCard() { const L = S.supps || []; return L.length ? '<section class="card stack"><h3>💊 مكملاتي من أخصائيك</h3>' + L.map((x) => '<div class="supi"><b>' + (x.k === 'h' ? '🌿 ' : '💊 ') + esc(x.n) + '</b>' + (x.dose ? '<div>' + esc(x.dose) + '</div>' : '') + (x.note ? '<div class="dim">' + esc(x.note) + '</div>' : '') + (x.warn ? '<div class="dim">⚠ ' + esc(x.warn) + '</div>' : '') + '</div>').join('') + '<p class="dim">لا تبدأ أو تغيّر جرعة دواء أو مكمل دون الرجوع لطبيبك وأخصائيك. يمكنك ضبط تذكير له من «التذكيرات».</p></section>' : ''; }
 
+// ---- 0.57: أوقات الصلاة تُحسب على الجهاز بلا إنترنت (الهيئة المصرية لمدن مصر، وأم القرى لمدن السعودية)، والصلاة على النبي ﷺ، وخطواتي
+const CITIES = [['القاهرة', 30.0444, 31.2357, 'eg'], ['الجيزة', 30.0131, 31.2089, 'eg'], ['الإسكندرية', 31.2001, 29.9187, 'eg'], ['المنصورة', 31.0409, 31.3785, 'eg'], ['طنطا', 30.7865, 31.0004, 'eg'], ['الزقازيق', 30.5877, 31.502, 'eg'], ['أسيوط', 27.1809, 31.1837, 'eg'], ['الأقصر', 25.6872, 32.6396, 'eg'], ['أسوان', 24.0889, 32.8998, 'eg'],
+  ['الرياض', 24.7136, 46.6753, 'sa'], ['جدة', 21.4858, 39.1925, 'sa'], ['مكة المكرمة', 21.3891, 39.8579, 'sa'], ['المدينة المنورة', 24.5247, 39.5692, 'sa'], ['الدمام', 26.4207, 50.0888, 'sa'], ['الخبر', 26.2172, 50.1971, 'sa'], ['الطائف', 21.2854, 40.4183, 'sa'], ['أبها', 18.2164, 42.5053, 'sa'], ['تبوك', 28.3835, 36.5662, 'sa'], ['بريدة', 26.326, 43.975, 'sa']];
+const PRN = { fajr: 'الفجر', dhuhr: 'الظهر', asr: 'العصر', maghrib: 'المغرب', isha: 'العشاء' };
+function prayTimes(date, lat, lng, tz, method) {        // خوارزمية موقع الشمس القياسية (PrayTimes)؛ النتيجة بالدقائق من منتصف الليل بتوقيت tz
+  const rad = (d) => d * Math.PI / 180, deg = (r) => r * 180 / Math.PI, fix = (a, b) => { a = a - b * Math.floor(a / b); return a < 0 ? a + b : a; };
+  const y = date.getFullYear(), mo = date.getMonth() + 1, dd = date.getDate(), Y = mo <= 2 ? y - 1 : y, M = mo <= 2 ? mo + 12 : mo, A = Math.floor(Y / 100), B = 2 - A + Math.floor(A / 4);
+  const jd = Math.floor(365.25 * (Y + 4716)) + Math.floor(30.6001 * (M + 1)) + dd + B - 1524.5 - lng / 360, D = jd - 2451545;
+  const g = fix(357.529 + 0.98560028 * D, 360), q = fix(280.459 + 0.98564736 * D, 360), L = fix(q + 1.915 * Math.sin(rad(g)) + 0.02 * Math.sin(rad(2 * g)), 360), e = 23.439 - 0.00000036 * D;
+  const RA = fix(deg(Math.atan2(Math.cos(rad(e)) * Math.sin(rad(L)), Math.cos(rad(L)))) / 15, 24), decl = deg(Math.asin(Math.sin(rad(e)) * Math.sin(rad(L)))), eqt = q / 15 - RA;
+  const noon = 12 + tz - lng / 15 - (eqt > 12 ? eqt - 24 : eqt < -12 ? eqt + 24 : eqt);
+  const T = (alt) => deg(Math.acos((Math.sin(rad(alt)) - Math.sin(rad(decl)) * Math.sin(rad(lat))) / (Math.cos(rad(decl)) * Math.cos(rad(lat))))) / 15;
+  const asrAlt = deg(Math.atan(1 / (1 + Math.tan(rad(Math.abs(lat - decl))))));
+  const fa = method === 'sa' ? 18.5 : method === 'eg' ? 19.5 : 18, ia = method === 'eg' ? 17.5 : 17, mg = noon + T(-0.833);
+  const m = (h) => Math.round(h * 60), mgm = m(mg) + 1;
+  return { fajr: m(noon - T(-fa)), sunrise: m(noon - T(-0.833)), dhuhr: m(noon) + 1, asr: m(noon + T(asrAlt)), maghrib: mgm, isha: method === 'sa' ? mgm + 90 : m(noon + T(-ia)) };
+}
+function prNow() { const R = S.rem || {}, c = CITIES.find((x) => x[0] === R.prCity); if (!c) return null; const d = new Date(), tz = -d.getTimezoneOffset() / 60; return prayTimes(d, c[1], c[2], tz, c[3]); }
+const m2hm = (m) => String(Math.floor(m / 60) % 24).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+function prCard() { const P = prNow(); if (!P) return ''; const n = new Date(), cm = n.getHours() * 60 + n.getMinutes(), nx = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'].find((k) => P[k] > cm);
+  return '<section class="card prc"><div class="row" style="justify-content:space-between"><h3>🕌 مواقيت الصلاة • ' + esc(S.rem.prCity) + '</h3>' + (nx ? '<span class="dim">التالية: ' + PRN[nx] + ' ' + hm12(m2hm(P[nx])) + '</span>' : '') + '</div><div class="prrow">' + ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'].map((k) => '<div class="' + (k === nx ? 'on' : '') + '"><small>' + PRN[k] + '</small><b>' + hm12(m2hm(P[k])) + '</b></div>').join('') + '</div></section>'; }
+function stepsWeek() { let tot = 0, nd = 0; for (let i = 0; i < 7; i++) { const L = S.log[dkey(new Date(now() - i * 864e5))], v = L && L.h && +L.h.steps; if (v) { tot += v; nd++; } } return { tot, nd, avg: nd ? Math.round(tot / nd) : 0 }; }
+
 // ---------- مساعدات
 function toast(m) { toastMsg = m; clearTimeout(toastT); toastT = setTimeout(() => { toastMsg = ''; render(); }, 3400); render(); }
 function bmi() { const w = +S.p.weight, h = +S.p.height / 100; return w && h ? (w / (h * h)).toFixed(1) : '—'; }
@@ -2866,7 +2891,7 @@ function scrApp() {
 function tabToday() {
   const d = TODAY, L = dl(d), [done, n] = itemsOfDay(d), pct = n ? Math.round(done / n * 100) : 0, C = 2 * Math.PI * 40;
   const first = (S.p.name || '').trim().split(/\s+/)[0] || '';
-  let out = (S.fw === 'pending' ? firstWinCard() : installState() === 'done' || installState() === 'desktop' ? notifCard(true) : installCard('today')) + '<div class="hello"><div class="av sm">' + esc(first.charAt(0) || '؟') + '</div><div style="flex:1"><div class="dim">' + esc(DATA.dayNames[d] || '') + '</div><h2>أهلاً ' + esc(first) + '</h2></div>' + chatBtn() + '</div>' + chalCard() + apCard() + wkCard() + bdCard() + panCard() + pfCard();
+  let out = (S.fw === 'pending' ? firstWinCard() : installState() === 'done' || installState() === 'desktop' ? notifCard(true) : installCard('today')) + '<div class="hello"><div class="av sm">' + esc(first.charAt(0) || '؟') + '</div><div style="flex:1"><div class="dim">' + esc(DATA.dayNames[d] || '') + '</div><h2>أهلاً ' + esc(first) + '</h2></div>' + chatBtn() + '</div>' + chalCard() + prCard() + apCard() + wkCard() + bdCard() + panCard() + pfCard();
   out += '<section class="card ring"><svg viewBox="0 0 100 100" role="img" aria-label="التزام اليوم ' + pct + '%"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="10"/><circle cx="50" cy="50" r="40" fill="none" stroke="#6fe3a9" stroke-width="10" stroke-linecap="round" stroke-dasharray="' + C + '" stroke-dashoffset="' + (C * (1 - pct / 100)) + '"/></svg><div style="flex:1"><div class="num">' + pct + '%</div><div class="mut">' + done + ' من ' + n + ' أصناف اليوم</div>'
     + (pct === 100 ? '<div class="dim" style="color:var(--mint)">يوم كامل، أحسنت!</div>' : '<div class="dim">علّم ما أكلته باللمس.</div>') + '</div></section>';
   const dp = dayPlan(d), kc = dp.kcal || DATA.kcal, pr = dp.p || DATA.pro, wt = +(dp.water || DATA.water), cups = Math.max(4, Math.min(16, Math.round(wt / CUP)));
@@ -2929,7 +2954,8 @@ function tabProgress() {
     chart = '<svg class="chart" viewBox="0 0 310 160" role="img" aria-label="منحنى الوزن">' + ticks + '<polyline points="' + W.map((w, i) => X(i) + ',' + Y(w[1])).join(' ') + '" fill="none" stroke="#9dbbff" stroke-width="2.5" stroke-linejoin="round"/>' + dots + lbl + '</svg>';
   }
   const bars = [6, 5, 4, 3, 2, 1, 0].map((back) => { const dt = new Date(now() - back * 86400000), n = DATA.dayNames[dt.getDay()] || '', v = adhBack(back); return '<div><b>' + (v == null ? '' : Math.round(v * 100)) + '</b><i class="' + (v == null ? 'na' : v < .6 ? 'lo' : '') + '" style="height:' + (v == null ? 6 : Math.max(6, v * 80)) + 'px"></i><small>' + esc(String(n).replace('ال', '').slice(0, 3)) + '</small></div>'; }).join('');
-  return hpTop() + suppCard() + ptsCard() + '<h2>تقدّمي</h2><section class="card stack"><div class="row" style="justify-content:space-between"><h3>الوزن</h3><span class="dim">' + (W.length > 1 ? (diff <= 0 ? diff + ' كجم منذ البداية' : '+' + diff + ' كجم') : '') + '</span></div>' + chart
+  const sw = stepsWeek();
+  return hpTop() + (sw.nd ? '<section class="card stack"><h3>👣 خطواتي آخر 7 أيام</h3><div class="stats3"><div class="st"><b>' + sw.tot.toLocaleString('ar') + '</b><small>خطوة</small></div><div class="st"><b>' + sw.avg.toLocaleString('ar') + '</b><small>متوسط يومي</small></div><div class="st"><b>' + sw.nd + '</b><small>أيام مسجّلة</small></div></div><p class="dim">سجّلها من «تسجيل اليوم» كما يعرضها عدّاد جوالك أو ساعتك.</p></section>' : '') + suppCard() + ptsCard() + '<h2>تقدّمي</h2><section class="card stack"><div class="row" style="justify-content:space-between"><h3>الوزن</h3><span class="dim">' + (W.length > 1 ? (diff <= 0 ? diff + ' كجم منذ البداية' : '+' + diff + ' كجم') : '') + '</span></div>' + chart
     + '<div class="row"><input class="inp" id="wIn" type="text" data-numf="1" autocomplete="off" inputmode="decimal" placeholder="وزن اليوم (كجم)" style="flex:1"><button class="btn sm" data-act="weigh">' + I('scale') + ' سجّل</button></div></section>'
     + '<section class="card stack"><div class="row" style="justify-content:space-between"><h3>الالتزام آخر 7 أيام</h3><span class="dim">% من الأصناف</span></div><div class="wk">' + bars + '</div></section>'
     + '<section class="card achcard"><div class="row" style="justify-content:space-between"><h3>🏅 إنجازاتي</h3><span class="dim">' + (S.ach || []).length + ' شهادة</span></div><button class="btn sm" data-act="achs">' + I('sparkle') + ' عرض إنجازاتي وشهاداتي</button></section>' + habitsProgress() + themeCard() + remCard() + '<section class="card stack"><h3>الحساب</h3><p class="dim">ملفك لدى ' + esc(S.dname) + (S.code ? ' • رقم ' + esc(S.code) : '') + '. بياناتك محفوظة مشفّرة على هذا الجوال فقط.</p>' + installCard('acct') + notifCard(false) + '<div class="row"><button class="btn sm sec" data-act="lock">' + I('lock') + ' قفل التطبيق</button><button class="btn sm sec" data-act="xferNew">' + I('phone') + ' نقل حسابي</button></div><button class="link" data-act="wipe" style="color:var(--coral)">حذف بياناتي من هذا الجوال</button></section>';
@@ -3011,7 +3037,7 @@ function rcpSheet() {
 const WATER = [600, 720, 840, 960, 1080, 1200];
 const MEDMAX = 4, hm2m = (x) => { const m = /^(\d{1,2}):(\d{2})/.exec(x || ''); return m ? (Math.round((+m[1] * 60 + +m[2]) / 15) * 15) % 1440 : null; };
 function remLimit(it) {                              // 0.54: ساعات الهدوء وحد أقصى يومي (الدواء والمواعيد لا تُحذف أبداً)
-  const R = S.rem || {}, q = R.quiet ? [hm2m(R.qFrom || '23:00'), hm2m(R.qTo || '07:00')] : null, keep = (x) => x.t === 'med' || x.t === 'appt';
+  const R = S.rem || {}, q = R.quiet ? [hm2m(R.qFrom || '23:00'), hm2m(R.qTo || '07:00')] : null, keep = (x) => x.t === 'med' || x.t === 'appt' || x.t === 'pr';
   const inQ = (m) => q && (q[0] <= q[1] ? m >= q[0] && m < q[1] : m >= q[0] || m < q[1]);
   let out = it.filter((x) => keep(x) || !inQ(x.m)); const cap = +R.cap || 0;
   if (cap) { const order = ['water', 'meal', 'wk', 'adhPm', 'adhAm']; while (out.filter((x) => !x.d).length > cap) { const t = order.find((k) => out.some((x) => x.t === k)); if (!t) break; const i = out.map((x) => x.t).lastIndexOf(t); out.splice(i, 1); } }
@@ -3023,6 +3049,9 @@ function remItems() {                              // أوقات اليوم ال
   if (R.adhAm) { const m = hm2m(R.adhAmT || '06:00'); if (m != null) it.push({ m, t: 'adhAm' }); }
   if (R.adhPm) { const m = hm2m(R.adhPmT || '17:30'); if (m != null) it.push({ m, t: 'adhPm' }); }
   if (R.med) (R.meds || []).slice(0, MEDMAX).forEach((x) => { const m = hm2m(x.t); if (m != null) it.push({ m, t: 'med', label: String(x.n || '').slice(0, 40) }); });
+  const P = R.pray ? prNow() : null, q15 = (m) => Math.min(1425, Math.ceil(m / 15) * 15);   // الأذان ثم أقرب ربع ساعة بعده (لا قبله)
+  if (P) ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'].forEach((k) => it.push({ m: q15(P[k]), t: 'pr', label: PRN[k] + ' ' + hm12(m2hm(P[k])) }));
+  if (R.sal) { const m = hm2m(R.salT || '21:00'); if (m != null) it.push({ m, t: 'sal' }); if (new Date().getDay() === 5) [10 * 60, 13 * 60 + 30, 17 * 60].forEach((x) => it.push({ m: x, t: 'sal', d: dkey(new Date()) })); }
   const eve = 20 * 60, dk = (t) => dkey(new Date(t));                       // 0.54: تذكير قبل الموعد بيوم (والقياس الأسبوعي) بتاريخ محدد
   (S.appts || []).forEach((a) => { const t = new Date(a.d + 'T12:00').getTime() - 864e5; if (t > now() - 864e5) it.push({ m: eve, t: 'appt', d: dk(t), label: hm12(a.t) + (a.mode ? ' • ' + a.mode : '') }); });
   if (S.plan && S.planAt) it.push({ m: eve, t: 'wk', d: dk(wkBase() + WKD - 864e5) });
@@ -3043,6 +3072,8 @@ function remCard() {
     + tg('adhPm', 'أذكار المساء', 'تذكير يومي بوقتك المفضّل') + (R.adhPm ? tm('adhPmT', '17:30', 'وقت أذكار المساء') : '')
     + tg('med', 'موعد الدواء', 'تذكير بأوقات أدويتك أو مكمّلاتك') + meds
     + '<label class="remrow"><span><b>صوت المنبّه</b><span class="dim">رنّة هادئة عندما يظهر التذكير على الشاشة</span></span><input type="checkbox" class="sw" data-remsound="1"' + (R.sound === false ? '' : ' checked') + '></label>'
+    + tg('pray', '🕌 مواقيت الصلاة', 'تذكير عند كل صلاة حسب مدينتك (الهيئة المصرية لمصر، وأم القرى للسعودية)') + (R.pray ? '<div class="remsub"><label class="dim" for="prCity">مدينتي</label><select class="inp" id="prCity" data-prcity>' + '<option value="">— اختر —</option>' + CITIES.map((c) => '<option' + (R.prCity === c[0] ? ' selected' : '') + '>' + c[0] + '</option>').join('') + '</select></div>' : '')
+    + tg('sal', 'ﷺ الصلاة على النبي', 'تذكير يومي بوقتك، ويوم الجمعة ثلاث مرات') + (R.sal ? tm('salT', '21:00', 'وقت التذكير اليومي') : '')
     + '<label class="remrow"><span><b>ساعات الهدوء</b><span class="dim">لا تذكيرات (إلا الدواء والمواعيد) في هذه الساعات</span></span><input type="checkbox" class="sw" data-rem="quiet"' + (R.quiet ? ' checked' : '') + '></label>' + (R.quiet ? '<div class="remsub"><label class="dim" for="rt_qFrom">من</label><input id="rt_qFrom" class="inp tm" type="time" step="900" data-remt="qFrom" value="' + esc(R.qFrom || '23:00') + '"><label class="dim" for="rt_qTo">إلى</label><input id="rt_qTo" class="inp tm" type="time" step="900" data-remt="qTo" value="' + esc(R.qTo || '07:00') + '"></div>' : '')
     + '<div class="remsub"><label class="dim" for="remCap">الحد الأقصى للتذكيرات في اليوم</label><select class="inp" id="remCap" data-remcap>' + [[0, 'بلا حد'], [5, '5'], [8, '8'], [12, '12']].map((o) => '<option value="' + o[0] + '"' + ((+R.cap || 0) === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select></div>'
     + (pushState() === 'on' ? '<p class="dim">تصلك والتطبيق مغلق. تُقرَّب الأوقات لأقرب ربع ساعة.</p>' : '<p class="dim">تحتاج تفعيل الإشعارات؛ يُطلب الإذن عند التشغيل.</p>') + '</section>';
@@ -3733,11 +3764,12 @@ document.addEventListener('change', (e) => {
   if (t.dataset.act === 'consent') { S.consent = t.checked; render(); }
   if (t.dataset.rem) {
     S.rem = Object.assign({ water: false, meals: false }, S.rem); S.rem[t.dataset.rem] = t.checked; if (t.dataset.rem === 'med' && t.checked && !(S.rem.meds || []).length) S.rem.meds = [{ n: '', t: '08:00' }]; save();
-    const MSG = { water: 'سيصلك تذكير الماء كل ساعتين 💧', meals: 'سيصلك تذكير مواعيد وجباتك 🍽', adhAm: 'سيصلك تذكير أذكار الصباح 📿', adhPm: 'سيصلك تذكير أذكار المساء 🌙', med: 'سيصلك تذكير موعد الدواء 💊', quiet: 'لا تذكيرات في ساعات الهدوء (عدا الدواء والمواعيد) 🌙' };
+    const MSG = { water: 'سيصلك تذكير الماء كل ساعتين 💧', meals: 'سيصلك تذكير مواعيد وجباتك 🍽', adhAm: 'سيصلك تذكير أذكار الصباح 📿', adhPm: 'سيصلك تذكير أذكار المساء 🌙', med: 'سيصلك تذكير موعد الدواء 💊', pray: 'اختر مدينتك لتصلك مواقيت الصلاة 🕌', sal: 'سيصلك تذكير الصلاة على النبي ﷺ', quiet: 'لا تذكيرات في ساعات الهدوء (عدا الدواء والمواعيد) 🌙' };
     (t.checked && pushState() !== 'on' ? pushSetup(true) : Promise.resolve(pushState())).then((st) => { if (t.checked && st !== 'on') toast(st === 'denied' ? 'الإشعارات محظورة من إعدادات المتصفح — فعّلها ليصلك التذكير' : 'فعّل الإشعارات ليصلك التذكير والتطبيق مغلق'); return remSync(true); }).then(() => { if (t.checked && pushState() === 'on') toast(MSG[t.dataset.rem] || 'فُعّل التذكير'); render(); });
   }
   if (t.dataset.wk) { const L = dl(TODAY), n = Math.max(0, Math.min(80000, Math.round(+numOnly(t.value) || 0))); L.h = L.h || {}; if (n) L.h[t.dataset.wk] = n; else delete L.h[t.dataset.wk]; queueLog(dkey(new Date())); save(); render(); }
   if (t.id === 'offT') { const L = dl(TODAY); L.offT = t.value.trim().slice(0, 500); queueLog(dkey(new Date())); save(); }
+  if (t.dataset.prcity != null && t.id === 'prCity') { S.rem = Object.assign({ water: false, meals: false }, S.rem); S.rem.prCity = t.value; save(); remSync(true); render(); toast(t.value ? 'مواقيت ' + t.value + ' ✓' : 'اختر مدينتك'); }
   if (t.dataset.remcap != null && t.id === 'remCap') { S.rem = Object.assign({ water: false, meals: false }, S.rem); S.rem.cap = +t.value || 0; save(); remSync(true); toast('حُفظ الحد الأقصى للتذكيرات'); }
   if (t.dataset.remsound) { S.rem = Object.assign({ water: false, meals: false }, S.rem); S.rem.sound = t.checked; save(); if (t.checked) almChime(); else almStop(); }
   if (t.dataset.remt) { S.rem = Object.assign({ water: false, meals: false }, S.rem); S.rem[t.dataset.remt] = t.value || (t.dataset.remt === 'adhAmT' ? '06:00' : '17:30'); save(); remSync(true).then(() => { toast('حُفظ وقت التذكير'); render(); }); }
@@ -3760,7 +3792,7 @@ document.addEventListener('input', (e) => {
 });
 window.addEventListener('online', () => { V.online = true; poll(); });
 window.addEventListener('offline', () => { V.online = false; render(); });
-window.HissatiApp = { state: () => S, poll, flush, feed: () => FD, feedLoad: fdLoad, celebrateTest: (id) => celebrate(id), alarm: (items) => almShow(items), alarmTick: almTick, alarmFire: almFire, remItems, render };     // للاختبارات
+window.HissatiApp = { state: () => S, poll, flush, feed: () => FD, feedLoad: fdLoad, celebrateTest: (id) => celebrate(id), alarm: (items) => almShow(items), alarmTick: almTick, alarmFire: almFire, remItems, render, prayTimes };     // للاختبارات
 boot();
 })();
 </script></body></html>
