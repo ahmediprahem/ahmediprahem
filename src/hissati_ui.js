@@ -90,7 +90,7 @@ function hxInvite(label, phone, days, sys) {
   }).then(function () { return hxSave(); }).then(function () { return HX.st.inv[h]; }).catch(function (e) { delete HX.st.inv[h]; throw e; });
 }
 // ---------- الإرسال للعميل (مشفّر لمفتاحه، ومعه السر المشترك)
-var HX_PUSH = ['plan', 'msg', 'status', 'health'];             // ما يصل العميلَ إشعاراً على جواله (علامات القراءة تصل بصمت)
+var HX_PUSH = ['plan', 'msg', 'status', 'health', 'rwd', 'appt'];             // ما يصل العميلَ إشعاراً على جواله (علامات القراءة تصل بصمت)
 function hxSendTo(cid, enc, tok, payload) {
   payload.a = tok; payload.ts = payload.ts || Date.now();
   return HXC0.seal(enc, payload).then(function (box) { return hxFetch('POST', '/v1/send', { to: cid, box: box, push: HX_PUSH.indexOf(payload.t) >= 0 }, true); });

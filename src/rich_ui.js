@@ -3,6 +3,7 @@
 //    الصورة تُضغط هنا، وتُرفع إلى المحطة عند إرسال الخطة (محتوى عام كالتثقيف)، فلا تثقل رسالة الخطة المشفّرة.
 // 2) صور الوجبات: يصوّر العميل وجبته في «حصتي» (مشفّرة لك وحدك) فتظهر في تبويب «حصتي» بملفه، وتردّ بتعليق سريع يصله مع إشعار.
 var RC = { edit: null, d: null }, PH_QUICK = ['👏 ممتاز، استمر', '🥗 أضف خضاراً أكثر', '⚖ قلّل الكمية قليلاً', '🍗 زِد البروتين', '💧 لا تنسَ الماء'];
+function rcYt(u) { var m = /(?:youtu\.be\/|[?&]v=|\/shorts\/|\/embed\/|\/live\/)([A-Za-z0-9_-]{11})/.exec(String(u || '')); return m ? m[1] : ''; }   // 0.55: فيديو يوتيوب لطريقة التحضير
 function rcAll() { return S.settings.recipes || (S.settings.recipes = {}); }
 function rcByMeal(name) { var b = D.bank.filter(function (x) { return x.n === name; })[0]; return b ? { id: b.id, r: rcAll()[b.id] } : null; }
 function rcShrink(file) {
@@ -16,7 +17,7 @@ function rcEditor(id) {
   var d = RC.d, b = bkEff(id);
   return '<div class="ucard rced"><h3>📖 وصفة «' + esc(b ? b.n : '') + '»</h3><p class="small">تظهر للعميل في «حصتي» عند لمس الوجبة، مع مقاديره هو من خطته. اكتب كل خطوة في سطر.</p>'
     + '<div class="rcgrid"><div><label>خطوات التحضير<textarea id="rc_steps" data-rcf="steps" rows="6" placeholder="اغسل الأرز ونقّعه 20 دقيقة&#10;اطبخه بماء مغلي مع رشة ملح…">' + esc(d.steps) + '</textarea></label>'
-    + '<div class="bkfl"><label>وقت التحضير (دقيقة)<input id="rc_mins" data-rcf="mins" inputmode="numeric" value="' + esc(d.mins) + '"></label><label>نصيحة<input id="rc_tip" data-rcf="tip" maxlength="200" value="' + esc(d.tip) + '" placeholder="اختياري: بدّل الزيت ببخاخ زيت"></label></div></div>'
+    + '<div class="bkfl"><label>وقت التحضير (دقيقة)<input id="rc_mins" data-rcf="mins" inputmode="numeric" value="' + esc(d.mins) + '"></label><label>نصيحة<input id="rc_tip" data-rcf="tip" maxlength="200" value="' + esc(d.tip) + '" placeholder="اختياري: بدّل الزيت ببخاخ زيت"></label><label>فيديو التحضير (رابط يوتيوب، اختياري)<input id="rc_yt" data-rcf="yt" dir="ltr" value="' + esc(d.yt || '') + '" placeholder="https://youtu.be/…"></label></div></div>'
     + '<div class="rcimg">' + (d.img ? '<img src="' + d.img + '" alt=""><button class="sec sm" data-a="rcNoImg">إزالة الصورة</button>' : '<span class="small">بلا صورة</span>') + '<label class="sec sm fdfile">📷 ' + (d.img ? 'تغيير' : 'إضافة') + ' صورة<input type="file" id="rc_file" accept="image/*" hidden></label></div></div>'
     + '<div class="bkbtns"><button data-a="rcSave">💾 حفظ الوصفة</button><button class="sec" data-a="rcEdit" data-v="">إلغاء</button>' + (rcAll()[id] ? '<button class="sec" data-a="rcDel">🗑 حذف الوصفة</button>' : '') + '</div></div>';
 }
@@ -38,12 +39,12 @@ function phCard(c) {
 // ---------- الإجراءات والربط
 Object.assign(A, {
   rcEdit: function (v) { if (!v || RC.edit === v) { RC.edit = null; main(); return; } var r = rcAll()[v] || {}, b = bkEff(v); RC.edit = v; if (b) BK_CATS.forEach(function (c, i) { if (b.m[i]) BK.open[c[0]] = true; });     // القسم المطوي يُفتح ليظهر المحرر
-    RC.d = { steps: (r.steps || []).join('\n'), mins: r.mins || '', tip: r.tip || '', img: r.img || '', w: r.w, h: r.h }; main(); var n = $('#rc_steps'); if (n) n.focus(); },
+    RC.d = { steps: (r.steps || []).join('\n'), mins: r.mins || '', tip: r.tip || '', img: r.img || '', w: r.w, h: r.h, yt: r.yt ? 'https://youtu.be/' + r.yt : '' }; main(); var n = $('#rc_steps'); if (n) n.focus(); },
   rcNoImg: function () { RC.d.img = ''; main(); },
   rcSave: function () {
     var d = RC.d, steps = String(d.steps || '').split(/\n+/).map(function (x) { return x.trim(); }).filter(Boolean).slice(0, 30), mins = +String(d.mins || '').replace(/[٠-٩]/g, function (x) { return x.charCodeAt(0) - 0x660; }) || 0, old = rcAll()[RC.edit] || {};
     if (!steps.length && !d.img) return toast('اكتب خطوة واحدة على الأقل أو أضف صورة');
-    rcAll()[RC.edit] = { steps: steps.map(function (x) { return x.slice(0, 400); }), mins: Math.min(600, mins), tip: String(d.tip || '').trim().slice(0, 200), img: d.img || '', w: d.w || 0, h: d.h || 0, key: d.img && d.img === old.img ? old.key || '' : '', at: Date.now() };
+    rcAll()[RC.edit] = { steps: steps.map(function (x) { return x.slice(0, 400); }), mins: Math.min(600, mins), tip: String(d.tip || '').trim().slice(0, 200), yt: rcYt(d.yt), img: d.img || '', w: d.w || 0, h: d.h || 0, key: d.img && d.img === old.img ? old.key || '' : '', at: Date.now() };
     saveSettings(); RC.edit = null; main(); toast('📖 حُفظت الوصفة — تصل مع الخطة التالية التي ترسلها إلى «حصتي»');
   },
   rcDel: function () { if (!confirm('حذف الوصفة؟')) return; delete rcAll()[RC.edit]; saveSettings(); RC.edit = null; main(); },
@@ -55,7 +56,7 @@ Object.assign(A, {
 document.addEventListener('input', function (e) { var t = e.target; if (t.dataset && t.dataset.rcf && RC.d) RC.d[t.dataset.rcf] = t.value; });
 document.addEventListener('change', function (e) { var t = e.target; if (t.id !== 'rc_file' || !t.files || !t.files[0]) return; rcShrink(t.files[0]).then(function (x) { RC.d.img = x.url; RC.d.w = x.w; RC.d.h = x.h; main(); }).catch(function (er) { toast('⚠ ' + er.message); }); });
 (function (f) { bkRow = function (b) { var h = f.apply(this, arguments), has = !!rcAll()[b.id]; h = h.replace('<div class="bkact">', '<div class="bkact"><button class="sec sm' + (has ? ' rcon' : '') + '" data-a="rcEdit" data-v="' + esc(b.id) + '" title="وصفة الوجبة لتطبيق العميل">📖 ' + (has ? 'الوصفة ✓' : 'وصفة') + '</button>'); return RC.edit === b.id && h.indexOf('class="rced"') < 0 ? h + rcEditor(b.id) : h; }; })(bkRow);
-(function (f) { hxSnap = function (c) { var s = f.apply(this, arguments), rec = {}; rcOfPlan(c).forEach(function (x) { rec[x.name] = { steps: x.r.steps || [], mins: x.r.mins || 0, tip: x.r.tip || '', img: x.r.key || '' }; }); if (Object.keys(rec).length) s.recipes = rec; return s; }; })(hxSnap);
+(function (f) { hxSnap = function (c) { var s = f.apply(this, arguments), rec = {}; rcOfPlan(c).forEach(function (x) { rec[x.name] = { steps: x.r.steps || [], mins: x.r.mins || 0, tip: x.r.tip || '', img: x.r.key || '', yt: x.r.yt || '' }; }); if (Object.keys(rec).length) s.recipes = rec; return s; }; })(hxSnap);
 (function (f) { A.hxSendPlan = function () { var c = cur(), self = this, args = arguments; if (!c || !c.hx || !c.plan) return f.apply(self, args); var rs = rcOfPlan(c); if (!rs.some(function (x) { return x.r.img && !x.r.key; })) return f.apply(self, args); toast('جارٍ رفع صور الوصفات…'); return rcUpload(rs).catch(function (e) { toast('⚠ لم تُرفع صور الوصفات (' + e.message + ') — تُرسل الخطة بدونها'); }).then(function () { return f.apply(self, args); }); }; })(A.hxSendPlan);
 (function (f) { hxIn = function (c, p) {
   if (p.t === 'photo' && typeof p.img === 'string' && p.img.length < 300000 && /^[A-Za-z0-9+/=]+$/.test(p.img) && p.id) {

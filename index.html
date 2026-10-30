@@ -357,6 +357,7 @@ details.tbm:not([open])>.tbp,details.im:not([open])>.imx{display:none}
 .ciimgs,.cibd{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}.ciimgs figure,.cibd figure{margin:0}.ciimgs img{width:110px;height:110px;object-fit:cover;border-radius:10px;cursor:zoom-in}.cibd img{width:180px;height:240px;object-fit:cover;border-radius:12px;cursor:zoom-in}.ciimgs figcaption,.cibd figcaption{font-size:11px;color:#667;text-align:center}
 .cizoom{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.82);display:grid;place-items:center;cursor:zoom-out}.cizoom img{max-width:92vw;max-height:92vh;border-radius:12px}
 .apconf{display:inline-block;margin-inline-start:8px;font-size:12px;font-weight:700;padding:2px 8px;border-radius:10px}.apconf.ok{background:#e6f6ec;color:#1f6b3d}.apconf.chg{background:#fff1dc;color:#8a4b00}
+.ptset textarea{width:100%}
 </style><style id="thm">/* ===== ثيم «Linear داكن» (وهو أيضاً أساس الثيم «الزجاجي» الذي يضيف فوقه theme_glass.css) — طبقة إضافية فقط، لا تُحذف قواعد القالب الكلاسيكي ولا تُعطَّل. يعمل عند html:is([data-theme="linear"],[data-theme="glass"]) وعلى الشاشة فقط (الطباعة والتصدير كما هما). ===== */
 @media screen{
 html:is([data-theme="linear"],[data-theme="glass"]){color-scheme:dark;--lbg:#0b1329;--lpanel:rgba(255,255,255,.045);--lpanel2:rgba(255,255,255,.08);--lline:rgba(255,255,255,.10);--lline2:rgba(255,255,255,.2);--ltext:#f4f6fc;--lmut:#a3b2d6;--lacc:#22c55e;--lacc-d:#052e16;--lglow:rgba(34,197,94,.22);--lerr:#fca5a5;--lwarn:#fde68a}
@@ -4661,7 +4662,7 @@ function hxInvite(label, phone, days, sys) {
   }).then(function () { return hxSave(); }).then(function () { return HX.st.inv[h]; }).catch(function (e) { delete HX.st.inv[h]; throw e; });
 }
 // ---------- الإرسال للعميل (مشفّر لمفتاحه، ومعه السر المشترك)
-var HX_PUSH = ['plan', 'msg', 'status', 'health'];             // ما يصل العميلَ إشعاراً على جواله (علامات القراءة تصل بصمت)
+var HX_PUSH = ['plan', 'msg', 'status', 'health', 'rwd', 'appt'];             // ما يصل العميلَ إشعاراً على جواله (علامات القراءة تصل بصمت)
 function hxSendTo(cid, enc, tok, payload) {
   payload.a = tok; payload.ts = payload.ts || Date.now();
   return HXC0.seal(enc, payload).then(function (box) { return hxFetch('POST', '/v1/send', { to: cid, box: box, push: HX_PUSH.indexOf(payload.t) >= 0 }, true); });
@@ -5704,6 +5705,7 @@ window.DPApp.wk = { tick: wkTick, items: wkItems };                // للاخت
 //    الصورة تُضغط هنا، وتُرفع إلى المحطة عند إرسال الخطة (محتوى عام كالتثقيف)، فلا تثقل رسالة الخطة المشفّرة.
 // 2) صور الوجبات: يصوّر العميل وجبته في «حصتي» (مشفّرة لك وحدك) فتظهر في تبويب «حصتي» بملفه، وتردّ بتعليق سريع يصله مع إشعار.
 var RC = { edit: null, d: null }, PH_QUICK = ['👏 ممتاز، استمر', '🥗 أضف خضاراً أكثر', '⚖ قلّل الكمية قليلاً', '🍗 زِد البروتين', '💧 لا تنسَ الماء'];
+function rcYt(u) { var m = /(?:youtu\.be\/|[?&]v=|\/shorts\/|\/embed\/|\/live\/)([A-Za-z0-9_-]{11})/.exec(String(u || '')); return m ? m[1] : ''; }   // 0.55: فيديو يوتيوب لطريقة التحضير
 function rcAll() { return S.settings.recipes || (S.settings.recipes = {}); }
 function rcByMeal(name) { var b = D.bank.filter(function (x) { return x.n === name; })[0]; return b ? { id: b.id, r: rcAll()[b.id] } : null; }
 function rcShrink(file) {
@@ -5717,7 +5719,7 @@ function rcEditor(id) {
   var d = RC.d, b = bkEff(id);
   return '<div class="ucard rced"><h3>📖 وصفة «' + esc(b ? b.n : '') + '»</h3><p class="small">تظهر للعميل في «حصتي» عند لمس الوجبة، مع مقاديره هو من خطته. اكتب كل خطوة في سطر.</p>'
     + '<div class="rcgrid"><div><label>خطوات التحضير<textarea id="rc_steps" data-rcf="steps" rows="6" placeholder="اغسل الأرز ونقّعه 20 دقيقة&#10;اطبخه بماء مغلي مع رشة ملح…">' + esc(d.steps) + '</textarea></label>'
-    + '<div class="bkfl"><label>وقت التحضير (دقيقة)<input id="rc_mins" data-rcf="mins" inputmode="numeric" value="' + esc(d.mins) + '"></label><label>نصيحة<input id="rc_tip" data-rcf="tip" maxlength="200" value="' + esc(d.tip) + '" placeholder="اختياري: بدّل الزيت ببخاخ زيت"></label></div></div>'
+    + '<div class="bkfl"><label>وقت التحضير (دقيقة)<input id="rc_mins" data-rcf="mins" inputmode="numeric" value="' + esc(d.mins) + '"></label><label>نصيحة<input id="rc_tip" data-rcf="tip" maxlength="200" value="' + esc(d.tip) + '" placeholder="اختياري: بدّل الزيت ببخاخ زيت"></label><label>فيديو التحضير (رابط يوتيوب، اختياري)<input id="rc_yt" data-rcf="yt" dir="ltr" value="' + esc(d.yt || '') + '" placeholder="https://youtu.be/…"></label></div></div>'
     + '<div class="rcimg">' + (d.img ? '<img src="' + d.img + '" alt=""><button class="sec sm" data-a="rcNoImg">إزالة الصورة</button>' : '<span class="small">بلا صورة</span>') + '<label class="sec sm fdfile">📷 ' + (d.img ? 'تغيير' : 'إضافة') + ' صورة<input type="file" id="rc_file" accept="image/*" hidden></label></div></div>'
     + '<div class="bkbtns"><button data-a="rcSave">💾 حفظ الوصفة</button><button class="sec" data-a="rcEdit" data-v="">إلغاء</button>' + (rcAll()[id] ? '<button class="sec" data-a="rcDel">🗑 حذف الوصفة</button>' : '') + '</div></div>';
 }
@@ -5739,12 +5741,12 @@ function phCard(c) {
 // ---------- الإجراءات والربط
 Object.assign(A, {
   rcEdit: function (v) { if (!v || RC.edit === v) { RC.edit = null; main(); return; } var r = rcAll()[v] || {}, b = bkEff(v); RC.edit = v; if (b) BK_CATS.forEach(function (c, i) { if (b.m[i]) BK.open[c[0]] = true; });     // القسم المطوي يُفتح ليظهر المحرر
-    RC.d = { steps: (r.steps || []).join('\n'), mins: r.mins || '', tip: r.tip || '', img: r.img || '', w: r.w, h: r.h }; main(); var n = $('#rc_steps'); if (n) n.focus(); },
+    RC.d = { steps: (r.steps || []).join('\n'), mins: r.mins || '', tip: r.tip || '', img: r.img || '', w: r.w, h: r.h, yt: r.yt ? 'https://youtu.be/' + r.yt : '' }; main(); var n = $('#rc_steps'); if (n) n.focus(); },
   rcNoImg: function () { RC.d.img = ''; main(); },
   rcSave: function () {
     var d = RC.d, steps = String(d.steps || '').split(/\n+/).map(function (x) { return x.trim(); }).filter(Boolean).slice(0, 30), mins = +String(d.mins || '').replace(/[٠-٩]/g, function (x) { return x.charCodeAt(0) - 0x660; }) || 0, old = rcAll()[RC.edit] || {};
     if (!steps.length && !d.img) return toast('اكتب خطوة واحدة على الأقل أو أضف صورة');
-    rcAll()[RC.edit] = { steps: steps.map(function (x) { return x.slice(0, 400); }), mins: Math.min(600, mins), tip: String(d.tip || '').trim().slice(0, 200), img: d.img || '', w: d.w || 0, h: d.h || 0, key: d.img && d.img === old.img ? old.key || '' : '', at: Date.now() };
+    rcAll()[RC.edit] = { steps: steps.map(function (x) { return x.slice(0, 400); }), mins: Math.min(600, mins), tip: String(d.tip || '').trim().slice(0, 200), yt: rcYt(d.yt), img: d.img || '', w: d.w || 0, h: d.h || 0, key: d.img && d.img === old.img ? old.key || '' : '', at: Date.now() };
     saveSettings(); RC.edit = null; main(); toast('📖 حُفظت الوصفة — تصل مع الخطة التالية التي ترسلها إلى «حصتي»');
   },
   rcDel: function () { if (!confirm('حذف الوصفة؟')) return; delete rcAll()[RC.edit]; saveSettings(); RC.edit = null; main(); },
@@ -5756,7 +5758,7 @@ Object.assign(A, {
 document.addEventListener('input', function (e) { var t = e.target; if (t.dataset && t.dataset.rcf && RC.d) RC.d[t.dataset.rcf] = t.value; });
 document.addEventListener('change', function (e) { var t = e.target; if (t.id !== 'rc_file' || !t.files || !t.files[0]) return; rcShrink(t.files[0]).then(function (x) { RC.d.img = x.url; RC.d.w = x.w; RC.d.h = x.h; main(); }).catch(function (er) { toast('⚠ ' + er.message); }); });
 (function (f) { bkRow = function (b) { var h = f.apply(this, arguments), has = !!rcAll()[b.id]; h = h.replace('<div class="bkact">', '<div class="bkact"><button class="sec sm' + (has ? ' rcon' : '') + '" data-a="rcEdit" data-v="' + esc(b.id) + '" title="وصفة الوجبة لتطبيق العميل">📖 ' + (has ? 'الوصفة ✓' : 'وصفة') + '</button>'); return RC.edit === b.id && h.indexOf('class="rced"') < 0 ? h + rcEditor(b.id) : h; }; })(bkRow);
-(function (f) { hxSnap = function (c) { var s = f.apply(this, arguments), rec = {}; rcOfPlan(c).forEach(function (x) { rec[x.name] = { steps: x.r.steps || [], mins: x.r.mins || 0, tip: x.r.tip || '', img: x.r.key || '' }; }); if (Object.keys(rec).length) s.recipes = rec; return s; }; })(hxSnap);
+(function (f) { hxSnap = function (c) { var s = f.apply(this, arguments), rec = {}; rcOfPlan(c).forEach(function (x) { rec[x.name] = { steps: x.r.steps || [], mins: x.r.mins || 0, tip: x.r.tip || '', img: x.r.key || '', yt: x.r.yt || '' }; }); if (Object.keys(rec).length) s.recipes = rec; return s; }; })(hxSnap);
 (function (f) { A.hxSendPlan = function () { var c = cur(), self = this, args = arguments; if (!c || !c.hx || !c.plan) return f.apply(self, args); var rs = rcOfPlan(c); if (!rs.some(function (x) { return x.r.img && !x.r.key; })) return f.apply(self, args); toast('جارٍ رفع صور الوصفات…'); return rcUpload(rs).catch(function (e) { toast('⚠ لم تُرفع صور الوصفات (' + e.message + ') — تُرسل الخطة بدونها'); }).then(function () { return f.apply(self, args); }); }; })(A.hxSendPlan);
 (function (f) { hxIn = function (c, p) {
   if (p.t === 'photo' && typeof p.img === 'string' && p.img.length < 300000 && /^[A-Za-z0-9+/=]+$/.test(p.img) && p.id) {
@@ -6479,6 +6481,61 @@ Object.assign(A, {
   }
 });
 document.addEventListener('change', function (e) { var t = e.target; if (!t.hasAttribute || !t.hasAttribute('data-hxreply') || !HX.st) return; HX.st.replyAt = t.value || ''; hxSave().then(function () { hxApptSyncAll(true); toast(t.value ? '⏰ يرى عملاؤك أنك ترد يومياً الساعة ' + t.value : 'أُلغي وقت الرد اليومي'); }); });
+
+// ---- 0.55: النقاط والمكافآت (يحددها الأخصائي)، وكود الإحالة لكل عميل، تُحسب هنا من متابعة «حصتي» وتصل العميل
+function ptsCfg() { var p = (HX.st && HX.st.pts) || {}; return { on: !!p.on, per: p.per === 'm' ? 'm' : 'w', cap: +p.cap || 15, r: Object.assign({ day: 5, photo: 2, wk: 10, body: 5, att: 10 }, p.r || {}), rewards: Array.isArray(p.rewards) ? p.rewards : [{ p: 100, n: 'شهادة تقدير' }], refTxt: String(p.refTxt || ''), refDays: +p.refDays || 90 }; }
+function ptsStart(per) { var x = new Date(); x.setHours(0, 0, 0, 0); if (per === 'm') x.setDate(1); else x.setDate(x.getDate() - x.getDay()); return x.getTime(); }
+function dkOf(t) { var x = new Date(t); return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0'); }
+function ptsOf(c) {                                                  // نقاط الفترة الحالية لكل يوم بسقف يومي: السلوك فقط (تسجيل، صور، قياس، حضور)، لا مقدار النزول
+  var P = ptsCfg(), x = c.hx || {}, t0 = ptsStart(P.per), day = {}, add = function (k, v, why) { if (!k || new Date(k + 'T12:00').getTime() < t0) return; var d = day[k] = day[k] || { v: 0, w: [] }; d.v += v; d.w.push(why); };
+  Object.keys(x.logs || {}).forEach(function (k) { if (x.logs[k].sub) add(k, P.r.day, 'تسجيل اليوم'); });
+  (x.photos || []).forEach(function (q) { add(q.d || dkOf(q.ts), P.r.photo, 'صورة وجبة'); });
+  (x.checks || []).forEach(function (q) { add(dkOf(q.ts), P.r.wk, 'قياس الأسبوع'); });
+  (x.bodies || []).forEach(function (q) { add(dkOf(q.ts), P.r.body, 'صورة التقدم'); });
+  (c.att || []).forEach(function (k) { add(k, P.r.att, 'حضور المتابعة'); });
+  var tot = 0; Object.keys(day).forEach(function (k) { tot += Math.min(P.cap, day[k].v); }); return tot;
+}
+function ptsSync(c) {
+  var P = ptsCfg(); if (!c || !c.hx || !c.hx.planV || typeof hxSend !== 'function') return; if (!c.ref) { c.ref = (c.code || 'C').replace(/\W/g, '').slice(-3) + Math.random().toString(36).slice(2, 6).toUpperCase(); persist(c); }
+  var tot = P.on ? ptsOf(c) : 0, pk = P.per + ptsStart(P.per), got = (c.hx.rw = c.hx.rw || {})[pk] = c.hx.rw[pk] || [], earned = [];
+  if (P.on) P.rewards.forEach(function (rw, i) { if (rw && +rw.p > 0 && tot >= +rw.p && got.indexOf(i) < 0) { got.push(i); earned.push(rw); } });
+  var refs = (c.refs || []).filter(function (q) { return q.at >= Date.now() - P.refDays * 864e5; }), msg = { t: 'pts', on: P.on, total: tot, per: P.per, r: P.r, cap: P.cap, rewards: P.rewards, ref: c.ref, refs: refs.map(function (q) { return String(q.name || '').split(/\s+/)[0]; }), refTxt: P.refTxt, refDays: P.refDays }, sig = JSON.stringify(msg);
+  var go = function () { return c.hx.ptSig === sig ? Promise.resolve() : hxSend(c, msg).then(function () { c.hx.ptSig = sig; persist(c); }); };
+  go().then(function () { return earned.reduce(function (p, rw) { return p.then(function () { return hxSend(c, { t: 'rwd', n: String(rw.n).slice(0, 60), p: +rw.p, per: P.per }); }).then(function () { toast('🏅 ' + (c.name || '') + ' حصل على «' + rw.n + '» (' + rw.p + ' نقطة)'); c.hx.rwLog = (c.hx.rwLog || []).concat([{ n: rw.n, p: rw.p, at: Date.now() }]).slice(-30); persist(c); }); }, Promise.resolve()); }).catch(function () { });
+}
+var PT_T = 0; function ptsSyncAll() { clearTimeout(PT_T); PT_T = setTimeout(function () { S.clients.forEach(function (c) { if (c.hx && c.hx.planV) ptsSync(c); }); }, 400); }
+(function (f) { hxIn = function () { var r = f.apply(this, arguments); ptsSyncAll(); return r; }; })(hxIn);
+(function (f) { A.ciIn = function () { var r = f.apply(this, arguments); ptsSyncAll(); return r; }; })(A.ciIn);
+(function (f) { hxSetPage = function () {
+  var h = f.apply(this, arguments), P = ptsCfg(), R = [['day', 'كل يوم يرسل فيه «تسجيل اليوم»'], ['photo', 'كل صورة وجبة'], ['wk', 'قياس الأسبوع'], ['body', 'صورة التقدم'], ['att', 'حضور المتابعة']];
+  return h + '<div class="ucard ptset"><h3>🏅 النقاط والمكافآت</h3><p class="small">على السلوك فقط (التزام وتسجيل وحضور) — لا على مقدار النزول — وبسقف يومي حتى لا تُجمع بالتكرار. القيم والمكافآت تحددها أنت.</p>'
+    + '<label class="chk"><input type="checkbox" data-pt="on"' + (P.on ? ' checked' : '') + '> تفعيل النقاط لعملاء «حصتي»</label>'
+    + '<div class="row"><div><label>الفترة</label><select data-pt="per"><option value="w"' + (P.per === 'w' ? ' selected' : '') + '>أسبوعية</option><option value="m"' + (P.per === 'm' ? ' selected' : '') + '>شهرية</option></select></div><div><label>السقف اليومي</label><input type="number" data-pt="cap" value="' + P.cap + '"></div>' + R.map(function (q) { return '<div><label>' + q[1] + '</label><input type="number" data-ptr="' + q[0] + '" value="' + P.r[q[0]] + '"></div>'; }).join('') + '</div>'
+    + '<label>المكافآت (سطر لكل مكافأة: النقاط ثم الاسم، مثل «100 شهادة تقدير»)</label><textarea data-pt="rewards" rows="3">' + esc(P.rewards.map(function (q) { return q.p + ' ' + q.n; }).join('\n')) + '</textarea>'
+    + '<div class="row"><div><label>مكافأة الدعوة (نص يراه العميل، اختياري)</label><input data-pt="refTxt" maxlength="160" value="' + esc(P.refTxt) + '" placeholder="مثال تحدده أنت"></div><div><label>صلاحية الدعوة (يوماً)</label><input type="number" data-pt="refDays" value="' + P.refDays + '"></div></div></div>';
+}; })(hxSetPage);
+document.addEventListener('change', function (e) {
+  var t = e.target, k = t.getAttribute && (t.getAttribute('data-pt') || t.getAttribute('data-ptr')); if (!k || !HX.st) return; var P = HX.st.pts = HX.st.pts || {};
+  if (t.hasAttribute('data-ptr')) { P.r = P.r || {}; P.r[k] = Math.max(0, Math.min(100, +t.value || 0)); }
+  else if (k === 'on') P.on = t.checked; else if (k === 'per') P.per = t.value; else if (k === 'cap') P.cap = Math.max(1, Math.min(200, +t.value || 15)); else if (k === 'refDays') P.refDays = Math.max(7, Math.min(730, +t.value || 90)); else if (k === 'refTxt') P.refTxt = t.value.trim().slice(0, 160);
+  else if (k === 'rewards') P.rewards = t.value.split('\n').map(function (l) { var m = /^\s*([\d٠-٩]+)\s+(.+)$/.exec(l); return m ? { p: +m[1].replace(/[٠-٩]/g, function (d) { return '٠١٢٣٤٥٦٧٨٩'.indexOf(d); }), n: m[2].trim().slice(0, 60) } : null; }).filter(Boolean).slice(0, 8);
+  hxSave().then(function () { ptsSyncAll(); toast('حُفظت إعدادات النقاط'); });
+});
+(function (f) { hxInvForm = function () { return f.apply(this, arguments).replace('placeholder="05xxxxxxxx"></div>', 'placeholder="05xxxxxxxx"></div><div><label>كود دعوة من عميل (اختياري)</label><input id="hxi_r" maxlength="12" dir="ltr" placeholder="مثال: 01AB2C"></div>'); }; })(hxInvForm);
+(function (f) { hxInvite = function () { var r = (($('#hxi_r') || {}).value || '').trim().toUpperCase(); return f.apply(this, arguments).then(function (inv) { if (r && inv) { inv.ref = r.slice(0, 12); hxSave(); } return inv; }); }; })(hxInvite);
+(function (f) { hxApprove = function (cid) {
+  var q = HX.st.reqs[cid], inv = q && HX.st.inv[q.h], ref = inv && inv.ref, n0 = S.clients.length;
+  return f.apply(this, arguments).then(function (r) {
+    if (ref && S.clients.length > n0) { var nc = S.clients[S.clients.length - 1], src = S.clients.filter(function (x) { return x.ref === ref && x !== nc; })[0]; nc.refBy = ref; persist(nc); if (src) { src.refs = (src.refs || []).concat([{ code: nc.code, name: nc.name, at: Date.now() }]); persist(src).then(function () { ptsSync(src); }); toast('🤝 ' + (nc.name || '') + ' اشترك بدعوة من ' + (src.name || '')); } }
+    return r;
+  });
+}; })(hxApprove);
+function ciPts(c) {
+  var P = ptsCfg(); if (!c.hx) return ''; var refs = c.refs || [];
+  return '<section class="ucard"><h3>🏅 النقاط والدعوات</h3>' + (P.on ? '<p>نقاط ' + (P.per === 'm' ? 'الشهر' : 'الأسبوع') + ': <b>' + ptsOf(c) + '</b>' + ((c.hx.rwLog || []).length ? ' • مكافآت: ' + c.hx.rwLog.slice(-3).map(function (q) { return esc(q.n); }).join('، ') : '') + '</p>' : '<p class="small">النقاط غير مفعّلة (من إعدادات «حصتي»).</p>')
+    + '<p class="small">كود دعوته: <b dir="ltr">' + esc(c.ref || '—') + '</b>' + (c.refBy ? ' • دخل بدعوة: ' + esc(c.refBy) : '') + ' • اشترك من طرفه: ' + refs.length + (refs.length ? ' (' + esc(refs.map(function (q) { return q.name; }).join('، ')) + ')' : '') + '</p></section>';
+}
+(function (f) { ciTab = function (c) { return f.apply(this, arguments).replace("<section class=\"ucard\"><h3>📋 آخر خطة</h3>", ciPts(c) + "<section class=\"ucard\"><h3>📋 آخر خطة</h3>"); }; })(ciTab);
 
 
 // ================= بطاقة «تطبيق الجوال»: روابط التنزيل والتحديث (يحرّرها المدير وتصل المستخدمين مع نسخة المستخدمين) =================

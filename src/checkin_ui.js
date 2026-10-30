@@ -142,3 +142,58 @@ Object.assign(A, {
   }
 });
 document.addEventListener('change', function (e) { var t = e.target; if (!t.hasAttribute || !t.hasAttribute('data-hxreply') || !HX.st) return; HX.st.replyAt = t.value || ''; hxSave().then(function () { hxApptSyncAll(true); toast(t.value ? '⏰ يرى عملاؤك أنك ترد يومياً الساعة ' + t.value : 'أُلغي وقت الرد اليومي'); }); });
+
+// ---- 0.55: النقاط والمكافآت (يحددها الأخصائي)، وكود الإحالة لكل عميل، تُحسب هنا من متابعة «حصتي» وتصل العميل
+function ptsCfg() { var p = (HX.st && HX.st.pts) || {}; return { on: !!p.on, per: p.per === 'm' ? 'm' : 'w', cap: +p.cap || 15, r: Object.assign({ day: 5, photo: 2, wk: 10, body: 5, att: 10 }, p.r || {}), rewards: Array.isArray(p.rewards) ? p.rewards : [{ p: 100, n: 'شهادة تقدير' }], refTxt: String(p.refTxt || ''), refDays: +p.refDays || 90 }; }
+function ptsStart(per) { var x = new Date(); x.setHours(0, 0, 0, 0); if (per === 'm') x.setDate(1); else x.setDate(x.getDate() - x.getDay()); return x.getTime(); }
+function dkOf(t) { var x = new Date(t); return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0'); }
+function ptsOf(c) {                                                  // نقاط الفترة الحالية لكل يوم بسقف يومي: السلوك فقط (تسجيل، صور، قياس، حضور)، لا مقدار النزول
+  var P = ptsCfg(), x = c.hx || {}, t0 = ptsStart(P.per), day = {}, add = function (k, v, why) { if (!k || new Date(k + 'T12:00').getTime() < t0) return; var d = day[k] = day[k] || { v: 0, w: [] }; d.v += v; d.w.push(why); };
+  Object.keys(x.logs || {}).forEach(function (k) { if (x.logs[k].sub) add(k, P.r.day, 'تسجيل اليوم'); });
+  (x.photos || []).forEach(function (q) { add(q.d || dkOf(q.ts), P.r.photo, 'صورة وجبة'); });
+  (x.checks || []).forEach(function (q) { add(dkOf(q.ts), P.r.wk, 'قياس الأسبوع'); });
+  (x.bodies || []).forEach(function (q) { add(dkOf(q.ts), P.r.body, 'صورة التقدم'); });
+  (c.att || []).forEach(function (k) { add(k, P.r.att, 'حضور المتابعة'); });
+  var tot = 0; Object.keys(day).forEach(function (k) { tot += Math.min(P.cap, day[k].v); }); return tot;
+}
+function ptsSync(c) {
+  var P = ptsCfg(); if (!c || !c.hx || !c.hx.planV || typeof hxSend !== 'function') return; if (!c.ref) { c.ref = (c.code || 'C').replace(/\W/g, '').slice(-3) + Math.random().toString(36).slice(2, 6).toUpperCase(); persist(c); }
+  var tot = P.on ? ptsOf(c) : 0, pk = P.per + ptsStart(P.per), got = (c.hx.rw = c.hx.rw || {})[pk] = c.hx.rw[pk] || [], earned = [];
+  if (P.on) P.rewards.forEach(function (rw, i) { if (rw && +rw.p > 0 && tot >= +rw.p && got.indexOf(i) < 0) { got.push(i); earned.push(rw); } });
+  var refs = (c.refs || []).filter(function (q) { return q.at >= Date.now() - P.refDays * 864e5; }), msg = { t: 'pts', on: P.on, total: tot, per: P.per, r: P.r, cap: P.cap, rewards: P.rewards, ref: c.ref, refs: refs.map(function (q) { return String(q.name || '').split(/\s+/)[0]; }), refTxt: P.refTxt, refDays: P.refDays }, sig = JSON.stringify(msg);
+  var go = function () { return c.hx.ptSig === sig ? Promise.resolve() : hxSend(c, msg).then(function () { c.hx.ptSig = sig; persist(c); }); };
+  go().then(function () { return earned.reduce(function (p, rw) { return p.then(function () { return hxSend(c, { t: 'rwd', n: String(rw.n).slice(0, 60), p: +rw.p, per: P.per }); }).then(function () { toast('🏅 ' + (c.name || '') + ' حصل على «' + rw.n + '» (' + rw.p + ' نقطة)'); c.hx.rwLog = (c.hx.rwLog || []).concat([{ n: rw.n, p: rw.p, at: Date.now() }]).slice(-30); persist(c); }); }, Promise.resolve()); }).catch(function () { });
+}
+var PT_T = 0; function ptsSyncAll() { clearTimeout(PT_T); PT_T = setTimeout(function () { S.clients.forEach(function (c) { if (c.hx && c.hx.planV) ptsSync(c); }); }, 400); }
+(function (f) { hxIn = function () { var r = f.apply(this, arguments); ptsSyncAll(); return r; }; })(hxIn);
+(function (f) { A.ciIn = function () { var r = f.apply(this, arguments); ptsSyncAll(); return r; }; })(A.ciIn);
+(function (f) { hxSetPage = function () {
+  var h = f.apply(this, arguments), P = ptsCfg(), R = [['day', 'كل يوم يرسل فيه «تسجيل اليوم»'], ['photo', 'كل صورة وجبة'], ['wk', 'قياس الأسبوع'], ['body', 'صورة التقدم'], ['att', 'حضور المتابعة']];
+  return h + '<div class="ucard ptset"><h3>🏅 النقاط والمكافآت</h3><p class="small">على السلوك فقط (التزام وتسجيل وحضور) — لا على مقدار النزول — وبسقف يومي حتى لا تُجمع بالتكرار. القيم والمكافآت تحددها أنت.</p>'
+    + '<label class="chk"><input type="checkbox" data-pt="on"' + (P.on ? ' checked' : '') + '> تفعيل النقاط لعملاء «حصتي»</label>'
+    + '<div class="row"><div><label>الفترة</label><select data-pt="per"><option value="w"' + (P.per === 'w' ? ' selected' : '') + '>أسبوعية</option><option value="m"' + (P.per === 'm' ? ' selected' : '') + '>شهرية</option></select></div><div><label>السقف اليومي</label><input type="number" data-pt="cap" value="' + P.cap + '"></div>' + R.map(function (q) { return '<div><label>' + q[1] + '</label><input type="number" data-ptr="' + q[0] + '" value="' + P.r[q[0]] + '"></div>'; }).join('') + '</div>'
+    + '<label>المكافآت (سطر لكل مكافأة: النقاط ثم الاسم، مثل «100 شهادة تقدير»)</label><textarea data-pt="rewards" rows="3">' + esc(P.rewards.map(function (q) { return q.p + ' ' + q.n; }).join('\n')) + '</textarea>'
+    + '<div class="row"><div><label>مكافأة الدعوة (نص يراه العميل، اختياري)</label><input data-pt="refTxt" maxlength="160" value="' + esc(P.refTxt) + '" placeholder="مثال تحدده أنت"></div><div><label>صلاحية الدعوة (يوماً)</label><input type="number" data-pt="refDays" value="' + P.refDays + '"></div></div></div>';
+}; })(hxSetPage);
+document.addEventListener('change', function (e) {
+  var t = e.target, k = t.getAttribute && (t.getAttribute('data-pt') || t.getAttribute('data-ptr')); if (!k || !HX.st) return; var P = HX.st.pts = HX.st.pts || {};
+  if (t.hasAttribute('data-ptr')) { P.r = P.r || {}; P.r[k] = Math.max(0, Math.min(100, +t.value || 0)); }
+  else if (k === 'on') P.on = t.checked; else if (k === 'per') P.per = t.value; else if (k === 'cap') P.cap = Math.max(1, Math.min(200, +t.value || 15)); else if (k === 'refDays') P.refDays = Math.max(7, Math.min(730, +t.value || 90)); else if (k === 'refTxt') P.refTxt = t.value.trim().slice(0, 160);
+  else if (k === 'rewards') P.rewards = t.value.split('\n').map(function (l) { var m = /^\s*([\d٠-٩]+)\s+(.+)$/.exec(l); return m ? { p: +m[1].replace(/[٠-٩]/g, function (d) { return '٠١٢٣٤٥٦٧٨٩'.indexOf(d); }), n: m[2].trim().slice(0, 60) } : null; }).filter(Boolean).slice(0, 8);
+  hxSave().then(function () { ptsSyncAll(); toast('حُفظت إعدادات النقاط'); });
+});
+(function (f) { hxInvForm = function () { return f.apply(this, arguments).replace('placeholder="05xxxxxxxx"></div>', 'placeholder="05xxxxxxxx"></div><div><label>كود دعوة من عميل (اختياري)</label><input id="hxi_r" maxlength="12" dir="ltr" placeholder="مثال: 01AB2C"></div>'); }; })(hxInvForm);
+(function (f) { hxInvite = function () { var r = (($('#hxi_r') || {}).value || '').trim().toUpperCase(); return f.apply(this, arguments).then(function (inv) { if (r && inv) { inv.ref = r.slice(0, 12); hxSave(); } return inv; }); }; })(hxInvite);
+(function (f) { hxApprove = function (cid) {
+  var q = HX.st.reqs[cid], inv = q && HX.st.inv[q.h], ref = inv && inv.ref, n0 = S.clients.length;
+  return f.apply(this, arguments).then(function (r) {
+    if (ref && S.clients.length > n0) { var nc = S.clients[S.clients.length - 1], src = S.clients.filter(function (x) { return x.ref === ref && x !== nc; })[0]; nc.refBy = ref; persist(nc); if (src) { src.refs = (src.refs || []).concat([{ code: nc.code, name: nc.name, at: Date.now() }]); persist(src).then(function () { ptsSync(src); }); toast('🤝 ' + (nc.name || '') + ' اشترك بدعوة من ' + (src.name || '')); } }
+    return r;
+  });
+}; })(hxApprove);
+function ciPts(c) {
+  var P = ptsCfg(); if (!c.hx) return ''; var refs = c.refs || [];
+  return '<section class="ucard"><h3>🏅 النقاط والدعوات</h3>' + (P.on ? '<p>نقاط ' + (P.per === 'm' ? 'الشهر' : 'الأسبوع') + ': <b>' + ptsOf(c) + '</b>' + ((c.hx.rwLog || []).length ? ' • مكافآت: ' + c.hx.rwLog.slice(-3).map(function (q) { return esc(q.n); }).join('، ') : '') + '</p>' : '<p class="small">النقاط غير مفعّلة (من إعدادات «حصتي»).</p>')
+    + '<p class="small">كود دعوته: <b dir="ltr">' + esc(c.ref || '—') + '</b>' + (c.refBy ? ' • دخل بدعوة: ' + esc(c.refBy) : '') + ' • اشترك من طرفه: ' + refs.length + (refs.length ? ' (' + esc(refs.map(function (q) { return q.name; }).join('، ')) + ')' : '') + '</p></section>';
+}
+(function (f) { ciTab = function (c) { return f.apply(this, arguments).replace("<section class=\"ucard\"><h3>📋 آخر خطة</h3>", ciPts(c) + "<section class=\"ucard\"><h3>📋 آخر خطة</h3>"); }; })(ciTab);

@@ -505,6 +505,8 @@ html[data-theme="pulse"] .alm{background:radial-gradient(70% 50% at 50% 30%,rgba
 /* 0.54: موعد المتابعة ووقت الرد */
 .apc h3{margin:0}.apc.soon{border-color:rgba(255,210,122,.6)}.apc .row .btn{flex:1}
 .replyb{margin:6px 12px 0;padding:8px 12px;border-radius:12px;background:rgba(127,168,255,.12);border:1px solid rgba(127,168,255,.35);font-size:13px;display:flex;gap:6px;align-items:center}
+/* 0.55: النقاط والدعوة */
+.pts h3,.ref h3{margin:0}.ptn{font-size:30px;color:var(--mint)}.refc{font-size:22px;letter-spacing:2px;flex:1}.rcpyt{margin:8px 0}
 
 /* ==========================================================================
    «حصتي» — themes.css  •  ثيم «وردة» (data-theme="rose") وثيم «نبض» (data-theme="pulse")
@@ -2415,6 +2417,10 @@ function handle(p) {
   if (p.t === 'chalx') { S.chal = null; return true; }
   if (p.t === 'pcm' && p.id) { const ph = (S.photos || []).find((x) => x.id === p.id); if (ph) { ph.cm = String(p.text || '').slice(0, 300); notify('علّق أخصائيك على صورة وجبتك', ph.cm); return true; } return false; }
   if (p.t === 'appt' && Array.isArray(p.list)) { S.appts = p.list.slice(0, 8).filter((a) => a && /^\d{4}-\d{2}-\d{2}$/.test(a.d)).map((a) => ({ id: String(a.id).slice(0, 30), d: a.d, t: String(a.t || '').slice(0, 5), type: String(a.type || 'متابعة').slice(0, 40), mode: String(a.mode || '').slice(0, 20), conf: a.conf || '' })); S.replyAt = /^\d{2}:\d{2}$/.test(p.reply || '') ? p.reply : ''; remSync(true); return true; }
+  if (p.t === 'pts') { S.pts = { on: !!p.on, total: +p.total || 0, per: p.per === 'm' ? 'm' : 'w', r: p.r || {}, cap: +p.cap || 0, rewards: Array.isArray(p.rewards) ? p.rewards.slice(0, 8) : [], ref: String(p.ref || '').slice(0, 12), refs: Array.isArray(p.refs) ? p.refs.slice(0, 50).map(String) : [], refTxt: String(p.refTxt || '').slice(0, 160), refDays: +p.refDays || 90 }; return true; }
+  if (p.t === 'rwd' && p.n) { const n = String(p.n).slice(0, 60), cert = /شهادة/.test(n); S.rwds = (S.rwds || []).concat([{ n, p: +p.p || 0, at: now() }]).slice(-20);
+    if (cert) { const c = { id: 'r' + now().toString(36), pid: 'pts', w: 98, title: 'جمع ' + (+p.p || 0) + ' نقطة التزام ' + (p.per === 'm' ? 'هذا الشهر' : 'هذا الأسبوع'), lines: [], at: now(), name: String(S.p.name || '').trim(), sex: S.p.sex, dname: S.dname, clinic: '', phrase: PHRASES[now() % PHRASES.length] }; S.ach = (S.ach || []).concat([c]); setTimeout(() => celebrateAch(c), 80); }
+    notify('🏅 مكافأة جديدة من أخصائيك', n); return true; }
   if (p.t === 'gate') { setGate(p.on ? { on: 1, hour: p.hour } : null); return true; }
   if (p.t === 'read') { S.msgs.forEach((m) => { if (m.from === 'c' && m.ts <= p.upTo) m.read = true; }); return true; }
   return false;
@@ -2564,6 +2570,17 @@ function apCard() {
   const when = new Date(a.d + 'T12:00').toLocaleDateString('ar', { weekday: 'long', day: 'numeric', month: 'long' }) + ' • ' + hm12(a.t) + (a.mode ? ' • ' + a.mode : '');
   return '<section class="card stack apc' + (soon && !c ? ' soon' : '') + '"><div class="row"><span style="font-size:22px">📅</span><div style="flex:1"><h3>' + (a.d === tdy ? 'موعد متابعتك اليوم' : a.d === tmr ? 'غداً موعد متابعتك' : 'موعد متابعتك القادم') + '</h3><div class="dim">' + esc(a.type) + ' • ' + esc(when) + '</div></div></div>'
     + (soon ? (c === 'ok' ? '<div class="banner ok">' + I('check') + '<span>أكّدت الموعد ✓</span></div>' : c === 'chg' ? '<div class="banner warn">' + I('clock') + '<span>طلبت تغيير الموعد؛ سيتواصل معك أخصائيك.</span></div>' : '<div class="row"><button class="btn" data-act="apOk" data-v="' + esc(a.id) + '">' + I('check') + ' أؤكد الموعد</button><button class="btn sec" data-act="apChg" data-v="' + esc(a.id) + '">أحتاج تغيير</button></div>') : '') + '</section>';
+}
+
+// ---- 0.55: نقاطي ومكافآتي (يحددها أخصائيك)، وكود دعوتي
+function ptsCard() {
+  const P = S.pts; if (!P) return ''; const per = P.per === 'm' ? 'الشهر' : 'الأسبوع', rw = (P.rewards || []).filter((q) => +q.p > 0).sort((a, b) => a.p - b.p), nx = rw.find((q) => q.p > P.total), R = P.r || {};
+  const how = [['day', 'كل يوم ترسل فيه «تسجيل اليوم»'], ['photo', 'صورة وجبة'], ['wk', 'قياس الأسبوع'], ['body', 'صورة التقدم'], ['att', 'حضور المتابعة']].filter((q) => +R[q[0]] > 0).map((q) => '<li>' + q[1] + ' <b>+' + (+R[q[0]]) + '</b></li>').join('');
+  return (P.on ? '<section class="card stack pts"><div class="row" style="justify-content:space-between"><h3>🏅 نقاطي هذا ' + per + '</h3><b class="ptn">' + P.total + '</b></div>'
+    + (nx ? '<div class="prog"><i style="width:' + Math.min(100, Math.round(P.total / nx.p * 100)) + '%"></i></div><p class="dim">باقي ' + (nx.p - P.total) + ' نقطة على «' + esc(nx.n) + '»</p>' : rw.length ? '<p class="dim">وصلت لكل مكافآت ' + per + ' 🎉</p>' : '')
+    + (rw.length ? '<p class="mut">المكافآت: ' + rw.map((q) => q.p + ' ← ' + esc(q.n)).join(' • ') + '</p>' : '') + (how ? '<details><summary class="dim">كيف أجمع النقاط؟</summary><ul class="plist">' + how + '</ul><p class="dim">بحد أقصى ' + (P.cap || 0) + ' نقطة في اليوم.</p></details>' : '')
+    + ((S.rwds || []).length ? '<p class="dim">حصلت على: ' + S.rwds.slice(-3).map((q) => esc(q.n)).join('، ') + '</p>' : '') + '</section>' : '')
+    + (P.ref ? '<section class="card stack ref"><h3>🤝 كود دعوتي</h3><div class="row"><b class="refc" dir="ltr">' + esc(P.ref) + '</b><button class="btn sm sec" data-act="refShare">' + I('share') + ' شارك</button></div><p class="mut">من يشترك عند أخصائيك بهذا الكود خلال ' + P.refDays + ' يوماً يُحسب لك.' + (P.refTxt ? ' ' + esc(P.refTxt) : '') + '</p><p class="dim">اشترك من طرفك: ' + P.refs.length + (P.refs.length ? ' (' + P.refs.map(esc).join('، ') + ')' : '') + '</p></section>' : '');
 }
 
 // ---------- مساعدات
@@ -2907,7 +2924,7 @@ function tabProgress() {
     chart = '<svg class="chart" viewBox="0 0 310 160" role="img" aria-label="منحنى الوزن">' + ticks + '<polyline points="' + W.map((w, i) => X(i) + ',' + Y(w[1])).join(' ') + '" fill="none" stroke="#9dbbff" stroke-width="2.5" stroke-linejoin="round"/>' + dots + lbl + '</svg>';
   }
   const bars = [6, 5, 4, 3, 2, 1, 0].map((back) => { const dt = new Date(now() - back * 86400000), n = DATA.dayNames[dt.getDay()] || '', v = adhBack(back); return '<div><b>' + (v == null ? '' : Math.round(v * 100)) + '</b><i class="' + (v == null ? 'na' : v < .6 ? 'lo' : '') + '" style="height:' + (v == null ? 6 : Math.max(6, v * 80)) + 'px"></i><small>' + esc(String(n).replace('ال', '').slice(0, 3)) + '</small></div>'; }).join('');
-  return hpTop() + '<h2>تقدّمي</h2><section class="card stack"><div class="row" style="justify-content:space-between"><h3>الوزن</h3><span class="dim">' + (W.length > 1 ? (diff <= 0 ? diff + ' كجم منذ البداية' : '+' + diff + ' كجم') : '') + '</span></div>' + chart
+  return hpTop() + ptsCard() + '<h2>تقدّمي</h2><section class="card stack"><div class="row" style="justify-content:space-between"><h3>الوزن</h3><span class="dim">' + (W.length > 1 ? (diff <= 0 ? diff + ' كجم منذ البداية' : '+' + diff + ' كجم') : '') + '</span></div>' + chart
     + '<div class="row"><input class="inp" id="wIn" type="text" data-numf="1" autocomplete="off" inputmode="decimal" placeholder="وزن اليوم (كجم)" style="flex:1"><button class="btn sm" data-act="weigh">' + I('scale') + ' سجّل</button></div></section>'
     + '<section class="card stack"><div class="row" style="justify-content:space-between"><h3>الالتزام آخر 7 أيام</h3><span class="dim">% من الأصناف</span></div><div class="wk">' + bars + '</div></section>'
     + '<section class="card achcard"><div class="row" style="justify-content:space-between"><h3>🏅 إنجازاتي</h3><span class="dim">' + (S.ach || []).length + ' شهادة</span></div><button class="btn sm" data-act="achs">' + I('sparkle') + ' عرض إنجازاتي وشهاداتي</button></section>' + habitsProgress() + themeCard() + remCard() + '<section class="card stack"><h3>الحساب</h3><p class="dim">ملفك لدى ' + esc(S.dname) + (S.code ? ' • رقم ' + esc(S.code) : '') + '. بياناتك محفوظة مشفّرة على هذا الجوال فقط.</p>' + installCard('acct') + notifCard(false) + '<div class="row"><button class="btn sm sec" data-act="lock">' + I('lock') + ' قفل التطبيق</button><button class="btn sm sec" data-act="xferNew">' + I('phone') + ' نقل حسابي</button></div><button class="link" data-act="wipe" style="color:var(--coral)">حذف بياناتي من هذا الجوال</button></section>';
@@ -2982,7 +2999,7 @@ function phStrip(si) {
 // ---------- الوصفات: يكتبها الأخصائي لوجبات البنك (خطوات ووقت وصورة) وتصل مع الخطة
 function rcpSheet() {
   const [d, si] = sheet.k.split('_').map(Number), s = dayPlan(d).slots[si], r = S.pm.recipes[s.meal] || {};
-  return '<div class="rcp">' + (r.img ? '<img src="/m/' + esc(r.img) + '" alt="' + esc(s.meal) + '">' : '') + (r.mins ? '<p class="dim">' + I('clock') + ' التحضير حوالي ' + (+r.mins) + ' دقيقة</p>' : '')
+  return '<div class="rcp">' + (r.img ? '<img src="/m/' + esc(r.img) + '" alt="' + esc(s.meal) + '">' : '') + (r.mins ? '<p class="dim">' + I('clock') + ' التحضير حوالي ' + (+r.mins) + ' دقيقة</p>' : '') + (/^[A-Za-z0-9_-]{11}$/.test(r.yt || '') ? '<div class="pyt rcpyt"><iframe src="https://www.youtube-nocookie.com/embed/' + r.yt + '?playsinline=1&rel=0" title="فيديو التحضير" allow="encrypted-media; picture-in-picture" allowfullscreen></iframe></div>' : '')
     + '<h3>المقادير لك</h3><ul class="plist">' + s.lines.map((l) => '<li>' + esc(lineT(l)) + '</li>').join('') + '</ul>' + ((r.steps || []).length ? '<h3>الطريقة</h3><ol class="steps">' + r.steps.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ol>' : '') + (r.tip ? '<div class="banner ok">' + I('sparkle') + '<span>' + esc(r.tip) + '</span></div>' : '') + '</div>';
 }
 // ---------- التذكيرات: الماء كل ساعتين والوجبات في أوقات خطتك — تصل والتطبيق مغلق (المحطة تعرف الأوقات فقط)
@@ -3327,7 +3344,7 @@ async function certCanvas(a) {
   g.strokeStyle = '#d4a72c'; g.lineWidth = 3; g.beginPath(); g.moveTo(W / 2 - 170, y + 24); g.lineTo(W / 2 + 170, y + 24); g.stroke();
   g.fillStyle = '#44506b'; g.font = F(400, 34); g.fillText('تُمنح هذه الشهادة ' + (a.sex === 'أنثى' ? 'للمتميّزة' : 'للمتميّز'), W / 2, y + 90);
   g.fillStyle = '#1f8a5b'; g.font = F(700, 92); g.fillText(a.name || 'بطل حصتي', W / 2, y + 200);
-  g.fillStyle = '#12305e'; g.font = F(400, 36); g.fillText((a.sex === 'أنثى' ? 'لإتمامها ' : 'لإتمامه ') + (a.w === 99 ? a.title + ' بنجاح' : 'تحدي الأسبوع ' + a.w + ': «' + a.title + '»'), W / 2, y + 275);
+  g.fillStyle = '#12305e'; g.font = F(400, 36); g.fillText((a.sex === 'أنثى' ? 'لإتمامها ' : 'لإتمامه ') + (a.w === 99 ? a.title + ' بنجاح' : a.w === 98 ? a.title : 'تحدي الأسبوع ' + a.w + ': «' + a.title + '»'), W / 2, y + 275);
   g.fillStyle = '#5b6680'; g.font = F(400, 26); const ln = a.lines.slice(0, 6), rows = [ln.slice(0, 3).join('    '), ln.slice(3).join('    ')].filter(Boolean); rows.forEach((r, i) => g.fillText(r, W / 2, y + 335 + i * 42));
   g.fillStyle = '#b8860b'; g.font = F(700, 38); g.fillText('“ ' + a.phrase + ' ”', W / 2, y + 335 + rows.length * 42 + 60);
   const by = H - 150; g.fillStyle = '#12305e'; g.font = F(700, 32); g.fillText(a.dname || 'أخصائي التغذية', W - 360, by); g.strokeStyle = '#9aa6c0'; g.lineWidth = 2; g.beginPath(); g.moveTo(W - 540, by + 22); g.lineTo(W - 180, by + 22); g.stroke();
@@ -3691,6 +3708,7 @@ document.addEventListener('click', (e) => {
     case 'avPic': picFile(async (f) => { try { const [th] = await shrink(f, [[200, 0.7]]); S.avatar = th; save(); render(); } catch (e) { toast(e.message); } }); break;
     case 'apOk': S.apConf = Object.assign({}, S.apConf, { [v]: 'ok' }); send({ t: 'apc', id: v, ok: 1 }); save(); toast('أكّدت الموعد ✓ — نراك فيه'); break;
     case 'apChg': { const note = (prompt('ما الوقت الأنسب لك؟ (اختياري)') || '').trim().slice(0, 200); S.apConf = Object.assign({}, S.apConf, { [v]: 'chg' }); send({ t: 'apc', id: v, ok: 0, note }); save(); toast('وصل طلب تغيير الموعد لأخصائيك'); break; }
+    case 'refShare': { const t = 'أتابع نظامي الغذائي مع ' + S.dname + ' على «حصتي». استعمل كود دعوتي ' + S.pts.ref + ' عند اشتراكك.'; if (navigator.share) navigator.share({ text: t }).catch(() => { }); else if (navigator.clipboard) navigator.clipboard.writeText(t).then(() => toast('نُسخت رسالة الدعوة')); break; }
     case 'subDay': { const L = dl(TODAY), t = $('#offT'); if (t) L.offT = t.value.trim().slice(0, 500); L.sub = Date.now(); logNow(TODAY); toast('وصل تسجيل اليوم لأخصائيك ✓'); break; }
     case 'qnote': { const t = $('#noteIn'); t.value = (t.value ? t.value + ' • ' : '') + v; t.focus(); return; }
     case 'savenote': { const t = $('#noteIn').value.trim().slice(0, 500), L = dl(TODAY); if (t) L.note[sheet.si] = t; else delete L.note[sheet.si]; sheet = null; queueLog(dkey(new Date())); toast('حُفظت الملاحظة وتصل أخصائيك.'); break; }
