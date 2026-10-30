@@ -332,6 +332,7 @@ function hxTab(c) {                                                // تبويب
   return '<div class="hxtab"><div class="ucard"><div class="hxtop"><h3>📲 «حصتي» <small>مرتبط منذ ' + new Date(x.since || Date.now()).toLocaleDateString('ar') + ' • آخر تحقق ' + hxAgo(HX.last) + '</small></h3><button class="sec sm" data-a="hxCheck">↻ تحقق الآن</button></div>'
     + (!c.plan && c.planSrc !== 'ready' ? '<p class="small">ولّد الخطة (من البنك أو جديدة) من «بيانات العميل» ثم أرسلها من هنا.</p>' : '<p>' + (x.planV ? 'آخر خطة أُرسلت: v' + x.planV + ' ' + hxAgo(x.sentAt) + '. ' : '') + '<button data-a="hxSendPlan">' + (x.planV ? '↻ أرسل الخطة المحدَّثة إلى «حصتي»' : '➤ أرسل الخطة إلى «حصتي»') + '</button></p><p class="small">' + (ath ? 'تصل الخطة بالجرامات لكل يوم (حسب نوع التدريب) مع ماكروز كل وجبة وبدائل كل صنف بجرامات تعادل الماكرو الرئيسي.' : 'تصل الخطة بكل أيامها ووجباتها مع بدائل كل صنف من نفس المجموعة.') + ' ما لا يحبه العميل يُستبدل تلقائياً في جواله.</p>')
     + '</div>'
+    + '<div class="ucard hxgate"><label class="chk"><input type="checkbox" data-hxgate ' + (x.gate ? 'checked' : '') + '> 📅 يوم واحد في كل مرة</label><p class="small">يرى العميل جدول يومه فقط. جدول الغد يُفتح بعد أن يرسل «تسجيل اليوم»، أو تلقائياً الساعة <select data-hxgateh>' + [9, 10, 12, 14, 16].map(function (h) { return '<option value="' + h + '"' + ((x.gateH || 12) === h ? ' selected' : '') + '>' + h + ':00</option>'; }).join('') + '</select> إن نسي (فلا يبقى بلا جدول). عدّل الخطة وأعد إرسالها متى شئت: يرى الجديد في يومه التالي.</p></div>'
     + (x.health ? '<div class="warn">🩺 يطلب العميل تعديل حالته الصحية إلى: <b>' + (esc(x.health.cond.concat(x.health.allg).join('، ')) || 'لا حالات') + '</b>' + (x.health.note ? ' — ' + esc(x.health.note) : '') + '<p class="two"><button class="sm" data-a="hxHealthOk">اعتماد وتحديث ملفه</button><button class="sec sm" data-a="hxHealthNo">رفض</button></p></div>' : '')
     + '<div class="hxgrid"><div class="ucard"><h3>💬 المحادثة</h3>' + (hxThread(x.msgs).replace('<div class="hxthread"></div>', '<p class="small">لا رسائل بعد. ما يكتبه العميل من «راسل الأخصائي» يظهر هنا مع إشعار.</p>')) + '<div class="hxcomp"><textarea id="hxMsg" rows="2" placeholder="اكتب رسالة للعميل…"></textarea><button data-a="hxSendMsg">إرسال</button></div></div>'
     + '<div class="ucard"><h3>✅ المتابعة اليومية</h3>' + (adh || '<p class="small">لم يسجّل العميل متابعة بعد. يعلّم في «حصتي» ما أكله بلمسة، ويكتب ما أضاف أو حذف.</p>') + '</div>'
@@ -383,6 +384,7 @@ Object.assign(A, {
     var c = cur(), rd = c && c.planSrc === 'ready' && c.ready && c.readyDoc && window.RL; if (!c || !c.hx || !(c.plan || rd)) return; var snap;
     try { snap = rd ? RL.toHissati(c.readyDoc, RL.plan(c.ready.id)) : c.kind === 'athlete' ? hxSnapG(c) : hxSnap(c); } catch (e) { toast('تعذّر تجهيز الخطة: ' + e.message); return; }
     var v = (c.hx.planV || 0) + 1; toast('جارٍ الإرسال…');
+    snap.gate = c.hx.gate ? { on: 1, hour: c.hx.gateH || 12 } : null; snap.wm = (c.name || '') + ' • ' + (c.code || '');
     hxSend(c, { t: 'plan', v: v, plan: snap, note: '' }).then(function () { c.hx.planV = v; c.hx.sentAt = Date.now(); if (rd) c.ready.sentV = v; persist(c); main(); toast('✓ وصلت الخطة v' + v + ' إلى «حصتي» مع إشعار للعميل'); }).catch(hxErr);
   },
   hxSendMsg: function () {
@@ -408,3 +410,10 @@ document.addEventListener('change', function (e) {
 document.addEventListener('keydown', function (e) { var t = e.target; if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && t && (t.id === 'hxMsg' || (t.dataset && t.dataset.hxr))) { e.preventDefault(); if (t.id === 'hxMsg') A.hxSendMsg(); else A.hxReqMsg(t.dataset.hxr); } });
 (function (f) { render = function () { var r = f.apply(this, arguments); if (!HX.loaded && DB) { HX.loaded = 'loading'; hxLoad().then(function () { hxRail(); if (S.view === 'hx' || S.view === 'settings') main(); }); } else hxRail(); return r; }; })(render);
 (function (f) { main0 = function () { if (S.view === 'hx') { $('main').innerHTML = hxPage(); return; } return f.apply(this, arguments); }; })(main0);
+
+// ---- 0.51: «يوم واحد في كل مرة» لكل عميل — يُرسل فوراً إلى «حصتي» ومع كل خطة
+document.addEventListener('change', function (e) {
+  var t = e.target, c = typeof cur === 'function' && cur(); if (!c || !c.hx || !(t.hasAttribute('data-hxgate') || t.hasAttribute('data-hxgateh'))) return;
+  if (t.hasAttribute('data-hxgate')) c.hx.gate = t.checked; else c.hx.gateH = +t.value || 12;
+  persist(c); hxSend(c, { t: 'gate', on: !!c.hx.gate, hour: c.hx.gateH || 12 }).then(function () { toast(c.hx.gate ? '📅 «يوم واحد في كل مرة» مفعّل لـ ' + (c.name || '') : 'أُلغي «يوم واحد في كل مرة»'); }).catch(hxErr);
+});

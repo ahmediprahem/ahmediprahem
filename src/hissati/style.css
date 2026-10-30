@@ -484,3 +484,7 @@ html[data-theme="pulse"] .alm{background:radial-gradient(70% 50% at 50% 30%,rgba
 .daylog .lrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.daylog .stepper{display:inline-flex;align-items:center;gap:10px}.daylog .stepper b{min-width:26px;text-align:center;font-size:18px}
 .daylog .lblk{display:flex;flex-direction:column;gap:8px}.daylog .lin{gap:8px}.daylog .lin label{flex:1;display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--mut,#aab)}.daylog .lin input{width:100%;min-width:0}
 .daylog textarea.inp{min-height:64px}.daylog .lin input.inp{min-height:44px;padding:0 10px}
+/* 0.51: يوم واحد في كل مرة + علامة مائية */
+.gatec{text-align:center;align-items:center}.gatec .gl{font-size:40px}.gatec h2{margin:0}
+.wmk{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;display:flex;flex-wrap:wrap;align-content:space-around;justify-content:space-around;gap:40px 30px;transform:rotate(-24deg) scale(1.4);opacity:.045;font-size:15px;font-weight:700;color:#fff;user-select:none}
+.scr.hasTabs>.scroll{position:relative;z-index:1}

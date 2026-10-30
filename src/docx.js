@@ -25,9 +25,11 @@
     if (!br || !br.logoBytes) return ''; var h = 324000, w = Math.round(h * br.logoW / br.logoH), id = ++picN;
     return '<w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="' + w + '" cy="' + h + '"/><wp:docPr id="' + id + '" name="logo' + id + '"/><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="' + id + '" name="logo.png"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="rIdLogo"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="' + w + '" cy="' + h + '"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r>';
   }
+  var WM = '';                                                     // 0.51: اسم العميل وكوده على كل صفحة (الخطة لا تصلح لغيره)
+  function wmOf(c) { return c ? 'خاصة بـ ' + (c.name || '') + ' • ' + (c.code || '') : ''; }
   function header(title, sub, phr, br, first) {
     var right = par(run(title, { sz: 20, b: 1, c: C.g })) + (sub ? par(run(sub, { sz: 10, c: C.n })) : '') + par('', { line: 5, shd: C.y }) + (phr ? par(run(phr, { sz: 9, b: 1, c: C.o }), { before: 1 }) : ''),
-      left = (br.logoBytes ? par(logoRun(br), { al: 'right' }) : '') + par(run(br.clinic || '', { sz: 9, b: 1, c: C.n }), { al: 'right' }) + (br.specialist ? par(run('الأخصائي: ' + br.specialist, { sz: 8.5, c: C.n }), { al: 'right' }) : par(''));
+      left = (br.logoBytes ? par(logoRun(br), { al: 'right' }) : '') + par(run(br.clinic || '', { sz: 9, b: 1, c: C.n }), { al: 'right' }) + (br.specialist ? par(run('الأخصائي: ' + br.specialist, { sz: 8.5, c: C.n }), { al: 'right' }) : par('')) + (WM ? par(run(WM, { sz: 7.5, c: '8A8F9C' }), { al: 'right' }) : '');
     return (first ? '' : par('', { pb: 1, line: 1 })) + tbl([13.2, 5.4], [tr([tc(13.2, right, { bsz: 0, mt: 0 }), tc(5.4, left, { bsz: 0, mt: 0 })])]);
   }
   function orange(day, kcal) {
@@ -38,6 +40,7 @@
   // ---------------- الصفحات
   function pgSum(c, p, D, E, br) {
     var T = p.targets, f = [['الاسم', c.name, 'الكود', c.code], ['العمر', c.age, 'الجنس', c.sex], ['الوزن (كجم)', c.weight, 'الطول (سم)', c.height], ['مؤشر كتلة الجسم', T.bmi.toFixed(1), 'مستوى النشاط', c.activity], ['الهدف', c.goal, 'الحالة الصحية', (c.conditions || []).join('، ') || 'جيدة']];
+    WM = wmOf(c);
     var h = header('نظامك الغذائي', 'الأسبوع الأول', p.phr[0][0], br, true) + gap(4) + sect('بيانات العميل');
     h += tbl([3.5, 5.8, 3.5, 5.8], f.map(function (r) { return tr([cell(3.5, r[0], C.g, C.w, 9.5), cell(5.8, String(r[1]), C.w, C.n, 10, true, { bc: C.g, bsz: 6 }), cell(3.5, r[2], C.g, C.w, 9.5), cell(5.8, String(r[3]), C.w, C.n, 10, true, { bc: C.g, bsz: 6 })], 0.58); }));
     h += gap(3) + sect('الماكروز اليومية — ' + Math.round(T.kcal) + ' سعرة') + tbl([6.2, 6.2, 6.2], [tr([cell(6.2, 'كربوهيدرات', C.y, C.n, 11), cell(6.2, 'بروتين', C.y, C.n, 11), cell(6.2, 'دهون', C.y, C.n, 11)], 0.6), tr([cell(6.2, Math.round(T.cho * 4 / T.kcal * 100) + '% • ' + Math.round(T.cho) + ' جم', C.n), cell(6.2, Math.round(T.pro * 4 / T.kcal * 100) + '% • ' + Math.round(T.pro) + ' جم', C.n), cell(6.2, Math.round(T.fat * 9 / T.kcal * 100) + '% • ' + Math.round(T.fat) + ' جم', C.n)], 0.7)]);
@@ -98,6 +101,7 @@
   function readyBody(c, R, d, E, br, X) {
     var G = d.days[0].m.some(function (m) { return m[2] && m[2].k; }), K = function (k) { return colOf(E, br, k); }, dn = X.days || [];
     var bmi = c.weight && c.height ? (c.weight / Math.pow(c.height / 100, 2)).toFixed(1) : '—', f = [['الاسم', c.name, 'الكود', c.code], ['العمر', c.age, 'الجنس', c.sex], ['الوزن (كجم)', c.weight, 'الطول (سم)', c.height], ['مؤشر كتلة الجسم', bmi, 'مستوى النشاط', c.activity], ['الهدف', c.goal, 'الحالة الصحية', (c.conditions || []).join('، ') || 'جيدة']];
+    WM = wmOf(c);
     var h = header('نظامك الغذائي', R.label, R.when || '', br, true) + gap(4) + sect('بيانات العميل');
     h += tbl([3.5, 5.8, 3.5, 5.8], f.map(function (r) { return tr([cell(3.5, r[0], C.g, C.w, 9.5), cell(5.8, String(r[1] == null ? '' : r[1]), C.w, C.n, 10, true, { bc: C.g, bsz: 6 }), cell(3.5, r[2], C.g, C.w, 9.5), cell(5.8, String(r[3] == null ? '' : r[3]), C.w, C.n, 10, true, { bc: C.g, bsz: 6 })], 0.58); }));
     var mac = [];
@@ -169,6 +173,7 @@
   // ---------------- صفحات الرياضيين
   function athSum(c, p, AD, br) {
     var T = p.T, info = [['الاسم', c.name, 'الكود', c.code], ['العمر', c.age, 'الجنس', c.sex], ['الوزن (كجم)', c.weight, 'الطول (سم)', c.height], ['الرياضة', c.sport || '—', 'نسبة الدهون', c.bf ? c.bf + '%' : '—'], ['المرحلة', c.phase, 'BMR', Math.round(T.bmr) + ' (' + T.method + ')']];
+    WM = wmOf(c);
     var h = header('خطتك الغذائية', c.phase, p.phr[0][0], br, true) + gap(4) + sect('بيانات العميل') + tbl([3.5, 5.8, 3.5, 5.8], info.map(function (r) { return tr([cell(3.5, r[0], C.g, C.w, 9.5), cell(5.8, String(r[1]), C.w, C.n, 10, true, { bc: C.g, bsz: 6 }), cell(3.5, r[2], C.g, C.w, 9.5), cell(5.8, String(r[3]), C.w, C.n, 10, true, { bc: C.g, bsz: 6 })], 0.58); }));
     var W = [2.6, 5.2, 2.2, 2.2, 2.2, 2.2, 2.0];
     h += gap(3) + sect('أهدافك اليومية بالجرام') + tbl(W, [tr([cell(2.6, 'اليوم', C.o, C.w, 9.5), cell(5.2, 'النوع', C.n, C.w, 9.5), cell(2.2, 'سعرات', C.g, C.w, 9.5), cell(2.2, 'بروتين', C.y, C.n, 9.5), cell(2.2, 'كارب', C.y, C.n, 9.5), cell(2.2, 'دهون', C.y, C.n, 9.5), cell(2.0, 'ماء (ل)', C.g, C.w, 9)], 0.52)].concat(T.days.map(function (d, i) {

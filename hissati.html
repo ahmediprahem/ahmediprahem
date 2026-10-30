@@ -489,6 +489,10 @@ html[data-theme="pulse"] .alm{background:radial-gradient(70% 50% at 50% 30%,rgba
 .daylog .lrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.daylog .stepper{display:inline-flex;align-items:center;gap:10px}.daylog .stepper b{min-width:26px;text-align:center;font-size:18px}
 .daylog .lblk{display:flex;flex-direction:column;gap:8px}.daylog .lin{gap:8px}.daylog .lin label{flex:1;display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--mut,#aab)}.daylog .lin input{width:100%;min-width:0}
 .daylog textarea.inp{min-height:64px}.daylog .lin input.inp{min-height:44px;padding:0 10px}
+/* 0.51: يوم واحد في كل مرة + علامة مائية */
+.gatec{text-align:center;align-items:center}.gatec .gl{font-size:40px}.gatec h2{margin:0}
+.wmk{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;display:flex;flex-wrap:wrap;align-content:space-around;justify-content:space-around;gap:40px 30px;transform:rotate(-24deg) scale(1.4);opacity:.045;font-size:15px;font-weight:700;color:#fff;user-select:none}
+.scr.hasTabs>.scroll{position:relative;z-index:1}
 
 /* ==========================================================================
    «حصتي» — themes.css  •  ثيم «وردة» (data-theme="rose") وثيم «نبض» (data-theme="pulse")
@@ -2377,7 +2381,7 @@ function handle(p) {
   }
   if (p.t === 'plan' && p.plan && Array.isArray(p.plan.days) && p.plan.days.length) {
     const pl = p.plan; S.pm = { sys: pl.sys || 'ex', kcal: pl.kcal, pro: pl.pro, cho: pl.cho, fat: pl.fat, water: pl.water, dayNames: pl.dayNames, groups: pl.groups, recipes: pl.recipes && typeof pl.recipes === 'object' ? pl.recipes : {}, ready: pl.ready && typeof pl.ready === 'object' ? { id: String(pl.ready.id || ''), name: String(pl.ready.name || '').slice(0, 80) } : null };
-    S.plan = JSON.parse(JSON.stringify(pl.days)); S.pv = +p.v || 1; mkData(); if (S.req !== 'approved') S.req = 'approved';
+    S.plan = JSON.parse(JSON.stringify(pl.days)); S.pv = +p.v || 1; mkData(); S.wm = String(pl.wm || '').slice(0, 80); setGate(pl.gate); if (S.req !== 'approved') S.req = 'approved';
     foodsOf('no').forEach((f) => { if (foodInPlan(f)) applyDislike(f); });
     const first = S.screen !== 'app'; S.screen = 'app'; if (first) S.tab = 'today'; remSync();
     notify(first ? 'وصلت خطتك من ' + S.dname : 'وصلت خطتك المحدَّثة (الإصدار ' + S.pv + ')', 'افتح «حصتي» لترى يومك'); return true;
@@ -2398,6 +2402,7 @@ function handle(p) {
   }
   if (p.t === 'chalx') { S.chal = null; return true; }
   if (p.t === 'pcm' && p.id) { const ph = (S.photos || []).find((x) => x.id === p.id); if (ph) { ph.cm = String(p.text || '').slice(0, 300); notify('علّق أخصائيك على صورة وجبتك', ph.cm); return true; } return false; }
+  if (p.t === 'gate') { setGate(p.on ? { on: 1, hour: p.hour } : null); return true; }
   if (p.t === 'read') { S.msgs.forEach((m) => { if (m.from === 'c' && m.ts <= p.upTo) m.read = true; }); return true; }
   return false;
 }
@@ -2422,6 +2427,18 @@ function dayLogCard(d) {
     + '<div class="lblk"><b>📝 خارج النظام اليوم (اختياري)</b><div class="chips">' + OFF.map((o) => chip('off', o[0], off[o[0]], o[1])).join('') + '</div>'
     + (Object.keys(off).length || L.offT ? '<textarea class="inp" id="offT" rows="2" maxlength="500" placeholder="ماذا أكلت؟ أو ما الأعراض؟ أو ما التعديل الذي تريده؟">' + esc(L.offT || '') + '</textarea>' : '') + '</div>'
     + '<button class="btn full' + (L.sub ? ' sec' : '') + '" data-act="subDay">' + I('send') + (L.sub ? ' أُرسل تسجيل اليوم ✓ (أرسل التحديث)' : ' أرسل تسجيل اليوم لأخصائيك') + '</button></section>';
+}
+// ---- 0.51: «يوم واحد في كل مرة» (يفعّله الأخصائي لكل عميل): جدول اليوم يُفتح بعد إرسال تسجيل أمس، أو تلقائياً في ساعة محددة
+function setGate(g) { const on = g && g.on; S.gate = on ? { on: 1, h: Math.min(20, Math.max(6, +g.hour || 12)), from: (S.gate && S.gate.from) || dkey(new Date()) } : null; }
+function yKey() { return dkey(new Date(now() - 864e5)); }
+function gateOpen() {
+  const g = S.gate; if (!g || !S.plan) return true; const y = yKey(), L = S.log[y];
+  return y < g.from || !!(L && L.sub) || new Date(now()).getHours() >= g.h;
+}
+function gateCard() {
+  return '<section class="card stack gatec"><div class="gl">🔒</div><h2>جدول اليوم ينتظر تسجيل أمس</h2><p class="mut">أرسل لأخصائيك كيف كان يومك أمس ليُفتح جدول اليوم. ثوانٍ فقط.</p>'
+    + '<button class="btn full" data-act="yAll">' + I('check') + ' التزمت بأمس كله</button><button class="btn sec full" data-act="ySub">' + I('send') + ' أرسل أمس كما سجّلته</button>'
+    + '<p class="dim">إن نسيت، يُفتح جدول اليوم تلقائياً الساعة ' + S.gate.h + ':00.</p></section>';
 }
 function logNow(d) { const k = dateFor(d); clearTimeout(logT[k]); sendLog(k); save(); }
 
@@ -2697,7 +2714,8 @@ function scrSent() {
 function scrApp() {
   const body = { today: tabToday, plan: tabPlan, prefs: tabPrefs, progress: tabProgress, feed: tabFeed }[S.tab]();
   const tb = [['today', 'today', 'اليوم'], ['plan', 'cal', 'خطتي'], ['prefs', 'heart', 'تفضيلاتي'], ['feed', 'news', 'تثقيف'], ['progress', 'trend', 'تقدّمي']].map((t) => '<button class="' + (S.tab === t[0] ? 'on' : '') + '" data-act="tab" data-v="' + t[0] + '"' + (S.tab === t[0] ? ' aria-current="page"' : '') + '>' + I(t[1]) + '<span>' + t[2] + '</span>' + (t[0] === 'feed' && fdNew() ? '<span class="nb" aria-label="' + fdNew() + ' جديد">' + fdNew() + '</span>' : '') + '</button>').join('');
-  return '<div class="scr hasTabs"><div class="scroll"><div class="stack">' + (S.removed ? '<div class="banner warn">' + I('alert') + '<span>أوقف أخصائيك ربط حسابك؛ خطتك الحالية تبقى معروضة لكن لا تصله متابعتك.</span></div>' : '') + body + '</div></div><nav class="tabbar" aria-label="التنقل">' + tb + '</nav></div>';
+  const wm = S.wm && (S.tab === 'today' || S.tab === 'plan') ? '<div class="wmk" aria-hidden="true">' + Array(18).fill('<span>' + esc(S.wm) + '</span>').join('') + '</div>' : '';   // 0.51: علامة مائية باسم العميل على الجدول
+  return '<div class="scr hasTabs">' + wm + '<div class="scroll"><div class="stack">' + (S.removed ? '<div class="banner warn">' + I('alert') + '<span>أوقف أخصائيك ربط حسابك؛ خطتك الحالية تبقى معروضة لكن لا تصله متابعتك.</span></div>' : '') + body + '</div></div><nav class="tabbar" aria-label="التنقل">' + tb + '</nav></div>';
 }
 function tabToday() {
   const d = TODAY, L = dl(d), [done, n] = itemsOfDay(d), pct = n ? Math.round(done / n * 100) : 0, C = 2 * Math.PI * 40;
@@ -2708,7 +2726,7 @@ function tabToday() {
   const dp = dayPlan(d), kc = dp.kcal || DATA.kcal, pr = dp.p || DATA.pro, wt = +(dp.water || DATA.water), cups = Math.max(4, Math.min(16, Math.round(wt / CUP)));
   if (dp.type) out += '<div class="banner info">' + I('dumbbell') + '<span><b>' + esc(dp.type) + '</b> • كارب ' + dp.c + ' جم • دهون ' + dp.f + ' جم</span></div>';
   out += '<div class="stats3"><div class="st"><b>' + kc + '</b><small>سعرة هدفك' + (dp.type ? ' اليوم' : '') + '</small></div><div class="st"><b>' + pr + ' جم</b><small>بروتين</small></div><div class="st"><b>' + (L.water * CUP).toFixed(2).replace(/\.?0+$/, '') + ' / ' + wt.toFixed(1) + '</b><small>لتر ماء</small></div></div>';
-  out += habitsHome() + '<h2 class="mealsh">وجباتي</h2>' + dayPlan(d).slots.map((s, si) => mealCard(d, si, s, true)).join('') + dayLogCard(d);
+  out += habitsHome() + (gateOpen() ? '<h2 class="mealsh">وجباتي</h2>' + dayPlan(d).slots.map((s, si) => mealCard(d, si, s, true)).join('') + dayLogCard(d) : gateCard());
   return out + syncLine();
 }
 function syncLine() { return '<p class="sync">' + (S.outbox.length ? 'بانتظار الإنترنت لإرسال ' + S.outbox.length + ' تحديث إلى أخصائيك' : 'متابعتك تصل أخصائيك تلقائياً') + ' • الخطة الإصدار ' + S.pv + '</p>'; }
@@ -2728,10 +2746,11 @@ function mealCard(d, si, s, live) {
     + '<div class="macts"><button class="btn sm sec" data-act="whole" data-v="' + si + '">' + I('check') + (all ? ' تمّت' : ' أكلتها كاملة') + '</button><button class="btn sm sec" data-act="note" data-v="' + si + '">' + I('edit') + ' أضفت / ملاحظة</button><button class="btn sm sec" data-act="skip" data-v="' + si + '">' + (skip ? 'تراجع' : 'لم آكلها') + '</button><button class="btn sm sec" data-act="ask" data-v="' + si + '">' + I('msg') + ' اسأل عنها</button><button class="btn sm sec" data-act="photo" data-v="' + si + '">' + I('camera') + ' صوّر وجبتك</button>' + rbtn + '</div></section>';
 }
 function tabPlan() {
-  const chips = DATA.dayNames.map((n, i) => { const [a, b] = itemsOfDay(i); return '<button class="' + (S.day === i ? 'on' : '') + (i === TODAY ? ' today' : '') + '" data-act="day" data-v="' + i + '"><b>' + esc(String(n).replace('ال', '')) + '</b><span>' + (b && i <= TODAY ? Math.round(a / b * 100) + '%' : '—') + '</span></button>'; }).join('');
+  const hid = S.gate && (S.day !== TODAY || !gateOpen());
+  const chips = DATA.dayNames.map((n, i) => { const [a, b] = itemsOfDay(i); return '<button class="' + (S.day === i ? 'on' : '') + (i === TODAY ? ' today' : '') + '" data-act="day" data-v="' + i + '"><b>' + esc(String(n).replace('ال', '')) + '</b><span>' + (S.gate && i !== TODAY ? '🔒' : b && i <= TODAY ? Math.round(a / b * 100) + '%' : '—') + '</span></button>'; }).join('');
   return '<div class="row" style="justify-content:space-between"><h2>خطتي</h2><button class="btn sm sec" data-act="shop">' + I('cart') + ' قائمة التسوّق</button></div>'
     + '<div class="dim">من ' + esc(S.dname) + ' • ' + (S.pm && S.pm.sys === 'g' ? 'نظام الجرامات: السعرات حسب نوع كل يوم' : S.pm && S.pm.ready ? esc(S.pm.ready.name) + ' • متوسط ' + DATA.kcal + ' سعرة' : DATA.kcal + ' سعرة يومياً') + ' • الإصدار ' + S.pv + '</div>'
-    + '<div class="daychips">' + chips + '</div>' + (dayPlan(S.day).type ? '<div class="banner info">' + I('dumbbell') + '<span><b>' + esc(dayPlan(S.day).type) + '</b> • ' + dayPlan(S.day).kcal + ' سعرة' + (dayPlan(S.day).p != null ? ' • بروتين ' + dayPlan(S.day).p + ' • كارب ' + dayPlan(S.day).c + ' • دهون ' + dayPlan(S.day).f + ' جم' : '') + '</span></div>' : '') + dayPlan(S.day).slots.map((s, si) => mealCard(S.day, si, s, false)).join('') + ((dayPlan(S.day).tips || []).length ? '<div class="banner info">' + I('sparkle') + '<span>' + dayPlan(S.day).tips.map(esc).join(' • ') + '</span></div>' : '') + rqCard(false);
+    + '<div class="daychips">' + chips + '</div>' + (hid ? '<section class="card stack gatec"><div class="gl">🔒</div><p class="mut">' + (S.day !== TODAY ? 'خطتك تظهر يوماً بيوم: يُفتح كل يوم في وقته بعد إرسال تسجيل اليوم السابق.' : 'أرسل تسجيل أمس من «اليوم» ليُفتح جدول اليوم.') + '</p></section>' : '') + (hid ? '' : (dayPlan(S.day).type ? '<div class="banner info">' + I('dumbbell') + '<span><b>' + esc(dayPlan(S.day).type) + '</b> • ' + dayPlan(S.day).kcal + ' سعرة' + (dayPlan(S.day).p != null ? ' • بروتين ' + dayPlan(S.day).p + ' • كارب ' + dayPlan(S.day).c + ' • دهون ' + dayPlan(S.day).f + ' جم' : '') + '</span></div>' : '') + dayPlan(S.day).slots.map((s, si) => mealCard(S.day, si, s, false)).join('') + ((dayPlan(S.day).tips || []).length ? '<div class="banner info">' + I('sparkle') + '<span>' + dayPlan(S.day).tips.map(esc).join(' • ') + '</span></div>' : '')) + rqCard(false);
 }
 function tabPrefs() {
   const lv = foodsOf('love').length, no = foodsOf('no').length;
@@ -3504,6 +3523,7 @@ document.addEventListener('click', (e) => {
     case 'wAdd': { const L = dl(TODAY); L.water = Math.max(0, Math.min(24, (L.water || 0) + (+v))); queueLog(dkey(new Date())); break; }
     case 'walkMin': case 'walkSteps': { const L = dl(TODAY), f = a === 'walkMin' ? 'walkMin' : 'steps'; L.h = L.h || {}; if (+L.h[f] === +v) delete L.h[f]; else L.h[f] = +v; queueLog(dkey(new Date())); break; }
     case 'off': { const L = dl(TODAY); L.off = L.off || {}; if (L.off[v]) delete L.off[v]; else L.off[v] = 1; queueLog(dkey(new Date())); break; }
+    case 'yAll': case 'ySub': { const y = yKey(), yd = new Date(now() - 864e5).getDay(), L = (S.log[y] = S.log[y] || { ck: {}, sw: {}, note: {}, skip: {}, water: 0 }); if (a === 'yAll') dayPlan(yd).slots.forEach((sl, si) => { if (!L.skip[si]) sl.lines.forEach((l, li) => { L.ck[si + '_' + li] = 1; }); }); L.sub = now(); clearTimeout(logT[y]); sendLog(y); save(); toast('وصل تسجيل أمس ✓ — هذا جدول اليوم'); break; }
     case 'subDay': { const L = dl(TODAY), t = $('#offT'); if (t) L.offT = t.value.trim().slice(0, 500); L.sub = Date.now(); logNow(TODAY); toast('وصل تسجيل اليوم لأخصائيك ✓'); break; }
     case 'qnote': { const t = $('#noteIn'); t.value = (t.value ? t.value + ' • ' : '') + v; t.focus(); return; }
     case 'savenote': { const t = $('#noteIn').value.trim().slice(0, 500), L = dl(TODAY); if (t) L.note[sheet.si] = t; else delete L.note[sheet.si]; sheet = null; queueLog(dkey(new Date())); toast('حُفظت الملاحظة وتصل أخصائيك.'); break; }

@@ -350,3 +350,4 @@ details.tbm:not([open])>.tbp,details.im:not([open])>.imx{display:none}
 .cid{display:grid;grid-template-columns:110px 1fr 64px 60px;gap:8px;align-items:center;padding:6px 0;border-top:1px solid var(--line)}.cid .ciex{grid-column:1/-1;color:#556}.cid.none{grid-template-columns:110px 1fr;opacity:.65}.cid.low span:nth-child(3){color:#b4321f;font-weight:700}.cid.off .ciex{color:#8a4b00}
 .ciflash{outline:3px solid #f5a623;outline-offset:3px;border-radius:10px}
 @media (max-width:760px){.cid{grid-template-columns:1fr 60px 56px}.cid b{grid-column:1/-1}}
+.pwm{color:#8a8f9c;font-size:10px}
