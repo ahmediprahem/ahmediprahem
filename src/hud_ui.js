@@ -55,7 +55,7 @@ function hudRender(live) {
     if (k !== null) { var s = d.slots[k], m = hudRows(E.colCounts(s.req || s.target || new Array(13).fill(0)), E.colCounts(E.actualGroups(s)), true); meal = '<div class="hudmt">المقترح لـ«' + esc(mealNm(p, s)) + '»' + (m.total && m.done === m.total ? ' <span class="hudok">✔ مطابق</span>' : '') + '</div>' + (m.html || '<small>— لا حصص مقترحة —</small>'); }
     el.className = 'hud noprint' + (HUD.min ? ' hf-min' : '') + (allDone ? ' hf-done' : '');
     el.innerHTML = '<div class="hudh"><span class="hudt" title="اسحب لتحريك المؤشر • نقر مزدوج لإعادته">⠿ هدف الحصص اليوم</span><span class="huddy">' + esc(dayName(p, q.di)) + '</span><button class="hudbtn" data-a="hudToggle" aria-label="' + (HUD.min ? 'توسيع' : 'تصغير') + '">' + (HUD.min ? '▢' : '–') + '</button></div>'
-      + '<div class="hudsum hs-' + (allDone ? 'ok' : 'low') + '">' + (allDone ? '✔ اكتمل اليوم' : 'اكتملت ' + day.done + ' من ' + day.total + ' مجموعة') + '</div>'
+      + hudHealth() + '<div class="hudsum hs-' + (allDone ? 'ok' : 'low') + '">' + (allDone ? '✔ اكتمل اليوم' : 'اكتملت ' + day.done + ' من ' + day.total + ' مجموعة') + '</div>'
       + '<div class="hudb">' + (day.html || '<small>— لا حصص مطلوبة —</small>') + (d.short && d.short.length ? '<div class="hudwarn">⚠ لم تتسع ' + d.short.map(function (x) { return num(x[1]) + ' من ' + esc(D.groups[x[0]]); }).join('، ') + ' في سقوف الوجبات</div>' : '') + '</div>'
       + '<div class="hudc"><div class="hudcl">الوجبة (اضغط لعرض المقترح):</div><div class="hudchips">' + chips + '</div>' + meal + '</div>';
   } catch (e) { var x = document.getElementById('hud'); if (x) x.style.display = 'none'; }
@@ -81,3 +81,6 @@ document.addEventListener('input', function (e) {         // صفحة تقسيم
 document.addEventListener('focusin', function (e) {                // المؤشر يتبع الوجبة التي تعدّلها
   var t = e.target, ds = t && t.dataset; if (!ds) return; var v = ds.cell || ds.le || ''; if (!v) return; var a = v.split(','); if (+a[0] === HUD.page && +a[1] !== HUD.slot) { HUD.slot = +a[1]; hudRender(); }
 });
+
+// ---- 0.50: الحالة الصحية للعميل في المؤشر الجانبي (يتذكرها الأخصائي وهو يعدّل الخطة)
+function hudHealth() { var c = cur(); if (!c) return ''; var a = (c.conditions || []).concat((c.allergens || []).map(function (x) { return 'حساسية: ' + x; })); return a.length ? '<div class="hudhl" title="الحالة الصحية للعميل">🩺 ' + esc(a.join(' • ')) + '</div>' : ''; }
