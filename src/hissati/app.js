@@ -262,8 +262,24 @@ let logT = {}; function queueLog(k) { clearTimeout(logT[k]); logT[k] = setTimeou
 function sendLog(k) {
   const L = S.log[k]; if (!L || !S.plan) return; const dow = new Date(k + 'T12:00:00').getDay(), day = S.plan[dow % S.plan.length]; let n = 0, done = 0;
   day.slots.forEach((s, si) => s.lines.forEach((l, li) => { n++; if (L.ck[si + '_' + li]) done++; }));
-  send({ t: 'log', d: k, dow, pv: S.pv, ck: L.ck, sw: L.sw, note: L.note, skip: L.skip, water: L.water, done, n, h: L.h || {}, hs: hList() });
+  send({ t: 'log', d: k, dow, pv: S.pv, ck: L.ck, sw: L.sw, note: L.note, skip: L.skip, water: L.water, done, n, h: L.h || {}, hs: hList(), off: L.off || {}, offT: L.offT || '', sub: L.sub || 0 });
 }
+
+// ---- 0.49: «تسجيل اليوم» في 30 ثانية: زر الالتزام الكامل، الماء، المشي، وما خرج عن النظام، ثم «أرسل تسجيل اليوم»
+const OFF = [['sweets', '🍰 حلويات'], ['out', '🍔 أكل من الخارج'], ['extra', '🍽 وجبة زيادة'], ['drinks', '🥤 مشروبات محلّاة'], ['sym', '🤒 تعب أو أعراض'], ['change', '✏️ أريد تعديل النظام']];
+const WALK_MIN = [15, 30, 45, 60], WALK_STEPS = [3000, 5000, 8000, 10000];
+function dayLogCard(d) {
+  const L = dl(d), H = L.h || {}, off = L.off || {}, [done, n] = itemsOfDay(d), pct = n ? Math.round(done / n * 100) : 0, chip = (act, v, on, t) => '<button class="chip' + (on ? ' on' : '') + '" data-act="' + act + '" data-v="' + v + '" aria-pressed="' + !!on + '">' + t + '</button>';
+  return '<section class="card stack daylog" id="daylog"><div class="row" style="justify-content:space-between"><h3>' + I('check') + ' تسجيل اليوم</h3><span class="dim">التزامك ' + pct + '%</span></div>'
+    + '<button class="btn full' + (pct === 100 ? ' sec' : '') + '" data-act="allDay">' + I('check') + (pct === 100 ? ' التزمت باليوم كله ✓' : ' التزمت باليوم كله') + '</button><p class="dim">أو علّم الوجبات واحدة واحدة أعلاه، واكتب الاستثناءات فقط.</p>'
+    + '<div class="lrow"><b>💧 الماء</b><span class="stepper"><button class="btn sm sec" data-act="wAdd" data-v="-1" aria-label="كوب أقل">−</button><b id="wv">' + (L.water || 0) + '</b><button class="btn sm sec" data-act="wAdd" data-v="1" aria-label="كوب أكثر">+</button></span><small class="dim">كوب (' + ((L.water || 0) * CUP).toFixed(2).replace(/\.?0+$/, '') + ' لتر)</small></div>'
+    + '<div class="lblk"><b>🚶 المشي أو الرياضة</b><div class="chips">' + WALK_MIN.map((m) => chip('walkMin', m, +H.walkMin === m, m + ' دقيقة')).join('') + '</div><div class="chips">' + WALK_STEPS.map((m) => chip('walkSteps', m, +H.steps === m, (m / 1000) + ' آلاف خطوة')).join('') + '</div>'
+    + '<div class="row lin"><label>دقائق<input class="inp" type="text" inputmode="numeric" data-numf="1" data-wk="walkMin" value="' + (H.walkMin || '') + '"></label><label>خطوات<input class="inp" type="text" inputmode="numeric" data-numf="1" data-wk="steps" value="' + (H.steps || '') + '"></label><label>متر<input class="inp" type="text" inputmode="numeric" data-numf="1" data-wk="walkM" value="' + (H.walkM || '') + '"></label></div></div>'
+    + '<div class="lblk"><b>📝 خارج النظام اليوم (اختياري)</b><div class="chips">' + OFF.map((o) => chip('off', o[0], off[o[0]], o[1])).join('') + '</div>'
+    + (Object.keys(off).length || L.offT ? '<textarea class="inp" id="offT" rows="2" maxlength="500" placeholder="ماذا أكلت؟ أو ما الأعراض؟ أو ما التعديل الذي تريده؟">' + esc(L.offT || '') + '</textarea>' : '') + '</div>'
+    + '<button class="btn full' + (L.sub ? ' sec' : '') + '" data-act="subDay">' + I('send') + (L.sub ? ' أُرسل تسجيل اليوم ✓ (أرسل التحديث)' : ' أرسل تسجيل اليوم لأخصائيك') + '</button></section>';
+}
+function logNow(d) { const k = dateFor(d); clearTimeout(logT[k]); sendLog(k); save(); }
 
 // ---------- مساعدات
 function toast(m) { toastMsg = m; clearTimeout(toastT); toastT = setTimeout(() => { toastMsg = ''; render(); }, 3400); render(); }
@@ -548,7 +564,7 @@ function tabToday() {
   const dp = dayPlan(d), kc = dp.kcal || DATA.kcal, pr = dp.p || DATA.pro, wt = +(dp.water || DATA.water), cups = Math.max(4, Math.min(16, Math.round(wt / CUP)));
   if (dp.type) out += '<div class="banner info">' + I('dumbbell') + '<span><b>' + esc(dp.type) + '</b> • كارب ' + dp.c + ' جم • دهون ' + dp.f + ' جم</span></div>';
   out += '<div class="stats3"><div class="st"><b>' + kc + '</b><small>سعرة هدفك' + (dp.type ? ' اليوم' : '') + '</small></div><div class="st"><b>' + pr + ' جم</b><small>بروتين</small></div><div class="st"><b>' + (L.water * CUP).toFixed(2).replace(/\.?0+$/, '') + ' / ' + wt.toFixed(1) + '</b><small>لتر ماء</small></div></div>';
-  out += habitsHome() + '<h2 class="mealsh">وجباتي</h2>' + dayPlan(d).slots.map((s, si) => mealCard(d, si, s, true)).join('');
+  out += habitsHome() + '<h2 class="mealsh">وجباتي</h2>' + dayPlan(d).slots.map((s, si) => mealCard(d, si, s, true)).join('') + dayLogCard(d);
   return out + syncLine();
 }
 function syncLine() { return '<p class="sync">' + (S.outbox.length ? 'بانتظار الإنترنت لإرسال ' + S.outbox.length + ' تحديث إلى أخصائيك' : 'متابعتك تصل أخصائيك تلقائياً') + ' • الخطة الإصدار ' + S.pv + '</p>'; }
@@ -1340,6 +1356,11 @@ document.addEventListener('click', (e) => {
     case 'swap': sheet = { t: 'swap', k: v }; break;
     case 'doswap': { const L = dl(TODAY); if (v) { L.sw[sheet.k] = v; L.ck[sheet.k] = 1; toast('تم التبديل، وسيعرف أخصائيك.'); } else delete L.sw[sheet.k]; sheet = null; queueLog(dkey(new Date())); break; }
     case 'note': sheet = { t: 'note', si: +v }; break;
+    case 'allDay': { const L = dl(TODAY), dp = dayPlan(TODAY); dp.slots.forEach((sl, si) => { if (L.skip[si]) return; sl.lines.forEach((l, li) => { L.ck[si + '_' + li] = 1; }); }); queueLog(dkey(new Date())); toast('أحسنت! سُجّل التزامك باليوم كله'); break; }
+    case 'wAdd': { const L = dl(TODAY); L.water = Math.max(0, Math.min(24, (L.water || 0) + (+v))); queueLog(dkey(new Date())); break; }
+    case 'walkMin': case 'walkSteps': { const L = dl(TODAY), f = a === 'walkMin' ? 'walkMin' : 'steps'; L.h = L.h || {}; if (+L.h[f] === +v) delete L.h[f]; else L.h[f] = +v; queueLog(dkey(new Date())); break; }
+    case 'off': { const L = dl(TODAY); L.off = L.off || {}; if (L.off[v]) delete L.off[v]; else L.off[v] = 1; queueLog(dkey(new Date())); break; }
+    case 'subDay': { const L = dl(TODAY), t = $('#offT'); if (t) L.offT = t.value.trim().slice(0, 500); L.sub = Date.now(); logNow(TODAY); toast('وصل تسجيل اليوم لأخصائيك ✓'); break; }
     case 'qnote': { const t = $('#noteIn'); t.value = (t.value ? t.value + ' • ' : '') + v; t.focus(); return; }
     case 'savenote': { const t = $('#noteIn').value.trim().slice(0, 500), L = dl(TODAY); if (t) L.note[sheet.si] = t; else delete L.note[sheet.si]; sheet = null; queueLog(dkey(new Date())); toast('حُفظت الملاحظة وتصل أخصائيك.'); break; }
     case 'shop': sheet = { t: 'shop' }; break;
@@ -1361,6 +1382,8 @@ document.addEventListener('change', (e) => {
     const MSG = { water: 'سيصلك تذكير الماء كل ساعتين 💧', meals: 'سيصلك تذكير مواعيد وجباتك 🍽', adhAm: 'سيصلك تذكير أذكار الصباح 📿', adhPm: 'سيصلك تذكير أذكار المساء 🌙', med: 'سيصلك تذكير موعد الدواء 💊' };
     (t.checked && pushState() !== 'on' ? pushSetup(true) : Promise.resolve(pushState())).then((st) => { if (t.checked && st !== 'on') toast(st === 'denied' ? 'الإشعارات محظورة من إعدادات المتصفح — فعّلها ليصلك التذكير' : 'فعّل الإشعارات ليصلك التذكير والتطبيق مغلق'); return remSync(true); }).then(() => { if (t.checked && pushState() === 'on') toast(MSG[t.dataset.rem] || 'فُعّل التذكير'); render(); });
   }
+  if (t.dataset.wk) { const L = dl(TODAY), n = Math.max(0, Math.min(80000, Math.round(+numOnly(t.value) || 0))); L.h = L.h || {}; if (n) L.h[t.dataset.wk] = n; else delete L.h[t.dataset.wk]; queueLog(dkey(new Date())); save(); render(); }
+  if (t.id === 'offT') { const L = dl(TODAY); L.offT = t.value.trim().slice(0, 500); queueLog(dkey(new Date())); save(); }
   if (t.dataset.remsound) { S.rem = Object.assign({ water: false, meals: false }, S.rem); S.rem.sound = t.checked; save(); if (t.checked) almChime(); else almStop(); }
   if (t.dataset.remt) { S.rem = Object.assign({ water: false, meals: false }, S.rem); S.rem[t.dataset.remt] = t.value || (t.dataset.remt === 'adhAmT' ? '06:00' : '17:30'); save(); remSync(true).then(() => { toast('حُفظ وقت التذكير'); render(); }); }
   if (t.dataset.med) { const [f, i] = t.dataset.med.split('|'), x = (S.rem && S.rem.meds || [])[+i]; if (x) { x[f] = f === 'n' ? t.value.trim().slice(0, 40) : (t.value || '08:00'); save(); remSync(true).then(() => { if (f === 't') toast('حُفظ موعد الدواء'); }); } }

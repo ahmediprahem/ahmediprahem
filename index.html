@@ -4683,7 +4683,8 @@ function hxQuiz(p) {
 function hxIn(c, p) {                                              // بعد الاعتماد: المتابعة اليومية، الوزن، التفضيلات، الصحة، المحادثة
   var x = c.hx, nm = c.name || x.label || '';
   if (p.t === 'log' && /^\d{4}-\d{2}-\d{2}$/.test(p.d)) {
-    x.logs = x.logs || {}; x.logs[p.d] = { dow: p.dow, pv: p.pv, ck: p.ck || {}, sw: p.sw || {}, note: p.note || {}, skip: p.skip || {}, water: +p.water || 0, done: +p.done || 0, n: +p.n || 0, ts: p.ts, h: p.h && typeof p.h === 'object' && JSON.stringify(p.h).length < 2000 ? p.h : {}, hs: Array.isArray(p.hs) ? p.hs.slice(0, 12).map(String) : [] };
+    x.logs = x.logs || {}; x.logs[p.d] = { dow: p.dow, pv: p.pv, ck: p.ck || {}, sw: p.sw || {}, note: p.note || {}, skip: p.skip || {}, water: +p.water || 0, done: +p.done || 0, n: +p.n || 0, ts: p.ts, h: p.h && typeof p.h === 'object' && JSON.stringify(p.h).length < 2000 ? p.h : {}, hs: Array.isArray(p.hs) ? p.hs.slice(0, 12).map(String) : [], off: hxOff(p.off), offT: String(p.offT || '').slice(0, 500), sub: +p.sub || 0 };
+    if (p.off && (p.off.sym || p.off.change) && !(x.flags || {})[p.d]) { x.flags = x.flags || {}; x.flags[p.d] = 1; x.unread = (x.unread || 0) + 1; toast('🩺 ' + nm + (p.off.sym ? ' سجّل أعراضاً اليوم' : ' يطلب تعديل النظام')); return 1; }
     var ks = Object.keys(x.logs).sort(); if (ks.length > 90) ks.slice(0, ks.length - 90).forEach(function (k) { delete x.logs[k]; });
     return 0;                                                       // المتابعة تُحدَّث بصمت (بلا إشعار لكل لمسة)
   }
@@ -4847,6 +4848,9 @@ function hxPage() {
     + (linked.length ? '<h3>عملاء على «حصتي» (' + linked.length + ')</h3><div class="hxlinked">' + linked.map(function (c) { var t = hxToday(c); return '<div class="cl" data-a="hxOpen" data-v="' + c.code + '"><span class="cav">' + esc(initial(c.name)) + '</span><b>' + esc(c.name) + (c.hx.unread || c.hx.health ? ' <em class="hxnb">' + ((c.hx.unread || 0) + (c.hx.health ? 1 : 0)) + '</em>' : '') + '</b><small>' + c.code + ' • ' + (c.hx.planV ? 'الخطة v' + c.hx.planV : 'لم تُرسل خطة') + (t ? ' • اليوم ' + t + '%' : '') + '</small></div>'; }).join('') + '</div>' : '')
     + '</div>';
 }
+var HX_OFF = { sweets: 'حلويات', out: 'أكل من الخارج', extra: 'وجبة زيادة', drinks: 'مشروبات محلّاة', sym: 'تعب أو أعراض', change: 'يريد تعديل النظام' };
+function hxOff(o) { var r = {}; if (o && typeof o === 'object') Object.keys(o).forEach(function (k) { if (HX_OFF[k]) r[k] = 1; }); return r; }
+function hxWalk(h) { h = h || {}; var a = []; if (+h.walkMin) a.push(+h.walkMin + ' دقيقة'); if (+h.steps && !HX_HB.steps) a.push(+h.steps + ' خطوة'); if (+h.walkM) a.push(+h.walkM + ' متر'); return a.length ? '🚶 ' + a.join(' • ') : ''; }
 function hxToday(c) { var d = new Date(), k = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'), l = (c.hx.logs || {})[k]; return l && l.n ? Math.round(l.done / l.n * 100) : 0; }
 function hxTab(c) {                                                // تبويب «حصتي» داخل ملف العميل
   var x = c.hx, ath = c.kind === 'athlete', logs = x.logs || {}, days = Object.keys(logs).sort().reverse().slice(0, 7), w = (x.weights || []).slice(-8);
@@ -4854,7 +4858,8 @@ function hxTab(c) {                                                // تبويب
     var l = logs[k], pct = l.n ? Math.round(l.done / l.n * 100) : 0, extra = [];
     Object.keys(l.sw || {}).forEach(function (q) { extra.push('⇄ ' + l.sw[q]); }); Object.keys(l.note || {}).forEach(function (q) { extra.push('✎ ' + l.note[q]); }); Object.keys(l.skip || {}).forEach(function (q) { extra.push('⤼ تخطّى وجبة ' + (+q + 1)); });
     var hb = hxHabits(l); if (hb) extra.unshift(hb);
-    return '<div class="hxday"><b>' + esc((D.days[l.dow] || '') + ' ' + k.slice(5)) + '</b><span class="hxbar"><i style="width:' + pct + '%"></i></span><span>' + pct + '%</span><small>💧 ' + (l.water * 0.25).toFixed(2).replace(/\.?0+$/, '') + ' ل</small>' + (extra.length ? '<small class="hxex">' + esc(extra.join(' • ')) + '</small>' : '') + '</div>';
+    var wk = hxWalk(l.h); if (wk) extra.unshift(wk); var of = Object.keys(l.off || {}).map(function (q) { return HX_OFF[q] || q; }); if (of.length || l.offT) extra.push('⚠ خارج النظام: ' + of.join('، ') + (l.offT ? ' — ' + l.offT : ''));
+    return '<div class="hxday"><b>' + esc((D.days[l.dow] || '') + ' ' + k.slice(5)) + '</b><span class="hxbar"><i style="width:' + pct + '%"></i></span><span>' + pct + '%' + (l.sub ? ' <em title="أرسل تسجيل اليوم">✓</em>' : '') + '</span><small>💧 ' + (l.water * 0.25).toFixed(2).replace(/\.?0+$/, '') + ' ل</small>' + (extra.length ? '<small class="hxex">' + esc(extra.join(' • ')) + '</small>' : '') + '</div>';
   }).join('');
   return '<div class="hxtab"><div class="ucard"><div class="hxtop"><h3>📲 «حصتي» <small>مرتبط منذ ' + new Date(x.since || Date.now()).toLocaleDateString('ar') + ' • آخر تحقق ' + hxAgo(HX.last) + '</small></h3><button class="sec sm" data-a="hxCheck">↻ تحقق الآن</button></div>'
     + (!c.plan && c.planSrc !== 'ready' ? '<p class="small">ولّد الخطة (من البنك أو جديدة) من «بيانات العميل» ثم أرسلها من هنا.</p>' : '<p>' + (x.planV ? 'آخر خطة أُرسلت: v' + x.planV + ' ' + hxAgo(x.sentAt) + '. ' : '') + '<button data-a="hxSendPlan">' + (x.planV ? '↻ أرسل الخطة المحدَّثة إلى «حصتي»' : '➤ أرسل الخطة إلى «حصتي»') + '</button></p><p class="small">' + (ath ? 'تصل الخطة بالجرامات لكل يوم (حسب نوع التدريب) مع ماكروز كل وجبة وبدائل كل صنف بجرامات تعادل الماكرو الرئيسي.' : 'تصل الخطة بكل أيامها ووجباتها مع بدائل كل صنف من نفس المجموعة.') + ' ما لا يحبه العميل يُستبدل تلقائياً في جواله.</p>')

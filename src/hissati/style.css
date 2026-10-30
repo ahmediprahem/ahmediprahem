@@ -480,3 +480,7 @@ html[data-theme="pulse"] .alm{background:radial-gradient(70% 50% at 50% 30%,rgba
 .rqo>span:nth-last-child(1),.rqo>span:nth-child(2){flex:1}.rqo .rqi{font-size:24px;flex:none;width:32px;text-align:center}.rqo.on{border-color:var(--mint);background:rgba(111,227,169,.14)}.rqo .ico{color:var(--mint)}.rqo.none{justify-content:center;font-weight:500;color:var(--mut)}
 .rqnum{display:flex;align-items:center;gap:10px}.rqnum .inp{font-size:22px;text-align:center;min-height:58px}.rqnum span{color:var(--mut);font-size:16px}
 .rqres .rqh{display:flex;align-items:center;gap:8px;margin-bottom:4px}.rqres .rqh b{font-size:17px}.rqres.best{border-color:var(--mint)}.rqli{margin:8px 0;padding-right:18px;line-height:1.8;font-size:14px;color:var(--mut)}.rqres .btn{margin-top:6px}.rqcard b{display:flex;align-items:center;gap:6px}.rqcard .btn{margin-top:8px}
+/* 0.49: تسجيل اليوم */
+.daylog .lrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.daylog .stepper{display:inline-flex;align-items:center;gap:10px}.daylog .stepper b{min-width:26px;text-align:center;font-size:18px}
+.daylog .lblk{display:flex;flex-direction:column;gap:8px}.daylog .lin{gap:8px}.daylog .lin label{flex:1;display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--mut,#aab)}.daylog .lin input{width:100%;min-width:0}
+.daylog textarea.inp{min-height:64px}.daylog .lin input.inp{min-height:44px;padding:0 10px}
