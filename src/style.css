@@ -358,3 +358,5 @@ details.tbm:not([open])>.tbp,details.im:not([open])>.imx{display:none}
 .cizoom{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.82);display:grid;place-items:center;cursor:zoom-out}.cizoom img{max-width:92vw;max-height:92vh;border-radius:12px}
 .apconf{display:inline-block;margin-inline-start:8px;font-size:12px;font-weight:700;padding:2px 8px;border-radius:10px}.apconf.ok{background:#e6f6ec;color:#1f6b3d}.apconf.chg{background:#fff1dc;color:#8a4b00}
 .ptset textarea{width:100%}
+/* 0.56: المكملات والأعشاب */
+.supt td{vertical-align:top}.supt td.small{max-width:260px}.dxb.draft{background:#fff1dc;color:#8a4b00}.cisupp ul{margin:6px 0;padding-inline-start:18px;line-height:1.9}

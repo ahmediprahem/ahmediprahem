@@ -237,3 +237,4 @@ html:is([data-theme="linear"],[data-theme="glass"]) .ciup.good{color:#6fe3a9}htm
 html:is([data-theme="linear"],[data-theme="glass"]) .cidl dt{color:#c5cde3}
 html:is([data-theme="linear"],[data-theme="glass"]) .ciimgs figcaption,html:is([data-theme="linear"],[data-theme="glass"]) .cibd figcaption{color:#c5cde3}
 html:is([data-theme="linear"],[data-theme="glass"]) .apconf.ok{background:rgba(111,227,169,.16);color:#9ff0c6}html:is([data-theme="linear"],[data-theme="glass"]) .apconf.chg{background:rgba(255,190,90,.16);color:#ffd59a}
+html:is([data-theme="linear"],[data-theme="glass"]) .dxb.draft{background:rgba(255,190,90,.16);color:#ffd59a}

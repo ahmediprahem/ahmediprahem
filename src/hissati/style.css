@@ -502,3 +502,4 @@ html[data-theme="pulse"] .alm{background:radial-gradient(70% 50% at 50% 30%,rgba
 .replyb{margin:6px 12px 0;padding:8px 12px;border-radius:12px;background:rgba(127,168,255,.12);border:1px solid rgba(127,168,255,.35);font-size:13px;display:flex;gap:6px;align-items:center}
 /* 0.55: النقاط والدعوة */
 .pts h3,.ref h3{margin:0}.ptn{font-size:30px;color:var(--mint)}.refc{font-size:22px;letter-spacing:2px;flex:1}.rcpyt{margin:8px 0}
+.supi{padding:8px 0;border-top:1px solid var(--line)}

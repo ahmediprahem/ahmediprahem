@@ -16,9 +16,9 @@ assert(await p.evaluate(() => document.body.classList.contains('clx')), 'عمو�
   assert(/اختر خطة جاهزة/.test(await p.textContent('main [data-a="genBank"]'))); assert(/من بنك الوجبات/.test(await p.textContent('main')));
   await p.click('.rail [data-a="home"]'); await p.waitForSelector('.qgrid'); assert(!(await p.evaluate(() => document.body.classList.contains('clx'))), 'عمود العملاء يظهر بعد أول عميل');
   ok('بيانات العميل: «📗 اختر خطة جاهزة» و«من بنك الوجبات»، وعمود العملاء يظهر بعد أول عميل');
-  await p.click('.rail [data-a="settings"]'); await p.waitForSelector('.stgs'); assert.strictEqual(await p.locator('.stg').count(), 4); assert.strictEqual(await p.locator('.stg [data-a="setTab"]').count(), 10);
+  await p.click('.rail [data-a="settings"]'); await p.waitForSelector('.stgs'); assert.strictEqual(await p.locator('.stg').count(), 4); assert.strictEqual(await p.locator('.stg [data-a="setTab"]').count(), 11);
   assert(/المساعد/.test(await p.textContent('[data-a="setTab"][data-v="dt"]'))); assert(!/dt\/hamed/.test(await p.textContent('.stgs')));
   await p.click('[data-a="setTab"][data-v="vault"]'); assert.strictEqual(await p.getAttribute('[data-a="setTab"][data-v="vault"]', 'class'), 'on');
-  ok('الإعدادات: عشرة تبويبات في أربعة أقسام (البيانات الغذائية، حصتي والعملاء، المظهر والمساعد، النسخ)، و«🤖 المساعد» بدل dt/hamed');
+  ok('الإعدادات: تبويباتها (11 منذ 0.56) في أربعة أقسام (البيانات الغذائية، حصتي والعملاء، المظهر والمساعد، النسخ)، و«🤖 المساعد» بدل dt/hamed');
   assert.deepStrictEqual(errs, [], errs.join('\n')); await b.close(); console.log('\nنجح', n, 'اختبارات التنقل والمسميات');
 })().catch((e) => { console.log('✘', e.message.slice(0, 900)); console.log(errs.join('\n')); process.exit(1); });

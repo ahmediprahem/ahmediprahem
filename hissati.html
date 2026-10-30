@@ -507,6 +507,7 @@ html[data-theme="pulse"] .alm{background:radial-gradient(70% 50% at 50% 30%,rgba
 .replyb{margin:6px 12px 0;padding:8px 12px;border-radius:12px;background:rgba(127,168,255,.12);border:1px solid rgba(127,168,255,.35);font-size:13px;display:flex;gap:6px;align-items:center}
 /* 0.55: النقاط والدعوة */
 .pts h3,.ref h3{margin:0}.ptn{font-size:30px;color:var(--mint)}.refc{font-size:22px;letter-spacing:2px;flex:1}.rcpyt{margin:8px 0}
+.supi{padding:8px 0;border-top:1px solid var(--line)}
 
 /* ==========================================================================
    «حصتي» — themes.css  •  ثيم «وردة» (data-theme="rose") وثيم «نبض» (data-theme="pulse")
@@ -2421,6 +2422,7 @@ function handle(p) {
   if (p.t === 'rwd' && p.n) { const n = String(p.n).slice(0, 60), cert = /شهادة/.test(n); S.rwds = (S.rwds || []).concat([{ n, p: +p.p || 0, at: now() }]).slice(-20);
     if (cert) { const c = { id: 'r' + now().toString(36), pid: 'pts', w: 98, title: 'جمع ' + (+p.p || 0) + ' نقطة التزام ' + (p.per === 'm' ? 'هذا الشهر' : 'هذا الأسبوع'), lines: [], at: now(), name: String(S.p.name || '').trim(), sex: S.p.sex, dname: S.dname, clinic: '', phrase: PHRASES[now() % PHRASES.length] }; S.ach = (S.ach || []).concat([c]); setTimeout(() => celebrateAch(c), 80); }
     notify('🏅 مكافأة جديدة من أخصائيك', n); return true; }
+  if (p.t === 'supp' && Array.isArray(p.list)) { S.supps = p.list.slice(0, 20).map((x) => ({ n: String(x.n || '').slice(0, 60), k: x.k === 'h' ? 'h' : 's', dose: String(x.dose || '').slice(0, 120), note: String(x.note || '').slice(0, 120), warn: String(x.warn || '').slice(0, 160) })); notify('💊 رشّح لك أخصائيك مكملات', S.supps.map((x) => x.n).join('، ')); return true; }
   if (p.t === 'gate') { setGate(p.on ? { on: 1, hour: p.hour } : null); return true; }
   if (p.t === 'read') { S.msgs.forEach((m) => { if (m.from === 'c' && m.ts <= p.upTo) m.read = true; }); return true; }
   return false;
@@ -2582,6 +2584,9 @@ function ptsCard() {
     + ((S.rwds || []).length ? '<p class="dim">حصلت على: ' + S.rwds.slice(-3).map((q) => esc(q.n)).join('، ') + '</p>' : '') + '</section>' : '')
     + (P.ref ? '<section class="card stack ref"><h3>🤝 كود دعوتي</h3><div class="row"><b class="refc" dir="ltr">' + esc(P.ref) + '</b><button class="btn sm sec" data-act="refShare">' + I('share') + ' شارك</button></div><p class="mut">من يشترك عند أخصائيك بهذا الكود خلال ' + P.refDays + ' يوماً يُحسب لك.' + (P.refTxt ? ' ' + esc(P.refTxt) : '') + '</p><p class="dim">اشترك من طرفك: ' + P.refs.length + (P.refs.length ? ' (' + P.refs.map(esc).join('، ') + ')' : '') + '</p></section>' : '');
 }
+
+// ---- 0.56: ما رشّحه الأخصائي من مكملات وأعشاب (مع الجرعة والتنبيه)
+function suppCard() { const L = S.supps || []; return L.length ? '<section class="card stack"><h3>💊 مكملاتي من أخصائيك</h3>' + L.map((x) => '<div class="supi"><b>' + (x.k === 'h' ? '🌿 ' : '💊 ') + esc(x.n) + '</b>' + (x.dose ? '<div>' + esc(x.dose) + '</div>' : '') + (x.note ? '<div class="dim">' + esc(x.note) + '</div>' : '') + (x.warn ? '<div class="dim">⚠ ' + esc(x.warn) + '</div>' : '') + '</div>').join('') + '<p class="dim">لا تبدأ أو تغيّر جرعة دواء أو مكمل دون الرجوع لطبيبك وأخصائيك. يمكنك ضبط تذكير له من «التذكيرات».</p></section>' : ''; }
 
 // ---------- مساعدات
 function toast(m) { toastMsg = m; clearTimeout(toastT); toastT = setTimeout(() => { toastMsg = ''; render(); }, 3400); render(); }
@@ -2924,7 +2929,7 @@ function tabProgress() {
     chart = '<svg class="chart" viewBox="0 0 310 160" role="img" aria-label="منحنى الوزن">' + ticks + '<polyline points="' + W.map((w, i) => X(i) + ',' + Y(w[1])).join(' ') + '" fill="none" stroke="#9dbbff" stroke-width="2.5" stroke-linejoin="round"/>' + dots + lbl + '</svg>';
   }
   const bars = [6, 5, 4, 3, 2, 1, 0].map((back) => { const dt = new Date(now() - back * 86400000), n = DATA.dayNames[dt.getDay()] || '', v = adhBack(back); return '<div><b>' + (v == null ? '' : Math.round(v * 100)) + '</b><i class="' + (v == null ? 'na' : v < .6 ? 'lo' : '') + '" style="height:' + (v == null ? 6 : Math.max(6, v * 80)) + 'px"></i><small>' + esc(String(n).replace('ال', '').slice(0, 3)) + '</small></div>'; }).join('');
-  return hpTop() + ptsCard() + '<h2>تقدّمي</h2><section class="card stack"><div class="row" style="justify-content:space-between"><h3>الوزن</h3><span class="dim">' + (W.length > 1 ? (diff <= 0 ? diff + ' كجم منذ البداية' : '+' + diff + ' كجم') : '') + '</span></div>' + chart
+  return hpTop() + suppCard() + ptsCard() + '<h2>تقدّمي</h2><section class="card stack"><div class="row" style="justify-content:space-between"><h3>الوزن</h3><span class="dim">' + (W.length > 1 ? (diff <= 0 ? diff + ' كجم منذ البداية' : '+' + diff + ' كجم') : '') + '</span></div>' + chart
     + '<div class="row"><input class="inp" id="wIn" type="text" data-numf="1" autocomplete="off" inputmode="decimal" placeholder="وزن اليوم (كجم)" style="flex:1"><button class="btn sm" data-act="weigh">' + I('scale') + ' سجّل</button></div></section>'
     + '<section class="card stack"><div class="row" style="justify-content:space-between"><h3>الالتزام آخر 7 أيام</h3><span class="dim">% من الأصناف</span></div><div class="wk">' + bars + '</div></section>'
     + '<section class="card achcard"><div class="row" style="justify-content:space-between"><h3>🏅 إنجازاتي</h3><span class="dim">' + (S.ach || []).length + ' شهادة</span></div><button class="btn sm" data-act="achs">' + I('sparkle') + ' عرض إنجازاتي وشهاداتي</button></section>' + habitsProgress() + themeCard() + remCard() + '<section class="card stack"><h3>الحساب</h3><p class="dim">ملفك لدى ' + esc(S.dname) + (S.code ? ' • رقم ' + esc(S.code) : '') + '. بياناتك محفوظة مشفّرة على هذا الجوال فقط.</p>' + installCard('acct') + notifCard(false) + '<div class="row"><button class="btn sm sec" data-act="lock">' + I('lock') + ' قفل التطبيق</button><button class="btn sm sec" data-act="xferNew">' + I('phone') + ' نقل حسابي</button></div><button class="link" data-act="wipe" style="color:var(--coral)">حذف بياناتي من هذا الجوال</button></section>';
