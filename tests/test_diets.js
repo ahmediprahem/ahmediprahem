@@ -41,6 +41,11 @@ t('كيتو: كارب ≤ الحد، بروتين معتدل، والدهون ا
 t('تدوير الكارب: متوسط السعرات الأسبوعي = المستهدف ±3%، وأيام الكارب المرتفع أعلى كارباً وسعراتٍ من المنخفض', () => {
   ALL.filter((r) => r.d.id === 'cycle').forEach((r) => { const ds = r.plan.days, avg = ds.reduce((s, d) => s + d.t.kcal, 0) / 7, k = r.c.diet.kcal; assert(Math.abs(avg - k) / k <= 0.03, avg + ' vs ' + k); const hi = ds.filter((d) => /مرتفع/.test(d.type)), lo = ds.filter((d) => /منخفض/.test(d.type)); assert(hi.length === 3 && lo.length === 4); assert(hi[0].t.c > lo[0].t.c * 1.2 && hi[0].t.kcal > lo[0].t.kcal, 'الفرق صغير'); assert((hi[0].t.kcal - lo[0].t.kcal) / lo[0].t.kcal <= 0.25 + 1e-9); });
 });
+t('تدوير الكارب (0.52): الأيام المرتفعة تقع على أيام التمرين الأطول في جدول الرياضي', () => {
+  const c = mk('ذكر', 88, 176, 35, 'ath'), sch = JSON.parse(JSON.stringify(c.schedule)), top = sch.map((x, i) => [i, +x.min || 0]).filter((q) => q[1] > 0).sort((a, b) => b[1] - a[1] || a[0] - b[0]).slice(0, 3).map((q) => q[0]).sort();
+  const r = DX.apply('cycle', c, DX.defaults('cycle'), D, AD, E, A); assert(r.ok); const hi = r.patch.schedule.map((x, i) => (/مرتفع/.test(x.type) ? i : -1)).filter((i) => i >= 0);
+  assert.deepStrictEqual(hi, top); assert(r.notes.some((x) => /أيام التمرين الأطول/.test(x)));
+});
 t('الصيام: نافذة 8 ساعات تُطبَّق على مواعيد الوجبات (الحصص والجرامات)، و5:2 بيومين غير متتاليين ~500 سعرة ووجبتين', () => {
   ALL.filter((r) => r.d.id === 'if' && r.v.pat === 'tre').forEach((r) => { const w = r.c.diet.window; assert(w && w.times.length === 3); if (r.kind === 'ex') r.plan.days[0].slots.filter((s) => s.lines.length).forEach((s) => assert(w.times.indexOf(s.time) >= 0, s.time)); else r.plan.days[0].meals.forEach((m) => assert(w.times.indexOf(m.time) >= 0, m.time)); });
   ALL.filter((r) => r.d.id === 'if' && r.v.pat === '52').forEach((r) => { const fd = r.c.diet.fastDays; assert.deepStrictEqual(fd, [1, 4]); fd.forEach((ix) => { const dy = r.plan.days[ix]; if (r.kind === 'ex') { assert.strictEqual(dy.slots.length, 2); const k = dy.nominal[0] * 4 + dy.nominal[1] * 4 + dy.nominal[2] * 9; assert(k >= 380 && k <= 650, 'يوم الصيام ' + Math.round(k)); } else { assert(dy.meals.length <= 2, 'وجبات يوم الصيام ' + dy.meals.length); assert(dy.got.k <= 800, 'ك ' + Math.round(dy.got.k)); } }); });
