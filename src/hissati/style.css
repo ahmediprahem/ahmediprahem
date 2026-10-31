@@ -567,4 +567,5 @@ html[data-theme="firoz"] .alm{background:radial-gradient(70% 50% at 50% 30%,rgba
 .whc-no{position:absolute;inset-inline-start:-4px;top:-26px;font-size:180px;font-weight:700;line-height:1;color:transparent;-webkit-text-stroke:2px color-mix(in srgb,var(--acc) 40%,transparent);pointer-events:none}
 .whc-tag{align-self:flex-start;background:var(--acc);color:#3a1409;font-weight:700;font-size:12px;border-radius:999px;padding:2px 12px}
 .whc-f{display:flex;gap:8px;padding:0 18px 18px}.whc-f .btn{min-height:44px;font-size:15px;flex:1}.whc-f .btn.sec{flex:none;width:48px;padding:0}
-
+.whc-w{margin:4px 0 0;padding-top:10px;border-top:1px solid color-mix(in srgb,var(--acc) 35%,transparent);font-size:14px;line-height:1.8;color:rgba(255,255,255,.92);text-align:right;align-self:stretch}.whc-w b{display:block;color:var(--acc);font-size:12px;margin-bottom:2px}
+.whc-n{color:var(--acc)!important;font-size:14px!important}.ayn{display:inline-block;width:.55em;height:.55em;margin:0 .35em;border:2px solid var(--acc);border-radius:50%;vertical-align:.1em;position:relative}.ayn::after{content:"";position:absolute;inset:25%;border-radius:50%;background:var(--acc)}

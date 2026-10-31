@@ -793,7 +793,7 @@ function whCats() { const w = whx(), q = whs().noQ; return w ? w.cats.map((c, i)
 function whText(ci, mi) {
   const m = whList(ci)[mi]; if (!m) return null; const id = whx().cats[ci].id;
   if (id === 'hero') return { t: (S.p.sex === 'ذكر' ? m.m : m.f).replace('{n}', dayStreak()) };
-  return { t: m.t, s: m.s || '', ref: m.ref || '', tf: m.tf || '', x: m.x || '' };
+  return { t: m.t, s: m.s || '', ref: m.ref || '', tf: m.tf || '', x: m.x || '', w: m.w || '' };
 }
 function whPick() {
   const w = whs(), cs = whCats(); if (!cs.length) return null; const day = whDay();
@@ -810,9 +810,9 @@ function whCardHtml(ci, mi, actions) {
   const c = whx().cats[ci], d = whText(ci, mi); if (!d) return ''; const w = whs(), fav = w.fav.includes(ci + '_' + mi);
   const head = '<div class="whc-h"><span class="whc-i">' + whSvg(c.ic) + '</span><div><b>' + esc(c.name) + '</b><small>رسالة اليوم</small></div></div>';
   let body = '';
-  if (c.id === 'arab') body = '<div class="whc-b ct"><p class="whc-t serif">' + esc(d.t) + '</p><p class="whc-n">' + esc(d.s) + '</p></div>';
-  else if (c.id === 'book') body = '<div class="whc-b"><div class="whc-q" aria-hidden="true">”</div><p class="whc-t">' + esc(d.t) + '</p><p class="whc-a">' + whSvg('book') + esc(d.s) + '</p></div>';
-  else if (c.id === 'quran') body = '<div class="whc-b ct"><p class="whc-ay">' + esc(d.t) + '</p><p class="whc-a ct">' + esc(d.ref) + '</p><p class="whc-tf"><b>رسالتك</b>' + esc(d.tf) + '</p></div>';
+  if (c.id === 'arab') body = '<div class="whc-b ct"><p class="whc-t serif">' + esc(d.t) + '</p><p class="whc-n">— ' + esc(d.s) + '</p>' + (d.w ? '<p class="whc-w"><b>ماذا أفعل؟</b>' + esc(d.w) + '</p>' : '') + '</div>';
+  else if (c.id === 'book') body = '<div class="whc-b"><div class="whc-q" aria-hidden="true">”</div><p class="whc-t">' + esc(d.t) + '</p><p class="whc-a">' + whSvg('book') + esc(d.s) + '</p>' + (d.w ? '<p class="whc-w"><b>ماذا أفعل؟</b>' + esc(d.w) + '</p>' : '') + '</div>';
+  else if (c.id === 'quran') body = '<div class="whc-b ct"><p class="whc-ay">' + esc(d.t).replace(/۝/g, '<span class="ayn" aria-hidden="true"></span>') + '</p><p class="whc-a ct">' + esc(d.ref) + '</p><p class="whc-tf"><b>رسالتك</b>' + esc(d.tf) + '</p>' + (d.w ? '<p class="whc-w"><b>ماذا أفعل؟</b>' + esc(d.w) + '</p>' : '') + '</div>';
   else if (c.id === 'self') body = '<div class="whc-b rel"><span class="whc-no" aria-hidden="true">لا</span><p class="whc-t b">' + esc(d.t) + '</p>' + (d.x ? '<p class="whc-x">' + esc(d.x) + '</p>' : '') + '</div>';
   else if (c.id === 'chal') body = '<div class="whc-b"><span class="whc-tag">تحدّي اليوم</span><p class="whc-t b">' + esc(d.t) + '</p></div>';
   else body = '<div class="whc-b"><p class="whc-t b">' + esc(d.t) + '</p></div>';
@@ -869,8 +869,8 @@ function whShare() {
   const gr = g.createLinearGradient(0, 0, 0, 1350); gr.addColorStop(0, c.deep); gr.addColorStop(1, '#0b1330'); g.fillStyle = gr; g.fillRect(0, 0, 1080, 1350);
   g.strokeStyle = c.acc; g.globalAlpha = .5; g.lineWidth = 3; g.strokeRect(36, 36, 1008, 1278); g.globalAlpha = 1; g.direction = 'rtl'; g.textAlign = 'center';
   const wrap = (txt, x, y, mw, lh) => { const ws = String(txt).split(' '); let line = ''; ws.forEach((wd) => { const t = line ? line + ' ' + wd : wd; if (g.measureText(t).width > mw && line) { g.fillText(line, x, y); y += lh; line = wd; } else line = t; }); g.fillText(line, x, y); return y + lh; };
-  g.fillStyle = c.acc; g.font = '700 46px sans-serif'; g.fillText(c.name, 540, 150); g.fillStyle = '#fff'; g.font = '700 ' + (c.id === 'quran' ? 64 : 58) + 'px "Amiri Quran","Amiri",serif'; let y = wrap(d.t, 540, 380, 880, c.id === 'quran' ? 120 : 100);
-  g.font = '500 40px sans-serif'; g.fillStyle = 'rgba(255,255,255,.88)'; if (d.tf) y = wrap(d.tf, 540, y + 40, 860, 70); if (d.s || d.ref) { g.fillStyle = c.acc; g.font = '600 36px sans-serif'; g.fillText(d.s || d.ref, 540, y + 40); }
+  g.fillStyle = c.acc; g.font = '700 46px sans-serif'; g.fillText(c.name, 540, 150); g.fillStyle = '#fff'; d.t = String(d.t).replace(/۝/g, '  •  '); g.font = '700 ' + (c.id === 'quran' ? 64 : 58) + 'px "Amiri Quran","Amiri",serif'; let y = wrap(d.t, 540, 380, 880, c.id === 'quran' ? 120 : 100);
+  g.font = '500 40px sans-serif'; g.fillStyle = 'rgba(255,255,255,.88)'; if (d.tf) y = wrap(d.tf, 540, y + 40, 860, 70); if (d.w) { g.fillStyle = c.acc; y = wrap('ماذا أفعل؟ ' + d.w, 540, y + 30, 860, 64); g.fillStyle = 'rgba(255,255,255,.88)'; } if (d.s || d.ref) { g.fillStyle = c.acc; g.font = '600 36px sans-serif'; g.fillText(d.s || d.ref, 540, y + 40); }
   g.fillStyle = 'rgba(255,255,255,.7)'; g.font = '600 38px sans-serif'; g.fillText('حصتي', 540, 1260);
   cv.toBlob((bl) => { if (!bl) return; const f = new File([bl], 'hissati-message.png', { type: 'image/png' }); if (navigator.canShare && navigator.canShare({ files: [f] })) navigator.share({ files: [f] }).catch(() => { }); else { const a = document.createElement('a'); a.href = URL.createObjectURL(bl); a.download = 'hissati-message.png'; document.body.appendChild(a); a.click(); a.remove(); } }, 'image/png');
 }
@@ -1800,6 +1800,6 @@ document.addEventListener('input', (e) => {
 });
 window.addEventListener('online', () => { V.online = true; poll(); });
 window.addEventListener('offline', () => { V.online = false; render(); });
-window.HissatiApp = { wheel: { cats: () => whCats().map((i) => whx().cats[i].id), dia: whDia, text: (id, i) => { const ci = whx().cats.findIndex((c) => c.id === id); return whText(ci, i); }, maybe: () => { WHL.shown = false; whMaybe(); } }, state: () => S, poll, flush, feed: () => FD, feedLoad: fdLoad, celebrateTest: (id) => celebrate(id), alarm: (items) => almShow(items), alarmTick: almTick, alarmFire: almFire, remItems, render, prayTimes };     // للاختبارات
+window.HissatiApp = { wheel: { cats: () => whCats().map((i) => whx().cats[i].id), dia: whDia, text: (id, i) => { const ci = whx().cats.findIndex((c) => c.id === id); return whText(ci, i); }, maybe: () => { WHL.shown = false; whMaybe(); }, open: (m) => whOpen(m) }, state: () => S, poll, flush, feed: () => FD, feedLoad: fdLoad, celebrateTest: (id) => celebrate(id), alarm: (items) => almShow(items), alarmTick: almTick, alarmFire: almFire, remItems, render, prayTimes };     // للاختبارات
 boot();
 })();
