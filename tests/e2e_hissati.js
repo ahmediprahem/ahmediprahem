@@ -169,7 +169,7 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
     for (let i = 0; i < 4; i++) await jp.click('[data-onb="cup"]'); assert((await jp.textContent('.onb-cup .oc')).trim() === '4 / 4'); assert(await jp.locator('.onb-cup.full').count() === 1); for (let i = 0; i < 4; i++) await jp.click('[data-onb="heart"]'); assert((await jp.textContent('.onb-heart .oh')).trim() === '100%'); await shot(jp, 'o3_story2');
     const b2 = await jp.locator('.onb-art').boundingBox(); await jp.mouse.move(b2.x + 20, b2.y + 20); await jp.mouse.down(); await jp.mouse.move(b2.x + 160, b2.y + 24, { steps: 6 }); await jp.mouse.up(); await jp.waitForSelector('.onb-story.s3');
     assert(await jp.locator('.cb.a').count() === 1 && await jp.locator('.cert').count() === 1); assert((await jp.textContent('.onb-lock')).includes('مشفّرة')); await jp.waitForTimeout(1500); await shot(jp, 'o4_story3');
-    await jp.click('.onb-foot [data-act="onbNext"]'); await jp.waitForSelector('.onb-theme'); assert.strictEqual(await jp.locator('.hx-th').count(), 3);
+    await jp.click('.onb-foot [data-act="onbNext"]'); await jp.waitForSelector('.onb-theme'); assert.strictEqual(await jp.locator('.hx-th').count(), 4);
     await jp.click('.hx-th[data-v="rose"]'); await jp.waitForFunction(() => document.documentElement.getAttribute('data-theme') === 'rose'); assert.strictEqual(await jp.getAttribute('link[rel=manifest]', 'href'), '/manifest.webmanifest?t=rose'); await jp.waitForTimeout(700); await shot(jp, 'o5_theme');
     await jp.click('.onb-foot [data-act="onbFinish"]'); await jp.waitForSelector('.invite .dr'); assert.strictEqual(await jp.evaluate(() => localStorage.getItem('hissati_onb')), '1');
     await jp.click('.hx-th, [data-act="theme"]', { timeout: 500 }).catch(() => { }); await jp.evaluate(() => HxTheme.set('classic'));
@@ -342,10 +342,10 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
     }
   }
   {     // الثيمات: «الحالي» الافتراضي + «وردة» + «نبض» — مختار الثيم في «تقدّمي»، يُحفظ على الجهاز، ويُطبَّق قبل أول رسم (حتى على شاشة القفل)
-    await ip.click('[data-act="tab"][data-v="progress"]'); await ip.waitForSelector('.hx-themes'); assert.strictEqual(await ip.locator('.hx-th').count(), 3);
+    await ip.click('[data-act="tab"][data-v="progress"]'); await ip.waitForSelector('.hx-themes'); assert.strictEqual(await ip.locator('.hx-th').count(), 4);
     assert.strictEqual(await ip.getAttribute('.hx-th[data-v="classic"]', 'aria-checked'), 'true'); assert.strictEqual(await ip.evaluate(() => document.documentElement.getAttribute('data-theme')), null);
     const bgOf = () => ip.evaluate(() => getComputedStyle(document.body).backgroundColor), classicBg = await bgOf();
-    for (const [t, meta, light] of [['rose', '#FAF6F2', true], ['pulse', '#0A0C0F', false]]) {
+    for (const [t, meta, light] of [['rose', '#FAF6F2', true], ['pulse', '#0A0C0F', false], ['firoz', '#031A1F', false]]) {
       await ip.click('.hx-th[data-v="' + t + '"]'); await ip.waitForFunction((x) => document.documentElement.getAttribute('data-theme') === x, t); await ip.waitForTimeout(700);
       assert.strictEqual(await ip.getAttribute('.hx-th[data-v="' + t + '"]', 'aria-checked'), 'true'); assert.strictEqual(await ip.getAttribute('meta[name="theme-color"]', 'content'), meta); assert.strictEqual(await ip.evaluate(() => localStorage.getItem('hissati_theme')), t);
       const bg = await bgOf(); assert.notStrictEqual(bg, classicBg); const rgb = bg.match(/\d+/g).map(Number); assert.strictEqual(rgb[0] + rgb[1] + rgb[2] > 600, light, 'خلفية ' + t + ' ' + bg);
@@ -362,11 +362,11 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
   }
   {     // المنبّه: التذكير يظهر على الشاشة بتصميم الثيم مع «تم» و«غفوة»، ولمس الإشعار يعرضه بعد الفتح
     await ip.click('[data-act="tab"][data-v="today"]'); await ip.waitForSelector('.hb');
-    const bgs = {}; for (const th of ['classic', 'rose', 'pulse']) {
+    const bgs = {}; for (const th of ['classic', 'rose', 'pulse', 'firoz']) {
       await ip.evaluate((t) => HxTheme.set(t), th); await ip.waitForTimeout(700); await ip.evaluate(() => window.HissatiApp.alarm([{ t: 'water', m: 9 * 60 + 5 }])); await ip.waitForSelector('#alm .alm-card'); assert((await ip.textContent('#alm h1')).includes('وقت كوب ماء')); assert.strictEqual((await ip.textContent('#alm .alm-time')).trim(), '09:05'); assert.strictEqual(await ip.getAttribute('#alm', 'role'), 'alertdialog');
       bgs[th] = await ip.evaluate(() => getComputedStyle(document.querySelector('#alm .alm-card')).backgroundColor + '|' + getComputedStyle(document.querySelector('#alm')).backgroundImage.slice(0, 60)); await shot(ip, th + '_alarm'); await ip.click('[data-alm="close"]'); await ip.waitForSelector('#alm', { state: 'detached' });
     }
-    assert.strictEqual(new Set(Object.values(bgs)).size, 3, 'لكل ثيم منبّه بتصميمه: ' + JSON.stringify(bgs)); await ip.evaluate(() => HxTheme.set('classic')); await ip.waitForTimeout(600);
+    assert.strictEqual(new Set(Object.values(bgs)).size, 4, 'لكل ثيم منبّه بتصميمه: ' + JSON.stringify(bgs)); await ip.evaluate(() => HxTheme.set('classic')); await ip.waitForTimeout(600);
     const w0 = await ip.evaluate(() => { const L = window.HissatiApp.state().log, k = Object.keys(L).sort().pop(); return L[k].water || 0; });
     await ip.evaluate(() => window.HissatiApp.alarm([{ t: 'water', m: 600 }])); await ip.click('[data-alm="done"]'); await ip.waitForSelector('#alm', { state: 'detached' }); assert.strictEqual(await ip.evaluate(() => { const L = window.HissatiApp.state().log, k = Object.keys(L).sort().pop(); return L[k].water; }), w0 + 1);
     await ip.evaluate(() => window.HissatiApp.alarm([{ t: 'med', m: 540, label: 'فيتامين د' }, { t: 'adhAm', m: 540 }])); assert((await ip.textContent('#alm h1')).includes('موعد دوائك — فيتامين د')); assert((await ip.textContent('#alm .alm-more')).includes('أذكار الصباح')); await ip.click('[data-alm="done"]'); assert.strictEqual(await ip.evaluate(() => { const L = window.HissatiApp.state().log, k = Object.keys(L).sort().pop(); return L[k].h.meds; }), 1);
