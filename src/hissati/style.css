@@ -526,4 +526,10 @@ html[data-theme="firoz"] .alm{background:radial-gradient(70% 50% at 50% 30%,rgba
 .msn .mic{width:48px;height:48px;border-radius:16px;display:grid;place-items:center;flex:none;background:color-mix(in srgb,var(--mint) 16%,transparent);color:var(--mint)}
 .msn .mic svg{width:26px;height:26px}
 .msn.done{border-color:var(--line)}.msn.done .mic{background:var(--glass2)}
+/* 0.59: رسوم الحالات الفارغة وأيقونة الوجبة */
+.empty .ea{width:120px;height:90px}.empty .ea svg{width:100%;height:100%}
+.empty.sm{padding:10px 6px;gap:8px}.empty.sm .ea{width:104px;height:78px}
+.empty h3{margin:0;font-size:16px}
+.mti{display:inline-grid;vertical-align:-5px;margin-inline-end:6px;width:24px;height:24px;border-radius:8px;place-items:center;background:color-mix(in srgb,var(--mint) 16%,transparent);color:var(--mint)}
+.mti svg{width:16px;height:16px}
 

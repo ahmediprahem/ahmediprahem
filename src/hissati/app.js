@@ -25,6 +25,8 @@ const P = {
   lock:'<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
   user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
   pulse:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+  cup:'<path d="M5 11h10v3a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4zM15 12h1.5a2 2 0 0 1 0 4H15M8 4v3M11 4v3"/>',
+  moonbowl:'<path d="M4 12h16a8 8 0 0 1-16 0zM9 4c-1 1.2 1 2 0 3.2M14 4c-1 1.2 1 2 0 3.2"/>',
   flame:'<path d="M12 3c1 3 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 2.5 2 2.5C11 9 11 6 12 3z"/>',
   utensils:'<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2M7 2v20M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>',
   apple:'<path d="M12 7c-1-1.2-2.6-1.8-4-1.5C5 6.1 3.5 9.1 4 12.5c.6 4.2 3.3 8.3 6 8.5.8.1 1.4-.4 2-.4s1.2.5 2 .4c2.7-.2 5.4-4.3 6-8.5.5-3.4-1-6.4-4-7-1.4-.3-3 .3-4 1.5Z"/><path d="M12 7c0-2 1-3.8 3-4.5"/>',
@@ -762,6 +764,18 @@ function missionCard(d) {                                  // أول وجبة ل
   if (w < g) return '<section class="card msn"><div class="mis"><span class="mic">' + I('drop') + '</span><div style="flex:1;min-width:0"><small>مهمتك الآن</small><h3>اشرب كوباً من الماء</h3><p class="dim">' + w + ' من ' + g + ' أكواب</p></div></div><button class="btn full" data-act="water" data-v="' + (w + 1) + '">' + I('drop') + ' شربت كوباً</button></section>';
   return '<section class="card msn done"><div class="mis"><span class="mic">' + I('check') + '</span><div style="flex:1;min-width:0"><small>مهمتك الآن</small><h3>أحسنت، أنجزت مهام اليوم</h3><p class="dim">وجباتك وماؤك كاملة. استرح، وغداً نكمل.</p></div></div></section>';
 }
+
+// ---------- 0.59: رسوم الحالات الفارغة (تتبع ألوان الثيم) وأيقونات الوجبات
+function emptyArt(k) {
+  const A = {
+    weight: '<rect x="30" y="20" width="60" height="52" rx="14" fill="var(--mint)" fill-opacity=".16" stroke="var(--mint)" stroke-width="2"/><path d="M44 44a16 16 0 0 1 32 0" fill="none" stroke="var(--mint)" stroke-width="2.4" stroke-linecap="round"/><path d="M60 44l6-9" stroke="var(--amber)" stroke-width="2.4" stroke-linecap="round"/><path d="M8 80c20 0 24-10 44-10s28 8 60 0" fill="none" stroke="var(--line2)" stroke-width="2" stroke-dasharray="4 5"/><circle cx="112" cy="72" r="4" fill="var(--amber)"/>',
+    news: '<rect x="26" y="18" width="62" height="58" rx="6" fill="var(--sky)" fill-opacity=".14" stroke="var(--sky)" stroke-width="2"/><path d="M88 28v44a8 8 0 0 0 16 0V34" fill="none" stroke="var(--sky)" stroke-width="2.2" stroke-linecap="round"/><path d="M36 32h30M36 42h40M36 52h26" stroke="var(--mut)" stroke-width="2.4" stroke-linecap="round"/><path d="M72 64c2-3 4-3 6 0-2 3-4 3-6 0z" fill="var(--amber)"/>',
+    chat: '<rect x="14" y="16" width="62" height="34" rx="14" fill="var(--mint)" fill-opacity=".16" stroke="var(--mint)" stroke-width="2"/><path d="M26 50l-4 12 14-12" fill="var(--mint)" fill-opacity=".16" stroke="var(--mint)" stroke-width="2" stroke-linejoin="round"/><rect x="48" y="42" width="58" height="30" rx="14" fill="var(--amber)" fill-opacity=".18" stroke="var(--amber)" stroke-width="2"/><circle cx="64" cy="57" r="2.6" fill="var(--amber)"/><circle cx="77" cy="57" r="2.6" fill="var(--amber)"/><circle cx="90" cy="57" r="2.6" fill="var(--amber)"/>',
+    ach: '<path d="M60 14l10 20 22 3-16 16 4 22-20-11-20 11 4-22-16-16 22-3z" fill="var(--amber)" fill-opacity=".2" stroke="var(--amber)" stroke-width="2.2" stroke-linejoin="round"/><path d="M34 80h52" stroke="var(--line2)" stroke-width="2.4" stroke-linecap="round"/><circle cx="60" cy="40" r="4" fill="var(--mint)"/>'
+  };
+  return '<div class="ea"><svg viewBox="0 0 120 90" aria-hidden="true">' + A[k] + '</svg></div>';
+}
+function mealIc(name) { const n = String(name || ''), k = /فطور|إفطار|افطار|صباح/.test(n) ? 'cup' : /سناك|تصبيرة|وجبة خفيفة/.test(n) ? 'apple' : /عشاء/.test(n) ? 'moonbowl' : /غداء|غذاء/.test(n) ? 'utensils' : ''; return k ? '<span class="mti">' + I(k) + '</span>' : ''; }
 function tabToday() {
   const d = TODAY, L = dl(d), [done, n] = itemsOfDay(d), pct = n ? Math.round(done / n * 100) : 0, C = 2 * Math.PI * 40;
   const first = (S.p.name || '').trim().split(/\s+/)[0] || '';
@@ -786,7 +800,7 @@ function mealCard(d, si, s, live) {
   const meal = s.meal ? '<div class="dim">' + esc(s.meal) + '</div>' : '', rec = s.meal && S.pm && S.pm.recipes && S.pm.recipes[s.meal];
   const rbtn = rec ? '<button class="btn sm sec" data-act="rcp" data-v="' + d + '_' + si + '">' + I('book') + ' الوصفة</button>' : '';
   if (!live) return '<section class="card"><div class="row" style="justify-content:space-between"><h3>' + esc(s.name) + '</h3><span class="dim">' + esc(s.time) + (s.kcal ? ' • ' + s.kcal + ' سعرة' : '') + '</span></div>' + meal + '<ul class="plist" style="margin-top:8px">' + items + '</ul>' + (rbtn ? '<div class="macts">' + rbtn + '</div>' : '') + '</section>';
-  return '<section class="card meal' + (all ? ' done' : '') + (skip ? ' skip' : '') + '"><div class="mt"><span class="tm">' + esc(s.time) + '</span><div style="flex:1;min-width:0"><h3>' + esc(s.name) + '</h3>' + meal + '</div>' + (s.kcal ? '<span class="pc">' + s.kcal + ' سعرة</span>' : '') + '</div><div class="items">' + items + '</div>'
+  return '<section class="card meal' + (all ? ' done' : '') + (skip ? ' skip' : '') + '"><div class="mt"><span class="tm">' + esc(s.time) + '</span><div style="flex:1;min-width:0"><h3>' + mealIc(s.name) + esc(s.name) + '</h3>' + meal + '</div>' + (s.kcal ? '<span class="pc">' + s.kcal + ' سعرة</span>' : '') + '</div><div class="items">' + items + '</div>'
     + (L.note[si] ? '<div class="note">' + I('edit') + ' ' + esc(L.note[si]) + '</div>' : '') + phStrip(si)
     + '<div class="macts"><button class="btn sm sec" data-act="whole" data-v="' + si + '">' + I('check') + (all ? ' تمّت' : ' أكلتها كاملة') + '</button><button class="btn sm sec" data-act="note" data-v="' + si + '">' + I('edit') + ' أضفت / ملاحظة</button><button class="btn sm sec" data-act="skip" data-v="' + si + '">' + (skip ? 'تراجع' : 'لم آكلها') + '</button><button class="btn sm sec" data-act="ask" data-v="' + si + '">' + I('msg') + ' اسأل عنها</button><button class="btn sm sec" data-act="photo" data-v="' + si + '">' + I('camera') + ' صوّر وجبتك</button>' + rbtn + '</div></section>';
 }
@@ -817,7 +831,7 @@ function themeCard() {
 }
 function tabProgress() {
   const W = S.weights.slice().sort((a, b) => a[0] - b[0]).slice(-10);
-  let chart = '<p class="dim">سجّل وزنك أسبوعياً ليظهر منحناك هنا.</p>', diff = 0;
+  let chart = '<div class="empty sm">' + emptyArt('weight') + '<h3>ابدأ منحنى وزنك</h3><p class="dim">سجّل وزنك أسبوعياً ليظهر منحناك هنا.</p></div>', diff = 0;
   if (W.length) {
     const ys = W.map((w) => w[1]), mn = Math.floor(Math.min(...ys) - .5), mx = Math.ceil(Math.max(...ys) + .5);
     const X = (i) => W.length === 1 ? 165 : 34 + i * (300 - 44) / (W.length - 1), Y = (v) => 10 + (mx - v) / (mx - mn) * 120;
@@ -870,7 +884,7 @@ function tabFeed() {
   return '<div class="row" style="justify-content:space-between"><h2>تثقيف</h2><button class="btn sm sec" data-act="fdRefresh">' + I('reset') + ' تحديث</button></div><div class="dim">نصائح ومواضيع وفيديوهات من ' + esc(S.dname) + ' ومن أخصائيي «حصة»</div>'
     + (FD.err ? '<div class="banner warn">' + I('alert') + '<span>' + esc(FD.err) + '</span></div>' : '')
     + (FD.posts.length ? FD.posts.map(fdCard).join('') + (FD.more ? '<button class="btn sec" data-act="fdMore">' + (FD.busy ? 'جارٍ التحميل…' : 'المزيد') + '</button>' : '')
-      : '<div class="empty"><div class="ei">' + I('news') + '</div><h3>' + (FD.at ? 'لا منشورات بعد' : 'جارٍ التحميل…') + '</h3><p class="dim">' + (FD.at ? 'ما ينشره أخصائيك من نصائح ومواضيع وفيديوهات يظهر هنا، وتستطيع الإعجاب به والتعليق عليه.' : '') + '</p></div>');
+      : '<div class="empty">' + emptyArt('news') + '<h3>' + (FD.at ? 'لا منشورات بعد' : 'جارٍ التحميل…') + '</h3><p class="dim">' + (FD.at ? 'ما ينشره أخصائيك من نصائح ومواضيع وفيديوهات يظهر هنا، وتستطيع الإعجاب به والتعليق عليه.' : '') + '</p></div>');
 }
 function cmSheet() {
   const c = FD.cm[sheet.pid], x = FD.posts.find((p) => p.id === sheet.pid) || {}, me = String(S.p.name || '').trim().split(/\s+/)[0] || 'مراجع';
@@ -1237,7 +1251,7 @@ function achSheet() {
   const L = (S.ach || []).slice().reverse();
   return '<div class="astats">' + achStats().map((s) => '<div><span>' + s[0] + '</span><b>' + s[1] + '</b><small>' + s[2] + '</small></div>').join('') + '</div>'
     + (L.length ? '<div class="clist">' + L.map((a) => '<button class="cthumb" data-act="cert" data-v="' + a.id + '"><img data-cert="' + a.id + '" alt="شهادة"><span><b>' + (a.w === 99 ? '🏆 البرنامج كاملاً' : 'الأسبوع ' + a.w) + '</b><small>' + esc(a.title) + ' • ' + new Date(a.at).toLocaleDateString('ar') + '</small></span></button>').join('') + '</div>'
-      : '<div class="empty"><div class="ei">🏅</div><p class="dim">' + (S.chal ? 'أتمّ أهداف تحدي هذا الأسبوع لتحصل على أول شهادة تقدير باسمك.' : 'حين يرسل لك أخصائيك تحدياً أسبوعياً، تظهر هنا شهاداتك عند إتمامه.') + '</p></div>');
+      : '<div class="empty">' + emptyArt('ach') + '<p class="dim">' + (S.chal ? 'أتمّ أهداف تحدي هذا الأسبوع لتحصل على أول شهادة تقدير باسمك.' : 'حين يرسل لك أخصائيك تحدياً أسبوعياً، تظهر هنا شهاداتك عند إتمامه.') + '</p></div>');
 }
 function certSheet() { const a = (S.ach || []).find((x) => x.id === sheet.v); if (!a) return ''; return '<img class="certbig" data-cert="' + a.id + '" alt="شهادة التقدير"><div class="row">' + '<button class="btn sm" data-act="certdl" data-v="png">' + I('share') + ' صورة</button><button class="btn sm sec" data-act="certdl" data-v="pdf">PDF</button>' + (navigator.share ? '<button class="btn sm sec" data-act="certdl" data-v="share">مشاركة</button>' : '') + '</div><p class="dim">' + esc(a.phrase) + '</p>'; }
 const CERT = {};
@@ -1338,7 +1352,7 @@ function bubbles() {
   }).join('');
 }
 function scrChat() {
-  const empty = S.msgs.length ? '' : '<div class="empty" style="padding:20px 6px"><div class="ei" style="background:rgba(111,227,169,.15);color:var(--mint)">' + I('msg') + '</div><p class="mut">اكتب لأخصائيك أي سؤال عن خطتك أو يومك. يصله إشعار.</p></div>';
+  const empty = S.msgs.length ? '' : '<div class="empty" style="padding:20px 6px">' + emptyArt('chat') + '<h3>ابدأ الحديث</h3><p class="mut">اكتب لأخصائيك أي سؤال عن خطتك أو يومك. يصله إشعار.</p></div>';
   return '<div class="scr"><div class="chat"><div class="who"><button class="back" data-act="chatClose" aria-label="رجوع" style="width:40px;height:40px;border-radius:13px;display:grid;place-items:center;background:var(--glass);border:1px solid var(--line)">' + I('back') + '</button><div class="av sm">' + esc(drInit()) + '</div><div style="flex:1;min-width:0"><b>' + esc(S.dname) + '</b><div class="dim">يرد عادة خلال ساعات العمل</div></div></div>'
     + (S.replyAt ? '<div class="replyb">' + I('clock') + ' يرد أخصائيك على الرسائل يومياً الساعة ' + esc(hm12(S.replyAt)) + ' — اكتب متى شئت.</div>' : '') + '<div class="thread" id="thread">' + empty + bubbles() + '</div>'
     + (S.msgs.length ? '' : '<div class="qr">' + CLIENT_Q.map((q) => '<button data-act="qmsg" data-v="' + esc(q) + '">' + esc(q) + '</button>').join('') + '</div>')
