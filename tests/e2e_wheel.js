@@ -1,0 +1,36 @@
+// عجلة رسالة اليوم (0.60): مرة واحدة يومياً عند أول فتح، بلد العميل ← اللهجة، الدوران يقف على فئة والبطاقة تُفتح، المعتمد فقط (القرآن والكتب مسودة لا تظهر)، المفضلة، وتقليل الحركة.
+const assert = require('assert'), linked = require('./hx_link_helper');
+let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
+(async () => {
+  const { m, close } = await linked('wheel', errs);
+  await m.evaluate(() => { localStorage.setItem('hx_wheel_e2e', '1'); window.HissatiApp.wheel.maybe(); }); await m.waitForSelector('#whl', { timeout: 6000 }); assert(await m.locator('#whl .whnat .chip').count() >= 15, 'خطوة اختيار البلد أولاً'); assert(/من أي بلد/.test(await m.textContent('#whl .ask')));
+  await m.click('#whl [data-v="مصر"]'); await m.waitForSelector('#whspin'); assert.strictEqual(await m.evaluate(() => window.HissatiApp.state().wh.nat), 'مصر'); assert.strictEqual(await m.evaluate(() => window.HissatiApp.wheel.dia()), 'eg');
+  assert(/لفّ العجلة لتلقي رسالتك/.test(await m.textContent('#whl .ask'))); assert.strictEqual(await m.locator('#whsvg .seg').count(), 4, 'أربعة قطاعات: المعتمد فقط');
+  ok('أول فتح: يسأل عن بلدك لتحديد اللهجة، ثم عجلة «لفّ العجلة لتلقي رسالتك» بالقطاعات المعتمدة فقط (٤ من ٦)');
+  const cats = await m.evaluate(() => window.HissatiApp.wheel.cats()); assert.deepStrictEqual(cats.sort(), ['arab', 'chal', 'hero', 'self']); assert(!cats.includes('quran') && !cats.includes('book'), 'المسودات لا تظهر قبل الاعتماد');
+  ok('القرآن والاقتباسات المنسوبة مسودة: لا تدخل العجلة قبل اعتماد المالك');
+  await m.click('#whspin'); await m.waitForSelector('#whl .whbox.win', { timeout: 9000 }); assert(await m.evaluate(() => { const b = document.querySelector('#whl .whbox').getBoundingClientRect(), e = document.elementFromPoint(b.left + b.width / 2, b.top + b.height * 0.2), s = e && e.closest('.seg'); return !!s && s.classList.contains('won'); }), 'القطاع تحت المؤشر هو الفائز'); await m.waitForSelector('#whcard .whc', { timeout: 6000 });
+  const title = (await m.textContent('#whcard .whc-h b')).trim(); assert(['على لسان العرب', 'احترم نفسك', 'تحدَّ نفسك', 'عاش يا بطل'].includes(title), title); assert((await m.textContent('#whcard .whc-t')).trim().length > 8);
+  const st = await m.evaluate(() => { const w = window.HissatiApp.state().wh; return [w.day, w.cat, w.idx]; }); assert(st[0] === (await m.evaluate(() => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); })) && st[1] >= 0);
+  ok('اللف يقف على فئة ويفتحها: عنوان الفئة ونص الرسالة، ويُسجَّل يوم اللف');
+  await m.click('#whcard [data-wh="fav"]'); assert.strictEqual(await m.getAttribute('#whcard [data-wh="fav"]', 'aria-pressed'), 'true'); assert.strictEqual(await m.evaluate(() => window.HissatiApp.state().wh.fav.length), 1);
+  await m.click('#whcard [data-wh="close"]'); await m.waitForSelector('#whl', { state: 'detached' }); await m.waitForSelector('.whchip'); assert(/رسالة اليوم/.test(await m.textContent('.whchip')));
+  await m.click('.whchip'); await m.waitForSelector('#whl .whc'); assert.strictEqual(await m.locator('#whl [data-wh="spin"]').count(), 0, 'إعادة القراءة بلا عجلة'); await m.click('#whl [data-wh="close"]'); await m.waitForSelector('#whl', { state: 'detached' });
+  ok('المفضلة تُحفظ، وشارة «رسالة اليوم» تعيد قراءة الرسالة بلا لف');
+  await m.evaluate(() => window.HissatiApp.wheel.maybe()); await m.waitForTimeout(900); assert.strictEqual(await m.locator('#whl').count(), 0, 'لا تظهر العجلة ثانيةً في اليوم نفسه');
+  ok('لا تعود العجلة في اليوم نفسه بعد اللف');
+  const cardOf = (id, i) => m.evaluate(([a, b]) => { const w = window.HissatiApp.state().wh, x = window.HissatiApp.wheel.text(a, b); return x; }, [id, i]);
+  const ar0 = await cardOf('arab', 0), ar1 = await cardOf('arab', 9), bk = await cardOf('book', 0), qr = await cardOf('quran', 0);
+  assert(ar0.s === 'المتنبي' && ar0.w.length > 20, 'على لسان العرب: أقوال أشخاص بنسبتها + «ماذا أفعل؟»'); assert(ar1.s.includes('الشافعي'));
+  assert(bk.w && qr.w && qr.tf && qr.ref, 'الكتب والقرآن فيها «ماذا أفعل؟»'); const allArab = await m.evaluate(() => [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map((i) => window.HissatiApp.wheel.text('arab', i).s)); assert(allArab.every((s) => s && !/^من (حكم|أمثال)/.test(s)), 'لا أمثال مجهولة في «على لسان العرب»');
+  await m.evaluate(() => { const S = window.HissatiApp.state(); S.wh.cat = 0; S.wh.idx = 0; S.wh.day = (() => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); })(); }); await m.waitForTimeout(100);
+  ok('«على لسان العرب» أقوال أشخاص (المتنبي، شوقي، الشابي، أبو ماضي) بنسبتها، ولكل قول وكتاب وآية «ماذا أفعل؟»');
+  const T = (nat, sex) => m.evaluate(([nt, sx]) => { const S = window.HissatiApp.state(); S.wh.nat = nt; S.p.sex = sx; return window.HissatiApp.wheel.text('hero', 1).t + '|' + window.HissatiApp.wheel.dia(); }, [nat, sex]);
+  const eg = await T('مصر', 'أنثى'), gf = await T('السعودية', 'ذكر'), lv = await T('لبنان', 'أنثى'), ms = await T('العراق', 'ذكر');
+  assert(/بطلة/.test(eg) && /بتكمّل/.test(eg) && /\|eg$/.test(eg), eg); assert(/بطل/.test(gf) && /يكمّل/.test(gf) && !/بطلة/.test(gf) && /\|gulf$/.test(gf), gf); assert(/\|lev$/.test(lv) && /بطلة/.test(lv), lv); assert(/\|msa$/.test(ms) && /من يُكمل/.test(ms), ms);
+  ok('اللهجة بحسب البلد (مصري ← مصرية، سعودي ← خليجية، لبنان ← شامية، العراق ← فصحى مبسطة) وصيغة بطل/بطلة بحسب الجنس');
+  await m.emulateMedia({ reducedMotion: 'reduce' }); await m.evaluate(() => { window.HissatiApp.state().wh.day = ''; window.HissatiApp.wheel.maybe(); }); await m.waitForSelector('#whspin', { timeout: 4000 });
+  assert(/اكشف رسالتك/.test(await m.textContent('#whspin'))); await m.click('#whspin'); await m.waitForSelector('#whcard .whc', { timeout: 3000 });
+  ok('تقليل الحركة: زر «اكشف رسالتك» يفتح البطاقة مباشرة بلا دوران');
+  assert.deepStrictEqual(errs, []); await close(); console.log('\nنجح ' + n + ' اختباراً');
+})().catch((e) => { console.log('✘', String(e && e.stack || e).slice(0, 1500)); console.log('أخطاء:', JSON.stringify(errs).slice(0, 600)); process.exit(1); });

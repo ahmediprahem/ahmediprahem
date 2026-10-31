@@ -169,7 +169,7 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
     for (let i = 0; i < 4; i++) await jp.click('[data-onb="cup"]'); assert((await jp.textContent('.onb-cup .oc')).trim() === '4 / 4'); assert(await jp.locator('.onb-cup.full').count() === 1); for (let i = 0; i < 4; i++) await jp.click('[data-onb="heart"]'); assert((await jp.textContent('.onb-heart .oh')).trim() === '100%'); await shot(jp, 'o3_story2');
     const b2 = await jp.locator('.onb-art').boundingBox(); await jp.mouse.move(b2.x + 20, b2.y + 20); await jp.mouse.down(); await jp.mouse.move(b2.x + 160, b2.y + 24, { steps: 6 }); await jp.mouse.up(); await jp.waitForSelector('.onb-story.s3');
     assert(await jp.locator('.cb.a').count() === 1 && await jp.locator('.cert').count() === 1); assert((await jp.textContent('.onb-lock')).includes('مشفّرة')); await jp.waitForTimeout(1500); await shot(jp, 'o4_story3');
-    await jp.click('.onb-foot [data-act="onbNext"]'); await jp.waitForSelector('.onb-theme'); assert.strictEqual(await jp.locator('.hx-th').count(), 3);
+    await jp.click('.onb-foot [data-act="onbNext"]'); await jp.waitForSelector('.onb-theme'); assert.strictEqual(await jp.locator('.hx-th').count(), 4);
     await jp.click('.hx-th[data-v="rose"]'); await jp.waitForFunction(() => document.documentElement.getAttribute('data-theme') === 'rose'); assert.strictEqual(await jp.getAttribute('link[rel=manifest]', 'href'), '/manifest.webmanifest?t=rose'); await jp.waitForTimeout(700); await shot(jp, 'o5_theme');
     await jp.click('.onb-foot [data-act="onbFinish"]'); await jp.waitForSelector('.invite .dr'); assert.strictEqual(await jp.evaluate(() => localStorage.getItem('hissati_onb')), '1');
     await jp.click('.hx-th, [data-act="theme"]', { timeout: 500 }).catch(() => { }); await jp.evaluate(() => HxTheme.set('classic'));
@@ -273,10 +273,10 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
     await tap('[data-hb="sleep"] [data-k="8"]', 'نوم هانئ'); for (let i = 0; i < 5; i++) await tap('[data-hb="veg"] path[data-k="' + i + '"]', i === 4 ? 'قوس قزح' : '');
     await tap('[data-hb="sugar"] [data-k="1"]', 'يوم بلا سكر'); await tap('[data-hb="move"] [data-k="2"]', 'مشحونة'); await tap('[data-hb="mindful"] [data-k="0"]'); await tap('[data-hb="mindful"] [data-k="1"]', 'أكلت بوعي');
     await tap('[data-hb="kitchen"] [data-k="1"]', 'المطبخ مغلق'); await ip.click('[data-hb="coffee"] [data-k="3"]');
-    await ip.click('[data-hb="adhkar"] [data-act="adhkar"]'); await ip.waitForSelector('.adk.cur'); assert.strictEqual(await ip.locator('.adk').count(), 18); assert((await ip.textContent('.adk')).includes('آية الكرسي'));
-    await ip.click('.adk[data-i="1"]'); assert((await ip.textContent('.adh small')).startsWith('1 من 254')); assert((await ip.textContent('.adk[data-i="1"] .adc')).includes('2 من 3'));
-    if (process.env.SHOTS) { for (let i = 0; i < 80; i++) await ip.click('.adk.cur'); await ip.screenshot({ path: path.join(process.env.SHOTS, 'c16_adhkar.png') }); }
-    await ip.evaluate(async () => { for (let i = 0; i < 300 && document.querySelector('#adx .adk:not(.fin)'); i++) document.querySelector('#adx .adk:not(.fin)').click(); });
+    await ip.click('[data-hb="adhkar"] [data-act="adhkar"]'); await ip.waitForSelector('#tsbtap'); assert.strictEqual(await ip.locator('.tsb-dots i').count(), 18); assert((await ip.textContent('.tsb-t')).includes('آية الكرسي')); assert.strictEqual(await ip.getAttribute('#tsbtap', 'data-of'), '1');
+    await ip.click('#tsbtap'); assert((await ip.textContent('.adh small')).startsWith('1 من 254')); assert(!(await ip.textContent('.tsb-t')).includes('آية الكرسي'), 'انتقل للذكر التالي بعد إتمام الأول'); await ip.click('#tsbtap'); assert.strictEqual(await ip.getAttribute('#tsbtap', 'data-c'), '1'); await ip.click('[data-ts="undo"]'); assert.strictEqual(await ip.getAttribute('#tsbtap', 'data-c'), '0'); await ip.click('#tsbtap'); await ip.click('#tsbtap');
+    if (process.env.SHOTS) { for (let i = 0; i < 80; i++) await ip.click('#tsbtap'); await ip.screenshot({ path: path.join(process.env.SHOTS, 'c16_adhkar.png') }); }
+    await ip.evaluate(async () => { for (let i = 0; i < 300 && document.querySelector('#adx #tsbtap'); i++) document.querySelector('#adx #tsbtap').click(); });
     await ip.waitForSelector('#cel.cel-adhkar .heart.full'); const ct = await ip.textContent('#cel'); assert(ct.includes('في مقربة من ربك') && ct.includes('نحو الجنة'), ct); if (process.env.SHOTS) await ip.screenshot({ path: path.join(process.env.SHOTS, 'c17_adhkar_done.png') }); await ip.click('#cel');
     assert(await ip.isVisible('[data-hb="adhkar"].done'));
     for (const id of ['steps', 'sleep', 'veg', 'sugar', 'move', 'mindful', 'kitchen']) assert(await ip.isVisible('[data-hb="' + id + '"].done'), 'لم تكتمل: ' + id);
@@ -298,8 +298,8 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
       for (let i = 0; i < 3; i++) await ip.click('[data-hb="gratitude"] .petal >> nth=' + i); await cel2('قلب ممتنّ');
       await ip.click('[data-hb="sunlight"] [data-k="15"]'); await cel2('صباح مُشرق'); await ip.click('[data-hb="reading"] [data-k="10"]'); await cel2('ختمتَ يومك بهدوء'); await ip.click('[data-hb="stretch"] [data-k="5"]'); await cel2('جسم مرن');
       for (let i = 0; i < 5; i++) await ip.click('[data-hb="breaks"] .dt >> nth=' + i); await cel2('جسم نشيط'); await ip.click('[data-hb="postwalk"] .wk >> nth=0'); await cel2('خطوات بعد الأكل');
-      await ip.click('[data-hb="adhkarPm"] [data-act="adhkar"]'); await ip.waitForSelector('#adx .adk'); const tot = await ip.evaluate(() => document.querySelectorAll('#adx .adk').length); assert.strictEqual(tot, 20);
-      for (let g = 0; g < 400 && await ip.locator('#adx').count(); g++) { const b = ip.locator('#adx .adk:not(.fin)').first(); if (!(await b.count())) break; await b.click({ force: true }).catch(() => { }); }
+      await ip.click('[data-hb="adhkarPm"] [data-act="adhkar"]'); await ip.waitForSelector('#adx #tsbtap'); const tot = await ip.evaluate(() => document.querySelectorAll('#adx .tsb-dots i').length); assert.strictEqual(tot, 20);
+      await ip.evaluate(async () => { for (let i = 0; i < 400 && document.querySelector('#adx #tsbtap'); i++) document.querySelector('#adx #tsbtap').click(); });
       await cel2('اكتملت أذكار المساء'); assert.strictEqual(await ip.locator('.hb.done').count() >= 10, true);
       const hv = await ip.evaluate(() => { const L = window.HissatiApp.state().log, k = Object.keys(L).sort().pop(); return L[k].h; }); assert.strictEqual(hv.social, 1); assert.strictEqual(hv.gratitude, 3); assert.strictEqual(hv.sunlight, 15); assert.strictEqual(hv.breaks, 5); assert.strictEqual(hv.meds, 1); assert.strictEqual(hv.adhkarPm.c.reduce((a, x) => a + x, 0), 259);
       ok('مكتبة العصر: 10 عادات جديدة (أذكار المساء بقلب بنفسجي من 20 ذكراً، سوشيال، شاشات قبل النوم، امتنان، شمس، حركة كل ساعة، قراءة، دواء، تمدّد، مشي بعد الوجبة) لكل منها تصميم وإنجاز واحتفال');
@@ -342,10 +342,10 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
     }
   }
   {     // الثيمات: «الحالي» الافتراضي + «وردة» + «نبض» — مختار الثيم في «تقدّمي»، يُحفظ على الجهاز، ويُطبَّق قبل أول رسم (حتى على شاشة القفل)
-    await ip.click('[data-act="tab"][data-v="progress"]'); await ip.waitForSelector('.hx-themes'); assert.strictEqual(await ip.locator('.hx-th').count(), 3);
+    await ip.click('[data-act="tab"][data-v="progress"]'); await ip.waitForSelector('.hx-themes'); assert.strictEqual(await ip.locator('.hx-th').count(), 4);
     assert.strictEqual(await ip.getAttribute('.hx-th[data-v="classic"]', 'aria-checked'), 'true'); assert.strictEqual(await ip.evaluate(() => document.documentElement.getAttribute('data-theme')), null);
     const bgOf = () => ip.evaluate(() => getComputedStyle(document.body).backgroundColor), classicBg = await bgOf();
-    for (const [t, meta, light] of [['rose', '#FAF6F2', true], ['pulse', '#0A0C0F', false]]) {
+    for (const [t, meta, light] of [['rose', '#FAF6F2', true], ['pulse', '#0A0C0F', false], ['firoz', '#031A1F', false]]) {
       await ip.click('.hx-th[data-v="' + t + '"]'); await ip.waitForFunction((x) => document.documentElement.getAttribute('data-theme') === x, t); await ip.waitForTimeout(700);
       assert.strictEqual(await ip.getAttribute('.hx-th[data-v="' + t + '"]', 'aria-checked'), 'true'); assert.strictEqual(await ip.getAttribute('meta[name="theme-color"]', 'content'), meta); assert.strictEqual(await ip.evaluate(() => localStorage.getItem('hissati_theme')), t);
       const bg = await bgOf(); assert.notStrictEqual(bg, classicBg); const rgb = bg.match(/\d+/g).map(Number); assert.strictEqual(rgb[0] + rgb[1] + rgb[2] > 600, light, 'خلفية ' + t + ' ' + bg);
@@ -362,15 +362,15 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
   }
   {     // المنبّه: التذكير يظهر على الشاشة بتصميم الثيم مع «تم» و«غفوة»، ولمس الإشعار يعرضه بعد الفتح
     await ip.click('[data-act="tab"][data-v="today"]'); await ip.waitForSelector('.hb');
-    const bgs = {}; for (const th of ['classic', 'rose', 'pulse']) {
+    const bgs = {}; for (const th of ['classic', 'rose', 'pulse', 'firoz']) {
       await ip.evaluate((t) => HxTheme.set(t), th); await ip.waitForTimeout(700); await ip.evaluate(() => window.HissatiApp.alarm([{ t: 'water', m: 9 * 60 + 5 }])); await ip.waitForSelector('#alm .alm-card'); assert((await ip.textContent('#alm h1')).includes('وقت كوب ماء')); assert.strictEqual((await ip.textContent('#alm .alm-time')).trim(), '09:05'); assert.strictEqual(await ip.getAttribute('#alm', 'role'), 'alertdialog');
       bgs[th] = await ip.evaluate(() => getComputedStyle(document.querySelector('#alm .alm-card')).backgroundColor + '|' + getComputedStyle(document.querySelector('#alm')).backgroundImage.slice(0, 60)); await shot(ip, th + '_alarm'); await ip.click('[data-alm="close"]'); await ip.waitForSelector('#alm', { state: 'detached' });
     }
-    assert.strictEqual(new Set(Object.values(bgs)).size, 3, 'لكل ثيم منبّه بتصميمه: ' + JSON.stringify(bgs)); await ip.evaluate(() => HxTheme.set('classic')); await ip.waitForTimeout(600);
+    assert.strictEqual(new Set(Object.values(bgs)).size, 4, 'لكل ثيم منبّه بتصميمه: ' + JSON.stringify(bgs)); await ip.evaluate(() => HxTheme.set('classic')); await ip.waitForTimeout(600);
     const w0 = await ip.evaluate(() => { const L = window.HissatiApp.state().log, k = Object.keys(L).sort().pop(); return L[k].water || 0; });
     await ip.evaluate(() => window.HissatiApp.alarm([{ t: 'water', m: 600 }])); await ip.click('[data-alm="done"]'); await ip.waitForSelector('#alm', { state: 'detached' }); assert.strictEqual(await ip.evaluate(() => { const L = window.HissatiApp.state().log, k = Object.keys(L).sort().pop(); return L[k].water; }), w0 + 1);
     await ip.evaluate(() => window.HissatiApp.alarm([{ t: 'med', m: 540, label: 'فيتامين د' }, { t: 'adhAm', m: 540 }])); assert((await ip.textContent('#alm h1')).includes('موعد دوائك — فيتامين د')); assert((await ip.textContent('#alm .alm-more')).includes('أذكار الصباح')); await ip.click('[data-alm="done"]'); assert.strictEqual(await ip.evaluate(() => { const L = window.HissatiApp.state().log, k = Object.keys(L).sort().pop(); return L[k].h.meds; }), 1);
-    await ip.evaluate(() => window.HissatiApp.alarm([{ t: 'adhPm', m: 1050 }])); await ip.click('[data-alm="done"]'); await ip.waitForSelector('#adx .adk'); await ip.click('#adclose');
+    await ip.evaluate(() => window.HissatiApp.alarm([{ t: 'adhPm', m: 1050 }])); await ip.click('[data-alm="done"]'); await ip.waitForSelector('#adx #tsbtap'); await ip.click('#adclose');
     await ip.evaluate(() => window.HissatiApp.alarm([{ t: 'meal', m: 780, label: 'الغداء' }])); await ip.click('[data-alm="snooze"]'); await ip.waitForSelector('#alm', { state: 'detached' }); await ip.waitForSelector('.toast:has-text("بعد 10 دقائق")');
     const hit = await ip.evaluate(() => { const S = window.HissatiApp.state(), d = new Date(), m = d.getHours() * 60 + d.getMinutes(); S.rem = Object.assign({}, S.rem, { med: true, meds: [{ n: 'اختبار', t: String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0') }] }); window.HissatiApp.alarmTick(); return !!document.getElementById('alm'); });
     assert.strictEqual(hit, false, 'الأوقات تُقرَّب لربع ساعة فلا يطابق الدقيقة الحالية إلا على حدّ الربع'); await ip.evaluate(() => { const S = window.HissatiApp.state(); S.rem = Object.assign({}, S.rem, { med: false }); });

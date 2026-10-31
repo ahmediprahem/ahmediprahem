@@ -340,11 +340,11 @@ async function feedApi(p, method, J, me, db, env, url, bg, origin) {
   return null;
 }
 function appPage(url) {
-  const ic = /^\/(icon-192|icon-512|maskable-512|apple-180)(-rose|-pulse)?\.png$/.exec(url.pathname);
+  const ic = /^\/(icon-192|icon-512|maskable-512|apple-180)(-rose|-pulse|-firoz)?\.png$/.exec(url.pathname);
   if (ic && ICONS[ic[1] + (ic[2] || '')]) return new Response(unb64u(ICONS[ic[1] + (ic[2] || '')]), { headers: { 'content-type': 'image/png', 'cache-control': 'public, max-age=604800' } });
   if (url.pathname === '/icon.png' && ICON_B64) return new Response(unb64u(ICON_B64), { headers: { 'content-type': 'image/png', 'cache-control': 'public, max-age=86400' } });
   if (url.pathname === '/manifest.webmanifest') {              // البيان يتبع ثيم العميل (?t=rose|pulse): أيقونة وألوان؛ المعرّف id ثابت فيبقى التطبيق نفسه
-    const th = url.searchParams.get('t'), sf = th === 'rose' ? '-rose' : th === 'pulse' ? '-pulse' : '', C = { '': ['#0c1534', '#121c45'], '-rose': ['#FAF6F2', '#FAF6F2'], '-pulse': ['#0A0C0F', '#0A0C0F'] }[sf];
+    const th = url.searchParams.get('t'), sf = th === 'rose' ? '-rose' : th === 'pulse' ? '-pulse' : th === 'firoz' ? '-firoz' : '', C = { '': ['#0c1534', '#121c45'], '-rose': ['#FAF6F2', '#FAF6F2'], '-pulse': ['#0A0C0F', '#0A0C0F'], '-firoz': ['#031A1F', '#031A1F'] }[sf];
     return new Response(JSON.stringify({
       id: '/', name: 'حصتي — خطتك الغذائية', short_name: 'حصتي', description: 'خطتك من أخصائي التغذية، ومتابعة يومك، والمحادثة معه — مشفّرة على جوالك.', start_url: '/', scope: '/', display: 'standalone', orientation: 'portrait', dir: 'rtl', lang: 'ar',
       background_color: C[0], theme_color: C[1], categories: ['health', 'food', 'lifestyle'], prefer_related_applications: false,

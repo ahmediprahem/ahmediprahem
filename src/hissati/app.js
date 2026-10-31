@@ -25,6 +25,9 @@ const P = {
   lock:'<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
   user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
   pulse:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+  cup:'<path d="M5 11h10v3a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4zM15 12h1.5a2 2 0 0 1 0 4H15M8 4v3M11 4v3"/>',
+  moonbowl:'<path d="M4 12h16a8 8 0 0 1-16 0zM9 4c-1 1.2 1 2 0 3.2M14 4c-1 1.2 1 2 0 3.2"/>',
+  flame:'<path d="M12 3c1 3 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 2.5 2 2.5C11 9 11 6 12 3z"/>',
   utensils:'<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2M7 2v20M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>',
   apple:'<path d="M12 7c-1-1.2-2.6-1.8-4-1.5C5 6.1 3.5 9.1 4 12.5c.6 4.2 3.3 8.3 6 8.5.8.1 1.4-.4 2-.4s1.2.5 2 .4c2.7-.2 5.4-4.3 6-8.5.5-3.4-1-6.4-4-7-1.4-.3-3 .3-4 1.5Z"/><path d="M12 7c0-2 1-3.8 3-4.5"/>',
   clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
@@ -67,7 +70,7 @@ const fresh = () => ({
   p: { name: '', phone: '', sex: 'أنثى', age: '', weight: '', height: '', act: 2, goal: 1, cond: [], allg: [], meds: '', notes: '',
        like: { B: [], L: [], D: [], S: [] }, nope: { B: [], L: [], D: [], S: [] }, food: {}, wake: '07:00', sleep: '23:00', nmeals: 5, wdays: [], bf: '', sport: '', gphase: '', supp: '', sched: null, cq: {} },
   consent: false, req: 'none', reqMsg: '', code: '', plan: null, pm: null, pv: 0, log: {}, weights: [], prefLog: [], pending: [], msgs: [], unreadC: 0, chat: false, ctx: '',
-  photos: [], chal: null, chLogo: {}, ach: [], rem: { water: false, meals: false }, remSig: '', ident: null, tok: '', fp: '', did: '', cid: '', dEnc: null, dname: '', cat: {}, after: 0, outbox: [], removed: false
+  photos: [], wh: null, chal: null, chLogo: {}, ach: [], rem: { water: false, meals: false }, remSig: '', ident: null, tok: '', fp: '', did: '', cid: '', dEnc: null, dname: '', cat: {}, after: 0, outbox: [], removed: false
 });
 let S = null, K = null, SALT = null, DATA = {}, CUPS = 10;
 const V = { screen: 'boot', err: '', pin: '', pin1: '', busy: false, tries: 0, until: 0, online: true, polling: false, timer: 0 };
@@ -427,7 +430,7 @@ function suppCard() { const L = S.supps || []; return L.length ? '<section class
 
 // ---- 0.57: أوقات الصلاة تُحسب على الجهاز بلا إنترنت (الهيئة المصرية لمدن مصر، وأم القرى لمدن السعودية)، والصلاة على النبي ﷺ، وخطواتي
 const CITIES = [['القاهرة', 30.0444, 31.2357, 'eg'], ['الجيزة', 30.0131, 31.2089, 'eg'], ['الإسكندرية', 31.2001, 29.9187, 'eg'], ['المنصورة', 31.0409, 31.3785, 'eg'], ['طنطا', 30.7865, 31.0004, 'eg'], ['الزقازيق', 30.5877, 31.502, 'eg'], ['أسيوط', 27.1809, 31.1837, 'eg'], ['الأقصر', 25.6872, 32.6396, 'eg'], ['أسوان', 24.0889, 32.8998, 'eg'],
-  ['الرياض', 24.7136, 46.6753, 'sa'], ['جدة', 21.4858, 39.1925, 'sa'], ['مكة المكرمة', 21.3891, 39.8579, 'sa'], ['المدينة المنورة', 24.5247, 39.5692, 'sa'], ['الدمام', 26.4207, 50.0888, 'sa'], ['الخبر', 26.2172, 50.1971, 'sa'], ['الطائف', 21.2854, 40.4183, 'sa'], ['أبها', 18.2164, 42.5053, 'sa'], ['تبوك', 28.3835, 36.5662, 'sa'], ['بريدة', 26.326, 43.975, 'sa']];
+  ['الرياض', 24.7136, 46.6753, 'sa'], ['جدة', 21.4858, 39.1925, 'sa'], ['مكة المكرمة', 21.3891, 39.8579, 'sa'], ['المدينة المنورة', 24.5247, 39.5692, 'sa'], ['الدمام', 26.4207, 50.0888, 'sa'], ['الخبر', 26.2172, 50.1971, 'sa'], ['الطائف', 21.2854, 40.4183, 'sa'], ['أبها', 18.2164, 42.5053, 'sa'], ['تبوك', 28.3835, 36.5662, 'sa'], ['بريدة', 26.326, 43.975, 'sa'], ['الأحساء', 25.3648, 49.5878, 'sa'], ['القطيف', 26.5565, 50.0089, 'sa'], ['الظهران', 26.2361, 50.0393, 'sa'], ['الجبيل', 27.0046, 49.6225, 'sa'], ['حفر الباطن', 28.4328, 45.9708, 'sa'], ['حائل', 27.5114, 41.7208, 'sa'], ['عرعر', 30.9753, 41.0381, 'sa'], ['سكاكا', 29.9697, 40.2064, 'sa'], ['جازان', 16.8892, 42.5511, 'sa'], ['نجران', 17.4917, 44.1322, 'sa'], ['الباحة', 20.0129, 41.4677, 'sa'], ['ينبع', 24.0895, 38.0618, 'sa'], ['الخرج', 24.1554, 47.3346, 'sa'], ['عنيزة', 26.084, 43.994, 'sa'], ['الرس', 25.8695, 43.4973, 'sa'], ['خميس مشيط', 18.3093, 42.7292, 'sa'], ['بيشة', 19.9906, 42.6049, 'sa'], ['العلا', 26.6085, 37.9232, 'sa'], ['المجمعة', 25.9039, 45.3467, 'sa'], ['وادي الدواسر', 20.4731, 44.7894, 'sa']];
 const PRN = { fajr: 'الفجر', dhuhr: 'الظهر', asr: 'العصر', maghrib: 'المغرب', isha: 'العشاء' };
 function prayTimes(date, lat, lng, tz, method) {        // خوارزمية موقع الشمس القياسية (PrayTimes)؛ النتيجة بالدقائق من منتصف الليل بتوقيت tz
   const rad = (d) => d * Math.PI / 180, deg = (r) => r * 180 / Math.PI, fix = (a, b) => { a = a - b * Math.floor(a / b); return a < 0 ? a + b : a; };
@@ -442,7 +445,12 @@ function prayTimes(date, lat, lng, tz, method) {        // خوارزمية مو
   const m = (h) => Math.round(h * 60), mgm = m(mg) + 1;
   return { fajr: m(noon - T(-fa)), sunrise: m(noon - T(-0.833)), dhuhr: m(noon) + 1, asr: m(noon + T(asrAlt)), maghrib: mgm, isha: method === 'sa' ? mgm + 90 : m(noon + T(-ia)) };
 }
-function prNow() { const R = S.rem || {}, c = CITIES.find((x) => x[0] === R.prCity); if (!c) return null; const d = new Date(), tz = -d.getTimezoneOffset() / 60; return prayTimes(d, c[1], c[2], tz, c[3]); }
+const isMus = () => !(S && S.p && (S.p.rel === 'ك' || S.p.rel === 'ن'));                 // 0.61: المسلم (أو من لم يحدّد بعد من العملاء القدامى) فقط يرى الأذان والأذكار والقرآن والصلاة على النبي
+function cityOpts(sel) {                                  // مدن مجمّعة بالبلد؛ السعودية أولاً
+  const g = (k, t) => '<optgroup label="' + t + '">' + CITIES.filter((c) => c[3] === k).map((c) => '<option' + (sel === c[0] ? ' selected' : '') + '>' + c[0] + '</option>').join('') + '</optgroup>';
+  return '<option value="">— اختر —</option>' + g('sa', 'المملكة العربية السعودية') + g('eg', 'مصر');
+}
+function prNow() { if (!isMus()) return null; const R = S.rem || {}, c = CITIES.find((x) => x[0] === R.prCity); if (!c) return null; const d = new Date(), tz = -d.getTimezoneOffset() / 60; return prayTimes(d, c[1], c[2], tz, c[3]); }
 const m2hm = (m) => String(Math.floor(m / 60) % 24).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
 function prCard() { const P = prNow(); if (!P) return ''; const n = new Date(), cm = n.getHours() * 60 + n.getMinutes(), nx = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'].find((k) => P[k] > cm);
   return '<section class="card prc"><div class="row" style="justify-content:space-between"><h3>🕌 مواقيت الصلاة • ' + esc(S.rem.prCity) + '</h3>' + (nx ? '<span class="dim">التالية: ' + PRN[nx] + ' ' + hm12(m2hm(P[nx])) + '</span>' : '') + '</div><div class="prrow">' + ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'].map((k) => '<div class="' + (k === nx ? 'on' : '') + '"><small>' + PRN[k] + '</small><b>' + hm12(m2hm(P[k])) + '</b></div>').join('') + '</div></section>'; }
@@ -487,7 +495,7 @@ function scrOnb() {
     return '<div class="scr onb onb-story s' + i + '" data-i="' + i + '"><div class="onb-mesh"><i></i><i></i><i></i></div>' + onbPhoto(i) + onbBars(i) + '<button class="onb-skip" data-act="onbSkip">تخطّي</button><button class="onb-edge l" data-act="onbNext" aria-label="التالي"></button><button class="onb-edge r" data-act="onbPrev" aria-label="السابق"></button>'
       + '<div class="onb-art">' + art + '</div><div class="onb-txt"><h1>' + T[0] + '</h1><p>' + T[1] + '</p>' + (i === 3 ? '<p class="onb-lock">' + I('lock') + ' بياناتك مشفّرة: لا يقرؤها إلا أخصائيك</p>' : '') + '</div><div class="onb-foot"><button class="btn full" data-act="onbNext">' + (i === 3 ? 'لنبدأ' : 'التالي') + '</button><span class="dim" aria-live="polite">الشاشة ' + i + ' من 3</span></div></div>';
   }
-  const cur = window.HxTheme ? HxTheme.get() : 'classic', T = [['classic', 'الحالي'], ['rose', 'وردة'], ['pulse', 'نبض']];
+  const cur = window.HxTheme ? HxTheme.get() : 'classic', T = [['classic', 'الحالي'], ['rose', 'وردة'], ['pulse', 'نبض'], ['firoz', 'فيروز']];
   return '<div class="scr onb onb-theme"><div class="onb-mesh"><i></i><i></i><i></i></div><button class="onb-skip" data-act="onbFinish">تخطّي</button><div class="onb-txt" style="margin-top:56px"><h1>اختر الشكل الذي يريحك</h1><p>تقدر تغيّره لاحقاً من «تقدّمي». خطتك وبياناتك لا تتغير.</p></div><div class="hx-themes" role="radiogroup" aria-label="مظهر التطبيق">'
     + T.map((t) => '<button class="hx-th" role="radio" aria-checked="' + (cur === t[0]) + '" data-act="theme" data-v="' + t[0] + '"><span class="hx-pv" data-theme="' + t[0] + '" aria-hidden="true"><i class="h"></i><i class="k"><b></b></i><i class="k s"></i><i class="c"></i></span><span class="hx-tl">' + t[1] + (cur === t[0] ? ' ✓' : '') + '</span></button>').join('') + '</div><div class="onb-foot"><button class="btn full" data-act="onbFinish">ابدأ</button></div></div>';
 }
@@ -518,6 +526,27 @@ function scrStart() {                               // بلا حساب ولا ر
     + (V.err ? '<p class="err">' + esc(V.err) + '</p>' : '') + '</div></div></div>';
 }
 function scrMoved() { return '<div class="scr"><div class="boot"><div class="stack" style="max-width:320px"><div class="empty"><div class="ei" style="background:rgba(111,227,169,.15);color:var(--mint)">' + I('check') + '</div><h1>انتقل حسابك ✓</h1><p class="mut">صار «حصتي» يعمل من التطبيق المثبّت أو الجوال الجديد، ومُسح من هنا. افتح «حصتي» من أيقونته.</p></div></div></div></div>'; }
+// ---- 0.61: أول تسجيل: الديانة ثم التذكيرات التي يريدها العميل (لئلا يبحث عنها في الإعدادات)
+function scrSetup() {
+  const U = V.setup = V.setup || { rel: '', city: '', on: { water: 1, meals: 1, pray: 1, adhAm: 1, adhPm: 1, sal: 1, med: 0 } }, mus = U.rel === 'م';
+  const row = (k, t, d) => '<label class="remrow"><span><b>' + t + '</b><span class="dim">' + d + '</span></span><input type="checkbox" class="sw" data-act="setupTog" data-v="' + k + '"' + (U.on[k] ? ' checked' : '') + '></label>';
+  const rel = (v, t) => '<button class="chip' + (U.rel === v ? ' on' : '') + '" data-act="setupRel" data-v="' + v + '">' + t + '</button>';
+  return '<div class="scr setup"><div class="scroll"><div class="stack"><div style="padding-top:18px"><h1>نجهّز تطبيقك</h1><p class="mut">اختر ما يناسبك فتصلك التذكيرات التي تريدها دون أن تبحث عنها. تغيّر كل شيء لاحقاً من «تقدّمي».</p></div>'
+    + '<section class="card stack"><h3>' + I('user') + ' ديانتك</h3><div class="chips">' + rel('م', 'مسلم') + rel('ك', 'مسيحي') + rel('ن', 'أفضّل عدم التحديد') + '</div>'
+    + (mus ? '<div class="banner info">' + I('check') + '<span>سنفعّل لك تلقائياً: مواقيت الصلاة وتذكيرها، وأذكار الصباح والمساء، ورسائل القرآن.</span></div>' : U.rel ? '<p class="dim">لن تظهر لك مواقيت الصلاة ولا الأذكار ولا القرآن.</p>' : '') + '</section>'
+    + (mus ? '<section class="card stack"><h3>🕌 مدينتك للأذان</h3><select class="inp" id="setupCity" aria-label="مدينتك">' + cityOpts(U.city) + '</select><p class="dim">المواقيت تُحسب على جوالك بلا إنترنت (أم القرى للسعودية، والهيئة المصرية لمصر).</p></section>' : '')
+    + '<section class="card stack"><h3>' + I('bell') + ' التذكيرات</h3>' + row('water', 'شرب الماء', 'كل ساعتين نهاراً') + row('meals', 'مواعيد الوجبات', 'في أوقات وجبات خطتك') + row('med', 'موعد الدواء', 'تضيف أوقات أدويتك لاحقاً من «تقدّمي»')
+    + (mus ? row('pray', '🕌 مواقيت الصلاة', U.city ? 'تذكير عند كل صلاة في ' + esc(U.city) : 'اختر مدينتك أولاً') + row('adhAm', 'أذكار الصباح', 'كل يوم 6:00 صباحاً') + row('adhPm', 'أذكار المساء', 'كل يوم 5:30 مساءً') + row('sal', 'ﷺ الصلاة على النبي', 'مساءً، والجمعة ثلاث مرات') : '') + '<p class="dim">تحتاج تفعيل الإشعارات ليصلك التذكير والتطبيق مغلق؛ نطلب الإذن عند التشغيل.</p></section>'
+    + '<button class="btn full" data-act="setupGo"' + (U.rel ? '' : ' disabled') + '>متابعة</button><button class="btn ghost full" data-act="setupSkip">تخطّي</button></div></div></div>';
+}
+function setupApply(skip) {
+  const U = V.setup || {}; if (!skip && U.rel) {
+    const mus = U.rel === 'م'; S.p.rel = U.rel; S.rem = Object.assign({ water: false, meals: false }, S.rem, { water: !!U.on.water, meals: !!U.on.meals, med: !!U.on.med });
+    Object.assign(S.rem, mus ? { prCity: U.city || '', pray: !!U.on.pray && !!U.city, adhAm: !!U.on.adhAm, adhPm: !!U.on.adhPm, sal: !!U.on.sal } : { pray: false, adhAm: false, adhPm: false, sal: false });
+    if (mus && U.city) { const c = CITIES.find((x) => x[0] === U.city); if (c && S.rem.prCity === U.city) S.rem.prCity = U.city; }
+  }
+  S.screen = 'wizard'; S.step = 1; V.setup = null; save(); remSync(true);
+}
 function scrInvite() {
   const c = S.cat || {};
   return '<div class="scr"><div class="scroll"><div class="invite">'
@@ -718,15 +747,183 @@ function scrSent() {
 
 // ---------- التطبيق بعد وصول الخطة
 function scrApp() {
-  const body = { today: tabToday, plan: tabPlan, prefs: tabPrefs, progress: tabProgress, feed: tabFeed }[S.tab]();
-  const tb = [['today', 'today', 'اليوم'], ['plan', 'cal', 'خطتي'], ['prefs', 'heart', 'تفضيلاتي'], ['feed', 'news', 'تثقيف'], ['progress', 'trend', 'تقدّمي']].map((t) => '<button class="' + (S.tab === t[0] ? 'on' : '') + '" data-act="tab" data-v="' + t[0] + '"' + (S.tab === t[0] ? ' aria-current="page"' : '') + '>' + I(t[1]) + '<span>' + t[2] + '</span>' + (t[0] === 'feed' && fdNew() ? '<span class="nb" aria-label="' + fdNew() + ' جديد">' + fdNew() + '</span>' : '') + '</button>').join('');
+  const body = { today: tabToday, plan: tabPlan, prefs: tabPrefs, progress: tabProgress, feed: tabFeed, file: tabFile }[S.tab]();
+  const tb = [['today', 'today', 'اليوم'], ['plan', 'cal', 'خطتي'], ['prefs', 'heart', 'تفضيلاتي'], ['feed', 'news', 'تثقيف'], ['progress', 'trend', 'تقدّمي'], ['file', 'pulse', 'ملفي']].map((t) => '<button class="' + (S.tab === t[0] ? 'on' : '') + '" data-act="tab" data-v="' + t[0] + '"' + (S.tab === t[0] ? ' aria-current="page"' : '') + '>' + I(t[1]) + '<span>' + t[2] + '</span>' + (t[0] === 'feed' && fdNew() ? '<span class="nb" aria-label="' + fdNew() + ' جديد">' + fdNew() + '</span>' : '') + '</button>').join('');
   const wm = S.wm && (S.tab === 'today' || S.tab === 'plan') ? '<div class="wmk" aria-hidden="true">' + Array(18).fill('<span>' + esc(S.wm) + '</span>').join('') + '</div>' : '';   // 0.51: علامة مائية باسم العميل على الجدول
   return '<div class="scr hasTabs">' + wm + '<div class="scroll"><div class="stack">' + (S.removed ? '<div class="banner warn">' + I('alert') + '<span>أوقف أخصائيك ربط حسابك؛ خطتك الحالية تبقى معروضة لكن لا تصله متابعتك.</span></div>' : '') + body + '</div></div><nav class="tabbar" aria-label="التنقل">' + tb + '</nav></div>';
+}
+
+// ---------- 0.58: ترويسة «اليوم» الحيّة (مشهد يتبع وقت اليوم والثيم) وبطاقة «مهمتك الآن»
+const TOD = {
+  morning: { g: 'صباح الخير', sky: ['#4f73c9', '#f1a98b', '#ffd9a0'], sun: [84, 118], sc: '#fff1c0', moon: 0 },
+  noon: { g: 'نهارك سعيد', sky: ['#2b8fd6', '#55c3e6', '#bdf0f0'], sun: [170, 46], sc: '#fff7d6', moon: 0 },
+  evening: { g: 'مساء النور', sky: ['#4a3c8f', '#d9607a', '#ffb36b'], sun: [262, 122], sc: '#ffd27a', moon: 0 },
+  night: { g: 'ليلة هادئة', sky: ['#070f2e', '#101b4d', '#22347f'], sun: [250, 50], sc: '#f4f1e0', moon: 1 }
+};
+const todOf = (h) => h >= 4 && h < 11 ? 'morning' : h < 16 ? 'noon' : h < 20 ? 'evening' : 'night';
+function dayStreak() {                                    // أيام متتالية سجّل فيها صنفاً واحداً على الأقل (اليوم يُحتسب إن سُجّل فيه، وإلا نبدأ من أمس)
+  let n = 0; const d = new Date(), has = (x) => { const L = S.log[dkey(x)]; return !!(L && L.ck && Object.keys(L.ck).length); };
+  if (!has(d)) d.setDate(d.getDate() - 1);
+  for (let i = 0; i < 400 && has(d); i++) { n++; d.setDate(d.getDate() - 1); }
+  return n;
+}
+function sceneSvg(tod, egy) {
+  const T = TOD[tod], x = T.sun[0], y = T.sun[1]; let s = '<svg viewBox="0 0 340 170" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="scsk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + T.sky[0] + '"/><stop offset=".62" stop-color="' + T.sky[1] + '"/><stop offset="1" stop-color="' + T.sky[2] + '"/></linearGradient></defs><rect width="340" height="170" fill="url(#scsk)"/>';
+  if (T.moon) { [[40, 26], [96, 54], [150, 20], [204, 62], [300, 34], [322, 84], [124, 90], [58, 82]].forEach((p, i) => { s += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + (i % 3 ? 1 : 1.6) + '" fill="#fff" opacity="' + (i % 2 ? .6 : .9) + '"/>'; }); s += '<circle cx="' + x + '" cy="' + y + '" r="32" fill="#fff" opacity=".08"/><path transform="translate(' + (x - 12) + ' ' + (y - 16) + ')" d="M14 0a16 16 0 1 0 12 26 13 13 0 0 1-12-26z" fill="' + T.sc + '"/>'; }
+  else { s += '<circle cx="' + x + '" cy="' + y + '" r="44" fill="' + T.sc + '" opacity=".18"/><circle cx="' + x + '" cy="' + y + '" r="25" fill="' + T.sc + '" opacity=".35"/><circle cx="' + x + '" cy="' + y + '" r="14" fill="' + T.sc + '"/>'; }
+  if (egy) s += '<path d="M0 170V138Q80 130 170 136T340 132V170z" class="sc2"/><path d="M150 152 215 84 280 152zM232 152 282 104 332 152zM96 152 128 120 160 152z" class="sc1"/><path d="M52 152V100l7-14 7 14v52z" class="sc1"/><path d="M0 170V152Q90 144 170 150T340 148V170z" class="sc1"/><path d="M20 162q8-4 16 0t16 0M120 164q8-4 16 0t16 0M250 162q8-4 16 0t16 0" fill="none" stroke="#3fe0cf" stroke-opacity=".5" stroke-width="1.4" stroke-linecap="round"/>';
+  else s += '<path d="M0 170V118Q70 92 140 114T270 106T340 118V170z" class="sc2"/><path d="M0 170V144Q90 120 170 140T340 134V170z" class="sc1"/><path d="M160 140c0-22 2-32 4-44M164 98c-12-10-22-8-28-2M164 98c10-12 22-10 30-4M164 98c-6-14-4-24 0-30" fill="none" stroke="var(--bg)" stroke-width="3" stroke-linecap="round"/>';
+  return s + '</svg>';
+}
+function sceneHeader(first, d) {
+  const tod = todOf(new Date().getHours()), egy = window.HxTheme && HxTheme.get() === 'firoz', st = dayStreak();
+  return '<section class="scn" data-tod="' + tod + '">' + sceneSvg(tod, egy) + '<div class="hello"><div class="av sm">' + esc(first.charAt(0) || '؟') + '</div><div style="flex:1;min-width:0"><div class="dim">' + esc(DATA.dayNames[d] || '') + '</div><h2>' + TOD[tod].g + ' ' + esc(first) + '</h2></div>'
+    + (st ? '<span class="stk" aria-label="' + st + (st === 1 ? ' يوم متتالٍ' : ' أيام متتالية') + '">' + I('flame') + '<b>' + st + '</b></span>' : '') + chatBtn() + '</div></section>';
+}
+function missionCard(d) {                                  // أول وجبة لم تُسجَّل، ثم الماء؛ وبعدهما رسالة إنجاز
+  if (!gateOpen()) return '';
+  const L = dl(d), dp = dayPlan(d), slots = dp.slots; let si = -1;
+  for (let i = 0; i < slots.length; i++) { if (!L.skip[i] && slots[i].lines.length && !slots[i].lines.every((l, li) => L.ck[i + '_' + li])) { si = i; break; } }
+  if (si >= 0) { const s = slots[si], first = s.lines[0] ? lineT(s.lines[0]) : '';
+    return '<section class="card msn"><div class="mis"><span class="mic">' + I('check') + '</span><div style="flex:1;min-width:0"><small>مهمتك الآن</small><h3>سجّل ' + esc(s.name) + '</h3><p class="dim">' + esc(s.time || '') + (s.kcal ? ' • ' + s.kcal + ' سعرة' : '') + (first ? ' • ' + esc(first) : '') + '</p></div></div><button class="btn full" data-act="whole" data-v="' + si + '">' + I('check') + ' أكلتها كاملة</button></section>'; }
+  const g = hWaterGoal(), w = L.water || 0;
+  if (w < g) return '<section class="card msn"><div class="mis"><span class="mic">' + I('drop') + '</span><div style="flex:1;min-width:0"><small>مهمتك الآن</small><h3>اشرب كوباً من الماء</h3><p class="dim">' + w + ' من ' + g + ' أكواب</p></div></div><button class="btn full" data-act="water" data-v="' + (w + 1) + '">' + I('drop') + ' شربت كوباً</button></section>';
+  return '<section class="card msn done"><div class="mis"><span class="mic">' + I('check') + '</span><div style="flex:1;min-width:0"><small>مهمتك الآن</small><h3>أحسنت، أنجزت مهام اليوم</h3><p class="dim">وجباتك وماؤك كاملة. استرح، وغداً نكمل.</p></div></div></section>';
+}
+
+// ---------- 0.59: رسوم الحالات الفارغة (تتبع ألوان الثيم) وأيقونات الوجبات
+function emptyArt(k) {
+  const A = {
+    weight: '<rect x="30" y="20" width="60" height="52" rx="14" fill="var(--mint)" fill-opacity=".16" stroke="var(--mint)" stroke-width="2"/><path d="M44 44a16 16 0 0 1 32 0" fill="none" stroke="var(--mint)" stroke-width="2.4" stroke-linecap="round"/><path d="M60 44l6-9" stroke="var(--amber)" stroke-width="2.4" stroke-linecap="round"/><path d="M8 80c20 0 24-10 44-10s28 8 60 0" fill="none" stroke="var(--line2)" stroke-width="2" stroke-dasharray="4 5"/><circle cx="112" cy="72" r="4" fill="var(--amber)"/>',
+    news: '<rect x="26" y="18" width="62" height="58" rx="6" fill="var(--sky)" fill-opacity=".14" stroke="var(--sky)" stroke-width="2"/><path d="M88 28v44a8 8 0 0 0 16 0V34" fill="none" stroke="var(--sky)" stroke-width="2.2" stroke-linecap="round"/><path d="M36 32h30M36 42h40M36 52h26" stroke="var(--mut)" stroke-width="2.4" stroke-linecap="round"/><path d="M72 64c2-3 4-3 6 0-2 3-4 3-6 0z" fill="var(--amber)"/>',
+    chat: '<rect x="14" y="16" width="62" height="34" rx="14" fill="var(--mint)" fill-opacity=".16" stroke="var(--mint)" stroke-width="2"/><path d="M26 50l-4 12 14-12" fill="var(--mint)" fill-opacity=".16" stroke="var(--mint)" stroke-width="2" stroke-linejoin="round"/><rect x="48" y="42" width="58" height="30" rx="14" fill="var(--amber)" fill-opacity=".18" stroke="var(--amber)" stroke-width="2"/><circle cx="64" cy="57" r="2.6" fill="var(--amber)"/><circle cx="77" cy="57" r="2.6" fill="var(--amber)"/><circle cx="90" cy="57" r="2.6" fill="var(--amber)"/>',
+    ach: '<path d="M60 14l10 20 22 3-16 16 4 22-20-11-20 11 4-22-16-16 22-3z" fill="var(--amber)" fill-opacity=".2" stroke="var(--amber)" stroke-width="2.2" stroke-linejoin="round"/><path d="M34 80h52" stroke="var(--line2)" stroke-width="2.4" stroke-linecap="round"/><circle cx="60" cy="40" r="4" fill="var(--mint)"/>'
+  };
+  return '<div class="ea"><svg viewBox="0 0 120 90" aria-hidden="true">' + A[k] + '</svg></div>';
+}
+function mealIc(name) { const n = String(name || ''), k = /فطور|إفطار|افطار|صباح/.test(n) ? 'cup' : /سناك|تصبيرة|وجبة خفيفة/.test(n) ? 'apple' : /عشاء/.test(n) ? 'moonbowl' : /غداء|غذاء/.test(n) ? 'utensils' : ''; return k ? '<span class="mti">' + I(k) + '</span>' : ''; }
+
+// ================= 0.60: عجلة الرسالة اليومية (مرة واحدة يومياً عند أول فتح) — الرسائل في wheel_msgs.js (المعتمد فقط)
+const WHL = { shown: false, spin: false, rot: 0 };
+const whx = () => window.HX_WHEEL || null;
+function whs() { if (!S.wh) S.wh = { on: true, nat: '', day: '', cat: -1, idx: -1, seen: {}, fav: [], noQ: false, last: -1 }; return S.wh; }
+const whDia = () => { const w = whx(); return (w && w.dia[whs().nat]) || 'msa'; };
+const whDay = () => Math.floor(Date.now() / 864e5);
+function whCond(c) {
+  const L = S.log[dkey(new Date())] || { ck: {}, water: 0 };
+  return c === 'meal' ? Object.keys(L.ck || {}).length > 0 : c === 'st3' ? dayStreak() >= 3 : c === 'water' ? (L.water || 0) >= hWaterGoal() : c === 'wt' ? (S.weights || []).length >= 2 : true;
+}
+function whList(ci) { const w = whx(), id = w.cats[ci].id, m = w.msgs[id]; return Array.isArray(m) ? m : (m[whDia()] || m.msa || []); }
+const whOkM = (m) => m.a === 1 && (!m.c || whCond(m.c));
+function whCats() { const w = whx(), q = whs().noQ || !isMus(); return w ? w.cats.map((c, i) => i).filter((i) => !(q && w.cats[i].id === 'quran') && whList(i).filter((m) => m.a === 1).length >= w.min) : []; }
+function whText(ci, mi) {
+  const m = whList(ci)[mi]; if (!m) return null; const id = whx().cats[ci].id;
+  if (id === 'hero') return { t: (S.p.sex === 'ذكر' ? m.m : m.f).replace('{n}', dayStreak()) };
+  return { t: m.t, s: m.s || '', ref: m.ref || '', tf: m.tf || '', x: m.x || '', w: m.w || '' };
+}
+function whPick() {
+  const w = whs(), cs = whCats(); if (!cs.length) return null; const day = whDay();
+  const pool = cs.filter((c) => c !== w.last), cs2 = pool.length ? pool : cs, ci = cs2[Math.floor(Math.random() * cs2.length)], L = whList(ci);
+  let ok = L.map((m, i) => i).filter((i) => whOkM(L[i])), fresh = ok.filter((i) => !(w.seen[ci + '_' + i] && day - w.seen[ci + '_' + i] < 30));
+  if (!fresh.length) fresh = ok; if (!fresh.length) return null;
+  // «عاش يا بطل»: ما انطبق شرطه على العميل اليوم يتقدّم على العام
+  if (whx().cats[ci].id === 'hero') { const cond = fresh.filter((i) => L[i].c); if (cond.length) fresh = cond; }
+  return { ci, mi: fresh[Math.floor(Math.random() * fresh.length)] };
+}
+function whIc(k) { const w = whx(); return k === 'star8' ? '<path d="M5 5h14v14H5z"/><path d="M12 1.5 22.5 12 12 22.5 1.5 12z"/>' : k === 'lamp' ? '<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>' : k === 'peak' ? '<path d="M3 20 9 9l4 6 3-4 5 9z"/><path d="M9 9V4l4 1.5L9 7"/>' : k === 'star' ? '<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>' : k === 'shield' ? '<path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/><path d="m9 12 2 2 4-4"/>' : '<path d="M4 5h6a2 2 0 0 1 2 2v12a2 2 0 0 0-2-2H4zM20 5h-6a2 2 0 0 0-2 2v12a2 2 0 0 1 2-2h6z"/>'; }
+const whSvg = (k) => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + whIc(k) + '</svg>';
+const WH_BRK = '<svg class="brk" viewBox="0 0 18 56" aria-hidden="true"><path d="M5 2C14 13 14 43 5 54 9.5 43 9.5 13 5 2Z" fill="currentColor"/><circle cx="12.5" cy="28" r="1.9" fill="currentColor"/></svg>';
+const WH_ORN = '<div class="orn" aria-hidden="true">' + '<svg viewBox="0 0 24 12"><path d="M4 6c0-3.6 3.6-3.6 6 0s6 3.6 6 0-3.6-3.6-6 0-6 3.6-6 0z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>'.repeat(5) + '</div>';
+function whCardHtml(ci, mi, actions) {
+  const c = whx().cats[ci], d = whText(ci, mi); if (!d) return ''; const w = whs(), fav = w.fav.includes(ci + '_' + mi);
+  const head = '<div class="whc-h"><span class="whc-i">' + whSvg(c.ic) + '</span><div><b>' + esc(c.name) + '</b><small>رسالة اليوم</small></div></div>';
+  let body = '';
+  if (c.id === 'arab') body = '<div class="whc-b ct"><p class="whc-t serif">' + esc(d.t) + '</p><p class="whc-n">— ' + esc(d.s) + '</p>' + (d.w ? '<p class="whc-w"><b>ماذا أفعل؟</b>' + esc(d.w) + '</p>' : '') + '</div>';
+  else if (c.id === 'book') body = '<div class="whc-b"><div class="whc-q" aria-hidden="true">”</div><p class="whc-t">' + esc(d.t) + '</p><p class="whc-a">' + whSvg('book') + esc(d.s) + '</p>' + (d.w ? '<p class="whc-w"><b>ماذا أفعل؟</b>' + esc(d.w) + '</p>' : '') + '</div>';
+  else if (c.id === 'quran') body = '<div class="whc-b ct"><div class="whc-v">' + WH_BRK + '<p class="whc-ay">' + esc(d.t).replace(/۝/g, '<span class="ayn" aria-hidden="true"></span>') + '</p>' + WH_BRK + '</div><p class="whc-rf">' + esc(d.ref) + '</p>' + WH_ORN + '<p class="whc-tf"><b>رسالتك</b>' + esc(d.tf) + '</p>' + (d.w ? '<p class="whc-w"><b>ماذا أفعل؟</b>' + esc(d.w) + '</p>' : '') + WH_ORN + '</div>';
+  else if (c.id === 'self') body = '<div class="whc-b rel"><span class="whc-no" aria-hidden="true">لا</span><p class="whc-t b">' + esc(d.t) + '</p>' + (d.x ? '<p class="whc-x">' + esc(d.x) + '</p>' : '') + '</div>';
+  else if (c.id === 'chal') body = '<div class="whc-b"><span class="whc-tag">تحدّي اليوم</span><p class="whc-t b">' + esc(d.t) + '</p></div>';
+  else body = '<div class="whc-b"><p class="whc-t b">' + esc(d.t) + '</p></div>';
+  const foot = actions ? '<div class="whc-f"><button class="btn" data-wh="close">' + (c.id === 'chal' ? 'قبلت التحدي' : 'شكراً') + '</button><button class="btn sec" data-wh="fav" aria-pressed="' + fav + '" aria-label="' + (fav ? 'إزالة من المفضلة' : 'إضافة إلى المفضلة') + '">' + (fav ? '★' : '☆') + '</button><button class="btn sec" data-wh="share" aria-label="مشاركة كصورة">' + I('send') + '</button></div>' : '';
+  return '<article class="whc whc-' + c.id + '" style="--deep:' + c.deep + ';--acc:' + c.acc + '" aria-label="' + esc(c.name) + '">' + head + body + foot + '</article>';
+}
+function whWheelSvg(cs) {
+  const w = whx(), n = cs.length, st = 360 / n, pt = (a, r) => { const t = a * Math.PI / 180; return [150 + r * Math.sin(t), 150 - r * Math.cos(t)]; };
+  let s = '<defs><radialGradient id="whrim" cx="50%" cy="50%" r="50%"><stop offset="92%" stop-color="#16265f"/><stop offset="100%" stop-color="#0c1740"/></radialGradient></defs><circle cx="150" cy="150" r="149" fill="url(#whrim)" stroke="#ffd27a" stroke-opacity=".7" stroke-width="2"/><g id="whrot">';
+  cs.forEach((ci, i) => {
+    const c = w.cats[ci], p0 = pt(i * st - st / 2, 132), p1 = pt(i * st + st / 2, 132);
+    s += '<g class="seg" data-i="' + i + '"><path d="M150 150 L' + p0[0].toFixed(2) + ' ' + p0[1].toFixed(2) + ' A132 132 0 0 1 ' + p1[0].toFixed(2) + ' ' + p1[1].toFixed(2) + 'Z" fill="' + c.deep + '" stroke="' + c.acc + '" stroke-opacity=".55" stroke-width="1.5"/>'
+      + '<g transform="rotate(' + (i * st) + ' 150 150)"><g transform="translate(138 28)" fill="none" stroke="' + c.acc + '" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + whIc(c.ic) + '</g><text x="150" y="68" text-anchor="middle" font-size="13.5" font-weight="700" fill="#fff">' + c.l1 + '</text><text x="150" y="85" text-anchor="middle" font-size="13.5" font-weight="700" fill="#fff">' + c.l2 + '</text></g></g>';
+  });
+  for (let k = 0; k < 18; k++) { const q = pt(k * 20, 141); s += '<circle class="lamp" cx="' + q[0].toFixed(1) + '" cy="' + q[1].toFixed(1) + '" r="2.6" fill="#ffd27a" style="animation-delay:' + (k % 6 * .35) + 's"/>'; }
+  return s + '</g><circle cx="150" cy="150" r="27" fill="#0b1330" stroke="#ffd27a" stroke-opacity=".8" stroke-width="2"/><g transform="translate(138 138)" fill="none" stroke="#ffd27a" stroke-width="1.6" stroke-linejoin="round">' + whIc('star8') + '</g>';
+}
+function whOpen(mode) {              // mode: 'wheel' | 'card'
+  const old = document.getElementById('whl'); if (old) old.remove(); const w = whs(), el = document.createElement('div'); el.id = 'whl'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'رسالة اليوم');
+  WHL.cs = whCats(); WHL.rm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (mode === 'card' && w.cat >= 0) el.innerHTML = '<div class="whs wcard show">' + whCardHtml(w.cat, w.idx, true) + '</div>';
+  else if (!w.nat) el.innerHTML = '<div class="whs"><div class="eyebrow">رسالة اليوم</div><h2 class="ask">من أي بلد أنت؟</h2><p class="dim" style="max-width:19em">لنختار لك لهجة الرسائل. تغيّرها لاحقاً من «تقدّمي».</p><div class="chips whnat">' + whx().countries.map((x) => '<button class="chip" data-wh="nat" data-v="' + esc(x) + '">' + esc(x) + '</button>').join('') + '</div><button class="btn ghost" data-wh="later">لاحقاً</button></div>';
+  else el.innerHTML = '<div class="whs wheel"><div class="eyebrow">رسالة اليوم</div><h2 class="ask" id="whask">لفّ العجلة لتلقي رسالتك</h2><div class="whbox"><svg class="whptr" viewBox="0 0 30 36" id="whptr" aria-hidden="true"><path d="M15 34 4 12a12 12 0 1 1 22 0z" fill="#ffd27a" stroke="#7a5a1c" stroke-width="2"/><circle cx="15" cy="11" r="4" fill="#0b1330"/></svg><svg viewBox="0 0 300 300" id="whsvg" aria-hidden="true">' + whWheelSvg(WHL.cs) + '</svg></div><div class="whbtns"><button class="btn" id="whspin" data-wh="spin">' + (WHL.rm ? 'اكشف رسالتك' : 'لفّ العجلة') + '</button><button class="btn ghost" data-wh="later">لاحقاً</button></div></div><div class="whs wcard" id="whcard"></div>';
+  document.body.appendChild(el); WHL.spin = false; const b = el.querySelector('.btn'); if (b && !('ontouchstart' in window)) try { b.focus({ preventScroll: true }); } catch (e) { }
+  el.className = WHL.rm ? 'rm' : '';
+}
+function whMaybe() {
+  try { if (navigator.webdriver && !localStorage.getItem('hx_wheel_e2e')) return; } catch (e) { }          // الاختبارات الآلية لا تُحجب بالعجلة إلا إن طلبتها
+  if (WHL.shown || !S || !K || V.screen !== '' || S.screen !== 'app' || S.tab !== 'today' || S.chat || document.getElementById('whl') || document.getElementById('alm')) return;
+  const w = whs(), x = whx(); if (!x || !w.on || w.day === dkey(new Date()) || !whCats().length) return;
+  WHL.shown = true; setTimeout(() => { if (S && V.screen === '' && !document.getElementById('whl')) whOpen('wheel'); }, 450);
+}
+function whSpin() {
+  if (WHL.spin) return; const el = document.getElementById('whl'), w = whs(); if (!el) return; const pk = whPick(); if (!pk) return; WHL.spin = true;
+  const ix = WHL.cs.indexOf(pk.ci), n = WHL.cs.length, st = 360 / n; $('#whspin').disabled = true; el.querySelectorAll('[data-wh="later"]').forEach((b) => { b.hidden = true; });
+  const finish = () => { w.day = dkey(new Date()); w.cat = pk.ci; w.idx = pk.mi; w.last = pk.ci; w.seen[pk.ci + '_' + pk.mi] = whDay(); save(); send({ t: 'whl', c: whx().cats[pk.ci].id }); whReveal(pk); };
+  if (WHL.rm) { $('#whask').textContent = 'رسالتك جاهزة'; setTimeout(finish, 250); return; }
+  $('#whask').textContent = '…'; const jitter = Math.random() * st * .6 - st * .3, cur = ((WHL.rot % 360) + 360) % 360, delta = (((360 - ix * st + jitter) - cur) % 360 + 360) % 360, total = 360 * 5 + delta, start = WHL.rot, dur = 4600;
+  const under = (a) => Math.floor((((-a % 360) + 360) % 360 + st / 2) / st) % n; let t0 = null, last = under(start), g = document.getElementById('whrot');
+  const frame = (ts) => {
+    if (!document.getElementById('whl')) return; if (t0 === null) t0 = ts; const p = Math.min((ts - t0) / dur, 1), e = 1 - Math.pow(1 - p, 4); WHL.rot = start + total * e; g.setAttribute('transform', 'rotate(' + WHL.rot + ' 150 150)');
+    const u = under(WHL.rot); if (u !== last) { last = u; const pt = document.getElementById('whptr'); if (pt && pt.animate) pt.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(-24deg)' }, { transform: 'rotate(0)' }], { duration: 150, easing: 'ease-out' }); if (navigator.vibrate) try { navigator.vibrate(6); } catch (e2) { } }
+    if (p < 1) requestAnimationFrame(frame); else { const box = el.querySelector('.whbox'); box.classList.add('win'); box.querySelector('.seg[data-i="' + ix + '"]').classList.add('won'); $('#whask').textContent = whx().cats[pk.ci].name; setTimeout(finish, 900); }
+  };
+  requestAnimationFrame(frame);
+}
+function whReveal(pk) {
+  const el = document.getElementById('whl'); if (!el) return; const c = el.querySelector('#whcard'); c.innerHTML = whCardHtml(pk.ci, pk.mi, true); el.querySelector('.whs.wheel').classList.add('gone'); requestAnimationFrame(() => c.classList.add('show'));
+  const b = c.querySelector('[data-wh="close"]'); if (b) try { b.focus({ preventScroll: true }); } catch (e) { } render();
+}
+function whClose() { const el = document.getElementById('whl'); if (!el) return; el.classList.add('out'); setTimeout(() => { el.remove(); render(); }, WHL.rm ? 20 : 330); }
+function whShare() {
+  const w = whs(); if (w.cat < 0) return; const c = whx().cats[w.cat], d = whText(w.cat, w.idx); if (!d) return; const cv = document.createElement('canvas'); cv.width = 1080; cv.height = 1350; const g = cv.getContext('2d');
+  const gr = g.createLinearGradient(0, 0, 0, 1350); gr.addColorStop(0, c.deep); gr.addColorStop(1, '#0b1330'); g.fillStyle = gr; g.fillRect(0, 0, 1080, 1350);
+  g.strokeStyle = c.acc; g.globalAlpha = .5; g.lineWidth = 3; g.strokeRect(36, 36, 1008, 1278); g.globalAlpha = 1; g.direction = 'rtl'; g.textAlign = 'center';
+  const wrap = (txt, x, y, mw, lh) => { const ws = String(txt).split(' '); let line = ''; ws.forEach((wd) => { const t = line ? line + ' ' + wd : wd; if (g.measureText(t).width > mw && line) { g.fillText(line, x, y); y += lh; line = wd; } else line = t; }); g.fillText(line, x, y); return y + lh; };
+  g.fillStyle = c.acc; g.font = '700 46px sans-serif'; g.fillText(c.name, 540, 150); g.fillStyle = '#fff'; d.t = String(d.t).replace(/۝/g, '  •  '); g.font = '700 ' + (c.id === 'quran' ? 64 : 58) + 'px "Hissa Quran","Amiri Quran","Hissa Amiri",serif'; let y = wrap(d.t, 540, 380, 880, c.id === 'quran' ? 120 : 100);
+  g.font = '500 40px sans-serif'; g.fillStyle = 'rgba(255,255,255,.88)'; if (d.tf) y = wrap(d.tf, 540, y + 40, 860, 70); if (d.w) { g.fillStyle = c.acc; y = wrap('ماذا أفعل؟ ' + d.w, 540, y + 30, 860, 64); g.fillStyle = 'rgba(255,255,255,.88)'; } if (d.s || d.ref) { g.fillStyle = c.acc; g.font = '600 36px sans-serif'; g.fillText(d.s || d.ref, 540, y + 40); }
+  g.fillStyle = 'rgba(255,255,255,.7)'; g.font = '600 38px sans-serif'; g.fillText('حصتي', 540, 1260);
+  cv.toBlob((bl) => { if (!bl) return; const f = new File([bl], 'hissati-message.png', { type: 'image/png' }); if (navigator.canShare && navigator.canShare({ files: [f] })) navigator.share({ files: [f] }).catch(() => { }); else { const a = document.createElement('a'); a.href = URL.createObjectURL(bl); a.download = 'hissati-message.png'; document.body.appendChild(a); a.click(); a.remove(); } }, 'image/png');
+}
+document.addEventListener('click', (e) => {
+  const b = e.target.closest && e.target.closest('#whl [data-wh]'); if (!b || !S) return; const k = b.dataset.wh, w = whs();
+  if (k === 'spin') whSpin(); else if (k === 'later') { WHL.shown = true; whClose(); } else if (k === 'close') whClose(); else if (k === 'share') whShare();
+  else if (k === 'nat') { w.nat = b.dataset.v; S.p.nat = w.nat; save(); whOpen('wheel'); }
+  else if (k === 'fav') { const id = w.cat + '_' + w.idx, i = w.fav.indexOf(id); if (i >= 0) w.fav.splice(i, 1); else w.fav.push(id); save(); const on = w.fav.includes(id); b.setAttribute('aria-pressed', on); b.textContent = on ? '★' : '☆'; }
+});
+function whChip() {
+  const w = whs(), x = whx(); if (!x || w.day !== dkey(new Date()) || w.cat < 0 || !whText(w.cat, w.idx)) return '';
+  return '<button class="whchip" data-act="whOpen" style="--acc:' + x.cats[w.cat].acc + '">' + whSvg(x.cats[w.cat].ic) + '<span>رسالة اليوم · ' + esc(x.cats[w.cat].name) + '</span></button>';
+}
+function whCard() {
+  const w = whs(), x = whx(); if (!x) return ''; const fav = w.fav.filter((id) => { const [c, m] = id.split('_'); return whText(+c, +m); });
+  return '<section class="card stack"><h3>' + I('sparkle') + ' عجلة رسالة اليوم</h3><label class="whrow"><span>أفتح العجلة عند أول دخول كل يوم</span><input type="checkbox" data-act="whTog" ' + (w.on ? 'checked' : '') + '></label>'
+    + '<div><div class="dim" style="margin-bottom:6px">الديانة (تحدّد ظهور الأذان والأذكار والقرآن)</div><div class="chips">' + [['م', 'مسلم'], ['ك', 'مسيحي'], ['ن', 'لا أحدد']].map((r) => '<button class="chip' + ((S.p.rel || 'م') === r[0] ? ' on' : '') + '" data-act="relSet" data-v="' + r[0] + '">' + r[1] + '</button>').join('') + '</div></div>'
+    + '<label class="whrow"><span>أخفِ رسائل القرآن</span><input type="checkbox" data-act="whQ" ' + (w.noQ ? 'checked' : '') + '></label>'
+    + '<div><div class="dim" style="margin-bottom:6px">بلدك (يحدّد لهجة «عاش يا بطل»)</div><div class="chips">' + x.countries.map((c) => '<button class="chip' + (w.nat === c ? ' on' : '') + '" data-act="whNat" data-v="' + esc(c) + '">' + esc(c) + '</button>').join('') + '</div></div>'
+    + (fav.length ? '<div><div class="dim" style="margin-bottom:6px">رسائلي المفضلة</div>' + fav.map((id) => { const [c, m] = id.split('_').map(Number), d = whText(c, m); return '<button class="whfav" data-act="whFavOpen" data-v="' + id + '"><b style="color:' + x.cats[c].acc + '">★</b> ' + esc(d.t.length > 60 ? d.t.slice(0, 58) + '…' : d.t) + '</button>'; }).join('') + '</div>' : '') + '</section>';
 }
 function tabToday() {
   const d = TODAY, L = dl(d), [done, n] = itemsOfDay(d), pct = n ? Math.round(done / n * 100) : 0, C = 2 * Math.PI * 40;
   const first = (S.p.name || '').trim().split(/\s+/)[0] || '';
-  let out = (S.fw === 'pending' ? firstWinCard() : installState() === 'done' || installState() === 'desktop' ? notifCard(true) : installCard('today')) + '<div class="hello"><div class="av sm">' + esc(first.charAt(0) || '؟') + '</div><div style="flex:1"><div class="dim">' + esc(DATA.dayNames[d] || '') + '</div><h2>أهلاً ' + esc(first) + '</h2></div>' + chatBtn() + '</div>' + chalCard() + prCard() + apCard() + wkCard() + bdCard() + panCard() + pfCard();
+  let out = sceneHeader(first, d) + missionCard(d) + whChip() + (S.fw === 'pending' ? firstWinCard() : installState() === 'done' || installState() === 'desktop' ? notifCard(true) : installCard('today')) + chalCard() + prCard() + apCard() + wkCard() + bdCard() + panCard() + pfCard();
   out += '<section class="card ring"><svg viewBox="0 0 100 100" role="img" aria-label="التزام اليوم ' + pct + '%"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="10"/><circle cx="50" cy="50" r="40" fill="none" stroke="#6fe3a9" stroke-width="10" stroke-linecap="round" stroke-dasharray="' + C + '" stroke-dashoffset="' + (C * (1 - pct / 100)) + '"/></svg><div style="flex:1"><div class="num">' + pct + '%</div><div class="mut">' + done + ' من ' + n + ' أصناف اليوم</div>'
     + (pct === 100 ? '<div class="dim" style="color:var(--mint)">يوم كامل، أحسنت!</div>' : '<div class="dim">علّم ما أكلته باللمس.</div>') + '</div></section>';
   const dp = dayPlan(d), kc = dp.kcal || DATA.kcal, pr = dp.p || DATA.pro, wt = +(dp.water || DATA.water), cups = Math.max(4, Math.min(16, Math.round(wt / CUP)));
@@ -747,7 +944,7 @@ function mealCard(d, si, s, live) {
   const meal = s.meal ? '<div class="dim">' + esc(s.meal) + '</div>' : '', rec = s.meal && S.pm && S.pm.recipes && S.pm.recipes[s.meal];
   const rbtn = rec ? '<button class="btn sm sec" data-act="rcp" data-v="' + d + '_' + si + '">' + I('book') + ' الوصفة</button>' : '';
   if (!live) return '<section class="card"><div class="row" style="justify-content:space-between"><h3>' + esc(s.name) + '</h3><span class="dim">' + esc(s.time) + (s.kcal ? ' • ' + s.kcal + ' سعرة' : '') + '</span></div>' + meal + '<ul class="plist" style="margin-top:8px">' + items + '</ul>' + (rbtn ? '<div class="macts">' + rbtn + '</div>' : '') + '</section>';
-  return '<section class="card meal' + (all ? ' done' : '') + (skip ? ' skip' : '') + '"><div class="mt"><span class="tm">' + esc(s.time) + '</span><div style="flex:1;min-width:0"><h3>' + esc(s.name) + '</h3>' + meal + '</div>' + (s.kcal ? '<span class="pc">' + s.kcal + ' سعرة</span>' : '') + '</div><div class="items">' + items + '</div>'
+  return '<section class="card meal' + (all ? ' done' : '') + (skip ? ' skip' : '') + '"><div class="mt"><span class="tm">' + esc(s.time) + '</span><div style="flex:1;min-width:0"><h3>' + mealIc(s.name) + esc(s.name) + '</h3>' + meal + '</div>' + (s.kcal ? '<span class="pc">' + s.kcal + ' سعرة</span>' : '') + '</div><div class="items">' + items + '</div>'
     + (L.note[si] ? '<div class="note">' + I('edit') + ' ' + esc(L.note[si]) + '</div>' : '') + phStrip(si)
     + '<div class="macts"><button class="btn sm sec" data-act="whole" data-v="' + si + '">' + I('check') + (all ? ' تمّت' : ' أكلتها كاملة') + '</button><button class="btn sm sec" data-act="note" data-v="' + si + '">' + I('edit') + ' أضفت / ملاحظة</button><button class="btn sm sec" data-act="skip" data-v="' + si + '">' + (skip ? 'تراجع' : 'لم آكلها') + '</button><button class="btn sm sec" data-act="ask" data-v="' + si + '">' + I('msg') + ' اسأل عنها</button><button class="btn sm sec" data-act="photo" data-v="' + si + '">' + I('camera') + ' صوّر وجبتك</button>' + rbtn + '</div></section>';
 }
@@ -767,18 +964,67 @@ function tabPrefs() {
     + (S.pending.length ? '<div class="banner warn">' + I('clock') + '<span>بانتظار الأخصائي: ' + S.pending.map(esc).join('، ') + '</span></div>' : '') + '</section>';
 }
 function applyThemeIcons(t) {                         // أيقونة التطبيق وبيانه تتبع الثيم: التثبيت التالي (وتحديث أندرويد لاحقاً) يأخذ أيقونة ثيمك
-  const sf = t === 'rose' || t === 'pulse' ? '-' + t : '', set = (sel, h) => { const e = document.querySelector(sel); if (e) e.setAttribute('href', h); };
+  const sf = t === 'rose' || t === 'pulse' || t === 'firoz' ? '-' + t : '', set = (sel, h) => { const e = document.querySelector(sel); if (e) e.setAttribute('href', h); };
   set('link[rel=manifest]', '/manifest.webmanifest' + (sf ? '?t=' + t : '')); set('link[rel=apple-touch-icon]', '/apple-180' + sf + '.png'); set('link[rel=icon]', '/icon-192' + sf + '.png');
 }
 function themeCard() {
-  const cur = window.HxTheme ? HxTheme.get() : 'classic', T = [['classic', 'الحالي'], ['rose', 'وردة'], ['pulse', 'نبض']];
+  const cur = window.HxTheme ? HxTheme.get() : 'classic', T = [['classic', 'الحالي'], ['rose', 'وردة'], ['pulse', 'نبض'], ['firoz', 'فيروز']];
   return '<section class="card stack"><h3>' + I('sparkle') + ' مظهر التطبيق</h3><div class="hx-themes" role="radiogroup" aria-label="مظهر التطبيق">'
     + T.map((t) => '<button class="hx-th" role="radio" aria-checked="' + (cur === t[0]) + '" data-act="theme" data-v="' + t[0] + '"><span class="hx-pv" data-theme="' + t[0] + '" aria-hidden="true"><i class="h"></i><i class="k"><b></b></i><i class="k s"></i><i class="c"></i></span><span class="hx-tl">' + t[1] + (cur === t[0] ? ' ✓' : '') + '</span></button>').join('')
     + '</div><p class="dim">خطتك وبياناتك لا تتغير، يتغير الشكل فقط. يُحفظ على هذا الجوال. أيقونة التطبيق تتبع الثيم أيضاً: عند التثبيت تُؤخذ أيقونة ثيمك الحالي (أندرويد يحدّثها لاحقاً من تلقاء نفسه، وآيفون يحتاج حذف الأيقونة وإعادة إضافتها).</p></section>';
 }
+
+// ================= 0.63: «ملفي الصحي» — تبويب يجمع الوزن والقياسات وInBody والفحوصات وصور التحول (تُشفَّر وتصل الأخصائي إن فعّل العميل الإرسال)
+const HF_M = [['waist', 'الخصر'], ['chest', 'الصدر'], ['hips', 'الأرداف'], ['arm', 'الذراع'], ['thigh', 'الفخذ']];
+const HF_I = [['w', 'الوزن', 'كجم', 20, 400], ['fat', 'نسبة الدهون', '%', 2, 70], ['mus', 'الكتلة العضلية', 'كجم', 5, 150], ['water', 'الماء في الجسم', '%', 20, 80], ['visc', 'الدهون الحشوية', 'مستوى', 1, 40], ['bmr', 'معدل الحرق BMR', 'سعرة', 600, 6000]];
+const HF_L = [['سكر صائم', 'mg/dL'], ['سكر تراكمي HbA1c', '%'], ['كوليسترول كلي', 'mg/dL'], ['LDL', 'mg/dL'], ['HDL', 'mg/dL'], ['ثلاثيات', 'mg/dL'], ['فيتامين د', 'ng/mL'], ['فيتامين ب12', 'pg/mL'], ['فيريتين', 'ng/mL'], ['TSH', 'mIU/L'], ['كرياتينين', 'mg/dL'], ['ALT', 'U/L']];
+const hfD = (ts) => new Date(ts).toLocaleDateString('ar', { day: 'numeric', month: 'short' });
+const hfN = (x) => String(Math.round(+x * 10) / 10);
+function hfDelta(a, b) { if (a == null || b == null) return ''; const d = Math.round((a - b) * 10) / 10; return d ? '<span class="dim">' + (d > 0 ? '↑ ' : '↓ ') + Math.abs(d) + '</span>' : ''; }
+function tabFile() {
+  const p = S.p, W = (S.weights || []).slice().sort((a, b) => a[0] - b[0]), lw = W.length ? W[W.length - 1][1] : null, h = +numOnly(String(p.height || '')) || 0;
+  const bmi = lw && h > 100 ? Math.round(lw / Math.pow(h / 100, 2) * 10) / 10 : null, M = S.meas || [], mi = M[M.length - 1] || {}, I1 = (S.inb || [])[(S.inb || []).length - 1] || {}, Lb = S.labs || [];
+  const tile = (v, l) => '<div class="st"><b>' + (v == null || v === '' ? '—' : v) + '</b><small>' + l + '</small></div>';
+  const unsent = [].concat(M, S.inb || [], Lb).filter((x) => x.s === 0).length;
+  const sec = (ic, t, b, act, lab) => '<section class="card stack hfs"><div class="row" style="justify-content:space-between"><h3>' + ic + ' ' + t + '</h3><button class="btn sm sec" data-act="' + act + '">' + I('plus') + ' ' + lab + '</button></div>' + b + '</section>';
+  const wl = (S.checks || []).slice(-4).reverse().map((c, i, a) => '<div class="hpr"><span>' + hfD(c.ts) + '</span><b>' + c.w + ' كجم</b>' + hfDelta(c.w, a[i + 1] && a[i + 1].w) + '<span class="dim">' + (c.waist ? 'خصر ' + c.waist : '') + '</span></div>').join('');
+  const mrows = HF_M.map((m) => { const arr = M.filter((x) => x[m[0]] != null), a = arr[arr.length - 1], b = arr[arr.length - 2]; return a ? '<div class="hpr"><span>' + m[1] + '</span><b>' + hfN(a[m[0]]) + ' سم</b>' + hfDelta(a[m[0]], b && b[m[0]]) + '<span class="dim">' + hfD(a.ts) + '</span></div>' : ''; }).join('');
+  const inb = (S.inb || []).slice(-1)[0], prev = (S.inb || []).slice(-2, -1)[0];
+  const irows = inb ? '<div class="stats3">' + HF_I.filter((f) => inb[f[0]] != null).slice(0, 6).map((f) => '<div class="st"><b>' + hfN(inb[f[0]]) + '</b><small>' + f[1] + ' (' + f[2] + ')</small>' + hfDelta(inb[f[0]], prev && prev[f[0]]) + '</div>').join('') + '</div><p class="dim">آخر قياس: ' + hfD(inb.ts) + '</p>' : '<p class="dim">سجّل نتيجة جهاز InBody لتتابع الدهون والعضل والماء.</p>';
+  const names = []; Lb.forEach((l) => { if (!names.includes(l.n)) names.push(l.n); });
+  const lrows = names.length ? names.map((n) => { const arr = Lb.filter((l) => l.n === n).sort((a, b) => a.ts - b.ts), a = arr[arr.length - 1], b = arr[arr.length - 2]; return '<div class="hpr"><span>' + esc(n) + '</span><b>' + hfN(a.v) + ' ' + esc(a.u || '') + '</b>' + hfDelta(a.v, b && b.v) + '<span class="dim">' + hfD(a.ts) + '</span></div>'; }).join('') : '<p class="dim">سجّل نتائج فحوصاتك (السكر، الدهون، الفيتامينات…) لتجمعها في مكان واحد.</p>';
+  const bd = S.bodies || [], pics = bd.length ? '<div class="row hfph"><figure><img alt="" src="' + bd[0].th + '"><figcaption>البداية • ' + hfD(bd[0].ts) + '</figcaption></figure>' + (bd.length > 1 ? '<figure><img alt="" src="' + bd[bd.length - 1].th + '"><figcaption>الآن • ' + hfD(bd[bd.length - 1].ts) + '</figcaption></figure>' : '') + '</div>' : '<p class="dim">صورة «قبل» الآن تقارنها بعد أسابيع بالفرق الذي لا يظهر في الميزان.</p>';
+  return '<div class="row" style="justify-content:space-between"><h2>ملفي الصحي</h2></div>'
+    + '<section class="card stack"><div class="stats3">' + tile(lw != null ? hfN(lw) : null, 'الوزن (كجم)') + tile(bmi, 'مؤشر الكتلة') + tile(mi.waist != null ? hfN(mi.waist) : ((S.checks || []).slice(-1)[0] || {}).waist, 'الخصر (سم)') + '</div><div class="stats3">' + tile(I1.fat != null ? hfN(I1.fat) + '%' : null, 'دهون InBody') + tile(I1.mus != null ? hfN(I1.mus) : null, 'عضل (كجم)') + tile(Lb.length || null, 'فحوصات') + '</div>'
+    + '<label class="whrow"><span>أرسل قياساتي ونتائجي الجديدة لأخصائيي تلقائياً</span><input type="checkbox" data-act="hfTog"' + (S.hfSend === 0 ? '' : ' checked') + '></label>'
+    + (unsent ? '<button class="btn sm sec" data-act="hfSendAll">أرسل ' + unsent + ' محفوظة على جوالي فقط</button>' : '') + '<p class="dim">بيانات صحية حساسة: تُشفَّر على جوالك ولا يقرؤها إلا أخصائيك. لا تفسير طبي هنا، وأخصائيك هو من يقرأ نتائجك.</p></section>'
+    + sec('⚖', 'الوزن', (wl || '<p class="dim">قياسك الأسبوعي يظهر هنا.</p>') + '<p class="dim">المنحنى الكامل في «تقدّمي».</p>', 'wkGo', 'قياس الأسبوع')
+    + sec('📏', 'قياسات الجسم', mrows || '<p class="dim">الخصر والصدر والأرداف والذراع والفخذ، كل أسبوعين مثلاً.</p>', 'hfNew" data-v="meas', 'قياس جديد')
+    + sec('🧬', 'InBody', irows, 'hfNew" data-v="inb', 'نتيجة جديدة')
+    + sec('🔬', 'الفحوصات', lrows, 'hfNew" data-v="lab', 'فحص جديد')
+    + sec('📸', 'صور التحول', pics, 'bdGo', 'صورة تقدم');
+}
+function scrHF() {
+  const x = V.hf, k = x.k, d = x.d, fld = (id, lab, ph, v) => '<div class="field"><label for="' + id + '">' + lab + '</label><input class="inp" id="' + id + '" inputmode="decimal" data-numf="1" placeholder="' + ph + '" value="' + esc(v == null ? '' : v) + '"></div>';
+  const T = { meas: ['📏 قياسات الجسم', 'قِس بشريط القياس، واقفاً بعد الزفير، وبنفس المكان كل مرة. اترك ما لا تريد تسجيله فارغاً.'], inb: ['🧬 نتيجة InBody', 'انقل الأرقام من ورقة الجهاز. اترك فارغاً ما لا يظهر لك.'], lab: ['🔬 فحص جديد', 'سجّل النتيجة كما هي في تقرير المختبر. لا نفسّرها هنا.'] }[k];
+  let body = '';
+  if (k === 'meas') body = HF_M.map((m) => fld('hf_' + m[0], m[1] + ' (سم)', 'مثال: 92', d[m[0]])).join('');
+  else if (k === 'inb') body = HF_I.map((f) => fld('hf_' + f[0], f[1] + ' (' + f[2] + ')', '', d[f[0]])).join('');
+  else body = '<div class="field"><label for="hf_n">الفحص</label><select class="inp" id="hf_n">' + HF_L.map((l) => '<option' + (d.n === l[0] ? ' selected' : '') + '>' + l[0] + '</option>').join('') + '<option' + (d.n === 'غير ذلك' ? ' selected' : '') + '>غير ذلك</option></select></div>'
+    + (d.n === 'غير ذلك' ? '<div class="field"><label for="hf_cn">اسم الفحص</label><input class="inp" id="hf_cn" maxlength="40" value="' + esc(d.cn || '') + '"></div>' : '') + fld('hf_v', 'النتيجة', 'مثال: 95', d.v) + '<div class="field"><label for="hf_u">الوحدة</label><input class="inp" id="hf_u" maxlength="14" dir="ltr" value="' + esc(d.u != null ? d.u : ((HF_L.find((l) => l[0] === (d.n || HF_L[0][0])) || [])[1] || '')) + '"></div><div class="field"><label for="hf_d">تاريخ الفحص</label><input class="inp" id="hf_d" type="date" value="' + esc(d.d || dkey(new Date())) + '"></div>';
+  return '<div class="scr"><div class="scroll"><div class="stack"><div class="row" style="justify-content:space-between"><h2>' + T[0] + '</h2><button class="btn sm sec" data-act="hfX">إغلاق</button></div><div class="banner info">' + I('lock') + '<span>' + T[1] + '</span></div>' + body + '</div></div><div class="foot"><button class="btn" data-act="hfSave">حفظ' + (S.hfSend === 0 ? '' : ' وإرسال لأخصائيك') + '</button></div></div>';
+}
+function hfSend(kind, x) { send(Object.assign({ t: kind }, x)); x.s = 1; }
+function hfCollect() {
+  const x = V.hf, k = x.k, g = (id) => { const e = $('#hf_' + id); return e ? e.value : ''; }, num = (id, lo, hi) => { const v = parseFloat(numOnly(g(id))); return v >= lo && v <= hi ? Math.round(v * 10) / 10 : null; };
+  if (k === 'meas') { const o = { ts: now() }; HF_M.forEach((m) => { const v = num(m[0], 15, 300); if (v != null) o[m[0]] = v; }); return Object.keys(o).length > 1 ? o : null; }
+  if (k === 'inb') { const o = { ts: now() }; HF_I.forEach((f) => { const v = num(f[0], f[3], f[4]); if (v != null) o[f[0]] = v; }); return Object.keys(o).length > 1 ? o : null; }
+  const n = g('n') === 'غير ذلك' ? String(g('cn')).trim().slice(0, 40) : g('n'), v = parseFloat(numOnly(g('v'))), dt = g('d') || dkey(new Date()); if (!n || !(v > -1e6 && v < 1e6) || isNaN(v)) return null;
+  return { id: pid(), ts: new Date(dt + 'T12:00').getTime() || now(), n, v: Math.round(v * 100) / 100, u: String(g('u')).trim().slice(0, 14) };
+}
 function tabProgress() {
   const W = S.weights.slice().sort((a, b) => a[0] - b[0]).slice(-10);
-  let chart = '<p class="dim">سجّل وزنك أسبوعياً ليظهر منحناك هنا.</p>', diff = 0;
+  let chart = '<div class="empty sm">' + emptyArt('weight') + '<h3>ابدأ منحنى وزنك</h3><p class="dim">سجّل وزنك أسبوعياً ليظهر منحناك هنا.</p></div>', diff = 0;
   if (W.length) {
     const ys = W.map((w) => w[1]), mn = Math.floor(Math.min(...ys) - .5), mx = Math.ceil(Math.max(...ys) + .5);
     const X = (i) => W.length === 1 ? 165 : 34 + i * (300 - 44) / (W.length - 1), Y = (v) => 10 + (mx - v) / (mx - mn) * 120;
@@ -793,7 +1039,7 @@ function tabProgress() {
   return hpTop() + (sw.nd ? '<section class="card stack"><h3>👣 خطواتي آخر 7 أيام</h3><div class="stats3"><div class="st"><b>' + sw.tot.toLocaleString('ar') + '</b><small>خطوة</small></div><div class="st"><b>' + sw.avg.toLocaleString('ar') + '</b><small>متوسط يومي</small></div><div class="st"><b>' + sw.nd + '</b><small>أيام مسجّلة</small></div></div><p class="dim">سجّلها من «تسجيل اليوم» كما يعرضها عدّاد جوالك أو ساعتك.</p></section>' : '') + suppCard() + ptsCard() + '<h2>تقدّمي</h2><section class="card stack"><div class="row" style="justify-content:space-between"><h3>الوزن</h3><span class="dim">' + (W.length > 1 ? (diff <= 0 ? diff + ' كجم منذ البداية' : '+' + diff + ' كجم') : '') + '</span></div>' + chart
     + '<div class="row"><input class="inp" id="wIn" type="text" data-numf="1" autocomplete="off" inputmode="decimal" placeholder="وزن اليوم (كجم)" style="flex:1"><button class="btn sm" data-act="weigh">' + I('scale') + ' سجّل</button></div></section>'
     + '<section class="card stack"><div class="row" style="justify-content:space-between"><h3>الالتزام آخر 7 أيام</h3><span class="dim">% من الأصناف</span></div><div class="wk">' + bars + '</div></section>'
-    + '<section class="card achcard"><div class="row" style="justify-content:space-between"><h3>🏅 إنجازاتي</h3><span class="dim">' + (S.ach || []).length + ' شهادة</span></div><button class="btn sm" data-act="achs">' + I('sparkle') + ' عرض إنجازاتي وشهاداتي</button></section>' + habitsProgress() + themeCard() + remCard() + '<section class="card stack"><h3>الحساب</h3><p class="dim">ملفك لدى ' + esc(S.dname) + (S.code ? ' • رقم ' + esc(S.code) : '') + '. بياناتك محفوظة مشفّرة على هذا الجوال فقط.</p>' + installCard('acct') + notifCard(false) + '<div class="row"><button class="btn sm sec" data-act="lock">' + I('lock') + ' قفل التطبيق</button><button class="btn sm sec" data-act="xferNew">' + I('phone') + ' نقل حسابي</button></div><button class="link" data-act="wipe" style="color:var(--coral)">حذف بياناتي من هذا الجوال</button></section>';
+    + '<section class="card achcard"><div class="row" style="justify-content:space-between"><h3>🏅 إنجازاتي</h3><span class="dim">' + (S.ach || []).length + ' شهادة</span></div><button class="btn sm" data-act="achs">' + I('sparkle') + ' عرض إنجازاتي وشهاداتي</button></section>' + habitsProgress() + themeCard() + whCard() + remCard() + '<section class="card stack"><h3>الحساب</h3><p class="dim">ملفك لدى ' + esc(S.dname) + (S.code ? ' • رقم ' + esc(S.code) : '') + '. بياناتك محفوظة مشفّرة على هذا الجوال فقط.</p>' + installCard('acct') + notifCard(false) + '<div class="row"><button class="btn sm sec" data-act="lock">' + I('lock') + ' قفل التطبيق</button><button class="btn sm sec" data-act="xferNew">' + I('phone') + ' نقل حسابي</button></div><button class="link" data-act="wipe" style="color:var(--coral)">حذف بياناتي من هذا الجوال</button></section>';
 }
 
 // ---------- التثقيف: منشورات أخصائيك (ومنشورات عامة لمراجعي «حصة» توافق عليها الإدارة) — إعجاب وتعليق
@@ -831,7 +1077,7 @@ function tabFeed() {
   return '<div class="row" style="justify-content:space-between"><h2>تثقيف</h2><button class="btn sm sec" data-act="fdRefresh">' + I('reset') + ' تحديث</button></div><div class="dim">نصائح ومواضيع وفيديوهات من ' + esc(S.dname) + ' ومن أخصائيي «حصة»</div>'
     + (FD.err ? '<div class="banner warn">' + I('alert') + '<span>' + esc(FD.err) + '</span></div>' : '')
     + (FD.posts.length ? FD.posts.map(fdCard).join('') + (FD.more ? '<button class="btn sec" data-act="fdMore">' + (FD.busy ? 'جارٍ التحميل…' : 'المزيد') + '</button>' : '')
-      : '<div class="empty"><div class="ei">' + I('news') + '</div><h3>' + (FD.at ? 'لا منشورات بعد' : 'جارٍ التحميل…') + '</h3><p class="dim">' + (FD.at ? 'ما ينشره أخصائيك من نصائح ومواضيع وفيديوهات يظهر هنا، وتستطيع الإعجاب به والتعليق عليه.' : '') + '</p></div>');
+      : '<div class="empty">' + emptyArt('news') + '<h3>' + (FD.at ? 'لا منشورات بعد' : 'جارٍ التحميل…') + '</h3><p class="dim">' + (FD.at ? 'ما ينشره أخصائيك من نصائح ومواضيع وفيديوهات يظهر هنا، وتستطيع الإعجاب به والتعليق عليه.' : '') + '</p></div>');
 }
 function cmSheet() {
   const c = FD.cm[sheet.pid], x = FD.posts.find((p) => p.id === sheet.pid) || {}, me = String(S.p.name || '').trim().split(/\s+/)[0] || 'مراجع';
@@ -881,12 +1127,12 @@ function remLimit(it) {                              // 0.54: ساعات اله�
 function remItems() {                              // أوقات اليوم المحلية (دقائق من منتصف الليل، مقرّبة لربع ساعة): ماء • وجبات • أذكار الصباح والمساء • مواعيد الدواء (اسم الدواء يبقى على الجوال ولا يصل المحطة)
   const R = S.rem || {}, it = []; if (R.water) WATER.forEach((m) => it.push({ m, t: 'water' }));
   if (R.meals && S.plan) dayPlan(TODAY).slots.forEach((s) => { const m = hm2m(s.time); if (m != null) it.push({ m, t: 'meal', label: s.name }); });
-  if (R.adhAm) { const m = hm2m(R.adhAmT || '06:00'); if (m != null) it.push({ m, t: 'adhAm' }); }
-  if (R.adhPm) { const m = hm2m(R.adhPmT || '17:30'); if (m != null) it.push({ m, t: 'adhPm' }); }
+  if (R.adhAm && isMus()) { const m = hm2m(R.adhAmT || '06:00'); if (m != null) it.push({ m, t: 'adhAm' }); }
+  if (R.adhPm && isMus()) { const m = hm2m(R.adhPmT || '17:30'); if (m != null) it.push({ m, t: 'adhPm' }); }
   if (R.med) (R.meds || []).slice(0, MEDMAX).forEach((x) => { const m = hm2m(x.t); if (m != null) it.push({ m, t: 'med', label: String(x.n || '').slice(0, 40) }); });
   const P = R.pray ? prNow() : null, q15 = (m) => Math.min(1425, Math.ceil(m / 15) * 15);   // الأذان ثم أقرب ربع ساعة بعده (لا قبله)
   if (P) ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'].forEach((k) => it.push({ m: q15(P[k]), t: 'pr', label: PRN[k] + ' ' + hm12(m2hm(P[k])) }));
-  if (R.sal) { const m = hm2m(R.salT || '21:00'); if (m != null) it.push({ m, t: 'sal' }); if (new Date().getDay() === 5) [10 * 60, 13 * 60 + 30, 17 * 60].forEach((x) => it.push({ m: x, t: 'sal', d: dkey(new Date()) })); }
+  if (R.sal && isMus()) { const m = hm2m(R.salT || '21:00'); if (m != null) it.push({ m, t: 'sal' }); if (new Date().getDay() === 5) [10 * 60, 13 * 60 + 30, 17 * 60].forEach((x) => it.push({ m: x, t: 'sal', d: dkey(new Date()) })); }
   const eve = 20 * 60, dk = (t) => dkey(new Date(t));                       // 0.54: تذكير قبل الموعد بيوم (والقياس الأسبوعي) بتاريخ محدد
   (S.appts || []).forEach((a) => { const t = new Date(a.d + 'T12:00').getTime() - 864e5; if (t > now() - 864e5) it.push({ m: eve, t: 'appt', d: dk(t), label: hm12(a.t) + (a.mode ? ' • ' + a.mode : '') }); });
   if (S.plan && S.planAt) it.push({ m: eve, t: 'wk', d: dk(wkBase() + WKD - 864e5) });
@@ -903,12 +1149,11 @@ function remCard() {
   const meds = R.med ? '<div class="remsub meds">' + (R.meds || []).map((x, i) => '<div class="medrow"><input class="inp" type="text" maxlength="40" placeholder="اسم الدواء (اختياري)" aria-label="اسم الدواء ' + (i + 1) + '" data-med="n|' + i + '" value="' + esc(x.n || '') + '"><input class="inp tm" type="time" step="900" aria-label="وقت الدواء ' + (i + 1) + '" data-med="t|' + i + '" value="' + esc(x.t || '08:00') + '"><button class="btn sm sec" data-act="medDel" data-v="' + i + '" aria-label="حذف الموعد ' + (i + 1) + '">' + I('x') + '</button></div>').join('')
     + ((R.meds || []).length < MEDMAX ? '<button class="btn sm sec" data-act="medAdd">' + I('plus') + ' أضف موعد دواء</button>' : '<span class="dim">وصلت للحد الأقصى (' + MEDMAX + ' مواعيد)</span>') + '<span class="dim">اسم الدواء يبقى على جوالك فقط؛ المحطة تعرف الوقت وحده.</span></div>' : '';
   return '<section class="card stack"><h3>' + I('bell') + ' التذكيرات</h3>' + tg('water', 'شرب الماء', 'كل ساعتين من 10 صباحاً إلى 8 مساءً') + tg('meals', 'مواعيد الوجبات', 'في أوقات وجبات خطتك')
-    + tg('adhAm', 'أذكار الصباح', 'تذكير يومي بوقتك المفضّل') + (R.adhAm ? tm('adhAmT', '06:00', 'وقت أذكار الصباح') : '')
-    + tg('adhPm', 'أذكار المساء', 'تذكير يومي بوقتك المفضّل') + (R.adhPm ? tm('adhPmT', '17:30', 'وقت أذكار المساء') : '')
+    + (isMus() ? tg('adhAm', 'أذكار الصباح', 'تذكير يومي بوقتك المفضّل') + (R.adhAm ? tm('adhAmT', '06:00', 'وقت أذكار الصباح') : '') + tg('adhPm', 'أذكار المساء', 'تذكير يومي بوقتك المفضّل') + (R.adhPm ? tm('adhPmT', '17:30', 'وقت أذكار المساء') : '') : '')
     + tg('med', 'موعد الدواء', 'تذكير بأوقات أدويتك أو مكمّلاتك') + meds
     + '<label class="remrow"><span><b>صوت المنبّه</b><span class="dim">رنّة هادئة عندما يظهر التذكير على الشاشة</span></span><input type="checkbox" class="sw" data-remsound="1"' + (R.sound === false ? '' : ' checked') + '></label>'
-    + tg('pray', '🕌 مواقيت الصلاة', 'تذكير عند كل صلاة حسب مدينتك (الهيئة المصرية لمصر، وأم القرى للسعودية)') + (R.pray ? '<div class="remsub"><label class="dim" for="prCity">مدينتي</label><select class="inp" id="prCity" data-prcity>' + '<option value="">— اختر —</option>' + CITIES.map((c) => '<option' + (R.prCity === c[0] ? ' selected' : '') + '>' + c[0] + '</option>').join('') + '</select></div>' : '')
-    + tg('sal', 'ﷺ الصلاة على النبي', 'تذكير يومي بوقتك، ويوم الجمعة ثلاث مرات') + (R.sal ? tm('salT', '21:00', 'وقت التذكير اليومي') : '')
+    + (isMus() ? tg('pray', '🕌 مواقيت الصلاة', 'تذكير عند كل صلاة حسب مدينتك (الهيئة المصرية لمصر، وأم القرى للسعودية)') + (R.pray ? '<div class="remsub"><label class="dim" for="prCity">مدينتي</label><select class="inp" id="prCity" data-prcity>' + cityOpts(R.prCity) + '</select></div>' : '')
+    + tg('sal', 'ﷺ الصلاة على النبي', 'تذكير يومي بوقتك، ويوم الجمعة ثلاث مرات') + (R.sal ? tm('salT', '21:00', 'وقت التذكير اليومي') : '') : '')
     + '<label class="remrow"><span><b>ساعات الهدوء</b><span class="dim">لا تذكيرات (إلا الدواء والمواعيد) في هذه الساعات</span></span><input type="checkbox" class="sw" data-rem="quiet"' + (R.quiet ? ' checked' : '') + '></label>' + (R.quiet ? '<div class="remsub"><label class="dim" for="rt_qFrom">من</label><input id="rt_qFrom" class="inp tm" type="time" step="900" data-remt="qFrom" value="' + esc(R.qFrom || '23:00') + '"><label class="dim" for="rt_qTo">إلى</label><input id="rt_qTo" class="inp tm" type="time" step="900" data-remt="qTo" value="' + esc(R.qTo || '07:00') + '"></div>' : '')
     + '<div class="remsub"><label class="dim" for="remCap">الحد الأقصى للتذكيرات في اليوم</label><select class="inp" id="remCap" data-remcap>' + [[0, 'بلا حد'], [5, '5'], [8, '8'], [12, '12']].map((o) => '<option value="' + o[0] + '"' + ((+R.cap || 0) === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select></div>'
     + (pushState() === 'on' ? '<p class="dim">تصلك والتطبيق مغلق. تُقرَّب الأوقات لأقرب ربع ساعة.</p>' : '<p class="dim">تحتاج تفعيل الإشعارات؛ يُطلب الإذن عند التشغيل.</p>') + '</section>';
@@ -941,7 +1186,8 @@ const HABITS = [
 ];
 const HB = (id) => HABITS.find((h) => h.id === id);
 function hWaterGoal() { const dp = S.plan ? dayPlan(TODAY) : {}, wt = +(dp.water || DATA.water || 2.5); return Math.max(4, Math.min(16, Math.round(wt / CUP))); }
-function hList() { if (!Array.isArray(S.habits)) S.habits = ['water']; return S.habits.filter((id) => HB(id)); }
+const RELH = ['adhkar', 'adhkarPm'];
+function hList() { if (!Array.isArray(S.habits)) S.habits = ['water']; return S.habits.filter((id) => HB(id) && (isMus() || !RELH.includes(id))); }
 function hVal(id, k) { const L = S.log[k || dkey(new Date())]; if (!L) return null; if (id === 'water') return L.water || 0; return L.h ? L.h[id] : null; }
 function hSet(id, v) { const L = dl(TODAY); if (id === 'water') L.water = v; else { L.h = L.h || {}; if (v == null) delete L.h[id]; else L.h[id] = v; } queueLog(dkey(new Date())); }
 function hOkDay(id, k) { const v = hVal(id, k); return v != null && HB(id).ok(v); }
@@ -1004,7 +1250,7 @@ function hCard(id) {
 function habitsHome() { const ls = hList(); return '<div class="row hbhead"><h2>عاداتي</h2><button class="btn sm sec" data-act="habits">' + I('plus') + ' العادات</button></div>' + (ls.length ? ls.map(hCard).join('') : '<div class="card dim">لا عادات في صفحتك. اختر من «العادات» ما تريد تنميته.</div>'); }
 function habitsSheet() {
   const ls = hList();
-  return '<p class="dim">اختر العادات التي تريد تنميتها؛ تظهر في «اليوم» بتصميمها، ويرى أخصائيك تقدّمك فيها. ابدأ بعادتين أو ثلاث.</p><div class="hlib">' + HABITS.map((h) => { const on = ls.indexOf(h.id) >= 0;
+  return '<p class="dim">اختر العادات التي تريد تنميتها؛ تظهر في «اليوم» بتصميمها، ويرى أخصائيك تقدّمك فيها. ابدأ بعادتين أو ثلاث.</p><div class="hlib">' + HABITS.filter((h) => isMus() || !RELH.includes(h.id)).map((h) => { const on = ls.indexOf(h.id) >= 0;
     return '<div class="hli' + (on ? ' on' : '') + '" style="--hc:' + h.c + '"><span class="hbi">' + h.ic + '</span><div><b>' + h.n + '</b><span class="dim">' + h.why + '</span></div><button class="btn sm' + (on ? ' sec' : '') + '" data-act="htoggle" data-v="' + h.id + '">' + (on ? 'إزالة' : I('plus') + ' أضف') + '</button></div>'; }).join('') + '</div>';
 }
 function habitsProgress() {
@@ -1061,24 +1307,42 @@ function heartSvg(p, big, pm) {
   return '<svg viewBox="0 0 100 94" class="heart' + (p >= 1 ? ' full' : '') + '" aria-hidden="true"><defs><clipPath id="' + id + '"><path d="' + d + '"/></clipPath><linearGradient id="' + id + 'g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + (pm ? '#b9b2ff' : '#8ff0b8') + '"/><stop offset="1" stop-color="' + (pm ? '#6a5fd6' : '#1fa463') + '"/></linearGradient></defs>'
     + '<path d="' + d + '" fill="rgba(255,255,255,.07)"/><g clip-path="url(#' + id + ')"><rect class="hf" x="0" y="' + y.toFixed(1) + '" width="100" height="100" fill="url(#' + id + 'g)"/>' + (p > 0 && p < 1 ? '<path class="hwave" d="M-10 ' + y.toFixed(1) + ' q15 -5 30 0 t30 0 t30 0 t30 0 v6 h-120z" fill="' + (pm ? '#b9b2ff' : '#8ff0b8') + '" opacity=".6"/>' : '') + '</g><path d="' + d + '" fill="none" stroke="' + (p >= 1 ? '#6fe3a9' : 'rgba(111,227,169,.6)') + '" stroke-width="3"/></svg>';
 }
-function adhOpen(hid) {
+function adhOpen(hid) {                       // 0.62: شاشة الأذكار على شكل سبحة: ذكر واحد، وحلقة حبات تُضيء بكل لمسة
   hid = hid || 'adhkar'; const LST = adhList(hid), TOT = adhTotal(hid), pm = hid === 'adhkarPm';
-  if (document.getElementById('adx')) return; const el = document.createElement('div'); el.id = 'adx'; el.className = 'adx'; document.body.appendChild(el);
-  const draw = (pulse) => {
-    const v = hVal(hid) || { c: [] }, done = adhDone(v, hid), p = done / TOT, nx = LST.findIndex((a, i) => (v.c[i] || 0) < a[1]);
-    el.innerHTML = '<div class="adh"><button class="btn sm sec" id="adclose">' + I('x') + ' إغلاق</button><div class="adheart' + (pulse ? ' pulse' : '') + '">' + heartSvg(p, 1, pm) + '<b>' + Math.round(p * 100) + '%</b></div><small>' + done + ' من ' + TOT + '</small></div>'
-      + '<div class="adlist">' + LST.map((a, i) => { const n = v.c[i] || 0, left = a[1] - n, fin = left <= 0;
-        return '<button class="adk' + (fin ? ' fin' : '') + (i === nx ? ' cur' : '') + '" data-i="' + i + '"' + (fin ? ' aria-disabled="true"' : '') + '>' + (fin ? '<span class="adone">' + (a[2] || a[0].split(/[،,:.]/)[0]) + '</span><span class="adc">✓ تمّ</span>' : (a[2] ? '<span class="adt">' + a[2] + '</span>' : '') + '<span class="adtx">' + a[0] + '</span><span class="adc">' + left + (a[1] > 1 ? ' من ' + a[1] : '') + '</span>') + '</button>'; }).join('') + '</div>';
+  if (document.getElementById('adx')) return; const el = document.createElement('div'); el.id = 'adx'; el.className = 'adx tsb'; document.body.appendChild(el);
+  const v0 = hVal(hid) || { c: [] }; let cur = Math.max(0, LST.findIndex((a, i) => (v0.c[i] || 0) < a[1])), flash = '';
+  const ar = (n) => String(n).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[d]);
+  const ring = (n, c) => {
+    const B = Math.min(n, 33), items = [{ k: 'i' }]; for (let b = 0; b < B; b++) { if (B === 33 && (b === 11 || b === 22)) items.push({ k: 's' }); items.push({ k: 'b', i: b }); }
+    const N = items.length, cx = 168, cy = 156, R = 124, lit = c <= 0 ? 0 : c >= n ? B : ((c - 1) % B) + 1, sz = Math.max(5.5, Math.min(9.5, (2 * Math.PI * R / N) * .36)), P = (a, r) => { const t = a * Math.PI / 180; return [cx + r * Math.sin(t), cy - r * Math.cos(t)]; };
+    let g = '<defs><radialGradient id="tbl" cx="35%" cy="30%" r="75%"><stop offset="0" style="stop-color:var(--tb1)"/><stop offset=".45" style="stop-color:var(--tb2)"/><stop offset="1" style="stop-color:var(--tb3)"/></radialGradient><radialGradient id="tbd" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="rgba(255,255,255,.22)"/><stop offset=".6" stop-color="rgba(255,255,255,.07)"/><stop offset="1" stop-color="rgba(255,255,255,.02)"/></radialGradient><radialGradient id="tbi" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#fff6d8"/><stop offset=".5" stop-color="#e6b84f"/><stop offset="1" stop-color="#7a5a1c"/></radialGradient></defs><circle cx="' + cx + '" cy="' + cy + '" r="' + R + '" fill="none" style="stroke:var(--tbs)" stroke-width="2"/>';
+    items.forEach((it, idx) => { const a = 180 + idx * 360 / N, q = P(a, R);
+      if (it.k === 'i') { const ty = cy + R + 14; g += '<ellipse cx="' + cx + '" cy="' + (cy + R) + '" rx="12" ry="15" fill="url(#tbi)"/><ellipse cx="' + (cx - 4) + '" cy="' + (cy + R - 5) + '" rx="3.4" ry="5" fill="#fff" opacity=".45"/><path d="M' + cx + ' ' + ty + 'c-9 0-11 10-8 17h16c3-7 1-17-8-17z" fill="url(#tbi)"/><path d="M' + (cx - 8) + ' ' + (ty + 17) + 'l-3 38M' + (cx - 4) + ' ' + (ty + 17) + 'l-1.5 42M' + cx + ' ' + (ty + 17) + 'v44M' + (cx + 4) + ' ' + (ty + 17) + 'l1.5 42M' + (cx + 8) + ' ' + (ty + 17) + 'l3 38" stroke="#e6b84f" stroke-width="2.2" stroke-linecap="round" fill="none"/>'; }
+      else if (it.k === 's') g += '<g transform="translate(' + q[0].toFixed(1) + ' ' + q[1].toFixed(1) + ') rotate(' + a + ')"><rect x="-3.2" y="-8" width="6.4" height="16" rx="2" fill="url(#tbi)"/></g>';
+      else g += '<circle class="bd' + (it.i < lit ? ' lit' : '') + (it.i === lit - 1 && flash === 'pop' ? ' pop' : '') + '" cx="' + q[0].toFixed(1) + '" cy="' + q[1].toFixed(1) + '" r="' + sz.toFixed(1) + '" fill="' + (it.i < lit ? 'url(#tbl)' : 'url(#tbd)') + '" stroke="rgba(255,255,255,.2)" stroke-width=".8"/>'; });
+    return '<svg viewBox="0 0 336 384" aria-hidden="true">' + g + '</svg>';
+  };
+  const draw = () => {
+    const v = hVal(hid) || { c: [] }, done = adhDone(v, hid), a = LST[cur], n = a[1], c = Math.min(n, v.c[cur] || 0), B = Math.min(n, 33), rounds = Math.ceil(n / B), rd = c <= 0 ? 1 : Math.min(rounds, Math.floor((c - 1) / B) + 1);
+    el.innerHTML = '<div class="adh"><button class="btn sm sec" id="adclose">' + I('x') + ' إغلاق</button><b class="tsb-h">' + (pm ? 'أذكار المساء' : 'أذكار الصباح') + '</b><small>' + done + ' من ' + TOT + '</small></div>'
+      + '<div class="tsb-dots" aria-hidden="true">' + LST.map((x, i) => '<i class="' + ((v.c[i] || 0) >= x[1] ? 'd' : i === cur ? 'on' : '') + '"></i>').join('') + '</div>'
+      + '<div class="tsb-t" aria-live="polite">' + (a[2] ? '<span class="adt">' + a[2] + '</span>' : '') + '<span class="adtx">' + a[0] + '</span></div>'
+      + '<button class="tsb-tap" id="tsbtap" data-c="' + c + '" data-of="' + n + '" aria-label="سبّح: ' + c + ' من ' + n + '">' + ring(n, c) + '<span class="tsb-cnt"><b' + (c ? '' : ' class="z"') + '>' + (c ? ar(c) : 'ابدأ') + '</b><small>من ' + ar(n) + (rounds > 1 ? ' · الدورة ' + ar(rd) + ' من ' + ar(rounds) : '') + '</small></span>' + (flash === 'done' ? '<span class="tsb-ok">✓ تمّ</span>' : '') + '</button>'
+      + '<div class="tsb-nav"><button class="btn sm sec" data-ts="next" aria-label="الذكر السابق">' + I('back') + '</button><button class="btn sm sec" data-ts="undo">تراجع</button><button class="btn sm sec" data-ts="prev" aria-label="الذكر التالي">' + I('back') + '</button></div>';
     el.querySelector('#adclose').onclick = () => { el.remove(); render(); };
-    const cur = el.querySelector('.adk.cur'); if (cur && (pulse === 'next' || pulse === 0)) cur.scrollIntoView({ block: 'center', behavior: pulse ? 'smooth' : 'auto' });
   };
   el.addEventListener('click', (e) => {
-    const b = e.target.closest('.adk'); if (!b || b.classList.contains('fin')) return; const i = +b.dataset.i, v = JSON.parse(JSON.stringify(hVal(hid) || { c: [] })), was = hOkDay(hid);
-    v.c[i] = Math.min(LST[i][1], (v.c[i] || 0) + 1); hSet(hid, v); if (navigator.vibrate) try { navigator.vibrate(12); } catch (x) { }
-    const fin = v.c[i] >= LST[i][1]; draw(fin ? 'next' : 1);
-    if (!was && hOkDay(hid)) { el.remove(); render(); celebrate(hid); }
+    const b = e.target.closest('#tsbtap,[data-ts]'); if (!b) return; const v = JSON.parse(JSON.stringify(hVal(hid) || { c: [] })), was = hOkDay(hid), k = b.dataset.ts;
+    if (k === 'next') { cur = Math.max(0, cur - 1); flash = ''; draw(); return; } if (k === 'prev') { cur = Math.min(LST.length - 1, cur + 1); flash = ''; draw(); return; }
+    if (k === 'undo') { if ((v.c[cur] || 0) > 0) { v.c[cur]--; hSet(hid, v); } flash = ''; draw(); return; }
+    if ((v.c[cur] || 0) >= LST[cur][1]) { const nx = LST.findIndex((a, i) => (v.c[i] || 0) < a[1]); if (nx >= 0) { cur = nx; flash = ''; draw(); } return; }
+    v.c[cur] = Math.min(LST[cur][1], (v.c[cur] || 0) + 1); hSet(hid, v); if (navigator.vibrate) try { navigator.vibrate(v.c[cur] >= LST[cur][1] ? [20, 40, 30] : 8); } catch (x) { }
+    const fin = v.c[cur] >= LST[cur][1]; flash = 'pop';
+    if (!was && hOkDay(hid)) { el.remove(); render(); celebrate(hid); return; }
+    if (fin) { const nx = LST.findIndex((a, i) => i > cur && (v.c[i] || 0) < a[1]), nx2 = nx >= 0 ? nx : LST.findIndex((a, i) => (v.c[i] || 0) < a[1]); if (nx2 >= 0) { cur = nx2; flash = 'done'; } }
+    draw(); if (flash === 'done') setTimeout(() => { flash = ''; const f = el.querySelector('.tsb-ok'); if (f) f.remove(); }, 650);
   });
-  draw(0);
+  draw();
 }
 // ---------- المنبّه (0.40): التذكير يظهر على الشاشة كمنبّه بتصميم الثيم، لا إشعاراً فقط — رنّة هادئة واهتزاز و«تم» و«غفوة 10 دقائق».
 // يظهر: عند حلول الوقت والتطبيق مفتوح، أو عند لمس إشعار التذكير. (التطبيق المغلق والجوال مقفل: إشعار ثابت يهتز فقط — الرنين فوق القفل يحتاج تطبيقاً أصلياً.)
@@ -1198,7 +1462,7 @@ function achSheet() {
   const L = (S.ach || []).slice().reverse();
   return '<div class="astats">' + achStats().map((s) => '<div><span>' + s[0] + '</span><b>' + s[1] + '</b><small>' + s[2] + '</small></div>').join('') + '</div>'
     + (L.length ? '<div class="clist">' + L.map((a) => '<button class="cthumb" data-act="cert" data-v="' + a.id + '"><img data-cert="' + a.id + '" alt="شهادة"><span><b>' + (a.w === 99 ? '🏆 البرنامج كاملاً' : 'الأسبوع ' + a.w) + '</b><small>' + esc(a.title) + ' • ' + new Date(a.at).toLocaleDateString('ar') + '</small></span></button>').join('') + '</div>'
-      : '<div class="empty"><div class="ei">🏅</div><p class="dim">' + (S.chal ? 'أتمّ أهداف تحدي هذا الأسبوع لتحصل على أول شهادة تقدير باسمك.' : 'حين يرسل لك أخصائيك تحدياً أسبوعياً، تظهر هنا شهاداتك عند إتمامه.') + '</p></div>');
+      : '<div class="empty">' + emptyArt('ach') + '<p class="dim">' + (S.chal ? 'أتمّ أهداف تحدي هذا الأسبوع لتحصل على أول شهادة تقدير باسمك.' : 'حين يرسل لك أخصائيك تحدياً أسبوعياً، تظهر هنا شهاداتك عند إتمامه.') + '</p></div>');
 }
 function certSheet() { const a = (S.ach || []).find((x) => x.id === sheet.v); if (!a) return ''; return '<img class="certbig" data-cert="' + a.id + '" alt="شهادة التقدير"><div class="row">' + '<button class="btn sm" data-act="certdl" data-v="png">' + I('share') + ' صورة</button><button class="btn sm sec" data-act="certdl" data-v="pdf">PDF</button>' + (navigator.share ? '<button class="btn sm sec" data-act="certdl" data-v="share">مشاركة</button>' : '') + '</div><p class="dim">' + esc(a.phrase) + '</p>'; }
 const CERT = {};
@@ -1299,7 +1563,7 @@ function bubbles() {
   }).join('');
 }
 function scrChat() {
-  const empty = S.msgs.length ? '' : '<div class="empty" style="padding:20px 6px"><div class="ei" style="background:rgba(111,227,169,.15);color:var(--mint)">' + I('msg') + '</div><p class="mut">اكتب لأخصائيك أي سؤال عن خطتك أو يومك. يصله إشعار.</p></div>';
+  const empty = S.msgs.length ? '' : '<div class="empty" style="padding:20px 6px">' + emptyArt('chat') + '<h3>ابدأ الحديث</h3><p class="mut">اكتب لأخصائيك أي سؤال عن خطتك أو يومك. يصله إشعار.</p></div>';
   return '<div class="scr"><div class="chat"><div class="who"><button class="back" data-act="chatClose" aria-label="رجوع" style="width:40px;height:40px;border-radius:13px;display:grid;place-items:center;background:var(--glass);border:1px solid var(--line)">' + I('back') + '</button><div class="av sm">' + esc(drInit()) + '</div><div style="flex:1;min-width:0"><b>' + esc(S.dname) + '</b><div class="dim">يرد عادة خلال ساعات العمل</div></div></div>'
     + (S.replyAt ? '<div class="replyb">' + I('clock') + ' يرد أخصائيك على الرسائل يومياً الساعة ' + esc(hm12(S.replyAt)) + ' — اكتب متى شئت.</div>' : '') + '<div class="thread" id="thread">' + empty + bubbles() + '</div>'
     + (S.msgs.length ? '' : '<div class="qr">' + CLIENT_Q.map((q) => '<button data-act="qmsg" data-v="' + esc(q) + '">' + esc(q) + '</button>').join('') + '</div>')
@@ -1331,7 +1595,7 @@ function render() {
   const sc = $('.scroll'), key = (S ? S.screen + S.step + S.tab + (S.chat ? 'c' : '') : '') + V.screen, top = sc ? sc.scrollTop : 0;
   let scr;
   if (V.screen === 'boot') scr = scrBoot(); else if (V.screen === 'bad') scr = scrBad(); else if (V.screen === 'start') scr = scrStart(); else if (V.screen === 'moved') scr = scrMoved(); else if (V.screen === 'lock') scr = scrLock(); else if (V.screen === 'pin') scr = scrPin(); else if (V.screen === 'onb') scr = scrOnb();
-  else scr = V.wk ? scrWk() : V.bd ? scrBody() : V.pan != null ? scrPantry() : V.pf != null ? scrProf() : S.rqOpen && window.RL && RL.idx ? scrQuiz() : S.chat ? scrChat() : S.plan && S.screen === 'app' ? scrApp() : { invite: scrInvite, wizard: scrWizard, review: scrReview, sent: scrSent, app: scrSent }[S.screen]();
+  else scr = V.hf ? scrHF() : V.wk ? scrWk() : V.bd ? scrBody() : V.pan != null ? scrPantry() : V.pf != null ? scrProf() : S.rqOpen && window.RL && RL.idx ? scrQuiz() : S.chat ? scrChat() : S.plan && S.screen === 'app' ? scrApp() : { invite: scrInvite, setup: scrSetup, wizard: scrWizard, review: scrReview, sent: scrSent, app: scrSent }[S.screen]();
   const keep = {}; document.querySelectorAll('video[data-keep]').forEach((n) => { keep[n.dataset.keep] = n; });
   const cmI = $('#cmIn'), cmV = cmI ? [cmI.value, document.activeElement === cmI] : null;          // مسودة التعليق تبقى عند إعادة الرسم (وصول التعليقات مثلاً)
   $('#root').innerHTML = '<div class="stage"><div class="device">' + (V.online ? '' : '<div class="offline">بلا اتصال — تُرسل بياناتك عند عودة الإنترنت</div>') + scr + (S ? sheetHtml() : '') + (toastMsg ? '<div class="toast" role="status">' + I('check') + '<span>' + esc(toastMsg) + '</span></div>' : '') + '</div></div>';
@@ -1339,7 +1603,7 @@ function render() {
   if (cmV) { const n = $('#cmIn'); if (n) { n.value = cmV[0]; if (cmV[1]) n.focus(); } }
   const s2 = $('.scroll'); if (s2 && key === lastKey) s2.scrollTop = top; lastKey = key;
   const th = $('#thread'); if (th) th.scrollTop = th.scrollHeight;
-  onbSplashTimer(); fillCerts(); if (window.HxMotion) HxMotion.after(); if (S && S.chal && S.screen === 'app' && V.screen === '') chalCheck();
+  onbSplashTimer(); fillCerts(); if (window.HxMotion) HxMotion.after(); if (S && S.chal && S.screen === 'app' && V.screen === '') chalCheck(); whMaybe();
   if (focusChat) { const c = $('#chatIn'); if (c) c.focus(); focusChat = false; }
   if (S && K) save();
 }
@@ -1361,7 +1625,7 @@ async function onPin() {
       const j = await api('POST', '/v1/join', { token: S.tok, sigPub: S.ident.sigPub, encPub: S.ident.encPub });
       if (j.did !== S.did || await HXC.fpOf(j.dEncPub) !== S.fp) throw new Error('تعذّر التحقق من هوية الأخصائي. لا تكمل، واطلب رابطاً جديداً.');
       S.cid = j.cid; SALT = crypto.getRandomValues(new Uint8Array(16)); K = await pinKey(V.pin, SALT);
-      S.screen = 'wizard'; S.step = 1; await persist(); try { sessionStorage.removeItem(TKEY); } catch (e) { }
+      S.screen = (navigator.webdriver && !localStorage.getItem('hx_setup_e2e')) ? 'wizard' : 'setup'; S.step = 1; await persist(); try { sessionStorage.removeItem(TKEY); } catch (e) { }
       V.screen = ''; V.pin = V.pin1 = ''; V.busy = false; startLoop(); render();
     } catch (e) {
       V.busy = false; V.pin = V.pin1 = ''; S.ident = null;
@@ -1533,6 +1797,22 @@ document.addEventListener('click', (e) => {
     }
     case 'medAdd': S.rem = Object.assign({ water: false, meals: false }, S.rem); S.rem.meds = (S.rem.meds || []).concat([{ n: '', t: '20:00' }]).slice(0, MEDMAX); save(); remSync(true); break;
     case 'medDel': if (S.rem && S.rem.meds) { S.rem.meds.splice(+v, 1); if (!S.rem.meds.length) S.rem.med = false; save(); remSync(true); } break;
+    case 'hfNew': V.hf = { k: v, d: {} }; break;
+    case 'hfX': V.hf = null; break;
+    case 'hfTog': S.hfSend = el.checked ? 1 : 0; break;
+    case 'hfSendAll': { [['hmeas', S.meas], ['hinb', S.inb], ['hlab', S.labs]].forEach((a) => (a[1] || []).forEach((q) => { if (q.s === 0) hfSend(a[0], q); })); toast('أُرسلت إلى أخصائيك'); break; }
+    case 'hfSave': { const o = hfCollect(); if (!o) { toast(V.hf.k === 'lab' ? 'اكتب اسم الفحص ونتيجته.' : 'اكتب قياساً واحداً على الأقل بقيمة صحيحة.'); return; }
+      const kind = { meas: 'hmeas', inb: 'hinb', lab: 'hlab' }[V.hf.k], key = { meas: 'meas', inb: 'inb', lab: 'labs' }[V.hf.k]; o.s = 0; S[key] = (S[key] || []).concat([o]).slice(-120); if (S.hfSend !== 0) hfSend(kind, o); V.hf = null; toast(S.hfSend === 0 ? 'حُفظ على جوالك فقط.' : 'حُفظ وأُرسل إلى أخصائيك.'); break; }
+    case 'setupRel': { const U = V.setup; U.rel = v; break; }
+    case 'setupTog': { V.setup.on[v] = el.checked ? 1 : 0; break; }
+    case 'setupGo': setupApply(false); break;
+    case 'setupSkip': setupApply(true); break;
+    case 'relSet': { S.p.rel = v; if (v !== 'م') { S.rem = Object.assign({ water: false, meals: false }, S.rem, { pray: false, adhAm: false, adhPm: false, sal: false }); } remSync(true); toast(v === 'م' ? 'فعّل مواقيت الصلاة والأذكار من «التذكيرات»' : 'أُخفيت المحتويات الدينية'); break; }
+    case 'whOpen': whOpen('card'); break;
+    case 'whFavOpen': { const [c, m] = v.split('_').map(Number), w = whs(); w.cat = c; w.idx = m; whOpen('card'); break; }
+    case 'whTog': whs().on = el.checked; break;
+    case 'whQ': whs().noQ = el.checked; break;
+    case 'whNat': { const w = whs(); w.nat = v; S.p.nat = v; break; }
     case 'theme': if (window.HxTheme) { HxTheme.set(v, el.querySelector('.hx-pv')); document.querySelectorAll('.hx-th').forEach((b) => { const on = b.dataset.v === v; b.setAttribute('aria-checked', String(on)); const l = b.querySelector('.hx-tl'); if (l) l.textContent = l.textContent.replace(' ✓', '') + (on ? ' ✓' : ''); }); applyThemeIcons(v); } return;
     case 'tab': S.tab = v; if (v === 'feed' && now() - FD.at > 60000) fdLoad().then(render); break;
     case 'day': S.day = +v; break;
@@ -1604,6 +1884,8 @@ document.addEventListener('change', (e) => {
   }
   if (t.dataset.wk) { const L = dl(TODAY), n = Math.max(0, Math.min(80000, Math.round(+numOnly(t.value) || 0))); L.h = L.h || {}; if (n) L.h[t.dataset.wk] = n; else delete L.h[t.dataset.wk]; queueLog(dkey(new Date())); save(); render(); }
   if (t.id === 'offT') { const L = dl(TODAY); L.offT = t.value.trim().slice(0, 500); queueLog(dkey(new Date())); save(); }
+  if (t.id === 'hf_n' && V.hf) { V.hf.d.n = t.value; V.hf.d.u = undefined; V.hf.d.v = ($('#hf_v') || {}).value; render(); return; }
+  if (t.id === 'setupCity' && V.setup) { V.setup.city = t.value; if (!t.value) V.setup.on.pray = 0; render(); return; }
   if (t.dataset.prcity != null && t.id === 'prCity') { S.rem = Object.assign({ water: false, meals: false }, S.rem); S.rem.prCity = t.value; save(); remSync(true); render(); toast(t.value ? 'مواقيت ' + t.value + ' ✓' : 'اختر مدينتك'); }
   if (t.dataset.remcap != null && t.id === 'remCap') { S.rem = Object.assign({ water: false, meals: false }, S.rem); S.rem.cap = +t.value || 0; save(); remSync(true); toast('حُفظ الحد الأقصى للتذكيرات'); }
   if (t.dataset.remsound) { S.rem = Object.assign({ water: false, meals: false }, S.rem); S.rem.sound = t.checked; save(); if (t.checked) almChime(); else almStop(); }
@@ -1617,6 +1899,7 @@ document.addEventListener('input', (e) => {               // التقاط أول
   const p = Math.max(0, (t.selectionStart == null ? n.length : t.selectionStart) - (v.length - n.length)); t.value = n; try { t.setSelectionRange(p, p); } catch (x) { }
 }, true);
 document.addEventListener('input', (e) => {
+  if (V.hf && e.target.id && e.target.id.startsWith('hf_')) V.hf.d[e.target.id.slice(3)] = e.target.value;       // ما يكتبه العميل يبقى إن أُعيد الرسم
   const t = e.target;
   if (t.dataset.bind || t.dataset.cq || t.dataset.schm || t.dataset.scht) {
     if (t.dataset.bind) S.p[t.dataset.bind] = t.value; else if (t.dataset.cq) { S.p.cq = S.p.cq || {}; S.p.cq[t.dataset.cq] = t.value; } else if (t.dataset.schm) sched()[+t.dataset.schm].min = +t.value || 0; else sched()[+t.dataset.scht].time = t.value;
@@ -1627,6 +1910,6 @@ document.addEventListener('input', (e) => {
 });
 window.addEventListener('online', () => { V.online = true; poll(); });
 window.addEventListener('offline', () => { V.online = false; render(); });
-window.HissatiApp = { state: () => S, poll, flush, feed: () => FD, feedLoad: fdLoad, celebrateTest: (id) => celebrate(id), alarm: (items) => almShow(items), alarmTick: almTick, alarmFire: almFire, remItems, render, prayTimes };     // للاختبارات
+window.HissatiApp = { wheel: { cats: () => whCats().map((i) => whx().cats[i].id), dia: whDia, text: (id, i) => { const ci = whx().cats.findIndex((c) => c.id === id); return whText(ci, i); }, maybe: () => { WHL.shown = false; whMaybe(); }, open: (m) => whOpen(m) }, state: () => S, poll, flush, feed: () => FD, feedLoad: fdLoad, celebrateTest: (id) => celebrate(id), alarm: (items) => almShow(items), alarmTick: almTick, alarmFire: almFire, remItems, render, prayTimes };     // للاختبارات
 boot();
 })();

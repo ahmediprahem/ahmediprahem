@@ -6,10 +6,10 @@
   var root = document.documentElement;
   var RM = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
   var canVibrate = 'vibrate' in navigator && !/iPad|iPhone|iPod/.test(navigator.userAgent);
-  var themed = function () { var t = root.getAttribute('data-theme'); return t === 'rose' || t === 'pulse'; };
+  var themed = function () { var t = root.getAttribute('data-theme'); return t === 'rose' || t === 'pulse' || t === 'firoz'; };
 
   /* ---------------- الثيم ---------------- */
-  var THEMES = { classic: { meta: '#121c45', scheme: 'dark' }, rose: { meta: '#FAF6F2', scheme: 'light' }, pulse: { meta: '#0A0C0F', scheme: 'dark' } };
+  var THEMES = { classic: { meta: '#121c45', scheme: 'dark' }, rose: { meta: '#FAF6F2', scheme: 'light' }, pulse: { meta: '#0A0C0F', scheme: 'dark' }, firoz: { meta: '#031A1F', scheme: 'dark' } };
   var TKEY = 'hissati_theme';
   function applyTheme(name) {
     if (name === 'classic' || !THEMES[name]) root.removeAttribute('data-theme'); else root.setAttribute('data-theme', name);
