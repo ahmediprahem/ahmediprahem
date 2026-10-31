@@ -70,7 +70,7 @@ const fresh = () => ({
   p: { name: '', phone: '', sex: 'أنثى', age: '', weight: '', height: '', act: 2, goal: 1, cond: [], allg: [], meds: '', notes: '',
        like: { B: [], L: [], D: [], S: [] }, nope: { B: [], L: [], D: [], S: [] }, food: {}, wake: '07:00', sleep: '23:00', nmeals: 5, wdays: [], bf: '', sport: '', gphase: '', supp: '', sched: null, cq: {} },
   consent: false, req: 'none', reqMsg: '', code: '', plan: null, pm: null, pv: 0, log: {}, weights: [], prefLog: [], pending: [], msgs: [], unreadC: 0, chat: false, ctx: '',
-  photos: [], chal: null, chLogo: {}, ach: [], rem: { water: false, meals: false }, remSig: '', ident: null, tok: '', fp: '', did: '', cid: '', dEnc: null, dname: '', cat: {}, after: 0, outbox: [], removed: false
+  photos: [], wh: null, chal: null, chLogo: {}, ach: [], rem: { water: false, meals: false }, remSig: '', ident: null, tok: '', fp: '', did: '', cid: '', dEnc: null, dname: '', cat: {}, after: 0, outbox: [], removed: false
 });
 let S = null, K = null, SALT = null, DATA = {}, CUPS = 10;
 const V = { screen: 'boot', err: '', pin: '', pin1: '', busy: false, tries: 0, until: 0, online: true, polling: false, timer: 0 };
@@ -776,10 +776,125 @@ function emptyArt(k) {
   return '<div class="ea"><svg viewBox="0 0 120 90" aria-hidden="true">' + A[k] + '</svg></div>';
 }
 function mealIc(name) { const n = String(name || ''), k = /فطور|إفطار|افطار|صباح/.test(n) ? 'cup' : /سناك|تصبيرة|وجبة خفيفة/.test(n) ? 'apple' : /عشاء/.test(n) ? 'moonbowl' : /غداء|غذاء/.test(n) ? 'utensils' : ''; return k ? '<span class="mti">' + I(k) + '</span>' : ''; }
+
+// ================= 0.60: عجلة الرسالة اليومية (مرة واحدة يومياً عند أول فتح) — الرسائل في wheel_msgs.js (المعتمد فقط)
+const WHL = { shown: false, spin: false, rot: 0 };
+const whx = () => window.HX_WHEEL || null;
+function whs() { if (!S.wh) S.wh = { on: true, nat: '', day: '', cat: -1, idx: -1, seen: {}, fav: [], noQ: false, last: -1 }; return S.wh; }
+const whDia = () => { const w = whx(); return (w && w.dia[whs().nat]) || 'msa'; };
+const whDay = () => Math.floor(Date.now() / 864e5);
+function whCond(c) {
+  const L = S.log[dkey(new Date())] || { ck: {}, water: 0 };
+  return c === 'meal' ? Object.keys(L.ck || {}).length > 0 : c === 'st3' ? dayStreak() >= 3 : c === 'water' ? (L.water || 0) >= hWaterGoal() : c === 'wt' ? (S.weights || []).length >= 2 : true;
+}
+function whList(ci) { const w = whx(), id = w.cats[ci].id, m = w.msgs[id]; return Array.isArray(m) ? m : (m[whDia()] || m.msa || []); }
+const whOkM = (m) => m.a === 1 && (!m.c || whCond(m.c));
+function whCats() { const w = whx(), q = whs().noQ; return w ? w.cats.map((c, i) => i).filter((i) => !(q && w.cats[i].id === 'quran') && whList(i).filter((m) => m.a === 1).length >= w.min) : []; }
+function whText(ci, mi) {
+  const m = whList(ci)[mi]; if (!m) return null; const id = whx().cats[ci].id;
+  if (id === 'hero') return { t: (S.p.sex === 'ذكر' ? m.m : m.f).replace('{n}', dayStreak()) };
+  return { t: m.t, s: m.s || '', ref: m.ref || '', tf: m.tf || '', x: m.x || '' };
+}
+function whPick() {
+  const w = whs(), cs = whCats(); if (!cs.length) return null; const day = whDay();
+  const pool = cs.filter((c) => c !== w.last), cs2 = pool.length ? pool : cs, ci = cs2[Math.floor(Math.random() * cs2.length)], L = whList(ci);
+  let ok = L.map((m, i) => i).filter((i) => whOkM(L[i])), fresh = ok.filter((i) => !(w.seen[ci + '_' + i] && day - w.seen[ci + '_' + i] < 30));
+  if (!fresh.length) fresh = ok; if (!fresh.length) return null;
+  // «عاش يا بطل»: ما انطبق شرطه على العميل اليوم يتقدّم على العام
+  if (whx().cats[ci].id === 'hero') { const cond = fresh.filter((i) => L[i].c); if (cond.length) fresh = cond; }
+  return { ci, mi: fresh[Math.floor(Math.random() * fresh.length)] };
+}
+function whIc(k) { const w = whx(); return k === 'star8' ? '<path d="M5 5h14v14H5z"/><path d="M12 1.5 22.5 12 12 22.5 1.5 12z"/>' : k === 'lamp' ? '<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>' : k === 'peak' ? '<path d="M3 20 9 9l4 6 3-4 5 9z"/><path d="M9 9V4l4 1.5L9 7"/>' : k === 'star' ? '<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>' : k === 'shield' ? '<path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/><path d="m9 12 2 2 4-4"/>' : '<path d="M4 5h6a2 2 0 0 1 2 2v12a2 2 0 0 0-2-2H4zM20 5h-6a2 2 0 0 0-2 2v12a2 2 0 0 1 2-2h6z"/>'; }
+const whSvg = (k) => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + whIc(k) + '</svg>';
+function whCardHtml(ci, mi, actions) {
+  const c = whx().cats[ci], d = whText(ci, mi); if (!d) return ''; const w = whs(), fav = w.fav.includes(ci + '_' + mi);
+  const head = '<div class="whc-h"><span class="whc-i">' + whSvg(c.ic) + '</span><div><b>' + esc(c.name) + '</b><small>رسالة اليوم</small></div></div>';
+  let body = '';
+  if (c.id === 'arab') body = '<div class="whc-b ct"><p class="whc-t serif">' + esc(d.t) + '</p><p class="whc-n">' + esc(d.s) + '</p></div>';
+  else if (c.id === 'book') body = '<div class="whc-b"><div class="whc-q" aria-hidden="true">”</div><p class="whc-t">' + esc(d.t) + '</p><p class="whc-a">' + whSvg('book') + esc(d.s) + '</p></div>';
+  else if (c.id === 'quran') body = '<div class="whc-b ct"><p class="whc-ay">' + esc(d.t) + '</p><p class="whc-a ct">' + esc(d.ref) + '</p><p class="whc-tf"><b>رسالتك</b>' + esc(d.tf) + '</p></div>';
+  else if (c.id === 'self') body = '<div class="whc-b rel"><span class="whc-no" aria-hidden="true">لا</span><p class="whc-t b">' + esc(d.t) + '</p>' + (d.x ? '<p class="whc-x">' + esc(d.x) + '</p>' : '') + '</div>';
+  else if (c.id === 'chal') body = '<div class="whc-b"><span class="whc-tag">تحدّي اليوم</span><p class="whc-t b">' + esc(d.t) + '</p></div>';
+  else body = '<div class="whc-b"><p class="whc-t b">' + esc(d.t) + '</p></div>';
+  const foot = actions ? '<div class="whc-f"><button class="btn" data-wh="close">' + (c.id === 'chal' ? 'قبلت التحدي' : 'شكراً') + '</button><button class="btn sec" data-wh="fav" aria-pressed="' + fav + '" aria-label="' + (fav ? 'إزالة من المفضلة' : 'إضافة إلى المفضلة') + '">' + (fav ? '★' : '☆') + '</button><button class="btn sec" data-wh="share" aria-label="مشاركة كصورة">' + I('send') + '</button></div>' : '';
+  return '<article class="whc whc-' + c.id + '" style="--deep:' + c.deep + ';--acc:' + c.acc + '" aria-label="' + esc(c.name) + '">' + head + body + foot + '</article>';
+}
+function whWheelSvg(cs) {
+  const w = whx(), n = cs.length, st = 360 / n, pt = (a, r) => { const t = a * Math.PI / 180; return [150 + r * Math.sin(t), 150 - r * Math.cos(t)]; };
+  let s = '<defs><radialGradient id="whrim" cx="50%" cy="50%" r="50%"><stop offset="92%" stop-color="#16265f"/><stop offset="100%" stop-color="#0c1740"/></radialGradient></defs><circle cx="150" cy="150" r="149" fill="url(#whrim)" stroke="#ffd27a" stroke-opacity=".7" stroke-width="2"/><g id="whrot">';
+  cs.forEach((ci, i) => {
+    const c = w.cats[ci], p0 = pt(i * st - st / 2, 132), p1 = pt(i * st + st / 2, 132);
+    s += '<g class="seg" data-i="' + i + '"><path d="M150 150 L' + p0[0].toFixed(2) + ' ' + p0[1].toFixed(2) + ' A132 132 0 0 1 ' + p1[0].toFixed(2) + ' ' + p1[1].toFixed(2) + 'Z" fill="' + c.deep + '" stroke="' + c.acc + '" stroke-opacity=".55" stroke-width="1.5"/>'
+      + '<g transform="rotate(' + (i * st) + ' 150 150)"><g transform="translate(138 28)" fill="none" stroke="' + c.acc + '" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + whIc(c.ic) + '</g><text x="150" y="68" text-anchor="middle" font-size="13.5" font-weight="700" fill="#fff">' + c.l1 + '</text><text x="150" y="85" text-anchor="middle" font-size="13.5" font-weight="700" fill="#fff">' + c.l2 + '</text></g></g>';
+  });
+  for (let k = 0; k < 18; k++) { const q = pt(k * 20, 141); s += '<circle class="lamp" cx="' + q[0].toFixed(1) + '" cy="' + q[1].toFixed(1) + '" r="2.6" fill="#ffd27a" style="animation-delay:' + (k % 6 * .35) + 's"/>'; }
+  return s + '</g><circle cx="150" cy="150" r="27" fill="#0b1330" stroke="#ffd27a" stroke-opacity=".8" stroke-width="2"/><g transform="translate(138 138)" fill="none" stroke="#ffd27a" stroke-width="1.6" stroke-linejoin="round">' + whIc('star8') + '</g>';
+}
+function whOpen(mode) {              // mode: 'wheel' | 'card'
+  const old = document.getElementById('whl'); if (old) old.remove(); const w = whs(), el = document.createElement('div'); el.id = 'whl'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'رسالة اليوم');
+  WHL.cs = whCats(); WHL.rm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (mode === 'card' && w.cat >= 0) el.innerHTML = '<div class="whs wcard show">' + whCardHtml(w.cat, w.idx, true) + '</div>';
+  else if (!w.nat) el.innerHTML = '<div class="whs"><div class="eyebrow">رسالة اليوم</div><h2 class="ask">من أي بلد أنت؟</h2><p class="dim" style="max-width:19em">لنختار لك لهجة الرسائل. تغيّرها لاحقاً من «تقدّمي».</p><div class="chips whnat">' + whx().countries.map((x) => '<button class="chip" data-wh="nat" data-v="' + esc(x) + '">' + esc(x) + '</button>').join('') + '</div><button class="btn ghost" data-wh="later">لاحقاً</button></div>';
+  else el.innerHTML = '<div class="whs wheel"><div class="eyebrow">رسالة اليوم</div><h2 class="ask" id="whask">لفّ العجلة لتلقي رسالتك</h2><div class="whbox"><svg class="whptr" viewBox="0 0 30 36" id="whptr" aria-hidden="true"><path d="M15 34 4 12a12 12 0 1 1 22 0z" fill="#ffd27a" stroke="#7a5a1c" stroke-width="2"/><circle cx="15" cy="11" r="4" fill="#0b1330"/></svg><svg viewBox="0 0 300 300" id="whsvg" aria-hidden="true">' + whWheelSvg(WHL.cs) + '</svg></div><div class="whbtns"><button class="btn" id="whspin" data-wh="spin">' + (WHL.rm ? 'اكشف رسالتك' : 'لفّ العجلة') + '</button><button class="btn ghost" data-wh="later">لاحقاً</button></div></div><div class="whs wcard" id="whcard"></div>';
+  document.body.appendChild(el); WHL.spin = false; const b = el.querySelector('.btn'); if (b && !('ontouchstart' in window)) try { b.focus({ preventScroll: true }); } catch (e) { }
+  el.className = WHL.rm ? 'rm' : '';
+}
+function whMaybe() {
+  try { if (navigator.webdriver && !localStorage.getItem('hx_wheel_e2e')) return; } catch (e) { }          // الاختبارات الآلية لا تُحجب بالعجلة إلا إن طلبتها
+  if (WHL.shown || !S || !K || V.screen !== '' || S.screen !== 'app' || S.tab !== 'today' || S.chat || document.getElementById('whl') || document.getElementById('alm')) return;
+  const w = whs(), x = whx(); if (!x || !w.on || w.day === dkey(new Date()) || !whCats().length) return;
+  WHL.shown = true; setTimeout(() => { if (S && V.screen === '' && !document.getElementById('whl')) whOpen('wheel'); }, 450);
+}
+function whSpin() {
+  if (WHL.spin) return; const el = document.getElementById('whl'), w = whs(); if (!el) return; const pk = whPick(); if (!pk) return; WHL.spin = true;
+  const ix = WHL.cs.indexOf(pk.ci), n = WHL.cs.length, st = 360 / n; $('#whspin').disabled = true; el.querySelectorAll('[data-wh="later"]').forEach((b) => { b.hidden = true; });
+  const finish = () => { w.day = dkey(new Date()); w.cat = pk.ci; w.idx = pk.mi; w.last = pk.ci; w.seen[pk.ci + '_' + pk.mi] = whDay(); save(); send({ t: 'whl', c: whx().cats[pk.ci].id }); whReveal(pk); };
+  if (WHL.rm) { $('#whask').textContent = 'رسالتك جاهزة'; setTimeout(finish, 250); return; }
+  $('#whask').textContent = '…'; const jitter = Math.random() * st * .6 - st * .3, cur = ((WHL.rot % 360) + 360) % 360, delta = (((360 - ix * st + jitter) - cur) % 360 + 360) % 360, total = 360 * 5 + delta, start = WHL.rot, dur = 4600;
+  const under = (a) => Math.floor((((-a % 360) + 360) % 360 + st / 2) / st) % n; let t0 = null, last = under(start), g = document.getElementById('whrot');
+  const frame = (ts) => {
+    if (!document.getElementById('whl')) return; if (t0 === null) t0 = ts; const p = Math.min((ts - t0) / dur, 1), e = 1 - Math.pow(1 - p, 4); WHL.rot = start + total * e; g.setAttribute('transform', 'rotate(' + WHL.rot + ' 150 150)');
+    const u = under(WHL.rot); if (u !== last) { last = u; const pt = document.getElementById('whptr'); if (pt && pt.animate) pt.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(-24deg)' }, { transform: 'rotate(0)' }], { duration: 150, easing: 'ease-out' }); if (navigator.vibrate) try { navigator.vibrate(6); } catch (e2) { } }
+    if (p < 1) requestAnimationFrame(frame); else { const box = el.querySelector('.whbox'); box.classList.add('win'); box.querySelector('.seg[data-i="' + ix + '"]').classList.add('won'); $('#whask').textContent = whx().cats[pk.ci].name; setTimeout(finish, 900); }
+  };
+  requestAnimationFrame(frame);
+}
+function whReveal(pk) {
+  const el = document.getElementById('whl'); if (!el) return; const c = el.querySelector('#whcard'); c.innerHTML = whCardHtml(pk.ci, pk.mi, true); el.querySelector('.whs.wheel').classList.add('gone'); requestAnimationFrame(() => c.classList.add('show'));
+  const b = c.querySelector('[data-wh="close"]'); if (b) try { b.focus({ preventScroll: true }); } catch (e) { } render();
+}
+function whClose() { const el = document.getElementById('whl'); if (!el) return; el.classList.add('out'); setTimeout(() => { el.remove(); render(); }, WHL.rm ? 20 : 330); }
+function whShare() {
+  const w = whs(); if (w.cat < 0) return; const c = whx().cats[w.cat], d = whText(w.cat, w.idx); if (!d) return; const cv = document.createElement('canvas'); cv.width = 1080; cv.height = 1350; const g = cv.getContext('2d');
+  const gr = g.createLinearGradient(0, 0, 0, 1350); gr.addColorStop(0, c.deep); gr.addColorStop(1, '#0b1330'); g.fillStyle = gr; g.fillRect(0, 0, 1080, 1350);
+  g.strokeStyle = c.acc; g.globalAlpha = .5; g.lineWidth = 3; g.strokeRect(36, 36, 1008, 1278); g.globalAlpha = 1; g.direction = 'rtl'; g.textAlign = 'center';
+  const wrap = (txt, x, y, mw, lh) => { const ws = String(txt).split(' '); let line = ''; ws.forEach((wd) => { const t = line ? line + ' ' + wd : wd; if (g.measureText(t).width > mw && line) { g.fillText(line, x, y); y += lh; line = wd; } else line = t; }); g.fillText(line, x, y); return y + lh; };
+  g.fillStyle = c.acc; g.font = '700 46px sans-serif'; g.fillText(c.name, 540, 150); g.fillStyle = '#fff'; g.font = '700 ' + (c.id === 'quran' ? 64 : 58) + 'px "Amiri Quran","Amiri",serif'; let y = wrap(d.t, 540, 380, 880, c.id === 'quran' ? 120 : 100);
+  g.font = '500 40px sans-serif'; g.fillStyle = 'rgba(255,255,255,.88)'; if (d.tf) y = wrap(d.tf, 540, y + 40, 860, 70); if (d.s || d.ref) { g.fillStyle = c.acc; g.font = '600 36px sans-serif'; g.fillText(d.s || d.ref, 540, y + 40); }
+  g.fillStyle = 'rgba(255,255,255,.7)'; g.font = '600 38px sans-serif'; g.fillText('حصتي', 540, 1260);
+  cv.toBlob((bl) => { if (!bl) return; const f = new File([bl], 'hissati-message.png', { type: 'image/png' }); if (navigator.canShare && navigator.canShare({ files: [f] })) navigator.share({ files: [f] }).catch(() => { }); else { const a = document.createElement('a'); a.href = URL.createObjectURL(bl); a.download = 'hissati-message.png'; document.body.appendChild(a); a.click(); a.remove(); } }, 'image/png');
+}
+document.addEventListener('click', (e) => {
+  const b = e.target.closest && e.target.closest('#whl [data-wh]'); if (!b || !S) return; const k = b.dataset.wh, w = whs();
+  if (k === 'spin') whSpin(); else if (k === 'later') { WHL.shown = true; whClose(); } else if (k === 'close') whClose(); else if (k === 'share') whShare();
+  else if (k === 'nat') { w.nat = b.dataset.v; S.p.nat = w.nat; save(); whOpen('wheel'); }
+  else if (k === 'fav') { const id = w.cat + '_' + w.idx, i = w.fav.indexOf(id); if (i >= 0) w.fav.splice(i, 1); else w.fav.push(id); save(); const on = w.fav.includes(id); b.setAttribute('aria-pressed', on); b.textContent = on ? '★' : '☆'; }
+});
+function whChip() {
+  const w = whs(), x = whx(); if (!x || w.day !== dkey(new Date()) || w.cat < 0 || !whText(w.cat, w.idx)) return '';
+  return '<button class="whchip" data-act="whOpen" style="--acc:' + x.cats[w.cat].acc + '">' + whSvg(x.cats[w.cat].ic) + '<span>رسالة اليوم · ' + esc(x.cats[w.cat].name) + '</span></button>';
+}
+function whCard() {
+  const w = whs(), x = whx(); if (!x) return ''; const fav = w.fav.filter((id) => { const [c, m] = id.split('_'); return whText(+c, +m); });
+  return '<section class="card stack"><h3>' + I('sparkle') + ' عجلة رسالة اليوم</h3><label class="whrow"><span>أفتح العجلة عند أول دخول كل يوم</span><input type="checkbox" data-act="whTog" ' + (w.on ? 'checked' : '') + '></label>'
+    + '<label class="whrow"><span>أخفِ رسائل القرآن</span><input type="checkbox" data-act="whQ" ' + (w.noQ ? 'checked' : '') + '></label>'
+    + '<div><div class="dim" style="margin-bottom:6px">بلدك (يحدّد لهجة «عاش يا بطل»)</div><div class="chips">' + x.countries.map((c) => '<button class="chip' + (w.nat === c ? ' on' : '') + '" data-act="whNat" data-v="' + esc(c) + '">' + esc(c) + '</button>').join('') + '</div></div>'
+    + (fav.length ? '<div><div class="dim" style="margin-bottom:6px">رسائلي المفضلة</div>' + fav.map((id) => { const [c, m] = id.split('_').map(Number), d = whText(c, m); return '<button class="whfav" data-act="whFavOpen" data-v="' + id + '"><b style="color:' + x.cats[c].acc + '">★</b> ' + esc(d.t.length > 60 ? d.t.slice(0, 58) + '…' : d.t) + '</button>'; }).join('') + '</div>' : '') + '</section>';
+}
 function tabToday() {
   const d = TODAY, L = dl(d), [done, n] = itemsOfDay(d), pct = n ? Math.round(done / n * 100) : 0, C = 2 * Math.PI * 40;
   const first = (S.p.name || '').trim().split(/\s+/)[0] || '';
-  let out = sceneHeader(first, d) + missionCard(d) + (S.fw === 'pending' ? firstWinCard() : installState() === 'done' || installState() === 'desktop' ? notifCard(true) : installCard('today')) + chalCard() + prCard() + apCard() + wkCard() + bdCard() + panCard() + pfCard();
+  let out = sceneHeader(first, d) + missionCard(d) + whChip() + (S.fw === 'pending' ? firstWinCard() : installState() === 'done' || installState() === 'desktop' ? notifCard(true) : installCard('today')) + chalCard() + prCard() + apCard() + wkCard() + bdCard() + panCard() + pfCard();
   out += '<section class="card ring"><svg viewBox="0 0 100 100" role="img" aria-label="التزام اليوم ' + pct + '%"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="10"/><circle cx="50" cy="50" r="40" fill="none" stroke="#6fe3a9" stroke-width="10" stroke-linecap="round" stroke-dasharray="' + C + '" stroke-dashoffset="' + (C * (1 - pct / 100)) + '"/></svg><div style="flex:1"><div class="num">' + pct + '%</div><div class="mut">' + done + ' من ' + n + ' أصناف اليوم</div>'
     + (pct === 100 ? '<div class="dim" style="color:var(--mint)">يوم كامل، أحسنت!</div>' : '<div class="dim">علّم ما أكلته باللمس.</div>') + '</div></section>';
   const dp = dayPlan(d), kc = dp.kcal || DATA.kcal, pr = dp.p || DATA.pro, wt = +(dp.water || DATA.water), cups = Math.max(4, Math.min(16, Math.round(wt / CUP)));
@@ -846,7 +961,7 @@ function tabProgress() {
   return hpTop() + (sw.nd ? '<section class="card stack"><h3>👣 خطواتي آخر 7 أيام</h3><div class="stats3"><div class="st"><b>' + sw.tot.toLocaleString('ar') + '</b><small>خطوة</small></div><div class="st"><b>' + sw.avg.toLocaleString('ar') + '</b><small>متوسط يومي</small></div><div class="st"><b>' + sw.nd + '</b><small>أيام مسجّلة</small></div></div><p class="dim">سجّلها من «تسجيل اليوم» كما يعرضها عدّاد جوالك أو ساعتك.</p></section>' : '') + suppCard() + ptsCard() + '<h2>تقدّمي</h2><section class="card stack"><div class="row" style="justify-content:space-between"><h3>الوزن</h3><span class="dim">' + (W.length > 1 ? (diff <= 0 ? diff + ' كجم منذ البداية' : '+' + diff + ' كجم') : '') + '</span></div>' + chart
     + '<div class="row"><input class="inp" id="wIn" type="text" data-numf="1" autocomplete="off" inputmode="decimal" placeholder="وزن اليوم (كجم)" style="flex:1"><button class="btn sm" data-act="weigh">' + I('scale') + ' سجّل</button></div></section>'
     + '<section class="card stack"><div class="row" style="justify-content:space-between"><h3>الالتزام آخر 7 أيام</h3><span class="dim">% من الأصناف</span></div><div class="wk">' + bars + '</div></section>'
-    + '<section class="card achcard"><div class="row" style="justify-content:space-between"><h3>🏅 إنجازاتي</h3><span class="dim">' + (S.ach || []).length + ' شهادة</span></div><button class="btn sm" data-act="achs">' + I('sparkle') + ' عرض إنجازاتي وشهاداتي</button></section>' + habitsProgress() + themeCard() + remCard() + '<section class="card stack"><h3>الحساب</h3><p class="dim">ملفك لدى ' + esc(S.dname) + (S.code ? ' • رقم ' + esc(S.code) : '') + '. بياناتك محفوظة مشفّرة على هذا الجوال فقط.</p>' + installCard('acct') + notifCard(false) + '<div class="row"><button class="btn sm sec" data-act="lock">' + I('lock') + ' قفل التطبيق</button><button class="btn sm sec" data-act="xferNew">' + I('phone') + ' نقل حسابي</button></div><button class="link" data-act="wipe" style="color:var(--coral)">حذف بياناتي من هذا الجوال</button></section>';
+    + '<section class="card achcard"><div class="row" style="justify-content:space-between"><h3>🏅 إنجازاتي</h3><span class="dim">' + (S.ach || []).length + ' شهادة</span></div><button class="btn sm" data-act="achs">' + I('sparkle') + ' عرض إنجازاتي وشهاداتي</button></section>' + habitsProgress() + themeCard() + whCard() + remCard() + '<section class="card stack"><h3>الحساب</h3><p class="dim">ملفك لدى ' + esc(S.dname) + (S.code ? ' • رقم ' + esc(S.code) : '') + '. بياناتك محفوظة مشفّرة على هذا الجوال فقط.</p>' + installCard('acct') + notifCard(false) + '<div class="row"><button class="btn sm sec" data-act="lock">' + I('lock') + ' قفل التطبيق</button><button class="btn sm sec" data-act="xferNew">' + I('phone') + ' نقل حسابي</button></div><button class="link" data-act="wipe" style="color:var(--coral)">حذف بياناتي من هذا الجوال</button></section>';
 }
 
 // ---------- التثقيف: منشورات أخصائيك (ومنشورات عامة لمراجعي «حصة» توافق عليها الإدارة) — إعجاب وتعليق
@@ -1392,7 +1507,7 @@ function render() {
   if (cmV) { const n = $('#cmIn'); if (n) { n.value = cmV[0]; if (cmV[1]) n.focus(); } }
   const s2 = $('.scroll'); if (s2 && key === lastKey) s2.scrollTop = top; lastKey = key;
   const th = $('#thread'); if (th) th.scrollTop = th.scrollHeight;
-  onbSplashTimer(); fillCerts(); if (window.HxMotion) HxMotion.after(); if (S && S.chal && S.screen === 'app' && V.screen === '') chalCheck();
+  onbSplashTimer(); fillCerts(); if (window.HxMotion) HxMotion.after(); if (S && S.chal && S.screen === 'app' && V.screen === '') chalCheck(); whMaybe();
   if (focusChat) { const c = $('#chatIn'); if (c) c.focus(); focusChat = false; }
   if (S && K) save();
 }
@@ -1586,6 +1701,11 @@ document.addEventListener('click', (e) => {
     }
     case 'medAdd': S.rem = Object.assign({ water: false, meals: false }, S.rem); S.rem.meds = (S.rem.meds || []).concat([{ n: '', t: '20:00' }]).slice(0, MEDMAX); save(); remSync(true); break;
     case 'medDel': if (S.rem && S.rem.meds) { S.rem.meds.splice(+v, 1); if (!S.rem.meds.length) S.rem.med = false; save(); remSync(true); } break;
+    case 'whOpen': whOpen('card'); break;
+    case 'whFavOpen': { const [c, m] = v.split('_').map(Number), w = whs(); w.cat = c; w.idx = m; whOpen('card'); break; }
+    case 'whTog': whs().on = el.checked; break;
+    case 'whQ': whs().noQ = el.checked; break;
+    case 'whNat': { const w = whs(); w.nat = v; S.p.nat = v; break; }
     case 'theme': if (window.HxTheme) { HxTheme.set(v, el.querySelector('.hx-pv')); document.querySelectorAll('.hx-th').forEach((b) => { const on = b.dataset.v === v; b.setAttribute('aria-checked', String(on)); const l = b.querySelector('.hx-tl'); if (l) l.textContent = l.textContent.replace(' ✓', '') + (on ? ' ✓' : ''); }); applyThemeIcons(v); } return;
     case 'tab': S.tab = v; if (v === 'feed' && now() - FD.at > 60000) fdLoad().then(render); break;
     case 'day': S.day = +v; break;
@@ -1680,6 +1800,6 @@ document.addEventListener('input', (e) => {
 });
 window.addEventListener('online', () => { V.online = true; poll(); });
 window.addEventListener('offline', () => { V.online = false; render(); });
-window.HissatiApp = { state: () => S, poll, flush, feed: () => FD, feedLoad: fdLoad, celebrateTest: (id) => celebrate(id), alarm: (items) => almShow(items), alarmTick: almTick, alarmFire: almFire, remItems, render, prayTimes };     // للاختبارات
+window.HissatiApp = { wheel: { cats: () => whCats().map((i) => whx().cats[i].id), dia: whDia, text: (id, i) => { const ci = whx().cats.findIndex((c) => c.id === id); return whText(ci, i); }, maybe: () => { WHL.shown = false; whMaybe(); } }, state: () => S, poll, flush, feed: () => FD, feedLoad: fdLoad, celebrateTest: (id) => celebrate(id), alarm: (items) => almShow(items), alarmTick: almTick, alarmFire: almFire, remItems, render, prayTimes };     // للاختبارات
 boot();
 })();
