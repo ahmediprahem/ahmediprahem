@@ -747,8 +747,8 @@ function scrSent() {
 
 // ---------- التطبيق بعد وصول الخطة
 function scrApp() {
-  const body = { today: tabToday, plan: tabPlan, prefs: tabPrefs, progress: tabProgress, feed: tabFeed }[S.tab]();
-  const tb = [['today', 'today', 'اليوم'], ['plan', 'cal', 'خطتي'], ['prefs', 'heart', 'تفضيلاتي'], ['feed', 'news', 'تثقيف'], ['progress', 'trend', 'تقدّمي']].map((t) => '<button class="' + (S.tab === t[0] ? 'on' : '') + '" data-act="tab" data-v="' + t[0] + '"' + (S.tab === t[0] ? ' aria-current="page"' : '') + '>' + I(t[1]) + '<span>' + t[2] + '</span>' + (t[0] === 'feed' && fdNew() ? '<span class="nb" aria-label="' + fdNew() + ' جديد">' + fdNew() + '</span>' : '') + '</button>').join('');
+  const body = { today: tabToday, plan: tabPlan, prefs: tabPrefs, progress: tabProgress, feed: tabFeed, file: tabFile }[S.tab]();
+  const tb = [['today', 'today', 'اليوم'], ['plan', 'cal', 'خطتي'], ['prefs', 'heart', 'تفضيلاتي'], ['feed', 'news', 'تثقيف'], ['progress', 'trend', 'تقدّمي'], ['file', 'pulse', 'ملفي']].map((t) => '<button class="' + (S.tab === t[0] ? 'on' : '') + '" data-act="tab" data-v="' + t[0] + '"' + (S.tab === t[0] ? ' aria-current="page"' : '') + '>' + I(t[1]) + '<span>' + t[2] + '</span>' + (t[0] === 'feed' && fdNew() ? '<span class="nb" aria-label="' + fdNew() + ' جديد">' + fdNew() + '</span>' : '') + '</button>').join('');
   const wm = S.wm && (S.tab === 'today' || S.tab === 'plan') ? '<div class="wmk" aria-hidden="true">' + Array(18).fill('<span>' + esc(S.wm) + '</span>').join('') + '</div>' : '';   // 0.51: علامة مائية باسم العميل على الجدول
   return '<div class="scr hasTabs">' + wm + '<div class="scroll"><div class="stack">' + (S.removed ? '<div class="banner warn">' + I('alert') + '<span>أوقف أخصائيك ربط حسابك؛ خطتك الحالية تبقى معروضة لكن لا تصله متابعتك.</span></div>' : '') + body + '</div></div><nav class="tabbar" aria-label="التنقل">' + tb + '</nav></div>';
 }
@@ -972,6 +972,55 @@ function themeCard() {
   return '<section class="card stack"><h3>' + I('sparkle') + ' مظهر التطبيق</h3><div class="hx-themes" role="radiogroup" aria-label="مظهر التطبيق">'
     + T.map((t) => '<button class="hx-th" role="radio" aria-checked="' + (cur === t[0]) + '" data-act="theme" data-v="' + t[0] + '"><span class="hx-pv" data-theme="' + t[0] + '" aria-hidden="true"><i class="h"></i><i class="k"><b></b></i><i class="k s"></i><i class="c"></i></span><span class="hx-tl">' + t[1] + (cur === t[0] ? ' ✓' : '') + '</span></button>').join('')
     + '</div><p class="dim">خطتك وبياناتك لا تتغير، يتغير الشكل فقط. يُحفظ على هذا الجوال. أيقونة التطبيق تتبع الثيم أيضاً: عند التثبيت تُؤخذ أيقونة ثيمك الحالي (أندرويد يحدّثها لاحقاً من تلقاء نفسه، وآيفون يحتاج حذف الأيقونة وإعادة إضافتها).</p></section>';
+}
+
+// ================= 0.63: «ملفي الصحي» — تبويب يجمع الوزن والقياسات وInBody والفحوصات وصور التحول (تُشفَّر وتصل الأخصائي إن فعّل العميل الإرسال)
+const HF_M = [['waist', 'الخصر'], ['chest', 'الصدر'], ['hips', 'الأرداف'], ['arm', 'الذراع'], ['thigh', 'الفخذ']];
+const HF_I = [['w', 'الوزن', 'كجم', 20, 400], ['fat', 'نسبة الدهون', '%', 2, 70], ['mus', 'الكتلة العضلية', 'كجم', 5, 150], ['water', 'الماء في الجسم', '%', 20, 80], ['visc', 'الدهون الحشوية', 'مستوى', 1, 40], ['bmr', 'معدل الحرق BMR', 'سعرة', 600, 6000]];
+const HF_L = [['سكر صائم', 'mg/dL'], ['سكر تراكمي HbA1c', '%'], ['كوليسترول كلي', 'mg/dL'], ['LDL', 'mg/dL'], ['HDL', 'mg/dL'], ['ثلاثيات', 'mg/dL'], ['فيتامين د', 'ng/mL'], ['فيتامين ب12', 'pg/mL'], ['فيريتين', 'ng/mL'], ['TSH', 'mIU/L'], ['كرياتينين', 'mg/dL'], ['ALT', 'U/L']];
+const hfD = (ts) => new Date(ts).toLocaleDateString('ar', { day: 'numeric', month: 'short' });
+const hfN = (x) => String(Math.round(+x * 10) / 10);
+function hfDelta(a, b) { if (a == null || b == null) return ''; const d = Math.round((a - b) * 10) / 10; return d ? '<span class="dim">' + (d > 0 ? '↑ ' : '↓ ') + Math.abs(d) + '</span>' : ''; }
+function tabFile() {
+  const p = S.p, W = (S.weights || []).slice().sort((a, b) => a[0] - b[0]), lw = W.length ? W[W.length - 1][1] : null, h = +numOnly(String(p.height || '')) || 0;
+  const bmi = lw && h > 100 ? Math.round(lw / Math.pow(h / 100, 2) * 10) / 10 : null, M = S.meas || [], mi = M[M.length - 1] || {}, I1 = (S.inb || [])[(S.inb || []).length - 1] || {}, Lb = S.labs || [];
+  const tile = (v, l) => '<div class="st"><b>' + (v == null || v === '' ? '—' : v) + '</b><small>' + l + '</small></div>';
+  const unsent = [].concat(M, S.inb || [], Lb).filter((x) => x.s === 0).length;
+  const sec = (ic, t, b, act, lab) => '<section class="card stack hfs"><div class="row" style="justify-content:space-between"><h3>' + ic + ' ' + t + '</h3><button class="btn sm sec" data-act="' + act + '">' + I('plus') + ' ' + lab + '</button></div>' + b + '</section>';
+  const wl = (S.checks || []).slice(-4).reverse().map((c, i, a) => '<div class="hpr"><span>' + hfD(c.ts) + '</span><b>' + c.w + ' كجم</b>' + hfDelta(c.w, a[i + 1] && a[i + 1].w) + '<span class="dim">' + (c.waist ? 'خصر ' + c.waist : '') + '</span></div>').join('');
+  const mrows = HF_M.map((m) => { const arr = M.filter((x) => x[m[0]] != null), a = arr[arr.length - 1], b = arr[arr.length - 2]; return a ? '<div class="hpr"><span>' + m[1] + '</span><b>' + hfN(a[m[0]]) + ' سم</b>' + hfDelta(a[m[0]], b && b[m[0]]) + '<span class="dim">' + hfD(a.ts) + '</span></div>' : ''; }).join('');
+  const inb = (S.inb || []).slice(-1)[0], prev = (S.inb || []).slice(-2, -1)[0];
+  const irows = inb ? '<div class="stats3">' + HF_I.filter((f) => inb[f[0]] != null).slice(0, 6).map((f) => '<div class="st"><b>' + hfN(inb[f[0]]) + '</b><small>' + f[1] + ' (' + f[2] + ')</small>' + hfDelta(inb[f[0]], prev && prev[f[0]]) + '</div>').join('') + '</div><p class="dim">آخر قياس: ' + hfD(inb.ts) + '</p>' : '<p class="dim">سجّل نتيجة جهاز InBody لتتابع الدهون والعضل والماء.</p>';
+  const names = []; Lb.forEach((l) => { if (!names.includes(l.n)) names.push(l.n); });
+  const lrows = names.length ? names.map((n) => { const arr = Lb.filter((l) => l.n === n).sort((a, b) => a.ts - b.ts), a = arr[arr.length - 1], b = arr[arr.length - 2]; return '<div class="hpr"><span>' + esc(n) + '</span><b>' + hfN(a.v) + ' ' + esc(a.u || '') + '</b>' + hfDelta(a.v, b && b.v) + '<span class="dim">' + hfD(a.ts) + '</span></div>'; }).join('') : '<p class="dim">سجّل نتائج فحوصاتك (السكر، الدهون، الفيتامينات…) لتجمعها في مكان واحد.</p>';
+  const bd = S.bodies || [], pics = bd.length ? '<div class="row hfph"><figure><img alt="" src="' + bd[0].th + '"><figcaption>البداية • ' + hfD(bd[0].ts) + '</figcaption></figure>' + (bd.length > 1 ? '<figure><img alt="" src="' + bd[bd.length - 1].th + '"><figcaption>الآن • ' + hfD(bd[bd.length - 1].ts) + '</figcaption></figure>' : '') + '</div>' : '<p class="dim">صورة «قبل» الآن تقارنها بعد أسابيع بالفرق الذي لا يظهر في الميزان.</p>';
+  return '<div class="row" style="justify-content:space-between"><h2>ملفي الصحي</h2></div>'
+    + '<section class="card stack"><div class="stats3">' + tile(lw != null ? hfN(lw) : null, 'الوزن (كجم)') + tile(bmi, 'مؤشر الكتلة') + tile(mi.waist != null ? hfN(mi.waist) : ((S.checks || []).slice(-1)[0] || {}).waist, 'الخصر (سم)') + '</div><div class="stats3">' + tile(I1.fat != null ? hfN(I1.fat) + '%' : null, 'دهون InBody') + tile(I1.mus != null ? hfN(I1.mus) : null, 'عضل (كجم)') + tile(Lb.length || null, 'فحوصات') + '</div>'
+    + '<label class="whrow"><span>أرسل قياساتي ونتائجي الجديدة لأخصائيي تلقائياً</span><input type="checkbox" data-act="hfTog"' + (S.hfSend === 0 ? '' : ' checked') + '></label>'
+    + (unsent ? '<button class="btn sm sec" data-act="hfSendAll">أرسل ' + unsent + ' محفوظة على جوالي فقط</button>' : '') + '<p class="dim">بيانات صحية حساسة: تُشفَّر على جوالك ولا يقرؤها إلا أخصائيك. لا تفسير طبي هنا، وأخصائيك هو من يقرأ نتائجك.</p></section>'
+    + sec('⚖', 'الوزن', (wl || '<p class="dim">قياسك الأسبوعي يظهر هنا.</p>') + '<p class="dim">المنحنى الكامل في «تقدّمي».</p>', 'wkGo', 'قياس الأسبوع')
+    + sec('📏', 'قياسات الجسم', mrows || '<p class="dim">الخصر والصدر والأرداف والذراع والفخذ، كل أسبوعين مثلاً.</p>', 'hfNew" data-v="meas', 'قياس جديد')
+    + sec('🧬', 'InBody', irows, 'hfNew" data-v="inb', 'نتيجة جديدة')
+    + sec('🔬', 'الفحوصات', lrows, 'hfNew" data-v="lab', 'فحص جديد')
+    + sec('📸', 'صور التحول', pics, 'bdGo', 'صورة تقدم');
+}
+function scrHF() {
+  const x = V.hf, k = x.k, d = x.d, fld = (id, lab, ph, v) => '<div class="field"><label for="' + id + '">' + lab + '</label><input class="inp" id="' + id + '" inputmode="decimal" data-numf="1" placeholder="' + ph + '" value="' + esc(v == null ? '' : v) + '"></div>';
+  const T = { meas: ['📏 قياسات الجسم', 'قِس بشريط القياس، واقفاً بعد الزفير، وبنفس المكان كل مرة. اترك ما لا تريد تسجيله فارغاً.'], inb: ['🧬 نتيجة InBody', 'انقل الأرقام من ورقة الجهاز. اترك فارغاً ما لا يظهر لك.'], lab: ['🔬 فحص جديد', 'سجّل النتيجة كما هي في تقرير المختبر. لا نفسّرها هنا.'] }[k];
+  let body = '';
+  if (k === 'meas') body = HF_M.map((m) => fld('hf_' + m[0], m[1] + ' (سم)', 'مثال: 92', d[m[0]])).join('');
+  else if (k === 'inb') body = HF_I.map((f) => fld('hf_' + f[0], f[1] + ' (' + f[2] + ')', '', d[f[0]])).join('');
+  else body = '<div class="field"><label for="hf_n">الفحص</label><select class="inp" id="hf_n">' + HF_L.map((l) => '<option' + (d.n === l[0] ? ' selected' : '') + '>' + l[0] + '</option>').join('') + '<option' + (d.n === 'غير ذلك' ? ' selected' : '') + '>غير ذلك</option></select></div>'
+    + (d.n === 'غير ذلك' ? '<div class="field"><label for="hf_cn">اسم الفحص</label><input class="inp" id="hf_cn" maxlength="40" value="' + esc(d.cn || '') + '"></div>' : '') + fld('hf_v', 'النتيجة', 'مثال: 95', d.v) + '<div class="field"><label for="hf_u">الوحدة</label><input class="inp" id="hf_u" maxlength="14" dir="ltr" value="' + esc(d.u != null ? d.u : ((HF_L.find((l) => l[0] === (d.n || HF_L[0][0])) || [])[1] || '')) + '"></div><div class="field"><label for="hf_d">تاريخ الفحص</label><input class="inp" id="hf_d" type="date" value="' + esc(d.d || dkey(new Date())) + '"></div>';
+  return '<div class="scr"><div class="scroll"><div class="stack"><div class="row" style="justify-content:space-between"><h2>' + T[0] + '</h2><button class="btn sm sec" data-act="hfX">إغلاق</button></div><div class="banner info">' + I('lock') + '<span>' + T[1] + '</span></div>' + body + '</div></div><div class="foot"><button class="btn" data-act="hfSave">حفظ' + (S.hfSend === 0 ? '' : ' وإرسال لأخصائيك') + '</button></div></div>';
+}
+function hfSend(kind, x) { send(Object.assign({ t: kind }, x)); x.s = 1; }
+function hfCollect() {
+  const x = V.hf, k = x.k, g = (id) => { const e = $('#hf_' + id); return e ? e.value : ''; }, num = (id, lo, hi) => { const v = parseFloat(numOnly(g(id))); return v >= lo && v <= hi ? Math.round(v * 10) / 10 : null; };
+  if (k === 'meas') { const o = { ts: now() }; HF_M.forEach((m) => { const v = num(m[0], 15, 300); if (v != null) o[m[0]] = v; }); return Object.keys(o).length > 1 ? o : null; }
+  if (k === 'inb') { const o = { ts: now() }; HF_I.forEach((f) => { const v = num(f[0], f[3], f[4]); if (v != null) o[f[0]] = v; }); return Object.keys(o).length > 1 ? o : null; }
+  const n = g('n') === 'غير ذلك' ? String(g('cn')).trim().slice(0, 40) : g('n'), v = parseFloat(numOnly(g('v'))), dt = g('d') || dkey(new Date()); if (!n || !(v > -1e6 && v < 1e6) || isNaN(v)) return null;
+  return { id: pid(), ts: new Date(dt + 'T12:00').getTime() || now(), n, v: Math.round(v * 100) / 100, u: String(g('u')).trim().slice(0, 14) };
 }
 function tabProgress() {
   const W = S.weights.slice().sort((a, b) => a[0] - b[0]).slice(-10);
@@ -1546,7 +1595,7 @@ function render() {
   const sc = $('.scroll'), key = (S ? S.screen + S.step + S.tab + (S.chat ? 'c' : '') : '') + V.screen, top = sc ? sc.scrollTop : 0;
   let scr;
   if (V.screen === 'boot') scr = scrBoot(); else if (V.screen === 'bad') scr = scrBad(); else if (V.screen === 'start') scr = scrStart(); else if (V.screen === 'moved') scr = scrMoved(); else if (V.screen === 'lock') scr = scrLock(); else if (V.screen === 'pin') scr = scrPin(); else if (V.screen === 'onb') scr = scrOnb();
-  else scr = V.wk ? scrWk() : V.bd ? scrBody() : V.pan != null ? scrPantry() : V.pf != null ? scrProf() : S.rqOpen && window.RL && RL.idx ? scrQuiz() : S.chat ? scrChat() : S.plan && S.screen === 'app' ? scrApp() : { invite: scrInvite, setup: scrSetup, wizard: scrWizard, review: scrReview, sent: scrSent, app: scrSent }[S.screen]();
+  else scr = V.hf ? scrHF() : V.wk ? scrWk() : V.bd ? scrBody() : V.pan != null ? scrPantry() : V.pf != null ? scrProf() : S.rqOpen && window.RL && RL.idx ? scrQuiz() : S.chat ? scrChat() : S.plan && S.screen === 'app' ? scrApp() : { invite: scrInvite, setup: scrSetup, wizard: scrWizard, review: scrReview, sent: scrSent, app: scrSent }[S.screen]();
   const keep = {}; document.querySelectorAll('video[data-keep]').forEach((n) => { keep[n.dataset.keep] = n; });
   const cmI = $('#cmIn'), cmV = cmI ? [cmI.value, document.activeElement === cmI] : null;          // مسودة التعليق تبقى عند إعادة الرسم (وصول التعليقات مثلاً)
   $('#root').innerHTML = '<div class="stage"><div class="device">' + (V.online ? '' : '<div class="offline">بلا اتصال — تُرسل بياناتك عند عودة الإنترنت</div>') + scr + (S ? sheetHtml() : '') + (toastMsg ? '<div class="toast" role="status">' + I('check') + '<span>' + esc(toastMsg) + '</span></div>' : '') + '</div></div>';
@@ -1748,6 +1797,12 @@ document.addEventListener('click', (e) => {
     }
     case 'medAdd': S.rem = Object.assign({ water: false, meals: false }, S.rem); S.rem.meds = (S.rem.meds || []).concat([{ n: '', t: '20:00' }]).slice(0, MEDMAX); save(); remSync(true); break;
     case 'medDel': if (S.rem && S.rem.meds) { S.rem.meds.splice(+v, 1); if (!S.rem.meds.length) S.rem.med = false; save(); remSync(true); } break;
+    case 'hfNew': V.hf = { k: v, d: {} }; break;
+    case 'hfX': V.hf = null; break;
+    case 'hfTog': S.hfSend = el.checked ? 1 : 0; break;
+    case 'hfSendAll': { [['hmeas', S.meas], ['hinb', S.inb], ['hlab', S.labs]].forEach((a) => (a[1] || []).forEach((q) => { if (q.s === 0) hfSend(a[0], q); })); toast('أُرسلت إلى أخصائيك'); break; }
+    case 'hfSave': { const o = hfCollect(); if (!o) { toast(V.hf.k === 'lab' ? 'اكتب اسم الفحص ونتيجته.' : 'اكتب قياساً واحداً على الأقل بقيمة صحيحة.'); return; }
+      const kind = { meas: 'hmeas', inb: 'hinb', lab: 'hlab' }[V.hf.k], key = { meas: 'meas', inb: 'inb', lab: 'labs' }[V.hf.k]; o.s = 0; S[key] = (S[key] || []).concat([o]).slice(-120); if (S.hfSend !== 0) hfSend(kind, o); V.hf = null; toast(S.hfSend === 0 ? 'حُفظ على جوالك فقط.' : 'حُفظ وأُرسل إلى أخصائيك.'); break; }
     case 'setupRel': { const U = V.setup; U.rel = v; break; }
     case 'setupTog': { V.setup.on[v] = el.checked ? 1 : 0; break; }
     case 'setupGo': setupApply(false); break;
@@ -1829,6 +1884,7 @@ document.addEventListener('change', (e) => {
   }
   if (t.dataset.wk) { const L = dl(TODAY), n = Math.max(0, Math.min(80000, Math.round(+numOnly(t.value) || 0))); L.h = L.h || {}; if (n) L.h[t.dataset.wk] = n; else delete L.h[t.dataset.wk]; queueLog(dkey(new Date())); save(); render(); }
   if (t.id === 'offT') { const L = dl(TODAY); L.offT = t.value.trim().slice(0, 500); queueLog(dkey(new Date())); save(); }
+  if (t.id === 'hf_n' && V.hf) { V.hf.d.n = t.value; V.hf.d.u = undefined; V.hf.d.v = ($('#hf_v') || {}).value; render(); return; }
   if (t.id === 'setupCity' && V.setup) { V.setup.city = t.value; if (!t.value) V.setup.on.pray = 0; render(); return; }
   if (t.dataset.prcity != null && t.id === 'prCity') { S.rem = Object.assign({ water: false, meals: false }, S.rem); S.rem.prCity = t.value; save(); remSync(true); render(); toast(t.value ? 'مواقيت ' + t.value + ' ✓' : 'اختر مدينتك'); }
   if (t.dataset.remcap != null && t.id === 'remCap') { S.rem = Object.assign({ water: false, meals: false }, S.rem); S.rem.cap = +t.value || 0; save(); remSync(true); toast('حُفظ الحد الأقصى للتذكيرات'); }
@@ -1843,6 +1899,7 @@ document.addEventListener('input', (e) => {               // التقاط أول
   const p = Math.max(0, (t.selectionStart == null ? n.length : t.selectionStart) - (v.length - n.length)); t.value = n; try { t.setSelectionRange(p, p); } catch (x) { }
 }, true);
 document.addEventListener('input', (e) => {
+  if (V.hf && e.target.id && e.target.id.startsWith('hf_')) V.hf.d[e.target.id.slice(3)] = e.target.value;       // ما يكتبه العميل يبقى إن أُعيد الرسم
   const t = e.target;
   if (t.dataset.bind || t.dataset.cq || t.dataset.schm || t.dataset.scht) {
     if (t.dataset.bind) S.p[t.dataset.bind] = t.value; else if (t.dataset.cq) { S.p.cq = S.p.cq || {}; S.p.cq[t.dataset.cq] = t.value; } else if (t.dataset.schm) sched()[+t.dataset.schm].min = +t.value || 0; else sched()[+t.dataset.scht].time = t.value;

@@ -600,3 +600,8 @@ html[data-theme="firoz"] .alm{background:radial-gradient(70% 50% at 50% 30%,rgba
 .tsb .adh{position:relative}.tsb .adh #adclose{position:static}.tsb .adh small{font-size:13px;white-space:nowrap}
 .tsb-cnt b.z{font-size:34px;font-weight:600;color:rgba(255,255,255,.8)}
 .tsb-dots i{width:10px}.tsb-dots i.on{width:20px}
+/* 0.63: ملفي الصحي */
+.tabbar button{min-width:0}.tabbar button span{font-size:11px}
+.hfph{gap:12px}.hfph figure{margin:0;flex:1;text-align:center}.hfph img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:14px;border:1px solid var(--line)}.hfph figcaption{font-size:12px;color:var(--mut);margin-top:4px}
+.hfs .hpr{display:grid;grid-template-columns:1.2fr 1.1fr .7fr 1fr;gap:6px;align-items:center}
+
