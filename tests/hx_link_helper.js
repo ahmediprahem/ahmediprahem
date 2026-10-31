@@ -14,7 +14,7 @@ module.exports = async function linked(tag, errs, opts) {
   const site = http.createServer((q, r) => { const f = { '/': '../admin.html', '/sw.js': '../src/hissa_sw.js' }[q.url.split('?')[0]]; if (!f) { r.writeHead(404); return r.end(); } r.writeHead(200, { 'content-type': f.endsWith('.js') ? 'text/javascript' : 'text/html; charset=utf-8' }); r.end(fs.readFileSync(path.resolve(__dirname, f))); });
   await new Promise((r) => site.listen(0, '127.0.0.1', r)); const SITE = 'http://127.0.0.1:' + site.address().port;
   const b = await chromium.launch(), dctx = await b.newContext({ viewport: { width: 1440, height: 900 }, acceptDownloads: true }), d = await dctx.newPage(); d.on('pageerror', (e) => errs.push('حصة: ' + e)); d.on('dialog', (x) => x.accept(x.type() === 'prompt' ? (globalThis.PR || '') : undefined));
-  const mctx = await b.newContext({ ...devices['iPhone 13'] }); await mctx.addInitScript(() => { try { localStorage.setItem('hissati_onb', '1'); } catch (e) { } }); const m = await mctx.newPage(); m.on('pageerror', (e) => errs.push('حصتي: ' + e)); m.on('dialog', (x) => x.accept());
+  const mctx = await b.newContext({ ...devices['iPhone 13'] }); await mctx.addInitScript((OPT_SETUP) => { try { localStorage.setItem('hissati_onb', '1'); if (OPT_SETUP) localStorage.setItem('hx_setup_e2e', '1'); } catch (e) { } }, !!opts.setup); const m = await mctx.newPage(); m.on('pageerror', (e) => errs.push('حصتي: ' + e)); m.on('dialog', (x) => x.accept());
   const hxCheck = async () => { await d.click('main [data-a="hxCheck"]'); await d.waitForFunction(() => ![...document.querySelectorAll('.toast')].some((t) => t.textContent.includes('جارٍ التحقق')), null, { timeout: 8000 }); await d.waitForTimeout(300); };
   const cPoll = async () => { await m.evaluate(() => window.HissatiApp.flush()); await m.evaluate(() => window.HissatiApp.poll()); await m.waitForTimeout(250); };
   const C = () => d.evaluate(() => JSON.parse(JSON.stringify(DPApp.S.clients.find((x) => x.code === DPApp.S.cur) || DPApp.S.clients[0])));
@@ -22,7 +22,7 @@ module.exports = async function linked(tag, errs, opts) {
   await d.fill('#hx_relay', RELAY); await d.fill('#hx_key', 'clinic-key'); await d.fill('#hx_name', 'د. أحمد حامد'); await d.click('[data-a="hxReg"]'); await d.waitForSelector('main .ok');
   await d.click('.rail [data-a="hxv"]'); await d.click('main [data-a="hxInvForm"]'); await d.fill('#hxi_l', 'منى علي'); await d.fill('#hxi_p', '01001234567'); await d.click('[data-a="hxInvMake"]');
   await d.waitForSelector('.hxinv.made .hxlink'); const link = (await d.textContent('.hxinv.made .hxlink')).trim();
-  await m.goto(link); await m.waitForSelector('.invite .dr'); await m.click('[data-act="go"][data-v="pin"]'); for (const k of '12341234') await m.click(`.pad [data-v="${k}"]`); await m.waitForSelector('.prog');
+  await m.goto(link); await m.waitForSelector('.invite .dr'); await m.click('[data-act="go"][data-v="pin"]'); for (const k of '12341234') await m.click(`.pad [data-v="${k}"]`); if (opts.setup) { await m.waitForSelector('.setup'); await opts.setup(m); } await m.waitForSelector('.prog');
   await m.fill('#f_phone', '01001234567'); await m.fill('#f_age', '34'); await m.fill('#f_weight', '88'); await m.fill('#f_height', '162');
   if (opts.wizard) await opts.wizard(m);
   for (let i = 0; i < 14 && !(await m.isVisible('#consent')); i++) { if (await m.isDisabled('.foot .btn')) { const t = await m.textContent('.scr h2'); throw new Error('خطوة لا تكتمل: ' + t); } await m.click('.foot .btn'); await m.waitForTimeout(150); }

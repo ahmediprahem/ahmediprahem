@@ -430,7 +430,7 @@ function suppCard() { const L = S.supps || []; return L.length ? '<section class
 
 // ---- 0.57: أوقات الصلاة تُحسب على الجهاز بلا إنترنت (الهيئة المصرية لمدن مصر، وأم القرى لمدن السعودية)، والصلاة على النبي ﷺ، وخطواتي
 const CITIES = [['القاهرة', 30.0444, 31.2357, 'eg'], ['الجيزة', 30.0131, 31.2089, 'eg'], ['الإسكندرية', 31.2001, 29.9187, 'eg'], ['المنصورة', 31.0409, 31.3785, 'eg'], ['طنطا', 30.7865, 31.0004, 'eg'], ['الزقازيق', 30.5877, 31.502, 'eg'], ['أسيوط', 27.1809, 31.1837, 'eg'], ['الأقصر', 25.6872, 32.6396, 'eg'], ['أسوان', 24.0889, 32.8998, 'eg'],
-  ['الرياض', 24.7136, 46.6753, 'sa'], ['جدة', 21.4858, 39.1925, 'sa'], ['مكة المكرمة', 21.3891, 39.8579, 'sa'], ['المدينة المنورة', 24.5247, 39.5692, 'sa'], ['الدمام', 26.4207, 50.0888, 'sa'], ['الخبر', 26.2172, 50.1971, 'sa'], ['الطائف', 21.2854, 40.4183, 'sa'], ['أبها', 18.2164, 42.5053, 'sa'], ['تبوك', 28.3835, 36.5662, 'sa'], ['بريدة', 26.326, 43.975, 'sa']];
+  ['الرياض', 24.7136, 46.6753, 'sa'], ['جدة', 21.4858, 39.1925, 'sa'], ['مكة المكرمة', 21.3891, 39.8579, 'sa'], ['المدينة المنورة', 24.5247, 39.5692, 'sa'], ['الدمام', 26.4207, 50.0888, 'sa'], ['الخبر', 26.2172, 50.1971, 'sa'], ['الطائف', 21.2854, 40.4183, 'sa'], ['أبها', 18.2164, 42.5053, 'sa'], ['تبوك', 28.3835, 36.5662, 'sa'], ['بريدة', 26.326, 43.975, 'sa'], ['الأحساء', 25.3648, 49.5878, 'sa'], ['القطيف', 26.5565, 50.0089, 'sa'], ['الظهران', 26.2361, 50.0393, 'sa'], ['الجبيل', 27.0046, 49.6225, 'sa'], ['حفر الباطن', 28.4328, 45.9708, 'sa'], ['حائل', 27.5114, 41.7208, 'sa'], ['عرعر', 30.9753, 41.0381, 'sa'], ['سكاكا', 29.9697, 40.2064, 'sa'], ['جازان', 16.8892, 42.5511, 'sa'], ['نجران', 17.4917, 44.1322, 'sa'], ['الباحة', 20.0129, 41.4677, 'sa'], ['ينبع', 24.0895, 38.0618, 'sa'], ['الخرج', 24.1554, 47.3346, 'sa'], ['عنيزة', 26.084, 43.994, 'sa'], ['الرس', 25.8695, 43.4973, 'sa'], ['خميس مشيط', 18.3093, 42.7292, 'sa'], ['بيشة', 19.9906, 42.6049, 'sa'], ['العلا', 26.6085, 37.9232, 'sa'], ['المجمعة', 25.9039, 45.3467, 'sa'], ['وادي الدواسر', 20.4731, 44.7894, 'sa']];
 const PRN = { fajr: 'الفجر', dhuhr: 'الظهر', asr: 'العصر', maghrib: 'المغرب', isha: 'العشاء' };
 function prayTimes(date, lat, lng, tz, method) {        // خوارزمية موقع الشمس القياسية (PrayTimes)؛ النتيجة بالدقائق من منتصف الليل بتوقيت tz
   const rad = (d) => d * Math.PI / 180, deg = (r) => r * 180 / Math.PI, fix = (a, b) => { a = a - b * Math.floor(a / b); return a < 0 ? a + b : a; };
@@ -445,7 +445,12 @@ function prayTimes(date, lat, lng, tz, method) {        // خوارزمية مو
   const m = (h) => Math.round(h * 60), mgm = m(mg) + 1;
   return { fajr: m(noon - T(-fa)), sunrise: m(noon - T(-0.833)), dhuhr: m(noon) + 1, asr: m(noon + T(asrAlt)), maghrib: mgm, isha: method === 'sa' ? mgm + 90 : m(noon + T(-ia)) };
 }
-function prNow() { const R = S.rem || {}, c = CITIES.find((x) => x[0] === R.prCity); if (!c) return null; const d = new Date(), tz = -d.getTimezoneOffset() / 60; return prayTimes(d, c[1], c[2], tz, c[3]); }
+const isMus = () => !(S && S.p && (S.p.rel === 'ك' || S.p.rel === 'ن'));                 // 0.61: المسلم (أو من لم يحدّد بعد من العملاء القدامى) فقط يرى الأذان والأذكار والقرآن والصلاة على النبي
+function cityOpts(sel) {                                  // مدن مجمّعة بالبلد؛ السعودية أولاً
+  const g = (k, t) => '<optgroup label="' + t + '">' + CITIES.filter((c) => c[3] === k).map((c) => '<option' + (sel === c[0] ? ' selected' : '') + '>' + c[0] + '</option>').join('') + '</optgroup>';
+  return '<option value="">— اختر —</option>' + g('sa', 'المملكة العربية السعودية') + g('eg', 'مصر');
+}
+function prNow() { if (!isMus()) return null; const R = S.rem || {}, c = CITIES.find((x) => x[0] === R.prCity); if (!c) return null; const d = new Date(), tz = -d.getTimezoneOffset() / 60; return prayTimes(d, c[1], c[2], tz, c[3]); }
 const m2hm = (m) => String(Math.floor(m / 60) % 24).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
 function prCard() { const P = prNow(); if (!P) return ''; const n = new Date(), cm = n.getHours() * 60 + n.getMinutes(), nx = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'].find((k) => P[k] > cm);
   return '<section class="card prc"><div class="row" style="justify-content:space-between"><h3>🕌 مواقيت الصلاة • ' + esc(S.rem.prCity) + '</h3>' + (nx ? '<span class="dim">التالية: ' + PRN[nx] + ' ' + hm12(m2hm(P[nx])) + '</span>' : '') + '</div><div class="prrow">' + ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'].map((k) => '<div class="' + (k === nx ? 'on' : '') + '"><small>' + PRN[k] + '</small><b>' + hm12(m2hm(P[k])) + '</b></div>').join('') + '</div></section>'; }
@@ -521,6 +526,27 @@ function scrStart() {                               // بلا حساب ولا ر
     + (V.err ? '<p class="err">' + esc(V.err) + '</p>' : '') + '</div></div></div>';
 }
 function scrMoved() { return '<div class="scr"><div class="boot"><div class="stack" style="max-width:320px"><div class="empty"><div class="ei" style="background:rgba(111,227,169,.15);color:var(--mint)">' + I('check') + '</div><h1>انتقل حسابك ✓</h1><p class="mut">صار «حصتي» يعمل من التطبيق المثبّت أو الجوال الجديد، ومُسح من هنا. افتح «حصتي» من أيقونته.</p></div></div></div></div>'; }
+// ---- 0.61: أول تسجيل: الديانة ثم التذكيرات التي يريدها العميل (لئلا يبحث عنها في الإعدادات)
+function scrSetup() {
+  const U = V.setup = V.setup || { rel: '', city: '', on: { water: 1, meals: 1, pray: 1, adhAm: 1, adhPm: 1, sal: 1, med: 0 } }, mus = U.rel === 'م';
+  const row = (k, t, d) => '<label class="remrow"><span><b>' + t + '</b><span class="dim">' + d + '</span></span><input type="checkbox" class="sw" data-act="setupTog" data-v="' + k + '"' + (U.on[k] ? ' checked' : '') + '></label>';
+  const rel = (v, t) => '<button class="chip' + (U.rel === v ? ' on' : '') + '" data-act="setupRel" data-v="' + v + '">' + t + '</button>';
+  return '<div class="scr setup"><div class="scroll"><div class="stack"><div style="padding-top:18px"><h1>نجهّز تطبيقك</h1><p class="mut">اختر ما يناسبك فتصلك التذكيرات التي تريدها دون أن تبحث عنها. تغيّر كل شيء لاحقاً من «تقدّمي».</p></div>'
+    + '<section class="card stack"><h3>' + I('user') + ' ديانتك</h3><div class="chips">' + rel('م', 'مسلم') + rel('ك', 'مسيحي') + rel('ن', 'أفضّل عدم التحديد') + '</div>'
+    + (mus ? '<div class="banner info">' + I('check') + '<span>سنفعّل لك تلقائياً: مواقيت الصلاة وتذكيرها، وأذكار الصباح والمساء، ورسائل القرآن.</span></div>' : U.rel ? '<p class="dim">لن تظهر لك مواقيت الصلاة ولا الأذكار ولا القرآن.</p>' : '') + '</section>'
+    + (mus ? '<section class="card stack"><h3>🕌 مدينتك للأذان</h3><select class="inp" id="setupCity" aria-label="مدينتك">' + cityOpts(U.city) + '</select><p class="dim">المواقيت تُحسب على جوالك بلا إنترنت (أم القرى للسعودية، والهيئة المصرية لمصر).</p></section>' : '')
+    + '<section class="card stack"><h3>' + I('bell') + ' التذكيرات</h3>' + row('water', 'شرب الماء', 'كل ساعتين نهاراً') + row('meals', 'مواعيد الوجبات', 'في أوقات وجبات خطتك') + row('med', 'موعد الدواء', 'تضيف أوقات أدويتك لاحقاً من «تقدّمي»')
+    + (mus ? row('pray', '🕌 مواقيت الصلاة', U.city ? 'تذكير عند كل صلاة في ' + esc(U.city) : 'اختر مدينتك أولاً') + row('adhAm', 'أذكار الصباح', 'كل يوم 6:00 صباحاً') + row('adhPm', 'أذكار المساء', 'كل يوم 5:30 مساءً') + row('sal', 'ﷺ الصلاة على النبي', 'مساءً، والجمعة ثلاث مرات') : '') + '<p class="dim">تحتاج تفعيل الإشعارات ليصلك التذكير والتطبيق مغلق؛ نطلب الإذن عند التشغيل.</p></section>'
+    + '<button class="btn full" data-act="setupGo"' + (U.rel ? '' : ' disabled') + '>متابعة</button><button class="btn ghost full" data-act="setupSkip">تخطّي</button></div></div></div>';
+}
+function setupApply(skip) {
+  const U = V.setup || {}; if (!skip && U.rel) {
+    const mus = U.rel === 'م'; S.p.rel = U.rel; S.rem = Object.assign({ water: false, meals: false }, S.rem, { water: !!U.on.water, meals: !!U.on.meals, med: !!U.on.med });
+    Object.assign(S.rem, mus ? { prCity: U.city || '', pray: !!U.on.pray && !!U.city, adhAm: !!U.on.adhAm, adhPm: !!U.on.adhPm, sal: !!U.on.sal } : { pray: false, adhAm: false, adhPm: false, sal: false });
+    if (mus && U.city) { const c = CITIES.find((x) => x[0] === U.city); if (c && S.rem.prCity === U.city) S.rem.prCity = U.city; }
+  }
+  S.screen = 'wizard'; S.step = 1; V.setup = null; save(); remSync(true);
+}
 function scrInvite() {
   const c = S.cat || {};
   return '<div class="scr"><div class="scroll"><div class="invite">'
@@ -789,7 +815,7 @@ function whCond(c) {
 }
 function whList(ci) { const w = whx(), id = w.cats[ci].id, m = w.msgs[id]; return Array.isArray(m) ? m : (m[whDia()] || m.msa || []); }
 const whOkM = (m) => m.a === 1 && (!m.c || whCond(m.c));
-function whCats() { const w = whx(), q = whs().noQ; return w ? w.cats.map((c, i) => i).filter((i) => !(q && w.cats[i].id === 'quran') && whList(i).filter((m) => m.a === 1).length >= w.min) : []; }
+function whCats() { const w = whx(), q = whs().noQ || !isMus(); return w ? w.cats.map((c, i) => i).filter((i) => !(q && w.cats[i].id === 'quran') && whList(i).filter((m) => m.a === 1).length >= w.min) : []; }
 function whText(ci, mi) {
   const m = whList(ci)[mi]; if (!m) return null; const id = whx().cats[ci].id;
   if (id === 'hero') return { t: (S.p.sex === 'ذكر' ? m.m : m.f).replace('{n}', dayStreak()) };
@@ -889,6 +915,7 @@ function whChip() {
 function whCard() {
   const w = whs(), x = whx(); if (!x) return ''; const fav = w.fav.filter((id) => { const [c, m] = id.split('_'); return whText(+c, +m); });
   return '<section class="card stack"><h3>' + I('sparkle') + ' عجلة رسالة اليوم</h3><label class="whrow"><span>أفتح العجلة عند أول دخول كل يوم</span><input type="checkbox" data-act="whTog" ' + (w.on ? 'checked' : '') + '></label>'
+    + '<div><div class="dim" style="margin-bottom:6px">الديانة (تحدّد ظهور الأذان والأذكار والقرآن)</div><div class="chips">' + [['م', 'مسلم'], ['ك', 'مسيحي'], ['ن', 'لا أحدد']].map((r) => '<button class="chip' + ((S.p.rel || 'م') === r[0] ? ' on' : '') + '" data-act="relSet" data-v="' + r[0] + '">' + r[1] + '</button>').join('') + '</div></div>'
     + '<label class="whrow"><span>أخفِ رسائل القرآن</span><input type="checkbox" data-act="whQ" ' + (w.noQ ? 'checked' : '') + '></label>'
     + '<div><div class="dim" style="margin-bottom:6px">بلدك (يحدّد لهجة «عاش يا بطل»)</div><div class="chips">' + x.countries.map((c) => '<button class="chip' + (w.nat === c ? ' on' : '') + '" data-act="whNat" data-v="' + esc(c) + '">' + esc(c) + '</button>').join('') + '</div></div>'
     + (fav.length ? '<div><div class="dim" style="margin-bottom:6px">رسائلي المفضلة</div>' + fav.map((id) => { const [c, m] = id.split('_').map(Number), d = whText(c, m); return '<button class="whfav" data-act="whFavOpen" data-v="' + id + '"><b style="color:' + x.cats[c].acc + '">★</b> ' + esc(d.t.length > 60 ? d.t.slice(0, 58) + '…' : d.t) + '</button>'; }).join('') + '</div>' : '') + '</section>';
@@ -1051,12 +1078,12 @@ function remLimit(it) {                              // 0.54: ساعات اله�
 function remItems() {                              // أوقات اليوم المحلية (دقائق من منتصف الليل، مقرّبة لربع ساعة): ماء • وجبات • أذكار الصباح والمساء • مواعيد الدواء (اسم الدواء يبقى على الجوال ولا يصل المحطة)
   const R = S.rem || {}, it = []; if (R.water) WATER.forEach((m) => it.push({ m, t: 'water' }));
   if (R.meals && S.plan) dayPlan(TODAY).slots.forEach((s) => { const m = hm2m(s.time); if (m != null) it.push({ m, t: 'meal', label: s.name }); });
-  if (R.adhAm) { const m = hm2m(R.adhAmT || '06:00'); if (m != null) it.push({ m, t: 'adhAm' }); }
-  if (R.adhPm) { const m = hm2m(R.adhPmT || '17:30'); if (m != null) it.push({ m, t: 'adhPm' }); }
+  if (R.adhAm && isMus()) { const m = hm2m(R.adhAmT || '06:00'); if (m != null) it.push({ m, t: 'adhAm' }); }
+  if (R.adhPm && isMus()) { const m = hm2m(R.adhPmT || '17:30'); if (m != null) it.push({ m, t: 'adhPm' }); }
   if (R.med) (R.meds || []).slice(0, MEDMAX).forEach((x) => { const m = hm2m(x.t); if (m != null) it.push({ m, t: 'med', label: String(x.n || '').slice(0, 40) }); });
   const P = R.pray ? prNow() : null, q15 = (m) => Math.min(1425, Math.ceil(m / 15) * 15);   // الأذان ثم أقرب ربع ساعة بعده (لا قبله)
   if (P) ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'].forEach((k) => it.push({ m: q15(P[k]), t: 'pr', label: PRN[k] + ' ' + hm12(m2hm(P[k])) }));
-  if (R.sal) { const m = hm2m(R.salT || '21:00'); if (m != null) it.push({ m, t: 'sal' }); if (new Date().getDay() === 5) [10 * 60, 13 * 60 + 30, 17 * 60].forEach((x) => it.push({ m: x, t: 'sal', d: dkey(new Date()) })); }
+  if (R.sal && isMus()) { const m = hm2m(R.salT || '21:00'); if (m != null) it.push({ m, t: 'sal' }); if (new Date().getDay() === 5) [10 * 60, 13 * 60 + 30, 17 * 60].forEach((x) => it.push({ m: x, t: 'sal', d: dkey(new Date()) })); }
   const eve = 20 * 60, dk = (t) => dkey(new Date(t));                       // 0.54: تذكير قبل الموعد بيوم (والقياس الأسبوعي) بتاريخ محدد
   (S.appts || []).forEach((a) => { const t = new Date(a.d + 'T12:00').getTime() - 864e5; if (t > now() - 864e5) it.push({ m: eve, t: 'appt', d: dk(t), label: hm12(a.t) + (a.mode ? ' • ' + a.mode : '') }); });
   if (S.plan && S.planAt) it.push({ m: eve, t: 'wk', d: dk(wkBase() + WKD - 864e5) });
@@ -1073,12 +1100,11 @@ function remCard() {
   const meds = R.med ? '<div class="remsub meds">' + (R.meds || []).map((x, i) => '<div class="medrow"><input class="inp" type="text" maxlength="40" placeholder="اسم الدواء (اختياري)" aria-label="اسم الدواء ' + (i + 1) + '" data-med="n|' + i + '" value="' + esc(x.n || '') + '"><input class="inp tm" type="time" step="900" aria-label="وقت الدواء ' + (i + 1) + '" data-med="t|' + i + '" value="' + esc(x.t || '08:00') + '"><button class="btn sm sec" data-act="medDel" data-v="' + i + '" aria-label="حذف الموعد ' + (i + 1) + '">' + I('x') + '</button></div>').join('')
     + ((R.meds || []).length < MEDMAX ? '<button class="btn sm sec" data-act="medAdd">' + I('plus') + ' أضف موعد دواء</button>' : '<span class="dim">وصلت للحد الأقصى (' + MEDMAX + ' مواعيد)</span>') + '<span class="dim">اسم الدواء يبقى على جوالك فقط؛ المحطة تعرف الوقت وحده.</span></div>' : '';
   return '<section class="card stack"><h3>' + I('bell') + ' التذكيرات</h3>' + tg('water', 'شرب الماء', 'كل ساعتين من 10 صباحاً إلى 8 مساءً') + tg('meals', 'مواعيد الوجبات', 'في أوقات وجبات خطتك')
-    + tg('adhAm', 'أذكار الصباح', 'تذكير يومي بوقتك المفضّل') + (R.adhAm ? tm('adhAmT', '06:00', 'وقت أذكار الصباح') : '')
-    + tg('adhPm', 'أذكار المساء', 'تذكير يومي بوقتك المفضّل') + (R.adhPm ? tm('adhPmT', '17:30', 'وقت أذكار المساء') : '')
+    + (isMus() ? tg('adhAm', 'أذكار الصباح', 'تذكير يومي بوقتك المفضّل') + (R.adhAm ? tm('adhAmT', '06:00', 'وقت أذكار الصباح') : '') + tg('adhPm', 'أذكار المساء', 'تذكير يومي بوقتك المفضّل') + (R.adhPm ? tm('adhPmT', '17:30', 'وقت أذكار المساء') : '') : '')
     + tg('med', 'موعد الدواء', 'تذكير بأوقات أدويتك أو مكمّلاتك') + meds
     + '<label class="remrow"><span><b>صوت المنبّه</b><span class="dim">رنّة هادئة عندما يظهر التذكير على الشاشة</span></span><input type="checkbox" class="sw" data-remsound="1"' + (R.sound === false ? '' : ' checked') + '></label>'
-    + tg('pray', '🕌 مواقيت الصلاة', 'تذكير عند كل صلاة حسب مدينتك (الهيئة المصرية لمصر، وأم القرى للسعودية)') + (R.pray ? '<div class="remsub"><label class="dim" for="prCity">مدينتي</label><select class="inp" id="prCity" data-prcity>' + '<option value="">— اختر —</option>' + CITIES.map((c) => '<option' + (R.prCity === c[0] ? ' selected' : '') + '>' + c[0] + '</option>').join('') + '</select></div>' : '')
-    + tg('sal', 'ﷺ الصلاة على النبي', 'تذكير يومي بوقتك، ويوم الجمعة ثلاث مرات') + (R.sal ? tm('salT', '21:00', 'وقت التذكير اليومي') : '')
+    + (isMus() ? tg('pray', '🕌 مواقيت الصلاة', 'تذكير عند كل صلاة حسب مدينتك (الهيئة المصرية لمصر، وأم القرى للسعودية)') + (R.pray ? '<div class="remsub"><label class="dim" for="prCity">مدينتي</label><select class="inp" id="prCity" data-prcity>' + cityOpts(R.prCity) + '</select></div>' : '')
+    + tg('sal', 'ﷺ الصلاة على النبي', 'تذكير يومي بوقتك، ويوم الجمعة ثلاث مرات') + (R.sal ? tm('salT', '21:00', 'وقت التذكير اليومي') : '') : '')
     + '<label class="remrow"><span><b>ساعات الهدوء</b><span class="dim">لا تذكيرات (إلا الدواء والمواعيد) في هذه الساعات</span></span><input type="checkbox" class="sw" data-rem="quiet"' + (R.quiet ? ' checked' : '') + '></label>' + (R.quiet ? '<div class="remsub"><label class="dim" for="rt_qFrom">من</label><input id="rt_qFrom" class="inp tm" type="time" step="900" data-remt="qFrom" value="' + esc(R.qFrom || '23:00') + '"><label class="dim" for="rt_qTo">إلى</label><input id="rt_qTo" class="inp tm" type="time" step="900" data-remt="qTo" value="' + esc(R.qTo || '07:00') + '"></div>' : '')
     + '<div class="remsub"><label class="dim" for="remCap">الحد الأقصى للتذكيرات في اليوم</label><select class="inp" id="remCap" data-remcap>' + [[0, 'بلا حد'], [5, '5'], [8, '8'], [12, '12']].map((o) => '<option value="' + o[0] + '"' + ((+R.cap || 0) === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select></div>'
     + (pushState() === 'on' ? '<p class="dim">تصلك والتطبيق مغلق. تُقرَّب الأوقات لأقرب ربع ساعة.</p>' : '<p class="dim">تحتاج تفعيل الإشعارات؛ يُطلب الإذن عند التشغيل.</p>') + '</section>';
@@ -1111,7 +1137,8 @@ const HABITS = [
 ];
 const HB = (id) => HABITS.find((h) => h.id === id);
 function hWaterGoal() { const dp = S.plan ? dayPlan(TODAY) : {}, wt = +(dp.water || DATA.water || 2.5); return Math.max(4, Math.min(16, Math.round(wt / CUP))); }
-function hList() { if (!Array.isArray(S.habits)) S.habits = ['water']; return S.habits.filter((id) => HB(id)); }
+const RELH = ['adhkar', 'adhkarPm'];
+function hList() { if (!Array.isArray(S.habits)) S.habits = ['water']; return S.habits.filter((id) => HB(id) && (isMus() || !RELH.includes(id))); }
 function hVal(id, k) { const L = S.log[k || dkey(new Date())]; if (!L) return null; if (id === 'water') return L.water || 0; return L.h ? L.h[id] : null; }
 function hSet(id, v) { const L = dl(TODAY); if (id === 'water') L.water = v; else { L.h = L.h || {}; if (v == null) delete L.h[id]; else L.h[id] = v; } queueLog(dkey(new Date())); }
 function hOkDay(id, k) { const v = hVal(id, k); return v != null && HB(id).ok(v); }
@@ -1174,7 +1201,7 @@ function hCard(id) {
 function habitsHome() { const ls = hList(); return '<div class="row hbhead"><h2>عاداتي</h2><button class="btn sm sec" data-act="habits">' + I('plus') + ' العادات</button></div>' + (ls.length ? ls.map(hCard).join('') : '<div class="card dim">لا عادات في صفحتك. اختر من «العادات» ما تريد تنميته.</div>'); }
 function habitsSheet() {
   const ls = hList();
-  return '<p class="dim">اختر العادات التي تريد تنميتها؛ تظهر في «اليوم» بتصميمها، ويرى أخصائيك تقدّمك فيها. ابدأ بعادتين أو ثلاث.</p><div class="hlib">' + HABITS.map((h) => { const on = ls.indexOf(h.id) >= 0;
+  return '<p class="dim">اختر العادات التي تريد تنميتها؛ تظهر في «اليوم» بتصميمها، ويرى أخصائيك تقدّمك فيها. ابدأ بعادتين أو ثلاث.</p><div class="hlib">' + HABITS.filter((h) => isMus() || !RELH.includes(h.id)).map((h) => { const on = ls.indexOf(h.id) >= 0;
     return '<div class="hli' + (on ? ' on' : '') + '" style="--hc:' + h.c + '"><span class="hbi">' + h.ic + '</span><div><b>' + h.n + '</b><span class="dim">' + h.why + '</span></div><button class="btn sm' + (on ? ' sec' : '') + '" data-act="htoggle" data-v="' + h.id + '">' + (on ? 'إزالة' : I('plus') + ' أضف') + '</button></div>'; }).join('') + '</div>';
 }
 function habitsProgress() {
@@ -1231,24 +1258,42 @@ function heartSvg(p, big, pm) {
   return '<svg viewBox="0 0 100 94" class="heart' + (p >= 1 ? ' full' : '') + '" aria-hidden="true"><defs><clipPath id="' + id + '"><path d="' + d + '"/></clipPath><linearGradient id="' + id + 'g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + (pm ? '#b9b2ff' : '#8ff0b8') + '"/><stop offset="1" stop-color="' + (pm ? '#6a5fd6' : '#1fa463') + '"/></linearGradient></defs>'
     + '<path d="' + d + '" fill="rgba(255,255,255,.07)"/><g clip-path="url(#' + id + ')"><rect class="hf" x="0" y="' + y.toFixed(1) + '" width="100" height="100" fill="url(#' + id + 'g)"/>' + (p > 0 && p < 1 ? '<path class="hwave" d="M-10 ' + y.toFixed(1) + ' q15 -5 30 0 t30 0 t30 0 t30 0 v6 h-120z" fill="' + (pm ? '#b9b2ff' : '#8ff0b8') + '" opacity=".6"/>' : '') + '</g><path d="' + d + '" fill="none" stroke="' + (p >= 1 ? '#6fe3a9' : 'rgba(111,227,169,.6)') + '" stroke-width="3"/></svg>';
 }
-function adhOpen(hid) {
+function adhOpen(hid) {                       // 0.62: شاشة الأذكار على شكل سبحة: ذكر واحد، وحلقة حبات تُضيء بكل لمسة
   hid = hid || 'adhkar'; const LST = adhList(hid), TOT = adhTotal(hid), pm = hid === 'adhkarPm';
-  if (document.getElementById('adx')) return; const el = document.createElement('div'); el.id = 'adx'; el.className = 'adx'; document.body.appendChild(el);
-  const draw = (pulse) => {
-    const v = hVal(hid) || { c: [] }, done = adhDone(v, hid), p = done / TOT, nx = LST.findIndex((a, i) => (v.c[i] || 0) < a[1]);
-    el.innerHTML = '<div class="adh"><button class="btn sm sec" id="adclose">' + I('x') + ' إغلاق</button><div class="adheart' + (pulse ? ' pulse' : '') + '">' + heartSvg(p, 1, pm) + '<b>' + Math.round(p * 100) + '%</b></div><small>' + done + ' من ' + TOT + '</small></div>'
-      + '<div class="adlist">' + LST.map((a, i) => { const n = v.c[i] || 0, left = a[1] - n, fin = left <= 0;
-        return '<button class="adk' + (fin ? ' fin' : '') + (i === nx ? ' cur' : '') + '" data-i="' + i + '"' + (fin ? ' aria-disabled="true"' : '') + '>' + (fin ? '<span class="adone">' + (a[2] || a[0].split(/[،,:.]/)[0]) + '</span><span class="adc">✓ تمّ</span>' : (a[2] ? '<span class="adt">' + a[2] + '</span>' : '') + '<span class="adtx">' + a[0] + '</span><span class="adc">' + left + (a[1] > 1 ? ' من ' + a[1] : '') + '</span>') + '</button>'; }).join('') + '</div>';
+  if (document.getElementById('adx')) return; const el = document.createElement('div'); el.id = 'adx'; el.className = 'adx tsb'; document.body.appendChild(el);
+  const v0 = hVal(hid) || { c: [] }; let cur = Math.max(0, LST.findIndex((a, i) => (v0.c[i] || 0) < a[1])), flash = '';
+  const ar = (n) => String(n).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[d]);
+  const ring = (n, c) => {
+    const B = Math.min(n, 33), items = [{ k: 'i' }]; for (let b = 0; b < B; b++) { if (B === 33 && (b === 11 || b === 22)) items.push({ k: 's' }); items.push({ k: 'b', i: b }); }
+    const N = items.length, cx = 168, cy = 156, R = 124, lit = c <= 0 ? 0 : c >= n ? B : ((c - 1) % B) + 1, sz = Math.max(5.5, Math.min(9.5, (2 * Math.PI * R / N) * .36)), P = (a, r) => { const t = a * Math.PI / 180; return [cx + r * Math.sin(t), cy - r * Math.cos(t)]; };
+    let g = '<defs><radialGradient id="tbl" cx="35%" cy="30%" r="75%"><stop offset="0" style="stop-color:var(--tb1)"/><stop offset=".45" style="stop-color:var(--tb2)"/><stop offset="1" style="stop-color:var(--tb3)"/></radialGradient><radialGradient id="tbd" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="rgba(255,255,255,.22)"/><stop offset=".6" stop-color="rgba(255,255,255,.07)"/><stop offset="1" stop-color="rgba(255,255,255,.02)"/></radialGradient><radialGradient id="tbi" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#fff6d8"/><stop offset=".5" stop-color="#e6b84f"/><stop offset="1" stop-color="#7a5a1c"/></radialGradient></defs><circle cx="' + cx + '" cy="' + cy + '" r="' + R + '" fill="none" style="stroke:var(--tbs)" stroke-width="2"/>';
+    items.forEach((it, idx) => { const a = 180 + idx * 360 / N, q = P(a, R);
+      if (it.k === 'i') { const ty = cy + R + 14; g += '<ellipse cx="' + cx + '" cy="' + (cy + R) + '" rx="12" ry="15" fill="url(#tbi)"/><ellipse cx="' + (cx - 4) + '" cy="' + (cy + R - 5) + '" rx="3.4" ry="5" fill="#fff" opacity=".45"/><path d="M' + cx + ' ' + ty + 'c-9 0-11 10-8 17h16c3-7 1-17-8-17z" fill="url(#tbi)"/><path d="M' + (cx - 8) + ' ' + (ty + 17) + 'l-3 38M' + (cx - 4) + ' ' + (ty + 17) + 'l-1.5 42M' + cx + ' ' + (ty + 17) + 'v44M' + (cx + 4) + ' ' + (ty + 17) + 'l1.5 42M' + (cx + 8) + ' ' + (ty + 17) + 'l3 38" stroke="#e6b84f" stroke-width="2.2" stroke-linecap="round" fill="none"/>'; }
+      else if (it.k === 's') g += '<g transform="translate(' + q[0].toFixed(1) + ' ' + q[1].toFixed(1) + ') rotate(' + a + ')"><rect x="-3.2" y="-8" width="6.4" height="16" rx="2" fill="url(#tbi)"/></g>';
+      else g += '<circle class="bd' + (it.i < lit ? ' lit' : '') + (it.i === lit - 1 && flash === 'pop' ? ' pop' : '') + '" cx="' + q[0].toFixed(1) + '" cy="' + q[1].toFixed(1) + '" r="' + sz.toFixed(1) + '" fill="' + (it.i < lit ? 'url(#tbl)' : 'url(#tbd)') + '" stroke="rgba(255,255,255,.2)" stroke-width=".8"/>'; });
+    return '<svg viewBox="0 0 336 384" aria-hidden="true">' + g + '</svg>';
+  };
+  const draw = () => {
+    const v = hVal(hid) || { c: [] }, done = adhDone(v, hid), a = LST[cur], n = a[1], c = Math.min(n, v.c[cur] || 0), B = Math.min(n, 33), rounds = Math.ceil(n / B), rd = c <= 0 ? 1 : Math.min(rounds, Math.floor((c - 1) / B) + 1);
+    el.innerHTML = '<div class="adh"><button class="btn sm sec" id="adclose">' + I('x') + ' إغلاق</button><b class="tsb-h">' + (pm ? 'أذكار المساء' : 'أذكار الصباح') + '</b><small>' + done + ' من ' + TOT + '</small></div>'
+      + '<div class="tsb-dots" aria-hidden="true">' + LST.map((x, i) => '<i class="' + ((v.c[i] || 0) >= x[1] ? 'd' : i === cur ? 'on' : '') + '"></i>').join('') + '</div>'
+      + '<div class="tsb-t" aria-live="polite">' + (a[2] ? '<span class="adt">' + a[2] + '</span>' : '') + '<span class="adtx">' + a[0] + '</span></div>'
+      + '<button class="tsb-tap" id="tsbtap" data-c="' + c + '" data-of="' + n + '" aria-label="سبّح: ' + c + ' من ' + n + '">' + ring(n, c) + '<span class="tsb-cnt"><b' + (c ? '' : ' class="z"') + '>' + (c ? ar(c) : 'ابدأ') + '</b><small>من ' + ar(n) + (rounds > 1 ? ' · الدورة ' + ar(rd) + ' من ' + ar(rounds) : '') + '</small></span>' + (flash === 'done' ? '<span class="tsb-ok">✓ تمّ</span>' : '') + '</button>'
+      + '<div class="tsb-nav"><button class="btn sm sec" data-ts="next" aria-label="الذكر السابق">' + I('back') + '</button><button class="btn sm sec" data-ts="undo">تراجع</button><button class="btn sm sec" data-ts="prev" aria-label="الذكر التالي">' + I('back') + '</button></div>';
     el.querySelector('#adclose').onclick = () => { el.remove(); render(); };
-    const cur = el.querySelector('.adk.cur'); if (cur && (pulse === 'next' || pulse === 0)) cur.scrollIntoView({ block: 'center', behavior: pulse ? 'smooth' : 'auto' });
   };
   el.addEventListener('click', (e) => {
-    const b = e.target.closest('.adk'); if (!b || b.classList.contains('fin')) return; const i = +b.dataset.i, v = JSON.parse(JSON.stringify(hVal(hid) || { c: [] })), was = hOkDay(hid);
-    v.c[i] = Math.min(LST[i][1], (v.c[i] || 0) + 1); hSet(hid, v); if (navigator.vibrate) try { navigator.vibrate(12); } catch (x) { }
-    const fin = v.c[i] >= LST[i][1]; draw(fin ? 'next' : 1);
-    if (!was && hOkDay(hid)) { el.remove(); render(); celebrate(hid); }
+    const b = e.target.closest('#tsbtap,[data-ts]'); if (!b) return; const v = JSON.parse(JSON.stringify(hVal(hid) || { c: [] })), was = hOkDay(hid), k = b.dataset.ts;
+    if (k === 'next') { cur = Math.max(0, cur - 1); flash = ''; draw(); return; } if (k === 'prev') { cur = Math.min(LST.length - 1, cur + 1); flash = ''; draw(); return; }
+    if (k === 'undo') { if ((v.c[cur] || 0) > 0) { v.c[cur]--; hSet(hid, v); } flash = ''; draw(); return; }
+    if ((v.c[cur] || 0) >= LST[cur][1]) { const nx = LST.findIndex((a, i) => (v.c[i] || 0) < a[1]); if (nx >= 0) { cur = nx; flash = ''; draw(); } return; }
+    v.c[cur] = Math.min(LST[cur][1], (v.c[cur] || 0) + 1); hSet(hid, v); if (navigator.vibrate) try { navigator.vibrate(v.c[cur] >= LST[cur][1] ? [20, 40, 30] : 8); } catch (x) { }
+    const fin = v.c[cur] >= LST[cur][1]; flash = 'pop';
+    if (!was && hOkDay(hid)) { el.remove(); render(); celebrate(hid); return; }
+    if (fin) { const nx = LST.findIndex((a, i) => i > cur && (v.c[i] || 0) < a[1]), nx2 = nx >= 0 ? nx : LST.findIndex((a, i) => (v.c[i] || 0) < a[1]); if (nx2 >= 0) { cur = nx2; flash = 'done'; } }
+    draw(); if (flash === 'done') setTimeout(() => { flash = ''; const f = el.querySelector('.tsb-ok'); if (f) f.remove(); }, 650);
   });
-  draw(0);
+  draw();
 }
 // ---------- المنبّه (0.40): التذكير يظهر على الشاشة كمنبّه بتصميم الثيم، لا إشعاراً فقط — رنّة هادئة واهتزاز و«تم» و«غفوة 10 دقائق».
 // يظهر: عند حلول الوقت والتطبيق مفتوح، أو عند لمس إشعار التذكير. (التطبيق المغلق والجوال مقفل: إشعار ثابت يهتز فقط — الرنين فوق القفل يحتاج تطبيقاً أصلياً.)
@@ -1501,7 +1546,7 @@ function render() {
   const sc = $('.scroll'), key = (S ? S.screen + S.step + S.tab + (S.chat ? 'c' : '') : '') + V.screen, top = sc ? sc.scrollTop : 0;
   let scr;
   if (V.screen === 'boot') scr = scrBoot(); else if (V.screen === 'bad') scr = scrBad(); else if (V.screen === 'start') scr = scrStart(); else if (V.screen === 'moved') scr = scrMoved(); else if (V.screen === 'lock') scr = scrLock(); else if (V.screen === 'pin') scr = scrPin(); else if (V.screen === 'onb') scr = scrOnb();
-  else scr = V.wk ? scrWk() : V.bd ? scrBody() : V.pan != null ? scrPantry() : V.pf != null ? scrProf() : S.rqOpen && window.RL && RL.idx ? scrQuiz() : S.chat ? scrChat() : S.plan && S.screen === 'app' ? scrApp() : { invite: scrInvite, wizard: scrWizard, review: scrReview, sent: scrSent, app: scrSent }[S.screen]();
+  else scr = V.wk ? scrWk() : V.bd ? scrBody() : V.pan != null ? scrPantry() : V.pf != null ? scrProf() : S.rqOpen && window.RL && RL.idx ? scrQuiz() : S.chat ? scrChat() : S.plan && S.screen === 'app' ? scrApp() : { invite: scrInvite, setup: scrSetup, wizard: scrWizard, review: scrReview, sent: scrSent, app: scrSent }[S.screen]();
   const keep = {}; document.querySelectorAll('video[data-keep]').forEach((n) => { keep[n.dataset.keep] = n; });
   const cmI = $('#cmIn'), cmV = cmI ? [cmI.value, document.activeElement === cmI] : null;          // مسودة التعليق تبقى عند إعادة الرسم (وصول التعليقات مثلاً)
   $('#root').innerHTML = '<div class="stage"><div class="device">' + (V.online ? '' : '<div class="offline">بلا اتصال — تُرسل بياناتك عند عودة الإنترنت</div>') + scr + (S ? sheetHtml() : '') + (toastMsg ? '<div class="toast" role="status">' + I('check') + '<span>' + esc(toastMsg) + '</span></div>' : '') + '</div></div>';
@@ -1531,7 +1576,7 @@ async function onPin() {
       const j = await api('POST', '/v1/join', { token: S.tok, sigPub: S.ident.sigPub, encPub: S.ident.encPub });
       if (j.did !== S.did || await HXC.fpOf(j.dEncPub) !== S.fp) throw new Error('تعذّر التحقق من هوية الأخصائي. لا تكمل، واطلب رابطاً جديداً.');
       S.cid = j.cid; SALT = crypto.getRandomValues(new Uint8Array(16)); K = await pinKey(V.pin, SALT);
-      S.screen = 'wizard'; S.step = 1; await persist(); try { sessionStorage.removeItem(TKEY); } catch (e) { }
+      S.screen = (navigator.webdriver && !localStorage.getItem('hx_setup_e2e')) ? 'wizard' : 'setup'; S.step = 1; await persist(); try { sessionStorage.removeItem(TKEY); } catch (e) { }
       V.screen = ''; V.pin = V.pin1 = ''; V.busy = false; startLoop(); render();
     } catch (e) {
       V.busy = false; V.pin = V.pin1 = ''; S.ident = null;
@@ -1703,6 +1748,11 @@ document.addEventListener('click', (e) => {
     }
     case 'medAdd': S.rem = Object.assign({ water: false, meals: false }, S.rem); S.rem.meds = (S.rem.meds || []).concat([{ n: '', t: '20:00' }]).slice(0, MEDMAX); save(); remSync(true); break;
     case 'medDel': if (S.rem && S.rem.meds) { S.rem.meds.splice(+v, 1); if (!S.rem.meds.length) S.rem.med = false; save(); remSync(true); } break;
+    case 'setupRel': { const U = V.setup; U.rel = v; break; }
+    case 'setupTog': { V.setup.on[v] = el.checked ? 1 : 0; break; }
+    case 'setupGo': setupApply(false); break;
+    case 'setupSkip': setupApply(true); break;
+    case 'relSet': { S.p.rel = v; if (v !== 'م') { S.rem = Object.assign({ water: false, meals: false }, S.rem, { pray: false, adhAm: false, adhPm: false, sal: false }); } remSync(true); toast(v === 'م' ? 'فعّل مواقيت الصلاة والأذكار من «التذكيرات»' : 'أُخفيت المحتويات الدينية'); break; }
     case 'whOpen': whOpen('card'); break;
     case 'whFavOpen': { const [c, m] = v.split('_').map(Number), w = whs(); w.cat = c; w.idx = m; whOpen('card'); break; }
     case 'whTog': whs().on = el.checked; break;
@@ -1779,6 +1829,7 @@ document.addEventListener('change', (e) => {
   }
   if (t.dataset.wk) { const L = dl(TODAY), n = Math.max(0, Math.min(80000, Math.round(+numOnly(t.value) || 0))); L.h = L.h || {}; if (n) L.h[t.dataset.wk] = n; else delete L.h[t.dataset.wk]; queueLog(dkey(new Date())); save(); render(); }
   if (t.id === 'offT') { const L = dl(TODAY); L.offT = t.value.trim().slice(0, 500); queueLog(dkey(new Date())); save(); }
+  if (t.id === 'setupCity' && V.setup) { V.setup.city = t.value; if (!t.value) V.setup.on.pray = 0; render(); return; }
   if (t.dataset.prcity != null && t.id === 'prCity') { S.rem = Object.assign({ water: false, meals: false }, S.rem); S.rem.prCity = t.value; save(); remSync(true); render(); toast(t.value ? 'مواقيت ' + t.value + ' ✓' : 'اختر مدينتك'); }
   if (t.dataset.remcap != null && t.id === 'remCap') { S.rem = Object.assign({ water: false, meals: false }, S.rem); S.rem.cap = +t.value || 0; save(); remSync(true); toast('حُفظ الحد الأقصى للتذكيرات'); }
   if (t.dataset.remsound) { S.rem = Object.assign({ water: false, meals: false }, S.rem); S.rem.sound = t.checked; save(); if (t.checked) almChime(); else almStop(); }

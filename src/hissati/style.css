@@ -577,4 +577,26 @@ html[data-theme="firoz"] .alm{background:radial-gradient(70% 50% at 50% 30%,rgba
 .whc-quran .whc-tf b,.whc-quran .whc-w b{font-family:var(--font);text-align:right}
 .whc-quran .whc-w{border-top:0;padding-top:0}
 .whc-t.serif,.whc-arab .whc-t{font-family:'Hissa Amiri','Amiri','Traditional Arabic',serif}.whc-t.serif{font-weight:700}
-
+/* 0.61: شاشة التجهيز الأولى */
+.btn.ghost{background:none;border:0;box-shadow:none;color:var(--mut);font-weight:500}
+.setup h1{margin:0 0 6px;font-size:26px}.setup .remrow{border-top:1px solid var(--line);padding-top:10px}.setup select.inp{width:100%}
+/* 0.62: الأذكار على شكل سبحة (حلقة حبات + إمامة + شرّابة) */
+:root{--tb1:#fff6d8;--tb2:#e6b84f;--tb3:#7a5a1c;--tbs:rgba(255,255,255,.35)}
+[data-theme="firoz"]{--tb1:#d8fff8;--tb2:#2cc9b8;--tb3:#0b5b55;--tbs:rgba(233,191,98,.55)}
+.adx.tsb{align-items:center;overflow-y:auto}
+.tsb .adh{width:100%;flex-direction:row;justify-content:space-between;align-items:center;gap:8px}.tsb .adh small{color:rgba(255,255,255,.75)}
+.tsb-h{font-size:18px}
+.tsb-dots{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;padding:2px 18px;max-width:340px}.tsb-dots i{width:14px;height:5px;border-radius:3px;background:rgba(255,255,255,.2)}.tsb-dots i.on{width:26px;background:var(--amber)}.tsb-dots i.d{background:var(--mint)}
+.tsb-t{text-align:center;padding:8px 22px 0;min-height:96px;max-height:30vh;overflow-y:auto;width:100%;max-width:420px}
+.tsb-t .adtx{display:block;font-family:'Hissa Amiri','Amiri','Traditional Arabic',serif;font-weight:700;font-size:25px;line-height:1.75;text-wrap:balance}.tsb-t .adt{display:block;font-size:13px;color:var(--amber);margin-bottom:2px}
+.tsb-tap{position:relative;width:min(92vw,336px);aspect-ratio:336/384;flex:none;background:none;border:0;padding:0;border-radius:50%;color:#fff;font-family:inherit;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.tsb-tap>svg{display:block;width:100%;height:100%;overflow:visible}
+.tsb-cnt{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);text-align:center;pointer-events:none}.tsb-cnt b{display:block;font-size:60px;line-height:1;font-weight:700;font-variant-numeric:tabular-nums}.tsb-cnt small{display:block;margin-top:6px;font-size:13px;color:rgba(255,255,255,.75)}
+.tsb-ok{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);font-size:34px;font-weight:700;color:var(--mint);background:rgba(8,12,32,.7);border-radius:20px;padding:6px 18px;pointer-events:none;animation:tsbok .65s ease both}@keyframes tsbok{from{opacity:0;transform:translate(-50%,-30%) scale(.8)}30%{opacity:1;transform:translate(-50%,-50%) scale(1)}to{opacity:0}}
+.tsb .bd{transition:transform .3s cubic-bezier(.34,1.7,.5,1);transform-box:fill-box;transform-origin:center}.tsb .bd.pop{animation:tsbpop .3s ease-out}@keyframes tsbpop{40%{transform:scale(1.55)}}
+.tsb-nav{display:flex;gap:10px;padding:6px 16px calc(18px + env(safe-area-inset-bottom,0px))}.tsb-nav .btn{min-height:44px;min-width:56px}
+@media(prefers-reduced-motion:reduce){.tsb .bd.pop,.tsb-ok{animation:none}}
+.tsb-nav .btn:last-child svg{transform:scaleX(-1)}
+.tsb .adh{position:relative}.tsb .adh #adclose{position:static}.tsb .adh small{font-size:13px;white-space:nowrap}
+.tsb-cnt b.z{font-size:34px;font-weight:600;color:rgba(255,255,255,.8)}
+.tsb-dots i{width:10px}.tsb-dots i.on{width:20px}
