@@ -6679,7 +6679,12 @@ document.addEventListener('change', function (e) {
     if (!j || j.hissaClient !== 1 || !j.client || !j.client.name) { toast('هذا ليس ملف عميل جاهز من «حصة»'); return; }
     var c = newClient('ath'); Object.assign(c, { name: String(j.client.name).slice(0, 80), sex: j.client.sex === 'أنثى' ? 'أنثى' : 'ذكر', age: +j.client.age || c.age, weight: +j.client.weight || c.weight, height: +j.client.height || c.height, notes: String(j.client.notes || '').slice(0, 1000) });
     if (j.snap && Array.isArray(j.snap.days) && j.snap.days.length) c.rawSnap = j.snap; if (j.work && Array.isArray(j.work.days)) c.work = j.work; if (j.shop) c.shop = j.shop;
-    S.clients.push(c); S.view = 'client'; S.cur = c.code; S.tab = 'client'; S.page = 'sum'; persist(c); S.versions = []; render(); toast('✓ أُضيف العميل «' + c.name + '» بخطته وبرنامجه وقائمة تسوقه'); }); t.value = ''; return; }
+    S.clients.push(c); S.view = 'client'; S.cur = c.code; S.tab = 'client'; S.page = 'sum'; persist(c); S.versions = []; render(); toast('✓ أُضيف العميل «' + c.name + '» بخطته وبرنامجه وقائمة تسوقه');
+    var ac = j.account;             // الملف يحمل اسم مستخدم وكلمة سر: يُنشأ دخول العميل تلقائياً (مربوطاً بهذا العميل) فيدخل «حصتي» مباشرة
+    if (ac && /^[a-z0-9._-]{3,30}$/.test(String(ac.u || '')) && String(ac.pw || '').length >= 10 && /[A-Za-z]/.test(ac.pw) && /\d/.test(ac.pw)) {
+      if (!hxOn()) { toast('أُضيف العميل. اربط المحطة من «الإعدادات ← حصتي» ثم أنشئ دخوله من ملفه (🔑).'); return; }
+      hxInvite(c.name, c.phone || '', 14, c.kind === 'athlete' ? 'g' : 'ex').then(function (inv) { var h = Object.keys(HX.st.inv).filter(function (q) { return HX.st.inv[q] === inv; })[0]; inv.cl = c.code; return hxCredMake(h, inv, String(ac.u).toLowerCase(), ac.pw).then(function () { HX.made = h; HX.form = false; A.hxv(); toast('✓ أُنشئ دخول «' + c.name + '»: اسم المستخدم وكلمة السر جاهزان للإرسال'); }); }).catch(function (er) { toast('أُضيف العميل، وتعذّر إنشاء الدخول تلقائياً: ' + ((er && er.message) || '') + ' — أنشئه من ملفه (🔑)'); });
+    } }); t.value = ''; return; }
   if (t.hasAttribute && t.hasAttribute('data-gv') && (c = cur()) && c.work) {
     var p = t.getAttribute('data-gv').split('|').map(Number), ex = c.work.days[p[0]] && c.work.days[p[0]].ex[p[1]]; if (!ex) return; var v = gyVid(t.value);
     if (v === false) { toast('اكتب رابطاً يبدأ بـ https://'); return; } if (v) ex.v = v; else delete ex.v; persist(c).then(function () { toast(v ? (v.yt ? '✓ فيديو يوتيوب سيُشغَّل داخل «حصتي»' : '✓ حُفظ الرابط') : 'أُزيل الفيديو'); main(); }); return;
