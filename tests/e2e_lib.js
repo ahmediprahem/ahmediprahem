@@ -18,6 +18,8 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   await d.click('[data-a="hxSendPlan"]'); await d.waitForFunction((c) => (DPApp.S.clients.find((q) => q.code === c).hx.planV || 0) >= 1, old, { timeout: 15000 });
   await cPoll(); await m.waitForFunction(() => (window.HissatiApp.state().lib || []).length >= 3, null, { timeout: 8000 });
   ok('«حصتي» تتسلّم المكتبة مع الخطة');
+  await m.evaluate(() => { window.HissatiApp.state().lib = []; }); await d.click('main .tabs [data-v="ci"]'); await d.waitForSelector('[data-a="libSend"]', { state: 'attached' }); await d.evaluate(() => DPApp.A.libSend()); await cPoll(); await m.waitForFunction(() => (window.HissatiApp.state().lib || []).length >= 3, null, { timeout: 8000 });
+  ok('«📤 أرسل المكتبة لكل عملائي»: تصل المكتبة دون إعادة إرسال الخطة');
   assert.strictEqual(await m.locator('.tabbar button').last().textContent().then((t) => /ملفي/.test(t)), true); await m.click('.tabbar [data-v="lib"]'); await m.waitForSelector('.lbf');
   assert.deepStrictEqual((await m.locator('.segc button').allTextContents()).map((x) => x.replace(/[\s\d]+$/, '').trim()), ['🏋 تمارين النادي', '🏠 تمارين منزلية']); assert(/ملف أول/.test(await m.textContent('.lbf >> nth=0 >> summary')));
   assert.strictEqual(await m.locator('.lbi').count() >= 1, true); const gymN = await m.locator('.lbi').count();

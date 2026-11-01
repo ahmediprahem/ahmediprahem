@@ -243,6 +243,7 @@ function handle(p) {
     const first = S.screen !== 'app'; S.screen = 'app'; if (first) S.tab = 'today'; if (!S.planAt) S.planAt = now(); remSync();
     notify(first ? 'وصلت خطتك من ' + S.dname : 'وصلت خطتك المحدَّثة (الإصدار ' + S.pv + ')', 'افتح «حصتي» لترى يومك'); return true;
   }
+  if (p.t === 'lib' && Array.isArray(p.lib)) { S.lib = cleanLib(p.lib); return true; }
   if (p.t === 'msg' && p.text) {
     S.msgs.push({ from: 'd', t: String(p.text).slice(0, 2000), ts: p.ts || now() }); S.msgs = S.msgs.slice(-300);
     if (S.chat && !document.hidden) readReceipt(); else { S.unreadC++; notify('رسالة من ' + S.dname, String(p.text).slice(0, 80)); }
@@ -752,7 +753,7 @@ function scrSent() {
 // ---------- التطبيق بعد وصول الخطة
 function scrApp() {
   const body = { today: tabToday, plan: tabPlan, prefs: tabPrefs, progress: tabProgress, feed: tabFeed, file: tabFile, lib: tabLib }[S.tab] ? { today: tabToday, plan: tabPlan, prefs: tabPrefs, progress: tabProgress, feed: tabFeed, file: tabFile, lib: tabLib }[S.tab]() : tabToday();
-  const tb = [['today', 'today', 'اليوم'], ['plan', 'cal', 'خطتي'], ['prefs', 'heart', 'تفضيلاتي'], ['feed', 'news', 'تثقيف'], ['progress', 'trend', 'تقدّمي']].concat((S.lib || []).length ? [['lib', 'dumb', 'التمارين']] : [], [['file', 'pulse', 'ملفي']]).map((t) => '<button class="' + (S.tab === t[0] ? 'on' : '') + '" data-act="tab" data-v="' + t[0] + '"' + (S.tab === t[0] ? ' aria-current="page"' : '') + '>' + I(t[1]) + '<span>' + t[2] + '</span>' + (t[0] === 'feed' && fdNew() ? '<span class="nb" aria-label="' + fdNew() + ' جديد">' + fdNew() + '</span>' : '') + '</button>').join('');
+  const tb = [['today', 'today', 'اليوم'], ['plan', 'cal', 'خطتي'], ['prefs', 'heart', 'تفضيلاتي'], ['feed', 'news', 'تثقيف'], ['progress', 'trend', 'تقدّمي']].concat([['lib', 'dumb', 'التمارين'], ['file', 'pulse', 'ملفي']]).map((t) => '<button class="' + (S.tab === t[0] ? 'on' : '') + '" data-act="tab" data-v="' + t[0] + '"' + (S.tab === t[0] ? ' aria-current="page"' : '') + '>' + I(t[1]) + '<span>' + t[2] + '</span>' + (t[0] === 'feed' && fdNew() ? '<span class="nb" aria-label="' + fdNew() + ' جديد">' + fdNew() + '</span>' : '') + '</button>').join('');
   const wm = S.wm && (S.tab === 'today' || S.tab === 'plan') ? '<div class="wmk" aria-hidden="true">' + Array(18).fill('<span>' + esc(S.wm) + '</span>').join('') + '</div>' : '';   // 0.51: علامة مائية باسم العميل على الجدول
   return '<div class="scr hasTabs">' + wm + '<div class="scroll"><div class="stack">' + (S.removed ? '<div class="banner warn">' + I('alert') + '<span>أوقف أخصائيك ربط حسابك؛ خطتك الحالية تبقى معروضة لكن لا تصله متابعتك.</span></div>' : '') + body + '</div></div><nav class="tabbar" aria-label="التنقل">' + tb + '</nav></div>';
 }
@@ -1139,7 +1140,7 @@ function tabLib() {
   const seg = '<div class="segc" role="tablist" aria-label="أقسام المكتبة">' + [['gym', '🏋 تمارين النادي'], ['home', '🏠 تمارين منزلية']].map((x) => '<button role="tab" class="' + (sec === x[0] ? 'on' : '') + '" aria-selected="' + (sec === x[0]) + '" data-act="ls" data-v="' + x[0] + '">' + x[1] + ' <small>' + L.filter((e) => e.s === x[0]).length + '</small></button>').join('') + '</div>';
   const chips = gs.length > 1 ? '<div class="chips"><button class="chip' + (g0 ? '' : ' on') + '" data-act="lg" data-v="">الكل</button>' + gs.map((g) => '<button class="chip' + (g0 === g ? ' on' : '') + '" data-act="lg" data-v="' + esc(g) + '">' + esc(g) + '</button>').join('') + '</div>' : '';
   const M2 = M.filter((x) => !g0 || x[0].g === g0); let body;
-  if (!M.length) body = '<section class="card"><p class="mut">' + (sec === 'home' ? 'لا تمارين منزلية بعد. سيضيفها أخصائيك هنا.' : 'لا تمارين بعد.') + '</p></section>';
+  if (!M.length) body = '<section class="card"><p class="mut">' + (sec === 'home' ? 'لا تمارين منزلية بعد. سيضيفها أخصائيك هنا.' : 'لا تمارين بعد. حين يضيف أخصائيك تمارين تظهر هنا في ملفات.') + '</p></section>';
   else if (sec === 'home') body = '<div class="stack" id="libl">' + M2.map((x) => libRow(x[0], x[1])).join('') + '</div>';
   else { const fs = []; M2.forEach((x) => { const f = x[0].f || 'تمارين عامة'; let o = fs.filter((q) => q.f === f)[0]; if (!o) fs.push(o = { f, a: [] }); o.a.push(x); });
     body = '<div class="stack" id="libl">' + fs.map((o, k) => '<details class="card lbf" ' + (k === 0 ? 'open' : '') + '><summary><span class="lbfi" aria-hidden="true">📁</span> <b>' + esc(o.f) + '</b> <small class="dim">' + o.a.length + ' تمريناً</small></summary><div class="stack">' + o.a.map((x) => libRow(x[0], x[1])).join('') + '</div></details>').join('') + '</div>'; }

@@ -6666,7 +6666,7 @@ function libMerge(w) {
 }
 function libCard() {
   var L = exlib(), h = '<div class="ucard"><details><summary><b>📚 مكتبة التمارين (' + L.length + ')</b> <small>تصل كل عملائك في «حصتي ← خطتي ← المكتبة»</small></summary>';
-  h += '<p class="small">أي تمرين هنا يفتحه أي عميل لديه «حصتي» بفيديوه وطريقة أدائه، ويسجّل أوزانه عليه. تُرسَل مع «أرسل الخطة».</p><p class="two"><button class="sec sm" data-a="libAdd">➕ تمرين جديد</button><button class="sec sm" data-a="libFromWork">⬇ أضف تمارين برنامج هذا العميل</button></p>';
+  h += '<p class="small">أي تمرين هنا يفتحه أي عميل لديه «حصتي» بفيديوه وطريقة أدائه، ويسجّل أوزانه عليه. تُرسَل مع «أرسل الخطة».</p><p class="two"><button class="sec sm" data-a="libAdd">➕ تمرين جديد</button><button class="sec sm" data-a="libSend">📤 أرسل المكتبة لكل عملائي</button><button class="sec sm" data-a="libFromWork">⬇ أضف تمارين برنامج هذا العميل</button></p>';
   h += L.map(function (e, i) { return '<div class="gye"><input class="gyv" data-lf="' + i + '|n" value="' + esc(e.n) + '" placeholder="الاسم" aria-label="اسم التمرين"><input class="gyv" data-lf="' + i + '|en" value="' + esc(e.en) + '" placeholder="English" dir="ltr"><select class="gyv" data-lf="' + i + '|s" aria-label="القسم"><option value="gym"' + (e.s === 'home' ? '' : ' selected') + '>🏋 النادي</option><option value="home"' + (e.s === 'home' ? ' selected' : '') + '>🏠 منزلي</option></select><input class="gyv" data-lf="' + i + '|f" value="' + esc(e.f || '') + '" placeholder="اسم الملف (مجلد)"><input class="gyv" data-lf="' + i + '|g" value="' + esc(e.g) + '" placeholder="المجموعة العضلية"><input class="gyv" data-lf="' + i + '|v" value="' + esc(gyShow(e.v)) + '" placeholder="رابط فيديو" dir="ltr"><button class="sec sm" data-a="libDel" data-v="' + i + '" aria-label="حذف">🗑</button></div>'; }).join('');
   return h + '</details></div>';
 }
@@ -6696,6 +6696,10 @@ function gymCard(c) {
 Object.assign(A, {
   libAdd: function () { var n = (prompt('اسم التمرين (بالعربية)') || '').trim().slice(0, 80); if (!n) return; var L = exlib(); if (L.some(function (x) { return x.n === n; })) { toast('موجود في المكتبة'); return; } L.unshift({ n: n, en: '', s: 'gym', f: 'تمارين عامة', g: lbGuess(n), cues: [], v: null }); saveSettings().then(main); },
   libFromWork: function () { var c = cur(); if (!c || !c.work) { toast('لا برنامج تمرين لهذا العميل'); return; } var n = libMerge(c.work); toast(n ? '✓ أُضيف/حُدّث ' + n + ' تمريناً في المكتبة' : 'كلها موجودة في المكتبة'); main(); },
+  libSend: function () {
+    var cs = (S.clients || []).filter(function (c) { return c.hx && c.hx.cid; }), L = exlib(); if (!cs.length) { toast('لا عملاء مرتبطون بـ«حصتي» بعد'); return; } if (!L.length) { toast('المكتبة فارغة'); return; }
+    toast('جارٍ الإرسال…'); Promise.all(cs.map(function (c) { return hxSend(c, { t: 'lib', lib: L.slice(0, 300) }).then(function () { return 1; }).catch(function () { return 0; }); })).then(function (r) { var ok = r.reduce(function (a, b) { return a + b; }, 0); toast('✓ وصلت المكتبة إلى ' + ok + ' من ' + cs.length + ' عميل'); });
+  },
   libDel: function (v) { var L = exlib(), e = L[+v]; if (!e || !confirm('حذف «' + e.n + '» من المكتبة؟')) return; L.splice(+v, 1); saveSettings().then(main); },
   gymCheck: function () {
     var c = cur(); if (!c || !c.work) return; var all = []; c.work.days.forEach(function (d) { (d.ex || []).forEach(function (e) { if (e.v && e.v.yt) all.push(e); }); }); var box = document.getElementById('gycheck'), done = 0, bad = [], unk = 0;
