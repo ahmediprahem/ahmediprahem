@@ -524,6 +524,7 @@ function firstWinCard() {
 function scrStart() {                               // بلا حساب ولا رابط (مثل فتح التطبيق المثبّت أول مرة): رمز الدعوة أو رمز النقل
   return '<div class="scr"><div class="scroll"><div class="stack" style="padding-top:22px"><div class="logo" style="width:180px;margin:0 auto;color:#fff">' + LOGO + '</div>'
     + '<section class="card stack"><h3>لديّ رابط دعوة من أخصائيي</h3><p class="dim">ألصق الرابط أو رمز الدعوة كما وصلك على واتساب.</p><input class="inp" id="invIn" dir="ltr" autocomplete="off" placeholder="https://… أو رمز الدعوة"><button class="btn" data-act="useInv">متابعة</button></section>'
+    + '<section class="card stack"><h3>لديّ اسم مستخدم وكلمة سر</h3><p class="dim">من أخصائيك بدل الرابط: اكتبهما كما وصلاك.</p><input class="inp" id="crU" dir="ltr" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="اسم المستخدم"><input class="inp" id="crP" dir="ltr" type="password" autocomplete="current-password" placeholder="كلمة السر"><button class="btn" data-act="useCred"' + (V.busy ? ' disabled' : '') + '>' + (V.busy ? 'جارٍ التحقق…' : 'دخول') + '</button></section>'
     + '<section class="card stack"><h3>لديّ حساب في متصفح أو جوال آخر</h3><p class="dim">من «حصتي» القديم: تقدّمي ← «نقل حسابي» ← انسخ الرمز وألصقه هنا.</p><input class="inp" id="xferIn" dir="ltr" autocomplete="off" placeholder="HX1-…"><button class="btn sec" data-act="useXfer"' + (V.busy ? ' disabled' : '') + '>' + (V.busy ? 'جارٍ النقل…' : 'نقل حسابي إلى هنا') + '</button></section>'
     + (V.err ? '<p class="err">' + esc(V.err) + '</p>' : '') + '</div></div></div>';
 }
@@ -1820,6 +1821,12 @@ document.addEventListener('click', (e) => {
       const v = ($('#invIn') || {}).value || '', m = /(?:#t=)?([A-Za-z0-9_-]{16,40})\.([A-Za-z0-9_-]{11})(?![A-Za-z0-9_-])/.exec(v.trim());
       if (!m) { V.err = 'الرابط أو الرمز غير صحيح. انسخه كاملاً من رسالة أخصائيك.'; break; }
       try { sessionStorage.setItem(TKEY, m[1] + '.' + m[2]); } catch (x) { } V.err = ''; boot(); return;
+    }
+    case 'useCred': {
+      const u = (($('#crU') || {}).value || '').trim(), pw = (($('#crP') || {}).value || '').trim(); if (!u || !pw) { V.err = 'اكتب اسم المستخدم وكلمة السر.'; break; } V.busy = true; V.err = ''; render();
+      HXC.userHash(u).then((uh) => fetch(API + '/v1/creds/' + uh, { cache: 'no-store' }).then((r) => r.json().catch(() => ({})).then((j) => { if (r.status === 429) throw new Error(j.error || 'محاولات كثيرة، حاول بعد ساعة'); if (!r.ok || !j.blob) throw new Error('bad'); return HXC.credOpen(pw, j); })))
+        .then((t) => { const m = /^([A-Za-z0-9_-]{16,40})\.([A-Za-z0-9_-]{11})$/.exec(t); if (!m) throw new Error('bad'); try { sessionStorage.setItem(TKEY, t); } catch (x) { } V.busy = false; V.err = ''; boot(); })
+        .catch((x) => { V.busy = false; V.err = x && x.message && x.message !== 'bad' && !/operation/i.test(x.message) && !/decrypt/i.test(x.message) ? x.message : 'اسم المستخدم أو كلمة السر غير صحيحة، أو انتهت صلاحيتها. اطلب من أخصائيك بيانات جديدة.'; render(); }); return;
     }
     case 'useXfer': {
       const v = ($('#xferIn') || {}).value || ''; V.busy = true; V.err = ''; render();

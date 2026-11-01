@@ -4,7 +4,7 @@
    - تقدّم تطبيق «حصتي» نفسه على الصفحة الرئيسية (/)، فرابط الدعوة = عنوان هذه المحطة.
    - الجداول تُنشأ تلقائياً أول مرة؛ يكفي ربط قاعدة D1 باسم DB. متغير اختياري REG_KEY: مفتاح تسجيل الأخصائيين (بدونه يقبل أي «حصة»).
    - لا تسجّل أي محتوى (لا console.log). يُبنى منه worker/relay/dist/worker.js بـ py build_web.py (يُضمَّن تطبيق «حصتي» وأيقونته). */
-const VER = '1.5';
+const VER = '1.6';
 const APP_HTML = /*HISSATI_HTML*/'<!doctype html><meta charset="utf-8"><title>حصتي</title><p>ابنِ الملف بـ py build_web.py</p>'/*END*/;
 const ICON_B64 = /*HISSATI_ICON*/''/*END*/;
 const SW_JS = /*HISSATI_SW*/''/*END*/;
@@ -56,6 +56,8 @@ const SCHEMA = [
   'CREATE INDEX IF NOT EXISTS comments_pid ON comments (pid, id)',
   'CREATE TABLE IF NOT EXISTS media (key TEXT PRIMARY KEY, did TEXT NOT NULL, type TEXT, size INTEGER, store TEXT, data TEXT, created INTEGER)',
   'CREATE TABLE IF NOT EXISTS remind (id TEXT PRIMARY KEY, mins TEXT NOT NULL, upd INTEGER)',
+  'CREATE TABLE IF NOT EXISTS creds (uh TEXT PRIMARY KEY, did TEXT NOT NULL, h TEXT NOT NULL, salt TEXT NOT NULL, iter INTEGER NOT NULL, blob TEXT NOT NULL, exp INTEGER, created INTEGER)',
+  'CREATE TABLE IF NOT EXISTS credtry (uh TEXT PRIMARY KEY, n INTEGER NOT NULL, t INTEGER NOT NULL)',
   'CREATE TABLE IF NOT EXISTS vault_chunks (vid TEXT NOT NULL, up TEXT NOT NULL, idx INTEGER NOT NULL, data TEXT NOT NULL, ts INTEGER, PRIMARY KEY (vid, up, idx))'
 ];
 let ready = null;
@@ -135,6 +137,18 @@ async function api(req, env, url, ctx) {
     if (iv.used) return err(410, 'used', 'استُعملت هذه الدعوة من قبل'); if (iv.exp && iv.exp < now()) return err(410, 'expired', 'انتهت صلاحية الدعوة');
     return json({ ok: true, did: iv.did, dname: iv.name, label: iv.label, exp: iv.exp, encPub: JSON.parse(iv.enc), cat: iv.cat ? JSON.parse(iv.cat) : null });
   }
+  const mCr = /^\/v1\/creds\/([A-Za-z0-9_-]{43})$/.exec(p);
+  if (mCr && method === 'GET') {                                      // الدخول باسم مستخدم: يُعاد غلاف الدعوة المشفّر بكلمة السر (لا فرق ظاهراً بين اسم موجود وغير موجود)
+    const uh = mCr[1], t = now(), tr = await one(db, 'SELECT n, t FROM credtry WHERE uh = ?', uh);
+    if (!tr || tr.t < t - 3600) await run(db, 'INSERT INTO credtry (uh, n, t) VALUES (?, 1, ?) ON CONFLICT(uh) DO UPDATE SET n = 1, t = excluded.t', uh, t);
+    else { if (tr.n >= 15) return err(429, 'tries', 'محاولات كثيرة لهذا الاسم؛ حاول بعد ساعة'); await run(db, 'UPDATE credtry SET n = n + 1 WHERE uh = ?', uh); }
+    const c = await one(db, 'SELECT salt, iter, blob, exp FROM creds WHERE uh = ?', uh);
+    if (c && (!c.exp || c.exp > t)) return json({ ok: true, salt: c.salt, iter: c.iter, blob: c.blob });
+    let k = await one(db, "SELECT v FROM kv WHERE k = 'decoy'"); if (!k) { await run(db, "INSERT OR IGNORE INTO kv (k, v) VALUES ('decoy', ?)", b64u(crypto.getRandomValues(new Uint8Array(24)))); k = await one(db, "SELECT v FROM kv WHERE k = 'decoy'"); }
+    const d1 = new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode('d1|' + uh + '|' + k.v))), d2 = new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode('d2|' + uh + '|' + k.v)));
+    const fake = new Uint8Array(48); fake.set(d1, 0); fake.set(d2.slice(0, 16), 32);
+    return json({ ok: true, salt: b64u(d1.slice(0, 16)), iter: 310000, blob: b64u(fake) });
+  }
   if (p === '/v1/join' && method === 'POST') {
     if (!validJwk(J.sigPub) || !validJwk(J.encPub) || typeof J.token !== 'string') return err(400, 'keys', 'بيانات ناقصة');
     const a = await authed(req, db, path, body, J.sigPub); if (a.e) return a.e;
@@ -144,6 +158,7 @@ async function api(req, env, url, ctx) {
     const t = now(), d = await one(db, 'SELECT enc FROM dietitians WHERE id = ?', iv.did);
     await db.batch([
       db.prepare('UPDATE invites SET used = 1, cat = NULL WHERE h = ?').bind(h),
+      db.prepare('DELETE FROM creds WHERE h = ?').bind(h),
       db.prepare('INSERT INTO clients (id, did, sig, enc, label, created) VALUES (?, ?, ?, ?, ?, ?)').bind(a.id, iv.did, JSON.stringify(pubOnly(J.sigPub)), JSON.stringify(pubOnly(J.encPub)), iv.label || '', t),
       db.prepare('INSERT INTO msgs (rcpt, sender, kind, body, ts) VALUES (?, ?, ?, ?, ?)').bind(iv.did, a.id, 'join', JSON.stringify({ cid: a.id, sigPub: pubOnly(J.sigPub), encPub: pubOnly(J.encPub), label: iv.label || '', inv: h }), t)
     ]);
@@ -185,8 +200,18 @@ async function api(req, env, url, ctx) {
   }
   if (p === '/v1/invites/revoke' && method === 'POST') {           // الأخصائي يلغي دعوة لم تُستعمل
     if (me.role !== 'd') return err(403, 'role', 'للأخصائي فقط');
-    await run(db, 'UPDATE invites SET used = 1, cat = NULL WHERE h = ? AND did = ?', String(J.h || ''), me.id); return json({ ok: true });
+    await run(db, 'UPDATE invites SET used = 1, cat = NULL WHERE h = ? AND did = ?', String(J.h || ''), me.id); await run(db, 'DELETE FROM creds WHERE h = ? AND did = ?', String(J.h || ''), me.id); return json({ ok: true });
   }
+  if (p === '/v1/creds' && method === 'POST') {                    // الأخصائي يسجّل غلاف دعوة بكلمة سر لاسم مستخدم (المحطة لا ترى كلمة السر ولا الرمز)
+    if (me.role !== 'd') return err(403, 'role', 'للأخصائي فقط');
+    const b64 = /^[A-Za-z0-9_-]+$/; if (!/^[A-Za-z0-9_-]{43}$/.test(J.uh || '') || !/^[A-Za-z0-9_-]{32}$/.test(J.h || '') || !b64.test(J.salt || '') || String(J.salt).length > 40 || !b64.test(J.blob || '') || String(J.blob).length > 400 || !(+J.iter >= 100000 && +J.iter <= 1000000)) return err(400, 'cred', 'بيانات غير صالحة');
+    const iv = await one(db, 'SELECT exp, used FROM invites WHERE h = ? AND did = ?', J.h, me.id); if (!iv || iv.used) return err(404, 'invite', 'الدعوة غير موجودة أو استُعملت');
+    const ex = await one(db, 'SELECT did FROM creds WHERE uh = ?', J.uh); if (ex && ex.did !== me.id) return err(409, 'taken', 'اسم المستخدم مستعمل، اختر غيره');
+    const n = await one(db, 'SELECT COUNT(*) AS n FROM creds WHERE did = ?', me.id); if (!ex && n && n.n >= 300) return err(429, 'many', 'حسابات كثيرة بانتظار الدخول');
+    await run(db, 'INSERT INTO creds (uh, did, h, salt, iter, blob, exp, created) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(uh) DO UPDATE SET h = excluded.h, salt = excluded.salt, iter = excluded.iter, blob = excluded.blob, exp = excluded.exp', J.uh, me.id, J.h, J.salt, Math.round(+J.iter), J.blob, iv.exp || 0, now());
+    await run(db, 'DELETE FROM credtry WHERE uh = ?', J.uh); return json({ ok: true });
+  }
+  if (p === '/v1/creds/revoke' && method === 'POST') { if (me.role !== 'd') return err(403, 'role', 'للأخصائي فقط'); await run(db, 'DELETE FROM creds WHERE uh = ? AND did = ?', String(J.uh || ''), me.id); return json({ ok: true }); }
   if (p === '/v1/vault/put' && method === 'POST') {                // رفع جزء من نسخة؛ عند اكتمال الأجزاء تصبح النسخة التالية وتُحذف الأقدم من 7
     if (me.role !== 'd') return err(403, 'role', 'للأخصائي فقط'); const x = await vauth(J); if (x.e) return x.e;
     const up = String(J.up || ''), idx = +J.idx, n = +J.n, data = String(J.data || '');

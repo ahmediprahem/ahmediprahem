@@ -1821,9 +1821,15 @@ html.hx-theming,html.hx-theming *,html.hx-theming *::before,html.hx-theming *::a
   function wrap(pin, obj) { var salt = rand(16), iv = rand(12); return pinKey(pin, salt).then(function (k) { return S.encrypt({ name: 'AES-GCM', iv: iv }, k, enc.encode(JSON.stringify(obj))); }).then(function (c) { return { s: b64u(salt), iv: b64u(iv), c: b64u(c) }; }); }
   function unwrap(pin, w) { return pinKey(pin, unb64u(w.s)).then(function (k) { return S.decrypt({ name: 'AES-GCM', iv: unb64u(w.iv) }, k, unb64u(w.c)); }).then(function (pt) { return JSON.parse(dec.decode(pt)); }); }
   function pinKey(pin, salt) { return S.importKey('raw', enc.encode(String(pin)), 'PBKDF2', false, ['deriveKey']).then(function (k) { return S.deriveKey({ name: 'PBKDF2', hash: 'SHA-256', salt: salt, iterations: 200000 }, k, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']); }); }
+  // 0.67: الدخول باسم مستخدم وكلمة سر بدل الرابط: رمز الدعوة يُغلَّف بمفتاح مشتق من كلمة السر (PBKDF2) فلا تراه المحطة ولا تعرف كلمة السر
+  var CRED_ITER = 310000;
+  function userHash(u) { return sha256('hissati-user|' + String(u).trim().toLowerCase()).then(function (h) { return b64u(h); }); }
+  function credKey(pw, salt, iter) { return S.importKey('raw', enc.encode(String(pw).trim()), 'PBKDF2', false, ['deriveKey']).then(function (k) { return S.deriveKey({ name: 'PBKDF2', hash: 'SHA-256', salt: salt, iterations: iter }, k, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']); }); }
+  function credSeal(pw, text) { var salt = rand(16), iv = rand(12); return credKey(pw, salt, CRED_ITER).then(function (k) { return S.encrypt({ name: 'AES-GCM', iv: iv }, k, enc.encode(text)); }).then(function (c) { var all = new Uint8Array(12 + c.byteLength); all.set(iv, 0); all.set(new Uint8Array(c), 12); return { salt: b64u(salt), iter: CRED_ITER, blob: b64u(all) }; }); }
+  function credOpen(pw, o) { var raw = unb64u(o.blob), iter = +o.iter; if (!(iter >= 100000 && iter <= 1000000) || raw.length < 29) return Promise.reject(new Error('bad')); return credKey(pw, unb64u(o.salt), iter).then(function (k) { return S.decrypt({ name: 'AES-GCM', iv: raw.slice(0, 12) }, k, raw.slice(12)); }).then(function (pt) { return dec.decode(pt); }); }
   function token() { return b64u(rand(18)); }                  // رمز الدعوة (144 بت)
   function tokenHash(t) { return sha256('inv.' + t).then(function (h) { return b64u(h).slice(0, 32); }); }
-  return { b64u: b64u, unb64u: unb64u, sha256: sha256, hex: hex, idOf: idOf, fpOf: fpOf, genIdentity: genIdentity, signReq: signReq, parseAuth: parseAuth, verifyReq: verifyReq, seal: seal, open: open, wrap: wrap, unwrap: unwrap, token: token, tokenHash: tokenHash, pubOnly: pubOnly };
+  return { userHash: userHash, credSeal: credSeal, credOpen: credOpen, b64u: b64u, unb64u: unb64u, sha256: sha256, hex: hex, idOf: idOf, fpOf: fpOf, genIdentity: genIdentity, signReq: signReq, parseAuth: parseAuth, verifyReq: verifyReq, seal: seal, open: open, wrap: wrap, unwrap: unwrap, token: token, tokenHash: tokenHash, pubOnly: pubOnly };
 });
 </script><script>// ================= استبيانات التسجيل في «حصتي» (مشترك بين «حصة» و«حصتي» والاختبارات)
 // لكل نظام استبيان: الحصص (ex) والجرامات (g). الاستبيان = أقسام (خطوات) فيها أسئلة:
@@ -3086,6 +3092,7 @@ function firstWinCard() {
 function scrStart() {                               // بلا حساب ولا رابط (مثل فتح التطبيق المثبّت أول مرة): رمز الدعوة أو رمز النقل
   return '<div class="scr"><div class="scroll"><div class="stack" style="padding-top:22px"><div class="logo" style="width:180px;margin:0 auto;color:#fff">' + LOGO + '</div>'
     + '<section class="card stack"><h3>لديّ رابط دعوة من أخصائيي</h3><p class="dim">ألصق الرابط أو رمز الدعوة كما وصلك على واتساب.</p><input class="inp" id="invIn" dir="ltr" autocomplete="off" placeholder="https://… أو رمز الدعوة"><button class="btn" data-act="useInv">متابعة</button></section>'
+    + '<section class="card stack"><h3>لديّ اسم مستخدم وكلمة سر</h3><p class="dim">من أخصائيك بدل الرابط: اكتبهما كما وصلاك.</p><input class="inp" id="crU" dir="ltr" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="اسم المستخدم"><input class="inp" id="crP" dir="ltr" type="password" autocomplete="current-password" placeholder="كلمة السر"><button class="btn" data-act="useCred"' + (V.busy ? ' disabled' : '') + '>' + (V.busy ? 'جارٍ التحقق…' : 'دخول') + '</button></section>'
     + '<section class="card stack"><h3>لديّ حساب في متصفح أو جوال آخر</h3><p class="dim">من «حصتي» القديم: تقدّمي ← «نقل حسابي» ← انسخ الرمز وألصقه هنا.</p><input class="inp" id="xferIn" dir="ltr" autocomplete="off" placeholder="HX1-…"><button class="btn sec" data-act="useXfer"' + (V.busy ? ' disabled' : '') + '>' + (V.busy ? 'جارٍ النقل…' : 'نقل حسابي إلى هنا') + '</button></section>'
     + (V.err ? '<p class="err">' + esc(V.err) + '</p>' : '') + '</div></div></div>';
 }
@@ -4382,6 +4389,12 @@ document.addEventListener('click', (e) => {
       const v = ($('#invIn') || {}).value || '', m = /(?:#t=)?([A-Za-z0-9_-]{16,40})\.([A-Za-z0-9_-]{11})(?![A-Za-z0-9_-])/.exec(v.trim());
       if (!m) { V.err = 'الرابط أو الرمز غير صحيح. انسخه كاملاً من رسالة أخصائيك.'; break; }
       try { sessionStorage.setItem(TKEY, m[1] + '.' + m[2]); } catch (x) { } V.err = ''; boot(); return;
+    }
+    case 'useCred': {
+      const u = (($('#crU') || {}).value || '').trim(), pw = (($('#crP') || {}).value || '').trim(); if (!u || !pw) { V.err = 'اكتب اسم المستخدم وكلمة السر.'; break; } V.busy = true; V.err = ''; render();
+      HXC.userHash(u).then((uh) => fetch(API + '/v1/creds/' + uh, { cache: 'no-store' }).then((r) => r.json().catch(() => ({})).then((j) => { if (r.status === 429) throw new Error(j.error || 'محاولات كثيرة، حاول بعد ساعة'); if (!r.ok || !j.blob) throw new Error('bad'); return HXC.credOpen(pw, j); })))
+        .then((t) => { const m = /^([A-Za-z0-9_-]{16,40})\.([A-Za-z0-9_-]{11})$/.exec(t); if (!m) throw new Error('bad'); try { sessionStorage.setItem(TKEY, t); } catch (x) { } V.busy = false; V.err = ''; boot(); })
+        .catch((x) => { V.busy = false; V.err = x && x.message && x.message !== 'bad' && !/operation/i.test(x.message) && !/decrypt/i.test(x.message) ? x.message : 'اسم المستخدم أو كلمة السر غير صحيحة، أو انتهت صلاحيتها. اطلب من أخصائيك بيانات جديدة.'; render(); }); return;
     }
     case 'useXfer': {
       const v = ($('#xferIn') || {}).value || ''; V.busy = true; V.err = ''; render();

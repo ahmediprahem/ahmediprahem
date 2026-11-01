@@ -80,8 +80,14 @@ function hxCat(sys) {
 }
 function hxPhone(p) { p = String(p || '').replace(/[٠-٩]/g, function (d) { return d.charCodeAt(0) - 0x660; }).replace(/[۰-۹]/g, function (d) { return d.charCodeAt(0) - 0x6F0; }).replace(/[^\d+]/g, ''); if (!p) return ''; if (p.charAt(0) === '+') return p.slice(1); if (p.slice(0, 2) === '00') return p.slice(2); var cc = String(HX.st.cc || '966').replace(/\D/g, ''); return p.charAt(0) === '0' ? cc + p.slice(1) : (p.indexOf(cc) === 0 ? p : cc + p); }
 function hxLink(inv) { return hxRelay() + '/#t=' + inv.tok + '.' + inv.fp; }
-function hxWaText(inv) { return 'مرحباً ' + inv.label + '،\nأرسل لك ' + (HX.st.name || 'أخصائي التغذية') + ' رابط تطبيق «حصتي» لتسجيل بياناتك واستلام خطتك الغذائية على جوالك:\n' + hxLink(inv) + '\n\nالرابط شخصي ويُستعمل مرة واحدة، وصالح حتى ' + new Date(inv.exp * 1000).toLocaleDateString('ar') + '.'; }
+function hxWaText(inv) { if (inv.cu) return 'مرحباً ' + inv.label + '،\nأرسل لك ' + (HX.st.name || 'أخصائي التغذية') + ' بيانات دخولك إلى تطبيق «حصتي» لتسجيل بياناتك واستلام خطتك:\n\nافتح: ' + hxRelay() + '\nاختر «لديّ اسم مستخدم وكلمة سر»\nاسم المستخدم: ' + inv.cu + '\nكلمة السر: ' + inv.cp + '\n\nشخصية ولا تشاركها، وصالحة حتى ' + new Date(inv.exp * 1000).toLocaleDateString('ar') + '.'; return 'مرحباً ' + inv.label + '،\nأرسل لك ' + (HX.st.name || 'أخصائي التغذية') + ' رابط تطبيق «حصتي» لتسجيل بياناتك واستلام خطتك الغذائية على جوالك:\n' + hxLink(inv) + '\n\nالرابط شخصي ويُستعمل مرة واحدة، وصالح حتى ' + new Date(inv.exp * 1000).toLocaleDateString('ar') + '.'; }
 function hxWa(inv) { var p = hxPhone(inv.phone); return 'https://wa.me/' + (p || '') + '?text=' + encodeURIComponent(hxWaText(inv)); }
+var HX_PW = 'abcdefghjkmnpqrstuvwxyz23456789';
+function hxRnd(n) { var a = crypto.getRandomValues(new Uint8Array(n)), o = ''; for (var i = 0; i < n; i++) o += HX_PW[a[i] % HX_PW.length]; return o; }
+function hxCredMake(h, inv, un, pw) {                              // اسم مستخدم + كلمة سر ← غلاف الدعوة (tok.fp) مشفّر بكلمة السر، يُسجَّل على المحطة؛ ولا يُرسَل رابط
+  un = un || ('hs' + hxRnd(6)); pw = pw || (hxRnd(4) + '-' + hxRnd(4) + '-' + hxRnd(4));
+  return Promise.all([HXC0.userHash(un), HXC0.credSeal(pw, inv.tok + '.' + inv.fp)]).then(function (r) { return hxFetch('POST', '/v1/creds', { uh: r[0], h: h, salt: r[1].salt, iter: r[1].iter, blob: r[1].blob }, true).then(function () { inv.cu = un; inv.cp = pw; inv.cuh = r[0]; return hxSave(); }); });
+}
 function hxInvite(label, phone, days, sys) {
   var tok = HXC0.token(), exp = Math.floor(Date.now() / 1000) + days * 86400, h;
   return Promise.all([HXC0.tokenHash(tok), HXC0.fpOf(HX.st.ident.encPub)]).then(function (r) {
@@ -277,12 +283,13 @@ function hxSetPage() {
 }
 function hxInvForm() {
   return '<div class="ucard hxform"><h3>دعوة عميل إلى «حصتي»</h3><div class="row"><div><label>اسم العميل</label><input id="hxi_l" maxlength="80" placeholder="مثال: سارة أحمد"></div><div><label>جوال العميل (للواتساب)</label><input id="hxi_p" type="tel" inputmode="tel" dir="ltr" placeholder="05xxxxxxxx"></div><div><label>نظام الخطة</label><select id="hxi_s"><option value="ex">نظام الحصص</option><option value="g">نظام الجرامات</option></select></div><div><label>صلاحية الرابط</label><select id="hxi_d">' + HX_DAYS.map(function (x) { return '<option value="' + x[0] + '"' + (x[0] === 7 ? ' selected' : '') + '>' + x[1] + '</option>'; }).join('') + '</select></div></div>'
+    + '<div class="row"><div><label>طريقة دخول العميل</label><select id="hxi_m"><option value="link">رابط على واتساب</option><option value="cred">اسم مستخدم وكلمة سر (بدل الرابط)</option></select></div><div><label>اسم المستخدم (اختياري)</label><input id="hxi_u" dir="ltr" autocomplete="off" maxlength="30" placeholder="يُولَّد تلقائياً إن تُرك فارغاً"></div><div><label>كلمة السر (اختياري)</label><input id="hxi_pw" dir="ltr" autocomplete="off" maxlength="40" placeholder="تُولَّد قوية تلقائياً (موصى به)"></div></div><p class="small">باسم مستخدم وكلمة سر يدخل العميل «حصتي» مباشرة دون رابط. كلمة السر تُغلِّف الدعوة على جهازك ولا تراها المحطة، ويُنصح بتركها تُولَّد تلقائياً.</p>'
     + '<p class="two"><button data-a="hxInvMake">إنشاء الرابط</button><button class="sec" data-a="hxInvForm">إلغاء</button></p></div>';
 }
 function hxInvCard(h, v) {
   var exp = v.exp * 1000 < Date.now();
   return '<div class="ucard hxinv' + (exp ? ' exp' : '') + '"><b>' + esc(v.label) + '</b> <small>' + (v.phone ? '<span dir="ltr">' + esc(v.phone) + '</span> • ' : '') + (exp ? 'انتهت صلاحيته' : 'صالح حتى ' + new Date(v.exp * 1000).toLocaleDateString('ar')) + ' • ' + (v.sys === 'g' ? 'نظام الجرامات' : 'نظام الحصص') + ' • لم يُفتح بعد</small>'
-    + (exp ? '' : '<div class="hxlink" dir="ltr">' + esc(hxLink(v)) + '</div><p class="two"><a class="btn" href="' + esc(hxWa(v)) + '" target="_blank" rel="noopener" data-hxwa="1">💬 إرسال على واتساب</a><button class="sec" data-a="hxCopy" data-v="' + h + '">نسخ الرابط</button><button class="sec" data-a="hxInvDel" data-v="' + h + '">إلغاء الدعوة</button></p>')
+    + (exp ? '' : (v.cu ? '<div class="hxlink" dir="ltr">👤 ' + esc(v.cu) + ' &nbsp; 🔑 ' + esc(v.cp) + '</div><p class="small">يدخل العميل من ' + esc(hxRelay()) + ' ← «لديّ اسم مستخدم وكلمة سر».</p>' : '<div class="hxlink" dir="ltr">' + esc(hxLink(v)) + '</div>') + '<p class="two"><a class="btn" href="' + esc(hxWa(v)) + '" target="_blank" rel="noopener" data-hxwa="1">💬 إرسال على واتساب</a><button class="sec" data-a="hxCopy" data-v="' + h + '">' + (v.cu ? 'نسخ البيانات' : 'نسخ الرابط') + '</button><button class="sec" data-a="hxInvDel" data-v="' + h + '">إلغاء الدعوة</button></p>')
     + (exp ? '<button class="sec sm" data-a="hxInvDel" data-v="' + h + '">حذف</button>' : '') + '</div>';
 }
 function hxReqCard(q) {
@@ -373,7 +380,12 @@ Object.assign(A, {
   hxInvMake: function () {
     var l = ($('#hxi_l').value || '').trim(), ph = ($('#hxi_p').value || '').trim(), d = +$('#hxi_d').value || 7, sy = ($('#hxi_s') || {}).value === 'g' ? 'g' : 'ex';
     if (!l) { toast('اكتب اسم العميل'); return; }
-    hxInvite(l, ph, d, sy).then(function (inv) { HX.form = false; HX.made = Object.keys(HX.st.inv).filter(function (h) { return HX.st.inv[h] === inv; })[0]; main(); toast('✓ جاهز — أرسل الرابط على واتساب أو انسخه'); }).catch(hxErr);
+    var cred = ($('#hxi_m') || {}).value === 'cred', un = (($('#hxi_u') || {}).value || '').trim().toLowerCase(), pw = (($('#hxi_pw') || {}).value || '').trim();
+    if (cred) { if (un && !/^[a-z0-9._-]{3,30}$/.test(un)) { toast('اسم المستخدم: 3 إلى 30 حرفاً إنجليزياً صغيراً أو أرقاماً أو . _ -'); return; } if (pw && (pw.length < 10 || !/[A-Za-z]/.test(pw) || !/\d/.test(pw))) { toast('كلمة السر: 10 أحرف على الأقل وفيها حروف وأرقام'); return; } }
+    hxInvite(l, ph, d, sy).then(function (inv) {
+      var h = Object.keys(HX.st.inv).filter(function (q) { return HX.st.inv[q] === inv; })[0]; if (!cred) { HX.form = false; HX.made = h; main(); toast('✓ جاهز — أرسل الرابط على واتساب أو انسخه'); return; }
+      return hxCredMake(h, inv, un, pw).then(function () { HX.form = false; HX.made = h; main(); toast('✓ جاهز — أرسل اسم المستخدم وكلمة السر'); }).catch(function (e) { return hxFetch('POST', '/v1/invites/revoke', { h: h }, true).catch(function () { }).then(function () { delete HX.st.inv[h]; return hxSave(); }).then(function () { throw e; }); });
+    }).catch(hxErr);
   },
   hxCopy: function (h) { var v = HX.st.inv[h]; if (!v) return; var t = hxWaText(v); (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function () { toast('نُسخت الرسالة مع الرابط'); }).catch(function () { prompt('انسخ الرابط:', hxLink(v)); }); },
   hxInvDel: function (h) { if (!confirm('إلغاء هذه الدعوة؟ لن يعمل الرابط بعد الآن.')) return; hxFetch('POST', '/v1/invites/revoke', { h: h }, true).catch(function () { }).then(function () { delete HX.st.inv[h]; if (HX.made === h) HX.made = null; return hxSave(); }).then(main); },
