@@ -651,6 +651,18 @@ html[data-theme="firoz"] .alm{background:radial-gradient(70% 50% at 50% 30%,rgba
 .lbi[hidden]{display:none}#libq{width:100%}
 .lbf[hidden]{display:none}.lbf summary{cursor:pointer;display:flex;align-items:center;gap:8px;list-style:none}.lbf summary::-webkit-details-marker{display:none}.lbf>.stack{margin-top:10px}.lbfi{font-size:20px}
 
+/* 0.78 تحدي الحركة + الشريحة */
+.chcar{position:relative;overflow:hidden;direction:rtl}.chcar.one{overflow:visible}.chtr{display:flex;transition:transform .55s cubic-bezier(.2,.8,.2,1)}.chsl{flex:0 0 100%;min-width:0;padding-inline:1px;direction:rtl}.chsl>.card{height:100%}
+.chdt{display:flex;gap:6px;justify-content:center;padding:6px 0 0}.chdt button{width:8px;height:8px;border-radius:9px;background:var(--line2);padding:0;transition:.3s}.chdt button.on{width:22px;background:var(--mint)}
+.mvc{width:100%;text-align:right;border-color:color-mix(in srgb,var(--mint) 35%,transparent);background:linear-gradient(135deg,color-mix(in srgb,var(--mint) 16%,var(--glass)),var(--glass));color:inherit;font:inherit;min-height:176px}.mvk{font-size:12px;color:var(--amber);font-weight:700}.mvt{font-size:19px}
+.mvp{position:relative;display:flex;align-items:center;margin:14px 8px 6px;height:26px}.mvp i{width:14px;height:14px;border-radius:50%;flex:none;background:var(--glass);border:2px solid var(--line2)}.mvp i.on{background:var(--mint);border-color:var(--mint);box-shadow:0 0 10px var(--mint)}.mvp i.fin{border-color:var(--amber)}.mvp b{flex:1;height:2px;background:var(--line2);border-radius:2px}.mvme{position:absolute;top:-16px;font-size:24px;transition:inset-inline-start .6s}
+.mvgo{margin-top:auto;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--mut)}.pill.g{background:color-mix(in srgb,var(--amber) 18%,transparent);color:var(--amber)}
+.mvlv{gap:4px}.mvlv button{flex-direction:column;line-height:1.3}.mvlv small{display:block;font-size:11px}.mvlv button:disabled:not(.on){opacity:.45}
+.mvd{display:flex;flex-direction:column;gap:6px}.mvdy{display:flex;gap:10px;align-items:center;padding:8px;border-radius:12px;background:var(--glass);font-size:13px}.mvdy b{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--glass2,var(--glass));flex:none}.mvdy.d b{background:var(--mint);color:#032a27}.mvdy.c{outline:1px solid var(--mint)}.mvdy span{min-width:0;direction:ltr;text-align:left;flex:1}
+.mvcert{border:1.5px solid var(--amber);border-radius:16px;padding:12px;text-align:center}.mvcert .o{color:var(--amber);letter-spacing:.25em;font-size:12px}.mvcert b{display:block;font-size:20px}.mvcert small{display:block;color:var(--mut)}.mvcert.lock{opacity:.6}
+@media (prefers-reduced-motion:reduce){.chtr,.mvme{transition:none}}
+.pill{padding:2px 10px;border-radius:99px;background:color-mix(in srgb,var(--mint) 18%,transparent);color:var(--mint);font-weight:700;font-size:12px}
+
 /* ==========================================================================
    «حصتي» — themes.css  •  ثيم «وردة» (data-theme="rose") وثيم «نبض» (data-theme="pulse")
    يُحمَّل بعد code/style.css. الثيم الحالي يبقى الافتراضي: بلا data-theme لا يتغيّر شيء.
@@ -3582,10 +3594,64 @@ function sdAchieve() {
   const id = 'a' + now().toString(36) + 'sd', c = { id, pid: 'sd7', w: 99, title: 'تحدي العادات السبع', lines: ['٧ أيام لتطوير الذات: المبادرة، والهدف، والأولويات، والكل رابح، والإصغاء، والتكاتف، والتجديد'], at: now(), name: String(S.p.name || '').trim(), sex: S.p.sex, dname: S.dname || '', clinic: '', phrase: PHRASES[now() % PHRASES.length] };
   S.ach = (S.ach || []).concat([c]); send({ t: 'ach', id: 'sd7', w: 99, title: c.title }); save(); return c;
 }
+
+// ---- 0.78: تحدي الحركة (شريحة في «اليوم»): 4 مستويات × 7 أيام، فيديو مشي واحد كل يوم من قناة Walk at Home، ويُفتح اليوم بعد إتمام السابق، وشهادة عند اليوم السابع
+const MVL = [
+  { n: 'خطوة', m: 15, mi: 'ميل', v: [['tW9IY48x1bc', 'Walk 15 — 1 Mile Walking Exercise'], ['k_SoCdUlBvM', 'Beginner 1 Mile Walk'], ['njeZ29umqVE', '1 Mile Happy Walk'], ['KCe3ZS7pAC4', '1 Mile In-Home Walk'], ['JKT2U_hJe1g', '1 Mile Express'], ['lweAVLxdblQ', 'Burn Body Fat 1 Mile'], ['u08lo0bESJc', 'Heart Healthy 1 Mile Walk']] },
+  { n: 'إيقاع', m: 20, mi: 'ميل ونصف', v: [['wQrV75N2BrI', '20 Minute Brisk Walk'], ['kqaNUjTR70A', 'Walk Off Fat Fast — 20 Minute'], ['m9yI2LGZRE0', '20 Minute Boosted Walk'], ['-SSYX8sIOmM', '20 Minute Walk at Home Exercise'], ['UXS_fFeGAlc', '20 Minute Super Walk'], ['-SSYX8sIOmM', '20 Minute Walk at Home Exercise (إعادة)'], ['kqaNUjTR70A', 'Walk Off Fat Fast — 20 Minute (إعادة)']] },
+  { n: 'انطلاق', m: 30, mi: 'ميلان', v: [['l5uilZNoaAU', 'Burn Body Fat 2 Mile — 30 Minute'], ['AEREJOT_Mpc', '30 Minute Walking Exercise — 2 Mile'], ['oqo7iNdRoaw', '30 Minute FAST Walk — 2 Mile'], ['OavMd2j3DvU', '2 Mile Walk Workout'], ['cvEJ5WFk2KE', '30 Minute Boosted Fitness Walk'], ['82Jbd0OdLx4', '30 Minute FAST Walk With Bands'], ['m3v3PN5bvZo', '30 Minute Power Walking Workout']] },
+  { n: 'اندفاع', m: 45, mi: 'ثلاثة أميال', v: [['Yr41_8QOTF8', 'Burn Body Fat 3 Mile'], ['wuDp6v_oL34', 'iWalk Strong 3 Mile Walk'], ['KDmqv_XMouA', '5K with a Twist — 3 x 1 Mile'], ['6Z99XgLamg4', '3 Mile Walk & Firm'], ['DYuw4f1c4xs', 'American Heart Association 3 Mile Walk'], ['DYuw4f1c4xs', 'American Heart Association 3 Mile Walk (إعادة)'], ['Yr41_8QOTF8', 'Burn Body Fat 3 Mile (إعادة)']] }
+];
+const MV_GAIN = ['طاقة ونشاط أعلى خلال يومك', 'لياقة قلب وتنفس تتحسن تدريجياً', 'دعم لحرق الدهون مع نظامك الغذائي', 'عادة حركة تستمر بعد التحدي'];
+function mvSt() { return S.mv && S.mv.st ? S.mv : null; }
+const mvDone = (i) => !!(S.mv && S.mv.dn && S.mv.dn[i]);
+const mvN = () => (S.mv && S.mv.dn ? Object.keys(S.mv.dn).length : 0);
+function mvFocus() {            // اليوم المفتوح الآن: التالي بعد آخر يوم أُتمّ في يوم سابق، أو -1 للانتظار حتى الغد / الانتهاء
+  const m = mvSt(); if (!m) return -1; const n = mvN(); if (n >= 7) return -1; if (!n) return 0; const last = m.dn[n - 1]; return dkey(new Date(last)) < dkey(new Date()) ? n : -1;
+}
+function mvStones() { const n = mvN(); return '<div class="mvp" aria-hidden="true">' + Array.from({ length: 7 }, (_, i) => '<i class="' + (i < n ? 'on' : '') + (i === 6 ? ' fin' : '') + '"></i>').join('<b></b>') + '<span class="mvme" style="inset-inline-start:calc(' + (Math.min(n, 6) / 6 * 100) + '% - 13px)">🚶</span></div>'; }
+function mvCard() {
+  const m = mvSt(), n = mvN(), L = m ? MVL[m.l] : null;
+  if (m && m.fin) return '<button class="card mvc stack" data-act="mvOpen"><span class="mvk">أتممتَ التحدي 🏅</span><b class="mvt">تحدي الحركة — المستوى ' + (m.l + 1) + ' «' + L.n + '»</b><span class="dim">شهادتك محفوظة في ملفي. ابدأ مستوى أعلى متى شئت.</span></button>';
+  return '<button class="card mvc stack" data-act="mvOpen"><span class="mvk">تحدي ٧ أيام' + (L ? ' • ' + L.m + ' دقيقة يومياً' : '') + '</span><b class="mvt">🚶 تحدي الحركة</b><span class="dim">امشِ في بيتك مع فيديو كل يوم: طاقة أعلى ولياقة تزداد ودعم لحرقك. شهادة في اليوم السابع.</span>' + mvStones()
+    + '<span class="mvgo">' + (m ? '<span class="pill">' + n + ' من ٧</span>' : '<span class="pill g">🏅 شهادة</span>') + '<span>' + (m ? (mvFocus() >= 0 ? 'فيديو اليوم ‹' : 'يُفتح الغد ‹') : 'التفاصيل والانضمام ‹') + '</span></span></button>';
+}
+function chalCar() {
+  const sd = sdCard(), sl = [mvCard()].concat(sd ? [sd] : []), i = Math.min(V.chi || 0, sl.length - 1);
+  if (sl.length === 1) return '<div class="chcar one">' + sl[0] + '</div>';
+  return '<div class="chcar" data-n="' + sl.length + '" role="region" aria-roledescription="شرائح" aria-label="تحدياتي"><div class="chtr" style="transform:translateX(' + (i * 100) + '%)">' + sl.map((x) => '<div class="chsl">' + x + '</div>').join('') + '</div><div class="chdt">' + sl.map((x, k) => '<button class="' + (k === i ? 'on' : '') + '" data-act="chGo" data-v="' + k + '" aria-label="الشريحة ' + (k + 1) + '"></button>').join('') + '</div></div>';
+}
+function scrMv() {
+  const m = mvSt(), sel = V.mvl == null ? (m ? m.l : 2) : V.mvl, L = MVL[sel], n = mvN(), f = mvFocus();
+  let h = '<div class="scr"><div class="scroll"><div class="stack"><div class="row" style="justify-content:space-between"><h2>🚶 تحدي الحركة</h2><button class="btn sm sec" data-act="mvX">إغلاق</button></div>';
+  h += '<div class="segc mvlv" role="group" aria-label="المستوى">' + MVL.map((l, i) => '<button class="' + (i === sel ? 'on' : '') + '" data-act="mvLv" data-v="' + i + '"' + (m && !m.fin ? ' disabled' : '') + '><b>' + (i + 1) + '</b> ' + l.n + '<small>' + l.m + ' د</small></button>').join('') + '</div>';
+  h += '<section class="card stack"><h3>المطلوب منك</h3><ul class="plist"><li>٧ أيام، كل يوم فيديو مشي واحد مدته نحو ' + L.m + ' دقيقة (' + L.mi + ').</li><li>يُفتح كل يوم بعد إتمام السابق في يوم سابق.</li></ul><h3>ما يعود عليك</h3><ul class="plist">' + MV_GAIN.map((x) => '<li>' + x + '</li>').join('') + '</ul>'
+    + '<div class="cert mvcert' + (m && m.fin ? '' : ' lock') + '"><span class="o">شهادة إتمام</span><b>' + esc(String(S.p.name || '').trim() || 'اسمك هنا') + '</b><small>تحدي الحركة • المستوى ' + (sel + 1) + ' «' + L.n + '» • ' + L.m * 7 + ' دقيقة في ٧ أيام</small></div>'
+    + '<p class="dim">استشر طبيبك قبل البدء إن كان لديك مرض في القلب أو الركبتين أو كنتِ حاملاً. توقف إذا شعرت بألم أو دوار.</p></section>';
+  if (!m || m.fin) h += '<button class="btn full" data-act="mvJoin">' + (m && m.fin ? 'ابدأ هذا المستوى من جديد' : 'انضم للتحدي وأضفه لشاشتي الرئيسية') + '</button>';
+  else {
+    h += '<section class="card stack"><div class="row" style="justify-content:space-between"><h3>أيامك</h3><span class="dim">' + n + ' من ٧</span></div>' + mvStones() + '<div class="mvd">' + L.v.map((v, i) => '<div class="mvdy' + (mvDone(i) ? ' d' : '') + (i === f ? ' c' : '') + '"><b>' + (mvDone(i) ? '✓' : i + 1) + '</b><span>' + esc(v[1]) + '</span></div>').join('') + '</div></section>';
+    if (f >= 0) h += '<section class="card stack"><h3>فيديو اليوم ' + (f + 1) + '</h3><p class="dim" dir="ltr" style="text-align:right">' + esc(L.v[f][1]) + '</p>' + wvid({ yt: L.v[f][0] }) + '<button class="btn full" data-act="mvDone">أتممتُ تمرين اليوم ' + (f + 1) + '</button></section>';
+    else h += '<div class="banner info">' + I('check') + '<span>أتممتَ اليوم ' + n + '. فيديو الغد يُفتح غداً.</span></div>';
+    h += '<button class="btn sec sm" data-act="mvQuit">إيقاف التحدي</button>';
+  }
+  return h + '<p class="dim">الفيديوهات من قناة Walk at Home على يوتيوب وتُشغَّل عبر مشغّل يوتيوب الرسمي.</p></div></div></div>';
+}
+function mvAchieve() {
+  const m = S.mv, L = MVL[m.l], id = 'a' + now().toString(36) + 'mv', c = { id, pid: 'mv' + m.l, w: 99, title: 'شهادة إتمام تحدي الحركة', lines: ['المستوى ' + (m.l + 1) + ' «' + L.n + '» • ٧ أيام • ' + L.m * 7 + ' دقيقة مشي'], at: now(), name: String(S.p.name || '').trim(), sex: S.p.sex, dname: S.dname || '', clinic: '', phrase: PHRASES[now() % PHRASES.length] };
+  S.ach = (S.ach || []).concat([c]); send({ t: 'ach', id: 'mv' + m.l, w: 99, title: c.title }); save(); return c;
+}
+setInterval(() => {
+  const el = document.querySelector('.chcar[data-n]'); if (!el || V.chp || sheet || (window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches) || document.hidden) return;
+  const n = +el.dataset.n; V.chi = ((V.chi || 0) + 1) % n; el.querySelector('.chtr').style.transform = 'translateX(' + V.chi * 100 + '%)'; el.querySelectorAll('.chdt button').forEach((b, k) => b.classList.toggle('on', k === V.chi));
+}, 6000);
+let chX = null;
+document.addEventListener('touchstart', (e) => { const el = e.target.closest && e.target.closest('.chcar[data-n]'); chX = el ? e.touches[0].clientX : null; if (el) V.chp = 1; }, { passive: true });
+document.addEventListener('touchend', (e) => { if (chX == null) return; const el = document.querySelector('.chcar[data-n]'), dx = e.changedTouches[0].clientX - chX; chX = null; setTimeout(() => { V.chp = 0; }, 4000); if (!el || Math.abs(dx) < 45) return; const n = +el.dataset.n; V.chi = ((V.chi || 0) + (dx > 0 ? 1 : n - 1)) % n; el.querySelector('.chtr').style.transform = 'translateX(' + V.chi * 100 + '%)'; el.querySelectorAll('.chdt button').forEach((b, k) => b.classList.toggle('on', k === V.chi)); }, { passive: true });
 function tabToday() {
   const d = TODAY, L = dl(d), [done, n] = itemsOfDay(d), pct = n ? Math.round(done / n * 100) : 0, C = 2 * Math.PI * 40;
   const first = (S.p.name || '').trim().split(/\s+/)[0] || '';
-  let out = sceneHeader(first, d) + missionCard(d) + whChip() + sdCard() + (S.fw === 'pending' ? firstWinCard() : installState() === 'done' || installState() === 'desktop' ? notifCard(true) : installCard('today')) + chalCard() + prCard() + apCard() + wkCard() + bdCard() + panCard() + pfCard();
+  let out = sceneHeader(first, d) + missionCard(d) + whChip() + chalCar() + (S.fw === 'pending' ? firstWinCard() : installState() === 'done' || installState() === 'desktop' ? notifCard(true) : installCard('today')) + chalCard() + prCard() + apCard() + wkCard() + bdCard() + panCard() + pfCard();
   out += '<section class="card ring"><svg viewBox="0 0 100 100" role="img" aria-label="التزام اليوم ' + pct + '%"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="10"/><circle cx="50" cy="50" r="40" fill="none" stroke="#6fe3a9" stroke-width="10" stroke-linecap="round" stroke-dasharray="' + C + '" stroke-dashoffset="' + (C * (1 - pct / 100)) + '"/></svg><div style="flex:1"><div class="num">' + pct + '%</div><div class="mut">' + done + ' من ' + n + ' أصناف اليوم</div>'
     + (pct === 100 ? '<div class="dim" style="color:var(--mint)">يوم كامل، أحسنت!</div>' : '<div class="dim">علّم ما أكلته باللمس.</div>') + '</div></section>';
   const dp = dayPlan(d), kc = dp.kcal || DATA.kcal, pr = dp.p || DATA.pro, wt = +(dp.water || DATA.water), cups = Math.max(4, Math.min(16, Math.round(wt / CUP)));
@@ -4392,7 +4458,7 @@ function render() {
   const sc = $('.scroll'), key = (S ? S.screen + S.step + S.tab + (S.chat ? 'c' : '') : '') + V.screen, top = sc ? sc.scrollTop : 0;
   let scr;
   if (V.screen === 'boot') scr = scrBoot(); else if (V.screen === 'bad') scr = scrBad(); else if (V.screen === 'start') scr = scrStart(); else if (V.screen === 'moved') scr = scrMoved(); else if (V.screen === 'lock') scr = scrLock(); else if (V.screen === 'pin') scr = scrPin(); else if (V.screen === 'onb') scr = scrOnb();
-  else scr = V.sd != null && S.sd && S.sd.st ? scrSd() : V.hf ? scrHF() : V.wk ? scrWk() : V.bd ? scrBody() : V.pan != null ? scrPantry() : V.pf != null ? scrProf() : S.rqOpen && window.RL && RL.idx ? scrQuiz() : S.chat ? scrChat() : S.plan && S.screen === 'app' ? scrApp() : { invite: scrInvite, setup: scrSetup, wizard: scrWizard, review: scrReview, sent: scrSent, app: scrSent }[S.screen]();
+  else scr = V.mv ? scrMv() : V.sd != null && S.sd && S.sd.st ? scrSd() : V.hf ? scrHF() : V.wk ? scrWk() : V.bd ? scrBody() : V.pan != null ? scrPantry() : V.pf != null ? scrProf() : S.rqOpen && window.RL && RL.idx ? scrQuiz() : S.chat ? scrChat() : S.plan && S.screen === 'app' ? scrApp() : { invite: scrInvite, setup: scrSetup, wizard: scrWizard, review: scrReview, sent: scrSent, app: scrSent }[S.screen]();
   const keep = {}; document.querySelectorAll('video[data-keep]').forEach((n) => { keep[n.dataset.keep] = n; });
   const cmI = $('#cmIn'), cmV = cmI ? [cmI.value, document.activeElement === cmI] : null;          // مسودة التعليق تبقى عند إعادة الرسم (وصول التعليقات مثلاً)
   $('#root').innerHTML = '<div class="stage"><div class="device">' + (V.online ? '' : '<div class="offline">بلا اتصال — تُرسل بياناتك عند عودة الإنترنت</div>') + scr + (S ? sheetHtml() : '') + (toastMsg ? '<div class="toast" role="status">' + I('check') + '<span>' + esc(toastMsg) + '</span></div>' : '') + '</div></div>';
@@ -4602,6 +4668,13 @@ document.addEventListener('click', (e) => {
     case 'sdStart': S.sd = { st: dkey(new Date()), dn: {} }; V.sd = 0; break;
     case 'sdLater': S.sd = Object.assign(S.sd || {}, { hide: now() }); break;
     case 'sdOpen': V.sd = +v; break;
+    case 'chGo': V.chi = +v; V.chp = 1; setTimeout(() => { V.chp = 0; }, 4000); break;
+    case 'mvOpen': V.mv = 1; V.mvl = null; break;
+    case 'mvX': V.mv = 0; break;
+    case 'mvLv': V.mvl = +v; break;
+    case 'mvJoin': S.mv = { l: V.mvl == null ? 2 : V.mvl, st: dkey(new Date()), dn: {} }; V.mvl = null; toast('انضممت! التحدي على شاشتك الرئيسية'); break;
+    case 'mvQuit': if (confirm('إيقاف التحدي؟ سيُحذف تقدّمك فيه.')) { S.mv = null; V.mv = 0; } break;
+    case 'mvDone': { const f = mvFocus(); if (f < 0 || !mvSt()) break; S.mv.dn[f] = now(); if (mvN() >= 7) { S.mv.fin = now(); const c = mvAchieve(); setTimeout(() => celebrateAch(c), 80); } else toast('✓ أحسنت! تبقى ' + (7 - mvN()) + ' أيام'); break; }
     case 'sdX': V.sd = null; break;
     case 'sdDay': { const i = +v; if (i > sdAvail()) { toast('تُفتح عادة هذا اليوم في موعدها: خطوة كل يوم.'); return; } V.sd = i; break; }
     case 'sdTask': { const i = V.sd, dn = (S.sd.dn[i] = S.sd.dn[i] || { t: [], n: '' }); if (dn.ok) break; dn.t[+v] = dn.t[+v] ? 0 : 1; break; }
