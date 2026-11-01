@@ -6,7 +6,8 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   const A = await linked('setup_m', errs, { setup: async (m) => {
     assert(/نجهّز تطبيقك/.test(await m.textContent('.setup h1'))); assert(await m.isDisabled('[data-act="setupGo"]'), 'لا متابعة قبل اختيار الديانة');
     await m.click('[data-act="setupRel"][data-v="م"]'); await m.waitForSelector('#setupCity'); assert(await m.locator('#setupCity optgroup[label="المملكة العربية السعودية"] option').count() >= 30, 'مدن المملكة كاملة');
-    for (const c of ['الأحساء', 'حائل', 'عرعر', 'سكاكا', 'جازان', 'نجران', 'الباحة', 'تبوك', 'بريدة', 'ينبع']) assert(await m.locator('#setupCity option', { hasText: c }).count() === 1, 'مدينة ' + c);
+    for (const c of ['الأحساء', 'حائل', 'عرعر', 'سكاكا', 'جازان', 'نجران', 'الباحة', 'تبوك', 'بريدة', 'ينبع', 'القريات', 'طبرجل', 'دومة الجندل', 'طريف', 'رفحاء', 'تيماء']) assert(await m.locator('#setupCity option', { hasText: c }).count() === 1, 'مدينة ' + c);
+    assert(await m.locator('#setupCity optgroup[label="مصر"] option').count() >= 28, 'محافظات مصر كلها'); for (const c of ['بنها', 'دمياط', 'الغردقة', 'مرسى مطروح', 'الخارجة', 'العريش', 'شرم الشيخ', 'الفيوم', 'سوهاج', 'قنا']) assert(await m.locator('#setupCity option', { hasText: c }).count() === 1, 'مدينة ' + c);
     await m.selectOption('#setupCity', 'الرياض'); await m.click('[data-act="setupTog"][data-v="med"]'); await m.click('[data-act="setupGo"]'); } });
   let R = await A.m.evaluate(() => { const S = window.HissatiApp.state(); return { rel: S.p.rel, rem: S.rem }; });
   assert.strictEqual(R.rel, 'م'); assert(R.rem.pray && R.rem.prCity === 'الرياض' && R.rem.adhAm && R.rem.adhPm && R.rem.sal && R.rem.water && R.rem.meals && R.rem.med, JSON.stringify(R.rem));

@@ -611,6 +611,16 @@ html[data-theme="firoz"] .alm{background:radial-gradient(70% 50% at 50% 30%,rgba
 .tabbar button{min-width:0}.tabbar button span{font-size:11px}
 .hfph{gap:12px}.hfph figure{margin:0;flex:1;text-align:center}.hfph img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:14px;border:1px solid var(--line)}.hfph figcaption{font-size:12px;color:var(--mut);margin-top:4px}
 .hfs .hpr{display:grid;grid-template-columns:1.2fr 1.1fr .7fr 1fr;gap:6px;align-items:center}
+/* 0.64: تحدي العادات السبع (تطوير الذات) */
+.sdc{border-color:color-mix(in srgb,var(--mint) 35%,transparent)}.sdh{display:flex;justify-content:space-between;align-items:center;gap:8px}.sdh h3{margin:0}
+.sdn{display:flex;align-items:center;gap:0;direction:rtl}.sdnd{width:34px;height:34px;border-radius:50%;flex:none;border:2px solid var(--line2);background:var(--glass);color:var(--mut);font:inherit;font-weight:700;font-size:13px;display:grid;place-items:center;padding:0}
+.sdnd.d{background:var(--mint);border-color:var(--mint);color:var(--mintInk)}.sdnd.c{border-color:var(--amber);color:var(--amber);box-shadow:0 0 0 4px color-mix(in srgb,var(--amber) 22%,transparent)}.sdnd.l{opacity:.55}
+.sdlk{height:3px;flex:1;background:var(--line2);min-width:4px}
+.sdnow{display:flex;flex-direction:column;gap:4px}.sdnow b{font-size:16px}
+.sdday{display:flex;flex-direction:column;gap:10px}.sdcvw{border-radius:16px;overflow:hidden;background:linear-gradient(180deg,var(--glass2),transparent);border:1px solid var(--line)}.sdcv{display:block;width:100%;height:auto}
+.sdno{font-size:12px;color:var(--amber);letter-spacing:.05em}.sdday h3{margin:0;font-size:20px}
+.sdt{display:flex;flex-direction:column;gap:8px}.sdtk{display:flex;gap:10px;align-items:center;text-align:right;width:100%;padding:12px;border-radius:14px;border:1px solid var(--line2);background:var(--glass);color:var(--text);font:inherit;font-size:14px;line-height:1.6}
+.sdtk .ck{width:24px;height:24px;border-radius:8px;border:2px solid var(--line2);flex:none;display:grid;place-items:center;font-weight:700;color:var(--mintInk)}.sdtk.on{border-color:var(--mint);background:color-mix(in srgb,var(--mint) 12%,transparent)}.sdtk.on .ck{background:var(--mint);border-color:var(--mint)}
 
 
 /* ==========================================================================
@@ -2950,7 +2960,8 @@ function suppCard() { const L = S.supps || []; return L.length ? '<section class
 
 // ---- 0.57: أوقات الصلاة تُحسب على الجهاز بلا إنترنت (الهيئة المصرية لمدن مصر، وأم القرى لمدن السعودية)، والصلاة على النبي ﷺ، وخطواتي
 const CITIES = [['القاهرة', 30.0444, 31.2357, 'eg'], ['الجيزة', 30.0131, 31.2089, 'eg'], ['الإسكندرية', 31.2001, 29.9187, 'eg'], ['المنصورة', 31.0409, 31.3785, 'eg'], ['طنطا', 30.7865, 31.0004, 'eg'], ['الزقازيق', 30.5877, 31.502, 'eg'], ['أسيوط', 27.1809, 31.1837, 'eg'], ['الأقصر', 25.6872, 32.6396, 'eg'], ['أسوان', 24.0889, 32.8998, 'eg'],
-  ['الرياض', 24.7136, 46.6753, 'sa'], ['جدة', 21.4858, 39.1925, 'sa'], ['مكة المكرمة', 21.3891, 39.8579, 'sa'], ['المدينة المنورة', 24.5247, 39.5692, 'sa'], ['الدمام', 26.4207, 50.0888, 'sa'], ['الخبر', 26.2172, 50.1971, 'sa'], ['الطائف', 21.2854, 40.4183, 'sa'], ['أبها', 18.2164, 42.5053, 'sa'], ['تبوك', 28.3835, 36.5662, 'sa'], ['بريدة', 26.326, 43.975, 'sa'], ['الأحساء', 25.3648, 49.5878, 'sa'], ['القطيف', 26.5565, 50.0089, 'sa'], ['الظهران', 26.2361, 50.0393, 'sa'], ['الجبيل', 27.0046, 49.6225, 'sa'], ['حفر الباطن', 28.4328, 45.9708, 'sa'], ['حائل', 27.5114, 41.7208, 'sa'], ['عرعر', 30.9753, 41.0381, 'sa'], ['سكاكا', 29.9697, 40.2064, 'sa'], ['جازان', 16.8892, 42.5511, 'sa'], ['نجران', 17.4917, 44.1322, 'sa'], ['الباحة', 20.0129, 41.4677, 'sa'], ['ينبع', 24.0895, 38.0618, 'sa'], ['الخرج', 24.1554, 47.3346, 'sa'], ['عنيزة', 26.084, 43.994, 'sa'], ['الرس', 25.8695, 43.4973, 'sa'], ['خميس مشيط', 18.3093, 42.7292, 'sa'], ['بيشة', 19.9906, 42.6049, 'sa'], ['العلا', 26.6085, 37.9232, 'sa'], ['المجمعة', 25.9039, 45.3467, 'sa'], ['وادي الدواسر', 20.4731, 44.7894, 'sa']];
+  ['الرياض', 24.7136, 46.6753, 'sa'], ['جدة', 21.4858, 39.1925, 'sa'], ['مكة المكرمة', 21.3891, 39.8579, 'sa'], ['المدينة المنورة', 24.5247, 39.5692, 'sa'], ['الدمام', 26.4207, 50.0888, 'sa'], ['الخبر', 26.2172, 50.1971, 'sa'], ['الطائف', 21.2854, 40.4183, 'sa'], ['أبها', 18.2164, 42.5053, 'sa'], ['تبوك', 28.3835, 36.5662, 'sa'], ['بريدة', 26.326, 43.975, 'sa'], ['الأحساء', 25.3648, 49.5878, 'sa'], ['القطيف', 26.5565, 50.0089, 'sa'], ['الظهران', 26.2361, 50.0393, 'sa'], ['الجبيل', 27.0046, 49.6225, 'sa'], ['حفر الباطن', 28.4328, 45.9708, 'sa'], ['حائل', 27.5114, 41.7208, 'sa'], ['عرعر', 30.9753, 41.0381, 'sa'], ['سكاكا', 29.9697, 40.2064, 'sa'], ['جازان', 16.8892, 42.5511, 'sa'], ['نجران', 17.4917, 44.1322, 'sa'], ['الباحة', 20.0129, 41.4677, 'sa'], ['ينبع', 24.0895, 38.0618, 'sa'], ['الخرج', 24.1554, 47.3346, 'sa'], ['عنيزة', 26.084, 43.994, 'sa'], ['الرس', 25.8695, 43.4973, 'sa'], ['خميس مشيط', 18.3093, 42.7292, 'sa'], ['بيشة', 19.9906, 42.6049, 'sa'], ['العلا', 26.6085, 37.9232, 'sa'], ['المجمعة', 25.9039, 45.3467, 'sa'], ['وادي الدواسر', 20.4731, 44.7894, 'sa'], ['القريات', 31.3318, 37.3428, 'sa'], ['طبرجل', 30.4999, 38.2161, 'sa'], ['دومة الجندل', 29.8113, 39.8669, 'sa'], ['طريف', 29.6233, 38.656, 'sa'], ['رفحاء', 29.6269, 43.4949, 'sa'], ['تيماء', 27.629, 38.546, 'sa'], ['ضباء', 27.35, 35.688, 'sa'], ['الوجه', 26.2333, 36.4667, 'sa'], ['أملج', 25.0386, 37.2681, 'sa'], ['حقل', 29.2885, 34.9366, 'sa'],
+  ['بنها', 30.466, 31.1848, 'eg'], ['شبين الكوم', 30.5588, 31.0114, 'eg'], ['دمنهور', 31.0341, 30.4682, 'eg'], ['كفر الشيخ', 31.1107, 30.9388, 'eg'], ['دمياط', 31.4165, 31.8133, 'eg'], ['بورسعيد', 31.2653, 32.3019, 'eg'], ['الإسماعيلية', 30.5965, 32.2715, 'eg'], ['السويس', 29.9668, 32.5498, 'eg'], ['العريش', 31.1316, 33.7984, 'eg'], ['الطور', 28.241, 33.6222, 'eg'], ['شرم الشيخ', 27.9158, 34.33, 'eg'], ['الفيوم', 29.3084, 30.8428, 'eg'], ['بني سويف', 29.0661, 31.0994, 'eg'], ['المنيا', 28.1099, 30.7503, 'eg'], ['سوهاج', 26.5569, 31.6948, 'eg'], ['قنا', 26.1551, 32.716, 'eg'], ['الغردقة', 27.2579, 33.8116, 'eg'], ['الخارجة', 25.439, 30.5586, 'eg'], ['مرسى مطروح', 31.3543, 27.2373, 'eg'], ['6 أكتوبر', 29.9285, 30.9188, 'eg'], ['العاصمة الإدارية', 30.0197, 31.7453, 'eg']];
 const PRN = { fajr: 'الفجر', dhuhr: 'الظهر', asr: 'العصر', maghrib: 'المغرب', isha: 'العشاء' };
 function prayTimes(date, lat, lng, tz, method) {        // خوارزمية موقع الشمس القياسية (PrayTimes)؛ النتيجة بالدقائق من منتصف الليل بتوقيت tz
   const rad = (d) => d * Math.PI / 180, deg = (r) => r * 180 / Math.PI, fix = (a, b) => { a = a - b * Math.floor(a / b); return a < 0 ? a + b : a; };
@@ -3440,10 +3451,59 @@ function whCard() {
     + '<div><div class="dim" style="margin-bottom:6px">بلدك (يحدّد لهجة «عاش يا بطل»)</div><div class="chips">' + x.countries.map((c) => '<button class="chip' + (w.nat === c ? ' on' : '') + '" data-act="whNat" data-v="' + esc(c) + '">' + esc(c) + '</button>').join('') + '</div></div>'
     + (fav.length ? '<div><div class="dim" style="margin-bottom:6px">رسائلي المفضلة</div>' + fav.map((id) => { const [c, m] = id.split('_').map(Number), d = whText(c, m); return '<button class="whfav" data-act="whFavOpen" data-v="' + id + '"><b style="color:' + x.cats[c].acc + '">★</b> ' + esc(d.t.length > 60 ? d.t.slice(0, 58) + '…' : d.t) + '</button>'; }).join('') + '</div>' : '') + '</section>';
 }
+
+// ================= 0.64: «تحدي العادات السبع» — ٧ أيام لتطوير الذات (عادة كل يوم)، مستوحى من أفكار كتاب «العادات السبع للناس الأكثر فعالية» (ستيفن كوفي)، والصياغة لنا
+const SD7 = [
+  { k: 'step', n: 'كن مبادراً', why: 'لا تنتظر الظروف أن تتغير: ركّز على ما تستطيع التحكم فيه اليوم.', t: ['اكتب ٣ أشياء في يدك اليوم وشيئاً ليس في يدك', 'اختر شيئاً مما في يدك وابدأ به الآن', 'حين يضايقك موقف، خذ ثلاثة أنفاس قبل أن تردّ'], q: 'ما الذي بادرتَ به اليوم؟' },
+  { k: 'goal', n: 'ابدأ والنهاية في ذهنك', why: 'اعرف إلى أين تريد أن تصل لتختار الخطوة الصحيحة.', t: ['اكتب جملة تصف الشخص الذي تريد أن تكونه بعد سنة', 'اكتب هدفاً واحداً واضحاً لهذا الشهر', 'قرّر خطوة اليوم التي تقرّبك منه'], q: 'كيف تحب أن يصفك المقرّبون بعد سنة؟' },
+  { k: 'jar', n: 'ابدأ بالأهم قبل المهم', why: 'المهم غير العاجل (صحتك، تعلّمك، علاقاتك) هو ما تُبنى به حياتك، فلا تتركه للصدف.', t: ['اكتب مهمتين مهمتين غير عاجلتين', 'خصّص ٣٠ دقيقة لأولاهما قبل أي شيء آخر', 'اعتذر أو أجّل شيئاً واحداً غير مهم'], q: 'ما المهم غير العاجل الذي أنجزته اليوم؟' },
+  { k: 'venn', n: 'فكّر بعقلية الكل رابح', why: 'أفضل الاتفاقات تُرضي الطرفين: لا تربح على حساب أحد، ولا تخسر لترضي أحداً.', t: ['في أي اتفاق اليوم اسأل: ما الحل الذي يناسبنا نحن الاثنين؟', 'قدّم لشخص ما ينفعه دون مقابل', 'افرح بنجاح شخص آخر وقل له ذلك'], q: 'أين وجدتَ حلاً يربح فيه الطرفان؟' },
+  { k: 'listen', n: 'افهم أولاً ثم اطلب أن تُفهَم', why: 'الإصغاء الحقيقي يغيّر العلاقات أكثر من أي كلام.', t: ['استمع لشخص ١٠ دقائق دون مقاطعة أو نصيحة', 'أعد صياغة ما قاله: «فهمتُ أنك…»', 'اسأل سؤالاً واحداً لتفهمه أكثر'], q: 'ماذا اكتشفتَ حين أنصتّ؟' },
+  { k: 'syn', n: 'التكاتف', why: 'اجتماع المختلفين يصنع ما لا يصنعه كل واحد وحده.', t: ['اعمل اليوم مع شخص مختلف عنك على شيء مشترك', 'اطلب رأي من يخالفك في أمر تعمل عليه', 'سمِّ ميزة عند شخص قريب تكمّل نقصاً فيك'], q: 'ما الذي صنعتَه مع غيرك ولم تكن لتصنعه وحدك؟' },
+  { k: 'saw', n: 'اشحذ المنشار', why: 'أنت أهم أداة عندك: جدّد جسمك وعقلك وعلاقاتك وروحك باستمرار.', t: ['جسمي: تحرّك ٢٠ دقيقة أو نم مبكراً', 'عقلي: اقرأ أو تعلّم شيئاً جديداً ١٥ دقيقة', 'علاقاتي وروحي: تواصل مع من تحب، وخصّص وقتاً لما يغذي روحك'], q: 'أي جانب من نفسك أحوج للتجديد هذا الشهر؟' }
+];
+function sdSt() { return S.sd && S.sd.st ? S.sd : null; }
+function sdAvail() { const d = sdSt(); if (!d) return -1; return Math.max(0, Math.min(6, Math.round((new Date(dkey(new Date()) + 'T12:00') - new Date(d.st + 'T12:00')) / 864e5))); }
+const sdDone = (i) => !!(S.sd && S.sd.dn && S.sd.dn[i] && S.sd.dn[i].ok);
+function sdFocus() { const a = sdAvail(); for (let i = 0; i <= a; i++) if (!sdDone(i)) return i; return -1; }
+function sdCover(k) {
+  const a = 'var(--mint)', b = 'var(--amber)', c = 'var(--sky)', w = 'var(--coral)', B = {
+    step: '<g fill="' + a + '" fill-opacity=".2" stroke="' + a + '" stroke-width="2" stroke-linejoin="round"><path d="M28 98V82h36V98zM64 82V66h36v32H64zM100 66V50h36v48h-36zM136 50V34h36v64h-36z"/></g><circle cx="154" cy="22" r="8" fill="' + b + '"/><path d="M38 70c18-18 40-18 52-34" fill="none" stroke="' + b + '" stroke-width="2.4" stroke-dasharray="3 5" stroke-linecap="round"/>',
+    goal: '<path d="M20 98 70 44l24 28 20-20 50 46z" fill="' + a + '" fill-opacity=".18" stroke="' + a + '" stroke-width="2" stroke-linejoin="round"/><path d="M114 52V26" stroke="' + b + '" stroke-width="2.4" stroke-linecap="round"/><path d="M114 26l22 7-22 8z" fill="' + b + '"/><path d="M22 106c30-4 40-14 60-14" fill="none" stroke="' + c + '" stroke-width="2.2" stroke-dasharray="3 5" stroke-linecap="round"/>',
+    jar: '<path d="M70 24h60M74 24v10c-8 6-10 14-10 24v34a8 8 0 0 0 8 8h56a8 8 0 0 0 8-8V58c0-10-2-18-10-24V24" fill="' + c + '" fill-opacity=".1" stroke="' + c + '" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="88" cy="82" r="11" fill="' + a + '"/><circle cx="114" cy="84" r="9" fill="' + b + '"/><circle cx="100" cy="64" r="10" fill="' + w + '"/><g fill="var(--mut)"><circle cx="78" cy="96" r="1.8"/><circle cx="92" cy="98" r="1.8"/><circle cx="108" cy="97" r="1.8"/><circle cx="122" cy="95" r="1.8"/></g>',
+    venn: '<circle cx="82" cy="60" r="30" fill="' + a + '" fill-opacity=".25" stroke="' + a + '" stroke-width="2"/><circle cx="118" cy="60" r="30" fill="' + b + '" fill-opacity=".25" stroke="' + b + '" stroke-width="2"/><path d="m92 60 6 7 11-14" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>',
+    listen: '<path d="M100 88s-26-16-26-34a14 14 0 0 1 26-6 14 14 0 0 1 26 6c0 18-26 34-26 34z" fill="' + w + '" fill-opacity=".25" stroke="' + w + '" stroke-width="2.2" stroke-linejoin="round"/><g fill="none" stroke="' + c + '" stroke-width="2.2" stroke-linecap="round"><path d="M142 44a22 22 0 0 1 0 32"/><path d="M152 34a36 36 0 0 1 0 52" stroke-opacity=".6"/><path d="M58 44a22 22 0 0 0 0 32"/><path d="M48 34a36 36 0 0 0 0 52" stroke-opacity=".6"/></g>',
+    syn: '<circle cx="100" cy="46" r="24" fill="' + a + '" fill-opacity=".22" stroke="' + a + '" stroke-width="2"/><circle cx="84" cy="72" r="24" fill="' + b + '" fill-opacity=".22" stroke="' + b + '" stroke-width="2"/><circle cx="116" cy="72" r="24" fill="' + c + '" fill-opacity=".22" stroke="' + c + '" stroke-width="2"/><circle cx="100" cy="64" r="5" fill="#fff"/>',
+    saw: '<path d="M30 70h110l12 6-12 6H30z" fill="' + c + '" fill-opacity=".18" stroke="' + c + '" stroke-width="2" stroke-linejoin="round"/><path d="M36 82l8 10 8-10 8 10 8-10 8 10 8-10 8 10 8-10 8 10 8-10" fill="none" stroke="' + c + '" stroke-width="2" stroke-linejoin="round"/><rect x="146" y="60" width="30" height="16" rx="8" fill="' + b + '"/><circle cx="46" cy="40" r="11" fill="' + b + '"/><path d="M100 36c8 8 8 20 0 28-8-8-8-20 0-28z" fill="' + a + '" fill-opacity=".3" stroke="' + a + '" stroke-width="2"/>'
+  }[k];
+  return '<svg class="sdcv" viewBox="0 0 200 120" aria-hidden="true">' + B + '</svg>';
+}
+function sdNodes(cur) { const a = sdAvail(); return '<div class="sdn" role="group" aria-label="أيام التحدي">' + SD7.map((x, i) => '<button class="sdnd' + (sdDone(i) ? ' d' : i === cur ? ' c' : '') + (i > a ? ' l' : '') + '" data-act="sdDay" data-v="' + i + '" aria-label="اليوم ' + (i + 1) + ': ' + esc(x.n) + (sdDone(i) ? ' (تم)' : i > a ? ' (يُفتح غداً)' : '') + '"' + (i > a ? ' aria-disabled="true"' : '') + '>' + (sdDone(i) ? '✓' : i + 1) + '</button>').join('<i class="sdlk' + '"></i>') + '</div>'; }
+function sdCard() {
+  const d = sdSt(), done = SD7.filter((x, i) => sdDone(i)).length;
+  if (d && d.fin) return '';
+  if (!d) { if (S.sd && S.sd.hide && now() - S.sd.hide < 3 * 864e5) return '';
+    return '<section class="card stack sdc"><div class="sdh"><h3>🌱 تحدي العادات السبع</h3><span class="dim">٧ أيام</span></div><p class="mut">عادة كل يوم لتطوير نفسك: المبادرة، والهدف، والأولويات، والإصغاء، والتجديد… بمهام صغيرة تنجزها في دقائق. مستوحى من كتاب «العادات السبع للناس الأكثر فعالية».</p><div class="row"><button class="btn" data-act="sdStart">ابدأ التحدي</button><button class="btn sec" data-act="sdLater">لاحقاً</button></div></section>'; }
+  const f = sdFocus(), x = SD7[f < 0 ? Math.min(6, sdAvail()) : f];
+  return '<section class="card stack sdc"><div class="sdh"><h3>🌱 تحدي العادات السبع</h3><span class="dim">' + done + ' من ٧</span></div>' + sdNodes(f)
+    + (f < 0 ? '<p class="mut">أتممتَ مهام اليوم، وعادة الغد تُفتح غداً.</p><button class="btn sec" data-act="sdOpen" data-v="' + sdAvail() + '">راجع ما كتبت</button>' : '<div class="sdnow"><b>اليوم ' + (f + 1) + ': ' + esc(x.n) + '</b><span class="dim">' + esc(x.why) + '</span></div><button class="btn" data-act="sdOpen" data-v="' + f + '">افتح مهام اليوم</button>') + '</section>';
+}
+function scrSd() {
+  const i = V.sd, x = SD7[i], dn = (S.sd.dn || {})[i] || { t: [], n: '' }, a = sdAvail();
+  return '<div class="scr"><div class="scroll"><div class="stack"><div class="row" style="justify-content:space-between"><h2>🌱 تحدي العادات السبع</h2><button class="btn sm sec" data-act="sdX">إغلاق</button></div>' + sdNodes(i)
+    + '<div class="card sdday"><div class="sdcvw">' + sdCover(x.k) + '</div><div class="sdno">العادة ' + (i + 1) + ' من ٧</div><h3>' + esc(x.n) + '</h3><p class="mut">' + esc(x.why) + '</p>'
+    + '<div class="sdt">' + x.t.map((t, j) => '<button class="sdtk' + (dn.t[j] ? ' on' : '') + '" data-act="sdTask" data-v="' + j + '" aria-pressed="' + !!dn.t[j] + '"><span class="ck">' + (dn.t[j] ? '✓' : '') + '</span><span>' + esc(t) + '</span></button>').join('') + '</div>'
+    + '<div class="field"><label for="sdNote">' + esc(x.q) + ' <span class="dim">(اختياري، يبقى على جوالك)</span></label><textarea class="inp" id="sdNote" rows="3" maxlength="600">' + esc(dn.n || '') + '</textarea></div>'
+    + (dn.ok ? '<div class="banner info">' + I('check') + '<span>أتممتَ هذا اليوم. أحسنت!</span></div>' : '<button class="btn full" data-act="sdDone"' + (x.t.every((t, j) => dn.t[j]) ? '' : ' disabled') + '>أتممتُ اليوم ' + (i + 1) + '</button>' + (i > a ? '' : '')) + '</div><p class="dim">مستوحى من أفكار كتاب «العادات السبع للناس الأكثر فعالية» لستيفن كوفي؛ الصياغة والمهام لنا.</p></div></div></div>';
+}
+function sdAchieve() {
+  const id = 'a' + now().toString(36) + 'sd', c = { id, pid: 'sd7', w: 99, title: 'تحدي العادات السبع', lines: ['٧ أيام لتطوير الذات: المبادرة، والهدف، والأولويات، والكل رابح، والإصغاء، والتكاتف، والتجديد'], at: now(), name: String(S.p.name || '').trim(), sex: S.p.sex, dname: S.dname || '', clinic: '', phrase: PHRASES[now() % PHRASES.length] };
+  S.ach = (S.ach || []).concat([c]); send({ t: 'ach', id: 'sd7', w: 99, title: c.title }); save(); return c;
+}
 function tabToday() {
   const d = TODAY, L = dl(d), [done, n] = itemsOfDay(d), pct = n ? Math.round(done / n * 100) : 0, C = 2 * Math.PI * 40;
   const first = (S.p.name || '').trim().split(/\s+/)[0] || '';
-  let out = sceneHeader(first, d) + missionCard(d) + whChip() + (S.fw === 'pending' ? firstWinCard() : installState() === 'done' || installState() === 'desktop' ? notifCard(true) : installCard('today')) + chalCard() + prCard() + apCard() + wkCard() + bdCard() + panCard() + pfCard();
+  let out = sceneHeader(first, d) + missionCard(d) + whChip() + sdCard() + (S.fw === 'pending' ? firstWinCard() : installState() === 'done' || installState() === 'desktop' ? notifCard(true) : installCard('today')) + chalCard() + prCard() + apCard() + wkCard() + bdCard() + panCard() + pfCard();
   out += '<section class="card ring"><svg viewBox="0 0 100 100" role="img" aria-label="التزام اليوم ' + pct + '%"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="10"/><circle cx="50" cy="50" r="40" fill="none" stroke="#6fe3a9" stroke-width="10" stroke-linecap="round" stroke-dasharray="' + C + '" stroke-dashoffset="' + (C * (1 - pct / 100)) + '"/></svg><div style="flex:1"><div class="num">' + pct + '%</div><div class="mut">' + done + ' من ' + n + ' أصناف اليوم</div>'
     + (pct === 100 ? '<div class="dim" style="color:var(--mint)">يوم كامل، أحسنت!</div>' : '<div class="dim">علّم ما أكلته باللمس.</div>') + '</div></section>';
   const dp = dayPlan(d), kc = dp.kcal || DATA.kcal, pr = dp.p || DATA.pro, wt = +(dp.water || DATA.water), cups = Math.max(4, Math.min(16, Math.round(wt / CUP)));
@@ -4115,7 +4175,7 @@ function render() {
   const sc = $('.scroll'), key = (S ? S.screen + S.step + S.tab + (S.chat ? 'c' : '') : '') + V.screen, top = sc ? sc.scrollTop : 0;
   let scr;
   if (V.screen === 'boot') scr = scrBoot(); else if (V.screen === 'bad') scr = scrBad(); else if (V.screen === 'start') scr = scrStart(); else if (V.screen === 'moved') scr = scrMoved(); else if (V.screen === 'lock') scr = scrLock(); else if (V.screen === 'pin') scr = scrPin(); else if (V.screen === 'onb') scr = scrOnb();
-  else scr = V.hf ? scrHF() : V.wk ? scrWk() : V.bd ? scrBody() : V.pan != null ? scrPantry() : V.pf != null ? scrProf() : S.rqOpen && window.RL && RL.idx ? scrQuiz() : S.chat ? scrChat() : S.plan && S.screen === 'app' ? scrApp() : { invite: scrInvite, setup: scrSetup, wizard: scrWizard, review: scrReview, sent: scrSent, app: scrSent }[S.screen]();
+  else scr = V.sd != null && S.sd && S.sd.st ? scrSd() : V.hf ? scrHF() : V.wk ? scrWk() : V.bd ? scrBody() : V.pan != null ? scrPantry() : V.pf != null ? scrProf() : S.rqOpen && window.RL && RL.idx ? scrQuiz() : S.chat ? scrChat() : S.plan && S.screen === 'app' ? scrApp() : { invite: scrInvite, setup: scrSetup, wizard: scrWizard, review: scrReview, sent: scrSent, app: scrSent }[S.screen]();
   const keep = {}; document.querySelectorAll('video[data-keep]').forEach((n) => { keep[n.dataset.keep] = n; });
   const cmI = $('#cmIn'), cmV = cmI ? [cmI.value, document.activeElement === cmI] : null;          // مسودة التعليق تبقى عند إعادة الرسم (وصول التعليقات مثلاً)
   $('#root').innerHTML = '<div class="stage"><div class="device">' + (V.online ? '' : '<div class="offline">بلا اتصال — تُرسل بياناتك عند عودة الإنترنت</div>') + scr + (S ? sheetHtml() : '') + (toastMsg ? '<div class="toast" role="status">' + I('check') + '<span>' + esc(toastMsg) + '</span></div>' : '') + '</div></div>';
@@ -4317,6 +4377,15 @@ document.addEventListener('click', (e) => {
     }
     case 'medAdd': S.rem = Object.assign({ water: false, meals: false }, S.rem); S.rem.meds = (S.rem.meds || []).concat([{ n: '', t: '20:00' }]).slice(0, MEDMAX); save(); remSync(true); break;
     case 'medDel': if (S.rem && S.rem.meds) { S.rem.meds.splice(+v, 1); if (!S.rem.meds.length) S.rem.med = false; save(); remSync(true); } break;
+    case 'sdStart': S.sd = { st: dkey(new Date()), dn: {} }; V.sd = 0; break;
+    case 'sdLater': S.sd = Object.assign(S.sd || {}, { hide: now() }); break;
+    case 'sdOpen': V.sd = +v; break;
+    case 'sdX': V.sd = null; break;
+    case 'sdDay': { const i = +v; if (i > sdAvail()) { toast('تُفتح عادة هذا اليوم في موعدها: خطوة كل يوم.'); return; } V.sd = i; break; }
+    case 'sdTask': { const i = V.sd, dn = (S.sd.dn[i] = S.sd.dn[i] || { t: [], n: '' }); if (dn.ok) break; dn.t[+v] = dn.t[+v] ? 0 : 1; break; }
+    case 'sdDone': { const i = V.sd, x = SD7[i], dn = (S.sd.dn[i] = S.sd.dn[i] || { t: [], n: '' }); if (dn.ok || !x.t.every((t, j) => dn.t[j])) break; dn.ok = now();
+      if (SD7.every((y, j) => sdDone(j))) { S.sd.fin = now(); const c = sdAchieve(); V.sd = null; setTimeout(() => celebrateAch(c), 80); }
+      else { toast('أحسنت! أتممتَ عادة «' + x.n + '».'); if (navigator.vibrate) try { navigator.vibrate([20, 40, 30]); } catch (e) { } } break; }
     case 'hfNew': V.hf = { k: v, d: {} }; break;
     case 'hfX': V.hf = null; break;
     case 'hfTog': S.hfSend = el.checked ? 1 : 0; break;
@@ -4419,6 +4488,7 @@ document.addEventListener('input', (e) => {               // التقاط أول
   const p = Math.max(0, (t.selectionStart == null ? n.length : t.selectionStart) - (v.length - n.length)); t.value = n; try { t.setSelectionRange(p, p); } catch (x) { }
 }, true);
 document.addEventListener('input', (e) => {
+  if (e.target.id === 'sdNote' && V.sd != null && S.sd) { const dn = (S.sd.dn[V.sd] = S.sd.dn[V.sd] || { t: [], n: '' }); dn.n = e.target.value.slice(0, 600); }
   if (V.hf && e.target.id && e.target.id.startsWith('hf_')) V.hf.d[e.target.id.slice(3)] = e.target.value;       // ما يكتبه العميل يبقى إن أُعيد الرسم
   const t = e.target;
   if (t.dataset.bind || t.dataset.cq || t.dataset.schm || t.dataset.scht) {

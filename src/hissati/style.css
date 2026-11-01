@@ -604,4 +604,14 @@ html[data-theme="firoz"] .alm{background:radial-gradient(70% 50% at 50% 30%,rgba
 .tabbar button{min-width:0}.tabbar button span{font-size:11px}
 .hfph{gap:12px}.hfph figure{margin:0;flex:1;text-align:center}.hfph img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:14px;border:1px solid var(--line)}.hfph figcaption{font-size:12px;color:var(--mut);margin-top:4px}
 .hfs .hpr{display:grid;grid-template-columns:1.2fr 1.1fr .7fr 1fr;gap:6px;align-items:center}
+/* 0.64: تحدي العادات السبع (تطوير الذات) */
+.sdc{border-color:color-mix(in srgb,var(--mint) 35%,transparent)}.sdh{display:flex;justify-content:space-between;align-items:center;gap:8px}.sdh h3{margin:0}
+.sdn{display:flex;align-items:center;gap:0;direction:rtl}.sdnd{width:34px;height:34px;border-radius:50%;flex:none;border:2px solid var(--line2);background:var(--glass);color:var(--mut);font:inherit;font-weight:700;font-size:13px;display:grid;place-items:center;padding:0}
+.sdnd.d{background:var(--mint);border-color:var(--mint);color:var(--mintInk)}.sdnd.c{border-color:var(--amber);color:var(--amber);box-shadow:0 0 0 4px color-mix(in srgb,var(--amber) 22%,transparent)}.sdnd.l{opacity:.55}
+.sdlk{height:3px;flex:1;background:var(--line2);min-width:4px}
+.sdnow{display:flex;flex-direction:column;gap:4px}.sdnow b{font-size:16px}
+.sdday{display:flex;flex-direction:column;gap:10px}.sdcvw{border-radius:16px;overflow:hidden;background:linear-gradient(180deg,var(--glass2),transparent);border:1px solid var(--line)}.sdcv{display:block;width:100%;height:auto}
+.sdno{font-size:12px;color:var(--amber);letter-spacing:.05em}.sdday h3{margin:0;font-size:20px}
+.sdt{display:flex;flex-direction:column;gap:8px}.sdtk{display:flex;gap:10px;align-items:center;text-align:right;width:100%;padding:12px;border-radius:14px;border:1px solid var(--line2);background:var(--glass);color:var(--text);font:inherit;font-size:14px;line-height:1.6}
+.sdtk .ck{width:24px;height:24px;border-radius:8px;border:2px solid var(--line2);flex:none;display:grid;place-items:center;font-weight:700;color:var(--mintInk)}.sdtk.on{border-color:var(--mint);background:color-mix(in srgb,var(--mint) 12%,transparent)}.sdtk.on .ck{background:var(--mint);border-color:var(--mint)}
 
