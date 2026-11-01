@@ -32,11 +32,13 @@ function gymCard(c) {
   h += '<p class="two"><button class="sec sm" data-a="gymLoad">📂 ' + (w ? 'استبدال البرنامج من ملف' : 'تحميل برنامج من ملف') + '</button>' + (w ? '<button class="sec sm" data-a="gymClear">🗑 إزالة البرنامج</button>' : '') + '<input type="file" id="gymf" accept=".json" hidden></p>';
   h += '<h4>🛒 قائمة التسوق</h4><p class="small">سطر «# اسم المجموعة» ثم الأصناف: «الصنف | الكمية». إن تركتها فارغة تُولَّد تلقائياً من الخطة (مجموع الجرامات الأسبوعي).</p><textarea class="gys" rows="7" data-gshop placeholder="# البروتين&#10;دجاج | 2.5 كجم">' + esc(gyShopText(c.shop)) + '</textarea>';
   if (c.rawSnap) h += '<p class="small">🍽 الخطة الغذائية لهذا العميل مستوردة جاهزة (' + c.rawSnap.days.length + ' أيام).</p>';
+  if (!x) h += '<p class="two"><button data-a="gymAccount">🔑 إنشاء دخول «حصتي» لهذا العميل (اسم مستخدم وكلمة سر)</button></p><p class="small">يُفتح نموذج الدعوة مربوطاً بهذا العميل؛ بعد أن يدخل العميل ويسجّل بياناته تضغط «اعتماد» فتصله خطته وبرنامجه وقائمة تسوقه تلقائياً.</p>';
   if (x) h += '<p class="small">أرسل الخطة بعد التعديل من «حصتي ← ➤ أرسل الخطة المحدَّثة».</p>';
   return h + '</div>';
 }
 (function (f) { ciTab = function (c) { var h = f.apply(this, arguments); return gymCard(c) + h; }; })(ciTab);
 Object.assign(A, {
+  gymAccount: function () { var c = cur(); if (!c) return; HX.pre = { l: c.name || '', p: c.phone || '', cl: c.code, m: 'cred', u: '' }; HX.form = true; A.hxv(); },
   gymLoad: function () { var i = document.getElementById('gymf'); if (i) i.click(); },
   gymClear: function () { var c = cur(); if (!c || !confirm('إزالة برنامج التمرين من ملف هذا العميل؟ (ما أُرسل لـ«حصتي» يبقى حتى ترسل خطة جديدة)')) return; c.work = null; persist(c).then(main); },
   importClient: function () { var i = document.getElementById('impc'); if (i) i.click(); }

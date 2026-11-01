@@ -14,8 +14,10 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   await d.locator('.gym details').evaluateAll((es) => es.forEach((e) => { e.open = true; }));
   await d.fill('.gym [data-gv="0|2"]', 'https://youtu.be/abcdefghijk'); await d.press('.gym [data-gv="0|2"]', 'Tab'); await d.waitForFunction(() => { const c = DPApp.S.clients.find((x) => x.name === 'عميل تجريبي'); return c.work.days[0].ex[2].v && c.work.days[0].ex[2].v.yt === 'abcdefghijk'; });
   ok('بطاقة «التمرين وقائمة التسوق» في ملف العميل: رابط يوتيوب لتمرين يُحفظ فيديو مضمَّناً (yt)');
+  await d.click('.gym [data-a="gymAccount"]'); await d.waitForSelector('#hxi_l'); assert.strictEqual(await d.inputValue('#hxi_l'), 'عميل تجريبي'); assert.strictEqual(await d.inputValue('#hxi_m'), 'cred'); assert.strictEqual(await d.inputValue('#hxi_c'), imp.code);
+  ok('زر «🔑 إنشاء دخول «حصتي» لهذا العميل» يفتح نموذج الدعوة مربوطاً بالعميل وبطريقة اسم المستخدم وكلمة السر'); await d.click('[data-a="hxInvForm"]');
   // ---- العميل المرتبط: تحميل برنامج من ملف ثم إرسال الخطة الجاهزة
-  await d.evaluate((c) => { DPApp.S.cur = c; }, old); await d.click('main .tabs [data-v="ci"]').catch(() => { }); await d.waitForSelector('#gymf', { state: 'attached' });
+  await d.evaluate((c) => DPApp.A.pick(c), old); await d.click('main .tabs [data-v="ci"]').catch(() => { }); await d.waitForSelector('#gymf', { state: 'attached' });
   await d.setInputFiles('#gymf', FX); await d.waitForFunction((c) => { const x = DPApp.S.clients.find((q) => q.code === c); return x.work && x.shop; }, old);
   await d.evaluate((o) => { const c = DPApp.S.clients.find((q) => q.code === o.c); c.rawSnap = o.snap; }, { c: old, snap: PK.snap }); await d.click('main .tabs [data-v="hx"]'); await d.waitForSelector('[data-a="hxSendPlan"]'); await d.click('[data-a="hxSendPlan"]'); await d.waitForFunction((c) => (DPApp.S.clients.find((q) => q.code === c).hx.planV || 0) >= 2, old, { timeout: 15000 });
   await cPoll(); await m.waitForFunction(() => window.HissatiApp.state().work, null, { timeout: 8000 });
