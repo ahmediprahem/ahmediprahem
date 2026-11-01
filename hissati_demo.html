@@ -621,7 +621,8 @@ html[data-theme="firoz"] .alm{background:radial-gradient(70% 50% at 50% 30%,rgba
 .sdno{font-size:12px;color:var(--amber);letter-spacing:.05em}.sdday h3{margin:0;font-size:20px}
 .sdt{display:flex;flex-direction:column;gap:8px}.sdtk{display:flex;gap:10px;align-items:center;text-align:right;width:100%;padding:12px;border-radius:14px;border:1px solid var(--line2);background:var(--glass);color:var(--text);font:inherit;font-size:14px;line-height:1.6}
 .sdtk .ck{width:24px;height:24px;border-radius:8px;border:2px solid var(--line2);flex:none;display:grid;place-items:center;font-weight:700;color:var(--mintInk)}.sdtk.on{border-color:var(--mint);background:color-mix(in srgb,var(--mint) 12%,transparent)}.sdtk.on .ck{background:var(--mint);border-color:var(--mint)}
-
+/* 0.65: العدّ التنازلي للوجبة القادمة */
+.mcd{display:inline-block;width:fit-content;font-size:12px;font-weight:700;color:var(--mintInk);background:var(--mint);border-radius:999px;padding:1px 10px;margin:2px 0}
 
 /* ==========================================================================
    «حصتي» — themes.css  •  ثيم «وردة» (data-theme="rose") وثيم «نبض» (data-theme="pulse")
@@ -2464,7 +2465,13 @@ window.HX_WHEEL = {
       { a: 1, t: 'أن تتوقف عن جلد نفسك أول خطوة لتتحسن.', x: 'اللوم لا يغذّي، والتشجيع يغذّي.' },
       { a: 1, t: 'اطلب ما تحتاجه بوضوح؛ الغموض يؤخّرك.', x: 'أخصائيك موجود لتسأله.' },
       { a: 1, t: 'ليس كل دعوة تُقبل، وليس كل تعليق يستحق الرد.', x: '' },
-      { a: 1, t: 'احترامك لنفسك يظهر في قرارٍ هادئ لا يحتاج إلى جمهور.', x: '' }
+      { a: 1, t: 'احترامك لنفسك يظهر في قرارٍ هادئ لا يحتاج إلى جمهور.', x: '' },
+      { a: 1, t: 'لا تعتذر عن حاجتك للراحة.', x: 'الراحة جزء من الأداء الجيد، لا ضعف.' },
+      { a: 1, t: 'من يحترم نفسه يضع لها وقتاً في يومه.', x: 'احجز نصف ساعة اليوم لك وحدك.' },
+      { a: 1, t: 'ليس مطلوباً منك أن تكون بخير طوال الوقت.', x: 'اعترف بما تشعر به ثم اختر خطوتك الصغيرة.' },
+      { a: 1, t: 'ما تسمح به تتكرر عليك صورته.', x: 'اختر ما تسمح به بوعي اليوم.' },
+      { a: 1, t: 'تحدّث إلى نفسك كما تتحدث إلى صديق تحبه.', x: 'استبدل عبارة قاسية واحدة بعبارة لطيفة.' },
+      { a: 1, t: 'أن تقول رأيك بهدوء أقوى من أن تصمت لتسلم.', x: 'قلها مرة واحدة اليوم بلطف.' }
     ],
     chal: [
       { a: 1, t: 'جرّب اليوم صنفاً جديداً من الخضار لم تأكله هذا الشهر.' },
@@ -2482,7 +2489,19 @@ window.HX_WHEEL = {
       { a: 1, t: 'أطفئ الشاشات قبل النوم بساعة الليلة.' },
       { a: 1, t: 'اختر مكاناً جديداً للمشي اليوم.' },
       { a: 1, t: 'صوّر وجبتك وارسلها لأخصائيك لتتعلم منها.' },
-      { a: 1, t: 'جرّب اليوم أن تقول «لا» لشيء واحد لا يخدمك.' }
+      { a: 1, t: 'جرّب اليوم أن تقول «لا» لشيء واحد لا يخدمك.' },
+      { a: 1, t: 'اقرأ عشر صفحات اليوم من كتاب تحبه.' },
+      { a: 1, t: 'تعلّم كلمة أو مهارة صغيرة جديدة قبل أن تنام.' },
+      { a: 1, t: 'رتّب مكاناً واحداً في بيتك أو مكتبك الآن.' },
+      { a: 1, t: 'أرسل رسالة شكر لشخص أفادك.' },
+      { a: 1, t: 'اترك هاتفك في غرفة أخرى ساعة كاملة.' },
+      { a: 1, t: 'امشِ في الهواء الطلق ١٥ دقيقة بلا سماعات.' },
+      { a: 1, d: 5, t: 'اليوم الجمعة: امشِ نصف ساعة مع من تحب.' },
+      { a: 1, d: 5, t: 'اليوم الجمعة: خصّص ساعة للراحة بلا شاشة.' },
+      { a: 1, d: 5, t: 'اليوم الجمعة: رتّب مساحة صغيرة في بيتك.' },
+      { a: 1, d: 'ram', t: 'اجعل رمضان فرصة لعادة صغيرة جديدة تبقى بعده.' },
+      { a: 1, d: 'ram', t: 'اتصل اليوم بمن لم تسأل عنه منذ مدة.' },
+      { a: 1, d: 'ram', t: 'قلّل الشاشة قبل السحور وبعد الفطور.' }
     ],
     hero: {
       eg: [
@@ -3059,20 +3078,20 @@ function scrStart() {                               // بلا حساب ولا ر
 function scrMoved() { return '<div class="scr"><div class="boot"><div class="stack" style="max-width:320px"><div class="empty"><div class="ei" style="background:rgba(111,227,169,.15);color:var(--mint)">' + I('check') + '</div><h1>انتقل حسابك ✓</h1><p class="mut">صار «حصتي» يعمل من التطبيق المثبّت أو الجوال الجديد، ومُسح من هنا. افتح «حصتي» من أيقونته.</p></div></div></div></div>'; }
 // ---- 0.61: أول تسجيل: الديانة ثم التذكيرات التي يريدها العميل (لئلا يبحث عنها في الإعدادات)
 function scrSetup() {
-  const U = V.setup = V.setup || { rel: '', city: '', on: { water: 1, meals: 1, pray: 1, adhAm: 1, adhPm: 1, sal: 1, med: 0 } }, mus = U.rel === 'م';
+  const U = V.setup = V.setup || { rel: '', city: '', on: { water: 1, meals: 1, wh: 1, pray: 1, adhAm: 1, adhPm: 1, sal: 1, med: 0 } }, mus = U.rel === 'م';
   const row = (k, t, d) => '<label class="remrow"><span><b>' + t + '</b><span class="dim">' + d + '</span></span><input type="checkbox" class="sw" data-act="setupTog" data-v="' + k + '"' + (U.on[k] ? ' checked' : '') + '></label>';
   const rel = (v, t) => '<button class="chip' + (U.rel === v ? ' on' : '') + '" data-act="setupRel" data-v="' + v + '">' + t + '</button>';
   return '<div class="scr setup"><div class="scroll"><div class="stack"><div style="padding-top:18px"><h1>نجهّز تطبيقك</h1><p class="mut">اختر ما يناسبك فتصلك التذكيرات التي تريدها دون أن تبحث عنها. تغيّر كل شيء لاحقاً من «تقدّمي».</p></div>'
     + '<section class="card stack"><h3>' + I('user') + ' ديانتك</h3><div class="chips">' + rel('م', 'مسلم') + rel('ك', 'مسيحي') + rel('ن', 'أفضّل عدم التحديد') + '</div>'
     + (mus ? '<div class="banner info">' + I('check') + '<span>سنفعّل لك تلقائياً: مواقيت الصلاة وتذكيرها، وأذكار الصباح والمساء، ورسائل القرآن.</span></div>' : U.rel ? '<p class="dim">لن تظهر لك مواقيت الصلاة ولا الأذكار ولا القرآن.</p>' : '') + '</section>'
     + (mus ? '<section class="card stack"><h3>🕌 مدينتك للأذان</h3><select class="inp" id="setupCity" aria-label="مدينتك">' + cityOpts(U.city) + '</select><p class="dim">المواقيت تُحسب على جوالك بلا إنترنت (أم القرى للسعودية، والهيئة المصرية لمصر).</p></section>' : '')
-    + '<section class="card stack"><h3>' + I('bell') + ' التذكيرات</h3>' + row('water', 'شرب الماء', 'كل ساعتين نهاراً') + row('meals', 'مواعيد الوجبات', 'في أوقات وجبات خطتك') + row('med', 'موعد الدواء', 'تضيف أوقات أدويتك لاحقاً من «تقدّمي»')
+    + '<section class="card stack"><h3>' + I('bell') + ' التذكيرات</h3>' + row('water', 'شرب الماء', 'كل ساعتين نهاراً') + row('meals', 'مواعيد الوجبات', 'في أوقات وجبات خطتك') + row('wh', '🎡 عجلة رسالة اليوم', 'تذكير الساعة 9:00 صباحاً') + row('med', 'موعد الدواء', 'تضيف أوقات أدويتك لاحقاً من «تقدّمي»')
     + (mus ? row('pray', '🕌 مواقيت الصلاة', U.city ? 'تذكير عند كل صلاة في ' + esc(U.city) : 'اختر مدينتك أولاً') + row('adhAm', 'أذكار الصباح', 'كل يوم 6:00 صباحاً') + row('adhPm', 'أذكار المساء', 'كل يوم 5:30 مساءً') + row('sal', 'ﷺ الصلاة على النبي', 'مساءً، والجمعة ثلاث مرات') : '') + '<p class="dim">تحتاج تفعيل الإشعارات ليصلك التذكير والتطبيق مغلق؛ نطلب الإذن عند التشغيل.</p></section>'
     + '<button class="btn full" data-act="setupGo"' + (U.rel ? '' : ' disabled') + '>متابعة</button><button class="btn ghost full" data-act="setupSkip">تخطّي</button></div></div></div>';
 }
 function setupApply(skip) {
   const U = V.setup || {}; if (!skip && U.rel) {
-    const mus = U.rel === 'م'; S.p.rel = U.rel; S.rem = Object.assign({ water: false, meals: false }, S.rem, { water: !!U.on.water, meals: !!U.on.meals, med: !!U.on.med });
+    const mus = U.rel === 'م'; S.p.rel = U.rel; S.rem = Object.assign({ water: false, meals: false }, S.rem, { water: !!U.on.water, meals: !!U.on.meals, wh: !!U.on.wh, med: !!U.on.med });
     Object.assign(S.rem, mus ? { prCity: U.city || '', pray: !!U.on.pray && !!U.city, adhAm: !!U.on.adhAm, adhPm: !!U.on.adhPm, sal: !!U.on.sal } : { pray: false, adhAm: false, adhPm: false, sal: false });
     if (mus && U.city) { const c = CITIES.find((x) => x[0] === U.city); if (c && S.rem.prCity === U.city) S.rem.prCity = U.city; }
   }
@@ -3311,12 +3330,35 @@ function sceneHeader(first, d) {
   return '<section class="scn" data-tod="' + tod + '">' + sceneSvg(tod, egy) + '<div class="hello"><div class="av sm">' + esc(first.charAt(0) || '؟') + '</div><div style="flex:1;min-width:0"><div class="dim">' + esc(DATA.dayNames[d] || '') + '</div><h2>' + TOD[tod].g + ' ' + esc(first) + '</h2></div>'
     + (st ? '<span class="stk" aria-label="' + st + (st === 1 ? ' يوم متتالٍ' : ' أيام متتالية') + '">' + I('flame') + '<b>' + st + '</b></span>' : '') + chatBtn() + '</div></section>';
 }
+
+// ---- 0.65: اختصارات أيقونة التطبيق (?a=meal|water|chat|wheel)، رقم الوجبات المتبقية على الأيقونة، والعدّ التنازلي للوجبة القادمة
+try { const q = new URLSearchParams(location.search).get('a'); if (['meal', 'water', 'chat', 'wheel'].includes(q)) { V.act = q; history.replaceState(null, '', location.pathname); } } catch (e) { }
+function actMaybe() {
+  if (!V.act || !S || !K || V.screen !== '' || S.screen !== 'app' || !S.plan) return; const a = V.act; V.act = null;
+  if (a === 'meal') { S.tab = 'today'; setTimeout(() => { const e = $('.msn'); if (e && e.scrollIntoView) e.scrollIntoView({ block: 'center', behavior: 'smooth' }); }, 150); }
+  else if (a === 'water') { S.tab = 'today'; const L = dl(TODAY); L.water = (L.water || 0) + 1; queueLog(dkey(new Date())); toast('كوب جديد 💧 ' + L.water + ' من ' + hWaterGoal()); }
+  else if (a === 'chat') { S.chat = true; }
+  else if (a === 'wheel') { S.tab = 'today'; WHL.shown = true; const w = whs(); if (w.day === dkey(new Date()) && w.cat >= 0) setTimeout(() => whOpen('card'), 200); else if (whx() && whCats().length) setTimeout(() => whOpen('wheel'), 200); }
+  render();
+}
+function mcLeft(t, cm) {
+  const m = hm2m(t); if (m == null) return ''; if (cm == null) { const d = new Date(); cm = d.getHours() * 60 + d.getMinutes(); } const diff = m - cm;
+  const h = (n) => n === 1 ? 'ساعة' : n === 2 ? 'ساعتان' : n + ' ساعات', mn = (n) => n === 1 ? 'دقيقة' : n === 2 ? 'دقيقتان' : n <= 10 ? n + ' دقائق' : n + ' دقيقة', span = (x) => { const H = Math.floor(x / 60), R = x % 60; return (H ? h(H) : '') + (H && R ? ' و' : '') + (R ? mn(R) : ''); };
+  return diff > 0 ? 'بعد ' + span(diff) : diff >= -30 ? 'حان وقتها الآن' : 'فاتت منذ ' + span(-diff);
+}
+function badgeSync() {
+  if (!S || !navigator.setAppBadge) return; let n = 0;
+  if (S.plan && S.screen === 'app') { const L = S.log[dkey(new Date())] || { ck: {}, skip: {} }; dayPlan(TODAY).slots.forEach((s, i) => { if (s.lines.length && !(L.skip || {})[i] && !s.lines.every((l, li) => (L.ck || {})[i + '_' + li])) n++; }); }
+  n += +S.unreadC || 0; if (V.badge === n) return; V.badge = n;
+  try { (n ? navigator.setAppBadge(n) : navigator.clearAppBadge()).catch(() => { }); } catch (e) { }
+}
+setInterval(() => { document.querySelectorAll('.mcd[data-t]').forEach((e) => { e.textContent = mcLeft(e.dataset.t); }); }, 30000);
 function missionCard(d) {                                  // أول وجبة لم تُسجَّل، ثم الماء؛ وبعدهما رسالة إنجاز
   if (!gateOpen()) return '';
   const L = dl(d), dp = dayPlan(d), slots = dp.slots; let si = -1;
   for (let i = 0; i < slots.length; i++) { if (!L.skip[i] && slots[i].lines.length && !slots[i].lines.every((l, li) => L.ck[i + '_' + li])) { si = i; break; } }
   if (si >= 0) { const s = slots[si], first = s.lines[0] ? lineT(s.lines[0]) : '';
-    return '<section class="card msn"><div class="mis"><span class="mic">' + I('check') + '</span><div style="flex:1;min-width:0"><small>مهمتك الآن</small><h3>سجّل ' + esc(s.name) + '</h3><p class="dim">' + esc(s.time || '') + (s.kcal ? ' • ' + s.kcal + ' سعرة' : '') + (first ? ' • ' + esc(first) : '') + '</p></div></div><button class="btn full" data-act="whole" data-v="' + si + '">' + I('check') + ' أكلتها كاملة</button></section>'; }
+    return '<section class="card msn"><div class="mis"><span class="mic">' + I('check') + '</span><div style="flex:1;min-width:0"><small>مهمتك الآن</small><h3>سجّل ' + esc(s.name) + '</h3>' + (s.time ? '<span class="mcd" data-t="' + esc(s.time) + '">' + mcLeft(s.time) + '</span>' : '') + '<p class="dim">' + esc(s.time || '') + (s.kcal ? ' • ' + s.kcal + ' سعرة' : '') + (first ? ' • ' + esc(first) : '') + '</p></div></div><button class="btn full" data-act="whole" data-v="' + si + '">' + I('check') + ' أكلتها كاملة</button></section>'; }
   const g = hWaterGoal(), w = L.water || 0;
   if (w < g) return '<section class="card msn"><div class="mis"><span class="mic">' + I('drop') + '</span><div style="flex:1;min-width:0"><small>مهمتك الآن</small><h3>اشرب كوباً من الماء</h3><p class="dim">' + w + ' من ' + g + ' أكواب</p></div></div><button class="btn full" data-act="water" data-v="' + (w + 1) + '">' + I('drop') + ' شربت كوباً</button></section>';
   return '<section class="card msn done"><div class="mis"><span class="mic">' + I('check') + '</span><div style="flex:1;min-width:0"><small>مهمتك الآن</small><h3>أحسنت، أنجزت مهام اليوم</h3><p class="dim">وجباتك وماؤك كاملة. استرح، وغداً نكمل.</p></div></div></section>';
@@ -3345,7 +3387,9 @@ function whCond(c) {
   return c === 'meal' ? Object.keys(L.ck || {}).length > 0 : c === 'st3' ? dayStreak() >= 3 : c === 'water' ? (L.water || 0) >= hWaterGoal() : c === 'wt' ? (S.weights || []).length >= 2 : true;
 }
 function whList(ci) { const w = whx(), id = w.cats[ci].id, m = w.msgs[id]; return Array.isArray(m) ? m : (m[whDia()] || m.msa || []); }
-const whOkM = (m) => m.a === 1 && (!m.c || whCond(m.c));
+const hijriM = () => { try { return +new Intl.DateTimeFormat('en-u-ca-islamic-umalqura', { month: 'numeric' }).format(new Date()); } catch (e) { return 0; } };
+const whDayOk = (d) => d === 5 ? new Date().getDay() === 5 : d === 'ram' ? isMus() && hijriM() === 9 : true;
+const whOkM = (m) => m.a === 1 && (!m.c || whCond(m.c)) && (!m.d || whDayOk(m.d));
 function whCats() { const w = whx(), q = whs().noQ || !isMus(); return w ? w.cats.map((c, i) => i).filter((i) => !(q && w.cats[i].id === 'quran') && whList(i).filter((m) => m.a === 1).length >= w.min) : []; }
 function whText(ci, mi) {
   const m = whList(ci)[mi]; if (!m) return null; const id = whx().cats[ci].id;
@@ -3359,6 +3403,7 @@ function whPick() {
   if (!fresh.length) fresh = ok; if (!fresh.length) return null;
   // «عاش يا بطل»: ما انطبق شرطه على العميل اليوم يتقدّم على العام
   if (whx().cats[ci].id === 'hero') { const cond = fresh.filter((i) => L[i].c); if (cond.length) fresh = cond; }
+  const sea = fresh.filter((i) => L[i].d); if (sea.length) fresh = sea;                  // رسالة اليوم الموسمية (الجمعة، رمضان) تتقدّم إن وُجدت
   return { ci, mi: fresh[Math.floor(Math.random() * fresh.length)] };
 }
 function whIc(k) { const w = whx(); return k === 'star8' ? '<path d="M5 5h14v14H5z"/><path d="M12 1.5 22.5 12 12 22.5 1.5 12z"/>' : k === 'lamp' ? '<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>' : k === 'peak' ? '<path d="M3 20 9 9l4 6 3-4 5 9z"/><path d="M9 9V4l4 1.5L9 7"/>' : k === 'star' ? '<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>' : k === 'shield' ? '<path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/><path d="m9 12 2 2 4-4"/>' : '<path d="M4 5h6a2 2 0 0 1 2 2v12a2 2 0 0 0-2-2H4zM20 5h-6a2 2 0 0 0-2 2v12a2 2 0 0 1 2-2h6z"/>'; }
@@ -3706,7 +3751,8 @@ function remLimit(it) {                              // 0.54: ساعات اله�
 }
 function remItems() {                              // أوقات اليوم المحلية (دقائق من منتصف الليل، مقرّبة لربع ساعة): ماء • وجبات • أذكار الصباح والمساء • مواعيد الدواء (اسم الدواء يبقى على الجوال ولا يصل المحطة)
   const R = S.rem || {}, it = []; if (R.water) WATER.forEach((m) => it.push({ m, t: 'water' }));
-  if (R.meals && S.plan) dayPlan(TODAY).slots.forEach((s) => { const m = hm2m(s.time); if (m != null) it.push({ m, t: 'meal', label: s.name }); });
+  if (R.meals && S.plan) dayPlan(TODAY).slots.forEach((s) => { const m = hm2m(s.time); if (m != null) it.push({ m, t: 'meal', label: s.name + (s.kcal ? ' • ' + s.kcal + ' سعرة' : '') }); });
+  if (R.wh && whx() && whCats().length) { const m = hm2m(R.whT || '09:00'); if (m != null) it.push({ m, t: 'wh' }); }
   if (R.adhAm && isMus()) { const m = hm2m(R.adhAmT || '06:00'); if (m != null) it.push({ m, t: 'adhAm' }); }
   if (R.adhPm && isMus()) { const m = hm2m(R.adhPmT || '17:30'); if (m != null) it.push({ m, t: 'adhPm' }); }
   if (R.med) (R.meds || []).slice(0, MEDMAX).forEach((x) => { const m = hm2m(x.t); if (m != null) it.push({ m, t: 'med', label: String(x.n || '').slice(0, 40) }); });
@@ -3729,6 +3775,7 @@ function remCard() {
   const meds = R.med ? '<div class="remsub meds">' + (R.meds || []).map((x, i) => '<div class="medrow"><input class="inp" type="text" maxlength="40" placeholder="اسم الدواء (اختياري)" aria-label="اسم الدواء ' + (i + 1) + '" data-med="n|' + i + '" value="' + esc(x.n || '') + '"><input class="inp tm" type="time" step="900" aria-label="وقت الدواء ' + (i + 1) + '" data-med="t|' + i + '" value="' + esc(x.t || '08:00') + '"><button class="btn sm sec" data-act="medDel" data-v="' + i + '" aria-label="حذف الموعد ' + (i + 1) + '">' + I('x') + '</button></div>').join('')
     + ((R.meds || []).length < MEDMAX ? '<button class="btn sm sec" data-act="medAdd">' + I('plus') + ' أضف موعد دواء</button>' : '<span class="dim">وصلت للحد الأقصى (' + MEDMAX + ' مواعيد)</span>') + '<span class="dim">اسم الدواء يبقى على جوالك فقط؛ المحطة تعرف الوقت وحده.</span></div>' : '';
   return '<section class="card stack"><h3>' + I('bell') + ' التذكيرات</h3>' + tg('water', 'شرب الماء', 'كل ساعتين من 10 صباحاً إلى 8 مساءً') + tg('meals', 'مواعيد الوجبات', 'في أوقات وجبات خطتك')
+    + tg('wh', '🎡 عجلة رسالة اليوم', 'تذكير صباحي: عجلتك جاهزة') + (R.wh ? tm('whT', '09:00', 'وقت التذكير') : '')
     + (isMus() ? tg('adhAm', 'أذكار الصباح', 'تذكير يومي بوقتك المفضّل') + (R.adhAm ? tm('adhAmT', '06:00', 'وقت أذكار الصباح') : '') + tg('adhPm', 'أذكار المساء', 'تذكير يومي بوقتك المفضّل') + (R.adhPm ? tm('adhPmT', '17:30', 'وقت أذكار المساء') : '') : '')
     + tg('med', 'موعد الدواء', 'تذكير بأوقات أدويتك أو مكمّلاتك') + meds
     + '<label class="remrow"><span><b>صوت المنبّه</b><span class="dim">رنّة هادئة عندما يظهر التذكير على الشاشة</span></span><input type="checkbox" class="sw" data-remsound="1"' + (R.sound === false ? '' : ' checked') + '></label>'
@@ -3928,7 +3975,7 @@ function adhOpen(hid) {                       // 0.62: شاشة الأذكار �
 // يظهر: عند حلول الوقت والتطبيق مفتوح، أو عند لمس إشعار التذكير. (التطبيق المغلق والجوال مقفل: إشعار ثابت يهتز فقط — الرنين فوق القفل يحتاج تطبيقاً أصلياً.)
 const ALM_T = {
   water: ['drop', 'وقت كوب ماء', 'اشرب كوباً الآن ثم سجّله بلمسة.', 'تم، شربت'], meal: ['utensils', 'حان وقت وجبتك', 'افتح خطتك وعلّم ما تأكله.', 'افتح خطتي'],
-  adhAm: ['sun', 'أذكار الصباح', 'ابدأ يومك بذكر الله.', 'ابدأ الأذكار'], adhPm: ['moon', 'أذكار المساء', 'حصّن مساءك بذكر الله.', 'ابدأ الأذكار'], med: ['pill', 'موعد دوائك', 'خذ دواءك أو مكمّلك في موعده.', 'أخذته']
+  adhAm: ['sun', 'أذكار الصباح', 'ابدأ يومك بذكر الله.', 'ابدأ الأذكار'], adhPm: ['moon', 'أذكار المساء', 'حصّن مساءك بذكر الله.', 'ابدأ الأذكار'], med: ['pill', 'موعد دوائك', 'خذ دواءك أو مكمّلك في موعده.', 'أخذته'], wh: ['sparkle', 'عجلة رسالة اليوم', 'عجلتك جاهزة: لفّها لتلقي رسالتك.', 'افتح العجلة']
 };
 const ALM = { fired: {}, snz: 0, snd: 0, ctx: null };
 const almIcon = (t) => t === 'pill' ? '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><g transform="rotate(-35 12 12)"><rect x="2" y="7.5" width="20" height="9" rx="4.5"/><path d="M12 7.5v9"/></g></svg>' : I(t);
@@ -3954,6 +4001,7 @@ function almDone(items) {                              // «تم»: ينفّذ �
   if (x.t === 'water') { const L = dl(TODAY); L.water = Math.min(24, (L.water || 0) + 1); queueLog(dkey(new Date())); save(); toast('💧 سُجّل كوب ماء'); }
   else if (x.t === 'med') { if (!Array.isArray(S.habits)) S.habits = ['water']; if (S.habits.indexOf('meds') < 0) S.habits.push('meds'); hSet('meds', 1); save(); toast('💊 سُجّل التزامك بالدواء'); }
   else if (x.t === 'meal') { S.tab = 'plan'; S.day = TODAY; }
+  else if (x.t === 'wh') { S.tab = 'today'; WHL.shown = true; setTimeout(() => { const w = whs(); if (w.day === dkey(new Date()) && w.cat >= 0) whOpen('card'); else if (whx() && whCats().length) whOpen('wheel'); }, 150); }
   render(); if (x.t === 'adhAm') adhOpen('adhkar'); else if (x.t === 'adhPm') adhOpen('adhkarPm');
 }
 document.addEventListener('click', (e) => {
@@ -4183,8 +4231,7 @@ function render() {
   if (cmV) { const n = $('#cmIn'); if (n) { n.value = cmV[0]; if (cmV[1]) n.focus(); } }
   const s2 = $('.scroll'); if (s2 && key === lastKey) s2.scrollTop = top; lastKey = key;
   const th = $('#thread'); if (th) th.scrollTop = th.scrollHeight;
-  onbSplashTimer(); fillCerts(); if (window.HxMotion) HxMotion.after(); if (S && S.chal && S.screen === 'app' && V.screen === '') chalCheck(); whMaybe();
-  if (focusChat) { const c = $('#chatIn'); if (c) c.focus(); focusChat = false; }
+  onbSplashTimer(); fillCerts(); if (window.HxMotion) HxMotion.after(); if (S && S.chal && S.screen === 'app' && V.screen === '') chalCheck(); chalCheck(); whMaybe(); actMaybe(); badgeSync(); { const c = $('#chatIn'); if (c) c.focus(); focusChat = false; }
   if (S && K) save();
 }
 let focusChat = false;
@@ -4478,7 +4525,7 @@ document.addEventListener('change', (e) => {
   if (t.dataset.prcity != null && t.id === 'prCity') { S.rem = Object.assign({ water: false, meals: false }, S.rem); S.rem.prCity = t.value; save(); remSync(true); render(); toast(t.value ? 'مواقيت ' + t.value + ' ✓' : 'اختر مدينتك'); }
   if (t.dataset.remcap != null && t.id === 'remCap') { S.rem = Object.assign({ water: false, meals: false }, S.rem); S.rem.cap = +t.value || 0; save(); remSync(true); toast('حُفظ الحد الأقصى للتذكيرات'); }
   if (t.dataset.remsound) { S.rem = Object.assign({ water: false, meals: false }, S.rem); S.rem.sound = t.checked; save(); if (t.checked) almChime(); else almStop(); }
-  if (t.dataset.remt) { S.rem = Object.assign({ water: false, meals: false }, S.rem); S.rem[t.dataset.remt] = t.value || (t.dataset.remt === 'adhAmT' ? '06:00' : '17:30'); save(); remSync(true).then(() => { toast('حُفظ وقت التذكير'); render(); }); }
+  if (t.dataset.remt) { S.rem = Object.assign({ water: false, meals: false }, S.rem); S.rem[t.dataset.remt] = t.value || ({ adhAmT: '06:00', whT: '09:00', salT: '21:00' }[t.dataset.remt] || '17:30'); save(); remSync(true).then(() => { toast('حُفظ وقت التذكير'); render(); }); }
   if (t.dataset.med) { const [f, i] = t.dataset.med.split('|'), x = (S.rem && S.rem.meds || [])[+i]; if (x) { x[f] = f === 'n' ? t.value.trim().slice(0, 40) : (t.value || '08:00'); save(); remSync(true).then(() => { if (f === 't') toast('حُفظ موعد الدواء'); }); } }
   if (t.dataset.sch) { const x = sched()[+t.dataset.sch]; x.type = t.value; if (t.value === dayTypes()[0]) { x.min = 0; x.time = ''; } else if (!x.min) { x.min = 60; x.time = x.time || '17:00'; } render(); }
 });
@@ -4500,7 +4547,7 @@ document.addEventListener('input', (e) => {
 });
 window.addEventListener('online', () => { V.online = true; poll(); });
 window.addEventListener('offline', () => { V.online = false; render(); });
-window.HissatiApp = { wheel: { cats: () => whCats().map((i) => whx().cats[i].id), dia: whDia, text: (id, i) => { const ci = whx().cats.findIndex((c) => c.id === id); return whText(ci, i); }, maybe: () => { WHL.shown = false; whMaybe(); }, open: (m) => whOpen(m) }, state: () => S, poll, flush, feed: () => FD, feedLoad: fdLoad, celebrateTest: (id) => celebrate(id), alarm: (items) => almShow(items), alarmTick: almTick, alarmFire: almFire, remItems, render, prayTimes };     // للاختبارات
+window.HissatiApp = { mcLeft, remItems, whDayOk, badge: () => V.badge, wheel: { dayOk: whDayOk, cats: () => whCats().map((i) => whx().cats[i].id), dia: whDia, text: (id, i) => { const ci = whx().cats.findIndex((c) => c.id === id); return whText(ci, i); }, maybe: () => { WHL.shown = false; whMaybe(); }, open: (m) => whOpen(m) }, state: () => S, poll, flush, feed: () => FD, feedLoad: fdLoad, celebrateTest: (id) => celebrate(id), alarm: (items) => almShow(items), alarmTick: almTick, alarmFire: almFire, remItems, render, prayTimes };     // للاختبارات
 boot();
 })();
 </script></body></html>

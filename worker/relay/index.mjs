@@ -348,6 +348,7 @@ function appPage(url) {
     return new Response(JSON.stringify({
       id: '/', name: 'حصتي — خطتك الغذائية', short_name: 'حصتي', description: 'خطتك من أخصائي التغذية، ومتابعة يومك، والمحادثة معه — مشفّرة على جوالك.', start_url: '/', scope: '/', display: 'standalone', orientation: 'portrait', dir: 'rtl', lang: 'ar',
       background_color: C[0], theme_color: C[1], categories: ['health', 'food', 'lifestyle'], prefer_related_applications: false,
+      shortcuts: [['الوجبة القادمة', 'الوجبة', 'meal'], ['سجّل كوب ماء', 'ماء', 'water'], ['راسل الأخصائي', 'المحادثة', 'chat'], ['رسالة اليوم', 'رسالة اليوم', 'wheel']].map((x) => ({ name: x[0], short_name: x[1], url: '/?a=' + x[2], icons: [{ src: '/icon-192' + sf + '.png', sizes: '192x192', type: 'image/png' }] })),
       icons: ICONS['icon-192'] ? [{ src: '/icon-192' + sf + '.png', sizes: '192x192', type: 'image/png', purpose: 'any' }, { src: '/icon-512' + sf + '.png', sizes: '512x512', type: 'image/png', purpose: 'any' }, { src: '/maskable-512' + sf + '.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }] : ICON_B64 ? [{ src: '/icon.png', sizes: '256x256', type: 'image/png' }] : []
     }), { headers: { 'content-type': 'application/manifest+json', 'cache-control': 'no-cache' } });
   }

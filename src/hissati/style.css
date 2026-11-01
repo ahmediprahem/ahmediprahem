@@ -614,4 +614,5 @@ html[data-theme="firoz"] .alm{background:radial-gradient(70% 50% at 50% 30%,rgba
 .sdno{font-size:12px;color:var(--amber);letter-spacing:.05em}.sdday h3{margin:0;font-size:20px}
 .sdt{display:flex;flex-direction:column;gap:8px}.sdtk{display:flex;gap:10px;align-items:center;text-align:right;width:100%;padding:12px;border-radius:14px;border:1px solid var(--line2);background:var(--glass);color:var(--text);font:inherit;font-size:14px;line-height:1.6}
 .sdtk .ck{width:24px;height:24px;border-radius:8px;border:2px solid var(--line2);flex:none;display:grid;place-items:center;font-weight:700;color:var(--mintInk)}.sdtk.on{border-color:var(--mint);background:color-mix(in srgb,var(--mint) 12%,transparent)}.sdtk.on .ck{background:var(--mint);border-color:var(--mint)}
-
+/* 0.65: العدّ التنازلي للوجبة القادمة */
+.mcd{display:inline-block;width:fit-content;font-size:12px;font-weight:700;color:var(--mintInk);background:var(--mint);border-radius:999px;padding:1px 10px;margin:2px 0}
