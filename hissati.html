@@ -3629,7 +3629,7 @@ window.addEventListener('message', (e) => {            // خطأ من مشغّل
 function wvid(v, big) {
   if (!v) return '<p class="dim">لا فيديو لهذا التمرين بعد.</p>';
   if (v.yt && v.x) return '<a class="btn full" href="https://www.youtube.com/watch?v=' + v.yt + '" target="_blank" rel="noopener noreferrer">▶ افتح الفيديو في يوتيوب</a><p class="dim">صاحب هذا الفيديو لا يسمح بتشغيله داخل التطبيق.</p>';
-  if (v.yt) return '<div class="wvf"><iframe src="https://www.youtube-nocookie.com/embed/' + v.yt + '?rel=0&playsinline=1&enablejsapi=1&origin=' + encodeURIComponent(location.origin) + '" title="فيديو التمرين" allow="encrypted-media; picture-in-picture; fullscreen" allowfullscreen loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></div><p class="dim"><a href="https://www.youtube.com/watch?v=' + v.yt + '" target="_blank" rel="noopener noreferrer">لا يعمل هنا؟ افتحه في يوتيوب</a></p>';
+  if (v.yt) return '<div class="wvf"><iframe src="https://www.youtube-nocookie.com/embed/' + v.yt + '?rel=0&playsinline=1&autoplay=1&enablejsapi=1&origin=' + encodeURIComponent(location.origin) + '" title="فيديو التمرين" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div><p class="dim"><a href="https://www.youtube.com/watch?v=' + v.yt + '" target="_blank" rel="noopener noreferrer">لا يعمل هنا؟ افتحه في يوتيوب</a></p>';
   if (v.m) return '<video class="wvv" src="/m/' + v.m + '" controls playsinline preload="metadata"></video>';
   return '<a class="btn full" href="' + esc(v.url) + '" target="_blank" rel="noopener noreferrer">▶ افتح فيديو التمرين</a>';
 }
