@@ -631,13 +631,21 @@ html[data-theme="firoz"] .alm{background:radial-gradient(70% 50% at 50% 30%,rgba
 .wxt{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}.wxt b{font-size:15px}.wxt small{color:var(--dim);direction:ltr;text-align:right;font-size:11px}
 .wxp{width:36px;height:36px;border-radius:50%;flex:none;display:grid;place-items:center;background:var(--mint);color:var(--mintInk);font-size:13px}
 .wxc{width:44px;height:44px;border-radius:14px;flex:none;border:2px solid var(--line2);background:none;color:transparent;display:grid;place-items:center}.wxc.on{background:var(--mint);border-color:var(--mint);color:var(--mintInk)}.wxc svg{width:22px;height:22px}
-.wvf{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;background:#000;margin-bottom:8px}.wvf iframe{position:absolute;inset:0;width:100%;height:100%;border:0}.wvv{width:100%;border-radius:14px;margin-bottom:8px;background:#000}
+.wvf{flex:none;position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;background:#000;margin-bottom:8px}.wvf iframe{position:absolute;inset:0;width:100%;height:100%;border:0}.wvv{flex:none;width:100%;border-radius:14px;margin-bottom:8px;background:#000}
 .wwm summary{cursor:pointer;font-weight:700;padding:6px 0}
 .shi{display:flex;align-items:center;gap:8px;border-top:1px solid var(--line);padding:6px 0}.shi:first-of-type{border-top:0}.shi .shb{flex:1;display:flex;align-items:center;gap:10px;min-width:0;text-align:right;padding:6px 4px;background:none;border:0;color:var(--text);font:inherit}.shi .ck{width:26px;height:26px;border-radius:8px;border:2px solid var(--line2);flex:none;display:grid;place-items:center;color:var(--mintInk);font-weight:700}.shi.on .ck{background:var(--mint);border-color:var(--mint)}.shi .shn{flex:1;min-width:0}.shi.on .shn{text-decoration:line-through;opacity:.6}.shi .px{width:5.4em;min-height:40px;text-align:center;font:inherit;font-weight:600;color:var(--text);background:var(--glass);border:1px solid var(--line2);border-radius:10px}.shi .px::placeholder{font-weight:400;color:var(--dim)}
 .sbar{height:8px;border-radius:4px;background:var(--glass2);overflow:hidden;margin:6px 0}.sbar i{display:block;height:100%;background:var(--mint);transition:width .3s}
 .shsum{display:flex;flex-direction:column;gap:8px}.shtot{display:flex;flex-direction:column;align-items:center;padding:10px;border-radius:16px;background:color-mix(in srgb,var(--mint) 12%,transparent);border:1px solid color-mix(in srgb,var(--mint) 40%,transparent)}.shtot small{color:var(--mut)}.shtot b{font-size:30px;line-height:1.2;font-variant-numeric:tabular-nums}.shtot b span{font-size:15px;color:var(--mut)}
 .shgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.shgrid>div{text-align:center;padding:6px 2px;border-radius:12px;background:var(--glass)}.shgrid small{display:block;font-size:11px;color:var(--mut)}.shgrid b{font-size:15px;font-variant-numeric:tabular-nums}
 .shcalc .row{display:flex;gap:8px;align-items:center;justify-content:space-between}.shcalc .row .inp{max-width:60%}
+/* 0.73: سجل الأوزان والعدّات */
+.wlt{display:inline-block;margin-top:2px;font-size:12px;color:var(--amber)}
+.wllast{display:flex;flex-direction:column;gap:6px;padding:10px;border-radius:14px;background:color-mix(in srgb,var(--amber) 10%,transparent);border:1px solid color-mix(in srgb,var(--amber) 35%,transparent);font-size:14px}.wllast b{color:var(--amber)}
+.wlhint{margin:0;padding:8px 10px;border-radius:12px;background:color-mix(in srgb,var(--mint) 12%,transparent);color:var(--text);font-size:14px}
+.wlr{display:flex;align-items:center;gap:8px}.wlr>b{width:22px;text-align:center;color:var(--mut)}.stp{flex:1;display:flex;align-items:center;gap:4px;min-width:0}.stp button{width:36px;height:44px;border-radius:12px;border:1px solid var(--line2);background:var(--glass);color:var(--text);font:inherit;font-size:20px;flex:none}
+.wli{flex:1;min-width:0;height:44px;text-align:center;font:inherit;font-weight:700;font-size:16px;color:var(--text);background:var(--glass2);border:1px solid var(--line2);border-radius:12px}.wli::placeholder{font-weight:400;color:var(--dim);font-size:13px}
+.wlsum{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.wlsum div{text-align:center;padding:6px 2px;border-radius:12px;background:var(--glass)}.wlsum small{display:block;font-size:11px;color:var(--mut)}.wlsum b{font-size:17px;font-variant-numeric:tabular-nums}
+.wlh li{display:flex;gap:8px;align-items:baseline}
 
 
 /* ==========================================================================
@@ -3643,7 +3651,7 @@ function workView() {
     const dn = (S.wlog || {})[dkey(new Date())] || {}, doneN = d.ex.filter((e, j) => dn[wd + '_' + j]).length;
     body = '<section class="card stack"><div class="row" style="justify-content:space-between"><h3>🏋 ' + esc(d.name) + '</h3>' + (wd === TODAY ? '<span class="dim">' + doneN + ' من ' + d.ex.length + '</span>' : '') + '</div>' + (d.time ? '<p class="mut">⏰ ' + esc(d.time) + '</p>' : '') + (d.note ? '<p class="dim">' + esc(d.note) + '</p>' : '')
       + (W.warm.steps.length ? '<details class="wwm"><summary>' + esc(W.warm.t || 'الإحماء') + '</summary><ol class="steps">' + W.warm.steps.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ol></details>' : '') + '</section>'
-      + d.ex.map((e, j) => '<div class="card wex' + (dn[wd + '_' + j] && wd === TODAY ? ' fin' : '') + '"><button class="wxm" data-act="wex" data-v="' + wd + '_' + j + '" aria-label="' + esc(e.n) + ': تفاصيل وفيديو"><span class="wxn">' + (j + 1) + '</span><span class="wxt"><b>' + esc(e.n) + '</b>' + (e.en ? '<small>' + esc(e.en) + '</small>' : '') + '<span class="dim">' + esc(e.sr) + (e.rest ? ' • راحة ' + esc(e.rest) : '') + '</span></span>' + (e.v ? '<span class="wxp" aria-hidden="true">▶</span>' : '') + '</button>' + (wd === TODAY ? '<button class="wxc' + (dn[wd + '_' + j] ? ' on' : '') + '" data-act="wdone" data-v="' + wd + '_' + j + '" aria-pressed="' + !!dn[wd + '_' + j] + '" aria-label="تم">' + I('check') + '</button>' : '') + '</div>').join('');
+      + d.ex.map((e, j) => '<div class="card wex' + (dn[wd + '_' + j] && wd === TODAY ? ' fin' : '') + '"><button class="wxm" data-act="wex" data-v="' + wd + '_' + j + '" aria-label="' + esc(e.n) + ': تفاصيل وفيديو"><span class="wxn">' + (j + 1) + '</span><span class="wxt"><b>' + esc(e.n) + '</b>' + (e.en ? '<small>' + esc(e.en) + '</small>' : '') + '<span class="dim">' + esc(e.sr) + (e.rest ? ' • راحة ' + esc(e.rest) : '') + '</span>' + (wlLast(exKey(e)) && wlTop(wlLast(exKey(e)).sets) ? '<span class="wlt">آخر مرة: ' + wlFmt(wlTop(wlLast(exKey(e)).sets), exSets(e).sec) + '</span>' : '') + '</span>' + (e.v ? '<span class="wxp" aria-hidden="true">▶</span>' : '') + '</button>' + (wd === TODAY ? '<button class="wxc' + (dn[wd + '_' + j] ? ' on' : '') + '" data-act="wdone" data-v="' + wd + '_' + j + '" aria-pressed="' + !!dn[wd + '_' + j] + '" aria-label="تم">' + I('check') + '</button>' : '') + '</div>').join('');
   }
   const more = (W.prog.length ? '<section class="card stack"><h3>كيف تتطور كل أسبوع</h3>' + W.prog.map((x) => '<p><b>' + esc(x[0]) + ':</b> <span class="mut">' + esc(x[1]) + '</span></p>').join('') + '</section>' : '') + (W.rules.length ? '<section class="card stack"><h3>قواعد مهمة</h3><ul class="plist">' + W.rules.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul></section>' : '');
   return '<div class="row" style="justify-content:space-between"><h2>تمريني</h2></div>' + planSeg() + (W.intro ? '<div class="dim">' + esc(W.intro) + '</div>' : '') + '<div class="daychips">' + chips + '</div>' + body + more;
@@ -3666,9 +3674,38 @@ function shopView() {
     + '<section class="card stack shcalc"><h3>🧮 حاسبة التكلفة</h3>' + shopSum() + '<div class="row"><label class="dim" for="shCur">العملة</label><select class="inp" id="shCur" data-shcur>' + SH_CUR.map((c) => '<option value="' + c[0] + '"' + (shCur() === c[0] ? ' selected' : '') + '>' + c[0] + ' — ' + c[1] + '</option>').join('') + '</select></div><div class="row"><label class="dim" for="shBud">ميزانية الأسبوع (اختياري)</label><input class="inp" id="shBud" inputmode="decimal" data-shbud placeholder="مثال: 800" value="' + esc(+S.shopBud > 0 ? S.shopBud : '') + '"></div><p class="dim">اكتب ما دفعتَه (أو ما تتوقعه) لكل بند، فيحسب التطبيق تكلفة الخطة، وتعرف كم تحتاج كل أسبوع وكل شهر لتحسب ميزانيتك. الأسعار تبقى على جوالك فقط.</p></section>'
     + (sh.prep.length ? '<details class="card wwm"><summary>تحضير الأسبوع</summary><ol class="steps">' + sh.prep.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ol></details>' : '') + gs;
 }
+
+// ---- 0.73: حاسبة العدّات والأوزان لكل تمرين: تسجّل مجموعاتك (وزن × عدّات)، فتتذكّر آخر مرة وتقترح الزيادة، وتحسب الحجم وأفضل مجموعة والحد الأقصى التقديري (Epley)
+const exKey = (e) => String(e.n || '').slice(0, 80);
+function exSets(e) {
+  const m = /^(\d+)\s*×\s*(\d+)(?:\s*-\s*(\d+))?/.exec(String(e.sr || '').replace(/\s+/g, ' ')); const n = m ? Math.min(10, +m[1]) : 3, a = m ? +m[2] : 10, b = m && m[3] ? +m[3] : a;
+  return { n, lo: Math.min(a, b), hi: Math.max(a, b), sec: /\sث/.test(e.sr || '') };
+}
+const wlogs = (k) => ((S.wlogs || {})[k] || []).slice().sort((a, b) => a.ts - b.ts);
+const wlTop = (ss) => (ss || []).filter((x) => x.r > 0).reduce((t, x) => !t || x.w > t.w || (x.w === t.w && x.r > t.r) ? x : t, null);
+const wlN = (x) => String(Math.round(x * 100) / 100);
+function wlLast(k) { const t = dkey(new Date()), a = wlogs(k).filter((x) => x.d !== t); return a[a.length - 1] || null; }
+const wlFmt = (x, sec) => (x.w > 0 ? wlN(x.w) + ' كجم × ' : '') + wlN(x.r) + (sec ? ' ث' : '');
+function wlCalc(ss) { let vol = 0, reps = 0, best = null; (ss || []).forEach((x) => { if (x.r > 0) { reps += x.r; vol += (x.w || 0) * x.r; const e1 = x.w > 0 && x.r <= 12 ? x.w * (1 + x.r / 30) : 0; if (!best || e1 > best) best = e1; } }); return { vol, reps, e1: best || 0 }; }
+function wlInit(k, e) {
+  const ex = exSets(e), last = wlLast(k), td = wlogs(k).filter((x) => x.d === dkey(new Date())).pop(), src = td || last;
+  V.wl = { k, n: ex.n, sets: Array.from({ length: Math.max(ex.n, src ? src.sets.length : 0) }, (_, i) => { const q = src && src.sets[i]; return { w: q && q.w > 0 ? String(q.w) : '', r: td && q ? String(q.r) : '' }; }) };
+}
+function wlSum() {
+  const ss = (V.wl ? V.wl.sets : []).map((x) => ({ w: parseFloat(numOnly(x.w)) || 0, r: parseFloat(numOnly(x.r)) || 0 })), c = wlCalc(ss);
+  return '<div class="wlsum" id="wlsum"><div><small>مجموع العدّات</small><b>' + wlN(c.reps) + '</b></div><div><small>الحجم (كجم)</small><b>' + wlN(c.vol) + '</b></div><div><small>أقصى تقديري</small><b>' + (c.e1 ? wlN(c.e1) : '—') + '</b></div></div>';
+}
+function wlHtml(k, e) {
+  if (!V.wl || V.wl.k !== k) wlInit(k, e); const ex = exSets(e), last = wlLast(k), hist = wlogs(k).slice(-5).reverse(), w = V.wl;
+  let hint = ''; if (last) { const lt = last.sets.filter((x) => x.r > 0); if (lt.length >= ex.n && lt.every((x) => x.r >= ex.hi)) hint = '<p class="wlhint">أتممتَ ' + ex.hi + ' عدّة في كل المجموعات آخر مرة: زد الوزن زيادة صغيرة هذه المرة وارجع لأقل عدّات (' + ex.lo + ').</p>'; else hint = '<p class="dim">الهدف: ' + ex.lo + (ex.hi !== ex.lo ? '–' + ex.hi : '') + (ex.sec ? ' ثانية' : ' عدّة') + ' في كل مجموعة. ثبّت الوزن حتى تبلغ ' + ex.hi + ' في كلها.</p>'; }
+  const rows = w.sets.map((q, i) => '<div class="wlr"><b>' + (i + 1) + '</b><div class="stp"><button data-act="wlstep" data-v="' + i + '|w|-2.5" aria-label="أنقص الوزن">−</button><input class="wli" id="wlw_' + i + '" data-wl="' + i + '|w" inputmode="decimal" placeholder="' + (last && last.sets[i] && last.sets[i].w > 0 ? wlN(last.sets[i].w) : 'كجم') + '" value="' + esc(q.w) + '" aria-label="الوزن للمجموعة ' + (i + 1) + '"><button data-act="wlstep" data-v="' + i + '|w|2.5" aria-label="زد الوزن">+</button></div><span class="dim">×</span><div class="stp"><button data-act="wlstep" data-v="' + i + '|r|-1" aria-label="أنقص العدّات">−</button><input class="wli" id="wlr_' + i + '" data-wl="' + i + '|r" inputmode="numeric" placeholder="' + (last && last.sets[i] ? wlN(last.sets[i].r) : (ex.sec ? 'ث' : 'عدّات')) + '" value="' + esc(q.r) + '" aria-label="' + (ex.sec ? 'الثواني' : 'العدّات') + ' للمجموعة ' + (i + 1) + '"><button data-act="wlstep" data-v="' + i + '|r|1" aria-label="زد العدّات">+</button></div></div>').join('');
+  return '<h3>🏋 سجّل أداءك</h3>' + (last ? '<div class="wllast"><b>آخر مرة (' + new Date(last.ts).toLocaleDateString('ar', { day: 'numeric', month: 'short' }) + '):</b> ' + last.sets.filter((x) => x.r > 0).map((x) => wlFmt(x, ex.sec)).join(' • ') + '<button class="btn sm sec" data-act="wlrep">كرّرها</button></div>' : '<p class="dim">لا سجل سابق لهذا التمرين: ما تسجّله اليوم تراه هنا في المرة القادمة.</p>') + hint + rows
+    + '<div class="row"><button class="btn sm sec" data-act="wladd">+ مجموعة</button><button class="btn sm sec" data-act="wldel"' + (w.sets.length <= 1 ? ' disabled' : '') + '>− مجموعة</button></div>' + wlSum()
+    + '<button class="btn full" data-act="wlsave">' + I('check') + ' حفظ في سجلي</button>' + (hist.length ? '<h3>سجلي</h3><ul class="plist wlh">' + hist.map((x) => { const t = wlTop(x.sets); return '<li><b>' + new Date(x.ts).toLocaleDateString('ar', { day: 'numeric', month: 'short' }) + '</b> ' + (t ? wlFmt(t, ex.sec) : '') + ' <span class="dim">(' + x.sets.filter((q) => q.r > 0).length + ' مجموعات)</span></li>'; }).join('') + '</ul>' : '');
+}
 function wexSheet(k) {
   const [di, ei] = k.split('_').map(Number), d = S.work.days.find((x) => x.d === di), e = d && d.ex[ei]; if (!e) return ['', ''];
-  return [esc(e.n), (e.en ? '<p class="dim" dir="ltr" style="text-align:right">' + esc(e.en) + '</p>' : '') + wvid(e.v) + '<p class="mut"><b>' + esc(e.sr) + '</b>' + (e.rest ? ' • راحة ' + esc(e.rest) : '') + '</p>' + (e.cues.length ? '<h3>طريقة الأداء الصحيحة</h3><ul class="plist">' + e.cues.map((c) => '<li>' + esc(String(c).replace(/^[•\s]+/, '')) + '</li>').join('') + '</ul>' : '')];
+  return [esc(e.n), (e.en ? '<p class="dim" dir="ltr" style="text-align:right">' + esc(e.en) + '</p>' : '') + wvid(e.v) + '<p class="mut"><b>' + esc(e.sr) + '</b>' + (e.rest ? ' • راحة ' + esc(e.rest) : '') + '</p>' + (e.cues.length ? '<h3>طريقة الأداء الصحيحة</h3><ul class="plist">' + e.cues.map((c) => '<li>' + esc(String(c).replace(/^[•\s]+/, '')) + '</li>').join('') + '</ul>' : '') + wlHtml(exKey(e), e)];
 }
 function tabPlan() {
   if (S.pt === 'work' && S.work) return workView(); if (S.pt === 'shop') return shopView();
@@ -4558,7 +4595,17 @@ document.addEventListener('click', (e) => {
     case 'tab': S.tab = v; if (v === 'feed' && now() - FD.at > 60000) fdLoad().then(render); break;
     case 'pt': S.pt = v; break;
     case 'wkday': S.wd = +v; break;
-    case 'wex': sheet = { t: 'wex', k: v }; break;
+    case 'wex': { sheet = { t: 'wex', k: v }; const [di, ei] = v.split('_').map(Number), d = S.work.days.find((x) => x.d === di), e = d && d.ex[ei]; if (e) wlInit(exKey(e), e); break; }
+    case 'wlstep': { const [i, f, dl2] = v.split('|'), q = V.wl.sets[+i]; if (!q) break; const cur = parseFloat(numOnly(q[f])) || 0, nx = Math.max(0, Math.round((cur + parseFloat(dl2)) * 100) / 100); q[f] = nx ? String(nx) : ''; break; }
+    case 'wladd': V.wl.sets.push(Object.assign({}, V.wl.sets[V.wl.sets.length - 1] || { w: '', r: '' }, { r: '' })); break;
+    case 'wldel': if (V.wl.sets.length > 1) V.wl.sets.pop(); break;
+    case 'wlrep': { const l = wlLast(V.wl.k); if (l) V.wl.sets = l.sets.map((x) => ({ w: x.w > 0 ? String(x.w) : '', r: String(x.r) })); break; }
+    case 'wlsave': {
+      const ss = V.wl.sets.map((x) => ({ w: Math.min(500, parseFloat(numOnly(x.w)) || 0), r: Math.min(1000, Math.round(parseFloat(numOnly(x.r)) || 0)) })).filter((x) => x.r > 0); if (!ss.length) { toast('اكتب عدّات مجموعة واحدة على الأقل.'); return; }
+      const k = V.wl.k, t = dkey(new Date()), prev = wlogs(k).filter((x) => x.d !== t), bestPrev = prev.reduce((m, x) => Math.max(m, wlCalc(x.sets).e1, wlTop(x.sets) ? wlTop(x.sets).w : 0), 0), now1 = wlCalc(ss).e1, topW = (wlTop(ss) || { w: 0 }).w;
+      S.wlogs = S.wlogs || {}; S.wlogs[k] = (S.wlogs[k] || []).filter((x) => x.d !== t).concat([{ ts: now(), d: t, sets: ss }]).slice(-40); const [di, ei] = sheet.k.split('_'); S.wlog = S.wlog || {}; (S.wlog[t] = S.wlog[t] || {})[di + '_' + ei] = 1;
+      if (S.hfSend !== 0) send({ t: 'wlog', n: k, d: t, sets: ss }); const pr = prev.length && (now1 > bestPrev + 0.01 || topW > bestPrev + 0.01); toast(pr ? '🏆 رقم جديد! حُفظ أداؤك' : '✓ حُفظ في سجلك — تراه المرة القادمة'); if (navigator.vibrate) try { navigator.vibrate([20, 40, 30]); } catch (e) { } break; }
+
     case 'wdone': { const k = dkey(new Date()); S.wlog = S.wlog || {}; const o = S.wlog[k] = S.wlog[k] || {}; if (o[v]) delete o[v]; else o[v] = 1; break; }
     case 'shk': { S.shopOk = S.shopOk || {}; if (S.shopOk[v]) delete S.shopOk[v]; else S.shopOk[v] = now(); break; }
     case 'shreset': S.shopOk = {}; break;
@@ -4647,6 +4694,7 @@ document.addEventListener('input', (e) => {               // التقاط أول
   const p = Math.max(0, (t.selectionStart == null ? n.length : t.selectionStart) - (v.length - n.length)); t.value = n; try { t.setSelectionRange(p, p); } catch (x) { }
 }, true);
 document.addEventListener('input', (e) => {
+  if (S && V.wl && e.target.dataset && e.target.dataset.wl != null) { const [i, f] = e.target.dataset.wl.split('|'); if (V.wl.sets[+i]) V.wl.sets[+i][f] = e.target.value; const o = $('#wlsum'); if (o) o.outerHTML = wlSum(); return; }
   if (S && e.target.dataset && e.target.dataset.px != null) { const v = parseFloat(numOnly(e.target.value)); S.shopPx = S.shopPx || {}; if (v > 0 && v < 1e7) S.shopPx[e.target.dataset.px] = Math.round(v * 100) / 100; else delete S.shopPx[e.target.dataset.px]; const o = $('#shsum'); if (o) o.outerHTML = shopSum(); save(); return; }
   if (S && e.target.dataset && e.target.dataset.shbud != null) { const v = parseFloat(numOnly(e.target.value)); S.shopBud = v > 0 && v < 1e8 ? Math.round(v) : 0; const o = $('#shsum'); if (o) o.outerHTML = shopSum(); save(); return; }
   if (e.target.id === 'sdNote' && V.sd != null && S.sd) { const dn = (S.sd.dn[V.sd] = S.sd.dn[V.sd] || { t: [], n: '' }); dn.n = e.target.value.slice(0, 600); }
