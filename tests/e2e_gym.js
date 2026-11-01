@@ -33,8 +33,16 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   ok('تمريني: الأيام والأوقات، إحماء، تمارين بتفاصيلها، فيديو يوتيوب يُشغَّل داخل «حصتي» (nocookie) أو رابط خارجي آمن، وتعليم «تم» لتمارين اليوم');
   // ---- قائمة التسوق
   await m.click('.ptseg [data-v="shop"]'); await m.waitForSelector('.shi'); assert.strictEqual(await m.locator('.shi').count(), 3); assert(/اشتريتَ 0 من 3/.test(await m.textContent('.scroll')));
-  await m.click('.shi >> nth=0'); assert(/اشتريتَ 1 من 3/.test(await m.textContent('.scroll'))); assert.strictEqual(await m.getAttribute('.shi >> nth=0', 'aria-pressed'), 'true'); assert.strictEqual(await m.evaluate(() => Object.keys(window.HissatiApp.state().shopOk).length), 1);
+  await m.click('.shi >> nth=0 >> .shb'); assert(/اشتريتَ 1 من 3/.test(await m.textContent('.scroll'))); assert.strictEqual(await m.getAttribute('.shi >> nth=0 >> .shb', 'aria-pressed'), 'true'); assert.strictEqual(await m.evaluate(() => Object.keys(window.HissatiApp.state().shopOk).length), 1);
   await m.click('[data-act="shreset"]'); assert(/اشتريتَ 0 من 3/.test(await m.textContent('.scroll'))); ok('قائمة التسوق: بنود مجمّعة بكمياتها، تعليم ما اشتريت وشريط تقدم، و«من جديد»');
+  assert(/0 <span>|0\s*ر\.س/.test((await m.textContent('.shtot')).replace(/\s+/g, ' ')) || /تكلفة الخطة/.test(await m.textContent('.shtot')));
+  await m.fill('.px >> nth=0', '٢٥٫٥'.replace('٫', '.')); await m.fill('.px >> nth=1', '10'); await m.fill('.px >> nth=2', '14.5');
+  assert.strictEqual((await m.textContent('.shtot b')).replace(/\s+/g, ' ').trim(), '50 ر.س'); assert(/لليوم/.test(await m.textContent('.shgrid')) && /7\.14/.test(await m.textContent('.shgrid')) && /214\.29/.test(await m.textContent('.shgrid')));
+  await m.click('.shi >> nth=0 >> .shb'); assert(/25\.5/.test(await m.textContent('.shgrid > div:nth-child(1)')) && /24\.5/.test(await m.textContent('.shgrid > div:nth-child(2)')));
+  await m.fill('#shBud', '40'); assert(/تتجاوز ميزانيتك بـ 10/.test(await m.textContent('#shsum'))); await m.fill('#shBud', '80'); assert(/تبقى من ميزانيتك 30/.test(await m.textContent('#shsum')));
+  await m.selectOption('#shCur', 'ج.م'); assert(/ج\.م/.test(await m.textContent('.shtot b'))); await m.click('[data-act="shreset"]'); assert.strictEqual((await m.textContent('.shtot b')).replace(/\s+/g, ' ').trim(), '50 ج.م', 'الأسعار تبقى بعد «من جديد»');
+  const px = await m.evaluate(() => window.HissatiApp.state().shopPx); assert.deepStrictEqual([px['دجاج'], px['بيض'], px['زيت زيتون']], [25.5, 10, 14.5]);
+  ok('حاسبة التكلفة: سعر لكل بند فتجمع التكلفة، وما اشتُري والمتبقي، ولليوم وللشهر، ومقارنة بميزانية، وعملة بحسب البلد، والأسعار تبقى على الجوال');
   // ---- قائمة تلقائية من الخطة إن لم يُرسل الأخصائي قائمة
   await m.evaluate(() => { const S = window.HissatiApp.state(); S.shop = null; }); await m.click('.ptseg [data-v="meals"]'); await m.click('.ptseg [data-v="shop"]');
   const t = await m.textContent('.scroll'); assert(/بيض كامل/.test(t) && /جم في الأسبوع/.test(t), 'تُولَّد من الخطة بمجموع الجرامات الأسبوعي');

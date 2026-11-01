@@ -633,8 +633,11 @@ html[data-theme="firoz"] .alm{background:radial-gradient(70% 50% at 50% 30%,rgba
 .wxc{width:44px;height:44px;border-radius:14px;flex:none;border:2px solid var(--line2);background:none;color:transparent;display:grid;place-items:center}.wxc.on{background:var(--mint);border-color:var(--mint);color:var(--mintInk)}.wxc svg{width:22px;height:22px}
 .wvf{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;background:#000;margin-bottom:8px}.wvf iframe{position:absolute;inset:0;width:100%;height:100%;border:0}.wvv{width:100%;border-radius:14px;margin-bottom:8px;background:#000}
 .wwm summary{cursor:pointer;font-weight:700;padding:6px 0}
-.shi{display:flex;align-items:center;gap:10px;width:100%;text-align:right;padding:10px 4px;background:none;border:0;border-top:1px solid var(--line);color:var(--text);font:inherit}.shi:first-of-type{border-top:0}.shi .ck{width:26px;height:26px;border-radius:8px;border:2px solid var(--line2);flex:none;display:grid;place-items:center;color:var(--mintInk);font-weight:700}.shi.on .ck{background:var(--mint);border-color:var(--mint)}.shi .shn{flex:1}.shi.on .shn{text-decoration:line-through;opacity:.6}
+.shi{display:flex;align-items:center;gap:8px;border-top:1px solid var(--line);padding:6px 0}.shi:first-of-type{border-top:0}.shi .shb{flex:1;display:flex;align-items:center;gap:10px;min-width:0;text-align:right;padding:6px 4px;background:none;border:0;color:var(--text);font:inherit}.shi .ck{width:26px;height:26px;border-radius:8px;border:2px solid var(--line2);flex:none;display:grid;place-items:center;color:var(--mintInk);font-weight:700}.shi.on .ck{background:var(--mint);border-color:var(--mint)}.shi .shn{flex:1;min-width:0}.shi.on .shn{text-decoration:line-through;opacity:.6}.shi .px{width:5.4em;min-height:40px;text-align:center;font:inherit;font-weight:600;color:var(--text);background:var(--glass);border:1px solid var(--line2);border-radius:10px}.shi .px::placeholder{font-weight:400;color:var(--dim)}
 .sbar{height:8px;border-radius:4px;background:var(--glass2);overflow:hidden;margin:6px 0}.sbar i{display:block;height:100%;background:var(--mint);transition:width .3s}
+.shsum{display:flex;flex-direction:column;gap:8px}.shtot{display:flex;flex-direction:column;align-items:center;padding:10px;border-radius:16px;background:color-mix(in srgb,var(--mint) 12%,transparent);border:1px solid color-mix(in srgb,var(--mint) 40%,transparent)}.shtot small{color:var(--mut)}.shtot b{font-size:30px;line-height:1.2;font-variant-numeric:tabular-nums}.shtot b span{font-size:15px;color:var(--mut)}
+.shgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.shgrid>div{text-align:center;padding:6px 2px;border-radius:12px;background:var(--glass)}.shgrid small{display:block;font-size:11px;color:var(--mut)}.shgrid b{font-size:15px;font-variant-numeric:tabular-nums}
+.shcalc .row{display:flex;gap:8px;align-items:center;justify-content:space-between}.shcalc .row .inp{max-width:60%}
 
 
 /* ==========================================================================
@@ -3639,10 +3642,22 @@ function workView() {
   const more = (W.prog.length ? '<section class="card stack"><h3>كيف تتطور كل أسبوع</h3>' + W.prog.map((x) => '<p><b>' + esc(x[0]) + ':</b> <span class="mut">' + esc(x[1]) + '</span></p>').join('') + '</section>' : '') + (W.rules.length ? '<section class="card stack"><h3>قواعد مهمة</h3><ul class="plist">' + W.rules.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul></section>' : '');
   return '<div class="row" style="justify-content:space-between"><h2>تمريني</h2></div>' + planSeg() + (W.intro ? '<div class="dim">' + esc(W.intro) + '</div>' : '') + '<div class="daychips">' + chips + '</div>' + body + more;
 }
+const SH_CUR = [['ر.س', 'ريال سعودي'], ['ج.م', 'جنيه مصري'], ['د.إ', 'درهم إماراتي'], ['د.ك', 'دينار كويتي'], ['ر.ق', 'ريال قطري'], ['د.ب', 'دينار بحريني'], ['ر.ع', 'ريال عماني'], ['د.أ', 'دينار أردني']];
+const shCur = () => S.shopCur || ({ 'مصر': 'ج.م', 'الإمارات': 'د.إ', 'الكويت': 'د.ك', 'قطر': 'ر.ق', 'البحرين': 'د.ب', 'عُمان': 'ر.ع', 'الأردن': 'د.أ' }[S.p.nat] || 'ر.س');
+const shMoney = (x) => (Math.round(x * 100) / 100).toLocaleString('en', { maximumFractionDigits: 2 });
+function shopSum() {                                       // التكلفة: ما سُعِّر، وما اشتُري، والمتبقي، ونصيب اليوم والشهر، ومقارنة بالميزانية
+  const sh = S.shop || shopAuto(), px = S.shopPx || {}, ok = S.shopOk || {}; let tot = 0, got = 0, np = 0, n = 0;
+  sh.groups.forEach((g, gi) => g.items.forEach((it, ii) => { n++; const v = +px[it.n]; if (v > 0) { tot += v; if (ok[gi + '_' + ii]) got += v; } else np++; }));
+  const cur = shCur(), bud = +S.shopBud || 0;
+  return '<div class="shsum" id="shsum"><div class="shtot"><small>تكلفة الخطة لهذا الأسبوع</small><b>' + shMoney(tot) + ' <span>' + cur + '</span></b></div><div class="shgrid"><div><small>اشتريتَ</small><b>' + shMoney(got) + '</b></div><div><small>المتبقي</small><b>' + shMoney(tot - got) + '</b></div><div><small>لليوم</small><b>' + shMoney(tot / 7) + '</b></div><div><small>للشهر (≈)</small><b>' + shMoney(tot * 30 / 7) + '</b></div></div>'
+    + (bud > 0 ? '<div class="bar sbar"><i style="width:' + Math.min(100, Math.round(tot / bud * 100)) + '%;' + (tot > bud ? 'background:var(--coral)' : '') + '"></i></div><p class="' + (tot > bud ? 'err' : 'dim') + '">' + (tot > bud ? 'تتجاوز ميزانيتك بـ ' + shMoney(tot - bud) + ' ' + cur : 'تبقى من ميزانيتك ' + shMoney(bud - tot) + ' ' + cur) + '</p>' : '')
+    + (np && n ? '<p class="dim">' + np + ' بند بلا سعر بعد، أدخل سعر الشراء بجانب كل بند.</p>' : '') + '</div>';
+}
 function shopView() {
-  const sh = S.shop || shopAuto(), ok = S.shopOk || {}; let all = 0, got = 0;
-  const gs = sh.groups.map((g, gi) => '<section class="card stack"><h3>' + esc(g.g) + '</h3>' + g.items.map((it, ii) => { const k = gi + '_' + ii; all++; if (ok[k]) got++; return '<button class="shi' + (ok[k] ? ' on' : '') + '" data-act="shk" data-v="' + k + '" aria-pressed="' + !!ok[k] + '"><span class="ck">' + (ok[k] ? '✓' : '') + '</span><span class="shn">' + esc(it.n) + '</span><span class="dim">' + esc(it.q) + '</span></button>'; }).join('') + '</section>').join('');
+  const sh = S.shop || shopAuto(), ok = S.shopOk || {}, px = S.shopPx || {}; let all = 0, got = 0;
+  const gs = sh.groups.map((g, gi) => '<section class="card stack"><h3>' + esc(g.g) + '</h3>' + g.items.map((it, ii) => { const k = gi + '_' + ii; all++; if (ok[k]) got++; return '<div class="shi' + (ok[k] ? ' on' : '') + '"><button class="shb" data-act="shk" data-v="' + k + '" aria-pressed="' + !!ok[k] + '"><span class="ck">' + (ok[k] ? '✓' : '') + '</span><span class="shn">' + esc(it.n) + '</span><span class="dim">' + esc(it.q) + '</span></button><input class="px" inputmode="decimal" data-px="' + esc(it.n) + '" placeholder="السعر" aria-label="سعر ' + esc(it.n) + '" value="' + esc(px[it.n] > 0 ? px[it.n] : '') + '"></div>'; }).join('') + '</section>').join('');
   return '<div class="row" style="justify-content:space-between"><h2>قائمة التسوق</h2><button class="btn sm sec" data-act="shreset">' + I('reset') + ' من جديد</button></div>' + planSeg() + '<div class="dim">' + esc(sh.title || '') + ' • اشتريتَ ' + got + ' من ' + all + '</div><div class="bar sbar" role="progressbar" aria-valuemin="0" aria-valuemax="' + all + '" aria-valuenow="' + got + '"><i style="width:' + (all ? Math.round(got / all * 100) : 0) + '%"></i></div>'
+    + '<section class="card stack shcalc"><h3>🧮 حاسبة التكلفة</h3>' + shopSum() + '<div class="row"><label class="dim" for="shCur">العملة</label><select class="inp" id="shCur" data-shcur>' + SH_CUR.map((c) => '<option value="' + c[0] + '"' + (shCur() === c[0] ? ' selected' : '') + '>' + c[0] + ' — ' + c[1] + '</option>').join('') + '</select></div><div class="row"><label class="dim" for="shBud">ميزانية الأسبوع (اختياري)</label><input class="inp" id="shBud" inputmode="decimal" data-shbud placeholder="مثال: 800" value="' + esc(+S.shopBud > 0 ? S.shopBud : '') + '"></div><p class="dim">اكتب ما دفعتَه (أو ما تتوقعه) لكل بند، فيحسب التطبيق تكلفة الخطة، وتعرف كم تحتاج كل أسبوع وكل شهر لتحسب ميزانيتك. الأسعار تبقى على جوالك فقط.</p></section>'
     + (sh.prep.length ? '<details class="card wwm"><summary>تحضير الأسبوع</summary><ol class="steps">' + sh.prep.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ol></details>' : '') + gs;
 }
 function wexSheet(k) {
@@ -4611,6 +4626,7 @@ document.addEventListener('change', (e) => {
   if (t.dataset.wk) { const L = dl(TODAY), n = Math.max(0, Math.min(80000, Math.round(+numOnly(t.value) || 0))); L.h = L.h || {}; if (n) L.h[t.dataset.wk] = n; else delete L.h[t.dataset.wk]; queueLog(dkey(new Date())); save(); render(); }
   if (t.id === 'offT') { const L = dl(TODAY); L.offT = t.value.trim().slice(0, 500); queueLog(dkey(new Date())); save(); }
   if (t.id === 'hf_n' && V.hf) { V.hf.d.n = t.value; V.hf.d.u = undefined; V.hf.d.v = ($('#hf_v') || {}).value; render(); return; }
+  if (S && t.dataset && t.dataset.shcur != null) { S.shopCur = t.value; const o = $('#shsum'); if (o) o.outerHTML = shopSum(); save(); return; }
   if (t.id === 'setupCity' && V.setup) { V.setup.city = t.value; if (!t.value) V.setup.on.pray = 0; render(); return; }
   if (t.dataset.prcity != null && t.id === 'prCity') { S.rem = Object.assign({ water: false, meals: false }, S.rem); S.rem.prCity = t.value; save(); remSync(true); render(); toast(t.value ? 'مواقيت ' + t.value + ' ✓' : 'اختر مدينتك'); }
   if (t.dataset.remcap != null && t.id === 'remCap') { S.rem = Object.assign({ water: false, meals: false }, S.rem); S.rem.cap = +t.value || 0; save(); remSync(true); toast('حُفظ الحد الأقصى للتذكيرات'); }
@@ -4625,6 +4641,8 @@ document.addEventListener('input', (e) => {               // التقاط أول
   const p = Math.max(0, (t.selectionStart == null ? n.length : t.selectionStart) - (v.length - n.length)); t.value = n; try { t.setSelectionRange(p, p); } catch (x) { }
 }, true);
 document.addEventListener('input', (e) => {
+  if (S && e.target.dataset && e.target.dataset.px != null) { const v = parseFloat(numOnly(e.target.value)); S.shopPx = S.shopPx || {}; if (v > 0 && v < 1e7) S.shopPx[e.target.dataset.px] = Math.round(v * 100) / 100; else delete S.shopPx[e.target.dataset.px]; const o = $('#shsum'); if (o) o.outerHTML = shopSum(); save(); return; }
+  if (S && e.target.dataset && e.target.dataset.shbud != null) { const v = parseFloat(numOnly(e.target.value)); S.shopBud = v > 0 && v < 1e8 ? Math.round(v) : 0; const o = $('#shsum'); if (o) o.outerHTML = shopSum(); save(); return; }
   if (e.target.id === 'sdNote' && V.sd != null && S.sd) { const dn = (S.sd.dn[V.sd] = S.sd.dn[V.sd] || { t: [], n: '' }); dn.n = e.target.value.slice(0, 600); }
   if (V.hf && e.target.id && e.target.id.startsWith('hf_')) V.hf.d[e.target.id.slice(3)] = e.target.value;       // ما يكتبه العميل يبقى إن أُعيد الرسم
   const t = e.target;
