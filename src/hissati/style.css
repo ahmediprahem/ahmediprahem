@@ -640,3 +640,5 @@ html[data-theme="firoz"] .alm{background:radial-gradient(70% 50% at 50% 30%,rgba
 .wlsum{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.wlsum div{text-align:center;padding:6px 2px;border-radius:12px;background:var(--glass)}.wlsum small{display:block;font-size:11px;color:var(--mut)}.wlsum b{font-size:17px;font-variant-numeric:tabular-nums}
 .wlh li{display:flex;gap:8px;align-items:baseline}
 
+
+.lbi[hidden]{display:none}#libq{width:100%}

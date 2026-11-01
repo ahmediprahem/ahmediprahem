@@ -5002,7 +5002,7 @@ Object.assign(A, {
     var c = cur(), rd = c && c.planSrc === 'ready' && c.ready && c.readyDoc && window.RL; if (!c || !c.hx || !(c.plan || rd || c.rawSnap)) return; var snap;
     try { snap = c.rawSnap ? JSON.parse(JSON.stringify(c.rawSnap)) : rd ? RL.toHissati(c.readyDoc, RL.plan(c.ready.id)) : c.kind === 'athlete' ? hxSnapG(c) : hxSnap(c); } catch (e) { toast('تعذّر تجهيز الخطة: ' + e.message); return; }
     var v = (c.hx.planV || 0) + 1; toast('جارٍ الإرسال…');
-    if (c.work) snap.work = c.work; if (c.shop) snap.shop = c.shop; snap.gate = c.hx.gate ? { on: 1, hour: c.hx.gateH || 12 } : null; snap.wm = (c.name || '') + ' • ' + (c.code || '');
+    if (c.work) snap.work = c.work; if (c.shop) snap.shop = c.shop; if (S.settings && (S.settings.exlib || []).length) snap.lib = S.settings.exlib; snap.gate = c.hx.gate ? { on: 1, hour: c.hx.gateH || 12 } : null; snap.wm = (c.name || '') + ' • ' + (c.code || '');
     hxSend(c, { t: 'plan', v: v, plan: snap, note: '' }).then(function () { c.hx.planV = v; c.hx.sentAt = Date.now(); if (rd) c.ready.sentV = v; persist(c); main(); toast('✓ وصلت الخطة v' + v + ' إلى «حصتي» مع إشعار للعميل'); }).catch(hxErr);
   },
   hxSendMsg: function () {
@@ -6648,6 +6648,28 @@ function gyShopParse(t, old) {
   });
   return { title: old && old.title || 'قائمة المشتريات الأسبوعية', prep: old && old.prep || [], groups: groups.slice(0, 12) };
 }
+
+// ---- 0.74: مكتبة التمارين: عامة لكل العملاء، تُرسَل مع كل خطة وتظهر في «حصتي ← خطتي ← المكتبة» (بحث ومجموعات وفيديو وسجل أوزان)
+function exlib() { S.settings = S.settings || {}; if (!Array.isArray(S.settings.exlib)) S.settings.exlib = []; return S.settings.exlib; }
+function lbGuess(t) {
+  var m = [['صدر', /صدر|بنش|ضغط|فلاي|ديبس|chest|bench|fly|dip/i], ['ظهر', /ظهر|سحب|رو |لات|back|row|pull|lat/i], ['أرجل', /رجل|أرجل|سكوات|ثبات|لانج|ليج|squat|leg|lunge|calf|سمانة/i], ['أكتاف', /كتف|أكتاف|جانبي|shoulder|lateral|press/i], ['ذراعين', /باي|ترا|ذراع|مطرقة|curl|triceps|biceps|hammer/i], ['بطن', /بطن|بلانك|كرنش|abs|plank|crunch/i], ['كارديو', /كارديو|مشي|جري|cardio|walk|run/i]];
+  for (var i = 0; i < m.length; i++) if (m[i][1].test(t)) return m[i][0]; return 'عام';
+}
+function libMerge(w) {
+  var L = exlib(), n = 0; if (!w || !Array.isArray(w.days)) return 0;
+  w.days.forEach(function (d) { (d.ex || []).forEach(function (e) {
+    var k = String(e.n || '').trim(); if (!k || L.length >= 300) return; var o = L.filter(function (x) { return x.n === k; })[0];
+    if (o) { if (!o.v && e.v) { o.v = e.v; n++; } return; }
+    L.push({ n: k.slice(0, 80), en: String(e.en || '').slice(0, 60), g: lbGuess(k + ' ' + (e.en || '') + ' ' + (d.name || '')), cues: (e.cues || []).slice(0, 10), v: e.v || null }); n++;
+  }); });
+  if (n) saveSettings(); return n;
+}
+function libCard() {
+  var L = exlib(), h = '<div class="ucard"><details><summary><b>📚 مكتبة التمارين (' + L.length + ')</b> <small>تصل كل عملائك في «حصتي ← خطتي ← المكتبة»</small></summary>';
+  h += '<p class="small">أي تمرين هنا يفتحه أي عميل لديه «حصتي» بفيديوه وطريقة أدائه، ويسجّل أوزانه عليه. تُرسَل مع «أرسل الخطة».</p><p class="two"><button class="sec sm" data-a="libAdd">➕ تمرين جديد</button><button class="sec sm" data-a="libFromWork">⬇ أضف تمارين برنامج هذا العميل</button></p>';
+  h += L.map(function (e, i) { return '<div class="gye"><input class="gyv" data-lf="' + i + '|n" value="' + esc(e.n) + '" placeholder="الاسم" aria-label="اسم التمرين"><input class="gyv" data-lf="' + i + '|en" value="' + esc(e.en) + '" placeholder="English" dir="ltr"><input class="gyv" data-lf="' + i + '|g" value="' + esc(e.g) + '" placeholder="المجموعة العضلية"><input class="gyv" data-lf="' + i + '|v" value="' + esc(gyShow(e.v)) + '" placeholder="رابط فيديو" dir="ltr"><button class="sec sm" data-a="libDel" data-v="' + i + '" aria-label="حذف">🗑</button></div>'; }).join('');
+  return h + '</details></div>';
+}
 function gymCard(c) {
   var w = c.work, nEx = 0, nVid = 0, x = c.hx;
   if (w) w.days.forEach(function (d) { (d.ex || []).forEach(function (e) { nEx++; if (e.v) nVid++; }); });
@@ -6670,8 +6692,11 @@ function gymCard(c) {
   if (x) h += '<p class="small">أرسل الخطة بعد التعديل من «حصتي ← ➤ أرسل الخطة المحدَّثة».</p>';
   return h + '</div>';
 }
-(function (f) { ciTab = function (c) { var h = f.apply(this, arguments); return gymCard(c) + h; }; })(ciTab);
+(function (f) { ciTab = function (c) { var h = f.apply(this, arguments); return libCard() + gymCard(c) + h; }; })(ciTab);
 Object.assign(A, {
+  libAdd: function () { var n = (prompt('اسم التمرين (بالعربية)') || '').trim().slice(0, 80); if (!n) return; var L = exlib(); if (L.some(function (x) { return x.n === n; })) { toast('موجود في المكتبة'); return; } L.unshift({ n: n, en: '', g: lbGuess(n), cues: [], v: null }); saveSettings().then(main); },
+  libFromWork: function () { var c = cur(); if (!c || !c.work) { toast('لا برنامج تمرين لهذا العميل'); return; } var n = libMerge(c.work); toast(n ? '✓ أُضيف/حُدّث ' + n + ' تمريناً في المكتبة' : 'كلها موجودة في المكتبة'); main(); },
+  libDel: function (v) { var L = exlib(), e = L[+v]; if (!e || !confirm('حذف «' + e.n + '» من المكتبة؟')) return; L.splice(+v, 1); saveSettings().then(main); },
   gymCheck: function () {
     var c = cur(); if (!c || !c.work) return; var all = []; c.work.days.forEach(function (d) { (d.ex || []).forEach(function (e) { if (e.v && e.v.yt) all.push(e); }); }); var box = document.getElementById('gycheck'), done = 0, bad = [], unk = 0;
     if (!all.length) { toast('لا فيديوهات يوتيوب للفحص'); return; } var next = 0;
@@ -6686,17 +6711,18 @@ Object.assign(A, {
 function gyReadFile(file, cb) { var r = new FileReader(); r.onload = function () { try { cb(JSON.parse(r.result)); } catch (e) { toast('الملف ليس JSON صالحاً'); } }; r.readAsText(file); }
 document.addEventListener('change', function (e) {
   var t = e.target, c;
-  if (t.id === 'gymf' && t.files && t.files[0] && (c = cur())) { gyReadFile(t.files[0], function (j) { var w = j.work || (j.days ? j : null); if (!w || !Array.isArray(w.days) || !w.days.length) { toast('لا برنامج تمرين في هذا الملف'); return; } c.work = w; if (j.shop) c.shop = j.shop; persist(c).then(function () { toast('✓ حُمِّل برنامج التمرين'); main(); }); }); t.value = ''; return; }
+  if (t.id === 'gymf' && t.files && t.files[0] && (c = cur())) { gyReadFile(t.files[0], function (j) { var w = j.work || (j.days ? j : null); if (!w || !Array.isArray(w.days) || !w.days.length) { toast('لا برنامج تمرين في هذا الملف'); return; } c.work = w; libMerge(w); if (j.shop) c.shop = j.shop; persist(c).then(function () { toast('✓ حُمِّل برنامج التمرين'); main(); }); }); t.value = ''; return; }
   if (t.id === 'impc' && t.files && t.files[0]) { gyReadFile(t.files[0], function (j) {
     if (!j || j.hissaClient !== 1 || !j.client || !j.client.name) { toast('هذا ليس ملف عميل جاهز من «حصة»'); return; }
     var c = newClient('ath'); Object.assign(c, { name: String(j.client.name).slice(0, 80), sex: j.client.sex === 'أنثى' ? 'أنثى' : 'ذكر', age: +j.client.age || c.age, weight: +j.client.weight || c.weight, height: +j.client.height || c.height, notes: String(j.client.notes || '').slice(0, 1000) });
-    if (j.snap && Array.isArray(j.snap.days) && j.snap.days.length) c.rawSnap = j.snap; if (j.work && Array.isArray(j.work.days)) c.work = j.work; if (j.shop) c.shop = j.shop;
+    if (j.snap && Array.isArray(j.snap.days) && j.snap.days.length) c.rawSnap = j.snap; if (j.work && Array.isArray(j.work.days)) { c.work = j.work; libMerge(j.work); } if (j.shop) c.shop = j.shop;
     S.clients.push(c); S.view = 'client'; S.cur = c.code; S.tab = 'client'; S.page = 'sum'; persist(c); S.versions = []; render(); toast('✓ أُضيف العميل «' + c.name + '» بخطته وبرنامجه وقائمة تسوقه');
     var ac = j.account;             // الملف يحمل اسم مستخدم وكلمة سر: يُنشأ دخول العميل تلقائياً (مربوطاً بهذا العميل) فيدخل «حصتي» مباشرة
     if (ac && /^[a-z0-9._-]{3,30}$/.test(String(ac.u || '')) && String(ac.pw || '').length >= 10 && /[A-Za-z]/.test(ac.pw) && /\d/.test(ac.pw)) {
       if (!hxOn()) { toast('أُضيف العميل. اربط المحطة من «الإعدادات ← حصتي» ثم أنشئ دخوله من ملفه (🔑).'); return; }
       hxInvite(c.name, c.phone || '', 14, c.kind === 'athlete' ? 'g' : 'ex').then(function (inv) { var h = Object.keys(HX.st.inv).filter(function (q) { return HX.st.inv[q] === inv; })[0]; inv.cl = c.code; return hxCredMake(h, inv, String(ac.u).toLowerCase(), ac.pw).then(function () { HX.made = h; HX.form = false; A.hxv(); toast('✓ أُنشئ دخول «' + c.name + '»: اسم المستخدم وكلمة السر جاهزان للإرسال'); }); }).catch(function (er) { toast('أُضيف العميل، وتعذّر إنشاء الدخول تلقائياً: ' + ((er && er.message) || '') + ' — أنشئه من ملفه (🔑)'); });
     } }); t.value = ''; return; }
+  if (t.hasAttribute && t.hasAttribute('data-lf')) { var q0 = t.getAttribute('data-lf').split('|'), e0 = exlib()[+q0[0]]; if (!e0) return; if (q0[1] === 'v') { var v0 = gyVid(t.value); if (v0 === false) { toast('اكتب رابطاً يبدأ بـ https://'); return; } e0.v = v0 || null; } else if (q0[1] === 'n') { if (!t.value.trim()) { t.value = e0.n; return; } e0.n = t.value.trim().slice(0, 80); } else e0[q0[1]] = t.value.trim().slice(0, 60); saveSettings().then(function () { toast('✓ حُفظ'); }); return; }
   if (t.hasAttribute && t.hasAttribute('data-gv') && (c = cur()) && c.work) {
     var p = t.getAttribute('data-gv').split('|').map(Number), ex = c.work.days[p[0]] && c.work.days[p[0]].ex[p[1]]; if (!ex) return; var v = gyVid(t.value);
     if (v === false) { toast('اكتب رابطاً يبدأ بـ https://'); return; } if (v) ex.v = v; else delete ex.v; persist(c).then(function () { toast(v ? (v.yt ? '✓ فيديو يوتيوب سيُشغَّل داخل «حصتي»' : '✓ حُفظ الرابط') : 'أُزيل الفيديو'); main(); }); return;

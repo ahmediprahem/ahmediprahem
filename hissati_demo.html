@@ -648,6 +648,8 @@ html[data-theme="firoz"] .alm{background:radial-gradient(70% 50% at 50% 30%,rgba
 .wlh li{display:flex;gap:8px;align-items:baseline}
 
 
+.lbi[hidden]{display:none}#libq{width:100%}
+
 /* ==========================================================================
    «حصتي» — themes.css  •  ثيم «وردة» (data-theme="rose") وثيم «نبض» (data-theme="pulse")
    يُحمَّل بعد code/style.css. الثيم الحالي يبقى الافتراضي: بلا data-theme لا يتغيّر شيء.
@@ -2815,7 +2817,7 @@ function handle(p) {
   }
   if (p.t === 'plan' && p.plan && Array.isArray(p.plan.days) && p.plan.days.length) {
     const pl = p.plan; S.pm = { sys: pl.sys || 'ex', kcal: pl.kcal, pro: pl.pro, cho: pl.cho, fat: pl.fat, water: pl.water, dayNames: pl.dayNames, groups: pl.groups, recipes: pl.recipes && typeof pl.recipes === 'object' ? pl.recipes : {}, ready: pl.ready && typeof pl.ready === 'object' ? { id: String(pl.ready.id || ''), name: String(pl.ready.name || '').slice(0, 80) } : null };
-    S.work = cleanWork(pl.work); S.shop = cleanShop(pl.shop); if (!S.work && S.pt === 'work') S.pt = 'meals'; if (S.shopSig !== JSON.stringify(S.shop)) { S.shopSig = JSON.stringify(S.shop); S.shopOk = {}; }
+    S.work = cleanWork(pl.work); S.lib = cleanLib(pl.lib); S.shop = cleanShop(pl.shop); if (!S.work && S.pt === 'work') S.pt = 'meals'; if (S.shopSig !== JSON.stringify(S.shop)) { S.shopSig = JSON.stringify(S.shop); S.shopOk = {}; }
     S.plan = JSON.parse(JSON.stringify(pl.days)); S.pv = +p.v || 1; mkData(); S.wm = String(pl.wm || '').slice(0, 80); setGate(pl.gate); if (S.req !== 'approved') S.req = 'approved';
     foodsOf('no').forEach((f) => { if (foodInPlan(f)) applyDislike(f); });
     const first = S.screen !== 'app'; S.screen = 'app'; if (first) S.tab = 'today'; if (!S.planAt) S.planAt = now(); remSync();
@@ -3626,7 +3628,7 @@ function shopAuto() {                                        // من الخطة:
   return { title: 'قائمة تسوّق الأسبوع', prep: [], groups: Object.keys(by).map((g) => ({ g, items: Object.keys(by[g]).map((n) => ({ n, q: by[g][n].g ? Math.round(by[g][n].g).toLocaleString('en') + ' جم في الأسبوع' : '× ' + by[g][n].n })) })) };
 }
 function planSeg() {
-  const t = [['meals', 'وجباتي']]; if (S.work) t.push(['work', 'تمريني']); t.push(['shop', 'قائمة التسوق']);
+  const t = [['meals', 'وجباتي']]; if (S.work) t.push(['work', 'تمريني']); if ((S.lib || []).length) t.push(['lib', 'المكتبة']); t.push(['shop', 'قائمة التسوق']);
   return '<div class="segc ptseg" role="tablist" aria-label="أقسام خطتي">' + t.map((x) => '<button role="tab" class="' + ((S.pt || 'meals') === x[0] ? 'on' : '') + '" aria-selected="' + ((S.pt || 'meals') === x[0]) + '" data-act="pt" data-v="' + x[0] + '">' + x[1] + '</button>').join('') + '</div>';
 }
 document.addEventListener('load', (e) => { const t = e.target; if (t && t.tagName === 'IFRAME' && /youtube-nocookie\.com/.test(t.src || '') && t.contentWindow) try { t.contentWindow.postMessage(JSON.stringify({ event: 'listening', id: 1, channel: 'widget' }), 'https://www.youtube-nocookie.com'); } catch (x) { } }, true);
@@ -3703,12 +3705,26 @@ function wlHtml(k, e) {
     + '<div class="row"><button class="btn sm sec" data-act="wladd">+ مجموعة</button><button class="btn sm sec" data-act="wldel"' + (w.sets.length <= 1 ? ' disabled' : '') + '>− مجموعة</button></div>' + wlSum()
     + '<button class="btn full" data-act="wlsave">' + I('check') + ' حفظ في سجلي</button>' + (hist.length ? '<h3>سجلي</h3><ul class="plist wlh">' + hist.map((x) => { const t = wlTop(x.sets); return '<li><b>' + new Date(x.ts).toLocaleDateString('ar', { day: 'numeric', month: 'short' }) + '</b> ' + (t ? wlFmt(t, ex.sec) : '') + ' <span class="dim">(' + x.sets.filter((q) => q.r > 0).length + ' مجموعات)</span></li>'; }).join('') + '</ul>' : '');
 }
+
+// ---- 0.74: مكتبة التمارين (يرسلها الأخصائي لكل عملائه): بحث ومجموعات عضلية، وتفتح بالفيديو وطريقة الأداء وسجل الأوزان
+function cleanLib(a) {
+  if (!Array.isArray(a)) return []; return a.slice(0, 300).map((e) => ({ n: sl(e && e.n, 80), en: sl(e && e.en, 60), g: sl(e && e.g, 30), cues: (e && Array.isArray(e.cues) ? e.cues : []).slice(0, 10).map((c) => sl(c, 240)), v: cleanVid(e && e.v) })).filter((e) => e.n);
+}
+function libView() {
+  const L = S.lib || [], gs = [], g0 = V.lg || ''; L.forEach((e) => { if (e.g && gs.indexOf(e.g) < 0) gs.push(e.g); });
+  const chips = '<div class="chips"><button class="chip' + (g0 ? '' : ' on') + '" data-act="lg" data-v="">الكل</button>' + gs.map((g) => '<button class="chip' + (g0 === g ? ' on' : '') + '" data-act="lg" data-v="' + esc(g) + '">' + esc(g) + '</button>').join('') + '</div>';
+  const rows = L.map((e, i) => (g0 && e.g !== g0) ? '' : '<div class="card wex lbi" data-q="' + esc((e.n + ' ' + e.en + ' ' + e.g).toLowerCase()) + '"><button class="wxm" data-act="lib" data-v="' + i + '" aria-label="' + esc(e.n) + ': تفاصيل وفيديو"><span class="wxt"><b>' + esc(e.n) + '</b>' + (e.en ? '<small>' + esc(e.en) + '</small>' : '') + (e.g ? '<span class="dim">' + esc(e.g) + '</span>' : '') + (wlLast(exKey(e)) && wlTop(wlLast(exKey(e)).sets) ? '<span class="wlt">آخر مرة: ' + wlFmt(wlTop(wlLast(exKey(e)).sets), false) + '</span>' : '') + '</span>' + (e.v ? '<span class="wxp" aria-hidden="true">▶</span>' : '') + '</button></div>').join('');
+  return '<div class="row" style="justify-content:space-between"><h2>مكتبة التمارين</h2><span class="dim">' + L.length + ' تمريناً</span></div>' + planSeg() + '<input class="inp" id="libq" data-lq="1" type="search" placeholder="ابحث عن تمرين…" aria-label="بحث في مكتبة التمارين">' + (gs.length ? chips : '') + '<div class="stack" id="libl">' + rows + '</div>';
+}
+function libSheet(i) {
+  const e = (S.lib || [])[i]; if (!e) return ['', '']; return [esc(e.n), (e.en ? '<p class="dim" dir="ltr" style="text-align:right">' + esc(e.en) + '</p>' : '') + (e.g ? '<p class="mut">' + esc(e.g) + '</p>' : '') + wvid(e.v) + (e.cues.length ? '<h3>طريقة الأداء الصحيحة</h3><ul class="plist">' + e.cues.map((c) => '<li>' + esc(String(c).replace(/^[•\s]+/, '')) + '</li>').join('') + '</ul>' : '') + wlHtml(exKey(e), e)];
+}
 function wexSheet(k) {
   const [di, ei] = k.split('_').map(Number), d = S.work.days.find((x) => x.d === di), e = d && d.ex[ei]; if (!e) return ['', ''];
   return [esc(e.n), (e.en ? '<p class="dim" dir="ltr" style="text-align:right">' + esc(e.en) + '</p>' : '') + wvid(e.v) + '<p class="mut"><b>' + esc(e.sr) + '</b>' + (e.rest ? ' • راحة ' + esc(e.rest) : '') + '</p>' + (e.cues.length ? '<h3>طريقة الأداء الصحيحة</h3><ul class="plist">' + e.cues.map((c) => '<li>' + esc(String(c).replace(/^[•\s]+/, '')) + '</li>').join('') + '</ul>' : '') + wlHtml(exKey(e), e)];
 }
 function tabPlan() {
-  if (S.pt === 'work' && S.work) return workView(); if (S.pt === 'shop') return shopView();
+  if (S.pt === 'work' && S.work) return workView(); if (S.pt === 'lib' && (S.lib || []).length) return libView(); if (S.pt === 'shop') return shopView();
   const hid = S.gate && (S.day !== TODAY || !gateOpen());
   const chips = DATA.dayNames.map((n, i) => { const [a, b] = itemsOfDay(i); return '<button class="' + (S.day === i ? 'on' : '') + (i === TODAY ? ' today' : '') + '" data-act="day" data-v="' + i + '"><b>' + esc(String(n).replace('ال', '')) + '</b><span>' + (S.gate && i !== TODAY ? '🔒' : b && i <= TODAY ? Math.round(a / b * 100) + '%' : '—') + '</span></button>'; }).join('');
   return '<div class="row" style="justify-content:space-between"><h2>خطتي</h2></div>' + planSeg()
@@ -4288,6 +4304,7 @@ function sheetHtml() {
     h = 'ملاحظة على ' + esc(s.name); b = '<div class="chips">' + ['أضفت شيئاً', 'أكلت كمية أقل', 'أكلت كمية أكثر', 'أكلت خارج البيت'].map((x) => '<button class="chip" data-act="qnote" data-v="' + x + '">' + x + '</button>').join('') + '</div>'
       + '<textarea class="inp" id="noteIn" placeholder="مثال: أضفت ملعقة عسل للشوفان">' + esc(dl(TODAY).note[sheet.si] || '') + '</textarea><button class="btn" data-act="savenote">حفظ الملاحظة</button><p class="dim">تصل ملاحظتك لأخصائيك مع متابعة اليوم.</p>';
   } else if (sheet.t === 'wex') { const r = wexSheet(sheet.k); h = r[0]; b = r[1];
+  } else if (sheet.t === 'lib') { const r = libSheet(sheet.i); h = r[0]; b = r[1];
   } else if (sheet.t === 'shop') {
     const byG = {}; S.plan.forEach((d) => d.slots.forEach((s) => s.lines.forEach((l) => { const g = DATA.groups[l[0]] || 'أخرى'; (byG[g] = byG[g] || {}); byG[g][l[1]] = (byG[g][l[1]] || 0) + 1; })));
     h = 'قائمة تسوّق الأسبوع'; b = Object.keys(byG).map((g) => '<section class="card"><h3 style="margin-bottom:6px">' + esc(g) + '</h3><ul class="plist">' + Object.keys(byG[g]).map((n) => '<li>' + esc(n) + ' <span class="dim">× ' + byG[g][n] + '</span></li>').join('') + '</ul></section>').join('');
@@ -4595,6 +4612,8 @@ document.addEventListener('click', (e) => {
     case 'tab': S.tab = v; if (v === 'feed' && now() - FD.at > 60000) fdLoad().then(render); break;
     case 'pt': S.pt = v; break;
     case 'wkday': S.wd = +v; break;
+    case 'lg': V.lg = v; break;
+    case 'lib': { sheet = { t: 'lib', i: +v }; const e = (S.lib || [])[+v]; if (e) wlInit(exKey(e), e); break; }
     case 'wex': { sheet = { t: 'wex', k: v }; const [di, ei] = v.split('_').map(Number), d = S.work.days.find((x) => x.d === di), e = d && d.ex[ei]; if (e) wlInit(exKey(e), e); break; }
     case 'wlstep': { const [i, f, dl2] = v.split('|'), q = V.wl.sets[+i]; if (!q) break; const cur = parseFloat(numOnly(q[f])) || 0, nx = Math.max(0, Math.round((cur + parseFloat(dl2)) * 100) / 100); q[f] = nx ? String(nx) : ''; break; }
     case 'wladd': V.wl.sets.push(Object.assign({}, V.wl.sets[V.wl.sets.length - 1] || { w: '', r: '' }, { r: '' })); break;
@@ -4603,7 +4622,7 @@ document.addEventListener('click', (e) => {
     case 'wlsave': {
       const ss = V.wl.sets.map((x) => ({ w: Math.min(500, parseFloat(numOnly(x.w)) || 0), r: Math.min(1000, Math.round(parseFloat(numOnly(x.r)) || 0)) })).filter((x) => x.r > 0); if (!ss.length) { toast('اكتب عدّات مجموعة واحدة على الأقل.'); return; }
       const k = V.wl.k, t = dkey(new Date()), prev = wlogs(k).filter((x) => x.d !== t), bestPrev = prev.reduce((m, x) => Math.max(m, wlCalc(x.sets).e1, wlTop(x.sets) ? wlTop(x.sets).w : 0), 0), now1 = wlCalc(ss).e1, topW = (wlTop(ss) || { w: 0 }).w;
-      S.wlogs = S.wlogs || {}; S.wlogs[k] = (S.wlogs[k] || []).filter((x) => x.d !== t).concat([{ ts: now(), d: t, sets: ss }]).slice(-40); const [di, ei] = sheet.k.split('_'); S.wlog = S.wlog || {}; (S.wlog[t] = S.wlog[t] || {})[di + '_' + ei] = 1;
+      S.wlogs = S.wlogs || {}; S.wlogs[k] = (S.wlogs[k] || []).filter((x) => x.d !== t).concat([{ ts: now(), d: t, sets: ss }]).slice(-40); if (sheet.t === 'wex') { const [di, ei] = sheet.k.split('_'); S.wlog = S.wlog || {}; (S.wlog[t] = S.wlog[t] || {})[di + '_' + ei] = 1; }
       if (S.hfSend !== 0) send({ t: 'wlog', n: k, d: t, sets: ss }); const pr = prev.length && (now1 > bestPrev + 0.01 || topW > bestPrev + 0.01); toast(pr ? '🏆 رقم جديد! حُفظ أداؤك' : '✓ حُفظ في سجلك — تراه المرة القادمة'); if (navigator.vibrate) try { navigator.vibrate([20, 40, 30]); } catch (e) { } break; }
 
     case 'wdone': { const k = dkey(new Date()); S.wlog = S.wlog || {}; const o = S.wlog[k] = S.wlog[k] || {}; if (o[v]) delete o[v]; else o[v] = 1; break; }
@@ -4694,6 +4713,7 @@ document.addEventListener('input', (e) => {               // التقاط أول
   const p = Math.max(0, (t.selectionStart == null ? n.length : t.selectionStart) - (v.length - n.length)); t.value = n; try { t.setSelectionRange(p, p); } catch (x) { }
 }, true);
 document.addEventListener('input', (e) => {
+  if (S && e.target.dataset && e.target.dataset.lq != null) { const q = e.target.value.trim().toLowerCase(); document.querySelectorAll('.lbi').forEach((r) => { r.hidden = !!q && (r.dataset.q || '').indexOf(q) < 0; }); return; }
   if (S && V.wl && e.target.dataset && e.target.dataset.wl != null) { const [i, f] = e.target.dataset.wl.split('|'); if (V.wl.sets[+i]) V.wl.sets[+i][f] = e.target.value; const o = $('#wlsum'); if (o) o.outerHTML = wlSum(); return; }
   if (S && e.target.dataset && e.target.dataset.px != null) { const v = parseFloat(numOnly(e.target.value)); S.shopPx = S.shopPx || {}; if (v > 0 && v < 1e7) S.shopPx[e.target.dataset.px] = Math.round(v * 100) / 100; else delete S.shopPx[e.target.dataset.px]; const o = $('#shsum'); if (o) o.outerHTML = shopSum(); save(); return; }
   if (S && e.target.dataset && e.target.dataset.shbud != null) { const v = parseFloat(numOnly(e.target.value)); S.shopBud = v > 0 && v < 1e8 ? Math.round(v) : 0; const o = $('#shsum'); if (o) o.outerHTML = shopSum(); save(); return; }
