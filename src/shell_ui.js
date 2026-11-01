@@ -11,7 +11,7 @@ function glassSide() {
     + (admin ? '<div class="sbg' + sbc('tools') + '" data-g="tools"><button class="sbh" data-a="sbg" data-v="tools" aria-expanded="' + (SBG.tools === 0 ? 'false' : 'true') + '">أدوات الإدارة <i>' + IC('chevron') + '</i></button><div class="sbb">'
       + railBtn('users', 'users', 'المستخدمون والأجهزة', S.view === 'users') + railBtn('exportUsers', 'package', 'تصدير نسخة المستخدمين') + railBtn('exportSite', 'globe', 'تصدير موقع للنشر (ZIP)') + '</div></div>' : '')
     + '<div class="sbg' + sbc('bak') + '" data-g="bak"><button class="sbh" data-a="sbg" data-v="bak" aria-expanded="' + (SBG.bak === 0 ? 'false' : 'true') + '">النسخ الاحتياطي <i>' + IC('chevron') + '</i></button><div class="sbb">'
-    + railBtn('export', 'download', 'نسخة احتياطية') + railBtn('import', 'upload', 'استرجاع') + '<input type="file" id="imp" accept=".json" class="hide"><p class="small">البيانات محفوظة داخل هذا المتصفح فقط. خذ نسخة احتياطية دورياً.</p></div></div>'
+    + railBtn('export', 'download', 'نسخة احتياطية') + railBtn('import', 'upload', 'استرجاع') + railBtn('importClient', 'user', 'استيراد عميل جاهز') + '<input type="file" id="impc" accept=".json" class="hide"><input type="file" id="imp" accept=".json" class="hide"><p class="small">البيانات محفوظة داخل هذا المتصفح فقط. خذ نسخة احتياطية دورياً.</p></div></div>'
     + '</nav>';
   var cls = '<section class="clients" aria-label="العملاء"><div class="clh"><b>العملاء</b><span class="cnt">' + S.clients.length + '</span></div>'
     + '<label class="srch">' + IC('search') + '<input id="q" placeholder="بحث بالاسم أو الكود أو الجوال" oninput="DPApp.relist()" aria-label="بحث في العملاء"></label>'

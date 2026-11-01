@@ -623,6 +623,19 @@ html[data-theme="firoz"] .alm{background:radial-gradient(70% 50% at 50% 30%,rgba
 .sdtk .ck{width:24px;height:24px;border-radius:8px;border:2px solid var(--line2);flex:none;display:grid;place-items:center;font-weight:700;color:var(--mintInk)}.sdtk.on{border-color:var(--mint);background:color-mix(in srgb,var(--mint) 12%,transparent)}.sdtk.on .ck{background:var(--mint);border-color:var(--mint)}
 /* 0.65: العدّ التنازلي للوجبة القادمة */
 .mcd{display:inline-block;width:fit-content;font-size:12px;font-weight:700;color:var(--mintInk);background:var(--mint);border-radius:999px;padding:1px 10px;margin:2px 0}
+/* 0.66: تمريني وقائمة التسوق */
+.ptseg{margin:8px 0 4px}
+.wex{display:flex;align-items:center;gap:8px;padding:8px}.wex.fin{border-color:color-mix(in srgb,var(--mint) 55%,transparent);background:color-mix(in srgb,var(--mint) 8%,var(--glass))}
+.wxm{flex:1;display:flex;align-items:center;gap:10px;text-align:right;background:none;border:0;color:var(--text);font:inherit;padding:6px;min-width:0}
+.wxn{width:30px;height:30px;border-radius:50%;flex:none;display:grid;place-items:center;font-weight:700;background:var(--glass2);font-size:13px}
+.wxt{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}.wxt b{font-size:15px}.wxt small{color:var(--dim);direction:ltr;text-align:right;font-size:11px}
+.wxp{width:36px;height:36px;border-radius:50%;flex:none;display:grid;place-items:center;background:var(--mint);color:var(--mintInk);font-size:13px}
+.wxc{width:44px;height:44px;border-radius:14px;flex:none;border:2px solid var(--line2);background:none;color:transparent;display:grid;place-items:center}.wxc.on{background:var(--mint);border-color:var(--mint);color:var(--mintInk)}.wxc svg{width:22px;height:22px}
+.wvf{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;background:#000;margin-bottom:8px}.wvf iframe{position:absolute;inset:0;width:100%;height:100%;border:0}.wvv{width:100%;border-radius:14px;margin-bottom:8px;background:#000}
+.wwm summary{cursor:pointer;font-weight:700;padding:6px 0}
+.shi{display:flex;align-items:center;gap:10px;width:100%;text-align:right;padding:10px 4px;background:none;border:0;border-top:1px solid var(--line);color:var(--text);font:inherit}.shi:first-of-type{border-top:0}.shi .ck{width:26px;height:26px;border-radius:8px;border:2px solid var(--line2);flex:none;display:grid;place-items:center;color:var(--mintInk);font-weight:700}.shi.on .ck{background:var(--mint);border-color:var(--mint)}.shi .shn{flex:1}.shi.on .shn{text-decoration:line-through;opacity:.6}
+.sbar{height:8px;border-radius:4px;background:var(--glass2);overflow:hidden;margin:6px 0}.sbar i{display:block;height:100%;background:var(--mint);transition:width .3s}
+
 
 /* ==========================================================================
    «حصتي» — themes.css  •  ثيم «وردة» (data-theme="rose") وثيم «نبض» (data-theme="pulse")
@@ -2785,6 +2798,7 @@ function handle(p) {
   }
   if (p.t === 'plan' && p.plan && Array.isArray(p.plan.days) && p.plan.days.length) {
     const pl = p.plan; S.pm = { sys: pl.sys || 'ex', kcal: pl.kcal, pro: pl.pro, cho: pl.cho, fat: pl.fat, water: pl.water, dayNames: pl.dayNames, groups: pl.groups, recipes: pl.recipes && typeof pl.recipes === 'object' ? pl.recipes : {}, ready: pl.ready && typeof pl.ready === 'object' ? { id: String(pl.ready.id || ''), name: String(pl.ready.name || '').slice(0, 80) } : null };
+    S.work = cleanWork(pl.work); S.shop = cleanShop(pl.shop); if (!S.work && S.pt === 'work') S.pt = 'meals'; if (S.shopSig !== JSON.stringify(S.shop)) { S.shopSig = JSON.stringify(S.shop); S.shopOk = {}; }
     S.plan = JSON.parse(JSON.stringify(pl.days)); S.pv = +p.v || 1; mkData(); S.wm = String(pl.wm || '').slice(0, 80); setGate(pl.gate); if (S.req !== 'approved') S.req = 'approved';
     foodsOf('no').forEach((f) => { if (foodInPlan(f)) applyDislike(f); });
     const first = S.screen !== 'app'; S.screen = 'app'; if (first) S.tab = 'today'; if (!S.planAt) S.planAt = now(); remSync();
@@ -3573,10 +3587,66 @@ function mealCard(d, si, s, live) {
     + (L.note[si] ? '<div class="note">' + I('edit') + ' ' + esc(L.note[si]) + '</div>' : '') + phStrip(si)
     + '<div class="macts"><button class="btn sm sec" data-act="whole" data-v="' + si + '">' + I('check') + (all ? ' تمّت' : ' أكلتها كاملة') + '</button><button class="btn sm sec" data-act="note" data-v="' + si + '">' + I('edit') + ' أضفت / ملاحظة</button><button class="btn sm sec" data-act="skip" data-v="' + si + '">' + (skip ? 'تراجع' : 'لم آكلها') + '</button><button class="btn sm sec" data-act="ask" data-v="' + si + '">' + I('msg') + ' اسأل عنها</button><button class="btn sm sec" data-act="photo" data-v="' + si + '">' + I('camera') + ' صوّر وجبتك</button>' + rbtn + '</div></section>';
 }
+
+// ================= 0.66: «تمريني» (برنامج التمرين بالأيام والأوقات، وفيديو لكل تمرين بلمسة) و«قائمة التسوق» (مع تعليم ما اشتريت)
+const WDN = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+const sl = (x, n) => String(x == null ? '' : x).slice(0, n);
+function ytId(u) { const m = /^https:\/\/(?:www\.|m\.)?(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})(?:[?&#].*)?$/.exec(String(u || '')); return m ? m[1] : ''; }
+function cleanVid(v) {                                    // رابط يوتيوب يُضمَّن، وفيديو مرفوع على المحطة يُشغَّل، وغيرهما يُفتح برابط خارجي
+  if (!v) return null; if (typeof v === 'string') { const y = ytId(v); return y ? { yt: y } : /^https:\/\//.test(v) ? { url: sl(v, 400) } : null; }
+  if (v.yt && /^[\w-]{11}$/.test(v.yt)) return { yt: v.yt }; if (v.m && /^[\w-]{10,40}$/.test(v.m)) return { m: v.m }; if (v.url) { const y = ytId(v.url); return y ? { yt: y } : /^https:\/\//.test(v.url) ? { url: sl(v.url, 400) } : null; } return null;
+}
+function cleanWork(w) {
+  if (!w || !Array.isArray(w.days)) return null; const days = w.days.slice(0, 7).map((d) => ({ d: +d.d >= 0 && +d.d <= 6 ? +d.d : 0, kind: d.kind === 'rest' ? 'rest' : 'train', name: sl(d.name, 60), time: sl(d.time, 80), note: sl(d.note, 200), ex: (Array.isArray(d.ex) ? d.ex : []).slice(0, 20).map((e) => ({ n: sl(e.n, 80), en: sl(e.en, 60), sr: sl(e.sr, 30), rest: sl(e.rest, 20), cues: (Array.isArray(e.cues) ? e.cues : []).slice(0, 6).map((c) => sl(c, 160)), v: cleanVid(e.v) })) }));
+  return { title: sl(w.title, 100), intro: sl(w.intro, 400), warm: { t: sl((w.warm || {}).t, 60), steps: ((w.warm || {}).steps || []).slice(0, 8).map((x) => sl(x, 200)) }, prog: (w.prog || []).slice(0, 8).map((x) => [sl(x[0], 60), sl(x[1], 220)]), rules: (w.rules || []).slice(0, 10).map((x) => sl(x, 220)), days };
+}
+function cleanShop(sh) {
+  if (!sh || !Array.isArray(sh.groups)) return null; return { title: sl(sh.title, 80), prep: (sh.prep || []).slice(0, 10).map((x) => sl(x, 240)), groups: sh.groups.slice(0, 12).map((g) => ({ g: sl(g.g, 40), items: (g.items || []).slice(0, 40).map((i) => ({ n: sl(i.n, 80), q: sl(i.q, 60) })) })) };
+}
+function shopAuto() {                                        // من الخطة: مجموع الجرامات الأسبوعي لكل صنف (وعدد المرات إن لم يكن بالجرام)
+  const by = {}; (S.plan || []).forEach((d) => d.slots.forEach((sl2) => sl2.lines.forEach((l) => { const g = DATA.groups[l[0]] || 'أخرى', m = /(\d+(?:\.\d+)?)\s*جم/.exec(String(l[2] || '')); by[g] = by[g] || {}; const o = by[g][l[1]] = by[g][l[1]] || { g: 0, n: 0 }; o.n++; if (m) o.g += +m[1]; })));
+  return { title: 'قائمة تسوّق الأسبوع', prep: [], groups: Object.keys(by).map((g) => ({ g, items: Object.keys(by[g]).map((n) => ({ n, q: by[g][n].g ? Math.round(by[g][n].g).toLocaleString('en') + ' جم في الأسبوع' : '× ' + by[g][n].n })) })) };
+}
+function planSeg() {
+  const t = [['meals', 'وجباتي']]; if (S.work) t.push(['work', 'تمريني']); t.push(['shop', 'قائمة التسوق']);
+  return '<div class="segc ptseg" role="tablist" aria-label="أقسام خطتي">' + t.map((x) => '<button role="tab" class="' + ((S.pt || 'meals') === x[0] ? 'on' : '') + '" aria-selected="' + ((S.pt || 'meals') === x[0]) + '" data-act="pt" data-v="' + x[0] + '">' + x[1] + '</button>').join('') + '</div>';
+}
+function wvid(v, big) {
+  if (!v) return '<p class="dim">لا فيديو لهذا التمرين بعد.</p>';
+  if (v.yt) return '<div class="wvf"><iframe src="https://www.youtube-nocookie.com/embed/' + v.yt + '?rel=0&playsinline=1" title="فيديو التمرين" allow="encrypted-media; picture-in-picture; fullscreen" allowfullscreen loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>';
+  if (v.m) return '<video class="wvv" src="/m/' + v.m + '" controls playsinline preload="metadata"></video>';
+  return '<a class="btn full" href="' + esc(v.url) + '" target="_blank" rel="noopener noreferrer">▶ افتح فيديو التمرين</a>';
+}
+function workView() {
+  const W = S.work, wd = S.wd == null ? TODAY : S.wd, byD = {}; W.days.forEach((d) => { byD[d.d] = d; });
+  const chips = WDN.map((n, i) => { const d = byD[i]; return '<button class="' + (wd === i ? 'on' : '') + (i === TODAY ? ' today' : '') + '" data-act="wkday" data-v="' + i + '"><b>' + esc(n.replace('ال', '')) + '</b><span>' + (d ? (d.kind === 'rest' ? '😌' : '🏋') : '—') + '</span></button>'; }).join('');
+  const d = byD[wd]; let body;
+  if (!d) body = '<section class="card"><p class="mut">لا برنامج لهذا اليوم.</p></section>';
+  else if (d.kind === 'rest') body = '<section class="card stack"><h3>😌 ' + esc(d.name || 'راحة') + '</h3>' + (d.time ? '<p class="mut">' + esc(d.time) + '</p>' : '') + (d.note ? '<p class="dim">' + esc(d.note) + '</p>' : '') + '</section>';
+  else {
+    const dn = (S.wlog || {})[dkey(new Date())] || {}, doneN = d.ex.filter((e, j) => dn[wd + '_' + j]).length;
+    body = '<section class="card stack"><div class="row" style="justify-content:space-between"><h3>🏋 ' + esc(d.name) + '</h3>' + (wd === TODAY ? '<span class="dim">' + doneN + ' من ' + d.ex.length + '</span>' : '') + '</div>' + (d.time ? '<p class="mut">⏰ ' + esc(d.time) + '</p>' : '') + (d.note ? '<p class="dim">' + esc(d.note) + '</p>' : '')
+      + (W.warm.steps.length ? '<details class="wwm"><summary>' + esc(W.warm.t || 'الإحماء') + '</summary><ol class="steps">' + W.warm.steps.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ol></details>' : '') + '</section>'
+      + d.ex.map((e, j) => '<div class="card wex' + (dn[wd + '_' + j] && wd === TODAY ? ' fin' : '') + '"><button class="wxm" data-act="wex" data-v="' + wd + '_' + j + '" aria-label="' + esc(e.n) + ': تفاصيل وفيديو"><span class="wxn">' + (j + 1) + '</span><span class="wxt"><b>' + esc(e.n) + '</b>' + (e.en ? '<small>' + esc(e.en) + '</small>' : '') + '<span class="dim">' + esc(e.sr) + (e.rest ? ' • راحة ' + esc(e.rest) : '') + '</span></span>' + (e.v ? '<span class="wxp" aria-hidden="true">▶</span>' : '') + '</button>' + (wd === TODAY ? '<button class="wxc' + (dn[wd + '_' + j] ? ' on' : '') + '" data-act="wdone" data-v="' + wd + '_' + j + '" aria-pressed="' + !!dn[wd + '_' + j] + '" aria-label="تم">' + I('check') + '</button>' : '') + '</div>').join('');
+  }
+  const more = (W.prog.length ? '<section class="card stack"><h3>كيف تتطور كل أسبوع</h3>' + W.prog.map((x) => '<p><b>' + esc(x[0]) + ':</b> <span class="mut">' + esc(x[1]) + '</span></p>').join('') + '</section>' : '') + (W.rules.length ? '<section class="card stack"><h3>قواعد مهمة</h3><ul class="plist">' + W.rules.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul></section>' : '');
+  return '<div class="row" style="justify-content:space-between"><h2>تمريني</h2></div>' + planSeg() + (W.intro ? '<div class="dim">' + esc(W.intro) + '</div>' : '') + '<div class="daychips">' + chips + '</div>' + body + more;
+}
+function shopView() {
+  const sh = S.shop || shopAuto(), ok = S.shopOk || {}; let all = 0, got = 0;
+  const gs = sh.groups.map((g, gi) => '<section class="card stack"><h3>' + esc(g.g) + '</h3>' + g.items.map((it, ii) => { const k = gi + '_' + ii; all++; if (ok[k]) got++; return '<button class="shi' + (ok[k] ? ' on' : '') + '" data-act="shk" data-v="' + k + '" aria-pressed="' + !!ok[k] + '"><span class="ck">' + (ok[k] ? '✓' : '') + '</span><span class="shn">' + esc(it.n) + '</span><span class="dim">' + esc(it.q) + '</span></button>'; }).join('') + '</section>').join('');
+  return '<div class="row" style="justify-content:space-between"><h2>قائمة التسوق</h2><button class="btn sm sec" data-act="shreset">' + I('reset') + ' من جديد</button></div>' + planSeg() + '<div class="dim">' + esc(sh.title || '') + ' • اشتريتَ ' + got + ' من ' + all + '</div><div class="bar sbar" role="progressbar" aria-valuemin="0" aria-valuemax="' + all + '" aria-valuenow="' + got + '"><i style="width:' + (all ? Math.round(got / all * 100) : 0) + '%"></i></div>'
+    + (sh.prep.length ? '<details class="card wwm"><summary>تحضير الأسبوع</summary><ol class="steps">' + sh.prep.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ol></details>' : '') + gs;
+}
+function wexSheet(k) {
+  const [di, ei] = k.split('_').map(Number), d = S.work.days.find((x) => x.d === di), e = d && d.ex[ei]; if (!e) return ['', ''];
+  return [esc(e.n), (e.en ? '<p class="dim" dir="ltr" style="text-align:right">' + esc(e.en) + '</p>' : '') + wvid(e.v) + '<p class="mut"><b>' + esc(e.sr) + '</b>' + (e.rest ? ' • راحة ' + esc(e.rest) : '') + '</p>' + (e.cues.length ? '<h3>طريقة الأداء الصحيحة</h3><ul class="plist">' + e.cues.map((c) => '<li>' + esc(String(c).replace(/^[•\s]+/, '')) + '</li>').join('') + '</ul>' : '')];
+}
 function tabPlan() {
+  if (S.pt === 'work' && S.work) return workView(); if (S.pt === 'shop') return shopView();
   const hid = S.gate && (S.day !== TODAY || !gateOpen());
   const chips = DATA.dayNames.map((n, i) => { const [a, b] = itemsOfDay(i); return '<button class="' + (S.day === i ? 'on' : '') + (i === TODAY ? ' today' : '') + '" data-act="day" data-v="' + i + '"><b>' + esc(String(n).replace('ال', '')) + '</b><span>' + (S.gate && i !== TODAY ? '🔒' : b && i <= TODAY ? Math.round(a / b * 100) + '%' : '—') + '</span></button>'; }).join('');
-  return '<div class="row" style="justify-content:space-between"><h2>خطتي</h2><button class="btn sm sec" data-act="shop">' + I('cart') + ' قائمة التسوّق</button></div>'
+  return '<div class="row" style="justify-content:space-between"><h2>خطتي</h2></div>' + planSeg()
     + '<div class="dim">من ' + esc(S.dname) + ' • ' + (S.pm && S.pm.sys === 'g' ? 'نظام الجرامات: السعرات حسب نوع كل يوم' : S.pm && S.pm.ready ? esc(S.pm.ready.name) + ' • متوسط ' + DATA.kcal + ' سعرة' : DATA.kcal + ' سعرة يومياً') + ' • الإصدار ' + S.pv + '</div>'
     + '<div class="daychips">' + chips + '</div>' + (hid ? '<section class="card stack gatec"><div class="gl">🔒</div><p class="mut">' + (S.day !== TODAY ? 'خطتك تظهر يوماً بيوم: يُفتح كل يوم في وقته بعد إرسال تسجيل اليوم السابق.' : 'أرسل تسجيل أمس من «اليوم» ليُفتح جدول اليوم.') + '</p></section>' : '') + (hid ? '' : (dayPlan(S.day).type ? '<div class="banner info">' + I('dumbbell') + '<span><b>' + esc(dayPlan(S.day).type) + '</b> • ' + dayPlan(S.day).kcal + ' سعرة' + (dayPlan(S.day).p != null ? ' • بروتين ' + dayPlan(S.day).p + ' • كارب ' + dayPlan(S.day).c + ' • دهون ' + dayPlan(S.day).f + ' جم' : '') + '</span></div>' : '') + dayPlan(S.day).slots.map((s, si) => mealCard(S.day, si, s, false)).join('') + ((dayPlan(S.day).tips || []).length ? '<div class="banner info">' + I('sparkle') + '<span>' + dayPlan(S.day).tips.map(esc).join(' • ') + '</span></div>' : '')) + rqCard(false);
 }
@@ -4152,6 +4222,7 @@ function sheetHtml() {
     const s = dayPlan(TODAY).slots[sheet.si];
     h = 'ملاحظة على ' + esc(s.name); b = '<div class="chips">' + ['أضفت شيئاً', 'أكلت كمية أقل', 'أكلت كمية أكثر', 'أكلت خارج البيت'].map((x) => '<button class="chip" data-act="qnote" data-v="' + x + '">' + x + '</button>').join('') + '</div>'
       + '<textarea class="inp" id="noteIn" placeholder="مثال: أضفت ملعقة عسل للشوفان">' + esc(dl(TODAY).note[sheet.si] || '') + '</textarea><button class="btn" data-act="savenote">حفظ الملاحظة</button><p class="dim">تصل ملاحظتك لأخصائيك مع متابعة اليوم.</p>';
+  } else if (sheet.t === 'wex') { const r = wexSheet(sheet.k); h = r[0]; b = r[1];
   } else if (sheet.t === 'shop') {
     const byG = {}; S.plan.forEach((d) => d.slots.forEach((s) => s.lines.forEach((l) => { const g = DATA.groups[l[0]] || 'أخرى'; (byG[g] = byG[g] || {}); byG[g][l[1]] = (byG[g][l[1]] || 0) + 1; })));
     h = 'قائمة تسوّق الأسبوع'; b = Object.keys(byG).map((g) => '<section class="card"><h3 style="margin-bottom:6px">' + esc(g) + '</h3><ul class="plist">' + Object.keys(byG[g]).map((n) => '<li>' + esc(n) + ' <span class="dim">× ' + byG[g][n] + '</span></li>').join('') + '</ul></section>').join('');
@@ -4451,6 +4522,12 @@ document.addEventListener('click', (e) => {
     case 'whNat': { const w = whs(); w.nat = v; S.p.nat = v; break; }
     case 'theme': if (window.HxTheme) { HxTheme.set(v, el.querySelector('.hx-pv')); document.querySelectorAll('.hx-th').forEach((b) => { const on = b.dataset.v === v; b.setAttribute('aria-checked', String(on)); const l = b.querySelector('.hx-tl'); if (l) l.textContent = l.textContent.replace(' ✓', '') + (on ? ' ✓' : ''); }); applyThemeIcons(v); } return;
     case 'tab': S.tab = v; if (v === 'feed' && now() - FD.at > 60000) fdLoad().then(render); break;
+    case 'pt': S.pt = v; break;
+    case 'wkday': S.wd = +v; break;
+    case 'wex': sheet = { t: 'wex', k: v }; break;
+    case 'wdone': { const k = dkey(new Date()); S.wlog = S.wlog || {}; const o = S.wlog[k] = S.wlog[k] || {}; if (o[v]) delete o[v]; else o[v] = 1; break; }
+    case 'shk': { S.shopOk = S.shopOk || {}; if (S.shopOk[v]) delete S.shopOk[v]; else S.shopOk[v] = now(); break; }
+    case 'shreset': S.shopOk = {}; break;
     case 'day': S.day = +v; break;
     case 'ck': { const L = dl(TODAY); L.ck[v] = !L.ck[v]; if (!L.ck[v]) delete L.ck[v]; queueLog(dkey(new Date())); break; }
     case 'whole': { const L = dl(TODAY), s = dayPlan(TODAY).slots[+v], all = s.lines.every((l, li) => L.ck[v + '_' + li]); s.lines.forEach((l, li) => { if (all) delete L.ck[v + '_' + li]; else L.ck[v + '_' + li] = 1; }); delete L.skip[v]; queueLog(dkey(new Date())); break; }
@@ -4499,7 +4576,7 @@ document.addEventListener('click', (e) => {
     case 'subDay': { const L = dl(TODAY), t = $('#offT'); if (t) L.offT = t.value.trim().slice(0, 500); L.sub = Date.now(); logNow(TODAY); toast('وصل تسجيل اليوم لأخصائيك ✓'); break; }
     case 'qnote': { const t = $('#noteIn'); t.value = (t.value ? t.value + ' • ' : '') + v; t.focus(); return; }
     case 'savenote': { const t = $('#noteIn').value.trim().slice(0, 500), L = dl(TODAY); if (t) L.note[sheet.si] = t; else delete L.note[sheet.si]; sheet = null; queueLog(dkey(new Date())); toast('حُفظت الملاحظة وتصل أخصائيك.'); break; }
-    case 'shop': sheet = { t: 'shop' }; break;
+    case 'shop': S.pt = 'shop'; S.tab = 'plan'; break;
     case 'healthReq': sheet = { t: 'health', cond: S.p.cond.slice(), allg: S.p.allg.slice() }; break;
     case 'htog': { const arr = sheet[k], i = arr.indexOf(v); i < 0 ? arr.push(v) : arr.splice(i, 1); el.classList.toggle('on'); return; }
     case 'sendhealth': S.pending = sheet.cond.concat(sheet.allg); if (!S.pending.length) S.pending = ['لا حالات']; send({ t: 'health', cond: sheet.cond, allg: sheet.allg }); sheet = null; toast('أُرسل الطلب، ولن تتغير خطتك قبل اعتماد أخصائيك.'); break;
