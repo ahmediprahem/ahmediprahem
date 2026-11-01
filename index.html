@@ -6660,14 +6660,14 @@ function libMerge(w) {
   w.days.forEach(function (d) { (d.ex || []).forEach(function (e) {
     var k = String(e.n || '').trim(); if (!k || L.length >= 300) return; var o = L.filter(function (x) { return x.n === k; })[0];
     if (o) { if (!o.v && e.v) { o.v = e.v; n++; } return; }
-    L.push({ n: k.slice(0, 80), en: String(e.en || '').slice(0, 60), g: lbGuess(k + ' ' + (e.en || '') + ' ' + (d.name || '')), cues: (e.cues || []).slice(0, 10), v: e.v || null }); n++;
+    L.push({ n: k.slice(0, 80), en: String(e.en || '').slice(0, 60), s: 'gym', f: String(w.title || 'برنامج التمرين').slice(0, 60), g: lbGuess(k + ' ' + (e.en || '') + ' ' + (d.name || '')), cues: (e.cues || []).slice(0, 10), v: e.v || null }); n++;
   }); });
   if (n) saveSettings(); return n;
 }
 function libCard() {
   var L = exlib(), h = '<div class="ucard"><details><summary><b>📚 مكتبة التمارين (' + L.length + ')</b> <small>تصل كل عملائك في «حصتي ← خطتي ← المكتبة»</small></summary>';
   h += '<p class="small">أي تمرين هنا يفتحه أي عميل لديه «حصتي» بفيديوه وطريقة أدائه، ويسجّل أوزانه عليه. تُرسَل مع «أرسل الخطة».</p><p class="two"><button class="sec sm" data-a="libAdd">➕ تمرين جديد</button><button class="sec sm" data-a="libFromWork">⬇ أضف تمارين برنامج هذا العميل</button></p>';
-  h += L.map(function (e, i) { return '<div class="gye"><input class="gyv" data-lf="' + i + '|n" value="' + esc(e.n) + '" placeholder="الاسم" aria-label="اسم التمرين"><input class="gyv" data-lf="' + i + '|en" value="' + esc(e.en) + '" placeholder="English" dir="ltr"><input class="gyv" data-lf="' + i + '|g" value="' + esc(e.g) + '" placeholder="المجموعة العضلية"><input class="gyv" data-lf="' + i + '|v" value="' + esc(gyShow(e.v)) + '" placeholder="رابط فيديو" dir="ltr"><button class="sec sm" data-a="libDel" data-v="' + i + '" aria-label="حذف">🗑</button></div>'; }).join('');
+  h += L.map(function (e, i) { return '<div class="gye"><input class="gyv" data-lf="' + i + '|n" value="' + esc(e.n) + '" placeholder="الاسم" aria-label="اسم التمرين"><input class="gyv" data-lf="' + i + '|en" value="' + esc(e.en) + '" placeholder="English" dir="ltr"><select class="gyv" data-lf="' + i + '|s" aria-label="القسم"><option value="gym"' + (e.s === 'home' ? '' : ' selected') + '>🏋 النادي</option><option value="home"' + (e.s === 'home' ? ' selected' : '') + '>🏠 منزلي</option></select><input class="gyv" data-lf="' + i + '|f" value="' + esc(e.f || '') + '" placeholder="اسم الملف (مجلد)"><input class="gyv" data-lf="' + i + '|g" value="' + esc(e.g) + '" placeholder="المجموعة العضلية"><input class="gyv" data-lf="' + i + '|v" value="' + esc(gyShow(e.v)) + '" placeholder="رابط فيديو" dir="ltr"><button class="sec sm" data-a="libDel" data-v="' + i + '" aria-label="حذف">🗑</button></div>'; }).join('');
   return h + '</details></div>';
 }
 function gymCard(c) {
@@ -6694,7 +6694,7 @@ function gymCard(c) {
 }
 (function (f) { ciTab = function (c) { var h = f.apply(this, arguments); return libCard() + gymCard(c) + h; }; })(ciTab);
 Object.assign(A, {
-  libAdd: function () { var n = (prompt('اسم التمرين (بالعربية)') || '').trim().slice(0, 80); if (!n) return; var L = exlib(); if (L.some(function (x) { return x.n === n; })) { toast('موجود في المكتبة'); return; } L.unshift({ n: n, en: '', g: lbGuess(n), cues: [], v: null }); saveSettings().then(main); },
+  libAdd: function () { var n = (prompt('اسم التمرين (بالعربية)') || '').trim().slice(0, 80); if (!n) return; var L = exlib(); if (L.some(function (x) { return x.n === n; })) { toast('موجود في المكتبة'); return; } L.unshift({ n: n, en: '', s: 'gym', f: 'تمارين عامة', g: lbGuess(n), cues: [], v: null }); saveSettings().then(main); },
   libFromWork: function () { var c = cur(); if (!c || !c.work) { toast('لا برنامج تمرين لهذا العميل'); return; } var n = libMerge(c.work); toast(n ? '✓ أُضيف/حُدّث ' + n + ' تمريناً في المكتبة' : 'كلها موجودة في المكتبة'); main(); },
   libDel: function (v) { var L = exlib(), e = L[+v]; if (!e || !confirm('حذف «' + e.n + '» من المكتبة؟')) return; L.splice(+v, 1); saveSettings().then(main); },
   gymCheck: function () {
@@ -6722,7 +6722,7 @@ document.addEventListener('change', function (e) {
       if (!hxOn()) { toast('أُضيف العميل. اربط المحطة من «الإعدادات ← حصتي» ثم أنشئ دخوله من ملفه (🔑).'); return; }
       hxInvite(c.name, c.phone || '', 14, c.kind === 'athlete' ? 'g' : 'ex').then(function (inv) { var h = Object.keys(HX.st.inv).filter(function (q) { return HX.st.inv[q] === inv; })[0]; inv.cl = c.code; return hxCredMake(h, inv, String(ac.u).toLowerCase(), ac.pw).then(function () { HX.made = h; HX.form = false; A.hxv(); toast('✓ أُنشئ دخول «' + c.name + '»: اسم المستخدم وكلمة السر جاهزان للإرسال'); }); }).catch(function (er) { toast('أُضيف العميل، وتعذّر إنشاء الدخول تلقائياً: ' + ((er && er.message) || '') + ' — أنشئه من ملفه (🔑)'); });
     } }); t.value = ''; return; }
-  if (t.hasAttribute && t.hasAttribute('data-lf')) { var q0 = t.getAttribute('data-lf').split('|'), e0 = exlib()[+q0[0]]; if (!e0) return; if (q0[1] === 'v') { var v0 = gyVid(t.value); if (v0 === false) { toast('اكتب رابطاً يبدأ بـ https://'); return; } e0.v = v0 || null; } else if (q0[1] === 'n') { if (!t.value.trim()) { t.value = e0.n; return; } e0.n = t.value.trim().slice(0, 80); } else e0[q0[1]] = t.value.trim().slice(0, 60); saveSettings().then(function () { toast('✓ حُفظ'); }); return; }
+  if (t.hasAttribute && t.hasAttribute('data-lf')) { var q0 = t.getAttribute('data-lf').split('|'), e0 = exlib()[+q0[0]]; if (!e0) return; if (q0[1] === 'v') { var v0 = gyVid(t.value); if (v0 === false) { toast('اكتب رابطاً يبدأ بـ https://'); return; } e0.v = v0 || null; } else if (q0[1] === 'n') { if (!t.value.trim()) { t.value = e0.n; return; } e0.n = t.value.trim().slice(0, 80); } else if (q0[1] === 's') e0.s = t.value === 'home' ? 'home' : 'gym'; else e0[q0[1]] = t.value.trim().slice(0, 60); saveSettings().then(function () { toast('✓ حُفظ'); }); return; }
   if (t.hasAttribute && t.hasAttribute('data-gv') && (c = cur()) && c.work) {
     var p = t.getAttribute('data-gv').split('|').map(Number), ex = c.work.days[p[0]] && c.work.days[p[0]].ex[p[1]]; if (!ex) return; var v = gyVid(t.value);
     if (v === false) { toast('اكتب رابطاً يبدأ بـ https://'); return; } if (v) ex.v = v; else delete ex.v; persist(c).then(function () { toast(v ? (v.yt ? '✓ فيديو يوتيوب سيُشغَّل داخل «حصتي»' : '✓ حُفظ الرابط') : 'أُزيل الفيديو'); main(); }); return;

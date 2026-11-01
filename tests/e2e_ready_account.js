@@ -9,7 +9,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   ok('الاعتماد يربط الطلب بالعميل المستورد (بلا عميل مكرر) ويرسل خطته وبرنامجه فوراً');
   const c = await m.evaluate(() => { const S = window.HissatiApp.state(); return { t0: S.plan[0].type, w: S.work.days.length, shop: S.shop.groups.length, scr: S.screen }; });
   assert.deepStrictEqual(c, { t0: 'يوم تجريبي 0', w: 7, shop: 2, scr: 'app' });
-  await m.click('[data-act="tab"][data-v="plan"]'); await m.waitForSelector('.ptseg'); assert.deepStrictEqual(await m.locator('.ptseg button').allTextContents(), ['وجباتي', 'تمريني', 'المكتبة', 'قائمة التسوق']);
+  await m.click('[data-act="tab"][data-v="plan"]'); await m.waitForSelector('.ptseg'); assert.deepStrictEqual(await m.locator('.ptseg button').allTextContents(), ['وجباتي', 'تمريني', 'قائمة التسوق']);
   ok('العميل (دخل باسم مستخدم وكلمة سر) يجد خطته وتمريني وقائمة التسوق أمامه');
   assert.deepStrictEqual(errs, []); await L.close(); console.log('\nنجح ' + n + ' اختباراً');
 })().catch((e) => { console.log('✘', String(e && e.stack || e).slice(0, 1800)); console.log('أخطاء:', JSON.stringify(errs).slice(0, 600)); process.exit(1); });

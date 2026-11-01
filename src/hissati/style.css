@@ -642,3 +642,4 @@ html[data-theme="firoz"] .alm{background:radial-gradient(70% 50% at 50% 30%,rgba
 
 
 .lbi[hidden]{display:none}#libq{width:100%}
+.lbf[hidden]{display:none}.lbf summary{cursor:pointer;display:flex;align-items:center;gap:8px;list-style:none}.lbf summary::-webkit-details-marker{display:none}.lbf>.stack{margin-top:10px}.lbfi{font-size:20px}

@@ -29,7 +29,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   assert.strictEqual(st.w, 7); assert.deepStrictEqual(st.ex[0], { yt: 'dQw4w9WgXcQ' }); assert.strictEqual(st.ex[2], null, 'رابط javascript: يُسقَط'); assert.strictEqual(st.shop, 2); assert.strictEqual(st.t0, 'يوم تجريبي 0', 'الخطة الجاهزة: الأحد أولاً');
   ok('«حصتي» تتسلّم الخطة الجاهزة (الأحد أولاً) + البرنامج (7 أيام) + قائمة التسوق، وتُسقط رابط javascript: الخبيث');
   // ---- «حصتي»: تمريني
-  await m.click('[data-act="tab"][data-v="plan"]'); await m.waitForSelector('.ptseg'); assert.deepStrictEqual(await m.locator('.ptseg button').allTextContents(), ['وجباتي', 'تمريني', 'المكتبة', 'قائمة التسوق']);
+  await m.click('[data-act="tab"][data-v="plan"]'); await m.waitForSelector('.ptseg'); assert.deepStrictEqual(await m.locator('.ptseg button').allTextContents(), ['وجباتي', 'تمريني', 'قائمة التسوق']);
   await m.click('.ptseg [data-v="work"]'); await m.waitForSelector('.wex'); assert.strictEqual(await m.locator('.wex').count(), 3); assert(/الإحماء/.test(await m.textContent('.wwm summary')));
   await m.click('.daychips [data-v="2"]'); assert(/الثلاثاء/.test(await m.textContent('.card.stack h3'))); await m.click('.daychips [data-v="' + new Date().getDay() + '"]');
   const csp = []; m.on('console', (g) => { if (/Content Security Policy|Refused to (frame|load)/i.test(g.text())) csp.push(g.text()); });
