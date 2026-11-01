@@ -363,4 +363,4 @@ details.tbm:not([open])>.tbp,details.im:not([open])>.imx{display:none}
 /* 0.66: التمرين وقائمة التسوق في ملف العميل */
 .gym .gyd{border-top:1px solid var(--line);padding:6px 0}.gym .gyd summary{cursor:pointer}.gym .gye{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1.6fr) auto auto;gap:6px;align-items:center;padding:4px 0}.gym .gyv{min-width:0}.gym .gyup{cursor:pointer;white-space:nowrap}.gym .gyok{color:#2f9e63;font-weight:700}.gym .gys{width:100%;font:inherit}
 @media(max-width:700px){.gym .gye{grid-template-columns:minmax(0,1fr)}}
-
+.gym .gyno{color:#c97a00;font-weight:700}

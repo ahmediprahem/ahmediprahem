@@ -7,6 +7,9 @@ function gyVid(s) {
   return /^https:\/\//.test(s) ? { url: s.slice(0, 400) } : false;
 }
 function gyShow(v) { return !v ? '' : v.yt ? 'https://youtu.be/' + v.yt : v.m ? '(فيديو مرفوع على المحطة)' : v.url || ''; }
+function gyEmbed(id) {                                   // oEmbed ليوتيوب: 200 = يسمح بالتضمين، 401/403 = يمنعه، 404 = محذوف أو خاص
+  return fetch('https://www.youtube.com/oembed?format=json&url=' + encodeURIComponent('https://www.youtube.com/watch?v=' + id), { cache: 'no-store' }).then(function (r) { return r.ok ? 1 : (r.status === 401 || r.status === 403 || r.status === 404 ? 0 : -1); }).catch(function () { return -1; });
+}
 function gyShopText(sh) { return sh ? (sh.groups || []).map(function (g) { return '# ' + g.g + '\n' + (g.items || []).map(function (i) { return i.n + (i.q ? ' | ' + i.q : ''); }).join('\n'); }).join('\n') : ''; }
 function gyShopParse(t, old) {
   var groups = [], g = null; String(t || '').split('\n').forEach(function (ln) {
@@ -24,11 +27,12 @@ function gymCard(c) {
     h += '<p>' + esc(w.title || 'برنامج التمرين') + ' • ' + w.days.filter(function (d) { return d.kind !== 'rest'; }).length + ' أيام تمرين • ' + nEx + ' تمريناً • فيديو مباشر في ' + nVid + ' منها</p>';
     h += w.days.slice().sort(function (a, b) { return (a.d + 6) % 7 - (b.d + 6) % 7; }).filter(function (d) { return d.kind !== 'rest'; }).map(function (d) {
       var di = w.days.indexOf(d); return '<details class="gyd"><summary><b>' + esc(['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'][d.d]) + ' — ' + esc(d.name) + '</b> <small>' + esc(d.time || '') + '</small></summary>' + (d.ex || []).map(function (e, ei) {
-        return '<div class="gye"><span><b>' + esc(e.n) + '</b> <small>' + esc(e.sr || '') + '</small></span><input class="gyv" data-gv="' + di + '|' + ei + '" placeholder="رابط فيديو (يوتيوب أو غيره)" value="' + esc(gyShow(e.v)) + '" aria-label="فيديو ' + esc(e.n) + '"><label class="sec sm gyup">رفع فيديو<input type="file" accept="video/mp4,video/webm,video/quicktime" data-gup="' + di + '|' + ei + '" hidden></label>' + (e.v ? '<span class="gyok" title="فيديو مضبوط">✓</span>' : '') + '</div>';
+        return '<div class="gye"><span><b>' + esc(e.n) + '</b> <small>' + esc(e.sr || '') + '</small></span><input class="gyv" data-gv="' + di + '|' + ei + '" placeholder="رابط فيديو (يوتيوب أو غيره)" value="' + esc(gyShow(e.v)) + '" aria-label="فيديو ' + esc(e.n) + '"><label class="sec sm gyup">رفع فيديو<input type="file" accept="video/mp4,video/webm,video/quicktime" data-gup="' + di + '|' + ei + '" hidden></label>' + (e.v ? (e.v.yt && e.v.x ? '<span class="gyno" title="يمنع التضمين: سيُفتح في يوتيوب">⚠</span>' : '<span class="gyok" title="فيديو مضبوط">✓</span>') : '') + '</div>';
       }).join('') + '</details>';
     }).join('');
     h += '<p class="small">الروابط التي تفتح نتائج بحث يوتيوب تعمل، لكن الأفضل رابط فيديو محدد فيُشغَّل داخل «حصتي» مباشرة. يمكنك رفع فيديو على المحطة (حتى 60 م.ب) فيُفتح من «حصتي» دون يوتيوب.</p>';
   }
+  if (w && nVid) h += '<p class="two"><button class="sec sm" data-a="gymCheck">🔎 افحص أن فيديوهات يوتيوب تعمل داخل «حصتي»</button></p><p class="small" id="gycheck"></p>';
   h += '<p class="two"><button class="sec sm" data-a="gymLoad">📂 ' + (w ? 'استبدال البرنامج من ملف' : 'تحميل برنامج من ملف') + '</button>' + (w ? '<button class="sec sm" data-a="gymClear">🗑 إزالة البرنامج</button>' : '') + '<input type="file" id="gymf" accept=".json" hidden></p>';
   h += '<h4>🛒 قائمة التسوق</h4><p class="small">سطر «# اسم المجموعة» ثم الأصناف: «الصنف | الكمية». إن تركتها فارغة تُولَّد تلقائياً من الخطة (مجموع الجرامات الأسبوعي).</p><textarea class="gys" rows="7" data-gshop placeholder="# البروتين&#10;دجاج | 2.5 كجم">' + esc(gyShopText(c.shop)) + '</textarea>';
   if (c.rawSnap) h += '<p class="small">🍽 الخطة الغذائية لهذا العميل مستوردة جاهزة (' + c.rawSnap.days.length + ' أيام).</p>';
@@ -38,6 +42,12 @@ function gymCard(c) {
 }
 (function (f) { ciTab = function (c) { var h = f.apply(this, arguments); return gymCard(c) + h; }; })(ciTab);
 Object.assign(A, {
+  gymCheck: function () {
+    var c = cur(); if (!c || !c.work) return; var all = []; c.work.days.forEach(function (d) { (d.ex || []).forEach(function (e) { if (e.v && e.v.yt) all.push(e); }); }); var box = document.getElementById('gycheck'), done = 0, bad = [], unk = 0;
+    if (!all.length) { toast('لا فيديوهات يوتيوب للفحص'); return; } var next = 0;
+    function one() { if (next >= all.length) return Promise.resolve(); var e = all[next++]; return gyEmbed(e.v.yt).then(function (k) { done++; if (k === 0) { e.v.x = 1; bad.push(e.n); } else if (k === 1) delete e.v.x; else unk++; if (box) box.textContent = 'جارٍ الفحص… ' + done + ' من ' + all.length; return one(); }); }
+    Promise.all([one(), one(), one(), one()]).then(function () { return persist(c); }).then(function () { toast(unk === all.length ? 'تعذّر الفحص الآن (لا اتصال بيوتيوب)' : '✓ تعمل ' + (all.length - bad.length - unk) + ' من ' + all.length + (bad.length ? ' • تمنع التضمين: ' + bad.length : '')); main(); setTimeout(function () { var b = document.getElementById('gycheck'); if (b) b.textContent = bad.length ? 'تمنع التضمين (ستُفتح في يوتيوب): ' + bad.join('، ') : (unk ? 'تعذّر فحص ' + unk + ' منها' : 'كلها تعمل داخل «حصتي».'); }, 50); });
+  },
   gymAccount: function () { var c = cur(); if (!c) return; HX.pre = { l: c.name || '', p: c.phone || '', cl: c.code, m: 'cred', u: '' }; HX.form = true; A.hxv(); },
   gymLoad: function () { var i = document.getElementById('gymf'); if (i) i.click(); },
   gymClear: function () { var c = cur(); if (!c || !confirm('إزالة برنامج التمرين من ملف هذا العميل؟ (ما أُرسل لـ«حصتي» يبقى حتى ترسل خطة جديدة)')) return; c.work = null; persist(c).then(main); },

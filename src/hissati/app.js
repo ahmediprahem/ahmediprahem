@@ -1033,7 +1033,7 @@ const sl = (x, n) => String(x == null ? '' : x).slice(0, n);
 function ytId(u) { const m = /^https:\/\/(?:www\.|m\.)?(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})(?:[?&#].*)?$/.exec(String(u || '')); return m ? m[1] : ''; }
 function cleanVid(v) {                                    // رابط يوتيوب يُضمَّن، وفيديو مرفوع على المحطة يُشغَّل، وغيرهما يُفتح برابط خارجي
   if (!v) return null; if (typeof v === 'string') { const y = ytId(v); return y ? { yt: y } : /^https:\/\//.test(v) ? { url: sl(v, 400) } : null; }
-  if (v.yt && /^[\w-]{11}$/.test(v.yt)) return { yt: v.yt }; if (v.m && /^[\w-]{10,40}$/.test(v.m)) return { m: v.m }; if (v.url) { const y = ytId(v.url); return y ? { yt: y } : /^https:\/\//.test(v.url) ? { url: sl(v.url, 400) } : null; } return null;
+  if (v.yt && /^[\w-]{11}$/.test(v.yt)) return v.x ? { yt: v.yt, x: 1 } : { yt: v.yt }; if (v.m && /^[\w-]{10,40}$/.test(v.m)) return { m: v.m }; if (v.url) { const y = ytId(v.url); return y ? { yt: y } : /^https:\/\//.test(v.url) ? { url: sl(v.url, 400) } : null; } return null;
 }
 function cleanWork(w) {
   if (!w || !Array.isArray(w.days)) return null; const days = w.days.slice(0, 7).map((d) => ({ d: +d.d >= 0 && +d.d <= 6 ? +d.d : 0, kind: d.kind === 'rest' ? 'rest' : 'train', name: sl(d.name, 60), time: sl(d.time, 80), note: sl(d.note, 200), ex: (Array.isArray(d.ex) ? d.ex : []).slice(0, 20).map((e) => ({ n: sl(e.n, 80), en: sl(e.en, 60), sr: sl(e.sr, 30), rest: sl(e.rest, 20), cues: (Array.isArray(e.cues) ? e.cues : []).slice(0, 6).map((c) => sl(c, 160)), v: cleanVid(e.v) })) }));
@@ -1050,9 +1050,15 @@ function planSeg() {
   const t = [['meals', 'وجباتي']]; if (S.work) t.push(['work', 'تمريني']); t.push(['shop', 'قائمة التسوق']);
   return '<div class="segc ptseg" role="tablist" aria-label="أقسام خطتي">' + t.map((x) => '<button role="tab" class="' + ((S.pt || 'meals') === x[0] ? 'on' : '') + '" aria-selected="' + ((S.pt || 'meals') === x[0]) + '" data-act="pt" data-v="' + x[0] + '">' + x[1] + '</button>').join('') + '</div>';
 }
+document.addEventListener('load', (e) => { const t = e.target; if (t && t.tagName === 'IFRAME' && /youtube-nocookie\.com/.test(t.src || '') && t.contentWindow) try { t.contentWindow.postMessage(JSON.stringify({ event: 'listening', id: 1, channel: 'widget' }), 'https://www.youtube-nocookie.com'); } catch (x) { } }, true);
+window.addEventListener('message', (e) => {            // خطأ من مشغّل يوتيوب (فيديو يمنع التضمين أو محذوف): يظهر رابط الفتح في يوتيوب بدل شاشة سوداء
+  if (e.origin !== 'https://www.youtube-nocookie.com') return; let d; try { d = JSON.parse(e.data); } catch (x) { return; } if (!d || d.event !== 'onError') return;
+  const f = document.querySelector('.wvf'); if (f) { const m = /embed\/([\w-]{11})/.exec((f.querySelector('iframe') || {}).src || ''); f.outerHTML = (m ? '<a class="btn full" href="https://www.youtube.com/watch?v=' + m[1] + '" target="_blank" rel="noopener noreferrer">▶ افتح الفيديو في يوتيوب</a>' : '') + '<p class="dim">تعذّر تشغيل الفيديو هنا؛ افتحه في يوتيوب.</p>'; }
+});
 function wvid(v, big) {
   if (!v) return '<p class="dim">لا فيديو لهذا التمرين بعد.</p>';
-  if (v.yt) return '<div class="wvf"><iframe src="https://www.youtube-nocookie.com/embed/' + v.yt + '?rel=0&playsinline=1" title="فيديو التمرين" allow="encrypted-media; picture-in-picture; fullscreen" allowfullscreen loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>';
+  if (v.yt && v.x) return '<a class="btn full" href="https://www.youtube.com/watch?v=' + v.yt + '" target="_blank" rel="noopener noreferrer">▶ افتح الفيديو في يوتيوب</a><p class="dim">صاحب هذا الفيديو لا يسمح بتشغيله داخل التطبيق.</p>';
+  if (v.yt) return '<div class="wvf"><iframe src="https://www.youtube-nocookie.com/embed/' + v.yt + '?rel=0&playsinline=1&enablejsapi=1&origin=' + encodeURIComponent(location.origin) + '" title="فيديو التمرين" allow="encrypted-media; picture-in-picture; fullscreen" allowfullscreen loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></div><p class="dim"><a href="https://www.youtube.com/watch?v=' + v.yt + '" target="_blank" rel="noopener noreferrer">لا يعمل هنا؟ افتحه في يوتيوب</a></p>';
   if (v.m) return '<video class="wvv" src="/m/' + v.m + '" controls playsinline preload="metadata"></video>';
   return '<a class="btn full" href="' + esc(v.url) + '" target="_blank" rel="noopener noreferrer">▶ افتح فيديو التمرين</a>';
 }
