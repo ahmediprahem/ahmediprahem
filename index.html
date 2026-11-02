@@ -4640,6 +4640,11 @@ function hxFetch(method, path, obj, signed) {
   });
 }
 // ---------- الهوية والتسجيل
+function hxAuto() {            // ربط تلقائي: إن حمل التصدير عنوان المحطة ومفتاحها (إعدادات المدير) يُربط الجهاز بلا خطوات
+  var d = hxDef(), r = String(d.relay || '').trim().replace(/\/+$/, ''); if (hxOn() || HX.autoTried || HX.loaded !== true || !hxUrlOk(r)) return null; HX.autoTried = 1;
+  return hxRegister(r, d.regKey || '', String(HX.st.name || BR().specialist || firstName() || 'الأخصائي').slice(0, 60)).then(function () { main(); hxRail(); toast('✓ رُبط جهازك بمحطة «حصتي» تلقائياً'); }).catch(function (e) { HX.err = (e && e.message) || 'تعذّر الربط التلقائي'; });
+}
+if (window.DPApp) window.DPApp.HXA = { auto: hxAuto, st: function () { return HX; }, on: function () { return hxOn(); } };
 function hxRegister(relay, regKey, name) {
   HX.st.relay = relay; HX.st.name = name;
   return (HX.st.ident ? Promise.resolve(HX.st.ident) : HXC0.genIdentity()).then(function (id) {
@@ -5026,7 +5031,7 @@ document.addEventListener('change', function (e) {
   hxSave(); if (t.dataset.hx === 'name' && hxOn()) hxFetch('POST', '/v1/register', { sigPub: HX.st.ident.sigPub, encPub: HX.st.ident.encPub, name: HX.st.name, regKey: hxDef().regKey || '' }, true).catch(function () { });
 });
 document.addEventListener('keydown', function (e) { var t = e.target; if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && t && (t.id === 'hxMsg' || (t.dataset && t.dataset.hxr))) { e.preventDefault(); if (t.id === 'hxMsg') A.hxSendMsg(); else A.hxReqMsg(t.dataset.hxr); } });
-(function (f) { render = function () { var r = f.apply(this, arguments); if (!HX.loaded && DB) { HX.loaded = 'loading'; hxLoad().then(function () { hxRail(); if (S.view === 'hx' || S.view === 'settings') main(); }); } else hxRail(); return r; }; })(render);
+(function (f) { render = function () { var r = f.apply(this, arguments); if (!HX.loaded && DB) { HX.loaded = 'loading'; hxLoad().then(function () { hxRail(); hxAuto(); if (S.view === 'hx' || S.view === 'settings') main(); }); } else hxRail(); return r; }; })(render);
 (function (f) { main0 = function () { if (S.view === 'hx') { $('main').innerHTML = hxPage(); return; } return f.apply(this, arguments); }; })(main0);
 
 // ---- 0.51: «يوم واحد في كل مرة» لكل عميل — يُرسل فوراً إلى «حصتي» ومع كل خطة
