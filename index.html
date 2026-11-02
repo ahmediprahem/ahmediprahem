@@ -4642,13 +4642,13 @@ function hxFetch(method, path, obj, signed) {
 // ---------- الهوية والتسجيل
 function hxAuto() {            // ربط تلقائي: إن حمل التصدير عنوان المحطة ومفتاحها (إعدادات المدير) يُربط الجهاز بلا خطوات
   var d = hxDef(), r = String(d.relay || '').trim().replace(/\/+$/, ''); if (hxOn() || HX.autoTried || HX.loaded !== true || !hxUrlOk(r)) return null; HX.autoTried = 1;
-  return hxRegister(r, d.regKey || '', String(HX.st.name || BR().specialist || firstName() || 'الأخصائي').slice(0, 60)).then(function () { main(); hxRail(); toast('✓ رُبط جهازك بمحطة «حصتي» تلقائياً'); }).catch(function (e) { HX.err = (e && e.message) || 'تعذّر الربط التلقائي'; });
+  return Promise.resolve(CFG.aiToken ? CFG.aiToken() : null).then(function (lic) { return hxRegister(r, d.regKey || '', String(HX.st.name || BR().specialist || firstName() || 'الأخصائي').slice(0, 60), lic || ''); }).then(function () { main(); hxRail(); toast('✓ رُبط جهازك بمحطة «حصتي» تلقائياً'); }).catch(function (e) { HX.err = (e && e.message) || 'تعذّر الربط التلقائي'; });
 }
 if (window.DPApp) window.DPApp.HXA = { auto: hxAuto, st: function () { return HX; }, on: function () { return hxOn(); } };
-function hxRegister(relay, regKey, name) {
+function hxRegister(relay, regKey, name, lic) {
   HX.st.relay = relay; HX.st.name = name;
   return (HX.st.ident ? Promise.resolve(HX.st.ident) : HXC0.genIdentity()).then(function (id) {
-    HX.st.ident = id; return hxFetch('POST', '/v1/register', { sigPub: id.sigPub, encPub: id.encPub, name: name, regKey: regKey || '' }, true);
+    HX.st.ident = id; return hxFetch('POST', '/v1/register', { sigPub: id.sigPub, encPub: id.encPub, name: name, regKey: regKey || '', lic: lic || '' }, true);
   }).then(function (j) { HX.st.reg = 1; HX.st.did = j.id; return hxSave(); }).then(hxTimer);
 }
 // ---------- قوائم النظام التي يختار منها العميل (تُرفق بالدعوة؛ بيانات عامة لا بيانات شخصية)

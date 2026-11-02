@@ -4,7 +4,18 @@
    - تقدّم تطبيق «حصتي» نفسه على الصفحة الرئيسية (/)، فرابط الدعوة = عنوان هذه المحطة.
    - الجداول تُنشأ تلقائياً أول مرة؛ يكفي ربط قاعدة D1 باسم DB. متغير اختياري REG_KEY: مفتاح تسجيل الأخصائيين (بدونه يقبل أي «حصة»).
    - لا تسجّل أي محتوى (لا console.log). يُبنى منه worker/relay/dist/worker.js بـ py build_web.py (يُضمَّن تطبيق «حصتي» وأيقونته). */
-const VER = '1.6';
+const VER = '1.7';
+// ---- 1.7: رخصة الأخصائي: كود تفعيل موقَّع بمفتاح المدير (ADMIN_PUB، مفتاح عام) يغني عن مفتاح التسجيل، فيُربط الأخصائي تلقائياً دون سر في الموقع
+const b64uBytes = (x) => { x = x.replace(/-/g, '+').replace(/_/g, '/'); while (x.length % 4) x += '='; const b = atob(x), u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; };
+async function licOk(tok, env) {
+  const t = String(tok || '').replace(/\s+/g, ''), parts = t.split('.'); if (!env.ADMIN_PUB || parts.length !== 2 || !parts[0] || !parts[1] || t.length > 4000) return false;
+  try {
+    const key = await crypto.subtle.importKey('jwk', JSON.parse(env.ADMIN_PUB), { name: 'ECDSA', namedCurve: 'P-256' }, false, ['verify']);
+    if (!(await crypto.subtle.verify({ name: 'ECDSA', hash: 'SHA-256' }, key, b64uBytes(parts[1]), new TextEncoder().encode(parts[0])))) return false;
+    const p = JSON.parse(new TextDecoder().decode(b64uBytes(parts[0]))); return p.v === 1 && !!p.u && (!p.exp || p.exp > Math.floor(Date.now() / 1000));
+  } catch { return false; }
+}
+
 const APP_HTML = /*HISSATI_HTML*/'<!doctype html><meta charset="utf-8"><title>حصتي</title><p>ابنِ الملف بـ py build_web.py</p>'/*END*/;
 const ICON_B64 = /*HISSATI_ICON*/''/*END*/;
 const SW_JS = /*HISSATI_SW*/''/*END*/;
@@ -121,10 +132,10 @@ async function api(req, env, url, ctx) {
   if (p === '/v1/media' && method === 'POST') return mediaUp(req, env, db, path);
   const body = method === 'POST' ? await req.text() : ''; if (body.length > LIM.body) return err(413, 'big', 'الطلب أكبر من المسموح');
   let J = {}; if (body) { try { J = JSON.parse(body); } catch { return err(400, 'json', 'صيغة غير صالحة'); } }
-  if (p === '/v1/health') return json({ ok: true, ver: VER, reg: !!env.REG_KEY });
+  if (p === '/v1/health') return json({ ok: true, ver: VER, reg: !!env.REG_KEY, lic: !!env.ADMIN_PUB });
   if (p === '/v1/register' && method === 'POST') {
     if (!validJwk(J.sigPub) || !validJwk(J.encPub)) return err(400, 'keys', 'مفاتيح غير صالحة');
-    if (env.REG_KEY && J.regKey !== env.REG_KEY) return err(403, 'regkey', 'مفتاح التسجيل غير صحيح');
+    if (env.REG_KEY && J.regKey !== env.REG_KEY && !(await licOk(J.lic, env))) return err(403, 'regkey', 'مفتاح التسجيل غير صحيح أو رخصة التفعيل غير صالحة');
     const a = await authed(req, db, path, body, J.sigPub); if (a.e) return a.e;
     const c = await one(db, 'SELECT id FROM clients WHERE id = ?', a.id); if (c) return err(409, 'role', 'هذا المفتاح لعميل');
     await run(db, 'INSERT INTO dietitians (id, sig, enc, name, created) VALUES (?, ?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET name = excluded.name', a.id, JSON.stringify(pubOnly(J.sigPub)), JSON.stringify(pubOnly(J.encPub)), String(J.name || '').slice(0, LIM.label), now());
