@@ -9,7 +9,7 @@ const col = (s) => { s = s.trim(); let m = /^#([0-9a-f]{6})$/i.exec(s); if (m) {
 const over = (top, bot) => { const a = top[3]; return [0, 1, 2].map((i) => top[i] * a + bot[i] * (1 - a)).concat([1]); };
 const lum = (c) => { const f = (x) => { x /= 255; return x <= .03928 ? x / 12.92 : Math.pow((x + .055) / 1.055, 2.4); }; return .2126 * f(c[0]) + .7152 * f(c[1]) + .0722 * f(c[2]); };
 const cr = (a, b) => { const A = lum(a), B = lum(b), hi = Math.max(A, B), lo = Math.min(A, B); return (hi + .05) / (lo + .05); };
-const CFG = { rose: { base: ['#FBF7F3', '#F5ECE6'], dark: false }, pulse: { base: ['#0B0E12', '#08090B'], dark: true } };
+const CFG = { rose: { base: ['#FBF7F3', '#F5ECE6'], dark: false }, pulse: { base: ['#0B0E12', '#08090B'], dark: true }, firoz: { base: ['#04252B', '#021A1F'], dark: true } };
 for (const th of Object.keys(CFG)) {
   const tb = block(T, th), gb = block(G, th), g = (k) => col(v(gb, 'hx-g-' + k)), c = (k) => col(v(tb, 'hx-' + k));
   // نقاط الخلفية: لونا الأساس + كل توهّج فوق كل أساس، وتوهّجان فوق بعضهما (أسوأ تراكم عند التقاء التوهّجات)

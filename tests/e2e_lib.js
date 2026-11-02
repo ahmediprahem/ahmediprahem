@@ -1,0 +1,35 @@
+// مكتبة التمارين (0.74): الأخصائي يبنيها ويرسلها، والعميل يبحث ويفتح التمرين ويسجّل وزنه.
+const assert = require('assert'), path = require('path'), linked = require('./hx_link_helper');
+const FX = path.join(__dirname, 'fixtures/client_pkg_sample.json');
+let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
+(async () => {
+  const { d, m, cPoll, close } = await linked('lib', errs);
+  const old = await d.evaluate(() => DPApp.S.cur);
+  await d.click('main .tabs [data-v="ci"]').catch(() => { }); await d.waitForSelector('#gymf', { state: 'attached' });
+  await d.setInputFiles('#gymf', FX); await d.waitForFunction((c) => { const x = DPApp.S.clients.find((q) => q.code === c); return x.work; }, old);
+  const cnt = await d.evaluate(() => DPApp.S.settings.exlib.length); assert(cnt >= 3, 'التمارين أُضيفت للمكتبة تلقائياً: ' + cnt);
+  await d.click('main .tabs [data-v="ci"]'); await d.locator('.ucard summary').first().click();
+  assert(/مكتبة التمارين \(\d+\)/.test(await d.textContent('.ucard summary')));
+  await d.evaluate(() => { window.prompt = () => 'تمرين إضافي تجريبي'; }); await d.click('[data-a="libAdd"]'); await d.waitForFunction(() => DPApp.S.settings.exlib.some((e) => e.n === 'تمرين إضافي تجريبي'));
+  ok('«حصة»: مكتبة التمارين تُملأ تلقائياً من البرنامج المحمَّل، وتقبل إضافة تمرين بالاسم');
+  await d.evaluate((o) => { const L = DPApp.S.settings.exlib; L[0].v = { yt: 'dQw4w9WgXcQ' }; L[0].g = 'صدر'; L[0].s = 'gym'; L[0].f = 'ملف أول'; L[1].g = 'ظهر'; L[2].s = 'home'; }, 0);
+  await d.evaluate((c) => DPApp.A.pick(c), old); await d.click('main .tabs [data-v="hx"]'); await d.waitForSelector('[data-a="hxSendPlan"]');
+  const snap = require(FX).snap; await d.evaluate((o) => { DPApp.S.clients.find((q) => q.code === o.c).rawSnap = o.s; }, { c: old, s: snap });
+  await d.click('[data-a="hxSendPlan"]'); await d.waitForFunction((c) => (DPApp.S.clients.find((q) => q.code === c).hx.planV || 0) >= 1, old, { timeout: 15000 });
+  await cPoll(); await m.waitForFunction(() => (window.HissatiApp.state().lib || []).length >= 3, null, { timeout: 8000 });
+  ok('«حصتي» تتسلّم المكتبة مع الخطة');
+  await m.evaluate(() => { window.HissatiApp.state().lib = []; window.HissatiApp.state().tab = 'lib'; }); await m.click('.tabbar [data-v="plan"]'); await m.click('.tabbar [data-v="lib"]'); await m.waitForSelector('.lbf'); assert(await m.locator('.lbi').count() >= 30, 'المكتبة المضمَّنة تظهر بلا إرسال'); assert(/أحمد حامد/.test(await m.textContent('.lbf >> nth=0 >> summary'))); await m.click('.segc [data-v="home"]'); assert.strictEqual(await m.locator('.lbi').count(), 14);
+  ok('مكتبة مضمَّنة في «حصتي» (32 تمرين نادي + 14 منزلياً) تظهر حتى لو لم يرسل الأخصائي شيئاً'); await d.click('main .tabs [data-v="ci"]'); await d.waitForSelector('[data-a="libSend"]', { state: 'attached' }); await d.evaluate(() => DPApp.A.libSend()); await cPoll(); await m.waitForFunction(() => (window.HissatiApp.state().lib || []).length >= 3, null, { timeout: 8000 });
+  ok('«📤 أرسل المكتبة لكل عملائي»: تصل المكتبة دون إعادة إرسال الخطة');
+  assert.strictEqual(await m.locator('.tabbar button').last().textContent().then((t) => /ملفي/.test(t)), true); await m.click('.tabbar [data-v="lib"]'); await m.click('.segc [data-v="gym"]'); await m.waitForSelector('.lbf');
+  assert.deepStrictEqual((await m.locator('.segc button').allTextContents()).map((x) => x.replace(/[\s\d]+$/, '').trim()), ['🏋 تمارين النادي', '🏠 تمارين منزلية']); assert(/ملف أول/.test(await m.textContent('.lbf >> nth=0 >> summary')));
+  assert.strictEqual(await m.locator('.lbi').count() >= 1, true); const gymN = await m.locator('.lbi').count();
+  await m.click('.segc [data-v="home"]'); await m.waitForSelector('.lbi'); assert(await m.locator('.lbi').count() >= 1); assert.strictEqual(await m.locator('.lbf').count(), 0); await m.click('.segc [data-v="gym"]'); await m.waitForSelector('.lbf');
+  await m.fill('#libq', 'zzzzxx'); assert.strictEqual(await m.locator('.lbi:not([hidden])').count(), 0); await m.fill('#libq', '');
+  await m.click('.chips [data-v="ظهر"]'); assert(await m.locator('.lbi').count() >= 1 && await m.locator('.lbi').count() < gymN);
+  ok('تبويب «مكتبة التمارين»: قسمان (النادي بملفات/مجلدات، ومنزلية)، وبحث ومرشّح بالمجموعة العضلية');
+  await m.click('.chips [data-v=""]'); await m.click('.lbf >> nth=0 >> .lbi >> nth=0 >> .wxm'); await m.waitForSelector('.sheet iframe'); assert(/dQw4w9WgXcQ/.test(await m.getAttribute('.sheet iframe', 'src')));
+  await m.fill('#wlw_0', '20'); await m.fill('#wlr_0', '10'); await m.click('[data-act="wlsave"]'); await m.waitForFunction(() => Object.keys(window.HissatiApp.state().wlogs || {}).length === 1);
+  ok('فتح تمرين من المكتبة: الفيديو داخل التطبيق + طريقة الأداء + تسجيل الوزن');
+  assert.deepStrictEqual(errs, []); await close(); console.log('\nنجح ' + n + ' اختباراً');
+})().catch((e) => { console.error(e); process.exit(1); });
