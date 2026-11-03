@@ -26,6 +26,9 @@ const P = {
   user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
   pulse:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
   dumb:'<path d="M6.5 6.5v11M17.5 6.5v11M3 9v6M21 9v6M6.5 12h11"/>',
+  trip:'<path d="M5 19c0-6 7-4 7-9s4-5 7-4"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="6" r="2"/>',
+  compass:'<circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/>',
+  star:'<path d="M12 3l2.4 5.2 5.6.7-4.1 3.9 1 5.6L12 15.6 7.1 18.4l1-5.6L4 8.9l5.6-.7z"/>',
   cup:'<path d="M5 11h10v3a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4zM15 12h1.5a2 2 0 0 1 0 4H15M8 4v3M11 4v3"/>',
   moonbowl:'<path d="M4 12h16a8 8 0 0 1-16 0zM9 4c-1 1.2 1 2 0 3.2M14 4c-1 1.2 1 2 0 3.2"/>',
   flame:'<path d="M12 3c1 3 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 2.5 2 2.5C11 9 11 6 12 3z"/>',
@@ -751,9 +754,14 @@ function scrSent() {
 }
 
 // ---------- التطبيق بعد وصول الخطة
+// ---- 0.80: خمسة تبويبات (اليوم، رحلتي، استكشف، نسختي، أنا). التبويبات الداخلية القديمة تبقى كما هي وتُجمَّع في مجموعات
+const TGRP = [['today', 'today', 'اليوم', ['today']], ['plan', 'trip', 'رحلتي', ['plan']], ['feed', 'compass', 'استكشف', ['feed', 'lib']], ['progress', 'star', 'نسختي', ['progress', 'file']], ['prefs', 'user', 'أنا', ['prefs']]];
+const TSUB = { feed: [['feed', 'التثقيف'], ['lib', 'مكتبة التمارين']], progress: [['progress', 'تقدّمي'], ['file', 'ملفي الصحي']] };
 function scrApp() {
-  const body = { today: tabToday, plan: tabPlan, prefs: tabPrefs, progress: tabProgress, feed: tabFeed, file: tabFile, lib: tabLib }[S.tab] ? { today: tabToday, plan: tabPlan, prefs: tabPrefs, progress: tabProgress, feed: tabFeed, file: tabFile, lib: tabLib }[S.tab]() : tabToday();
-  const tb = [['today', 'today', 'اليوم'], ['plan', 'cal', 'خطتي'], ['prefs', 'heart', 'تفضيلاتي'], ['feed', 'news', 'تثقيف'], ['progress', 'trend', 'تقدّمي']].concat([['lib', 'dumb', 'التمارين'], ['file', 'pulse', 'ملفي']]).map((t) => '<button class="' + (S.tab === t[0] ? 'on' : '') + '" data-act="tab" data-v="' + t[0] + '"' + (S.tab === t[0] ? ' aria-current="page"' : '') + '>' + I(t[1]) + '<span>' + t[2] + '</span>' + (t[0] === 'feed' && fdNew() ? '<span class="nb" aria-label="' + fdNew() + ' جديد">' + fdNew() + '</span>' : '') + '</button>').join('');
+  const T = { today: tabToday, plan: tabPlan, prefs: tabPrefs, progress: tabProgress, feed: tabFeed, file: tabFile, lib: tabLib }, g = TGRP.find((x) => x[3].includes(S.tab)), sub = g && TSUB[g[0]];
+  const segHtml = sub ? '<div class="segc ptseg subseg" role="tablist" aria-label="أقسام ' + g[2] + '">' + sub.map((x) => '<button role="tab" class="' + (S.tab === x[0] ? 'on' : '') + '" aria-selected="' + (S.tab === x[0]) + '" data-act="sub" data-v="' + x[0] + '">' + x[1] + '</button>').join('') + '</div>' : '';
+  const body = (T[S.tab] ? segHtml + T[S.tab]() : tabToday());
+  const tb = TGRP.map((t) => { const on = t[3].includes(S.tab); return '<button class="' + (on ? 'on' : '') + (on && V.tp === t[0] ? ' pop' : '') + '" data-act="tab" data-v="' + t[0] + '"' + (on ? ' aria-current="page"' : '') + '>' + I(t[1]) + '<span>' + t[2] + '</span>' + (t[0] === 'feed' && fdNew() ? '<span class="nb" aria-label="' + fdNew() + ' جديد">' + fdNew() + '</span>' : '') + '</button>'; }).join('');
   const wm = S.wm && (S.tab === 'today' || S.tab === 'plan') ? '<div class="wmk" aria-hidden="true">' + Array(18).fill('<span>' + esc(S.wm) + '</span>').join('') + '</div>' : '';   // 0.51: علامة مائية باسم العميل على الجدول
   return '<div class="scr hasTabs">' + wm + '<div class="scroll"><div class="stack">' + (S.removed ? '<div class="banner warn">' + I('alert') + '<span>أوقف أخصائيك ربط حسابك؛ خطتك الحالية تبقى معروضة لكن لا تصله متابعتك.</span></div>' : '') + body + '</div></div><nav class="tabbar" aria-label="التنقل">' + tb + '</nav></div>';
 }
@@ -2104,7 +2112,8 @@ document.addEventListener('click', (e) => {
     case 'whQ': whs().noQ = el.checked; break;
     case 'whNat': { const w = whs(); w.nat = v; S.p.nat = v; break; }
     case 'theme': if (window.HxTheme) { HxTheme.set(v, el.querySelector('.hx-pv')); document.querySelectorAll('.hx-th').forEach((b) => { const on = b.dataset.v === v; b.setAttribute('aria-checked', String(on)); const l = b.querySelector('.hx-tl'); if (l) l.textContent = l.textContent.replace(' ✓', '') + (on ? ' ✓' : ''); }); applyThemeIcons(v); } return;
-    case 'tab': S.tab = v; if (v === 'feed' && now() - FD.at > 60000) fdLoad().then(render); break;
+    case 'sub': S.tab = v; if (v === 'feed' && now() - FD.at > 60000) fdLoad().then(render); break;
+    case 'tab': V.tp = (TGRP.find((x) => x[3].includes(v)) || [])[0]; setTimeout(() => { V.tp = null; }, 500); S.tab = v; if (v === 'feed' && now() - FD.at > 60000) fdLoad().then(render); break;
     case 'pt': S.pt = v; break;
     case 'wkday': S.wd = +v; break;
     case 'lg': V.lg = v; break;
