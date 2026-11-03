@@ -790,7 +790,7 @@ function sceneSvg(tod, egy) {
   else s += '<path d="M0 170V118Q70 92 140 114T270 106T340 118V170z" class="sc2"/><path d="M0 170V144Q90 120 170 140T340 134V170z" class="sc1"/><path d="M160 140c0-22 2-32 4-44M164 98c-12-10-22-8-28-2M164 98c10-12 22-10 30-4M164 98c-6-14-4-24 0-30" fill="none" stroke="var(--bg)" stroke-width="3" stroke-linecap="round"/>';
   return s + '</svg>';
 }
-// ---- 0.81: خلفية صوتية بشرية بلا آلات (اختيارية، مغلقة افتراضياً). مولِّد كورال بلا كلمات بالتركيب الصوتي (Formant) كصوت تجريبي إلى أن تُعتمد تسجيلات بشرية مرخّصة
+// ---- 0.81: خلفية صوتية بشرية بلا آلات (اختيارية، مغلقة افتراضياً). مولِّد همهمات صوتية (mmm) بلا كلمات بالتركيب الصوتي (Formant) كصوت تجريبي إلى أن تُعتمد تسجيلات بشرية مرخّصة
 const snd = () => (S.snd = S.snd || { on: 0, vol: 0.5, ask: 0 });
 const SND = { ctx: null, m: null, playing: false, quiet: false, chords: { classic: [146.83, 220, 293.66, 369.99], rose: [130.81, 196, 261.63, 329.63], pulse: [123.47, 185, 246.94, 311.13], firoz: [138.59, 207.65, 277.18, 349.23] } };
 function sndInit() {
@@ -798,10 +798,10 @@ function sndInit() {
   const c = SND.ctx = new AC(), m = SND.m = c.createGain(), cp = c.createDynamicsCompressor(); m.gain.value = 0; m.connect(cp); cp.connect(c.destination); SND.an = c.createAnalyser(); SND.an.fftSize = 2048; cp.connect(SND.an);
   const th = (window.HxTheme && HxTheme.get()) || 'classic';
   (SND.chords[th] || SND.chords.classic).forEach((f, i) => {
-    const vg = c.createGain(); vg.gain.value = 0.3; const mix = c.createGain(); mix.gain.value = 0.5; vg.connect(m);
-    [[700, 3], [1100, 2], [2650, 1.2]].forEach(([fq, ga]) => { const bf = c.createBiquadFilter(); bf.type = 'bandpass'; bf.frequency.value = fq; bf.Q.value = 6; const fg = c.createGain(); fg.gain.value = ga; mix.connect(bf); bf.connect(fg); fg.connect(vg); });
-    [[f, 'sawtooth'], [f * 1.004, 'sawtooth'], [f * 0.5, 'sine']].forEach(([fr, ty]) => { const o = c.createOscillator(); o.type = ty; o.frequency.value = fr; const vb = c.createOscillator(); vb.frequency.value = 5 + i * 0.3; const vd = c.createGain(); vd.gain.value = fr * 0.0045; vb.connect(vd); vd.connect(o.frequency); const fs = c.createGain(); fs.gain.value = ty === 'sine' ? 0.6 : 0.25; o.connect(fs); fs.connect(mix); o.start(); vb.start(); });
-    const lf = c.createOscillator(); lf.frequency.value = 0.06 + i * 0.023; const ld = c.createGain(); ld.gain.value = 0.18; lf.connect(ld); ld.connect(vg.gain); lf.start();
+    const vg = c.createGain(); vg.gain.value = 0.34; const mix = c.createGain(); mix.gain.value = 0.5; vg.connect(m);
+    [[260, 3.6], [900, 0.7], [2200, 0.12]].forEach(([fq, ga]) => { const bf = c.createBiquadFilter(); bf.type = 'bandpass'; bf.frequency.value = fq; bf.Q.value = fq < 400 ? 4.5 : 3; const fg = c.createGain(); fg.gain.value = ga; mix.connect(bf); bf.connect(fg); fg.connect(vg); });
+    [[f, 'sawtooth'], [f * 1.004, 'sawtooth'], [f * 0.5, 'sine']].forEach(([fr, ty]) => { const o = c.createOscillator(); o.type = ty; o.frequency.value = fr; const vb = c.createOscillator(); vb.frequency.value = 5 + i * 0.3; const vd = c.createGain(); vd.gain.value = fr * 0.003; vb.connect(vd); vd.connect(o.frequency); const fs = c.createGain(); fs.gain.value = ty === 'sine' ? 0.6 : 0.25; o.connect(fs); fs.connect(mix); o.start(); vb.start(); });
+    const lf = c.createOscillator(); lf.frequency.value = 0.08 + i * 0.031; const ld = c.createGain(); ld.gain.value = 0.26; lf.connect(ld); ld.connect(vg.gain); lf.start();
   });
   return true;
 }
