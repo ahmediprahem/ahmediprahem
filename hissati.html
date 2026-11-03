@@ -672,6 +672,11 @@ html[data-theme="firoz"] .alm{background:radial-gradient(70% 50% at 50% 30%,rgba
 .subseg{margin-bottom:6px}
 @media (prefers-reduced-motion:reduce){.tabbar button.on.pop .ico{animation:none}.tabbar button .ico{transition:none}}
 
+/* 0.81: زر الصوت الخلفي */
+.sndb{width:38px;height:38px;border-radius:50%;flex:none;display:grid;place-items:center;background:rgba(255,255,255,.12);border:1px solid var(--line2);color:var(--mut)}.sndb[aria-pressed="true"]{color:var(--mint);background:rgba(255,255,255,.2)}.sndb .ico{width:19px;height:19px}
+.sndi h3{display:flex;gap:8px;align-items:center;margin:0}.sndi .ico{width:20px;height:20px;color:var(--mint)}
+input[type=range]{width:100%;accent-color:var(--mint)}
+
 /* ==========================================================================
    «حصتي» — themes.css  •  ثيم «وردة» (data-theme="rose") وثيم «نبض» (data-theme="pulse")
    يُحمَّل بعد code/style.css. الثيم الحالي يبقى الافتراضي: بلا data-theme لا يتغيّر شيء.
@@ -2629,6 +2634,8 @@ const P = {
   user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
   pulse:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
   dumb:'<path d="M6.5 6.5v11M17.5 6.5v11M3 9v6M21 9v6M6.5 12h11"/>',
+  vol:'<path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/>',
+  mute:'<path d="M4 9v6h4l5 4V5L8 9z"/><path d="M17 9l5 6M22 9l-5 6"/>',
   trip:'<path d="M5 19c0-6 7-4 7-9s4-5 7-4"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="6" r="2"/>',
   compass:'<circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/>',
   star:'<path d="M12 3l2.4 5.2 5.6.7-4.1 3.9 1 5.6L12 15.6 7.1 18.4l1-5.6L4 8.9l5.6-.7z"/>',
@@ -3391,10 +3398,34 @@ function sceneSvg(tod, egy) {
   else s += '<path d="M0 170V118Q70 92 140 114T270 106T340 118V170z" class="sc2"/><path d="M0 170V144Q90 120 170 140T340 134V170z" class="sc1"/><path d="M160 140c0-22 2-32 4-44M164 98c-12-10-22-8-28-2M164 98c10-12 22-10 30-4M164 98c-6-14-4-24 0-30" fill="none" stroke="var(--bg)" stroke-width="3" stroke-linecap="round"/>';
   return s + '</svg>';
 }
+// ---- 0.81: خلفية صوتية بشرية بلا آلات (اختيارية، مغلقة افتراضياً). مولِّد كورال بلا كلمات بالتركيب الصوتي (Formant) كصوت تجريبي إلى أن تُعتمد تسجيلات بشرية مرخّصة
+const snd = () => (S.snd = S.snd || { on: 0, vol: 0.5, ask: 0 });
+const SND = { ctx: null, m: null, playing: false, quiet: false, chords: { classic: [146.83, 220, 293.66, 369.99], rose: [130.81, 196, 261.63, 329.63], pulse: [123.47, 185, 246.94, 311.13], firoz: [138.59, 207.65, 277.18, 349.23] } };
+function sndInit() {
+  if (SND.ctx) return true; const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return false;
+  const c = SND.ctx = new AC(), m = SND.m = c.createGain(), cp = c.createDynamicsCompressor(); m.gain.value = 0; m.connect(cp); cp.connect(c.destination); SND.an = c.createAnalyser(); SND.an.fftSize = 2048; cp.connect(SND.an);
+  const th = (window.HxTheme && HxTheme.get()) || 'classic';
+  (SND.chords[th] || SND.chords.classic).forEach((f, i) => {
+    const vg = c.createGain(); vg.gain.value = 0.3; const mix = c.createGain(); mix.gain.value = 0.5; vg.connect(m);
+    [[700, 3], [1100, 2], [2650, 1.2]].forEach(([fq, ga]) => { const bf = c.createBiquadFilter(); bf.type = 'bandpass'; bf.frequency.value = fq; bf.Q.value = 6; const fg = c.createGain(); fg.gain.value = ga; mix.connect(bf); bf.connect(fg); fg.connect(vg); });
+    [[f, 'sawtooth'], [f * 1.004, 'sawtooth'], [f * 0.5, 'sine']].forEach(([fr, ty]) => { const o = c.createOscillator(); o.type = ty; o.frequency.value = fr; const vb = c.createOscillator(); vb.frequency.value = 5 + i * 0.3; const vd = c.createGain(); vd.gain.value = fr * 0.0045; vb.connect(vd); vd.connect(o.frequency); const fs = c.createGain(); fs.gain.value = ty === 'sine' ? 0.6 : 0.25; o.connect(fs); fs.connect(mix); o.start(); vb.start(); });
+    const lf = c.createOscillator(); lf.frequency.value = 0.06 + i * 0.023; const ld = c.createGain(); ld.gain.value = 0.18; lf.connect(ld); ld.connect(vg.gain); lf.start();
+  });
+  return true;
+}
+function sndTarget() { const q = document.querySelector('.wvf iframe, video, .adx, .alm'); return q ? 0.015 : snd().vol * 0.45; }
+function sndPlay() { if (!snd().on || !sndInit()) return; const c = SND.ctx; try { c.resume(); } catch (e) { } SND.m.gain.cancelScheduledValues(c.currentTime); SND.m.gain.setTargetAtTime(sndTarget(), c.currentTime, 0.9); SND.playing = true; }
+function sndStop() { if (!SND.ctx) { SND.playing = false; return; } const c = SND.ctx; SND.m.gain.cancelScheduledValues(c.currentTime); SND.m.gain.setTargetAtTime(0, c.currentTime, 0.35); SND.playing = false; setTimeout(() => { if (!SND.playing) try { c.suspend(); } catch (e) { } }, 1600); }
+document.addEventListener('pointerdown', () => { if (S && snd().on && !SND.playing && document.visibilityState === 'visible') sndPlay(); }, true);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') sndStop(); else if (S && snd().on) sndPlay(); });
+setInterval(() => { if (S && SND.playing && SND.ctx && SND.m) SND.m.gain.setTargetAtTime(sndTarget(), SND.ctx.currentTime, 0.6); }, 700);
+const sndBtn = () => '<button class="sndb" data-act="sndt" aria-pressed="' + !!snd().on + '" aria-label="' + (snd().on ? 'إيقاف الصوت الخلفي' : 'تشغيل صوت خلفي هادئ') + '">' + I(snd().on ? 'vol' : 'mute') + '</button>';
+function sndInvite() { if (snd().on || snd().ask) return ''; return '<section class="card stack sndi"><h3>' + I('vol') + ' تحب خلفية صوتية هادئة؟</h3><p class="mut">أصوات بشرية بلا آلات تعطي التطبيق حياة. تُوقَف بضغطة، ولا تعمل مع الفيديو والأذان والأذكار. (صوت تجريبي الآن.)</p><div class="row"><button class="btn" data-act="sndask" data-v="1">شغّلها</button><button class="btn sec" data-act="sndask" data-v="0">ليس الآن</button></div></section>'; }
+function sndCard() { return '<section class="card stack"><div class="row" style="justify-content:space-between"><div><b>صوت خلفي هادئ</b><div class="dim">أصوات بشرية بلا آلات (تجريبي)</div></div><input type="checkbox" class="sw" data-act="sndt" aria-label="صوت خلفي"' + (snd().on ? ' checked' : '') + '></div><label class="dim" for="sndV">مستوى الصوت</label><input type="range" id="sndV" data-snd-vol="1" min="0" max="100" value="' + Math.round(snd().vol * 100) + '" aria-label="مستوى الصوت"></section>'; }
 function sceneHeader(first, d) {
   const tod = todOf(new Date().getHours()), egy = window.HxTheme && HxTheme.get() === 'firoz', st = dayStreak();
   return '<section class="scn" data-tod="' + tod + '">' + sceneSvg(tod, egy) + '<div class="hello"><div class="av sm">' + esc(first.charAt(0) || '؟') + '</div><div style="flex:1;min-width:0"><div class="dim">' + esc(DATA.dayNames[d] || '') + '</div><h2>' + TOD[tod].g + ' ' + esc(first) + '</h2></div>'
-    + (st ? '<span class="stk" aria-label="' + st + (st === 1 ? ' يوم متتالٍ' : ' أيام متتالية') + '">' + I('flame') + '<b>' + st + '</b></span>' : '') + chatBtn() + '</div></section>';
+    + (st ? '<span class="stk" aria-label="' + st + (st === 1 ? ' يوم متتالٍ' : ' أيام متتالية') + '">' + I('flame') + '<b>' + st + '</b></span>' : '') + sndBtn() + chatBtn() + '</div></section>';
 }
 
 // ---- 0.65: اختصارات أيقونة التطبيق (?a=meal|water|chat|wheel)، رقم الوجبات المتبقية على الأيقونة، والعدّ التنازلي للوجبة القادمة
@@ -3668,7 +3699,7 @@ document.addEventListener('touchend', (e) => { if (chX == null) return; const el
 function tabToday() {
   const d = TODAY, L = dl(d), [done, n] = itemsOfDay(d), pct = n ? Math.round(done / n * 100) : 0, C = 2 * Math.PI * 40;
   const first = (S.p.name || '').trim().split(/\s+/)[0] || '';
-  let out = sceneHeader(first, d) + missionCard(d) + whChip() + chalCar() + (S.fw === 'pending' ? firstWinCard() : installState() === 'done' || installState() === 'desktop' ? notifCard(true) : installCard('today')) + chalCard() + prCard() + apCard() + wkCard() + bdCard() + panCard() + pfCard();
+  let out = sceneHeader(first, d) + missionCard(d) + sndInvite() + whChip() + chalCar() + (S.fw === 'pending' ? firstWinCard() : installState() === 'done' || installState() === 'desktop' ? notifCard(true) : installCard('today')) + chalCard() + prCard() + apCard() + wkCard() + bdCard() + panCard() + pfCard();
   out += '<section class="card ring"><svg viewBox="0 0 100 100" role="img" aria-label="التزام اليوم ' + pct + '%"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="10"/><circle cx="50" cy="50" r="40" fill="none" stroke="#6fe3a9" stroke-width="10" stroke-linecap="round" stroke-dasharray="' + C + '" stroke-dashoffset="' + (C * (1 - pct / 100)) + '"/></svg><div style="flex:1"><div class="num">' + pct + '%</div><div class="mut">' + done + ' من ' + n + ' أصناف اليوم</div>'
     + (pct === 100 ? '<div class="dim" style="color:var(--mint)">يوم كامل، أحسنت!</div>' : '<div class="dim">علّم ما أكلته باللمس.</div>') + '</div></section>';
   const dp = dayPlan(d), kc = dp.kcal || DATA.kcal, pr = dp.p || DATA.pro, wt = +(dp.water || DATA.water), cups = Math.max(4, Math.min(16, Math.round(wt / CUP)));
@@ -3832,7 +3863,7 @@ function tabPlan() {
 }
 function tabPrefs() {
   const lv = foodsOf('love').length, no = foodsOf('no').length;
-  return '<h2>تفضيلاتي</h2><div class="banner ok">' + I('sparkle') + '<span>ما تعلّمه «لا أحب» يُحذف من خطتك فوراً ويحل محله بديل من نفس المجموعة وبنفس الحصص، ويصل أخصائيك. وما تحبه يُفضَّل في خطتك القادمة.</span></div>'
+  return '<h2>تفضيلاتي</h2>' + sndCard() + '<div class="banner ok">' + I('sparkle') + '<span>ما تعلّمه «لا أحب» يُحذف من خطتك فوراً ويحل محله بديل من نفس المجموعة وبنفس الحصص، ويصل أخصائيك. وما تحبه يُفضَّل في خطتك القادمة.</span></div>'
     + '<div class="legend"><span><i class="dot" style="background:var(--mint)"></i>أحب ' + lv + '</span><span><i class="dot" style="background:var(--coral)"></i>لا أحب ' + no + '</span></div>'
     + foodGrid('prefCat', 'prefQ')
     + '<section class="card stack"><h3>صحتي</h3><p class="mut" style="font-size:14px">' + (S.p.cond.concat(S.p.allg).map(esc).join('، ') || 'لا حالات ولا حساسية') + '</p><button class="btn sm sec" data-act="healthReq">طلب تعديل الحالة الصحية</button><p class="dim">تغيير الحالة الصحية أو الحساسية يحتاج اعتماد أخصائيك قبل أن يغيّر خطتك.</p>'
@@ -4715,6 +4746,8 @@ document.addEventListener('click', (e) => {
     case 'whQ': whs().noQ = el.checked; break;
     case 'whNat': { const w = whs(); w.nat = v; S.p.nat = v; break; }
     case 'theme': if (window.HxTheme) { HxTheme.set(v, el.querySelector('.hx-pv')); document.querySelectorAll('.hx-th').forEach((b) => { const on = b.dataset.v === v; b.setAttribute('aria-checked', String(on)); const l = b.querySelector('.hx-tl'); if (l) l.textContent = l.textContent.replace(' ✓', '') + (on ? ' ✓' : ''); }); applyThemeIcons(v); } return;
+    case 'sndt': snd().on = snd().on ? 0 : 1; snd().ask = 1; if (snd().on) sndPlay(); else sndStop(); break;
+    case 'sndask': snd().ask = 1; if (+v) { snd().on = 1; sndPlay(); } break;
     case 'sub': S.tab = v; if (v === 'feed' && now() - FD.at > 60000) fdLoad().then(render); break;
     case 'tab': V.tp = (TGRP.find((x) => x[3].includes(v)) || [])[0]; setTimeout(() => { V.tp = null; }, 500); S.tab = v; if (v === 'feed' && now() - FD.at > 60000) fdLoad().then(render); break;
     case 'pt': S.pt = v; break;
@@ -4821,6 +4854,7 @@ document.addEventListener('input', (e) => {               // التقاط أول
   const p = Math.max(0, (t.selectionStart == null ? n.length : t.selectionStart) - (v.length - n.length)); t.value = n; try { t.setSelectionRange(p, p); } catch (x) { }
 }, true);
 document.addEventListener('input', (e) => {
+  if (S && e.target.dataset && e.target.dataset.sndVol != null) { snd().vol = Math.max(0, Math.min(1, (+e.target.value || 0) / 100)); if (SND.playing && SND.ctx) SND.m.gain.setTargetAtTime(sndTarget(), SND.ctx.currentTime, 0.2); return; }
   if (S && e.target.dataset && e.target.dataset.lq != null) { const q = e.target.value.trim().toLowerCase(); document.querySelectorAll('.lbi').forEach((r) => { r.hidden = !!q && (r.dataset.q || '').indexOf(q) < 0; }); document.querySelectorAll('.lbf').forEach((f) => { f.hidden = !!q && !f.querySelector('.lbi:not([hidden])'); if (q) f.open = true; }); return; }
   if (S && V.wl && e.target.dataset && e.target.dataset.wl != null) { const [i, f] = e.target.dataset.wl.split('|'); if (V.wl.sets[+i]) V.wl.sets[+i][f] = e.target.value; const o = $('#wlsum'); if (o) o.outerHTML = wlSum(); return; }
   if (S && e.target.dataset && e.target.dataset.px != null) { const v = parseFloat(numOnly(e.target.value)); S.shopPx = S.shopPx || {}; if (v > 0 && v < 1e7) S.shopPx[e.target.dataset.px] = Math.round(v * 100) / 100; else delete S.shopPx[e.target.dataset.px]; const o = $('#shsum'); if (o) o.outerHTML = shopSum(); save(); return; }
@@ -4837,7 +4871,7 @@ document.addEventListener('input', (e) => {
 });
 window.addEventListener('online', () => { V.online = true; poll(); });
 window.addEventListener('offline', () => { V.online = false; render(); });
-window.HissatiApp = { mcLeft, remItems, whDayOk, badge: () => V.badge, wheel: { dayOk: whDayOk, cats: () => whCats().map((i) => whx().cats[i].id), dia: whDia, text: (id, i) => { const ci = whx().cats.findIndex((c) => c.id === id); return whText(ci, i); }, maybe: () => { WHL.shown = false; whMaybe(); }, open: (m) => whOpen(m) }, state: () => S, poll, flush, feed: () => FD, feedLoad: fdLoad, celebrateTest: (id) => celebrate(id), alarm: (items) => almShow(items), alarmTick: almTick, alarmFire: almFire, remItems, render, prayTimes };     // للاختبارات
+window.HissatiApp = { mcLeft, remItems, whDayOk, badge: () => V.badge, wheel: { dayOk: whDayOk, cats: () => whCats().map((i) => whx().cats[i].id), dia: whDia, text: (id, i) => { const ci = whx().cats.findIndex((c) => c.id === id); return whText(ci, i); }, maybe: () => { WHL.shown = false; whMaybe(); }, open: (m) => whOpen(m) }, state: () => S, poll, flush, feed: () => FD, feedLoad: fdLoad, celebrateTest: (id) => celebrate(id), sound: { playing: () => SND.playing, state: () => (SND.ctx ? SND.ctx.state : 'none'), vol: () => snd().vol, level: () => { if (!SND.an) return 0; const b = new Float32Array(SND.an.fftSize); SND.an.getFloatTimeDomainData(b); let t = 0, pk = 0; for (const x of b) { t += x * x; pk = Math.max(pk, Math.abs(x)); } return { rms: Math.sqrt(t / b.length), peak: pk }; } },  alarm: (items) => almShow(items), alarmTick: almTick, alarmFire: almFire, remItems, render, prayTimes };     // للاختبارات
 boot();
 })();
 </script></body></html>
