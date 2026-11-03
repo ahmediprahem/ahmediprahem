@@ -793,6 +793,12 @@ function sceneSvg(tod, egy) {
 // ---- 0.81: خلفية صوتية بشرية بلا آلات (اختيارية، مغلقة افتراضياً). مولِّد همهمات صوتية (mmm) بلا كلمات بالتركيب الصوتي (Formant) كصوت تجريبي إلى أن تُعتمد تسجيلات بشرية مرخّصة
 const snd = () => (S.snd = S.snd || { on: 0, vol: 0.5, ask: 0 });
 const SND = { ctx: null, m: null, playing: false, quiet: false, chords: { classic: [146.83, 220, 293.66, 369.99], rose: [130.81, 196, 261.63, 329.63], pulse: [123.47, 185, 246.94, 311.13], firoz: [138.59, 207.65, 277.18, 349.23] } };
+const SND_SRC = {};                       // روابط التسجيلات البشرية المعتمدة شرعياً (all أو لكل ثيم)؛ فارغة الآن فلا يظهر الخيار للعملاء
+const sndDev = () => { try { return !!navigator.webdriver || localStorage.getItem('hx_snd_dev') === '1'; } catch (e) { return false; } };   // المولِّد البرمجي للتجارب فقط ولا يصل العملاء
+const sndSrc = () => SND_SRC[(window.HxTheme && HxTheme.get()) || 'classic'] || SND_SRC.all || '';
+const sndAvail = () => !!sndSrc() || sndDev();
+function sndPrayerQuiet(cm) { if (!isMus()) return false; const P = prNow(); if (!P) return false; if (cm == null) { const n = new Date(); cm = n.getHours() * 60 + n.getMinutes(); } return ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'].some((k) => cm >= P[k] - 10 && cm <= P[k] + 15); }   // صمت تام قبل الأذان بعشر دقائق وبعده بربع ساعة
+function sndGain(t) { if (SND.el) SND.el.volume = Math.max(0, Math.min(1, t / 0.45)); else if (SND.ctx && SND.m) SND.m.gain.setTargetAtTime(t, SND.ctx.currentTime, 0.6); }
 function sndInit() {
   if (SND.ctx) return true; const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return false;
   const c = SND.ctx = new AC(), m = SND.m = c.createGain(), cp = c.createDynamicsCompressor(); m.gain.value = 0; m.connect(cp); cp.connect(c.destination); SND.an = c.createAnalyser(); SND.an.fftSize = 2048; cp.connect(SND.an);
@@ -805,15 +811,18 @@ function sndInit() {
   });
   return true;
 }
-function sndTarget() { const q = document.querySelector('.wvf iframe, video, .adx, .alm'); return q ? 0.015 : snd().vol * 0.45; }
-function sndPlay() { if (!snd().on || !sndInit()) return; const c = SND.ctx; try { c.resume(); } catch (e) { } SND.m.gain.cancelScheduledValues(c.currentTime); SND.m.gain.setTargetAtTime(sndTarget(), c.currentTime, 0.9); SND.playing = true; }
-function sndStop() { if (!SND.ctx) { SND.playing = false; return; } const c = SND.ctx; SND.m.gain.cancelScheduledValues(c.currentTime); SND.m.gain.setTargetAtTime(0, c.currentTime, 0.35); SND.playing = false; setTimeout(() => { if (!SND.playing) try { c.suspend(); } catch (e) { } }, 1600); }
+function sndTarget() { if (sndPrayerQuiet()) return 0; const q = document.querySelector('.wvf iframe, video, .adx, .alm'); return q ? 0.015 : snd().vol * 0.45; }
+function sndPlay() {
+  if (!snd().on || !sndAvail()) return; const src = sndSrc();
+  if (src) { if (!SND.el) { SND.el = new Audio(src); SND.el.loop = true; SND.el.preload = 'auto'; SND.el.volume = 0; } SND.el.play().then(() => { SND.playing = true; sndGain(sndTarget()); }).catch(() => { }); SND.playing = true; let k = 0; clearInterval(SND.fd); SND.fd = setInterval(() => { k++; sndGain(sndTarget() * Math.min(1, k / 12)); if (k > 12) clearInterval(SND.fd); }, 200); return; }
+  if (!sndInit()) return; const c = SND.ctx; try { c.resume(); } catch (e) { } SND.m.gain.cancelScheduledValues(c.currentTime); SND.m.gain.setTargetAtTime(sndTarget(), c.currentTime, 0.9); SND.playing = true; }
+function sndStop() { if (SND.el) { SND.playing = false; clearInterval(SND.fd); let v = SND.el.volume; SND.fd = setInterval(() => { v = Math.max(0, v - 0.1); SND.el.volume = v; if (v <= 0) { clearInterval(SND.fd); SND.el.pause(); } }, 90); return; } if (!SND.ctx) { SND.playing = false; return; } const c = SND.ctx; SND.m.gain.cancelScheduledValues(c.currentTime); SND.m.gain.setTargetAtTime(0, c.currentTime, 0.35); SND.playing = false; setTimeout(() => { if (!SND.playing) try { c.suspend(); } catch (e) { } }, 1600); }
 document.addEventListener('pointerdown', () => { if (S && snd().on && !SND.playing && document.visibilityState === 'visible') sndPlay(); }, true);
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') sndStop(); else if (S && snd().on) sndPlay(); });
-setInterval(() => { if (S && SND.playing && SND.ctx && SND.m) SND.m.gain.setTargetAtTime(sndTarget(), SND.ctx.currentTime, 0.6); }, 700);
-const sndBtn = () => '<button class="sndb" data-act="sndt" aria-pressed="' + !!snd().on + '" aria-label="' + (snd().on ? 'إيقاف الصوت الخلفي' : 'تشغيل صوت خلفي هادئ') + '">' + I(snd().on ? 'vol' : 'mute') + '</button>';
-function sndInvite() { if (snd().on || snd().ask) return ''; return '<section class="card stack sndi"><h3>' + I('vol') + ' تحب خلفية صوتية هادئة؟</h3><p class="mut">أصوات بشرية بلا آلات تعطي التطبيق حياة. تُوقَف بضغطة، ولا تعمل مع الفيديو والأذان والأذكار. (صوت تجريبي الآن.)</p><div class="row"><button class="btn" data-act="sndask" data-v="1">شغّلها</button><button class="btn sec" data-act="sndask" data-v="0">ليس الآن</button></div></section>'; }
-function sndCard() { return '<section class="card stack"><div class="row" style="justify-content:space-between"><div><b>صوت خلفي هادئ</b><div class="dim">أصوات بشرية بلا آلات (تجريبي)</div></div><input type="checkbox" class="sw" data-act="sndt" aria-label="صوت خلفي"' + (snd().on ? ' checked' : '') + '></div><label class="dim" for="sndV">مستوى الصوت</label><input type="range" id="sndV" data-snd-vol="1" min="0" max="100" value="' + Math.round(snd().vol * 100) + '" aria-label="مستوى الصوت"></section>'; }
+setInterval(() => { if (S && SND.playing) sndGain(sndTarget()); }, 700);
+const sndBtn = () => !sndAvail() ? '' : '<button class="sndb" data-act="sndt" aria-pressed="' + !!snd().on + '" aria-label="' + (snd().on ? 'إيقاف الصوت الخلفي' : 'تشغيل صوت خلفي هادئ') + '">' + I(snd().on ? 'vol' : 'mute') + '</button>';
+function sndInvite() { if (!sndAvail() || snd().on || snd().ask) return ''; return '<section class="card stack sndi"><h3>' + I('vol') + ' تحب خلفية صوتية هادئة؟</h3><p class="mut">أصوات بشرية بلا آلات تعطي التطبيق حياة. تُوقَف بضغطة، ولا تعمل مع الفيديو والأذان والأذكار. </p><div class="row"><button class="btn" data-act="sndask" data-v="1">شغّلها</button><button class="btn sec" data-act="sndask" data-v="0">ليس الآن</button></div></section>'; }
+function sndCard() { if (!sndAvail()) return ''; return '<section class="card stack"><div class="row" style="justify-content:space-between"><div><b>صوت خلفي هادئ</b><div class="dim">أصوات بشرية بلا آلات</div></div><input type="checkbox" class="sw" data-act="sndt" aria-label="صوت خلفي"' + (snd().on ? ' checked' : '') + '></div><label class="dim" for="sndV">مستوى الصوت</label><input type="range" id="sndV" data-snd-vol="1" min="0" max="100" value="' + Math.round(snd().vol * 100) + '" aria-label="مستوى الصوت"></section>'; }
 function sceneHeader(first, d) {
   const tod = todOf(new Date().getHours()), egy = window.HxTheme && HxTheme.get() === 'firoz', st = dayStreak();
   return '<section class="scn" data-tod="' + tod + '">' + sceneSvg(tod, egy) + '<div class="hello"><div class="av sm">' + esc(first.charAt(0) || '؟') + '</div><div style="flex:1;min-width:0"><div class="dim">' + esc(DATA.dayNames[d] || '') + '</div><h2>' + TOD[tod].g + ' ' + esc(first) + '</h2></div>'
@@ -2246,7 +2255,7 @@ document.addEventListener('input', (e) => {               // التقاط أول
   const p = Math.max(0, (t.selectionStart == null ? n.length : t.selectionStart) - (v.length - n.length)); t.value = n; try { t.setSelectionRange(p, p); } catch (x) { }
 }, true);
 document.addEventListener('input', (e) => {
-  if (S && e.target.dataset && e.target.dataset.sndVol != null) { snd().vol = Math.max(0, Math.min(1, (+e.target.value || 0) / 100)); if (SND.playing && SND.ctx) SND.m.gain.setTargetAtTime(sndTarget(), SND.ctx.currentTime, 0.2); return; }
+  if (S && e.target.dataset && e.target.dataset.sndVol != null) { snd().vol = Math.max(0, Math.min(1, (+e.target.value || 0) / 100)); if (SND.playing) sndGain(sndTarget()); return; }
   if (S && e.target.dataset && e.target.dataset.lq != null) { const q = e.target.value.trim().toLowerCase(); document.querySelectorAll('.lbi').forEach((r) => { r.hidden = !!q && (r.dataset.q || '').indexOf(q) < 0; }); document.querySelectorAll('.lbf').forEach((f) => { f.hidden = !!q && !f.querySelector('.lbi:not([hidden])'); if (q) f.open = true; }); return; }
   if (S && V.wl && e.target.dataset && e.target.dataset.wl != null) { const [i, f] = e.target.dataset.wl.split('|'); if (V.wl.sets[+i]) V.wl.sets[+i][f] = e.target.value; const o = $('#wlsum'); if (o) o.outerHTML = wlSum(); return; }
   if (S && e.target.dataset && e.target.dataset.px != null) { const v = parseFloat(numOnly(e.target.value)); S.shopPx = S.shopPx || {}; if (v > 0 && v < 1e7) S.shopPx[e.target.dataset.px] = Math.round(v * 100) / 100; else delete S.shopPx[e.target.dataset.px]; const o = $('#shsum'); if (o) o.outerHTML = shopSum(); save(); return; }
@@ -2263,6 +2272,6 @@ document.addEventListener('input', (e) => {
 });
 window.addEventListener('online', () => { V.online = true; poll(); });
 window.addEventListener('offline', () => { V.online = false; render(); });
-window.HissatiApp = { mcLeft, remItems, whDayOk, badge: () => V.badge, wheel: { dayOk: whDayOk, cats: () => whCats().map((i) => whx().cats[i].id), dia: whDia, text: (id, i) => { const ci = whx().cats.findIndex((c) => c.id === id); return whText(ci, i); }, maybe: () => { WHL.shown = false; whMaybe(); }, open: (m) => whOpen(m) }, state: () => S, poll, flush, feed: () => FD, feedLoad: fdLoad, celebrateTest: (id) => celebrate(id), sound: { playing: () => SND.playing, state: () => (SND.ctx ? SND.ctx.state : 'none'), vol: () => snd().vol, level: () => { if (!SND.an) return 0; const b = new Float32Array(SND.an.fftSize); SND.an.getFloatTimeDomainData(b); let t = 0, pk = 0; for (const x of b) { t += x * x; pk = Math.max(pk, Math.abs(x)); } return { rms: Math.sqrt(t / b.length), peak: pk }; } },  alarm: (items) => almShow(items), alarmTick: almTick, alarmFire: almFire, remItems, render, prayTimes };     // للاختبارات
+window.HissatiApp = { mcLeft, remItems, whDayOk, badge: () => V.badge, wheel: { dayOk: whDayOk, cats: () => whCats().map((i) => whx().cats[i].id), dia: whDia, text: (id, i) => { const ci = whx().cats.findIndex((c) => c.id === id); return whText(ci, i); }, maybe: () => { WHL.shown = false; whMaybe(); }, open: (m) => whOpen(m) }, state: () => S, poll, flush, feed: () => FD, feedLoad: fdLoad, celebrateTest: (id) => celebrate(id), sound: { avail: sndAvail, quiet: sndPrayerQuiet, times: prNow, playing: () => SND.playing, state: () => (SND.ctx ? SND.ctx.state : 'none'), vol: () => snd().vol, level: () => { if (!SND.an) return 0; const b = new Float32Array(SND.an.fftSize); SND.an.getFloatTimeDomainData(b); let t = 0, pk = 0; for (const x of b) { t += x * x; pk = Math.max(pk, Math.abs(x)); } return { rms: Math.sqrt(t / b.length), peak: pk }; } },  alarm: (items) => almShow(items), alarmTick: almTick, alarmFire: almFire, remItems, render, prayTimes };     // للاختبارات
 boot();
 })();
