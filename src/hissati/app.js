@@ -516,6 +516,7 @@ function firstWinCard() {
 function scrStart() {                               // بلا حساب ولا رابط (مثل فتح التطبيق المثبّت أول مرة): رمز الدعوة أو رمز النقل
   return '<div class="scr"><div class="scroll"><div class="stack" style="padding-top:22px"><div class="logo" style="width:180px;margin:0 auto;color:#fff">' + LOGO + '</div>'
     + '<section class="card stack"><h3>لديّ رابط دعوة من أخصائيي</h3><p class="dim">ألصق الرابط أو رمز الدعوة كما وصلك على واتساب.</p><input class="inp" id="invIn" dir="ltr" autocomplete="off" placeholder="https://… أو رمز الدعوة"><button class="btn" data-act="useInv">متابعة</button></section>'
+    + '<section class="card stack"><h3>تحدي الخمس — بلا اشتراك</h3><p class="dim">30 يوماً: الصلاة في وقتها، ختمة بالآيات، الماء، الأذكار، وساعة تطوير يومياً.</p><button class="btn sec" data-act="khgStartG">تعرّف على التحدي</button></section>'
     + '<section class="card stack"><h3>لديّ حساب في متصفح أو جوال آخر</h3><p class="dim">من «حصتي» القديم: تقدّمي ← «نقل حسابي» ← انسخ الرمز وألصقه هنا.</p><input class="inp" id="xferIn" dir="ltr" autocomplete="off" placeholder="HX1-…"><button class="btn sec" data-act="useXfer"' + (V.busy ? ' disabled' : '') + '>' + (V.busy ? 'جارٍ النقل…' : 'نقل حسابي إلى هنا') + '</button></section>'
     + (V.err ? '<p class="err">' + esc(V.err) + '</p>' : '') + '</div></div></div>';
 }
@@ -1336,11 +1337,12 @@ function foodInPlan(f) { return S.plan && S.plan.some((d) => d.slots.some((s) =>
 // ---------- العرض
 let lastKey = '';
 function render() {
+  if (V.khWant && S && K && V.screen === '') { V.khWant = 0; if (S.kh && S.kh.on) V.kh = 1; else if (!S.guest) V.khg = { i: 0, guest: false }; }   // فُتح التطبيق من رابط التحدي
   if (S && S.chat && (S.unreadC || S.msgs.some((m) => m.from === 'd' && !m.rr))) readReceipt();
   const sc = $('.scroll'), key = (S ? S.screen + S.step + S.tab + (S.chat ? 'c' : '') : '') + V.screen, top = sc ? sc.scrollTop : 0;
   let scr;
-  if (V.screen === 'boot') scr = scrBoot(); else if (V.screen === 'bad') scr = scrBad(); else if (V.screen === 'start') scr = scrStart(); else if (V.screen === 'moved') scr = scrMoved(); else if (V.screen === 'lock') scr = scrLock(); else if (V.screen === 'pin') scr = scrPin(); else if (V.screen === 'onb') scr = scrOnb();
-  else scr = V.qr ? scrReader() : V.kh && S.kh && S.kh.on ? scrKhams() : V.wk ? scrWk() : V.bd ? scrBody() : V.pan != null ? scrPantry() : V.pf != null ? scrProf() : S.rqOpen && window.RL && RL.idx ? scrQuiz() : S.chat ? scrChat() : S.plan && S.screen === 'app' ? scrApp() : { invite: scrInvite, wizard: scrWizard, review: scrReview, sent: scrSent, app: scrSent }[S.screen]();
+  if (V.khg && (V.screen === 'khg' || S)) scr = scrKhGuide(); else if (V.screen === 'boot') scr = scrBoot(); else if (V.screen === 'bad') scr = scrBad(); else if (V.screen === 'start') scr = scrStart(); else if (V.screen === 'moved') scr = scrMoved(); else if (V.screen === 'lock') scr = scrLock(); else if (V.screen === 'pin') scr = scrPin(); else if (V.screen === 'onb') scr = scrOnb();
+  else scr = V.qr ? scrReader() : S.screen === 'khams' ? (S.kh && S.kh.on ? scrKhams() : scrKhRestart()) : V.kh && S.kh && S.kh.on ? scrKhams() : V.wk ? scrWk() : V.bd ? scrBody() : V.pan != null ? scrPantry() : V.pf != null ? scrProf() : S.rqOpen && window.RL && RL.idx ? scrQuiz() : S.chat ? scrChat() : S.plan && S.screen === 'app' ? scrApp() : { invite: scrInvite, wizard: scrWizard, review: scrReview, sent: scrSent, app: scrSent }[S.screen]();
   const keep = {}; document.querySelectorAll('video[data-keep]').forEach((n) => { keep[n.dataset.keep] = n; });
   const cmI = $('#cmIn'), cmV = cmI ? [cmI.value, document.activeElement === cmI] : null;          // مسودة التعليق تبقى عند إعادة الرسم (وصول التعليقات مثلاً)
   $('#root').innerHTML = '<div class="stage"><div class="device">' + (V.online ? '' : '<div class="offline">بلا اتصال — تُرسل بياناتك عند عودة الإنترنت</div>') + scr + (S ? sheetHtml() : '') + (toastMsg ? '<div class="toast" role="status">' + I('check') + '<span>' + esc(toastMsg) + '</span></div>' : '') + '</div></div>';
@@ -1360,6 +1362,10 @@ async function onPin() {
   if (V.screen === 'pin') {
     if (!V.pin1) { V.pin1 = V.pin; V.pin = ''; V.err = ''; return render(); }
     if (V.pin !== V.pin1) { V.pin = ''; V.pin1 = ''; V.err = 'الرمزان غير متطابقين، ابدأ من جديد.'; return render(); }
+    if (V.guest) {                                   // 0.58: مشترك في «تحدي الخمس» فقط، بلا أخصائي: حساب محلي مشفّر برمزه
+      SALT = crypto.getRandomValues(new Uint8Array(16)); K = await pinKey(V.pin, SALT); await persist();
+      V.guest = false; V.screen = ''; V.pin = V.pin1 = ''; startLoop(); toast('بدأ التحدي. بالتوفيق'); return render();
+    }
     if (V.xfer) {                                    // حساب منقول: لا انضمام جديد، فقط قفل نسخة هذا الجهاز برمزه
       SALT = crypto.getRandomValues(new Uint8Array(16)); K = await pinKey(V.pin, SALT); await persist();
       V.xfer = false; V.screen = ''; V.pin = V.pin1 = ''; startLoop(); toast('وصل حسابك ✓ وخطتك كما هي'); return render();
@@ -1395,7 +1401,9 @@ async function boot() {
   if (DEMO) { S = Object.assign(fresh(), JSON.parse(JSON.stringify(DEMO.state))); S.chat = false; S.day = TODAY; S.screen = 'app'; S.cid = 'demo'; mkData(); V.screen = onbSeen() ? '' : 'onb'; V.onb = { i: 0 }; return render(); }
   const m = /#t=([A-Za-z0-9_-]{16,40})\.([A-Za-z0-9_-]{11})\b/.exec(location.hash);
   if (m) { try { sessionStorage.setItem(TKEY, m[1] + '.' + m[2]); } catch (e) { } history.replaceState(null, '', location.pathname); }
+  const khL = /^#khams\b/.test(location.hash); if (khL) { history.replaceState(null, '', location.pathname); V.khWant = 1; }       // 0.58: رابط التحدي
   if (localStorage.getItem(KEY)) { V.screen = 'lock'; return render(); }
+  if (khL && !m) { V.khg = { i: 0, guest: true }; V.screen = 'khg'; return render(); }
   let t = m ? m[1] + '.' + m[2] : null; try { t = t || sessionStorage.getItem(TKEY); } catch (e) { }
   if (!t) { V.err = ''; V.screen = 'start'; return render(); }
   const [tok, fp] = t.split('.'); V.screen = 'boot'; V.retry = false; render();
@@ -1414,7 +1422,8 @@ async function boot() {
 document.addEventListener('click', (e) => {
   const el = e.target.closest('[data-act]'); if (!el || el.tagName === 'SELECT' || el.dataset.act === 'consent' || el.disabled) return;
   const a = el.dataset.act, v = el.dataset.v, k = el.dataset.k;
-  if (a.slice(0, 2) === 'kh' && S) { if (khAct(a, v)) render(); return; }
+  if (a === 'khgStartG') { V.khg = { i: 0, guest: true }; V.screen = 'khg'; render(); return; }
+  if (a.slice(0, 2) === 'kh' && (V.khg || S)) { if (V.khg ? khGuideAct(a, v, el) : khAct(a, v)) render(); return; }
   switch (a) {
     case 'onbNext': onbNextStage(1); return;
     case 'onbPrev': onbNextStage(-1); return;
@@ -1444,7 +1453,7 @@ document.addEventListener('click', (e) => {
     }
     case 'copyXfer': copyText(sheet.code, 'نُسخ رمز النقل'); return;
     case 'pin': if (V.busy) return; if (v === '⌫') V.pin = V.pin.slice(0, -1); else if (V.pin.length < 4) { V.pin += v; if (V.pin.length === 4) { render(); onPin(); return; } } break;
-    case 'pinBack': if (V.pin1) { V.pin1 = ''; V.pin = ''; } else if (V.xfer) { V.xfer = false; S = null; V.screen = 'start'; V.pin = ''; } else { V.screen = ''; V.pin = ''; } V.err = ''; break;
+    case 'pinBack': if (V.pin1) { V.pin1 = ''; V.pin = ''; } else if (V.guest) { V.guest = false; const f = { name: S.p.name, sex: S.p.sex, lv: S.kh.lv, wg: S.kh.wg, city: S.rem.prCity || '' }; S = null; V.khg = { i: KH_GUIDE.length, guest: true, f }; V.screen = 'khg'; V.pin = ''; } else if (V.xfer) { V.xfer = false; S = null; V.screen = 'start'; V.pin = ''; } else { V.screen = ''; V.pin = ''; } V.err = ''; break;
     case 'forgot': sheet = { t: 'forgot' }; if (!S) { S = fresh(); S.__tmp = 1; } break;
     case 'lock': clearInterval(V.timer); persist(); S = null; K = null; sheet = null; V.screen = 'lock'; V.pin = ''; V.err = ''; break;
     case 'notif': V.pushErr = 0; pushSetup(true).then((st) => { toast(st === 'on' ? 'فُعّلت الإشعارات ✓' : st === 'denied' ? 'الإشعارات محظورة من إعدادات المتصفح' : 'تعذّر تفعيل الإشعارات الآن'); render(); }); return;

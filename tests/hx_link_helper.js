@@ -32,5 +32,5 @@ module.exports = async function linked(tag, errs, opts) {
   await d.click('main [data-a="gen"]'); await d.waitForSelector('.pnav');
   await d.click('main .tabs [data-v="hx"]'); await d.click('main [data-a="hxSendPlan"]'); await d.waitForFunction(() => (DPApp.S.clients[0].hx || {}).planV >= 1, null, { timeout: 15000 });
   await cPoll(); await m.waitForSelector('.tabbar', { timeout: 10000 });
-  return { b, d, m, env, hxCheck, cPoll, C, close: async () => { await b.close(); srv.close(); site.close(); } };
+  return { b, d, m, env, hxCheck, cPoll, C, RELAY, close: async () => { await b.close(); srv.close(); site.close(); } };
 };

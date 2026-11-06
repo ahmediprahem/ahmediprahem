@@ -3,7 +3,7 @@
 const assert = require('assert'), linked = require('./hx_link_helper');
 let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
 (async () => {
-  const { m, close } = await linked('khams', errs);
+  const { m, b, RELAY, close } = await linked('khams', errs);
   const u = await m.evaluate(() => { const K = window.HissatiApp.khams, Q = K.meta(), d1 = K.portions('k', 0), all = []; for (let d = 0; d < 30; d++) all.push(...K.portions('k', d * 8)); return { d1, b1: K.portions('b', 0), s1: K.portions('s', 0), all, r: K.range(d1[0].a, d1[0].e), last: K.rel(all[all.length - 1].e), n: Q.n.length }; });
   assert.strictEqual(u.n, 114);
   assert.deepStrictEqual(u.d1.map((p) => [p.n, p.r]), [[50, 2], [31, 2], [31, 2], [18, 1], [18, 1]], JSON.stringify(u.d1));
@@ -12,10 +12,13 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   assert.strictEqual(u.all.length, 150); assert.strictEqual(u.all.reduce((a, p) => a + p.n, 0), 6236);
   assert(u.all.every((p, i) => i === 0 ? p.a === 0 : p.a === u.all[i - 1].e + 1), 'الأوراد متتالية بلا فجوة ولا تكرار'); assert.deepStrictEqual(u.last, [114, 6]);
   ok('الورد بالآيات: 30 يوماً × 5 أوراد = 6236 آية متتالية (يوم 1: الفاتحة 1 إلى البقرة 43 بعد الفجر)، و«بداية» ربع واحد، و«ثابت» 4 أرباع');
-  await m.waitForSelector('.khc'); await m.click('[data-act="khStart"]'); await m.waitForSelector('[data-act="khSetLv"][data-v="k"]'); await m.click('[data-act="khSetLv"][data-v="k"]');
+  await m.waitForSelector('.khc'); await m.click('[data-act="khStart"]'); await m.waitForSelector('.khg');
+  const pages = []; for (let i = 0; i < 5; i++) { pages.push(await m.textContent('.khg > h2')); await m.click('[data-act="khgNext"]'); }
+  assert.deepStrictEqual(pages, ['هدف التحدي', 'الأركان الخمسة', 'كيف يمشي يومك', 'مرونة لا تكسرك', 'خصوصيتك']); assert(!(await m.$('#khgN')), 'العميل المشترك لا يُسأل عن اسمه');
+  await m.click('[data-act="khgSet"][data-k="lv"][data-v="k"]'); await m.click('[data-act="khGo"]');
   await m.waitForSelector('.khs .khnext'); let tx = await m.textContent('.khnext'); assert(/صلاة الفجر/.test(tx), tx);
   assert(await m.$('[data-act="khExc"]') === null || await m.evaluate(() => window.HissatiApp.state().p.sex === 'أنثى'), 'أيام العذر للسيدات فقط');
-  ok('بطاقة «تحدي الخمس» في «اليوم» ← اختيار المستوى ← الشاشة وبطاقة «التالي» بفعل واحد: صلاة الفجر');
+  ok('إرشاد قبل البدء (الهدف، الأركان، كيف يمشي اليوم، المرونة، الخصوصية) ثم المستوى؛ وبطاقة «تحدي الخمس» في «اليوم» ← اختيار المستوى ← الشاشة وبطاقة «التالي» بفعل واحد: صلاة الفجر');
   await m.click('.khnext [data-act="khPr"]'); await m.waitForTimeout(150); tx = await m.textContent('.khnext'); assert(/ورد الفجر/.test(tx) && /الفاتحة 1 إلى البقرة 43/.test(tx), tx);
   await m.click('.khnext [data-act="khRead"]'); await m.waitForSelector('.qtext .qa', { timeout: 15000 });
   const rd = await m.evaluate(() => ({ n: document.querySelectorAll('.qtext .qa').length, s: document.querySelectorAll('.qsura').length, b: document.querySelectorAll('.qbsm').length, f: document.querySelector('.qa').textContent, src: document.querySelector('.qsrc').textContent }));
@@ -72,5 +75,23 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   if (process.env.KH_SHOT) { const fs = require('fs'); ['lu', 'su', 'hu'].forEach((k) => fs.writeFileSync(process.env.KH_SHOT + '_' + k + '.jpg', Buffer.from(imgs[k].split(',')[1], 'base64'))); }
   assert(await m.$('[data-act="khCertPriv"]'), 'خيار إخفاء أرقام العبادة من الشهادة');
   ok('شهادة إتمام «تحدي الخمس» بعد 30 يوماً: الإنجاز بالأرقام (الأيام الناجحة، الصلوات، ختمة 6236 آية، الماء، ساعات التطوير)، أفقية 1600×1131 للتنزيل وPDF، وطولية 1080×1350 للمشاركة، مع خيار إخفاء أرقام العبادة');
+  // زائر بلا اشتراك: رابط /#khams ← الإرشاد ← الاسم والمدينة وهدف الماء والمستوى ← رمز الدخول ← التحدي، ويبقى بعد إعادة الفتح
+  const gx = await b.newContext({ viewport: { width: 390, height: 844 } }), g = await gx.newPage(); g.on('pageerror', (e) => errs.push('زائر: ' + e));
+  await g.goto(RELAY + '/#khams'); await g.waitForSelector('.khg'); assert(/مجاني، ولا يحتاج اشتراكاً/.test(await g.textContent('.khg')));
+  for (let i = 0; i < 5; i++) await g.click('[data-act="khgNext"]');
+  await g.click('[data-act="khGo"]'); assert(/اكتب اسمك/.test(await g.textContent('.khg')), 'الاسم مطلوب للشهادة');
+  await g.fill('#khgN', 'منى علي'); await g.selectOption('#khgC', 'الرياض'); await g.click('[data-act="khgSet"][data-k="wg"][data-v="10"]'); await g.click('[data-act="khgSet"][data-k="lv"][data-v="s"]'); await g.click('[data-act="khGo"]');
+  const pin = async () => { for (const d of '1357') await g.click('[data-act="pin"][data-v="' + d + '"]'); };
+  await g.waitForSelector('[data-act="pin"]'); await pin(); await g.waitForTimeout(150); await pin(); await g.waitForSelector('.khs .khnext', { timeout: 15000 });
+  let gt = await g.textContent('.khs'); assert(/تحدي الخمس/.test(gt) && /اليوم 1 من 30/.test(gt) && /من 10 أكواب/.test(gt) && /أيام العذر/.test(gt) && /ادعُ صديقاً/.test(gt), gt.slice(0, 500));
+  assert(/الفجر[^]*[0-9]{1,2}:[0-9]{2}/.test(await g.textContent('.khrow')), 'مواقيت الرياض من المدينة المختارة');
+  assert.strictEqual(await g.$('[data-act="tab"]'), null, 'الزائر يرى التحدي وحده بلا تبويبات الخطة');
+  await g.click('[data-act="khPr"][data-v="0"]'); await g.waitForTimeout(300);
+  await g.reload(); await g.waitForSelector('[data-act="pin"]'); await pin(); await g.waitForSelector('.khs .khnext', { timeout: 15000 });
+  assert.strictEqual(await g.evaluate(() => { const S = window.HissatiApp.state(); return [S.guest, S.p.name, S.kh.lv, Object.values(S.kh.days)[0].pr[0], S.cid].join('|'); }), '1|منى علي|s|1|');
+  await g.click('[data-act="khGuide"]'); await g.waitForSelector('.khg'); assert.strictEqual(await g.textContent('.khg > h2'), 'هدف التحدي');
+  ok('بلا اشتراك: رابط ' + '/#khams' + ' يفتح الإرشاد ثم الاسم (مطلوب للشهادة) والمدينة (مواقيت الصلاة) وهدف الماء والمستوى ← رمز دخول ← التحدي وحده، محفوظ مشفّراً على الجوال ولا يصل للمحطة، و«؟» يعيد الإرشاد');
+  const g2 = await (await b.newContext()).newPage(); await g2.goto(RELAY + '/'); await g2.waitForSelector('[data-act="khgStartG"]'); await g2.click('[data-act="khgStartG"]'); await g2.waitForSelector('.khg');
+  ok('شاشة البداية بلا دعوة فيها «تحدي الخمس — بلا اشتراك» ← الإرشاد');
   assert.deepStrictEqual(errs, []); await close(); console.log('\nنجح ' + n + ' اختبارات تحدي الخمس');
 })().catch((e) => { console.log('✘', String(e && e.stack || e).slice(0, 1500)); console.log('أخطاء:', JSON.stringify(errs).slice(0, 600)); process.exit(1); });
