@@ -98,7 +98,10 @@ function scrKhams() {
     body = '<section class="card stack"><div class="row" style="justify-content:space-between"><h3>الختمة' + ((K2.kc || 0) ? ' ' + (K2.kc + 1) : '') + '</h3><b>' + pct + '%</b></div><div class="khbar2"><i style="width:' + pct + '%"></i></div><p class="dim">قرأت ' + jz + ' جزءاً من 30' + (bm > -1 ? ' • توقفت عند ' + esc(khPos(bm)) : '') + '</p></section>'
       + '<section class="card stack"><h3>أوراد اليوم' + (exc ? ' (خارج الحساب)' : '') + '</h3>' + (P.length ? P.map((p) => { const inB = bm >= p.a && bm < p.e; return '<div class="khqr' + (D.wd[p.p] ? ' on' : '') + '"><div><b>بعد ' + PN[p.p] + '</b><small>' + esc(khRange(p.a, p.e)) + ' • ' + p.n + ' آية' + (inB ? ' • توقفت عند ' + esc(khPos(bm)) : '') + '</small></div><button class="btn sm' + (D.wd[p.p] ? ' sec' : '') + '" data-act="khRead" data-v="' + p.p + '">' + I('book') + (D.wd[p.p] ? ' قرأته ✓' : inB ? ' أكمل' : ' اقرأ') + '</button></div>'; }).join('') : '<p class="dim">أتممت الختمة. تقبّل الله منك.</p>') + '</section>'; }
   else if (tab === 'adhkar') { const ap = D.azp || {}, card = (k, t, when, list) => { const done = D[k], at = Math.min(ap[k] || 0, list.length); return '<button class="card khazc' + (done ? ' on' : '') + '" data-act="khAz" data-v="' + k + '"><span class="khazi" aria-hidden="true">' + (k === 'am' ? '☀️' : '🌙') + '</span><span style="flex:1;text-align:right"><b>' + t + '</b><small class="dim">' + when + ' • ' + list.length + ' ذكراً' + (done ? ' • تمت ✓' : at ? ' • وصلت للذكر ' + (at + 1) : '') + '</small></span><span class="btn sm' + (done ? ' sec' : '') + '">' + (done ? 'أعد' : at ? 'أكمل' : 'ابدأ') + '</span></button>'; };
-    body = card('am', 'أذكار الصباح', 'بعد الفجر', ADHKAR) + card('pm', 'أذكار المساء', 'بعد العصر', ADHKAR_PM) + '<p class="dim">من «حصن المسلم»: المس الذكر لكل مرة، وتنتقل للتالي تلقائياً. التلاوة الصوتية اختيارية وتحتاج الإنترنت.</p>'; }
+    body = card('am', 'أذكار الصباح', 'بعد الفجر', ADHKAR) + card('pm', 'أذكار المساء', 'بعد العصر', ADHKAR_PM)
+      + '<button class="card khazc" data-act="khAz" data-v="tb"><span class="khazi" aria-hidden="true">📿</span><span style="flex:1;text-align:right"><b>التسبيح بعد الصلاة</b><small class="dim">سبحان الله 33 • الحمد لله 33 • الله أكبر 33 • وتمام المائة</small></span><span class="btn sm">ابدأ</span></button>'
+      + '<button class="card khazc" data-act="khAz" data-v="free"><span class="khazi" aria-hidden="true">📿</span><span style="flex:1;text-align:right"><b>سبحة حرة</b><small class="dim">' + (D.freeC ? 'المجموع اليوم ' + D.freeC : 'عدّاد مفتوح لأي ذكر') + '</small></span><span class="btn sm sec">افتح</span></button>'
+      + '<p class="dim">بطريقة السبحة: المس الحلقة لكل مرة فتضيء حبة، وينتقل للذكر التالي تلقائياً. أذكار الصباح والمساء من «حصن المسلم»، والتلاوة الصوتية اختيارية مع الإنترنت.</p>'; }
   else body = '<section class="card stack"><h3>أسبوعك</h3><div class="khwk">' + wk.map((x) => '<span class="' + (x[1] === -2 ? 'na' : x[1] >= 5 ? 'f' : (K2.days[x[0]] || {}).cmp ? 'c' : x[1] >= 3 ? 'p' : x[3] ? '' : x[1] >= -1 ? 'x' : 'na') + (x[3] ? ' t' : '') + '"><i></i>' + esc(x[2]) + '</span>').join('') + '</div>'
       + (lastMiss && !cmpUsed ? '<button class="btn sm sec" data-act="khCmp" data-v="' + lastMiss[0] + '">عوّض ' + esc(lastMiss[2]) + ' بيوم التعويض</button>' : '')
       + '<p class="dim">لا تفوّت يومين متتاليين. يوم فائت عادي، ولك يوم تعويض واحد كل أسبوع.</p></section>'
@@ -177,7 +180,7 @@ function khAct(a, v) {
     case 'khSetLv': { const lv = KH_LV[v] ? v : 'b'; if (!K2 || !K2.on) { S.kh = { on: 1, start: khDk(khT()), lv, pos: 0, kc: 0, days: {}, skill: '' }; V.kh = 1; toast('بدأ التحدي. بالتوفيق'); } else { K2.lv = lv; const d = khDay(khT()); if (!d.wd.some(Boolean)) d.lv = lv; toast('المستوى الآن: ' + KH_LV[lv].n); } sheet = null; save(); return true; }
     case 'khOpen': V.kh = 1; return true;
     case 'khTab': V.khTab = ['day', 'quran', 'adhkar', 'prog'].includes(v) ? v : 'day'; return true;
-    case 'khAz': if (D) { const k = v === 'pm' ? 'pm' : 'am'; V.az = { k, i: D[k] ? 0 : Math.min(((D.azp || {})[k]) || 0, khAzList(k).length - 1), c: 0 }; } return true;
+    case 'khAz': if (D) { const k = ['pm', 'tb', 'free'].includes(v) ? v : 'am'; V.az = { k, i: k === 'free' || D[k] ? 0 : Math.min(((D.azp || {})[k]) || 0, khAzList(k).length - 1), c: k === 'free' ? (D.freeC || 0) : 0 }; } return true;
     case 'khX': V.kh = 0; return true;
     case 'khPr': if (D && !(D.exc && khFem())) { D.pr[i] = D.pr[i] ? 0 : 1; if (D.pr[i]) toast('تقبّل الله'); save(); } return true;
     case 'khWd': if (D) { D.wd[i] = D.wd[i] ? 0 : 1; khAdvance(D); save(); } return true;
@@ -322,26 +325,41 @@ function khInstallBox(started) {
 
 // ---- مشغّل الأذكار: الذكر بنصه وعدد مراته، عدّاد باللمس ينتقل للتالي، وتلاوة صوتية اختيارية مع الإنترنت (hisnmuslim.com)
 const KH_AZA = 'https://www.hisnmuslim.com/audio/ar/', KH_AZM = [75, 76, 0, 0, 77, 79, 78, 90, 82, 86, 87, 88, 83, 94, 92, 98, 91, 96];   // رقم تسجيل كل ذكر صباحي (0 = لا تسجيل مستقل؛ المعوذتان ضمن تسجيل الإخلاص)
-function khAzList(k) { return k === 'pm' ? ADHKAR_PM : ADHKAR; }
+const KH_TB = [['سبحان الله', 33], ['الحمد لله', 33], ['الله أكبر', 33], ['لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير', 1, 'تمام المائة (صحيح مسلم)']];   // التسبيح بعد الصلاة
+const KH_FREE = [['اذكر الله بما تحب، والسبحة تعدّ معك', 0]];
+function khAzList(k) { return k === 'pm' ? ADHKAR_PM : k === 'tb' ? KH_TB : k === 'free' ? KH_FREE : ADHKAR; }
+const KH_AZN = { am: 'أذكار الصباح', pm: 'أذكار المساء', tb: 'التسبيح بعد الصلاة', free: 'سبحة حرة' };
+function khSebha(need, c) {                             // السبحة: حلقة حبّات تضيء حبة حبة، 33 حبة للدورة، والعدد الكبير دورات
+  const B = need && need <= 33 ? need : 33, done = need && c >= need, lit = done ? B : c % B === 0 && c ? B : c % B, R0 = 112, beads = [];
+  const rb = Math.max(5, Math.min(13, 300 / B));
+  for (let i = 0; i < B; i++) { const t = -Math.PI / 2 + (i + .5) * 2 * Math.PI / B, x = 140 + R0 * Math.cos(t), y = 140 + R0 * Math.sin(t); beads.push('<circle class="sb' + (i < lit ? ' on' : '') + (i === lit - 1 && !done ? ' nw' : '') + '" cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="' + rb.toFixed(1) + '"/>'); }
+  const rounds = need > 33 ? '<text x="140" y="196" class="sbr">الدورة ' + Math.min(Math.ceil(need / 33), Math.floor(c / 33) + (c % 33 || !c ? 1 : 0)) + ' من ' + Math.ceil(need / 33) + '</text>' : '';
+  return '<svg viewBox="0 0 280 300" class="sebha" aria-hidden="true"><circle cx="140" cy="140" r="' + R0 + '" class="sbs"/>' + beads.join('') + '<path d="M140 252 v18" class="sbt"/><circle cx="140" cy="' + (140 + R0) + '" r="' + (rb + 4) + '" class="sbi"/><path d="M134 270 l6 22 l6 -22 z" class="sbt2"/>'
+    + '<text x="140" y="' + (need ? 150 : 152) + '" class="sbn">' + (need ? (done ? '✓' : need - c) : c) + '</text><text x="140" y="178" class="sbl">' + (need ? (done ? 'تم' : need > 1 ? 'باقي من ' + need : 'المس عند الانتهاء') : 'مرة') + '</text>' + rounds + '</svg>';
+}
 function khAzAudio(x) { const j = ADHKAR.indexOf(x); if (j > -1) return KH_AZM[j] || 0; return /^أعوذ بكلمات الله التامات/.test(x[0]) ? 97 : 0; }   // أذكار المساء الخاصة بلفظها لا تسجيل مطابقاً لها
 function scrAdhkar() {
-  const A = V.az, list = khAzList(A.k), i = Math.min(A.i, list.length - 1), x = list[i], need = +x[1] || 1, left = Math.max(0, need - A.c), au = khAzAudio(x), on = V.online && navigator.onLine !== false;
-  return '<div class="scr khs"><div class="scroll"><div class="stack">' + head(A.k === 'am' ? 'أذكار الصباح' : 'أذكار المساء', 'khAzX', '', 'الذكر ' + (i + 1) + ' من ' + list.length)
+  const A = V.az, list = khAzList(A.k), i = Math.min(A.i, list.length - 1), x = list[i], need = A.k === 'free' ? 0 : (+x[1] || 1), left = Math.max(0, need - A.c), au = A.k === 'am' || A.k === 'pm' ? khAzAudio(x) : 0, on = V.online && navigator.onLine !== false;
+  return '<div class="scr khs"><div class="scroll"><div class="stack">' + head(KH_AZN[A.k], 'khAzX', '', A.k === 'free' ? 'المجموع ' + A.c : 'الذكر ' + (i + 1) + ' من ' + list.length)
     + '<div class="khbar2"><i style="width:' + Math.round(i / list.length * 100) + '%"></i></div>'
     + '<section class="card khazt"><p>' + esc(x[0]) + '</p>' + (x[2] ? '<small class="dim">' + esc(x[2]) + '</small>' : '') + '</section>'
-    + '<button class="khcount' + (left ? '' : ' done') + '" data-act="khAzTap" aria-label="عدّ مرة: باقي ' + left + '"><b>' + (left || '✓') + '</b><small>' + (left ? (need > 1 ? 'المس لكل مرة • من ' + need : 'المس عند الانتهاء') : 'تم') + '</small></button>'
-    + '<div class="row khbar"><button class="btn sec" data-act="khAzGo" data-v="-1"' + (i ? '' : ' disabled') + '>السابق</button>' + (au && on ? '<button class="btn sec" data-act="khAzPlay">' + (A.play ? '⏸ إيقاف' : '▶ استمع') + '</button>' : '') + '<button class="btn sec" data-act="khAzGo" data-v="1">' + (i === list.length - 1 ? 'إنهاء' : 'التالي') + '</button></div>'
+    + '<button class="khcount' + (need && !left ? ' done' : '') + '" data-act="khAzTap" aria-label="' + (need ? 'عدّ مرة: باقي ' + left : 'عدّ مرة: المجموع ' + A.c) + '">' + khSebha(need, A.c) + '</button>'
+    + (A.k === 'free' ? '<button class="btn sm sec" data-act="khAzReset" style="justify-self:center">تصفير السبحة</button>' : '')
+    + (A.k === 'free' ? '' : '<div class="row khbar"><button class="btn sec" data-act="khAzGo" data-v="-1"' + (i ? '' : ' disabled') + '>السابق</button>' + (au && on ? '<button class="btn sec" data-act="khAzPlay">' + (A.play ? '⏸ إيقاف' : '▶ استمع') + '</button>' : '') + '<button class="btn sec" data-act="khAzGo" data-v="1">' + (i === list.length - 1 ? 'إنهاء' : 'التالي') + '</button></div>')
     + (!on ? '<p class="dim" style="text-align:center">الاستماع يحتاج اتصالاً بالإنترنت.</p>' : au ? '' : '<p class="dim" style="text-align:center">لا تسجيل صوتي مستقل لهذا الذكر.</p>')
     + '<p class="dim qsrc">النصوص من «حصن المسلم»' + (on ? ' • التسجيلات من hisnmuslim.com' : '') + '</p></div></div></div>';
 }
 let QZ = null;
 function khAzStop() { if (QZ) { QZ.pause(); QZ.src = ''; QZ = null; } if (V.az) V.az.play = 0; }
 function khAzAct(a, v) {
-  const A = V.az, D = khDay(khT()); if (!A) return false; const list = khAzList(A.k), x = list[A.i], need = +x[1] || 1;
+  const A = V.az, D = khDay(khT()); if (!A) return false; const list = khAzList(A.k), x = list[A.i], need = A.k === 'free' ? 0 : (+x[1] || 1);
   const go = (d) => { khAzStop(); A.i += d; A.c = 0; if (A.i < 0) A.i = 0; D.azp = Object.assign({}, D.azp, { [A.k]: A.i });
-    if (A.i >= list.length) { D[A.k] = 1; D.azp[A.k] = 0; V.az = null; save(); toast((A.k === 'am' ? 'أذكار الصباح' : 'أذكار المساء') + ' تمت. تقبّل الله منك'); return; } save(); };
+    if (A.i >= list.length) { if (A.k === 'am' || A.k === 'pm') D[A.k] = 1; D.azp[A.k] = 0; V.az = null; save(); toast(KH_AZN[A.k] + ' تمت. تقبّل الله منك'); return; } save(); };
   switch (a) {
-    case 'khAzTap': if (A.c < need) A.c++; if (A.c >= need) setTimeout(() => { if (V.az === A && A.c >= need) { go(1); render(); } }, 450); return true;
+    case 'khAzTap': if (navigator.vibrate) try { navigator.vibrate(12); } catch (e) { }
+      if (!need) { A.c++; D.freeC = A.c; save(); return true; }
+      if (A.c < need) A.c++; if (A.c >= need) setTimeout(() => { if (V.az === A && A.c >= need) { go(1); render(); } }, 550); return true;
+    case 'khAzReset': A.c = 0; D.freeC = 0; save(); return true;
     case 'khAzGo': go(+v); return true;
     case 'khAzX': khAzStop(); V.az = null; return true;
     case 'khAzPlay': { if (A.play) { khAzStop(); return true; } const id = khAzAudio(x); if (!id) return false; QZ = new Audio(KH_AZA + id + '.mp3'); A.play = 1; QZ.addEventListener('ended', () => { khAzStop(); render(); }); QZ.addEventListener('error', () => { khAzStop(); toast('تعذّر تشغيل الصوت. تأكد من الإنترنت.'); render(); }); QZ.play().catch(() => { khAzStop(); render(); }); return true; }

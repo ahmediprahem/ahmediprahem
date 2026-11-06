@@ -561,3 +561,16 @@ html[data-theme="pulse"] .alm{background:radial-gradient(70% 50% at 50% 30%,rgba
 .khazt p{margin:0;font-size:20px;line-height:2;text-align:right}
 .khcount{justify-self:center;align-self:center;margin:6px auto;width:150px;height:150px;border-radius:50%;border:3px solid var(--mint);background:rgba(111,227,169,.12);color:var(--text);font:inherit;display:grid;place-content:center;gap:2px;cursor:pointer;transition:transform .12s}
 .khcount:active{transform:scale(.95)}.khcount b{font-size:46px;line-height:1}.khcount small{font-size:12px;color:var(--mut)}.khcount.done{background:var(--mint);color:var(--mintInk)}
+/* السبحة */
+.khcount{width:min(300px,86vw);height:auto;border-radius:24px;border:0;background:transparent;padding:0}
+.khcount.done{background:transparent;color:var(--text)}
+.sebha{width:100%;height:auto;display:block}
+.sebha .sbs{fill:none;stroke:rgba(255,255,255,.12);stroke-width:2}
+.sebha .sb{fill:rgba(255,255,255,.14);stroke:rgba(255,255,255,.25);stroke-width:1;transition:fill .25s}
+.sebha .sb.on{fill:var(--mint);stroke:#bff7da}
+.sebha .sb.nw{animation:sbpop .35s ease-out}
+@keyframes sbpop{0%{transform:scale(1.6);transform-box:fill-box;transform-origin:center}100%{transform:scale(1);transform-box:fill-box;transform-origin:center}}
+.sebha .sbi{fill:#f5a524}.sebha .sbt{stroke:#f5a524;stroke-width:3}.sebha .sbt2{fill:#f5a524}
+.sebha text{text-anchor:middle;fill:var(--text);font-family:var(--font)}
+.sebha .sbn{font-size:58px;font-weight:700}.sebha .sbl{font-size:14px;fill:var(--mut)}.sebha .sbr{font-size:13px;fill:var(--mut)}
+@media (prefers-reduced-motion:reduce){.sebha .sb.nw{animation:none}}

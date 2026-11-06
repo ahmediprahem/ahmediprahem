@@ -59,7 +59,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   let st = await m.evaluate(() => window.HissatiApp.khams.state(new Date())); assert.strictEqual(st[1], true, 'يوم صعب: أي ورد يكفي');
   // التبويبات والأذكار
   await m.click('[data-act="khTab"][data-v="quran"]'); tx = await m.textContent('.khs'); assert(/الختمة/.test(tx) && /أوراد اليوم/.test(tx) && /قرأت \d+ جزءاً من 30/.test(tx), tx.slice(0, 300));
-  await m.click('[data-act="khTab"][data-v="adhkar"]'); await m.waitForSelector('.khazc'); assert.strictEqual(await m.locator('.khazc').count(), 2);
+  await m.click('[data-act="khTab"][data-v="adhkar"]'); await m.waitForSelector('.khazc'); assert.strictEqual(await m.locator('.khazc').count(), 4);
   const azAsk = []; await m.context().route('https://www.hisnmuslim.com/**', (r) => { azAsk.push(r.request().url()); r.fulfill({ status: 404, body: '' }); });
   await m.click('.khazc[data-v="am"]'); await m.waitForSelector('.khcount'); tx = await m.textContent('.khs'); assert(/الذكر 1 من 18/.test(tx) && /حصن المسلم/.test(tx), tx.slice(0, 200));
   await m.click('[data-act="khAzPlay"]'); await m.waitForTimeout(500); assert(azAsk.some((u) => /\/audio\/ar\/75\.mp3$/.test(u)), JSON.stringify(azAsk));
@@ -68,6 +68,15 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   await m.click('[data-act="khAzX"]'); await m.click('[data-act="khTab"][data-v="adhkar"]'); assert(/وصلت للذكر 3/.test(await m.textContent('.khazc[data-v="am"]')), 'يحفظ موضعه');
   await m.click('.khazc[data-v="am"]'); await m.waitForSelector('.khcount'); for (let i = 2; i < 18; i++) await m.click('[data-act="khAzGo"][data-v="1"]');
   await m.waitForSelector('.khtabs'); assert.strictEqual(await m.evaluate(() => { const K = window.HissatiApp.state().kh; return Object.values(K.days).pop().am; }), 1);
+  // السبحة: التسبيح بعد الصلاة (33 حبة) والسبحة الحرة
+  await m.click('[data-act="khTab"][data-v="adhkar"]'); await m.click('.khazc[data-v="tb"]'); await m.waitForSelector('.sebha');
+  assert.strictEqual(await m.locator('.sebha .sb').count(), 33); for (let i = 0; i < 5; i++) await m.click('.khcount');
+  assert.strictEqual(await m.locator('.sebha .sb.on').count(), 5); assert(/28/.test(await m.textContent('.sebha .sbn')));
+  for (let i = 0; i < 28; i++) await m.click('.khcount'); await m.waitForTimeout(800); assert(/الذكر 2 من 4/.test(await m.textContent('.khs')) && /الحمد لله/.test(await m.textContent('.khazt')));
+  await m.click('[data-act="khAzX"]'); await m.click('[data-act="khTab"][data-v="adhkar"]'); await m.click('.khazc[data-v="free"]'); await m.waitForSelector('.sebha');
+  for (let i = 0; i < 35; i++) await m.click('.khcount'); assert(/المجموع 35/.test(await m.textContent('.khs'))); assert.strictEqual(await m.locator('.sebha .sb.on').count(), 2, 'دورة ثانية: حبتان');
+  await m.click('[data-act="khAzX"]'); await m.click('[data-act="khTab"][data-v="adhkar"]'); assert(/المجموع اليوم 35/.test(await m.textContent('.khazc[data-v="free"]')));
+  ok('السبحة: حلقة حبّات تضيء حبة حبة (33 للدورة)، التسبيح بعد الصلاة 33/33/33 وتمام المائة ينتقل تلقائياً، وسبحة حرة تحفظ مجموع اليوم');
   await m.click('[data-act="khTab"][data-v="day"]');
   ok('الشاشة بأربعة تبويبات (اليوم، القرآن، الأذكار، تقدّمي)، ومشغّل الأذكار: نص الذكر، عدّاد باللمس ينتقل للتالي، يحفظ موضعه، تلاوة صوتية من hisnmuslim.com، وإتمامها يعلّم الركن');
   ok('«يوم صعب»: الحد الأدنى يكفي (أي ورد، كوبان، ذكر واحد، 10 دقائق)');
