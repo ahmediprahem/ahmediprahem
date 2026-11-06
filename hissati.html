@@ -3030,7 +3030,7 @@ function scrAdhkar() {
     + '<button class="khcount' + (need && !left ? ' done' : '') + '" data-act="khAzTap" aria-label="' + (need ? 'عدّ مرة: باقي ' + left : 'عدّ مرة: المجموع ' + A.c) + '">' + khSebha(need, A.c) + '</button>'
     + (A.k === 'free' ? '<button class="btn sm sec" data-act="khAzReset" style="justify-self:center">تصفير السبحة</button>' : '')
     + (A.k === 'free' ? '' : '<div class="row khbar"><button class="btn sec" data-act="khAzGo" data-v="-1"' + (i ? '' : ' disabled') + '>السابق</button>' + (au && on ? '<button class="btn sec" data-act="khAzPlay">' + (A.play ? '⏸ إيقاف' : '▶ استمع') + '</button>' : '') + '<button class="btn sec" data-act="khAzGo" data-v="1">' + (i === list.length - 1 ? 'إنهاء' : 'التالي') + '</button></div>')
-    + (!on ? '<p class="dim" style="text-align:center">الاستماع يحتاج اتصالاً بالإنترنت.</p>' : au ? '' : '<p class="dim" style="text-align:center">لا تسجيل صوتي مستقل لهذا الذكر.</p>')
+    + (A.k !== 'am' && A.k !== 'pm' ? '' : !on ? '<p class="dim" style="text-align:center">الاستماع يحتاج اتصالاً بالإنترنت.</p>' : au ? '' : '<p class="dim" style="text-align:center">لا تسجيل صوتي مستقل لهذا الذكر.</p>')
     + '<p class="dim qsrc">النصوص من «حصن المسلم»' + (on ? ' • التسجيلات من hisnmuslim.com' : '') + '</p></div></div></div>';
 }
 let QZ = null;
