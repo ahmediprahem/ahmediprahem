@@ -61,5 +61,16 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   ok('«أيام العذر» للسيدات فقط: الصلاة والورد خارج حساب اليوم دون كسر السلسلة');
   await m.click('[data-act="khX"]'); await m.waitForSelector('.khmini'); assert(/تحدي الخمس • اليوم 1 من 30/.test(await m.textContent('.khmini')));
   ok('بطاقة مختصرة في «اليوم» بعد البدء: اليوم 1 من 30 وحالة اليوم');
+  await m.evaluate(() => { const A = window.HissatiApp, S = A.state(), K = S.kh, k = (i) => { const d = new Date(Date.now() - i * 864e5); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+    S.p.name = 'سارة أحمد'; K.start = k(29); K.days = {}; for (let i = 29; i >= 1; i--) { const L = S.log[k(i)] = S.log[k(i)] || { ck: {}, sw: {}, note: {}, skip: {} }; L.water = 10; K.days[k(i)] = { b: 0, lv: 'k', pr: [1, 1, 1, 1, i % 4 ? 1 : 0], wd: [1, 1, 1, 1, 1], am: 1, pm: i % 3 ? 1 : 0, sk: 60, hard: 0, exc: 0 }; } K.pos = 240; K.kc = 0; K.skill = 'اللغة الإنجليزية'; A.render(); });
+  await m.click('[data-act="khOpen"]').catch(() => {}); await m.waitForSelector('[data-act="khCert"]'); await m.click('[data-act="khCert"]'); await m.waitForTimeout(400);
+  const ach = await m.evaluate(() => { const S = window.HissatiApp.state(), a = S.ach.find((x) => x.w === 97); return a && { kh: a.kh, lines: a.lines, name: a.name }; });
+  assert(ach && ach.kh.khatma === 1 && ach.kh.ayat === 6236 && ach.kh.pr > 100 && ach.kh.hrs >= 29 && ach.kh.skill === 'اللغة الإنجليزية' && ach.kh.ok >= 25, JSON.stringify(ach));
+  await m.waitForSelector('#celcert'); assert(/أتممت تحدي الخمس/.test(await m.textContent('#cel'))); await m.click('#celcert'); await m.waitForSelector('[data-act="certdl"][data-v="story"]');
+  const imgs = await m.evaluate(async () => { const a = window.HissatiApp.state().ach.find((x) => x.w === 97), K = window.HissatiApp.khams, L = await K.cert(a, 'l'), Sx = await K.cert(a, 's'); a.hide = true; const H = await K.cert(a, 's'); a.hide = false; return { l: [L.width, L.height], s: [Sx.width, Sx.height], lu: L.toDataURL('image/jpeg', .85), su: Sx.toDataURL('image/jpeg', .85), hu: H.toDataURL('image/jpeg', .85) }; });
+  assert.deepStrictEqual([imgs.l, imgs.s], [[1600, 1131], [1080, 1350]]);
+  if (process.env.KH_SHOT) { const fs = require('fs'); ['lu', 'su', 'hu'].forEach((k) => fs.writeFileSync(process.env.KH_SHOT + '_' + k + '.jpg', Buffer.from(imgs[k].split(',')[1], 'base64'))); }
+  assert(await m.$('[data-act="khCertPriv"]'), 'خيار إخفاء أرقام العبادة من الشهادة');
+  ok('شهادة إتمام «تحدي الخمس» بعد 30 يوماً: الإنجاز بالأرقام (الأيام الناجحة، الصلوات، ختمة 6236 آية، الماء، ساعات التطوير)، أفقية 1600×1131 للتنزيل وPDF، وطولية 1080×1350 للمشاركة، مع خيار إخفاء أرقام العبادة');
   assert.deepStrictEqual(errs, []); await close(); console.log('\nنجح ' + n + ' اختبارات تحدي الخمس');
 })().catch((e) => { console.log('✘', String(e && e.stack || e).slice(0, 1500)); console.log('أخطاء:', JSON.stringify(errs).slice(0, 600)); process.exit(1); });

@@ -82,7 +82,7 @@ function scrKhams() {
   const lastMiss = missed.filter((x) => x[0] >= wkStart).pop();
   const twice = wk.slice(-3, -1).every((x) => x[1] >= -1 && x[1] < 3 && x[1] !== -2);
   const keep = day >= 25 ? '<section class="card stack"><h3>ماذا تكمل بعد التحدي؟</h3><p class="dim">اختر ركنين تحتفظ بهما بعد الشهر.</p><div class="khsub">' + ['الصلاة', 'الورد', 'الماء', 'الأذكار', 'التطوير'].map((x, i) => tog((K2.keep || []).includes(i), 'khKeep', i, x)).join('') + '</div></section>' : '';
-  const fin = day >= KH_DAYS && !K2.cert ? '<button class="btn full" data-act="khCert">' + I('check') + ' أتممت الشهر — شهادتي</button>' : '';
+  const fin = day >= KH_DAYS ? (K2.cert ? '<button class="btn full sec" data-act="khCertOpen">' + I('share') + ' شهادتي: شارك أو نزّل</button>' : '<section class="card stack"><h3>أتممت الثلاثين يوماً</h3><p class="dim">شهادتك جاهزة، وفيها ما أنجزته بالأرقام. تستطيع مشاركتها أو تنزيلها.</p><button class="btn full" data-act="khCert">' + I('check') + ' استلم شهادتي</button></section>') : '';
   return '<div class="scr khs"><div class="scroll"><div class="stack">' + head('تحدي الخمس', 'khX', '', 'اليوم ' + Math.min(day, KH_DAYS) + ' من ' + KH_DAYS)
     + '<div class="row" style="justify-content:space-between"><span class="dim">' + esc(DATA.dayNames && DATA.dayNames[TODAY] || '') + '</span><button class="chip" data-act="khLv">المستوى: ' + L.n + '</button></div>'
     + '<div class="khday"><span class="khbig" aria-hidden="true">' + khMark(n) + '</span><div class="khpips">' + st.map((x, i) => '<i class="' + (x ? (exc && i < 2 ? 'ex' : 'on') : '') + '"></i>').join('') + '</div><h2>' + (n === 5 ? 'اكتمل يومك' : n >= 3 ? 'يومك ناجح' : n ? 'بدأت يومك' : 'يوم جديد') + '</h2><p class="dim">' + (exc ? 'أيام العذر: الصلاة والورد خارج حساب يومك.' : D.hard ? 'يوم صعب: الحد الأدنى يكفي اليوم.' : n >= 3 && n < 5 ? 'باقي ' + (5 - n) + ' لاكتمال الشكل.' : n < 3 ? 'باقي ' + (3 - n) + ' ويصبح يومك ناجحاً.' : 'التحمت الحصتان.') + '</p></div>'
@@ -171,7 +171,9 @@ function khAct(a, v) {
     case 'khHard': if (D) { D.hard = D.hard ? 0 : 1; toast(D.hard ? 'يوم صعب: الحد الأدنى يكفي اليوم' : 'رجعنا لليوم العادي'); save(); } return true;
     case 'khExc': if (D && khFem()) { D.exc = D.exc ? 0 : 1; save(); } return true;
     case 'khCmp': { const d = (K2.days || {})[v]; if (d) { d.cmp = 1; toast('عوّضتَ هذا اليوم. سلسلتك مستمرة'); save(); } return true; }
-    case 'khCert': { const c = { id: 'k' + now().toString(36), pid: 'khams', w: 97, title: 'تحدي الخمس (30 يوماً)', lines: [], at: now(), name: String(S.p.name || '').trim(), sex: S.p.sex, dname: S.dname, clinic: '', phrase: PHRASES[now() % PHRASES.length] }; S.ach = (S.ach || []).concat([c]); K2.cert = 1; save(); setTimeout(() => celebrateAch(c), 80); return true; }
+    case 'khCert': { const x = khStats(), c = { id: 'k' + now().toString(36), pid: 'khams', w: 97, title: 'تحدي الخمس (30 يوماً)', kh: x, lines: khTiles(x).map((t) => t[0] + ' ' + t[1]), at: now(), name: String(S.p.name || '').trim(), sex: S.p.sex, dname: S.dname, clinic: '', phrase: PHRASES[now() % PHRASES.length] }; S.ach = (S.ach || []).concat([c]); K2.cert = c.id; save(); setTimeout(() => celebrateAch(c), 80); return true; }
+    case 'khCertOpen': if (K2 && K2.cert) sheet = { t: 'cert', v: K2.cert }; return true;
+    case 'khCertPriv': { const c = (S.ach || []).find((q) => q.id === v); if (c) { c.hide = !c.hide; delete CERT[c.id]; save(); } return true; }
     case 'khEnd': sheet = { t: 'khEnd' }; return true;
     case 'khEndOk': S.kh = Object.assign({}, K2, { on: 0 }); V.kh = 0; sheet = null; save(); toast('أوقفنا التحدي. يمكنك البدء من جديد متى شئت'); return true;
     case 'khRead': { const P = khPortions(D.lv, D.b), p = P.find((x) => x.p === i); if (p) { const bm = khBm(); V.qr = { a: p.a, e: p.e, p: p.p, jump: bm >= p.a && bm < p.e ? bm + 1 : null }; } return true; }
@@ -190,4 +192,51 @@ function khSheet() {                                   // تُستدعى من sh
   if (sheet.t === 'khSkill') return ['ماذا تريد أن تطوّر؟', '<input class="inp" id="khSkIn" maxlength="40" placeholder="مثال: اللغة الإنجليزية" value="' + esc((S.kh || {}).skill || '') + '"><button class="btn full" data-act="khSkillSave">حفظ</button>'];
   if (sheet.t === 'khEnd') return ['إيقاف التحدي؟', '<p class="dim">يبقى سجلك وموضع وردك محفوظين على جوالك.</p><button class="btn full" data-act="khEndOk">إيقاف</button><button class="btn full sec" data-act="close">رجوع</button>'];
   return ['', ''];
+}
+// ---- شهادة إتمام «تحدي الخمس»: إنجاز الشهر مسجلاً بالأرقام، بصيغتين: أفقية للتنزيل والطباعة، وطولية للمشاركة على مواقع التواصل
+function khStats() {
+  const K2 = S.kh, fem = khFem(), st = new Date(K2.start + 'T12:00'), keys = [];
+  for (let i = 0; i < KH_DAYS; i++) keys.push(khDk(new Date(st.getTime() + i * 864e5)));
+  let ok = 0, full = 0, pr = 0, az = 0, sk = 0, wa = 0;
+  keys.forEach((k) => { const D = (K2.days || {})[k]; if (!D) return; const sc = khScore(k), t = new Date(k + 'T12:00'), s5 = khState(t); if (sc >= 3) ok++; if (sc >= 5) full++; if (!(D.exc && fem)) pr += D.pr.filter(Boolean).length; if (s5[3]) az++; sk += D.sk || 0; wa += khLog(t).water || 0; });
+  const rubs = (K2.kc || 0) * 240 + Math.min(240, K2.pos || 0), ayat = (K2.kc || 0) * 6236 + (K2.pos >= 240 ? 6236 : khAbs(...QM.hq[K2.pos || 0]));
+  return { ok, full, pr, az, hrs: Math.round(sk / 6) / 10, wa, ayat, juz: Math.floor(rubs / 8), khatma: (K2.kc || 0) + (K2.pos >= 240 ? 1 : 0), skill: K2.skill || '', lv: (KH_LV[K2.lv] || KH_LV.b).n, from: K2.start, to: keys[KH_DAYS - 1] };
+}
+const khNum = (n) => Number(n).toLocaleString('en-US');
+function khTiles(x, hide) {                            // البطاقات المسجلة في الشهادة؛ أرقام العبادة تُخفى إن اختار العميل ذلك عند المشاركة
+  const t = [[x.ok + ' / 30', 'الأيام الناجحة'], [x.full + '', 'الأيام الكاملة بالأركان الخمسة']];
+  if (!hide) t.push([khNum(x.pr), 'الصلوات في وقتها'], [x.khatma ? (x.khatma > 1 ? x.khatma + ' ختمات' : 'ختمة كاملة') : x.juz + ' / 30', x.khatma ? khNum(x.ayat) + ' آية' : 'الأجزاء المقروءة • ' + khNum(x.ayat) + ' آية'], [x.az + '', 'أيام أذكار الصباح والمساء']);
+  t.push([khNum(x.wa), 'أكواب الماء'], [x.hrs + '', x.skill ? 'ساعات التطوير: ' + x.skill : 'ساعات التطوير']);
+  return t.filter((q) => q[0] !== '0');                 // لا نطبع إنجازاً بصفر
+}
+async function khCertCanvas(a, fmt) {
+  try { await document.fonts.load('700 40px "Hissa Plex"'); await document.fonts.load('400 30px "Hissa Plex"'); } catch (e) { }
+  const L = fmt !== 's', W = L ? 1600 : 1080, H = L ? 1131 : 1350, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const g = cv.getContext('2d'), F = (w, s) => w + ' ' + s + 'px "Hissa Plex", "Segoe UI", Tahoma, sans-serif', x = a.kh || {}, fem = a.sex === 'أنثى', NAV = '#1d2c63', MINT = '#6fe3a9', AMB = '#f5a524', MUT = '#5e6478';
+  g.fillStyle = '#faf6ef'; g.fillRect(0, 0, W, H);
+  g.strokeStyle = NAV; g.lineWidth = 6; g.strokeRect(40, 40, W - 80, H - 80); g.strokeStyle = '#d9cba8'; g.lineWidth = 2; g.strokeRect(58, 58, W - 116, H - 116);
+  const mk = (cx, cy, s) => { const p = new Path2D(KH_PC); g.save(); g.translate(cx, cy); g.scale(s, s); g.fillStyle = MINT; g.fill(p); g.rotate(Math.PI); g.fillStyle = AMB; g.fill(p); g.restore(); };
+  g.save(); g.globalAlpha = .05; mk(W / 2, H / 2 + 40, L ? 9 : 8); g.restore();
+  g.direction = 'rtl'; g.textAlign = 'center'; let y = 150; mk(W / 2, y, L ? 1.5 : 1.4); y += L ? 110 : 105;
+  g.fillStyle = NAV; g.font = F(700, L ? 72 : 76); g.fillText('شهادة إتمام', W / 2, y);
+  g.fillStyle = '#a36100'; g.font = F(700, L ? 32 : 34); g.fillText('تحدي الخمس • 30 يوماً للجسد والروح والعقل', W / 2, y + (L ? 56 : 58)); y += L ? 130 : 132;
+  g.fillStyle = MUT; g.font = F(400, L ? 32 : 34); g.fillText('تشهد «حصتي» بأن', W / 2, y);
+  g.fillStyle = NAV; g.font = F(700, L ? 84 : 88); g.fillText(a.name || (fem ? 'بطلة حصتي' : 'بطل حصتي'), W / 2, y + (L ? 100 : 108));
+  g.fillStyle = MUT; g.font = F(400, L ? 30 : 32); g.fillText((fem ? 'أتمّت' : 'أتمّ') + ' التحدي بمستوى «' + (x.lv || '') + '»، وهذا ما ' + (fem ? 'أنجزته' : 'أنجزه') + ':', W / 2, y + (L ? 160 : 168)); y += L ? 205 : 212;
+  let T = khTiles(x, a.hide); if (!L && T.length > 6) T = T.filter((q) => q[1] !== 'أكواب الماء').slice(0, 6);   // الطولية: 6 بطاقات على الأكثر
+  const cols = L ? Math.min(T.length, 4) : 2, tw = L ? 300 : 430, th = L ? 120 : 118, gap = L ? 24 : 18, rows = Math.ceil(T.length / cols);
+  if (!L && rows < 3) y += (3 - rows) * (th + gap) / 2;     // بطاقات أقل (أرقام العبادة مخفية): نوسّطها
+  T.forEach((t, i) => {
+    const r = Math.floor(i / cols), inRow = Math.min(cols, T.length - r * cols), c = i % cols, rowW = inRow * tw + (inRow - 1) * gap, x0 = W / 2 + rowW / 2 - tw - c * (tw + gap), y0 = y + r * (th + gap);
+    g.fillStyle = '#ffffff'; g.beginPath(); g.roundRect ? g.roundRect(x0, y0, tw, th, 18) : g.rect(x0, y0, tw, th); g.fill(); g.strokeStyle = '#ece4d6'; g.lineWidth = 2; g.stroke();
+    g.fillStyle = NAV; g.font = F(700, L ? 40 : 42); g.fillText(t[0], x0 + tw / 2, y0 + 56); g.fillStyle = MUT; g.font = F(400, L ? 22 : 24); g.fillText(t[1], x0 + tw / 2, y0 + 94);
+  });
+  y += rows * (th + gap) + (L ? 10 : 6);
+  g.fillStyle = '#b8860b'; g.font = F(700, L ? 32 : 34); g.fillText('“ ' + (a.phrase || 'خطوة صغيرة كل يوم تصنع فرقاً كبيراً') + ' ”', W / 2, y + 20);
+  const fmtD = (k) => new Date(k + 'T12:00').toLocaleDateString('ar', { day: 'numeric', month: 'long', year: 'numeric' }), by = H - 150;
+  g.fillStyle = NAV; g.font = F(700, L ? 28 : 30);
+  if (L) { g.fillText(a.dname || 'أخصائي التغذية', W - 360, by); g.fillText(fmtD(x.from || dkey(new Date())) + ' — ' + fmtD(x.to || dkey(new Date())), 380, by); g.strokeStyle = '#9aa6c0'; g.lineWidth = 2; [[W - 540, W - 180], [140, 620]].forEach(([p, q]) => { g.beginPath(); g.moveTo(p, by + 22); g.lineTo(q, by + 22); g.stroke(); }); g.fillStyle = MUT; g.font = F(400, 22); g.fillText('أخصائي التغذية', W - 360, by + 56); g.fillText('مدة التحدي', 380, by + 56); }
+  else { g.fillText(fmtD(x.from || dkey(new Date())) + ' — ' + fmtD(x.to || dkey(new Date())), W / 2, by); g.fillStyle = MUT; g.font = F(400, 26); g.fillText('بإشراف ' + (a.dname || 'أخصائي التغذية'), W / 2, by + 44); }
+  g.fillStyle = '#9aa6c0'; g.font = F(400, L ? 20 : 24); g.fillText('حصتي • #تحدي_الخمس', W / 2, H - (L ? 82 : 72));
+  return cv;
 }

@@ -1202,9 +1202,10 @@ function achSheet() {
     + (L.length ? '<div class="clist">' + L.map((a) => '<button class="cthumb" data-act="cert" data-v="' + a.id + '"><img data-cert="' + a.id + '" alt="شهادة"><span><b>' + (a.w === 99 ? '🏆 البرنامج كاملاً' : a.w === 97 ? 'تحدي الخمس' : 'الأسبوع ' + a.w) + '</b><small>' + esc(a.title) + ' • ' + new Date(a.at).toLocaleDateString('ar') + '</small></span></button>').join('') + '</div>'
       : '<div class="empty"><div class="ei">🏅</div><p class="dim">' + (S.chal ? 'أتمّ أهداف تحدي هذا الأسبوع لتحصل على أول شهادة تقدير باسمك.' : 'حين يرسل لك أخصائيك تحدياً أسبوعياً، تظهر هنا شهاداتك عند إتمامه.') + '</p></div>');
 }
-function certSheet() { const a = (S.ach || []).find((x) => x.id === sheet.v); if (!a) return ''; return '<img class="certbig" data-cert="' + a.id + '" alt="شهادة التقدير"><div class="row">' + '<button class="btn sm" data-act="certdl" data-v="png">' + I('share') + ' صورة</button><button class="btn sm sec" data-act="certdl" data-v="pdf">PDF</button>' + (navigator.share ? '<button class="btn sm sec" data-act="certdl" data-v="share">مشاركة</button>' : '') + '</div><p class="dim">' + esc(a.phrase) + '</p>'; }
+function certSheet() { const a = (S.ach || []).find((x) => x.id === sheet.v); if (!a) return ''; return '<img class="certbig" data-cert="' + a.id + '" alt="شهادة التقدير">' + (a.w === 97 ? '<button class="btn full" data-act="certdl" data-v="story">' + I('share') + ' صورة للمشاركة على مواقع التواصل</button><label class="row dim" style="gap:8px;align-items:center"><input type="checkbox" data-act="khCertPriv" data-v="' + a.id + '"' + (a.hide ? ' checked' : '') + '> أخفِ أرقام الصلاة والقرآن والأذكار من الشهادة</label>' : '') + '<div class="row">' + '<button class="btn sm" data-act="certdl" data-v="png">' + I('share') + ' صورة</button><button class="btn sm sec" data-act="certdl" data-v="pdf">PDF</button>' + (navigator.share ? '<button class="btn sm sec" data-act="certdl" data-v="share">مشاركة</button>' : '') + '</div><p class="dim">' + esc(a.phrase) + '</p>'; }
 const CERT = {};
 async function certCanvas(a) {
+  if (a.w === 97) return khCertCanvas(a, 'l');                    // 0.58: شهادة «تحدي الخمس» بتصميمها الخاص
   try { await document.fonts.load('700 40px "Hissa Plex"'); await document.fonts.load('400 30px "Hissa Plex"'); } catch (e) { }
   const W = 1600, H = 1131, cv = document.createElement('canvas'); cv.width = W; cv.height = H; const g = cv.getContext('2d'), F = (w, s) => w + ' ' + s + 'px "Hissa Plex", "Segoe UI", Tahoma, sans-serif';
   g.fillStyle = '#fffdf6'; g.fillRect(0, 0, W, H);
@@ -1239,14 +1240,19 @@ function pdfFromJpeg(bytes, w, h) {                                // PDF بصف
 }
 async function certDownload(kind) {
   const a = (S.ach || []).find((x) => x.id === sheet.v); if (!a) return; const url = await certUrl(a), bin = atob(url.split(',')[1]), u8 = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
-  const base = 'Hissati-Certificate-' + (a.w === 99 ? 'Program' : 'Week' + a.w) + '-' + dkey(new Date(a.at)),        // اسم لاتيني: بعض المتصفحات تُسقط الأسماء العربية للملفات المنزّلة
+  if (kind === 'story') {                                          // 0.58: صورة طولية 1080×1350 تناسب إنستجرام وفيسبوك وواتساب
+    const cv = await khCertCanvas(a, 's'), sb = await new Promise((r) => cv.toBlob(r, 'image/jpeg', 0.92)), fn = 'Hissati-Khams-' + dkey(new Date(a.at)) + '.jpg', f = new File([sb], fn, { type: 'image/jpeg' });
+    if (navigator.canShare && navigator.canShare({ files: [f] })) { try { await navigator.share({ files: [f], title: 'شهادة تحدي الخمس', text: 'أتممت #تحدي_الخمس على «حصتي»' }); } catch (e) { } return; }
+    const l = document.createElement('a'), ou = URL.createObjectURL(sb); l.href = ou; l.download = fn; l.style.display = 'none'; document.body.appendChild(l); l.click(); setTimeout(() => { l.remove(); URL.revokeObjectURL(ou); }, 4000); toast('نُزّلت صورة المشاركة'); return;
+  }
+  const base = 'Hissati-' + (a.w === 97 ? 'Khams' : 'Certificate-' + (a.w === 99 ? 'Program' : 'Week' + a.w)) + '-' + dkey(new Date(a.at)),        // اسم لاتيني: بعض المتصفحات تُسقط الأسماء العربية للملفات المنزّلة
     blob = kind === 'pdf' ? pdfFromJpeg(u8, 1600, 1131) : new Blob([u8], { type: 'image/jpeg' }), name = base + (kind === 'pdf' ? '.pdf' : '.jpg');
   if (kind === 'share') { try { await navigator.share({ files: [new File([u8], base + '.jpg', { type: 'image/jpeg' })], title: 'شهادة تقدير' }); } catch (e) { } return; }
   const l = document.createElement('a'), ou = URL.createObjectURL(blob); l.href = ou; l.download = name; l.style.display = 'none'; document.body.appendChild(l); l.click(); setTimeout(() => { l.remove(); URL.revokeObjectURL(ou); }, 4000); toast('نُزّلت الشهادة');
 }
 function celebrateAch(a) {
   const old = document.getElementById('cel'); if (old) old.remove(); const el = document.createElement('div'); el.id = 'cel'; el.className = 'cel cel-ach';
-  el.innerHTML = '<div class="fx">' + Array.from({ length: 22 }, (_, i) => '<i style="left:' + ((i * 37) % 100) + '%;animation-delay:' + ((i % 7) * 0.2).toFixed(2) + 's;font-size:' + (18 + (i * 7) % 20) + 'px">' + ['🎉', '⭐', '🏅', '✨'][i % 4] + '</i>').join('') + '</div><div class="celc"><div class="celi">' + (a.w === 99 ? '🏆' : '🏅') + '</div><h2>' + (a.w === 99 ? 'أتممت البرنامج كاملاً!' : 'أتممت تحدي الأسبوع ' + a.w + '!') + '</h2><p>' + esc(a.phrase) + '</p><button class="btn" id="celcert">' + I('sparkle') + ' استلم شهادتك</button><small>المس خارج الزر للإغلاق</small></div>';
+  el.innerHTML = '<div class="fx">' + Array.from({ length: 22 }, (_, i) => '<i style="left:' + ((i * 37) % 100) + '%;animation-delay:' + ((i % 7) * 0.2).toFixed(2) + 's;font-size:' + (18 + (i * 7) % 20) + 'px">' + ['🎉', '⭐', '🏅', '✨'][i % 4] + '</i>').join('') + '</div><div class="celc"><div class="celi">' + (a.w === 99 ? '🏆' : '🏅') + '</div><h2>' + (a.w === 99 ? 'أتممت البرنامج كاملاً!' : a.w === 97 ? 'أتممت تحدي الخمس!' : 'أتممت تحدي الأسبوع ' + a.w + '!') + '</h2><p>' + esc(a.phrase) + '</p><button class="btn" id="celcert">' + I('sparkle') + ' استلم شهادتك</button><small>المس خارج الزر للإغلاق</small></div>';
   el.onclick = (e) => { el.remove(); if (e.target.closest('#celcert')) { sheet = { t: 'cert', v: a.id }; render(); } }; document.body.appendChild(el);
 }
 // ---------- الأوراق السفلية
@@ -1631,6 +1637,6 @@ document.addEventListener('input', (e) => {
 });
 window.addEventListener('online', () => { V.online = true; poll(); });
 window.addEventListener('offline', () => { V.online = false; render(); });
-window.HissatiApp = { state: () => S, poll, flush, feed: () => FD, feedLoad: fdLoad, celebrateTest: (id) => celebrate(id), alarm: (items) => almShow(items), alarmTick: almTick, alarmFire: almFire, remItems, render, prayTimes, khams: { portions: khPortions, range: khRange, state: khState, rel: khRel, meta: () => QM } };     // للاختبارات
+window.HissatiApp = { state: () => S, poll, flush, feed: () => FD, feedLoad: fdLoad, celebrateTest: (id) => celebrate(id), alarm: (items) => almShow(items), alarmTick: almTick, alarmFire: almFire, remItems, render, prayTimes, khams: { portions: khPortions, range: khRange, state: khState, rel: khRel, meta: () => QM, cert: khCertCanvas, stats: khStats } };     // للاختبارات
 boot();
 })();
