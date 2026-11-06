@@ -35,7 +35,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   await m.waitForSelector('.tabbar'); assert.strictEqual(await m.locator('[data-act="pfGo"]').count(), 0);
   ok('«أكمل ملفك» بعد 3 أيام: سؤال في كل صفحة (الخصر بأرقام عربية، العمل، الجنسية، الحالة الاجتماعية، الفيتامينات، التمرين ونوعه وأيامه ومدته، المتابعة وطريقتها)، والأسئلة التابعة تظهر حسب الإجابة');
   await cPoll(); await d.click('main .tabs [data-v="hx"]'); await hxCheck(); c = await C(); assert.strictEqual(c.prof.waist, 94); assert.deepStrictEqual(c.prof.trD, [0, 2, 4]); assert.deepStrictEqual(c.wdays, [0, 2, 4]); assert.deepStrictEqual(c.prof.ch, ['فيديو']);
-  await d.click('main .tabs [data-v="ci"]'); const ci = await d.textContent('.ci'); for (const w of ['ملفه من «حصتي»', '94 سم', 'عمل مكتبي', 'نقص فيتامين د، أنيميا / نقص حديد', 'الأحد، الثلاثاء، الخميس', 'أونلاين (فيديو)']) assert(ci.includes(w), w + '\n' + ci);
+  await d.click('main .tabs [data-v="ci"]'); const ci = await d.textContent('.ci'); for (const w of ['ملفه من «زنها»', '94 سم', 'عمل مكتبي', 'نقص فيتامين د، أنيميا / نقص حديد', 'الأحد، الثلاثاء، الخميس', 'أونلاين (فيديو)']) assert(ci.includes(w), w + '\n' + ci);
   ok('الملف يصل «حصة» ويظهر في «الحضور»، وأيام التمرين تُحفظ للعميل');
   const id = await d.evaluate(() => RL.idx.plans.filter((p) => /^carbcycle_eg|^acc_eg/.test(p.f) && p.sx !== 'g')[0].i);
   await d.evaluate((pid) => { const c = DPApp.S.clients.find((x) => x.code === DPApp.S.cur); return new Promise((r) => { DPApp.A.rdApprove(pid, { getAttribute: () => c.code }); setTimeout(r, 1500); }); }, id);

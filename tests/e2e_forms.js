@@ -1,5 +1,5 @@
-// الاستبيانات ونظام الجرامات في «حصتي» من طرف إلى طرف: محرر الاستبيانات (الحصص والجرامات) ← نسخة ورقية ← دعوة بنظام الجرامات ←
-// العميل يملأ الاستبيان المعدّل (جدول التدريب، أسئلة مخصّصة إلزامية) ← طلب في «حصة» بالإجابات ← اعتماد كعميل نظام الجرامات ← خطة بالجرامات في «حصتي» ومتابعتها.
+// الاستبيانات ونظام الجرامات في «زنها» من طرف إلى طرف: محرر الاستبيانات (الحصص والجرامات) ← نسخة ورقية ← دعوة بنظام الجرامات ←
+// العميل يملأ الاستبيان المعدّل (جدول التدريب، أسئلة مخصّصة إلزامية) ← طلب في «حصة» بالإجابات ← اعتماد كعميل نظام الجرامات ← خطة بالجرامات في «زنها» ومتابعتها.
 const { fileUrl, TMP } = require('./_tmp.js');
 const { chromium, devices } = require('playwright'); const assert = require('assert'), path = require('path'), fs = require('fs'), http = require('http'), login = require('./auth_helper'), d1 = require('./d1_shim.js');
 let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
@@ -15,7 +15,7 @@ const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html'));
   await new Promise((r) => srv.listen(0, '127.0.0.1', r)); const RELAY = 'http://127.0.0.1:' + srv.address().port, realFetch = globalThis.fetch;
   globalThis.fetch = (u, o) => /googleapis|mozilla|apple\.com/.test(String(u)) ? Promise.resolve(new Response(null, { status: 201 })) : realFetch(u, o);
   const b = await chromium.launch(), dctx = await b.newContext({ viewport: { width: 1440, height: 900 }, acceptDownloads: true }), d = await dctx.newPage(); d.on('pageerror', (e) => errs.push('حصة: ' + e)); d.on('dialog', (x) => x.accept());
-  const mctx = await b.newContext({ ...devices['Pixel 7'] }); await mctx.addInitScript(() => { try { localStorage.setItem('hissati_onb', '1'); } catch (e) { } }); const m = await mctx.newPage(); m.on('pageerror', (e) => errs.push('حصتي: ' + e)); m.on('dialog', (x) => x.accept());
+  const mctx = await b.newContext({ ...devices['Pixel 7'] }); await mctx.addInitScript(() => { try { localStorage.setItem('hissati_onb', '1'); } catch (e) { } }); const m = await mctx.newPage(); m.on('pageerror', (e) => errs.push('زنها: ' + e)); m.on('dialog', (x) => x.accept());
   const hxCheck = async () => { await d.click('main [data-a="hxCheck"]'); await d.waitForTimeout(900); };
   const cPoll = async () => { await m.evaluate(() => window.HissatiApp.flush()); await m.evaluate(() => window.HissatiApp.poll()); await m.waitForTimeout(250); };
   const spec = (sys) => d.evaluate((s) => HForms.normalize((DPApp.S.settings.forms || {})[s], s), sys);
@@ -61,7 +61,7 @@ const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html'));
   assert((await m.textContent('.hd')).includes('نومك وتعافيك')); assert(await m.isDisabled('.foot .btn'), 'السؤال الإلزامي يمنع المتابعة'); await m.fill('[data-cq]', '٧'); await m.click('[data-act="cq1"][data-v="4"]'); assert(!(await m.isDisabled('.foot .btn'))); await m.click('.foot .btn');
   const rv = await m.textContent('.stack'); for (const s of ['كرة قدم', 'تنشيف', 'تدريب ثقيل 90د 18:30', 'تدريب متوسط 60د', '4 من 5', '7 ساعة', love]) assert(rv.includes(s), 'المراجعة بلا: ' + s);
   await m.check('#consent'); await m.click('[data-act="submit"]'); await m.waitForSelector('text=وصل طلبك إلى أخصائيك'); await cPoll();
-  ok('«حصتي» تعرض استبيان الجرامات كما عدّله الأخصائي: 6 أقسام، جدول تدريب لكل يوم، أغذية النظام بفئاتها، وسؤال إلزامي يمنع المتابعة حتى الإجابة، ومراجعة كاملة');
+  ok('«زنها» تعرض استبيان الجرامات كما عدّله الأخصائي: 6 أقسام، جدول تدريب لكل يوم، أغذية النظام بفئاتها، وسؤال إلزامي يمنع المتابعة حتى الإجابة، ومراجعة كاملة');
   // ---- 6) الطلب والاعتماد كعميل نظام الجرامات
   await hxCheck(); await d.waitForSelector('.hxreq:not(.wait)'); const card = await d.textContent('.hxreq');
   for (const s of ['نظام الجرامات', 'كرة قدم', 'تنشيف', 'الأحد: تدريب ثقيل 90د 18:30', 'دهون 15%', 'قيّم جودة نومك', '4 من 5', 'كم ساعة تنام؟', '7 ساعة', love]) assert(card.includes(s), 'بطاقة الطلب بلا: ' + s);
@@ -70,7 +70,7 @@ const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html'));
   assert.deepStrictEqual([c.kind, c.w, c.bf, c.sport, c.phase, c.meals], ['athlete', 82, 15, 'كرة قدم', 'تنشيف', 6]); assert.deepStrictEqual(c.s0, { type: 'تدريب ثقيل', min: 90, time: '18:30' }); assert.strictEqual(c.s1.type, 'راحة'); assert.deepStrictEqual(c.love, [love]); assert(c.notes.includes('قيّم جودة نومك: 4 من 5'));
   await cPoll(); await m.waitForSelector('text=اعتمدك أخصائيك');
   ok('الطلب في «حصة» يعرض إجابات الجرامات والأسئلة المخصّصة، والاعتماد ينشئ عميل نظام الجرامات بجدول تدريبه ومرحلته ونسبة دهونه وعدد وجباته، والإجابات في ملاحظاته');
-  // ---- 7) خطة الجرامات إلى «حصتي» ومتابعتها
+  // ---- 7) خطة الجرامات إلى «زنها» ومتابعتها
   await d.evaluate(() => { const c = DPApp.S.clients.find((x) => x.code === DPApp.S.cur); if (c && c.kind !== 'athlete') { c.goal = c.goal || DATA.settings.goals[2][0]; c.activity = c.activity || DATA.settings.activity[2][0]; } if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); }).then(() => d.click('button:has-text("ولّد خطة جديدة")')); await d.waitForSelector('.pnav button'); await d.click('main .tabs [data-v="hx"]'); await d.click('[data-a="hxSendPlan"]'); await d.waitForSelector('text=آخر خطة أُرسلت: v1');
   await cPoll(); await m.waitForSelector('.tabbar'); const tday = await m.textContent('#root');
   const st = await m.evaluate(() => { const S = window.HissatiApp.state(), d0 = S.plan[0], l = d0.slots[0].lines[0]; return { sys: S.pm.sys, type: d0.type, kcal: d0.kcal, k1: S.plan[2].kcal, line: l[2], alts: l[3].length, alt: (l[3][0] || [])[1] || '', meal: d0.slots[0].meal }; });
@@ -78,7 +78,7 @@ const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html'));
   await m.click('[data-act="tab"][data-v="plan"]'); await m.click('[data-act="day"][data-v="0"]'); assert((await m.textContent('#root')).includes('تدريب ثقيل')); await m.click('[data-act="tab"][data-v="today"]');
   await m.locator('.it .ck').nth(0).click(); await m.locator('.it .sw').first().click(); const alt = (await m.textContent('.sheet button.opt >> nth=0')).trim(); assert(/\d+ جم/.test(alt)); await m.click('.sheet button.opt >> nth=0');
   await m.waitForTimeout(2800); await cPoll(); await d.click('main [data-a="hxCheck"]'); await d.waitForSelector('.hxtab .hxday'); assert((await d.textContent('.hxtab')).includes(alt));
-  ok('خطة الجرامات تصل «حصتي»: سعرات كل يوم حسب نوع التدريب، الأصناف بالجرامات، ماكروز كل وجبة، وبدائل بجرامات مكافئة؛ والتبديل والمتابعة تعود إلى «حصة»');
+  ok('خطة الجرامات تصل «زنها»: سعرات كل يوم حسب نوع التدريب، الأصناف بالجرامات، ماكروز كل وجبة، وبدائل بجرامات مكافئة؛ والتبديل والمتابعة تعود إلى «حصة»');
   // ---- 8) استبيان الحصص المعدّل يصل أيضاً
   await d.click('.rail [data-a="hxv"]'); await d.click('main [data-a="hxInvForm"]'); await d.fill('#hxi_l', 'سارة'); await d.click('[data-a="hxInvMake"]'); await d.waitForSelector('.hxinv.made .hxlink');
   const link2 = (await d.textContent('.hxinv.made .hxlink')).trim(), j = await (async () => { const c = await b.newContext({ ...devices['Pixel 7'] }); await c.addInitScript(() => { try { localStorage.setItem('hissati_onb', '1'); } catch (e) { } }); return c.newPage(); })(); j.on('pageerror', (e) => errs.push('حصص: ' + e));
@@ -88,5 +88,5 @@ const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html'));
   await j.click('.foot .btn'); await j.click('.foot .btn'); await j.click('.foot .btn'); assert.strictEqual(await j.locator('[data-act="wday"]').count(), 0, 'أيام التمرين مخفية');
   ok('استبيان الحصص المعدّل يصل كما هو: النص الجديد، والسؤال المخصّص الإلزامي، والسؤال المخفي لا يظهر');
   assert.deepStrictEqual(errs, [], errs.join(' | ')); ok('لا أخطاء في وحدة التحكم');
-  console.log('\nنجح', n, 'اختبارات الاستبيانات ونظام الجرامات في «حصتي»'); globalThis.fetch = realFetch; await b.close(); srv.close();
+  console.log('\nنجح', n, 'اختبارات الاستبيانات ونظام الجرامات في «زنها»'); globalThis.fetch = realFetch; await b.close(); srv.close();
 })().catch((e) => { console.log('✘', String(e && e.stack || e).slice(0, 1500)); console.log('أخطاء:', JSON.stringify(errs).slice(0, 600)); process.exit(1); });

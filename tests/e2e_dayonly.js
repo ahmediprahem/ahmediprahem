@@ -1,16 +1,16 @@
-// «يوم واحد في كل مرة» والعلامة المائية (0.51): يفعّله الأخصائي لكل عميل ← «حصتي» تعرض يومها فقط (بقية الأيام 🔒)،
+// «يوم واحد في كل مرة» والعلامة المائية (0.51): يفعّله الأخصائي لكل عميل ← «زنها» تعرض يومها فقط (بقية الأيام 🔒)،
 // وجدول اليوم ينتظر تسجيل أمس (زر «التزمت بأمس كله») أو يُفتح تلقائياً في الساعة المحددة، واسم العميل وكوده على الجدول وفي Word والطباعة.
 const assert = require('assert'), path = require('path'), { execFileSync } = require('child_process'), linked = require('./hx_link_helper'), { TMP } = require('./_tmp.js');
 let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
 (async () => {
   const { d, m, hxCheck, cPoll, C, close } = await linked('dayonly', errs);
   assert(await m.locator('.wmk span').count() > 3); assert(/منى علي • C\d+/.test(await m.textContent('.wmk span')));
-  ok('«حصتي»: علامة مائية خفيفة باسم العميل وكوده على شاشة الجدول (الخطة لا تصلح لغيره)');
+  ok('«زنها»: علامة مائية خفيفة باسم العميل وكوده على شاشة الجدول (الخطة لا تصلح لغيره)');
   await d.click('main .tabs [data-v="hx"]'); await d.check('[data-hxgate]'); await d.waitForSelector('.toast:has-text("يوم واحد في كل مرة")'); await d.selectOption('[data-hxgateh]', '14'); await d.waitForTimeout(400);
   assert.strictEqual((await C()).hx.gate, true); await cPoll();
   let g = await m.evaluate(() => window.HissatiApp.state().gate); assert(g && g.on && g.h === 14, JSON.stringify(g));
   assert(await m.isVisible('#daylog'), 'أول يوم بعد التفعيل مفتوح');
-  ok('الأخصائي يفعّل «يوم واحد في كل مرة» (وساعة الفتح التلقائي 14:00) لهذا العميل فقط، ويصل «حصتي» فوراً، وأول يوم مفتوح');
+  ok('الأخصائي يفعّل «يوم واحد في كل مرة» (وساعة الفتح التلقائي 14:00) لهذا العميل فقط، ويصل «زنها» فوراً، وأول يوم مفتوح');
   await m.evaluate(() => { const S = window.HissatiApp.state(); S.gate.from = '2000-01-01'; const t = new Date(); t.setHours(7, 0, 0, 0); const T = t.getTime(); window.__dn = window.__dn || Date.now; Date.now = () => T; window.HissatiApp.render ? window.HissatiApp.render() : null; });
   await m.click('[data-act="tab"][data-v="plan"]'); await m.click('[data-act="tab"][data-v="today"]'); await m.waitForSelector('.gatec');
   assert(/جدول اليوم ينتظر تسجيل أمس/.test(await m.textContent('.gatec')) && /14:00/.test(await m.textContent('.gatec'))); assert.strictEqual(await m.locator('.card.meal').count(), 0, 'الوجبات مخفية');

@@ -17,7 +17,7 @@ function rdLoad() {                                                     // فك 
   return RDS.p;
 }
 function rdDoc(id) { var B = RDS.blob, d = B && B.plans[id]; if (!d) return null; return Object.assign({}, d, { subsArr: B.shared[d.subs] || [], secsArr: B.shared[d.secs] || [] }); }
-// بيانات العميل الأساسية + إجاباته (من «حصتي» أو تعديل الأخصائي)
+// بيانات العميل الأساسية + إجاباته (من «زنها» أو تعديل الأخصائي)
 function rdBase(c) { var pal = (D.settings.activity.filter(function (a) { return a[0] === c.activity; })[0] || [0, null])[1]; return { sex: c.sex, age: +c.age || 0, weight: +c.weight || 0, height: +c.height || 0, pal: pal }; }
 function rdAnswers(c) {
   if (RDS.ans[c.code]) return rdRegion(c, RDS.ans[c.code]);
@@ -68,7 +68,7 @@ function rdPreview(id) {
 function rdAutoTab(c) {
   if (!c) return '<p class="small">اختر عميلاً ليختار السيستم النظام الأنسب له من المكتبة تلقائياً.</p>';
   var a = rdAnswers(c), P = RL.norm(rdBase(c), a), qs = RL.questions(a, rdBase(c)), r = RL.recommend(a, rdBase(c));
-  var src = c.hx && c.hx.quiz ? '<div class="ok">📲 أجاب العميل على أسئلة الاختيار في «حصتي» (' + new Date(c.hx.quiz.at).toLocaleDateString('ar-EG') + ')' + (c.hx.quiz.pick ? ' واختار: <b>' + esc((RL.plan(c.hx.quiz.pick) && RL.label(RL.plan(c.hx.quiz.pick))) || c.hx.quiz.pick) + '</b>' : '') + '</div>' : '<p class="small">الإجابات مبدئية من ملف العميل؛ عدّلها أو أرسل الأسئلة له من «حصتي».</p>';
+  var src = c.hx && c.hx.quiz ? '<div class="ok">📲 أجاب العميل على أسئلة الاختيار في «زنها» (' + new Date(c.hx.quiz.at).toLocaleDateString('ar-EG') + ')' + (c.hx.quiz.pick ? ' واختار: <b>' + esc((RL.plan(c.hx.quiz.pick) && RL.label(RL.plan(c.hx.quiz.pick))) || c.hx.quiz.pick) + '</b>' : '') + '</div>' : '<p class="small">الإجابات مبدئية من ملف العميل؛ عدّلها أو أرسل الأسئلة له من «زنها».</p>';
   var h = src + '<div class="rdq"><div class="row">' + qs.map(function (q) { return rdQField(q, a, P); }).join('') + '</div>'
     + '<p class="small">الاحتياج التقديري ' + r.en.tdee + ' سعرة • مؤشر الكتلة ' + (r.en.bmi || '—') + (r.target ? ' • السعرات المستهدفة نحو ' + r.target : '') + '</p></div>';
   r.refer.forEach(function (t) { h += '<div class="warn dxstop">⛔ ' + esc(t) + '</div>'; });
@@ -115,7 +115,7 @@ function rdPage() {
   h += RDS.tab === 'auto' ? rdAutoTab(c) : RDS.tab === 'browse' ? rdBrowseTab(c) : rdGuideTab();
   return h + '</div>';
 }
-// ---- خطة من البنك: يعتمدها الأخصائي فتصير خطة العميل في تبويب «الخطة» والطباعة و«حصتي»
+// ---- خطة من البنك: يعتمدها الأخصائي فتصير خطة العميل في تبويب «الخطة» والطباعة و«زنها»
 function rdUse(c, id, quiet) {
   var e = RL.plan(id); if (!c || !e) { toast('اختر عميلاً أولاً'); return; }
   if (!quiet && c.plan && c.planSrc !== 'ready' && !confirm('سيُستبدل عرض الخطة الحالية بخطة البنك «' + RL.label(e) + '» (تبقى خطة المحرك محفوظة ويمكنك العودة لها بـ«ولّد خطة جديدة»). المتابعة؟')) return;
@@ -130,10 +130,10 @@ function rdUse(c, id, quiet) {
     return persist(c).then(function () { render(); window.scrollTo(0, 0); toast('✓ طُبّقت خطة البنك «' + c.ready.label + '» على ' + (c.name || c.code) + (al ? ' — أيام الكارب العالي على أيام تمرينه' : '')); });
   });
 }
-function rdQuizNote(c) {                                                // ما اختاره العميل في «حصتي» قبل الاعتماد
+function rdQuizNote(c) {                                                // ما اختاره العميل في «زنها» قبل الاعتماد
   var q = c.hx && c.hx.quiz, pk = q && q.pick && RL.plan(q.pick);
   if (!q) return '';
-  return '<div class="ok rdqn">📲 أجاب العميل على أسئلة الاختيار في «حصتي»' + (pk ? ' واختار: <b>' + esc(RL.label(pk)) + '</b>' : ' وترك الاختيار لك') + (c.planSrc === 'ready' && c.ready && pk && c.ready.id === q.pick ? ' — مطبَّقة ✓' : ' — افتح «📗 اختر خطة جاهزة» لترى اختياره مع الخيارات الأنسب') + '</div>';
+  return '<div class="ok rdqn">📲 أجاب العميل على أسئلة الاختيار في «زنها»' + (pk ? ' واختار: <b>' + esc(RL.label(pk)) + '</b>' : ' وترك الاختيار لك') + (c.planSrc === 'ready' && c.ready && pk && c.ready.id === q.pick ? ' — مطبَّقة ✓' : ' — افتح «📗 اختر خطة جاهزة» لترى اختياره مع الخيارات الأنسب') + '</div>';
 }
 function rdGenBtns(c) {                                                 // أسفل «بيانات العميل»: من البنك أو جديدة بالمحرك
   if (!window.RL || !RL.idx) return '<button class="o" data-a="gen">ولّد خطة جديدة ←</button>';
@@ -236,7 +236,7 @@ function rdPlanView(c) {                                                // خط�
   var R = c.ready, d = c.readyDoc, e = RL.plan(R.id), a = R.ans || {}, P = RL.norm(rdBase(c), a), G = rdIsG(d);
   R.ex = e ? RL.expect(e, P, RL.energy(P), a) : null;
   var pg = RDS.page[c.code] == null ? 'sum' : RDS.page[c.code], pages = [['sum', 'الملخص']].concat(!G && (d.ex || []).length ? [['grp', 'تقسيم الحصص']] : [], d.days.map(function (y, i) { return [String(i), (D.days || [])[i] || 'اليوم ' + (i + 1)]; }), [['all', 'كل الصفحات']]);
-  var h = '<div class="rdplan"><div class="noprint mxrow"><button class="sm sec" data-a="genBank">📗 اختر خطة أخرى من البنك</button> <button class="sm sec" data-a="gen">⚙ ولّد خطة جديدة</button> <button class="sm" data-a="rdDocx">تصدير Word (.docx)</button> <button class="sm" onclick="window.print()">تصدير PDF / طباعة</button>' + (c.hx ? ' <button class="sm" data-a="hxSendPlan">📲 أرسل إلى «حصتي»' + (R.sentV ? ' (أُرسل v' + R.sentV + ')' : '') + '</button>' : '') + (d.edited ? ' <button class="sm sec" data-a="rdReset">↺ استعادة الأصل من المكتبة</button>' : '') + '</div>'
+  var h = '<div class="rdplan"><div class="noprint mxrow"><button class="sm sec" data-a="genBank">📗 اختر خطة أخرى من البنك</button> <button class="sm sec" data-a="gen">⚙ ولّد خطة جديدة</button> <button class="sm" data-a="rdDocx">تصدير Word (.docx)</button> <button class="sm" onclick="window.print()">تصدير PDF / طباعة</button>' + (c.hx ? ' <button class="sm" data-a="hxSendPlan">📲 أرسل إلى «زنها»' + (R.sentV ? ' (أُرسل v' + R.sentV + ')' : '') + '</button>' : '') + (d.edited ? ' <button class="sm sec" data-a="rdReset">↺ استعادة الأصل من المكتبة</button>' : '') + '</div>'
     + '<div class="dxbox noprint rdph"><b>📗 ' + esc(R.name) + '</b> <span class="dxb">من البنك' + (d.edited ? ' • معدّلة' : '') + '</span> <small>' + esc(R.label) + '</small>' + (R.when ? '<div class="small">💡 ' + esc(R.when) + '</div>' : '') + (R.ex ? '<div class="small"><b>المتوقع:</b> ' + esc(R.ex.head || '') + '</div>' : '') + '</div>'
     + '<div class="pnav noprint">' + pages.map(function (x) { return '<button class="' + (pg === x[0] ? 'on' : 'sec') + '" data-a="rdPage" data-v="' + x[0] + '">' + esc(x[1]) + '</button>'; }).join('') + '</div>';
   if (pg === 'sum') h += rdPgSum(c, R, d); else if (pg === 'grp') h += rdPgGrp(c, R, d); else if (pg === 'all') h += rdPgSum(c, R, d) + (G ? '' : rdPgGrp(c, R, d)) + d.days.map(function (y, i) { return rdPgDay(c, R, d, i, false); }).join('');

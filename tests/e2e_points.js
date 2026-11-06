@@ -10,7 +10,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   ok('«حصة»: تفعيل النقاط، والقيم والسقف اليومي والمكافآت (سطر لكل مكافأة) يحددها الأخصائي');
   await d.click('.rail [data-a="hxv"]'); await hxCheck(); await d.waitForTimeout(700); await cPoll(); await m.click('[data-act="tab"][data-v="progress"]'); await m.waitForSelector('.pts');
   let pt = await m.textContent('.pts'); assert(/نقاطي هذا الأسبوع/.test(pt) && /\b0\b/.test(pt) && /باقي 10 نقطة على «شهادة تقدير»/.test(pt), pt); const ref = (await m.textContent('.refc')).trim(); assert(/^[A-Z0-9]{5,8}$/.test(ref), ref);
-  ok('«حصتي»: «🏅 نقاطي هذا الأسبوع» وتقدمها نحو المكافأة التالية وكيف تُجمع، و«🤝 كود دعوتي»');
+  ok('«زنها»: «🏅 نقاطي هذا الأسبوع» وتقدمها نحو المكافأة التالية وكيف تُجمع، و«🤝 كود دعوتي»');
   await m.click('[data-act="tab"][data-v="today"]'); await m.waitForSelector('#daylog'); await m.click('#daylog [data-act="allDay"]'); await m.click('#daylog [data-act="subDay"]');
   await m.evaluate(() => { window.HissatiApp.state().planAt = Date.now() - 7.5 * 864e5; }); await m.click('[data-act="tab"][data-v="plan"]'); await m.click('[data-act="tab"][data-v="today"]'); await m.click('[data-act="wkGo"]'); await m.fill('#wkW', '86'); await m.click('[data-act="wkSend"]');
   await cPoll(); await d.evaluate(() => DPApp.A.pick(DPApp.S.clients[0].code)); await d.waitForSelector('main .tabs [data-v="hx"]'); await d.click('main .tabs [data-v="hx"]'); await hxCheck(); await d.waitForTimeout(900); await cPoll();
@@ -43,7 +43,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
     assert.strictEqual(await d.evaluate((nm) => { const r = DPApp.S.settings.recipes; const k = Object.keys(r).find((x) => r[x] && r[x].yt); return k && r[k].yt; }, meal), 'dQw4w9WgXcQ');
     await d.evaluate(() => DPApp.A.pick(DPApp.S.clients[0].code)); await d.waitForSelector('main .tabs [data-v="hx"]'); await d.click('main .tabs [data-v="hx"]'); await d.click('main [data-a="hxSendPlan"]'); await d.waitForFunction(() => DPApp.S.clients[0].hx.planV >= 2, null, { timeout: 15000 }); await cPoll();
     await m.click('[data-act="tab"][data-v="today"]'); await m.click('[data-act="rcp"] >> nth=0'); await m.waitForSelector('.rcpyt iframe'); assert(/youtube-nocookie\.com\/embed\/dQw4w9WgXcQ/.test(await m.getAttribute('.rcpyt iframe', 'src')));
-    ok('فيديو التحضير: رابط يوتيوب في وصفة الوجبة (بنك الوجبات) يصل مع الخطة ويعمل داخل «حصتي» (youtube-nocookie)');
+    ok('فيديو التحضير: رابط يوتيوب في وصفة الوجبة (بنك الوجبات) يصل مع الخطة ويعمل داخل «زنها» (youtube-nocookie)');
   }
   assert.deepStrictEqual(errs, []); await close(); console.log('\nنجح ' + n + ' اختبارات النقاط والدعوة');
 })().catch((e) => { console.log('✘', String(e && e.stack || e).slice(0, 1500)); console.log('أخطاء:', JSON.stringify(errs).slice(0, 600)); process.exit(1); });

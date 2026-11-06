@@ -1,10 +1,10 @@
 // ================= النسخ الاحتياطي التلقائي المشفّر والمزامنة بين الأجهزة (يُدمج داخل app.js عند /*VAULTUI*/) — الإعدادات ← ☁ النسخ والمزامنة
-// - «خزنة» على محطة «حصتي» نفسها: من «معرّف النسخة» و«كلمة سر النسخ» يُشتق (PBKDF2 310 ألف دورة) معرّف الخزنة ومفتاح الوصول ومفتاح التشفير.
+// - «خزنة» على محطة «زنها» نفسها: من «معرّف النسخة» و«كلمة سر النسخ» يُشتق (PBKDF2 310 ألف دورة) معرّف الخزنة ومفتاح الوصول ومفتاح التشفير.
 //   كلمة السر لا تُحفظ ولا تُرسل؛ المحطة ترى بيانات مشفّرة (AES-GCM) فقط، وبصمة مفتاح الوصول.
-// - النسخة = العملاء والإصدارات والإعدادات وارتباطات «حصتي» (مضغوطة ثم مشفّرة)، تُرفع أجزاءً، وتُحفظ آخر 7 نسخ.
+// - النسخة = العملاء والإصدارات والإعدادات وارتباطات «زنها» (مضغوطة ثم مشفّرة)، تُرفع أجزاءً، وتُحفظ آخر 7 نسخ.
 // - تلقائياً: بعد كل تعديل (خلال 10 دقائق) ومرة يومياً على الأقل. والمزامنة: كل جهاز يدمج نسخ أجهزته الأخرى عميلاً بعميل (الأحدث يغلب،
 //   والحذف يُنقل، وتعارض نفس العميل يحفظ النسخة الأقدم كإصدار فلا يضيع شيء، وتصادم الكود بين عميلين مختلفين يعطي الوارد كوداً جديداً).
-// - ارتباطات «حصتي» (هوية المحطة) تُسترجع عند الاسترجاع على جهاز جديد فقط، ولا تُدمج أثناء المزامنة (جهاز واحد يستقبل رسائل العملاء).
+// - ارتباطات «زنها» (هوية المحطة) تُسترجع عند الاسترجاع على جهاز جديد فقط، ولا تُدمج أثناء المزامنة (جهاز واحد يستقبل رسائل العملاء).
 var VT = { st: null, busy: false, msg: '', list: null, timer: 0, dirtyAt: 0 }, VKEY = 'vault', VITER = 310000;
 function vtLoad() { return tx('meta', 'readonly', function (s) { return s.get(VKEY); }).then(function (r) { return r ? decRec('meta', r) : null; }).then(function (r) { VT.st = r || { key: VKEY, on: 0, tomb: [] }; VT.st.tomb = VT.st.tomb || []; vtTimer(); }).catch(function () { VT.st = { key: VKEY, on: 0, tomb: [] }; }); }
 function vtSave() { saveQ = saveQ.then(function () { return dbPut('meta', VT.st); }).catch(function () { }); return saveQ; }
@@ -67,7 +67,7 @@ function vtMerge(snap, opt) {
     }
     if ((r.updated || 0) <= (l.updated || 0)) return;
     if ((l.updated || 0) > since && since) { ops.push(dbPut('versions', { code: l.code, at: Date.now(), note: 'نسخة من هذا الجهاز قبل المزامنة (عُدّلت هنا وعلى جهاز آخر)', plan: l.plan, client: ec(l) })); out.conf++; }
-    if (!opt.withHx) { if (l.hx) r.hx = l.hx; else delete r.hx; }                                        // ارتباط «حصتي» يبقى على جهازه
+    if (!opt.withHx) { if (l.hx) r.hx = l.hx; else delete r.hx; }                                        // ارتباط «زنها» يبقى على جهازه
     if (r.code !== l.code) { if (codes[r.code] && codes[r.code] !== l) r.code = l.code; else { ops.push(dbDel0('clients', l.code)); delete codes[l.code]; codes[r.code] = l; } }
     Object.keys(l).forEach(function (x) { delete l[x]; }); Object.assign(l, r); ops.push(dbPut('clients', l)); out.upd++;
   });
@@ -119,9 +119,9 @@ function vtRail() {                                                     // تذ�
 function vaultPage() {
   var st = VT.st || {}, on = st.on, relay = vtRelay(), hxok = hxOn();
   var restore = '<div class="ucard"><h3>استرجاع من نسخة سابقة (جهاز جديد أو بعد مسح المتصفح)</h3><div class="row"><div><label>عنوان المحطة</label><input id="vt_r" dir="ltr" value="' + esc((VT.rf && VT.rf.r) || relay) + '" placeholder="https://hissati.…workers.dev"></div><div><label>معرّف النسخة</label><input id="vt_ri" dir="ltr" value="' + esc((VT.rf && VT.rf.id) || st.id || vtIdDefault()) + '"></div><div><label>كلمة سر النسخ</label><input id="vt_rp" type="password" autocomplete="off"></div></div><p><button class="sec" data-a="vtList">عرض النسخ المتاحة</button></p>'
-    + (VT.list ? '<div class="vtlist">' + VT.list.vers.map(function (v) { return '<div class="vtv"><b>نسخة ' + v.ver + '</b><small>' + new Date(v.at * 1000).toLocaleString('ar') + ' • ' + esc(v.dev || '') + ' • ' + Math.max(1, Math.round(v.size / 1024)) + ' ك.ب</small><button class="sm" data-a="vtRestore" data-v="' + v.ver + '">استرجاع</button></div>'; }).join('') + '<label class="chk"><input type="checkbox" id="vt_hx"' + (HX.st && HX.st.reg ? '' : ' checked') + '> استرجاع ارتباطات «حصتي» أيضاً (فقط إن لم يعد الجهاز القديم مستخدماً)</label><p class="small">الاسترجاع يدمج النسخة مع ما على هذا الجهاز ولا يحذف شيئاً منه.</p></div>' : '') + '</div>';
-  return '<h3>☁ النسخ الاحتياطي التلقائي والمزامنة</h3><p class="small">نسخة مشفّرة من كل عملائك وإصداراتهم وإعداداتك تُحفظ تلقائياً على محطة «حصتي» (آخر 7 نسخ). تُشفَّر على جهازك بـ«كلمة سر النسخ» قبل أن تغادره، فلا تستطيع المحطة ولا أي أحد قراءتها. ومن أي جهاز آخر بنفس المعرّف وكلمة السر تُسترجع، أو تتزامن الأجهزة تلقائياً.</p>'
-    + (!hxok ? '<div class="warn">اربط هذا الجهاز بالمحطة أولاً من «📲 حصتي» — الخزنة على المحطة نفسها. (الاسترجاع بالأسفل لا يحتاج الربط.)</div>'
+    + (VT.list ? '<div class="vtlist">' + VT.list.vers.map(function (v) { return '<div class="vtv"><b>نسخة ' + v.ver + '</b><small>' + new Date(v.at * 1000).toLocaleString('ar') + ' • ' + esc(v.dev || '') + ' • ' + Math.max(1, Math.round(v.size / 1024)) + ' ك.ب</small><button class="sm" data-a="vtRestore" data-v="' + v.ver + '">استرجاع</button></div>'; }).join('') + '<label class="chk"><input type="checkbox" id="vt_hx"' + (HX.st && HX.st.reg ? '' : ' checked') + '> استرجاع ارتباطات «زنها» أيضاً (فقط إن لم يعد الجهاز القديم مستخدماً)</label><p class="small">الاسترجاع يدمج النسخة مع ما على هذا الجهاز ولا يحذف شيئاً منه.</p></div>' : '') + '</div>';
+  return '<h3>☁ النسخ الاحتياطي التلقائي والمزامنة</h3><p class="small">نسخة مشفّرة من كل عملائك وإصداراتهم وإعداداتك تُحفظ تلقائياً على محطة «زنها» (آخر 7 نسخ). تُشفَّر على جهازك بـ«كلمة سر النسخ» قبل أن تغادره، فلا تستطيع المحطة ولا أي أحد قراءتها. ومن أي جهاز آخر بنفس المعرّف وكلمة السر تُسترجع، أو تتزامن الأجهزة تلقائياً.</p>'
+    + (!hxok ? '<div class="warn">اربط هذا الجهاز بالمحطة أولاً من «📲 زنها» — الخزنة على المحطة نفسها. (الاسترجاع بالأسفل لا يحتاج الربط.)</div>'
       : on ? '<div class="ok">✓ النسخ التلقائي مفعّل لـ«' + esc(st.id) + '» على «' + esc(st.dev) + '». آخر نسخة: ' + vtAgo(st.last) + (st.lastVer ? ' (نسخة ' + st.lastVer + '، ' + Math.max(1, Math.round((st.size || 0) / 1024)) + ' ك.ب)' : '') + (VT.dirtyAt ? ' • تعديلات بانتظار الرفع' : '') + (st.err ? ' — <span style="color:#c0392b">' + esc(st.err) + '</span>' : '') + '</div>'
         + '<p class="two"><button data-a="vtNow"' + (VT.busy ? ' disabled' : '') + '>' + (VT.busy ? 'جارٍ…' : '☁ انسخ الآن') + '</button><button class="sec" data-a="vtSyncNow">↻ مزامنة الآن</button><button class="sec" data-a="vtOff">إيقاف</button></p>'
         + '<label class="chk"><input type="checkbox" data-vt="sync"' + (st.sync ? ' checked' : '') + '> مزامنة تلقائية مع أجهزتي الأخرى (كل دقيقتين أثناء فتح «حصة»)</label>'
@@ -130,7 +130,7 @@ function vaultPage() {
         + '<p class="small">⚠ احفظ كلمة سر النسخ: لا يمكن استرجاعها، وبدونها لا تُفتح النسخ. يمكن أن تكون كلمة سر دخولك نفسها. استعمل نفس المعرّف وكلمة السر على أجهزتك الأخرى لتتزامن.</p><p><button data-a="vtOn"' + (VT.busy ? ' disabled' : '') + '>تفعيل وأخذ أول نسخة</button></p></div>')
     + (VT.msg ? '<div class="warn">' + esc(VT.msg) + '</div>' : '') + restore;
 }
-function vtHomeCard() { return VT.st && !VT.st.on && !S.clients.length ? '<div class="ucard vthome"><h3>☁ جهاز جديد؟</h3><p class="small">إن كانت لديك نسخة احتياطية تلقائية على محطة «حصتي»، استرجع عملاءك هنا بمعرّف النسخة وكلمة سرها.</p><button data-a="vtOpen">استرجاع عملائي</button></div>' : ''; }
+function vtHomeCard() { return VT.st && !VT.st.on && !S.clients.length ? '<div class="ucard vthome"><h3>☁ جهاز جديد؟</h3><p class="small">إن كانت لديك نسخة احتياطية تلقائية على محطة «زنها»، استرجع عملاءك هنا بمعرّف النسخة وكلمة سرها.</p><button data-a="vtOpen">استرجاع عملائي</button></div>' : ''; }
 Object.assign(A, {
   vtOpen: function () { S.view = 'settings'; S.setTab = 'vault'; render(); },
   vtOn: function () {

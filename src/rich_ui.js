@@ -1,7 +1,7 @@
 // ================= تجربة عميل أغنى (المرحلة 5) — يُدمج داخل app.js عند /*RICHUI*/
-// 1) الوصفات: لكل وجبة في محرر الحصص وصفة (خطوات، وقت التحضير، نصيحة، صورة) تُحفظ في S.settings.recipes وتصل مع الخطة إلى «حصتي».
+// 1) الوصفات: لكل وجبة في محرر الحصص وصفة (خطوات، وقت التحضير، نصيحة، صورة) تُحفظ في S.settings.recipes وتصل مع الخطة إلى «زنها».
 //    الصورة تُضغط هنا، وتُرفع إلى المحطة عند إرسال الخطة (محتوى عام كالتثقيف)، فلا تثقل رسالة الخطة المشفّرة.
-// 2) صور الوجبات: يصوّر العميل وجبته في «حصتي» (مشفّرة لك وحدك) فتظهر في تبويب «حصتي» بملفه، وتردّ بتعليق سريع يصله مع إشعار.
+// 2) صور الوجبات: يصوّر العميل وجبته في «زنها» (مشفّرة لك وحدك) فتظهر في تبويب «زنها» بملفه، وتردّ بتعليق سريع يصله مع إشعار.
 var RC = { edit: null, d: null }, PH_QUICK = ['👏 ممتاز، استمر', '🥗 أضف خضاراً أكثر', '⚖ قلّل الكمية قليلاً', '🍗 زِد البروتين', '💧 لا تنسَ الماء'];
 function rcYt(u) { var m = /(?:youtu\.be\/|[?&]v=|\/shorts\/|\/embed\/|\/live\/)([A-Za-z0-9_-]{11})/.exec(String(u || '')); return m ? m[1] : ''; }   // 0.55: فيديو يوتيوب لطريقة التحضير
 function rcAll() { return S.settings.recipes || (S.settings.recipes = {}); }
@@ -15,7 +15,7 @@ function rcShrink(file) {
 }
 function rcEditor(id) {
   var d = RC.d, b = bkEff(id);
-  return '<div class="ucard rced"><h3>📖 وصفة «' + esc(b ? b.n : '') + '»</h3><p class="small">تظهر للعميل في «حصتي» عند لمس الوجبة، مع مقاديره هو من خطته. اكتب كل خطوة في سطر.</p>'
+  return '<div class="ucard rced"><h3>📖 وصفة «' + esc(b ? b.n : '') + '»</h3><p class="small">تظهر للعميل في «زنها» عند لمس الوجبة، مع مقاديره هو من خطته. اكتب كل خطوة في سطر.</p>'
     + '<div class="rcgrid"><div><label>خطوات التحضير<textarea id="rc_steps" data-rcf="steps" rows="6" placeholder="اغسل الأرز ونقّعه 20 دقيقة&#10;اطبخه بماء مغلي مع رشة ملح…">' + esc(d.steps) + '</textarea></label>'
     + '<div class="bkfl"><label>وقت التحضير (دقيقة)<input id="rc_mins" data-rcf="mins" inputmode="numeric" value="' + esc(d.mins) + '"></label><label>نصيحة<input id="rc_tip" data-rcf="tip" maxlength="200" value="' + esc(d.tip) + '" placeholder="اختياري: بدّل الزيت ببخاخ زيت"></label><label>فيديو التحضير (رابط يوتيوب، اختياري)<input id="rc_yt" data-rcf="yt" dir="ltr" value="' + esc(d.yt || '') + '" placeholder="https://youtu.be/…"></label></div></div>'
     + '<div class="rcimg">' + (d.img ? '<img src="' + d.img + '" alt=""><button class="sec sm" data-a="rcNoImg">إزالة الصورة</button>' : '<span class="small">بلا صورة</span>') + '<label class="sec sm fdfile">📷 ' + (d.img ? 'تغيير' : 'إضافة') + ' صورة<input type="file" id="rc_file" accept="image/*" hidden></label></div></div>'
@@ -30,7 +30,7 @@ function rcUpload(rs) {                                             // صور ا
 function rcOfPlan(c) { var seen = {}, out = []; if (!c.plan || !c.plan.days || c.kind === 'athlete') return out; c.plan.days.forEach(function (d) { d.slots.forEach(function (s) { var n = s.mealLabel || s.meal; if (n && !seen[n]) { seen[n] = 1; var m = rcByMeal(s.meal) || rcByMeal(n); if (m && m.r) out.push({ name: n, r: m.r }); } }); }); return out; }
 // ---------- صور الوجبات في ملف العميل
 function phCard(c) {
-  var ps = (c.hx.photos || []).slice().reverse(); if (!ps.length) return '<div class="ucard"><h3>📷 صور الوجبات</h3><p class="small">يصوّر العميل وجبته من «حصتي» («صوّر وجبتك» في بطاقة الوجبة) فتظهر هنا مشفّرة، وتردّ بتعليق سريع.</p></div>';
+  var ps = (c.hx.photos || []).slice().reverse(); if (!ps.length) return '<div class="ucard"><h3>📷 صور الوجبات</h3><p class="small">يصوّر العميل وجبته من «زنها» («صوّر وجبتك» في بطاقة الوجبة) فتظهر هنا مشفّرة، وتردّ بتعليق سريع.</p></div>';
   return '<div class="ucard phcard"><h3>📷 صور الوجبات (' + ps.length + ')</h3><div class="phgrid">' + ps.slice(0, 24).map(function (p) {
     return '<figure class="' + (p.cm ? '' : 'new') + '"><img src="' + p.img + '" alt="صورة ' + esc(p.slot) + '" loading="lazy"><figcaption><b>' + esc(p.slot || 'وجبة') + '</b><small>' + esc(new Date(p.ts).toLocaleString('ar', { weekday: 'short', hour: '2-digit', minute: '2-digit' })) + '</small>'
       + (p.cm ? '<p class="phcm">✓ ' + esc(p.cm) + '</p>' : '<p class="phq">' + PH_QUICK.map(function (q) { return '<button class="sec sm" data-a="phCm" data-v="' + p.id + '" data-t="' + esc(q) + '">' + q + '</button>'; }).join('') + '<button class="sec sm" data-a="phCm" data-v="' + p.id + '" data-t="">✎ تعليق</button></p>') + '</figcaption></figure>';
@@ -45,12 +45,12 @@ Object.assign(A, {
     var d = RC.d, steps = String(d.steps || '').split(/\n+/).map(function (x) { return x.trim(); }).filter(Boolean).slice(0, 30), mins = +String(d.mins || '').replace(/[٠-٩]/g, function (x) { return x.charCodeAt(0) - 0x660; }) || 0, old = rcAll()[RC.edit] || {};
     if (!steps.length && !d.img) return toast('اكتب خطوة واحدة على الأقل أو أضف صورة');
     rcAll()[RC.edit] = { steps: steps.map(function (x) { return x.slice(0, 400); }), mins: Math.min(600, mins), tip: String(d.tip || '').trim().slice(0, 200), yt: rcYt(d.yt), img: d.img || '', w: d.w || 0, h: d.h || 0, key: d.img && d.img === old.img ? old.key || '' : '', at: Date.now() };
-    saveSettings(); RC.edit = null; main(); toast('📖 حُفظت الوصفة — تصل مع الخطة التالية التي ترسلها إلى «حصتي»');
+    saveSettings(); RC.edit = null; main(); toast('📖 حُفظت الوصفة — تصل مع الخطة التالية التي ترسلها إلى «زنها»');
   },
   rcDel: function () { if (!confirm('حذف الوصفة؟')) return; delete rcAll()[RC.edit]; saveSettings(); RC.edit = null; main(); },
   phCm: function (v, el) {
     var c = cur(), p = c && (c.hx.photos || []).filter(function (x) { return x.id === v; })[0], t = el.dataset.t || prompt('تعليقك على صورة الوجبة:', ''); if (!p || !t || !t.trim()) return;
-    hxSend(c, { t: 'pcm', id: v, text: t.trim().slice(0, 300) }).then(function () { p.cm = t.trim().slice(0, 300); persist(c); main(); toast('✓ وصل تعليقك إلى «حصتي»'); }).catch(hxErr);
+    hxSend(c, { t: 'pcm', id: v, text: t.trim().slice(0, 300) }).then(function () { p.cm = t.trim().slice(0, 300); persist(c); main(); toast('✓ وصل تعليقك إلى «زنها»'); }).catch(hxErr);
   }
 });
 document.addEventListener('input', function (e) { var t = e.target; if (t.dataset && t.dataset.rcf && RC.d) RC.d[t.dataset.rcf] = t.value; });

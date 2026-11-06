@@ -1,5 +1,5 @@
 'use strict';
-// مكتبة الأنظمة الجاهزة (0.42): الفهرس مكتمل ومنظّم، والترشيح يعطي الأمثل + بديلين مناسبين للهدف والحالة، والموانع تُحترم، والتحويل لـ«حصتي» سليم.
+// مكتبة الأنظمة الجاهزة (0.42): الفهرس مكتمل ومنظّم، والترشيح يعطي الأمثل + بديلين مناسبين للهدف والحالة، والموانع تُحترم، والتحويل لـ«زنها» سليم.
 const assert = require('assert'), fs = require('fs'), path = require('path'), zlib = require('zlib');
 const RL = require('../src/readylib.js'), IDX = require('../src/readylib/index.json'); RL.use(IDX);
 const B = JSON.parse(zlib.gunzipSync(fs.readFileSync(path.join(__dirname, '../src/readylib/plans.json.gz'))));
@@ -83,7 +83,7 @@ t('التثبيت والثبات: البروتوكول حسب الطريقة/ا�
 t('المتوقع: نزول بين 0.1 و1.2 كجم أسبوعياً للتنحيف، مع ملاحظة أنه تقديري', () => {
   [W('أنثى', 30, 95, 160, 1), W('ذكر', 45, 130, 178, 0), W('أنثى', 25, 68, 165, 2)].forEach((P) => rec({ goal: 'lose', style: 'fixed', veg: 'no' }, P).top.forEach((x) => { if (x.expect.wk) assert(x.expect.wk[0] >= 0.1 && x.expect.wk[1] <= 1.2, x.label + ' ' + x.expect.wk); assert(x.expect.lines.some((l) => /تقدير/.test(l))); }));
 });
-t('التحويل لخطة «حصتي»: 7 أيام بوجبات وأسطر مصنّفة ببدائل من نفس المجموعة، ونظام الجرامات بماكروز الوجبة', () => {
+t('التحويل لخطة «زنها»: 7 أيام بوجبات وأسطر مصنّفة ببدائل من نفس المجموعة، ونظام الجرامات بماكروز الوجبة', () => {
   ['Deficit_Balanced_1400kcal', 'ZigZag_EG_1400kcal_Form1_Egyptian-Classic', 'AthleteCut_EG_1800kcal_Form1_Evening-Training', 'Kids_EG_Girls_Age8-9_1402kcal_Form2_School-Lunchbox'].forEach((id) => {
     const d = Object.assign({}, B.plans[id], { subsArr: B.shared[B.plans[id].subs] }), e = RL.plan(id), h = RL.toHissati(d, e);
     assert.strictEqual(h.days.length, 7); assert.strictEqual(h.sys, 'ready'); assert.strictEqual(h.ready.id, id);

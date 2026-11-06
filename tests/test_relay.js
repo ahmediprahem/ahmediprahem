@@ -1,4 +1,4 @@
-// المحطة الوسيطة «حصة ↔ حصتي»: التسجيل، الدعوة، الانضمام، الرسائل المشفّرة من طرف إلى طرف، التحقق من التوقيع والعلاقات، والحدود.
+// المحطة الوسيطة «حصة ↔ زنها»: التسجيل، الدعوة، الانضمام، الرسائل المشفّرة من طرف إلى طرف، التحقق من التوقيع والعلاقات، والحدود.
 'use strict';
 const assert = require('assert'), path = require('path'), HXC = require('../src/hx_crypto.js'), d1 = require('./d1_shim.js');
 let n = 0; const ok = (m) => { n++; console.log('✔', m); };
@@ -56,14 +56,14 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); };
   const tamper = await HXC.signReq(dr, 'POST', '/v1/send', JSON.stringify({ to: cl.id, box: { v: 1 } }));
   assert.strictEqual((await W.default.fetch(new Request(base + '/v1/send', { method: 'POST', headers: { authorization: tamper }, body: JSON.stringify({ to: cl.id, box: { v: 2 } }) }), env)).status, 401);
   ok('الحماية: أخصائي آخر لا يراسل عميلاً ليس له، والعميل لا يراسل غير أخصائيه، والتوقيع المزوّر أو القديم أو الجسم المعدَّل يُرفض');
-  // 7) الحذف، الحدود، وتقديم تطبيق «حصتي»
+  // 7) الحذف، الحدود، وتقديم تطبيق «زنها»
   assert.strictEqual((await call(dr, 'POST', '/v1/send', { to: cl.id, box: { big: 'x'.repeat(500000) } })).s, 413);
   assert.strictEqual((await call(dr2, 'POST', '/v1/clients/remove', { cid: cl.id })).s, 404);
   assert.strictEqual((await call(dr, 'POST', '/v1/clients/remove', { cid: cl.id })).s, 200); assert.strictEqual((await call(cl, 'GET', '/v1/inbox?after=0')).s, 401);
   const app = await W.default.fetch(new Request(base + '/'), env); assert.strictEqual(app.status, 200); assert(/text\/html/.test(app.headers.get('content-type'))); assert(app.headers.get('content-security-policy').includes("connect-src 'self'"));
   const pre = await W.default.fetch(new Request(base + '/v1/send', { method: 'OPTIONS' }), env); assert.strictEqual(pre.status, 204); assert(pre.headers.get('access-control-allow-headers').includes('authorization'));
   assert.strictEqual((await W.default.fetch(new Request(base + '/v1/health'), { DB: null })).status, 500);
-  ok('الحذف: الأخصائي يفصل عميله فتُحذف بياناته ورسائله، والرسالة الضخمة تُرفض، والصفحة الرئيسية تقدّم «حصتي» بسياسة أمان صارمة');
+  ok('الحذف: الأخصائي يفصل عميله فتُحذف بياناته ورسائله، والرسالة الضخمة تُرفض، والصفحة الرئيسية تقدّم «زنها» بسياسة أمان صارمة');
   // 8) الإشعارات: مفتاح VAPID ثابت، اشتراك من خدمات معروفة فقط، إشعار بلا محتوى عند push:true، حد زمني، وحذف الاشتراك الميت
   const env2 = { DB: d1() }, W2 = W.default, ctxs = [], ctx = { waitUntil: (pr) => ctxs.push(pr) }; W._test.reset();
   const call2 = async (ident, method, p, obj) => { const body = obj === undefined ? '' : JSON.stringify(obj), h = { 'content-type': 'application/json' }; if (ident) h.authorization = await HXC.signReq(ident, method, p, body); const r = await W2.fetch(new Request(base + p, { method, headers: h, body: method === 'POST' ? body : undefined }), env2, ctx); return { s: r.status, j: await r.json().catch(() => null) }; };

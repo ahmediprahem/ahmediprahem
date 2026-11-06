@@ -1,7 +1,7 @@
 // ================= أدوات توفير الوقت (المرحلة 4) — يُدمج داخل app.js عند /*WORKUI*/
 // 1) قوالب الخطط ونسخ الخطة بين العملاء: «كما هي» (نفس السعرات والأصناف) أو «بسعرات هذا العميل» (إعدادات القالب ثم توليد على بياناته).
-// 2) المواعيد والتذكير: تبويب «📅 المواعيد» لكل عميل، وأجندة عامة، وتذكير قبل الموعد، ورسالة تذكير واتساب أو «حصتي»، وملف تقويم (.ics).
-// 3) «من يحتاج اهتمامي اليوم» في الرئيسية: مواعيد اليوم، رسائل وطلبات «حصتي»، التزام منخفض، انقطاع، خطة لم تُرسل، متابعة مستحقة، تنبيهات طبية.
+// 2) المواعيد والتذكير: تبويب «📅 المواعيد» لكل عميل، وأجندة عامة، وتذكير قبل الموعد، ورسالة تذكير واتساب أو «زنها»، وملف تقويم (.ics).
+// 3) «من يحتاج اهتمامي اليوم» في الرئيسية: مواعيد اليوم، رسائل وطلبات «زنها»، التزام منخفض، انقطاع، خطة لم تُرسل، متابعة مستحقة، تنبيهات طبية.
 // القوالب في الإعدادات (S.settings.tpls) فتدخل النسخ الاحتياطي والمزامنة؛ والمواعيد داخل سجل العميل (c.appts).
 var WK = { pick: false, rem: {}, told: '', all: false, form: null };
 var WK_TYPES = ['متابعة', 'أول زيارة', 'قياس وتحاليل', 'استشارة أونلاين'];
@@ -51,7 +51,7 @@ function wkRowHtml(c, a, withName) {
   var past = wkAt(a) < Date.now() - 3600000, st = a.st === 'done' ? '<span class="wkst ok">✓ حضر</span>' : a.st === 'miss' ? '<span class="wkst no">✕ لم يحضر</span>' : past ? '<span class="wkst late">لم يُسجَّل</span>' : '';
   var act = a.st ? '<button class="sec sm" data-a="wkSt" data-v="' + a.id + '" data-c="' + c.code + '" data-s="">↺</button>'
     : '<button class="sm" data-a="wkSt" data-v="' + a.id + '" data-c="' + c.code + '" data-s="done">✓ حضر</button><button class="sec sm" data-a="wkSt" data-v="' + a.id + '" data-c="' + c.code + '" data-s="miss">✕ لم يحضر</button>'
-      + (past ? '' : (c.phone ? '<a class="btn sec sm" target="_blank" rel="noopener" data-wkwa="' + a.id + '" href="' + esc(wkWa(c, a)) + '">💬 واتساب</a>' : '') + (c.hx ? '<button class="sec sm" data-a="wkHx" data-v="' + a.id + '" data-c="' + c.code + '">📲 تذكير «حصتي»' + (a.hxAt ? ' ✓' : '') + '</button>' : '') + '<button class="sec sm" data-a="wkIcs" data-v="' + a.id + '" data-c="' + c.code + '" title="ملف تقويم">📆</button>');
+      + (past ? '' : (c.phone ? '<a class="btn sec sm" target="_blank" rel="noopener" data-wkwa="' + a.id + '" href="' + esc(wkWa(c, a)) + '">💬 واتساب</a>' : '') + (c.hx ? '<button class="sec sm" data-a="wkHx" data-v="' + a.id + '" data-c="' + c.code + '">📲 تذكير «زنها»' + (a.hxAt ? ' ✓' : '') + '</button>' : '') + '<button class="sec sm" data-a="wkIcs" data-v="' + a.id + '" data-c="' + c.code + '" title="ملف تقويم">📆</button>');
   return '<div class="wkappt' + (a.d === wkDay() && !a.st ? ' today' : '') + '"><span class="wkt"><b>' + esc(a.t || '—') + '</b><small>' + (withName ? esc(wkDate(a.d)) : esc(wkDate(a.d))) + '</small></span><span class="wki">' + (withName ? '<a href="#" data-a="wkOpen" data-v="' + c.code + '">' + esc(c.name || c.code) + '</a> • ' : '') + esc(a.type || 'متابعة') + (a.note ? ' — ' + esc(a.note) : '') + ' ' + st + '</span><span class="wka">' + act + '<button class="sec sm" data-a="wkDel" data-v="' + a.id + '" data-c="' + c.code + '" aria-label="حذف">🗑</button></span></div>';
 }
 function wkForm(clientSel) {
@@ -74,7 +74,7 @@ function wkAgenda() {
   var grp = function (t, list, cls) { return list.length ? '<div class="ucard' + (cls ? ' ' + cls : '') + '"><h3>' + t + ' (' + list.length + ')</h3>' + list.map(function (r) { return wkRowHtml(r[0], r[1], true); }).join('') + '</div>' : ''; };
   var open = rows.filter(function (r) { return !r[1].st; }), late = open.filter(function (r) { return r[1].d < today || (r[1].d === today && wkAt(r[1]) < Date.now() - 3600000); });
   var tday = open.filter(function (r) { return r[1].d === today && late.indexOf(r) < 0; }), tm = open.filter(function (r) { return r[1].d === tmr; }), week = open.filter(function (r) { return r[1].d > tmr && r[1].d <= wk; }), later = open.filter(function (r) { return r[1].d > wk; });
-  return '<div class="wkpage"><div class="hxtop"><h2>📅 المواعيد</h2><small class="small">تذكير داخل «حصة» قبل كل موعد بنصف ساعة، ورسالة تذكير للعميل بواتساب أو «حصتي» بضغطة</small></div>'
+  return '<div class="wkpage"><div class="hxtop"><h2>📅 المواعيد</h2><small class="small">تذكير داخل «حصة» قبل كل موعد بنصف ساعة، ورسالة تذكير للعميل بواتساب أو «زنها» بضغطة</small></div>'
     + '<div class="ucard"><h3>+ موعد جديد</h3>' + wkForm(true) + '</div>'
     + grp('⏰ فائتة لم يُسجَّل حضورها', late, 'wklate') + grp('اليوم — ' + wkDate(today), tday, 'wktoday') + grp('غداً', tm) + grp('خلال الأسبوع', week) + grp('لاحقاً', later.slice(0, 60))
     + (open.length ? '' : '<p class="small">لا مواعيد قادمة. أضف موعداً من هنا أو من تبويب «📅 المواعيد» في ملف العميل.</p>') + '</div>';
@@ -102,22 +102,22 @@ function wkLastTouch(c) {
 }
 function wkItems() {
   var out = [], today = wkDay(), now = Date.now(), fd = wkFollowDays(), add = function (c, pri, ic, txt, tab, key) { out.push({ c: c, pri: pri, ic: ic, txt: txt, tab: tab, key: (c ? c.code : '') + ':' + key }); };
-  if (HX.st && HX.st.reqs) { var nr = Object.keys(HX.st.reqs).filter(function (k) { return HX.st.reqs[k].st === 'new'; }).length; if (nr) add(null, 0, '📲', nr + (nr === 1 ? ' طلب جديد' : ' طلبات جديدة') + ' من «حصتي» بانتظار الاعتماد', 'hxv', 'req'); }
+  if (HX.st && HX.st.reqs) { var nr = Object.keys(HX.st.reqs).filter(function (k) { return HX.st.reqs[k].st === 'new'; }).length; if (nr) add(null, 0, '📲', nr + (nr === 1 ? ' طلب جديد' : ' طلبات جديدة') + ' من «زنها» بانتظار الاعتماد', 'hxv', 'req'); }
   S.clients.forEach(function (c) {
     var ap = c.appts || [], future = ap.some(function (a) { return !a.st && wkAt(a) >= now - 3600000; });
     ap.forEach(function (a) { if (a.st) return; if (a.d === today && wkAt(a) >= now - 3600000) add(c, 0, '📅', 'موعد اليوم ' + (a.t || '') + ' — ' + (a.type || 'متابعة'), 'appt', 'a' + a.id); else if (wkAt(a) < now - 3600000) add(c, 1, '⏰', 'موعد ' + wkDate(a.d) + ' لم يُسجَّل حضوره', 'appt', 'l' + a.id); });
     var x = c.hx;
     if (x) {
-      if (x.unread) add(c, 0, '💬', x.unread + (x.unread === 1 ? ' رسالة جديدة' : ' رسائل جديدة') + ' في «حصتي»', 'hx', 'msg');
-      if (x.health) add(c, 0, '🩺', 'يطلب تعديل حالته الصحية من «حصتي»', 'hx', 'health');
-      if (c.plan && !x.planV) add(c, 1, '📤', 'لديه خطة لم تُرسل إلى «حصتي»', 'hx', 'send');
+      if (x.unread) add(c, 0, '💬', x.unread + (x.unread === 1 ? ' رسالة جديدة' : ' رسائل جديدة') + ' في «زنها»', 'hx', 'msg');
+      if (x.health) add(c, 0, '🩺', 'يطلب تعديل حالته الصحية من «زنها»', 'hx', 'health');
+      if (c.plan && !x.planV) add(c, 1, '📤', 'لديه خطة لم تُرسل إلى «زنها»', 'hx', 'send');
       var ks = Object.keys(x.logs || {}).sort(), last = ks.length ? new Date(ks[ks.length - 1] + 'T12:00').getTime() : 0, recent = ks.filter(function (k) { return k >= wkAddDays(-3) && k < today; }).map(function (k) { var l = x.logs[k]; return l.n ? l.done / l.n : 0; });
       var p1 = x.logs[wkAddDays(-1)], p2 = x.logs[wkAddDays(-2)], pc = function (l) { return l && l.n ? l.done / l.n : 0; };   // 0.50: يومان متتاليان تحت 60%
       if (p1 && p2 && pc(p1) < 0.6 && pc(p2) < 0.6) add(c, 1, '📉', 'التزام منخفض يومين متتاليين: ' + Math.round(pc(p2) * 100) + '% ثم ' + Math.round(pc(p1) * 100) + '%', 'ci', 'low');
-      else if (recent.length >= 2) { var avg = recent.reduce(function (s, v) { return s + v; }, 0) / recent.length; if (avg < 0.5) add(c, 1, '📉', 'التزام منخفض في «حصتي»: ' + Math.round(avg * 100) + '% آخر ' + recent.length + ' أيام', 'ci', 'low'); }
+      else if (recent.length >= 2) { var avg = recent.reduce(function (s, v) { return s + v; }, 0) / recent.length; if (avg < 0.5) add(c, 1, '📉', 'التزام منخفض في «زنها»: ' + Math.round(avg * 100) + '% آخر ' + recent.length + ' أيام', 'ci', 'low'); }
       ks.filter(function (k) { return k >= wkAddDays(-3); }).forEach(function (k) { var l = x.logs[k], o = l.off || {}; if (o.sym) add(c, 0, '🤒', 'سجّل أعراضاً (' + wkDate(k) + ')' + (l.offT ? ': ' + l.offT.slice(0, 80) : ''), 'ci', 'sym' + k); if (o.change) add(c, 0, '✏️', 'يطلب تعديل النظام (' + wkDate(k) + ')' + (l.offT && !o.sym ? ': ' + l.offT.slice(0, 80) : ''), 'ci', 'chg' + k); });
       var offN = ks.filter(function (k) { var o = x.logs[k].off || {}; return k >= wkAddDays(-7) && (o.sweets || o.out || o.extra || o.drinks); }).length; if (offN >= 3) add(c, 2, '🍰', 'خرج عن النظام ' + offN + ' أيام هذا الأسبوع', 'ci', 'off');
-      if (x.planV && (x.sentAt || 0) < now - 2 * 86400000 && (!last || last < now - 2 * 86400000)) add(c, 1, '😶', 'لم يسجّل في «حصتي» منذ ' + (last ? Math.floor((now - last) / 86400000) + ' أيام' : 'استلام الخطة'), 'ci', 'quiet');
+      if (x.planV && (x.sentAt || 0) < now - 2 * 86400000 && (!last || last < now - 2 * 86400000)) add(c, 1, '😶', 'لم يسجّل في «زنها» منذ ' + (last ? Math.floor((now - last) / 86400000) + ' أيام' : 'استلام الخطة'), 'ci', 'quiet');
     }
     if (typeof ciWeights === 'function') { var Wt = ciWeights(c).filter(function (q) { return q.t >= now - 21 * 86400000; }); if (Wt.length >= 2) { var dd = (Wt[Wt.length - 1].t - Wt[0].t) / 86400000, loss = Wt[0].w - Wt[Wt.length - 1].w; if (dd >= 6 && loss > 0 && loss / Wt[0].w / (dd / 7) > 0.01) add(c, 1, '⚡', 'نزول سريع: ' + num(loss) + ' كجم في ' + Math.round(dd) + ' يوماً (أكثر من 1% أسبوعياً)', 'ci', 'fast'); } }   // 0.50
     if (!c.plan && c.name && (c.created || 0) < now - 86400000 && (c.created || 0) > now - 60 * 86400000) add(c, 2, '📝', 'بلا خطة بعد', 'plan', 'noplan');
@@ -131,7 +131,7 @@ function wkHide(k) { try { var o = { d: wkDay(), k: wkHidden() }; o.k[k] = 1; lo
 function wkToday() {
   var it = wkItems(), n = it.length, show = WK.all ? it : it.slice(0, 8), fd = wkFollowDays();
   return '<section class="ucard wktodo"><div class="hxtop"><h3>☀ من يحتاج اهتمامك اليوم' + (n ? ' <em class="hxnb">' + n + '</em>' : '') + '</h3><label class="small">المتابعة كل <select data-wkset="follow">' + [14, 21, 30, 45, 60, 90].map(function (d) { return '<option value="' + d + '"' + (d === fd ? ' selected' : '') + '>' + d + ' يوماً</option>'; }).join('') + '</select></label></div>'
-    + (n ? show.map(function (i) { return '<div class="wkit p' + i.pri + '"><span class="wkic">' + i.ic + '</span><button class="wkgo" data-a="wkGo" data-v="' + (i.c ? i.c.code : '') + '" data-t="' + i.tab + '"><b>' + esc(i.c ? i.c.name || i.c.code : 'حصتي') + '</b><small>' + esc(i.txt) + '</small></button><button class="sec sm wkx" data-a="wkHide" data-v="' + esc(i.key) + '" title="إخفاء حتى الغد" aria-label="إخفاء حتى الغد">✕</button></div>'; }).join('') + (n > 8 ? '<p><button class="sec sm" data-a="wkAll">' + (WK.all ? 'عرض أقل' : 'عرض الكل (' + n + ')') + '</button></p>' : '')
+    + (n ? show.map(function (i) { return '<div class="wkit p' + i.pri + '"><span class="wkic">' + i.ic + '</span><button class="wkgo" data-a="wkGo" data-v="' + (i.c ? i.c.code : '') + '" data-t="' + i.tab + '"><b>' + esc(i.c ? i.c.name || i.c.code : 'زنها') + '</b><small>' + esc(i.txt) + '</small></button><button class="sec sm wkx" data-a="wkHide" data-v="' + esc(i.key) + '" title="إخفاء حتى الغد" aria-label="إخفاء حتى الغد">✕</button></div>'; }).join('') + (n > 8 ? '<p><button class="sec sm" data-a="wkAll">' + (WK.all ? 'عرض أقل' : 'عرض الكل (' + n + ')') + '</button></p>' : '')
       : '<p class="small">لا شيء عاجل اليوم 🎉 — المواعيد والرسائل والالتزام المنخفض والمتابعات المستحقة تظهر هنا تلقائياً.</p>') + '</section>';
 }
 // ---------- الإجراءات
@@ -162,7 +162,7 @@ Object.assign(A, {
   },
   wkSt: function (v, el) { var r = wkFind(el.dataset.c, v); if (!r[1]) return; r[1].st = el.dataset.s; persist(r[0]); wkRe(); if (el.dataset.s === 'done') toast('✓ سُجّل الحضور — سجّل القياسات من «🩺 الملف الطبي» وحدّد الموعد التالي'); },
   wkDel: function (v, el) { var r = wkFind(el.dataset.c, v); if (!r[1] || !confirm('حذف الموعد؟')) return; r[0].appts = r[0].appts.filter(function (a) { return a.id !== v; }); persist(r[0]); wkRe(); },
-  wkHx: function (v, el) { var r = wkFind(el.dataset.c, v), c = r[0], a = r[1]; if (!a || !c.hx) return; var ts = Date.now(), t = wkWaText(c, a); hxSend(c, { t: 'msg', text: t, ts: ts }).then(function () { c.hx.msgs = (c.hx.msgs || []).concat([{ from: 'd', t: t, ts: ts }]); a.hxAt = ts; persist(c); wkRe(); toast('📲 وصل التذكير إلى «حصتي» مع إشعار'); }).catch(function (e) { toast('⚠ ' + e.message); }); },
+  wkHx: function (v, el) { var r = wkFind(el.dataset.c, v), c = r[0], a = r[1]; if (!a || !c.hx) return; var ts = Date.now(), t = wkWaText(c, a); hxSend(c, { t: 'msg', text: t, ts: ts }).then(function () { c.hx.msgs = (c.hx.msgs || []).concat([{ from: 'd', t: t, ts: ts }]); a.hxAt = ts; persist(c); wkRe(); toast('📲 وصل التذكير إلى «زنها» مع إشعار'); }).catch(function (e) { toast('⚠ ' + e.message); }); },
   wkIcs: function (v, el) { var r = wkFind(el.dataset.c, v); if (r[1]) dlFile(new Blob([wkIcs(r[0], r[1])], { type: 'text/calendar' }), 'موعد_' + fileBase(r[0]) + '_' + r[1].d + '.ics'); }
 });
 document.addEventListener('input', function (e) { var t = e.target; if (t.dataset && t.dataset.wkf) { WK.form = WK.form || {}; WK.form[t.dataset.wkf] = t.value; } });

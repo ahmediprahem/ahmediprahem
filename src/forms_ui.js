@@ -1,4 +1,4 @@
-// ================= محرر استبيانات «حصتي» (يُدمج داخل app.js عند /*FORMSUI*/) — الإعدادات ← 📝 الاستبيانات
+// ================= محرر استبيانات «زنها» (يُدمج داخل app.js عند /*FORMSUI*/) — الإعدادات ← 📝 الاستبيانات
 // استبيان لكل نظام (الحصص / الجرامات): تسمية الأقسام وترتيبها وإخفاؤها، نص الأسئلة الأساسية وإخفاؤها (عدا الأساسي جداً)،
 // وأسئلة وأقسام مخصّصة بأنواع مختلفة. يُحفظ في S.settings.forms (ويصل المستخدمين مع التصدير)، ويُرسل مع كل دعوة جديدة.
 var FMT = {}; HForms.TYPES.forEach(function (t) { FMT[t[0]] = t[1]; });
@@ -19,7 +19,7 @@ function fmAddForm(si) {
 }
 function formsPage() {
   var sys = fmSys(), spec = fmSpec(), n = spec.steps.length;
-  return '<h3>📝 استبيانات «حصتي»</h3><p class="small">ما يملؤه العميل في «حصتي» عند التسجيل. لكل نظام استبيانه: غيّر نص أي سؤال، أخفِ ما لا تحتاجه، رتّب الأقسام والأسئلة، وأضف أسئلة بأنواع مختلفة أو أقساماً جديدة. يُرسل الاستبيان مع كل دعوة جديدة، وتصلك الإجابات في طلب العميل وفي ملاحظاته.</p>'
+  return '<h3>📝 استبيانات «زنها»</h3><p class="small">ما يملؤه العميل في «زنها» عند التسجيل. لكل نظام استبيانه: غيّر نص أي سؤال، أخفِ ما لا تحتاجه، رتّب الأقسام والأسئلة، وأضف أسئلة بأنواع مختلفة أو أقساماً جديدة. يُرسل الاستبيان مع كل دعوة جديدة، وتصلك الإجابات في طلب العميل وفي ملاحظاته.</p>'
     + '<div class="tabs"><button class="' + (sys === 'ex' ? 'on' : '') + '" data-a="fmSys" data-v="ex">نظام الحصص</button><button class="' + (sys === 'g' ? 'on' : '') + '" data-a="fmSys" data-v="g">نظام الجرامات</button></div>'
     + '<p class="two"><button data-a="fmStepAdd">+ قسم جديد</button><button class="sec" data-a="fmPrint">🖨 نسخة ورقية للطباعة</button><button class="sec" data-a="fmReset">استعادة الاستبيان الافتراضي</button></p>'
     + spec.steps.map(function (st, si) {
@@ -30,7 +30,7 @@ function formsPage() {
         + (S.fadd === st.id ? fmAddForm(si) : '<button class="sec sm" data-a="fmQAdd" data-v="' + st.id + '">+ سؤال في هذا القسم</button>') + '</div>';
     }).join('');
 }
-function fmPrintHtml() {                                             // نسخة ورقية من الاستبيان (للعيادة أو لمن لا يستخدم «حصتي»)
+function fmPrintHtml() {                                             // نسخة ورقية من الاستبيان (للعيادة أو لمن لا يستخدم «زنها»)
   var sys = fmSys(), spec = fmSpec(), AD = window.ATHLETE, b = BR(), box = function (l) { return l.map(function (x) { return '<span class="o">☐ ' + esc(x) + '</span>'; }).join(''); }, line = '<div class="ln"></div>';
   var B = {
     sex: box(['ذكر', 'أنثى']), act: box(D.settings.activity.map(function (a) { return a[0]; })), goal: box(D.settings.goals.map(function (g) { return g[0].replace(/[−+]\d+/, '').trim(); })), gphase: box(AD.phases.map(function (x) { return x.n; })),

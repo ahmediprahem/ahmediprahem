@@ -1,5 +1,5 @@
-// ================= التثقيف: مساحة الأخصائي لنشر التثقيف الغذائي لمراجعيه على «حصتي» (يُدمج داخل app.js عند /*FEEDUI*/)
-// منشور «لمراجعيّ» يظهر لعملائك على «حصتي» فوراً (مع إشعار)، و«عام» يظهر لكل مراجعي «حصة» بعد موافقة الإدارة.
+// ================= التثقيف: مساحة الأخصائي لنشر التثقيف الغذائي لمراجعيه على «زنها» (يُدمج داخل app.js عند /*FEEDUI*/)
+// منشور «لمراجعيّ» يظهر لعملائك على «زنها» فوراً (مع إشعار)، و«عام» يظهر لكل مراجعي «حصة» بعد موافقة الإدارة.
 // الأنواع: موضوع، نصيحة، صور (تُضغط هنا قبل الرفع)، فيديو أو ريلز (ملف يحتاج R2 في المحطة، أو رابط يوتيوب).
 // الإدارة = نسخة المدير (admin) المتصلة بالمحطة: تطالب بالإشراف تلقائياً أول مرة، وتراجع المنشورات العامة. الوسائط تُجلب من المحطة كـ blob (سياسة أمان الموقع).
 var FD = { me: null, posts: [], more: false, busy: false, err: '', at: 0, pending: 0, open: {}, cm: {}, blobs: {}, f: { kind: 'text', scope: 'mine', title: '', body: '', link: '' }, files: [], up: '', filter: 'all' };
@@ -75,14 +75,14 @@ function fdCard(x) {
 }
 function fdPage() {
   if (HX.loaded !== true) return '<p class="small">جارٍ التحميل…</p>';
-  if (!hxOn()) return '<div class="fdpage"><h2>📣 التثقيف</h2><div class="warn">اربط «حصة» بالمحطة أولاً من الإعدادات ← «حصتي»، ثم انشر لمراجعيك نصائح ومواضيع وصوراً وفيديوهات يتصفحونها في تبويب «تثقيف» على «حصتي» ويعلّقون عليها.</div><p><button data-a="fdSetup">ربط «حصتي»</button></p></div>';
+  if (!hxOn()) return '<div class="fdpage"><h2>📣 التثقيف</h2><div class="warn">اربط «حصة» بالمحطة أولاً من الإعدادات ← «زنها»، ثم انشر لمراجعيك نصائح ومواضيع وصوراً وفيديوهات يتصفحونها في تبويب «تثقيف» على «زنها» ويعلّقون عليها.</div><p><button data-a="fdSetup">ربط «زنها»</button></p></div>';
   var me = FD.me || {}, list = FD.posts.filter(function (x) { return FD.filter === 'all' || (FD.filter === 'mine' ? x.own : FD.filter === 'pending' ? x.status === 'pending' : x.scope === 'public' && !x.own); });
   var tab = function (v, t) { return '<button class="' + (FD.filter === v ? '' : 'sec ') + 'sm" data-a="fdFilter" data-v="' + v + '">' + t + '</button>'; };
-  return '<div class="fdpage"><div class="hxtop"><h2>📣 التثقيف <small>مساحة مراجعيك على «حصتي»</small></h2><button class="sec" data-a="fdRefresh">↻ تحديث</button></div>'
+  return '<div class="fdpage"><div class="hxtop"><h2>📣 التثقيف <small>مساحة مراجعيك على «زنها»</small></h2><button class="sec" data-a="fdRefresh">↻ تحديث</button></div>'
     + (me.mod ? '<div class="ok">🛡 أنت إدارة المحطة: المنشورات العامة من الأخصائيين تنتظر موافقتك' + (FD.pending ? ' — <b>' + FD.pending + ' بانتظار المراجعة</b>' : '') + '. منشوراتك العامة تظهر مباشرة.</div>' : '')
     + (FD.err ? '<div class="warn">⚠ ' + esc(FD.err) + '</div>' : '')
     + '<div class="fdgrid"><div>' + fdComposer() + '</div><div><p class="fdfilters">' + tab('all', 'الكل') + tab('mine', 'منشوراتي') + tab('public', 'العامة من غيري') + (me.mod ? tab('pending', '⏳ المراجعة' + (FD.pending ? ' (' + FD.pending + ')' : '')) : '') + '</p>'
-    + (list.length ? list.map(fdCard).join('') : '<p class="small">' + (FD.at ? 'لا منشورات هنا بعد. ابدأ بنصيحة قصيرة — تصل مراجعيك على «حصتي» مع إشعار.' : 'جارٍ التحميل…') + '</p>')
+    + (list.length ? list.map(fdCard).join('') : '<p class="small">' + (FD.at ? 'لا منشورات هنا بعد. ابدأ بنصيحة قصيرة — تصل مراجعيك على «زنها» مع إشعار.' : 'جارٍ التحميل…') + '</p>')
     + (FD.more ? '<p><button class="sec" data-a="fdMore">المزيد</button></p>' : '') + '</div></div>'
     + '<p class="small">معرّفك في المحطة: <code dir="ltr">' + esc(HX.st.did || '') + '</code>' + (me.modSet || me.mod ? '' : ' — الإشراف يُفعَّل تلقائياً من نسخة المدير، أو بمتغير MOD_ID في المحطة') + '</p></div>';
 }
@@ -117,7 +117,7 @@ Object.assign(A, {
     FD.up = 'جارٍ النشر…'; main();
     next().then(function () { return fdApi('POST', '/v1/posts', { kind: f.kind, title: title, body: body, link: yt ? link : '', media: media, scope: f.scope }); }).then(function (j) {
       FD.files.forEach(function (x) { if (x.url) URL.revokeObjectURL(x.url); }); FD.files = []; FD.f = { kind: f.kind, scope: f.scope, title: '', body: '', link: '' }; FD.up = '';
-      toast(j.status === 'pending' ? '⏳ أُرسل المنشور العام للإدارة — يظهر لمراجعي «حصة» بعد الموافقة' : '✓ نُشر — يصل مراجعيك على «حصتي» الآن'); return fdLoad();
+      toast(j.status === 'pending' ? '⏳ أُرسل المنشور العام للإدارة — يظهر لمراجعي «حصة» بعد الموافقة' : '✓ نُشر — يصل مراجعيك على «زنها» الآن'); return fdLoad();
     }).catch(function (e) { FD.up = ''; main(); toast('⚠ ' + e.message); });
   },
   fdLike: function (v) { var x = fdPost(v); if (!x) return; fdApi('POST', '/v1/posts/' + x.id + '/like', { on: x.liked ? 0 : 1 }).then(function (j) { x.liked = j.liked; x.likes = j.likes; fdRe(); }).catch(function (e) { toast('⚠ ' + e.message); }); },

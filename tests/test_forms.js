@@ -1,4 +1,4 @@
-// استبيانات «حصتي» (src/forms.js): الافتراضي لكل نظام، والتطبيع (استكمال الأساسي، منع إخفاء الأساسي جداً، تنظيف المخصّص)، ونصوص الإجابات.
+// استبيانات «زنها» (src/forms.js): الافتراضي لكل نظام، والتطبيع (استكمال الأساسي، منع إخفاء الأساسي جداً، تنظيف المخصّص)، ونصوص الإجابات.
 'use strict';
 const assert = require('assert'), F = require('../src/forms.js');
 let n = 0; const t = (name, fn) => { try { fn(); n++; console.log('✔', name); } catch (e) { console.log('✘', name, '\n   ', e.message.slice(0, 400)); process.exitCode = 1; } };

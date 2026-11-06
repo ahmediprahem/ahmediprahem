@@ -1,4 +1,4 @@
-// مساعد مشترك (0.49+): محطة محلية + «حصة» على موقع محلي + «حصتي» على iPhone، ثم دعوة وتسجيل واعتماد وخطة مُرسلة.
+// مساعد مشترك (0.49+): محطة محلية + «حصة» على موقع محلي + «زنها» على iPhone، ثم دعوة وتسجيل واعتماد وخطة مُرسلة.
 const { fileUrl, TMP } = require('./_tmp.js');
 const { chromium, devices } = require('playwright'); const path = require('path'), fs = require('fs'), http = require('http'), login = require('./auth_helper'), d1 = require('./d1_shim.js');
 module.exports = async function linked(tag, errs, opts) {
@@ -14,7 +14,7 @@ module.exports = async function linked(tag, errs, opts) {
   const site = http.createServer((q, r) => { const f = { '/': '../admin.html', '/sw.js': '../src/hissa_sw.js' }[q.url.split('?')[0]]; if (!f) { r.writeHead(404); return r.end(); } r.writeHead(200, { 'content-type': f.endsWith('.js') ? 'text/javascript' : 'text/html; charset=utf-8' }); r.end(fs.readFileSync(path.resolve(__dirname, f))); });
   await new Promise((r) => site.listen(0, '127.0.0.1', r)); const SITE = 'http://127.0.0.1:' + site.address().port;
   const b = await chromium.launch(), dctx = await b.newContext({ viewport: { width: 1440, height: 900 }, acceptDownloads: true }), d = await dctx.newPage(); d.on('pageerror', (e) => errs.push('حصة: ' + e)); d.on('dialog', (x) => x.accept(x.type() === 'prompt' ? (globalThis.PR || '') : undefined));
-  const mctx = await b.newContext({ ...devices['iPhone 13'] }); await mctx.addInitScript(() => { try { localStorage.setItem('hissati_onb', '1'); } catch (e) { } }); const m = await mctx.newPage(); m.on('pageerror', (e) => errs.push('حصتي: ' + e)); m.on('dialog', (x) => x.accept());
+  const mctx = await b.newContext({ ...devices['iPhone 13'] }); await mctx.addInitScript(() => { try { localStorage.setItem('hissati_onb', '1'); } catch (e) { } }); const m = await mctx.newPage(); m.on('pageerror', (e) => errs.push('زنها: ' + e)); m.on('dialog', (x) => x.accept());
   const hxCheck = async () => { await d.click('main [data-a="hxCheck"]'); await d.waitForFunction(() => ![...document.querySelectorAll('.toast')].some((t) => t.textContent.includes('جارٍ التحقق')), null, { timeout: 8000 }); await d.waitForTimeout(300); };
   const cPoll = async () => { await m.evaluate(() => window.HissatiApp.flush()); await m.evaluate(() => window.HissatiApp.poll()); await m.waitForTimeout(250); };
   const C = () => d.evaluate(() => JSON.parse(JSON.stringify(DPApp.S.clients.find((x) => x.code === DPApp.S.cur) || DPApp.S.clients[0])));

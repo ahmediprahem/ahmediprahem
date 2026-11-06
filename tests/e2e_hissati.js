@@ -1,4 +1,4 @@
-// «حصة ↔ حصتي» من طرف إلى طرف: المحطة الحقيقية (worker/relay/dist/worker.js فوق خادم محلي + D1 بديل)، و«حصة» (admin.html)، و«حصتي» على جوال.
+// «حصة ↔ زنها» من طرف إلى طرف: المحطة الحقيقية (worker/relay/dist/worker.js فوق خادم محلي + D1 بديل)، و«حصة» (admin.html)، و«زنها» على جوال.
 // الدعوة برابط واتساب ← تسجيل العميل برمز دخول وأرقام عربية ← طلب في «حصة» ← اعتماد كعميل جديد ← إرسال الخطة ← المتابعة اليومية والوزن والمحادثة والتفضيلات في الاتجاهين.
 const { fileUrl, TMP } = require('./_tmp.js');
 const { chromium, devices } = require('playwright'); const assert = require('assert'), path = require('path'), fs = require('fs'), http = require('http'), login = require('./auth_helper'), d1 = require('./d1_shim.js'), HXC = require('../src/hx_crypto.js');
@@ -17,7 +17,7 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
   // اعتراض ما ترسله المحطة إلى خدمة إشعارات Google (الاشتراكات في الاختبار بديلة)
   const pushes = [], realFetch = globalThis.fetch; globalThis.fetch = (u, o) => /fcm\.googleapis\.com/.test(String(u)) ? (pushes.push({ u: String(u), o }), Promise.resolve(new Response(null, { status: 201 }))) : realFetch(u, o);
   const b = await chromium.launch({ channel: 'chromium' }), dctx = await b.newContext({ viewport: { width: 1440, height: 900 } }), d = await dctx.newPage(); d.on('pageerror', (e) => errs.push('حصة: ' + e)); d.on('dialog', (x) => x.accept(x.type() === 'prompt' ? 'أرجو كتابة جرعة الدواء' : undefined));
-  const mctx = await b.newContext({ ...devices['iPhone 13'] }); await mctx.addInitScript(() => { try { localStorage.setItem('hissati_onb', '1'); } catch (e) { } }); const m = await mctx.newPage(); m.on('pageerror', (e) => errs.push('حصتي: ' + e)); m.on('dialog', (x) => x.accept());
+  const mctx = await b.newContext({ ...devices['iPhone 13'] }); await mctx.addInitScript(() => { try { localStorage.setItem('hissati_onb', '1'); } catch (e) { } }); const m = await mctx.newPage(); m.on('pageerror', (e) => errs.push('زنها: ' + e)); m.on('dialog', (x) => x.accept());
   const hxCheck = async () => { await d.click('main [data-a="hxCheck"]'); await d.waitForFunction(() => !window.DPApp || ![...document.querySelectorAll('.toast')].some((t) => t.textContent.includes('جارٍ التحقق')), null, { timeout: 8000 }); await d.waitForTimeout(300); };
   const shot = async (pg, name) => { if (process.env.SHOTS) await pg.screenshot({ path: path.join(process.env.SHOTS, name + '.png') }); };
   const cPoll = async () => { await m.evaluate(() => window.HissatiApp.flush()); await m.evaluate(() => window.HissatiApp.poll()); await m.waitForTimeout(200); };
@@ -44,7 +44,7 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
   await m.click('[data-act="go"][data-v="pin"]'); for (const k of '1234') await m.click(`.pad [data-v="${k}"]`); await m.waitForSelector('text=أعد كتابة الرمز');
   for (const k of '1234') await m.click(`.pad [data-v="${k}"]`); await m.waitForSelector('.prog');
   assert.strictEqual(await m.inputValue('#f_name'), 'سارة أحمد'); const stored = await m.evaluate(() => localStorage.getItem('hissati_v1')); assert(stored && !stored.includes('سارة') && !stored.includes('"d"'));
-  ok('«حصتي»: يتحقق من الأخصائي ويُخفي الرمز من شريط العنوان، ورمز دخول مؤكد مرتين، والبيانات على الجوال مشفّرة (لا اسم مقروء)');
+  ok('«زنها»: يتحقق من الأخصائي ويُخفي الرمز من شريط العنوان، ورمز دخول مؤكد مرتين، والبيانات على الجوال مشفّرة (لا اسم مقروء)');
   // ---- 4) التسجيل بأرقام عربية + الصحة + الوجبات + الأكلات
   await m.click('#f_phone'); await m.keyboard.type('٠٥٥٤٠٧٩٤٠٤'); await m.click('#f_age'); await m.keyboard.type('٢٩'); await m.click('#f_weight'); await m.keyboard.type('٧٢٫٥'); await m.click('#f_height'); await m.keyboard.type('١٦٢');
   await shot(m, 'c2_basic'); await m.click('.foot .btn'); const cond = await m.textContent('.chip >> nth=1'); await m.click('.chip >> nth=1'); await m.click('.foot .btn');
@@ -63,14 +63,14 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
   assert.deepStrictEqual([c.name, c.phone, c.w, c.h, c.age, c.sex], ['سارة أحمد', '0554079404', 72.5, 162, 29, 'أنثى']); assert.deepStrictEqual(c.cond, [cond]); assert.deepStrictEqual(c.avoid, [hate]); assert.deepStrictEqual(c.love, [love]); assert.deepStrictEqual(c.fav, [likeB.trim()]); assert.strictEqual(c.ex, 1); assert(c.hx);
   assert(await d.isVisible('main .tabs [data-v="hx"]')); assert.strictEqual(await d.textContent('.rail [data-a="hxv"] em'), '');
   await cPoll(); await m.waitForSelector('text=اعتمدك أخصائيك'); assert((await m.textContent('.tl')).includes(c.code));
-  ok('«حصة»: طلب العميل يظهر بكل بياناته مع شارة، والاعتماد ينشئ عميلاً جديداً مملوءاً (الأكلات المكروهة في «يتجنبها»)، ويصل الاعتماد ورقم الملف إلى «حصتي»');
-  // ---- 6) الخطة ← «حصتي»
+  ok('«حصة»: طلب العميل يظهر بكل بياناته مع شارة، والاعتماد ينشئ عميلاً جديداً مملوءاً (الأكلات المكروهة في «يتجنبها»)، ويصل الاعتماد ورقم الملف إلى «زنها»');
+  // ---- 6) الخطة ← «زنها»
   await d.click('main .tabs [data-v="plan"]'); await d.evaluate(() => { const c = DPApp.S.clients.find((x) => x.code === DPApp.S.cur); if (c && c.kind !== 'athlete') { c.goal = c.goal || DATA.settings.goals[2][0]; c.activity = c.activity || DATA.settings.activity[2][0]; } if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); }).then(() => d.click('button:has-text("ولّد خطة جديدة")')); await d.waitForSelector('.pnav button');
   const planHas = await d.evaluate((f) => { const c = DPApp.S.clients.filter((x) => x.code === DPApp.S.cur)[0]; return c.plan.days.some((d) => d.slots.some((s) => s.lines.some((l) => l.name === f))); }, hate); assert.strictEqual(planHas, false, 'المحرك تجاهل «يتجنبها»');
   await d.click('main .tabs [data-v="hx"]'); await d.click('[data-a="hxSendPlan"]'); await d.waitForSelector('text=آخر خطة أُرسلت: v1');
   await cPoll(); await m.waitForSelector('.tabbar'); const meals = await m.locator('.card.meal').count(); assert(meals >= 3, String(meals));
   const inst = await m.textContent('.inst'); assert(inst.includes('إضافة إلى الشاشة الرئيسية') && inst.includes('إنشاء رمز النقل'), inst); await shot(m, 'c5_today'); const today = await m.evaluate(() => { const S = window.HissatiApp.state(); return { kcal: S.pm.kcal, days: S.plan.length, alts: S.plan[0].slots[0].lines[0][3].length }; }); assert(today.kcal > 1000 && today.days === 7 && today.alts > 0, JSON.stringify(today));
-  ok('الخطة تُرسل من تبويب «حصتي» في ملف العميل وتصل كاملة (7 أيام ووجبات وبدائل لكل صنف) فتفتح «حصتي» على شاشة «اليوم»');
+  ok('الخطة تُرسل من تبويب «زنها» في ملف العميل وتصل كاملة (7 أيام ووجبات وبدائل لكل صنف) فتفتح «زنها» على شاشة «اليوم»');
   // ---- 7) المتابعة اليومية والملاحظة والماء والوزن والمحادثة ← «حصة»
   await m.locator('.it .ck').nth(0).click(); await m.locator('.it .ck').nth(1).click(); await m.locator('.cups button').nth(2).click();
   await m.locator('[data-act="note"]').first().click(); await m.click('.sheet .chip >> nth=0'); await m.click('[data-act="savenote"]');
@@ -80,22 +80,22 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
   await m.waitForTimeout(2800); await cPoll();
   await d.click('main .tabs [data-v="client"]'); await hxCheck().catch(() => { }); await d.click('.rail [data-a="hxv"]'); await hxCheck(); await d.waitForSelector('.hxlinked .hxnb');
   await d.click('.hxlinked .cl'); await d.waitForSelector('.hxtab .hxday');
-  const tab = await d.textContent('.hxtab'); await shot(d, 'd2_client_tab'); for (const s of ['هل أقدر أبدّل الأرز بالبطاطس؟', 'أضفت شيئاً', '71.8', swTo]) assert(tab.includes(s), 'تبويب حصتي بلا: ' + s);
+  const tab = await d.textContent('.hxtab'); await shot(d, 'd2_client_tab'); for (const s of ['هل أقدر أبدّل الأرز بالبطاطس؟', 'أضفت شيئاً', '71.8', swTo]) assert(tab.includes(s), 'تبويب زنها بلا: ' + s);
   assert(/\d+%/.test(await d.textContent('.hxday')) && (await d.textContent('.hxday')).includes('0.75'));
   assert.strictEqual(await d.evaluate(() => DPApp.S.clients.filter((x) => x.code === DPApp.S.cur)[0].weight), 71.8);
   ok('المتابعة: ما علّمه العميل والماء والملاحظة والتبديل والوزن ورسالته تصل ملف العميل في «حصة» (والوزن يُحدَّث في بياناته)');
-  // ---- 8) رد الأخصائي ← إشعار في «حصتي» وعلامة القراءة
+  // ---- 8) رد الأخصائي ← إشعار في «زنها» وعلامة القراءة
   await d.fill('#hxMsg', 'نعم، بدّلي من زر ⇄ بنفس الحصة'); await d.press('#hxMsg', 'Enter'); await d.waitForSelector('.hxb.me');
   await m.click('[data-act="tab"][data-v="today"]'); await cPoll(); await m.waitForSelector('.chatbtn .nb'); assert.strictEqual(await m.textContent('.chatbtn .nb'), '1');
   await m.click('.chatbtn'); await shot(m, 'c6_chat'); assert((await m.textContent('#thread')).includes('بدّلي من زر')); await m.waitForTimeout(200); await cPoll(); await m.click('[data-act="chatClose"]');
   await hxCheck(); assert((await d.textContent('.hxb.me small')).includes('✓✓'));
-  ok('رد الأخصائي يصل «حصتي» بشارة على «راسل الأخصائي»، وفتح المحادثة يرسل علامة القراءة (✓✓) إلى «حصة»');
+  ok('رد الأخصائي يصل «زنها» بشارة على «راسل الأخصائي»، وفتح المحادثة يرسل علامة القراءة (✓✓) إلى «حصة»');
   // ---- 9) «لا أحب» بعد الخطة: يُستبدل في الجوال فوراً ويُضاف في «حصة» إلى «يتجنبها»
   const inPlan = await m.evaluate(() => { const S = window.HissatiApp.state(); return S.plan[0].slots[0].lines.find((l) => l[3].length)[1]; });
   await m.click('[data-act="tab"][data-v="prefs"]'); await m.fill('#fq_prefCat', inPlan); await m.waitForTimeout(100); await m.locator('.food', { hasText: inPlan }).first().click(); await m.locator('.food', { hasText: inPlan }).first().click();
   assert((await m.textContent('.toast')).includes('موضعاً')); assert.strictEqual(await m.evaluate((f) => window.HissatiApp.state().plan.some((d) => d.slots.some((s) => s.lines.some((l) => l[1] === f))), inPlan), false);
   await cPoll(); await hxCheck(); assert(await d.evaluate((f) => DPApp.S.clients.filter((x) => x.code === DPApp.S.cur)[0].avoid.includes(f), inPlan)); assert((await d.textContent('.hxpl')).includes(inPlan));
-  ok('«لا أحب» في «حصتي» يحذف الصنف من الخطة فوراً ببديل من نفس المجموعة، ويصل «حصة» فيُضاف إلى «أصناف يتجنبها»');
+  ok('«لا أحب» في «زنها» يحذف الصنف من الخطة فوراً ببديل من نفس المجموعة، ويصل «حصة» فيُضاف إلى «أصناف يتجنبها»');
   // ---- 10) القفل وإعادة الفتح، والمحطة لا تحتفظ بما استُلم
   await m.click('[data-act="tab"][data-v="progress"]'); await shot(m, 'c7_progress');
   // تجهيز الإشعارات قبل إعادة الفتح: السماح بالإشعارات، واشتراك بديل (Chromium بلا واجهة لا يتصل بخدمة Google)، واعتراض إرسال المحطة إلى خدمة الإشعارات
@@ -105,13 +105,13 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
   for (const k of '1234') await m.click(`.pad [data-v="${k}"]`); await m.waitForSelector('.tabbar'); assert.strictEqual(await m.evaluate(() => window.HissatiApp.state().pv), 1);
   const left = env.DB._raw.prepare('SELECT COUNT(*) AS n FROM msgs').get().n; assert(left <= 2, 'رسائل باقية في المحطة: ' + left);
   const sw = await m.evaluate(() => document.documentElement.scrollWidth - innerWidth); assert(sw <= 1, 'تمرير أفقي ' + sw);
-  ok('إعادة فتح «حصتي» تطلب رمز الدخول (الخطأ يُرفض) وتعود الخطة كما هي، والمحطة تحذف ما استُلم، ولا تمرير أفقي على الجوال');
+  ok('إعادة فتح «زنها» تطلب رمز الدخول (الخطأ يُرفض) وتعود الخطة كما هي، والمحطة تحذف ما استُلم، ولا تمرير أفقي على الجوال');
   // ---- 11) الإشعارات والتطبيق مغلق
   await m.waitForFunction(() => window.HissatiApp.state() && window.HissatiApp.state().pushEp, null, { timeout: 15000 });
   assert.strictEqual(env.DB._raw.prepare('SELECT ep FROM push_subs').get().ep, 'https://fcm.googleapis.com/fcm/send/e2e-device-0001');
   await m.click('[data-act="tab"][data-v="progress"]'); assert((await m.textContent('main, #root')).includes('الإشعارات مفعّلة'));
   const swi = await m.evaluate(async () => { const r = await navigator.serviceWorker.ready; return { scope: r.scope, active: !!r.active, ctl: !!navigator.serviceWorker.controller }; }); assert(swi.active && swi.scope === RELAY + '/', JSON.stringify(swi));
-  ok('بعد السماح: «حصتي» تسجّل عامل الخدمة وتشترك في الإشعارات تلقائياً، وتختفي دعوة التفعيل ويظهر «الإشعارات مفعّلة»');
+  ok('بعد السماح: «زنها» تسجّل عامل الخدمة وتشترك في الإشعارات تلقائياً، وتختفي دعوة التفعيل ويظهر «الإشعارات مفعّلة»');
   await d.fill('#hxMsg', 'تذكير: قِيسي وزنك صباح الغد'); await d.press('#hxMsg', 'Enter'); await d.waitForTimeout(800);
   const toC = pushes.filter((x) => /e2e-device/.test(x.u)); assert.strictEqual(toC.length, 1, 'رسالة الأخصائي يجب أن تُرسل إشعاراً'); assert(/^vapid t=.+, k=.+/.test(toC[0].o.headers.Authorization) && !toC[0].o.body);
   ok('رسالة الأخصائي ← المحطة ترسل إشعاراً موقّعاً بلا محتوى إلى خدمة إشعارات جوال العميل');
@@ -122,12 +122,12 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
   ok('وصول إشعار والتطبيق مفتوح: عامل الخدمة يوقظ التطبيق فيجلب الرسالة فوراً وتظهر الشارة (بلا انتظار الدورة الدورية)');
   const other = await mctx.newPage(); await other.goto('about:blank'); const cdp2 = await mctx.newCDPSession(other); await m.close(); await other.waitForTimeout(300);
   await cdp2.send('ServiceWorker.enable'); await cdp2.send('ServiceWorker.deliverPushMessage', { origin: RELAY, registrationId: reg.registrationId, data: '' }); await other.waitForTimeout(1200);
-  const m2 = await mctx.newPage(); m2.on('pageerror', (e) => errs.push('حصتي2: ' + e)); await m2.goto(RELAY + '/'); await m2.waitForSelector('.pad');
+  const m2 = await mctx.newPage(); m2.on('pageerror', (e) => errs.push('زنها2: ' + e)); await m2.goto(RELAY + '/'); await m2.waitForSelector('.pad');
   const notes = await m2.evaluate(async () => (await (await navigator.serviceWorker.ready).getNotifications()).map((x) => [x.title, x.body, x.tag]));
   assert.deepStrictEqual(notes, [['زنها', 'لديك جديد من أخصائيك — افتح «زنها»', 'hissati']], JSON.stringify(notes));
-  ok('وصول إشعار والتطبيق مغلق: يظهر إشعار «حصتي» على الجوال بنص عام (لا بيانات صحية في الإشعار)');
+  ok('وصول إشعار والتطبيق مغلق: يظهر إشعار «زنها» على الجوال بنص عام (لا بيانات صحية في الإشعار)');
   await mctx.setOffline(true); await m2.reload(); await m2.waitForSelector('.pad'); for (const k of '1234') await m2.click(`.pad [data-v="${k}"]`); await m2.waitForSelector('.tabbar'); await m2.waitForSelector('.offline');
-  await mctx.setOffline(false); ok('بلا إنترنت: «حصتي» تفتح من نسخة عامل الخدمة، وتعرض الخطة مع شارة «بلا اتصال»');
+  await mctx.setOffline(false); ok('بلا إنترنت: «زنها» تفتح من نسخة عامل الخدمة، وتعرض الخطة مع شارة «بلا اتصال»');
   // ---- 12) إشعارات الأخصائي على موقع «حصة»
   const dsub = env.DB._raw.prepare("SELECT id FROM push_subs WHERE ep LIKE '%e2e-dietitian%'").get(); assert(dsub, 'الأخصائي لم يشترك في الإشعارات');
   await d.click('.rail [data-a="settings"]'); await d.click('[data-a="setTab"][data-v="hx"]'); assert((await d.textContent('main')).includes('إشعارات المتصفح مفعّلة'));
@@ -180,8 +180,8 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
   ok('فتح التطبيق المثبّت أول مرة: يقبل لصق رسالة الدعوة أو رمزها فيبدأ التسجيل داخله؛ وعلى آيفون تشرح شاشة الدعوة «ثبّت أولاً» مع نسخ رمز الدعوة');
   await ip.evaluate(() => { const e = new Event('beforeinstallprompt', { cancelable: true }); e.prompt = () => { window.__prompted = 1; }; e.userChoice = Promise.resolve({ outcome: 'accepted' }); window.dispatchEvent(e); });
   await ip.click('[data-act="tab"][data-v="progress"]'); await ip.click('.inst [data-act="install"]'); assert.strictEqual(await ip.evaluate(() => window.__prompted), 1); await ip.waitForSelector('text=جارٍ التثبيت');
-  ok('حين يتيح المتصفح التثبيت (Chrome/أندرويد) يظهر زر «تثبيت «حصتي»» ويفتح نافذة التثبيت الأصلية');
-  // ---- التثقيف: الأخصائي ينشر من «حصة» (نصيحة، صور تُضغط وتُرفع، ريلز يوتيوب) ← تبويب «تثقيف» في «حصتي» بشارة «جديد» ← إعجاب وتعليق ← رد الأخصائي ← منشور عام من أخصائي آخر ينتظر الإدارة
+  ok('حين يتيح المتصفح التثبيت (Chrome/أندرويد) يظهر زر «تثبيت «زنها»» ويفتح نافذة التثبيت الأصلية');
+  // ---- التثقيف: الأخصائي ينشر من «حصة» (نصيحة، صور تُضغط وتُرفع، ريلز يوتيوب) ← تبويب «تثقيف» في «زنها» بشارة «جديد» ← إعجاب وتعليق ← رد الأخصائي ← منشور عام من أخصائي آخر ينتظر الإدارة
   {
     await d.click('.rail [data-a="feed"]'); await d.waitForSelector('.fdcomp'); await d.waitForSelector('.fdpage .ok:has-text("إدارة المحطة")', { timeout: 8000 });
     await d.click('[data-a="fdKind"][data-v="tip"]'); await d.fill('#fd_title', 'اشرب الماء قبل الوجبة'); await d.fill('#fd_body', 'كوب ماء قبل الوجبة بربع ساعة يساعد على الشبع.'); await d.click('[data-a="fdPost"]'); await d.waitForSelector('.toast:has-text("نُشر")');
@@ -201,11 +201,11 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
     await ip.waitForTimeout(300); assert.strictEqual(env.DB._raw.prepare("SELECT likes FROM posts WHERE title = 'اشرب الماء قبل الوجبة'").get().likes, 1);
     await ip.click(tip + ' [data-act="fdCm"]'); await ip.waitForSelector('#cmIn'); assert((await ip.textContent('.sheet')).includes('«سارة»')); await ip.fill('#cmIn', 'كم كوب يكفي؟'); await ip.click('[data-act="fdCmSend"]'); await ip.waitForSelector('.cms .cm:has-text("كم كوب يكفي؟")'); assert.strictEqual(await ip.inputValue('#cmIn'), '', 'المسودة تُفرَّغ بعد النشر');
     assert((await ip.textContent('.cms .cm')).includes('سارة')); await ip.click('.sheet [data-act="close"]');
-    ok('«حصتي»: تبويب «تثقيف» بشارة المنشورات الجديدة، الصور من المحطة، ريلز يوتيوب يُشغَّل داخل التطبيق (youtube-nocookie)، والإعجاب والتعليق باسم العميل الأول');
+    ok('«زنها»: تبويب «تثقيف» بشارة المنشورات الجديدة، الصور من المحطة، ريلز يوتيوب يُشغَّل داخل التطبيق (youtube-nocookie)، والإعجاب والتعليق باسم العميل الأول');
     await d.click('[data-a="fdRefresh"]'); await d.waitForSelector('.fdpost:has-text("اشرب الماء") [data-a="fdCm"]:has-text("1 تعليق")'); assert((await d.textContent('.fdpost:has-text("اشرب الماء") [data-a="fdLike"]')).includes('1'));
     await d.click('.fdpost:has-text("اشرب الماء") [data-a="fdCm"]'); await d.waitForSelector('.fdcm:has-text("كم كوب يكفي؟")'); await d.fill('[data-fdr]', 'من 6 إلى 8 أكواب يومياً'); await d.press('[data-fdr]', 'Enter'); await d.waitForSelector('.fdcm.dr:has-text("6 إلى 8")');
     await ip.click(tip + ' [data-act="fdCm"]'); await ip.waitForSelector('.cm.dr:has-text("6 إلى 8")'); assert((await ip.textContent('.cm.dr')).includes('أخصائي')); await ip.click('.sheet [data-act="close"]');
-    ok('الأخصائي يرى الإعجاب والتعليق ويرد من «حصة»، ويظهر رده مميزاً «أخصائي» في «حصتي»');
+    ok('الأخصائي يرى الإعجاب والتعليق ويرد من «حصة»، ويظهر رده مميزاً «أخصائي» في «زنها»');
     const B = await HXC.genIdentity(), callB = async (method, p, obj) => { const body = obj === undefined ? '' : JSON.stringify(obj); const r = await realFetch(RELAY + p, { method, headers: { 'content-type': 'application/json', authorization: await HXC.signReq(B, method, p, body) }, body: method === 'POST' ? body : undefined }); return r.json(); };
     await callB('POST', '/v1/register', { sigPub: B.sigPub, encPub: B.encPub, name: 'د. منى', regKey: 'clinic-key' }); assert.strictEqual((await callB('POST', '/v1/posts', { kind: 'text', title: 'الألياف وصحة الأمعاء', body: 'نص', scope: 'public' })).status, 'pending');
     await ip.evaluate(() => window.HissatiApp.feedLoad()); assert(!(await ip.evaluate(() => window.HissatiApp.feed().posts.some((x) => x.title === 'الألياف وصحة الأمعاء'))), 'المعلّق لا يظهر للمراجعين');
@@ -216,7 +216,7 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
     assert.strictEqual(env.DB._raw.prepare('SELECT COUNT(*) AS n FROM media').get().n, 0, 'حذف المنشور يحذف صوره'); await ip.click('[data-act="fdRefresh"]'); await ip.waitForFunction(() => !document.body.textContent.includes('طبق متوازن'));
     ok('المنشور العام من أخصائي آخر لا يظهر للمراجعين قبل موافقة الإدارة؛ يظهر للإدارة في «المراجعة» بشارة، وبعد الاعتماد يصل مراجعي «حصة» «منشوراً عاماً»؛ وحذف المنشور يحذفه وصوره');
   }
-  // ---- المرحلة 5: وصفة بصورة من محرر الحصص ← تصل مع الخطة وتُفتح بلمس الوجبة؛ صورة وجبة مشفّرة من «حصتي» ← تعليق سريع من «حصة»؛ تذكير الماء
+  // ---- المرحلة 5: وصفة بصورة من محرر الحصص ← تصل مع الخطة وتُفتح بلمس الوجبة؛ صورة وجبة مشفّرة من «زنها» ← تعليق سريع من «حصة»؛ تذكير الماء
   {
     const tgt = await d.evaluate(() => { const c = DPApp.S.clients.find((x) => x.name === 'سارة أحمد'), day = c.plan.days[new Date().getDay()], s = day.slots.find((q) => q.meal); return { meal: s && s.meal, code: c.code }; });
     assert(tgt.meal, 'وجبة من البنك في خطة اليوم');
@@ -230,14 +230,14 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
     await ip.evaluate(() => window.HissatiApp.poll()); await ip.click('[data-act="tab"][data-v="today"]'); await ip.waitForSelector('[data-act="rcp"]');
     await ip.locator('[data-act="rcp"]').first().click(); await ip.waitForSelector('.rcp'); const rt = await ip.textContent('.rcp'); assert(rt.includes('أضف المكونات وقلّب') && rt.includes('15 دقيقة') && rt.includes('المقادير لك'), rt);
     await ip.waitForFunction(() => { const i = document.querySelector('.rcp img'); return i && i.complete && i.naturalWidth > 100; }); await shot(ip, 'c13_recipe'); await ip.click('.sheet [data-act="close"]');
-    ok('الوصفات: تُكتب لوجبة البنك بخطوات ووقت (أرقام عربية) وصورة تُضغط، وتُرفع صورتها مرة عند إرسال الخطة، وتظهر في «حصتي» بلمس «الوصفة» مع مقادير العميل من خطته');
+    ok('الوصفات: تُكتب لوجبة البنك بخطوات ووقت (أرقام عربية) وصورة تُضغط، وتُرفع صورتها مرة عند إرسال الخطة، وتظهر في «زنها» بلمس «الوصفة» مع مقادير العميل من خطته');
     const [fc] = await Promise.all([ip.waitForEvent('filechooser'), ip.locator('[data-act="photo"]').first().click()]); await fc.setFiles(path.resolve(__dirname, '../assets/hissati/icon-512.png'));
     await ip.waitForSelector('.toast:has-text("أُرسلت صورة")'); await ip.evaluate(() => window.HissatiApp.flush()); await ip.waitForSelector('.phs figure img');
     const raw = env.DB._raw.prepare("SELECT body FROM msgs WHERE kind = 'e' ORDER BY id DESC LIMIT 1").get().body; assert(raw.length > 5000 && !raw.includes('/9j/'), 'الصورة مشفّرة');
     await hxCheck(); await d.waitForSelector('.phgrid figure.new img'); assert(await d.evaluate(() => document.querySelector('.phgrid img').src.startsWith('data:image/jpeg;base64,')));
     await d.click('.phgrid [data-a="phCm"] >> nth=0'); await d.waitForSelector('.phcm:has-text("ممتاز")');
     await ip.evaluate(() => window.HissatiApp.poll()); await ip.waitForSelector('.phs figcaption:has-text("ممتاز")'); await shot(ip, 'c14_photo');
-    ok('صور الوجبات: «صوّر وجبتك» تُضغط وتُرسل مشفّرة (المحطة لا ترى JPEG)، وتظهر في ملف العميل بـ«حصة»، والتعليق السريع يصل تحت الصورة في «حصتي»');
+    ok('صور الوجبات: «صوّر وجبتك» تُضغط وتُرسل مشفّرة (المحطة لا ترى JPEG)، وتظهر في ملف العميل بـ«حصة»، والتعليق السريع يصل تحت الصورة في «زنها»');
     await ip.click('[data-act="tab"][data-v="progress"]'); await ip.check('[data-rem="water"]'); const remRow = async (n) => { for (let i = 0; i < 80; i++) { const r = env.DB._raw.prepare('SELECT mins FROM remind').get(); if (r && JSON.parse(r.mins).length >= n) return r; await new Promise((z) => setTimeout(z, 100)); } return null; }; await remRow(6);
     const rr = env.DB._raw.prepare('SELECT mins FROM remind').get(); assert.strictEqual(JSON.parse(rr.mins).length, 6);
     const cache = await ip.evaluate(async () => (await (await caches.open('hissati-rem')).match('/rem')).json()); assert.strictEqual(cache.items.filter((x) => x.t === 'water').length, 6);
@@ -378,7 +378,7 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
     await ip.waitForSelector('#alm h1:has-text("أذكار الصباح")', { timeout: 4000 }); assert.strictEqual(await ip.evaluate(async () => !(await (await caches.open('hissati-rem')).match('/alarm'))), true, 'البنود تُحذف بعد العرض'); await ip.click('[data-alm="close"]');
     ok('المنبّه: يظهر كامل الشاشة بتصميم كل ثيم (الحالي/وردة/نبض) بالوقت والأيقونة، «تم» ينفّذ الفعل (كوب ماء، عادة الدواء، فتح الأذكار)، «غفوة 10 دقائق» تؤجّله، وبنود إشعار مُلمَس تُعرض بعد فتح التطبيق');
   }
-  if (process.env.SHOTS) {      // جولة لقطات لكل شاشات «حصتي» بالثيمات (للتصميم فقط؛ لا شروط). SHOT_THEMES=rose,pulse لتحديد الثيمات
+  if (process.env.SHOTS) {      // جولة لقطات لكل شاشات «زنها» بالثيمات (للتصميم فقط؛ لا شروط). SHOT_THEMES=rose,pulse لتحديد الثيمات
     const tour = async (th, sel, name) => { try { await ip.click(sel, { timeout: 3000, force: true }); await ip.waitForTimeout(650); await shot(ip, th + '_' + name); } catch (e) { } };
     const close = async () => { await ip.click('#adclose', { timeout: 600 }).catch(() => { }); await ip.click('.sheet [data-act="close"]', { timeout: 800 }).catch(() => { }); await ip.click('#cel', { timeout: 400 }).catch(() => { }); await ip.waitForTimeout(450); };
     for (const TH of (process.env.SHOT_THEMES || 'classic,rose,pulse').split(',')) {
@@ -400,5 +400,5 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
   await ictx.close(); await jctx.close();
   site.close(); globalThis.fetch = realFetch;
   assert.deepStrictEqual(errs, [], errs.join(' | ')); ok('لا أخطاء في وحدة التحكم');
-  console.log('\nنجح', n, 'اختبارات «حصة ↔ حصتي» من طرف إلى طرف'); await b.close(); srv.close();
+  console.log('\nنجح', n, 'اختبارات «حصة ↔ زنها» من طرف إلى طرف'); await b.close(); srv.close();
 })().catch((e) => { console.log('✘', String(e && e.stack || e).slice(0, 1500)); console.log('أخطاء:', JSON.stringify(errs).slice(0, 600)); process.exit(1); });

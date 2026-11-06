@@ -1,6 +1,6 @@
 // ================= التحديات الأسبوعية وشهادات التقدير (يُدمج داخل app.js عند /*CHALUI*/)
-// قوالب جاهزة لأول 4 أسابيع (الإعدادات ← «🏆 التحديات») يعدّلها الأخصائي، ثم من ملف العميل ← «حصتي»: برنامج 4 أسابيع أو تحدٍّ مخصّص
-// يُعدَّل قبل الإرسال. كل هدف = عادة + قيمة يومية + عدد أيام في الأسبوع. «حصتي» تحسب التقدّم من سجل العميل، وتولّد شهادة تقدير
+// قوالب جاهزة لأول 4 أسابيع (الإعدادات ← «🏆 التحديات») يعدّلها الأخصائي، ثم من ملف العميل ← «زنها»: برنامج 4 أسابيع أو تحدٍّ مخصّص
+// يُعدَّل قبل الإرسال. كل هدف = عادة + قيمة يومية + عدد أيام في الأسبوع. «زنها» تحسب التقدّم من سجل العميل، وتولّد شهادة تقدير
 // باسم العميل وشعار الأخصائي واسمه عند إتمام كل أسبوع، وتُبلغ الأخصائي بالإنجاز.
 var CH = { ed: null, tplEd: null };
 var CH_G = {   // العادة: [الاسم، الوحدة، القيمة الافتراضية، هل لها قيمة، وصف المعيار]
@@ -12,7 +12,7 @@ var CH_G = {   // العادة: [الاسم، الوحدة، القيمة الا
   gratitude: ['امتنان', 'نعمة', 3, 1, 'نعم يذكرها يومياً'], sunlight: ['شمس الصباح', 'دقيقة', 15, 1, 'دقيقة ضوء نهار'], breaks: ['حركة كل ساعة', 'مرة', 5, 1, 'فواصل حركة يومية'],
   reading: ['قراءة أو وِرد', 'دقيقة', 10, 1, 'دقيقة قراءة'], meds: ['الدواء في موعده', '', 1, 0, 'أخذ الدواء في موعده'], stretch: ['تمدّد وإطالة', 'دقيقة', 5, 1, 'دقيقة تمدّد'], postwalk: ['مشي بعد الوجبة', 'مرة', 1, 1, 'مرات مشي بعد الوجبات']
 };
-var CH_ADH_PM = 259;                                            // مجموع تكرارات أذكار المساء في «حصتي» (يفحص tests/test_habits_sync.js تطابقه)
+var CH_ADH_PM = 259;                                            // مجموع تكرارات أذكار المساء في «زنها» (يفحص tests/test_habits_sync.js تطابقه)
 // مكتبة 10 تحديات جاهزة (أسبوع إلى 4 أسابيع) يختار منها الأخصائي ثم يعدّل قبل الإرسال
 var CH_LIB = [
   { id: 'social7', n: '7 أيام بلا سوشيال ميديا', d: 'أسبوع استراحة رقمية: وقت وتركيز أكثر وسهر أقل.', weeks: [{ title: 'أسبوع الاستراحة الرقمية', msg: 'سبعة أيام نبتعد فيها عن التصفّح العشوائي ونملأ الوقت بما ينفعنا.', goals: [{ h: 'social', v: 1, d: 6 }, { h: 'sunset', v: 1, d: 5 }, { h: 'water', v: 8, d: 5 }] }] },
@@ -50,7 +50,7 @@ function chTpls() { var t = S.settings.chal && S.settings.chal.weeks; return chC
 function chDay(t) { var d = new Date(t || Date.now()); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
 function chAdd(k, n) { var d = new Date(k + 'T12:00'); d.setDate(d.getDate() + n); return chDay(d.getTime()); }
 function chGoalTxt(g) { var m = CH_G[g.h]; if (!m) return ''; return m[0] + (m[3] ? ' ' + (g.h === 'coffee' ? '≤ ' : '') + Number(g.v).toLocaleString('en') + ' ' + m[1] : '') + ' • ' + g.d + ' أيام'; }
-// نفس معيار «حصتي»: قيمة اليوم من سجل المتابعة
+// نفس معيار «زنها»: قيمة اليوم من سجل المتابعة
 function chOk(g, l) { if (!l) return false; var h = l.h || {}, v = g.h === 'water' ? l.water : g.h === 'plan' ? (l.n ? l.done / l.n * 100 : null) : h[g.h]; if (v == null) return false;
   switch (g.h) { case 'sugar': case 'kitchen': case 'social': case 'sunset': case 'meds': return v === 1; case 'mindful': return (v || []).length >= g.v; case 'coffee': return v <= g.v; case 'adhkar': return ((v && v.c) || []).reduce(function (a, x) { return a + (+x || 0); }, 0) >= 254; case 'adhkarPm': return ((v && v.c) || []).reduce(function (a, x) { return a + (+x || 0); }, 0) >= CH_ADH_PM; default: return +v >= +g.v; } }
 function chWeekProg(c, w, wi) { var logs = (c.hx && c.hx.logs) || {}, s = chAdd(c.hx.chal.start, wi * 7); return w.goals.map(function (g) { var n = 0; for (var i = 0; i < 7; i++) if (chOk(g, logs[chAdd(s, i)])) n++; return n; }); }
@@ -65,14 +65,14 @@ function chWeekEd(w, p, wi) {
 function chRef(p) { var a = p.split('.'); return a[0] === 'tpl' ? CH.tplEd[+a[1]] : CH.ed.weeks[+a[1]]; }
 function chTplPage() {
   CH.tplEd = CH.tplEd || chTpls();
-  return '<div class="ucard"><h3>🏆 قوالب تحديات أول 4 أسابيع</h3><p class="small">جاهزة ومتدرّجة؛ عدّلها كما تحب، وتُستعمل عند «ابدأ برنامج 4 أسابيع» من ملف أي عميل مرتبط بـ«حصتي» (ويمكن تعديلها لكل عميل قبل الإرسال). كل هدف: عادة + قيمة يومية + عدد الأيام المطلوبة في الأسبوع.</p>'
+  return '<div class="ucard"><h3>🏆 قوالب تحديات أول 4 أسابيع</h3><p class="small">جاهزة ومتدرّجة؛ عدّلها كما تحب، وتُستعمل عند «ابدأ برنامج 4 أسابيع» من ملف أي عميل مرتبط بـ«زنها» (ويمكن تعديلها لكل عميل قبل الإرسال). كل هدف: عادة + قيمة يومية + عدد الأيام المطلوبة في الأسبوع.</p>'
     + CH.tplEd.map(function (w, i) { return chWeekEd(w, 'tpl.' + i, i); }).join('') + '<p class="two"><button data-a="chTplSave">💾 حفظ القوالب</button><button class="sec" data-a="chTplReset">↺ القوالب الافتراضية</button></p></div>';
 }
 function chCard(c) {
   var x = c.hx, ch = x.chal, ach = x.ach || [];
   if (CH.ed && CH.ed.code === c.code) return '<div class="ucard chcard"><h3>🏆 ' + (CH.ed.weeks.length > 1 ? 'برنامج تحديات 4 أسابيع' : 'تحدٍّ مخصّص') + ' لـ' + esc(c.name) + '</h3><p class="small">عدّل ما تريد قبل الإرسال. تُضاف العادات المطلوبة إلى صفحة العميل تلقائياً، وتولَّد له شهادة تقدير باسمه وشعارك عند إتمام كل أسبوع.</p>'
     + '<label class="small">يبدأ في <input type="date" data-chf="start" value="' + esc(CH.ed.start) + '"></label>' + CH.ed.weeks.map(function (w, i) { return chWeekEd(w, 'ed.' + i, i); }).join('')
-    + '<p class="two"><button data-a="chSend">➤ أرسل إلى «حصتي»</button><button class="sec" data-a="chCancelEd">إلغاء</button></p></div>';
+    + '<p class="two"><button data-a="chSend">➤ أرسل إلى «زنها»</button><button class="sec" data-a="chCancelEd">إلغاء</button></p></div>';
   var head = '<div class="ucard chcard"><div class="hxtop"><h3>🏆 التحديات' + (ach.length ? ' <small>🏅 ' + ach.length + ' شهادة</small>' : '') + '</h3><p class="two"><button class="sm" data-a="chNew" data-v="prog">ابدأ برنامج 4 أسابيع</button><button class="sec sm" data-a="chNew" data-v="one">تحدٍّ مخصّص</button><button class="sec sm" data-a="chLib">📚 مكتبة التحديات (10)</button></p></div>' + (CH.lib ? chLibList() : '');
   if (!ch) return head + '<p class="small">قوالب جاهزة متدرّجة (الماء ← الحركة ← النوم ← أسلوب الحياة) تعدّلها قبل الإرسال. يتابعها العميل في «اليوم» ويحصل على شهادة تقدير عند إتمام كل أسبوع.</p></div>';
   var today = chDay(), cur = Math.floor((new Date(today + 'T12:00') - new Date(ch.start + 'T12:00')) / 864e5 / 7);
@@ -99,7 +99,7 @@ Object.assign(A, {
     toast('جارٍ الإرسال…');
     chLogo().then(function (logo) {
       var b = BR(), prog = { id: 'ch' + Date.now().toString(36), start: e.start, weeks: e.weeks.map(function (w) { return { title: String(w.title).trim().slice(0, 60), msg: String(w.msg || '').slice(0, 200), goals: w.goals.filter(function (g) { return CH_G[g.h]; }).map(function (g) { return { h: g.h, v: CH_G[g.h][3] ? Math.max(0, +String(g.v).replace(/[٠-٩]/g, function (d) { return d.charCodeAt(0) - 0x660; }) || 0) : 1, d: Math.max(1, Math.min(7, +g.d || 5)) }; }) }; }), dname: b.specialist || HX.st.name || '', clinic: b.clinic || '', logo: logo };
-      return hxSend(c, { t: 'chal', prog: prog }).then(function () { var p2 = chClone(prog); delete p2.logo; c.hx.chal = p2; CH.ed = null; persist(c); main(); toast('🏆 وصل التحدي إلى «حصتي» مع إشعار'); });
+      return hxSend(c, { t: 'chal', prog: prog }).then(function () { var p2 = chClone(prog); delete p2.logo; c.hx.chal = p2; CH.ed = null; persist(c); main(); toast('🏆 وصل التحدي إلى «زنها» مع إشعار'); });
     }).catch(hxErr);
   }
 });
