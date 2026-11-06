@@ -546,3 +546,7 @@ html[data-theme="pulse"] .alm{background:radial-gradient(70% 50% at 50% 30%,rgba
 .qa{transition:background .3s}.qa.cur{background:rgba(245,165,36,.25);border-radius:6px}
 .qn{font-size:.8em;color:#8a6d1f;white-space:nowrap}
 .qsrc{text-align:center}.qsrc a{color:var(--mint)}
+.qstat{position:sticky;top:0;z-index:2;display:grid;gap:2px;padding:10px 14px;border-radius:14px;background:rgba(12,21,52,.92);border:1px solid var(--line);backdrop-filter:blur(8px)}
+.qstat b{font-size:14px}.qstat span{font-size:12.5px;color:var(--mut)}
+.qa{cursor:pointer}.qa.bm{background:rgba(111,227,169,.28);border-radius:6px}
+.qbm{font-family:var(--font);font-size:11px;font-weight:700;color:#0e4a30;background:#bdebd1;border-radius:999px;padding:1px 8px;margin-inline-start:4px;vertical-align:middle;white-space:nowrap}
