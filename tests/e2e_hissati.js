@@ -124,7 +124,7 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
   await cdp2.send('ServiceWorker.enable'); await cdp2.send('ServiceWorker.deliverPushMessage', { origin: RELAY, registrationId: reg.registrationId, data: '' }); await other.waitForTimeout(1200);
   const m2 = await mctx.newPage(); m2.on('pageerror', (e) => errs.push('حصتي2: ' + e)); await m2.goto(RELAY + '/'); await m2.waitForSelector('.pad');
   const notes = await m2.evaluate(async () => (await (await navigator.serviceWorker.ready).getNotifications()).map((x) => [x.title, x.body, x.tag]));
-  assert.deepStrictEqual(notes, [['حصتي', 'لديك جديد من أخصائيك — افتح «حصتي»', 'hissati']], JSON.stringify(notes));
+  assert.deepStrictEqual(notes, [['زنها', 'لديك جديد من أخصائيك — افتح «زنها»', 'hissati']], JSON.stringify(notes));
   ok('وصول إشعار والتطبيق مغلق: يظهر إشعار «حصتي» على الجوال بنص عام (لا بيانات صحية في الإشعار)');
   await mctx.setOffline(true); await m2.reload(); await m2.waitForSelector('.pad'); for (const k of '1234') await m2.click(`.pad [data-v="${k}"]`); await m2.waitForSelector('.tabbar'); await m2.waitForSelector('.offline');
   await mctx.setOffline(false); ok('بلا إنترنت: «حصتي» تفتح من نسخة عامل الخدمة، وتعرض الخطة مع شارة «بلا اتصال»');

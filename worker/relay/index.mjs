@@ -1,11 +1,11 @@
-/* محطة «حصة ↔ حصتي» على Cloudflare Workers + قاعدة D1 (تعمل على الخطة المجانية).
-   - صندوق بريد مشفّر: تنقل رسائل مقفلة بين «حصة» (الأخصائي) و«حصتي» (العميل) ولا تستطيع قراءة محتواها؛ التشفير من طرف إلى طرف (src/hx_crypto.js).
+/* محطة «حصة ↔ زنها» على Cloudflare Workers + قاعدة D1 (تعمل على الخطة المجانية).
+   - صندوق بريد مشفّر: تنقل رسائل مقفلة بين «حصة» (الأخصائي) و«زنها» (العميل) ولا تستطيع قراءة محتواها؛ التشفير من طرف إلى طرف (src/hx_crypto.js).
    - كل طلب موقَّع بمفتاح صاحبه (ECDSA P-256)؛ المحطة تتحقق من التوقيع ومن العلاقة (العميل يراسل أخصائيه فقط، والأخصائي عملاءه فقط).
-   - تقدّم تطبيق «حصتي» نفسه على الصفحة الرئيسية (/)، فرابط الدعوة = عنوان هذه المحطة.
+   - تقدّم تطبيق «زنها» نفسه على الصفحة الرئيسية (/)، فرابط الدعوة = عنوان هذه المحطة.
    - الجداول تُنشأ تلقائياً أول مرة؛ يكفي ربط قاعدة D1 باسم DB. متغير اختياري REG_KEY: مفتاح تسجيل الأخصائيين (بدونه يقبل أي «حصة»).
-   - لا تسجّل أي محتوى (لا console.log). يُبنى منه worker/relay/dist/worker.js بـ py build_web.py (يُضمَّن تطبيق «حصتي» وأيقونته). */
+   - لا تسجّل أي محتوى (لا console.log). يُبنى منه worker/relay/dist/worker.js بـ py build_web.py (يُضمَّن تطبيق «زنها» وأيقونته). */
 const VER = '1.5';
-const APP_HTML = /*HISSATI_HTML*/'<!doctype html><meta charset="utf-8"><title>حصتي</title><p>ابنِ الملف بـ py build_web.py</p>'/*END*/;
+const APP_HTML = /*HISSATI_HTML*/'<!doctype html><meta charset="utf-8"><title>زنها</title><p>ابنِ الملف بـ py build_web.py</p>'/*END*/;
 const ICON_B64 = /*HISSATI_ICON*/''/*END*/;
 const SW_JS = /*HISSATI_SW*/''/*END*/;
 const QURAN_TXT = /*QURAN_TXT*/''/*END*/;                      // 0.58: نص المصحف (Tanzil، بلا تعديل) وخط Amiri Quran؛ يُطلبان عند فتح القارئ فقط ويُحفظان على الجوال
@@ -346,14 +346,14 @@ function appPage(url) {
   if (ic && ICONS[ic[1] + (ic[2] || '')]) return new Response(unb64u(ICONS[ic[1] + (ic[2] || '')]), { headers: { 'content-type': 'image/png', 'cache-control': 'public, max-age=604800' } });
   if (url.pathname === '/icon.png' && ICON_B64) return new Response(unb64u(ICON_B64), { headers: { 'content-type': 'image/png', 'cache-control': 'public, max-age=86400' } });
   if (url.pathname === '/manifest.webmanifest') {              // البيان يتبع ثيم العميل (?t=rose|pulse): أيقونة وألوان؛ المعرّف id ثابت فيبقى التطبيق نفسه
-    const th = url.searchParams.get('t'), sf = th === 'rose' ? '-rose' : th === 'pulse' ? '-pulse' : '', C = { '': ['#0c1534', '#121c45'], '-rose': ['#FAF6F2', '#FAF6F2'], '-pulse': ['#0A0C0F', '#0A0C0F'] }[sf];
+    const th = url.searchParams.get('t'), sf = th === 'rose' ? '-rose' : th === 'pulse' ? '-pulse' : '', C = { '': ['#0E1440', '#0E1440'], '-rose': ['#FAF6F2', '#FAF6F2'], '-pulse': ['#0A0C0F', '#0A0C0F'] }[sf];
     return new Response(JSON.stringify({
-      id: '/', name: 'حصتي — خطتك الغذائية', short_name: 'حصتي', description: 'خطتك من أخصائي التغذية، ومتابعة يومك، والمحادثة معه — مشفّرة على جوالك.', start_url: '/', scope: '/', display: 'standalone', orientation: 'portrait', dir: 'rtl', lang: 'ar',
+      id: '/', name: 'زنها — عافيتك اليومية', short_name: 'زنها', description: 'خطتك من أخصائي التغذية، ومتابعة يومك، والمحادثة معه — مشفّرة على جوالك.', start_url: '/', scope: '/', display: 'standalone', orientation: 'portrait', dir: 'rtl', lang: 'ar',
       background_color: C[0], theme_color: C[1], categories: ['health', 'food', 'lifestyle'], prefer_related_applications: false,
       icons: ICONS['icon-192'] ? [{ src: '/icon-192' + sf + '.png', sizes: '192x192', type: 'image/png', purpose: 'any' }, { src: '/icon-512' + sf + '.png', sizes: '512x512', type: 'image/png', purpose: 'any' }, { src: '/maskable-512' + sf + '.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }] : ICON_B64 ? [{ src: '/icon.png', sizes: '256x256', type: 'image/png' }] : []
     }), { headers: { 'content-type': 'application/manifest+json', 'cache-control': 'no-cache' } });
   }
-  if (url.pathname === '/' || url.pathname === '/index.html') return new Response(APP_HTML, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-cache', 'x-content-type-options': 'nosniff', 'referrer-policy': 'no-referrer', 'x-frame-options': 'DENY', 'content-security-policy': "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: 'self'; media-src 'self' https://everyayah.com; frame-src https://www.youtube-nocookie.com; font-src data: 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'" } });
+  if (url.pathname === '/' || url.pathname === '/index.html') return new Response(APP_HTML, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-cache', 'x-content-type-options': 'nosniff', 'referrer-policy': 'no-referrer', 'x-frame-options': 'DENY', 'content-security-policy': "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: 'self'; media-src 'self' https://everyayah.com https://www.hisnmuslim.com; frame-src https://www.youtube-nocookie.com; font-src data: 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'" } });
   if (url.pathname === '/q/v1/quran.txt' && QURAN_TXT) return new Response(QURAN_TXT, { headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'public, max-age=31536000, immutable', 'x-content-type-options': 'nosniff' } });
   if (url.pathname === '/q/v1/font.ttf' && QURAN_FONT) return new Response(Uint8Array.from(atob(QURAN_FONT), (c) => c.charCodeAt(0)), { headers: { 'content-type': 'font/ttf', 'cache-control': 'public, max-age=31536000, immutable', 'x-content-type-options': 'nosniff' } });
   if (url.pathname === '/sw.js' && SW_JS) return new Response(SW_JS, { headers: { 'content-type': 'text/javascript; charset=utf-8', 'cache-control': 'no-cache', 'x-content-type-options': 'nosniff' } });

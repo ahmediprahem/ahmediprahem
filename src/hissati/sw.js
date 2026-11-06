@@ -1,4 +1,4 @@
-// عامل الخدمة لـ«حصتي» (تقدّمه المحطة على /sw.js): إشعارات والتطبيق مغلق، وفتح سريع وبلا إنترنت.
+// عامل الخدمة لـ«زنها» (تقدّمه المحطة على /sw.js): إشعارات والتطبيق مغلق، وفتح سريع وبلا إنترنت.
 // الإشعار بلا محتوى عمداً: لا تمر بيانات صحية عبر خدمات الإشعارات؛ والبيانات نفسها مشفّرة برمز الدخول فلا يقرؤها عامل الخدمة أصلاً.
 const C = 'hissati-v3';
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(C).then((c) => c.addAll(['/', '/icon.png'])).catch(() => { }).then(() => self.skipWaiting())); });
@@ -17,17 +17,17 @@ async function remText() {                                   // كل البنو�
     return near.filter((o) => o.d <= near[0].d + 8).map((o) => o.x);
   } catch (e) { return null; }
 }
-const REMT = (x) => x.t === 'pr' ? '🕌 حان وقت صلاة ' + (x.label || '') : x.t === 'sal' ? 'ﷺ صلِّ على النبي — اللهم صلِّ وسلم على نبينا محمد' : x.t === 'appt' ? '📅 غداً موعد متابعتك ' + (x.label || '') + ' — أكّده من «حصتي»' : x.t === 'wk' ? '⚖ غداً موعد قياسك الأسبوعي — على الريق بعد دخول الحمام' : x.t === 'water' ? '💧 وقت كوب ماء — سجّله في «حصتي»' : x.t === 'adhAm' ? '📿 أذكار الصباح — ابدأ يومك بذكر الله' : x.t === 'adhPm' ? '🌙 أذكار المساء — حصّن مساءك بذكر الله' : x.t === 'med' ? '💊 موعد دوائك' + (x.label ? ' — ' + x.label : '') : '🍽 حان وقت ' + (x.label || 'وجبتك') + ' — افتح خطتك';
+const REMT = (x) => x.t === 'pr' ? '🕌 حان وقت صلاة ' + (x.label || '') : x.t === 'sal' ? 'ﷺ صلِّ على النبي — اللهم صلِّ وسلم على نبينا محمد' : x.t === 'appt' ? '📅 غداً موعد متابعتك ' + (x.label || '') + ' — أكّده من «زنها»' : x.t === 'wk' ? '⚖ غداً موعد قياسك الأسبوعي — على الريق بعد دخول الحمام' : x.t === 'water' ? '💧 وقت كوب ماء — سجّله في «زنها»' : x.t === 'adhAm' ? '📿 أذكار الصباح — ابدأ يومك بذكر الله' : x.t === 'adhPm' ? '🌙 أذكار المساء — حصّن مساءك بذكر الله' : x.t === 'med' ? '💊 موعد دوائك' + (x.label ? ' — ' + x.label : '') : '🍽 حان وقت ' + (x.label || 'وجبتك') + ' — افتح خطتك';
 self.addEventListener('push', (e) => {
   e.waitUntil((async () => {
     let kind = 'msg';
     try { const sub = await self.registration.pushManager.getSubscription(); if (sub) kind = (await (await fetch('/v1/push/last?ep=' + encodeURIComponent(sub.endpoint), { cache: 'no-store' })).json()).kind || 'msg'; } catch (x) { }
     const rems = kind === 'rem' ? await remText() : null; if (kind === 'rem' && !rems) return; const rem = rems ? rems[0] : null;           // تذكير أُلغي من الجوال: لا شيء
     const cl = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
-    const body = rems ? rems.map(REMT).join('\n') : kind === 'feed' ? '📣 منشور تثقيفي جديد من أخصائيك' : 'لديك جديد من أخصائيك — افتح «حصتي»';
+    const body = rems ? rems.map(REMT).join('\n') : kind === 'feed' ? '📣 منشور تثقيفي جديد من أخصائيك' : 'لديك جديد من أخصائيك — افتح «زنها»';
     cl.forEach((c) => c.postMessage(rem ? { t: 'rem', text: body, items: rems } : { t: 'push', kind }));          // التطبيق المفتوح يجلب الجديد فوراً (أو يعرض التذكير)
     if (cl.some((c) => c.visibilityState === 'visible')) return;          // ظاهر أمام المستخدم: يكفي التنبيه داخل التطبيق
-    await self.registration.showNotification(rem ? '⏰ ' + (rems.length > 1 ? 'تذكيراتك' : rem.t === 'pr' ? 'مواقيت الصلاة' : rem.t === 'sal' ? 'الصلاة على النبي ﷺ' : rem.t === 'appt' ? 'موعد متابعتك' : rem.t === 'wk' ? 'قياس الأسبوع' : rem.t === 'pr' ? 'مواقيت الصلاة' : rem.t === 'sal' ? 'الصلاة على النبي ﷺ' : rem.t === 'appt' ? 'موعد متابعتك' : rem.t === 'wk' ? 'قياس الأسبوع' : rem.t === 'med' ? 'موعد دوائك' : rem.t === 'adhAm' ? 'أذكار الصباح' : rem.t === 'adhPm' ? 'أذكار المساء' : rem.t === 'water' ? 'وقت الماء' : 'وقت وجبتك') : 'حصتي', Object.assign({ body, icon: '/icon.png', badge: '/icon.png', tag: rem ? 'hissati-rem' : 'hissati', renotify: true, lang: 'ar', dir: 'rtl' }, rem ? { requireInteraction: true, vibrate: [300, 120, 300, 120, 500], data: { items: rems } } : {}));
+    await self.registration.showNotification(rem ? '⏰ ' + (rems.length > 1 ? 'تذكيراتك' : rem.t === 'pr' ? 'مواقيت الصلاة' : rem.t === 'sal' ? 'الصلاة على النبي ﷺ' : rem.t === 'appt' ? 'موعد متابعتك' : rem.t === 'wk' ? 'قياس الأسبوع' : rem.t === 'pr' ? 'مواقيت الصلاة' : rem.t === 'sal' ? 'الصلاة على النبي ﷺ' : rem.t === 'appt' ? 'موعد متابعتك' : rem.t === 'wk' ? 'قياس الأسبوع' : rem.t === 'med' ? 'موعد دوائك' : rem.t === 'adhAm' ? 'أذكار الصباح' : rem.t === 'adhPm' ? 'أذكار المساء' : rem.t === 'water' ? 'وقت الماء' : 'وقت وجبتك') : 'زنها', Object.assign({ body, icon: '/icon.png', badge: '/icon.png', tag: rem ? 'hissati-rem' : 'hissati', renotify: true, lang: 'ar', dir: 'rtl' }, rem ? { requireInteraction: true, vibrate: [300, 120, 300, 120, 500], data: { items: rems } } : {}));
   })());
 });
 self.addEventListener('notificationclick', (e) => {
