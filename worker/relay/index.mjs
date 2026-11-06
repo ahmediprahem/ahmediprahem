@@ -8,6 +8,8 @@ const VER = '1.5';
 const APP_HTML = /*HISSATI_HTML*/'<!doctype html><meta charset="utf-8"><title>حصتي</title><p>ابنِ الملف بـ py build_web.py</p>'/*END*/;
 const ICON_B64 = /*HISSATI_ICON*/''/*END*/;
 const SW_JS = /*HISSATI_SW*/''/*END*/;
+const QURAN_TXT = /*QURAN_TXT*/''/*END*/;                      // 0.58: نص المصحف (Tanzil، بلا تعديل) وخط Amiri Quran؛ يُطلبان عند فتح القارئ فقط ويُحفظان على الجوال
+const QURAN_FONT = /*QURAN_FONT*/''/*END*/;
 const ICONS = /*HISSATI_ICONS*/{}/*END*/;                          // أيقونات التثبيت من المتصفح: icon-192 / icon-512 / maskable-512 / apple-180
 const LIM = { remind: 24, chunk: 900000, chunks: 40, keep: 7, xfer: 1500000, xferTtl: 900, body: 1600000, box: 450000, cat: 300000, label: 80, invitesActive: 300, perHour: 400, inbox: 100, skew: 300 };
 const enc = new TextEncoder();
@@ -351,7 +353,9 @@ function appPage(url) {
       icons: ICONS['icon-192'] ? [{ src: '/icon-192' + sf + '.png', sizes: '192x192', type: 'image/png', purpose: 'any' }, { src: '/icon-512' + sf + '.png', sizes: '512x512', type: 'image/png', purpose: 'any' }, { src: '/maskable-512' + sf + '.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }] : ICON_B64 ? [{ src: '/icon.png', sizes: '256x256', type: 'image/png' }] : []
     }), { headers: { 'content-type': 'application/manifest+json', 'cache-control': 'no-cache' } });
   }
-  if (url.pathname === '/' || url.pathname === '/index.html') return new Response(APP_HTML, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-cache', 'x-content-type-options': 'nosniff', 'referrer-policy': 'no-referrer', 'x-frame-options': 'DENY', 'content-security-policy': "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: 'self'; media-src 'self'; frame-src https://www.youtube-nocookie.com; font-src data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'" } });
+  if (url.pathname === '/' || url.pathname === '/index.html') return new Response(APP_HTML, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-cache', 'x-content-type-options': 'nosniff', 'referrer-policy': 'no-referrer', 'x-frame-options': 'DENY', 'content-security-policy': "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: 'self'; media-src 'self' https://everyayah.com; frame-src https://www.youtube-nocookie.com; font-src data: 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'" } });
+  if (url.pathname === '/q/v1/quran.txt' && QURAN_TXT) return new Response(QURAN_TXT, { headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'public, max-age=31536000, immutable', 'x-content-type-options': 'nosniff' } });
+  if (url.pathname === '/q/v1/font.ttf' && QURAN_FONT) return new Response(Uint8Array.from(atob(QURAN_FONT), (c) => c.charCodeAt(0)), { headers: { 'content-type': 'font/ttf', 'cache-control': 'public, max-age=31536000, immutable', 'x-content-type-options': 'nosniff' } });
   if (url.pathname === '/sw.js' && SW_JS) return new Response(SW_JS, { headers: { 'content-type': 'text/javascript; charset=utf-8', 'cache-control': 'no-cache', 'x-content-type-options': 'nosniff' } });
   if (url.pathname === '/robots.txt') return new Response('User-agent: *\nDisallow: /\n', { headers: { 'content-type': 'text/plain' } });
   return null;

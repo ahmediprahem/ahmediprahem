@@ -1,0 +1,56 @@
+// «تحدي الخمس» (0.58): الورد بالآيات من بيانات Tanzil (جزء = 8 أرباع مقسّمة 2-2-2-1-1 على الصلوات)، البطاقة والشاشة،
+// قارئ المصحف (نص Tanzil بلا تعديل يُحمَّل من المحطة)، اكتمال اليوم، يوم صعب، أيام العذر للسيدات فقط، الاستكمال من حيث توقف، والصوت مع الإنترنت فقط.
+const assert = require('assert'), linked = require('./hx_link_helper');
+let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
+(async () => {
+  const { m, close } = await linked('khams', errs);
+  const u = await m.evaluate(() => { const K = window.HissatiApp.khams, Q = K.meta(), d1 = K.portions('k', 0), all = []; for (let d = 0; d < 30; d++) all.push(...K.portions('k', d * 8)); return { d1, b1: K.portions('b', 0), s1: K.portions('s', 0), all, r: K.range(d1[0].a, d1[0].e), last: K.rel(all[all.length - 1].e), n: Q.n.length }; });
+  assert.strictEqual(u.n, 114);
+  assert.deepStrictEqual(u.d1.map((p) => [p.n, p.r]), [[50, 2], [31, 2], [31, 2], [18, 1], [18, 1]], JSON.stringify(u.d1));
+  assert.strictEqual(u.r, 'من الفاتحة 1 إلى البقرة 43');
+  assert.strictEqual(u.b1.length, 1); assert.strictEqual(u.s1.length, 4);
+  assert.strictEqual(u.all.length, 150); assert.strictEqual(u.all.reduce((a, p) => a + p.n, 0), 6236);
+  assert(u.all.every((p, i) => i === 0 ? p.a === 0 : p.a === u.all[i - 1].e + 1), 'الأوراد متتالية بلا فجوة ولا تكرار'); assert.deepStrictEqual(u.last, [114, 6]);
+  ok('الورد بالآيات: 30 يوماً × 5 أوراد = 6236 آية متتالية (يوم 1: الفاتحة 1 إلى البقرة 43 بعد الفجر)، و«بداية» ربع واحد، و«ثابت» 4 أرباع');
+  await m.waitForSelector('.khc'); await m.click('[data-act="khStart"]'); await m.waitForSelector('[data-act="khSetLv"][data-v="k"]'); await m.click('[data-act="khSetLv"][data-v="k"]');
+  await m.waitForSelector('.khs .khnext'); let tx = await m.textContent('.khnext'); assert(/صلاة الفجر/.test(tx), tx);
+  assert(await m.$('[data-act="khExc"]') === null || await m.evaluate(() => window.HissatiApp.state().p.sex === 'أنثى'), 'أيام العذر للسيدات فقط');
+  ok('بطاقة «تحدي الخمس» في «اليوم» ← اختيار المستوى ← الشاشة وبطاقة «التالي» بفعل واحد: صلاة الفجر');
+  await m.click('.khnext [data-act="khPr"]'); await m.waitForTimeout(150); tx = await m.textContent('.khnext'); assert(/ورد الفجر/.test(tx) && /الفاتحة 1 إلى البقرة 43/.test(tx), tx);
+  await m.click('.khnext [data-act="khRead"]'); await m.waitForSelector('.qtext .qa', { timeout: 15000 });
+  const rd = await m.evaluate(() => ({ n: document.querySelectorAll('.qtext .qa').length, s: document.querySelectorAll('.qsura').length, b: document.querySelectorAll('.qbsm').length, f: document.querySelector('.qa').textContent, src: document.querySelector('.qsrc').textContent }));
+  assert.strictEqual(rd.n, 50); assert.strictEqual(rd.s, 2); assert.strictEqual(rd.b, 1, 'البسملة سطر مستقل في البقرة، وهي آية في الفاتحة'); assert(rd.f[0] === 'ب' && /﴿1﴾$/.test(rd.f.trim()), rd.f); assert(/Tanzil/.test(rd.src));
+  const fr = await m.evaluate(async () => { const r = await fetch('/q/v1/font.ttf'); const t = await fetch('/q/v1/quran.txt'); const x = await t.text(); return [r.status, r.headers.get('content-type'), t.status, x.split('\n').filter((l) => l && l[0] !== '#').length, /PLEASE DO NOT REMOVE OR CHANGE THIS COPYRIGHT BLOCK/.test(x), !!(await (await caches.open('hx-quran-v1')).match('/q/v1/quran.txt'))]; });
+  assert.deepStrictEqual(fr, [200, 'font/ttf', 200, 6236, true, true]);
+  ok('قارئ المصحف: ورد الفجر 50 آية بسورتيها والبسملة، والنص كاملاً من المحطة (6236 آية مع حقوق Tanzil) محفوظ على الجوال، والخط Amiri Quran');
+  const asked = []; await m.context().route('https://everyayah.com/**', (r) => { asked.push(r.request().url()); r.fulfill({ status: 404, body: '' }); });
+  assert(await m.$('[data-act="khPlay"]')); await m.click('[data-act="khPlay"]'); await m.waitForTimeout(600);
+  assert(asked.some((x) => /Alafasy_128kbps\/001001\.mp3$/.test(x)), JSON.stringify(asked));
+  await m.context().setOffline(true); await m.evaluate(() => { window.dispatchEvent(new Event('offline')); window.HissatiApp.render(); }); await m.waitForTimeout(200);
+  assert(!(await m.$('[data-act="khPlay"]')) && /الاستماع يحتاج اتصالاً بالإنترنت/.test(await m.textContent('.qtools')), 'زر الصوت يختفي بلا إنترنت'); assert.strictEqual(await m.locator('.qtext .qa').count(), 50, 'القراءة تعمل بلا إنترنت');
+  await m.context().setOffline(false); await m.evaluate(() => { window.dispatchEvent(new Event('online')); });
+  ok('الصوت اختياري ومع الإنترنت فقط: زر «استمع للورد» يطلب الآية 001001 من everyayah، ويختفي بلا اتصال بينما تبقى القراءة');
+  await m.click('[data-act="khRDone"]'); await m.waitForSelector('.khs .khnext');
+  let S = await m.evaluate(() => { const K = window.HissatiApp.state().kh; return { pos: K.pos, wd: Object.values(K.days)[0].wd }; }); assert.strictEqual(S.pos, 2); assert.strictEqual(S.wd[0], 1);
+  ok('«أتممت الورد» يعلّم ورد الفجر ويحرّك موضع الختمة (ربعان)');
+  for (let i = 1; i < 5; i++) { await m.click('[data-act="khPr"][data-v="' + i + '"]'); await m.click('[data-act="khWd"][data-v="' + i + '"]'); }
+  await m.evaluate(() => { const A = window.HissatiApp; A.state().log = A.state().log || {}; }); const wg = await m.evaluate(() => +document.querySelector('.khrow:nth-child(3) small').textContent.match(/من (\d+)/)[1]);
+  for (let i = 0; i < wg; i++) await m.click('.khrow [data-act="khW"][data-v="1"]');
+  await m.click('[data-act="khAm"]'); await m.click('[data-act="khPm"]'); for (let i = 0; i < 6; i++) await m.click('.khrow [data-act="khSk"][data-v="10"]');
+  await m.waitForTimeout(200); const h2 = await m.textContent('.khday h2'); assert.strictEqual(h2, 'اكتمل يومك');
+  S = await m.evaluate(() => window.HissatiApp.state().kh.pos); assert.strictEqual(S, 8, 'جزء كامل = 8 أرباع');
+  ok('الأركان الخمسة (الصلوات، الأوراد، الماء حسب الخطة، الأذكار، ساعة التطوير) ← «اكتمل يومك»، والختمة تقدّمت جزءاً');
+  await m.evaluate(() => { const S = window.HissatiApp.state(), K = S.kh, k = Object.keys(K.days)[0]; delete K.days[k]; K.pos = 3; window.HissatiApp.render(); });
+  tx = await m.evaluate(() => document.querySelector('.khrow:nth-child(2) .khsub').textContent); assert(/البقرة 60/.test(tx), tx);
+  ok('الاستكمال من حيث توقف: يوم جديد يبدأ ورده من موضع الختمة الحالي (الربع 4 = البقرة 60)');
+  await m.click('[data-act="khHard"]'); await m.click('[data-act="khPr"][data-v="0"]'); await m.click('[data-act="khWd"][data-v="0"]'); await m.waitForTimeout(100);
+  let st = await m.evaluate(() => window.HissatiApp.khams.state(new Date())); assert.strictEqual(st[1], true, 'يوم صعب: أي ورد يكفي');
+  ok('«يوم صعب»: الحد الأدنى يكفي (أي ورد، كوبان، ذكر واحد، 10 دقائق)');
+  await m.evaluate(() => { window.HissatiApp.state().p.sex = 'ذكر'; window.HissatiApp.render(); }); assert.strictEqual(await m.$('[data-act="khExc"]'), null);
+  await m.evaluate(() => { window.HissatiApp.state().p.sex = 'أنثى'; window.HissatiApp.render(); }); await m.click('[data-act="khExc"]'); await m.waitForTimeout(100);
+  st = await m.evaluate(() => window.HissatiApp.khams.state(new Date())); assert(st[0] && st[1]); assert(/خارج الحساب/.test(await m.textContent('.khpil')));
+  ok('«أيام العذر» للسيدات فقط: الصلاة والورد خارج حساب اليوم دون كسر السلسلة');
+  await m.click('[data-act="khX"]'); await m.waitForSelector('.khmini'); assert(/تحدي الخمس • اليوم 1 من 30/.test(await m.textContent('.khmini')));
+  ok('بطاقة مختصرة في «اليوم» بعد البدء: اليوم 1 من 30 وحالة اليوم');
+  assert.deepStrictEqual(errs, []); await close(); console.log('\nنجح ' + n + ' اختبارات تحدي الخمس');
+})().catch((e) => { console.log('✘', String(e && e.stack || e).slice(0, 1500)); console.log('أخطاء:', JSON.stringify(errs).slice(0, 600)); process.exit(1); });

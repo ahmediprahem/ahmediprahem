@@ -448,6 +448,8 @@ function prCard() { const P = prNow(); if (!P) return ''; const n = new Date(), 
   return '<section class="card prc"><div class="row" style="justify-content:space-between"><h3>🕌 مواقيت الصلاة • ' + esc(S.rem.prCity) + '</h3>' + (nx ? '<span class="dim">التالية: ' + PRN[nx] + ' ' + hm12(m2hm(P[nx])) + '</span>' : '') + '</div><div class="prrow">' + ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'].map((k) => '<div class="' + (k === nx ? 'on' : '') + '"><small>' + PRN[k] + '</small><b>' + hm12(m2hm(P[k])) + '</b></div>').join('') + '</div></section>'; }
 function stepsWeek() { let tot = 0, nd = 0; for (let i = 0; i < 7; i++) { const L = S.log[dkey(new Date(now() - i * 864e5))], v = L && L.h && +L.h.steps; if (v) { tot += v; nd++; } } return { tot, nd, avg: nd ? Math.round(tot / nd) : 0 }; }
 
+/*KHAMS*/
+
 // ---------- مساعدات
 function toast(m) { toastMsg = m; clearTimeout(toastT); toastT = setTimeout(() => { toastMsg = ''; render(); }, 3400); render(); }
 function bmi() { const w = +S.p.weight, h = +S.p.height / 100; return w && h ? (w / (h * h)).toFixed(1) : '—'; }
@@ -726,7 +728,7 @@ function scrApp() {
 function tabToday() {
   const d = TODAY, L = dl(d), [done, n] = itemsOfDay(d), pct = n ? Math.round(done / n * 100) : 0, C = 2 * Math.PI * 40;
   const first = (S.p.name || '').trim().split(/\s+/)[0] || '';
-  let out = (S.fw === 'pending' ? firstWinCard() : installState() === 'done' || installState() === 'desktop' ? notifCard(true) : installCard('today')) + '<div class="hello"><div class="av sm">' + esc(first.charAt(0) || '؟') + '</div><div style="flex:1"><div class="dim">' + esc(DATA.dayNames[d] || '') + '</div><h2>أهلاً ' + esc(first) + '</h2></div>' + chatBtn() + '</div>' + chalCard() + prCard() + apCard() + wkCard() + bdCard() + panCard() + pfCard();
+  let out = (S.fw === 'pending' ? firstWinCard() : installState() === 'done' || installState() === 'desktop' ? notifCard(true) : installCard('today')) + '<div class="hello"><div class="av sm">' + esc(first.charAt(0) || '؟') + '</div><div style="flex:1"><div class="dim">' + esc(DATA.dayNames[d] || '') + '</div><h2>أهلاً ' + esc(first) + '</h2></div>' + chatBtn() + '</div>' + khCard() + chalCard() + prCard() + apCard() + wkCard() + bdCard() + panCard() + pfCard();
   out += '<section class="card ring"><svg viewBox="0 0 100 100" role="img" aria-label="التزام اليوم ' + pct + '%"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="10"/><circle cx="50" cy="50" r="40" fill="none" stroke="#6fe3a9" stroke-width="10" stroke-linecap="round" stroke-dasharray="' + C + '" stroke-dashoffset="' + (C * (1 - pct / 100)) + '"/></svg><div style="flex:1"><div class="num">' + pct + '%</div><div class="mut">' + done + ' من ' + n + ' أصناف اليوم</div>'
     + (pct === 100 ? '<div class="dim" style="color:var(--mint)">يوم كامل، أحسنت!</div>' : '<div class="dim">علّم ما أكلته باللمس.</div>') + '</div></section>';
   const dp = dayPlan(d), kc = dp.kcal || DATA.kcal, pr = dp.p || DATA.pro, wt = +(dp.water || DATA.water), cups = Math.max(4, Math.min(16, Math.round(wt / CUP)));
@@ -1197,7 +1199,7 @@ function achStats() {
 function achSheet() {
   const L = (S.ach || []).slice().reverse();
   return '<div class="astats">' + achStats().map((s) => '<div><span>' + s[0] + '</span><b>' + s[1] + '</b><small>' + s[2] + '</small></div>').join('') + '</div>'
-    + (L.length ? '<div class="clist">' + L.map((a) => '<button class="cthumb" data-act="cert" data-v="' + a.id + '"><img data-cert="' + a.id + '" alt="شهادة"><span><b>' + (a.w === 99 ? '🏆 البرنامج كاملاً' : 'الأسبوع ' + a.w) + '</b><small>' + esc(a.title) + ' • ' + new Date(a.at).toLocaleDateString('ar') + '</small></span></button>').join('') + '</div>'
+    + (L.length ? '<div class="clist">' + L.map((a) => '<button class="cthumb" data-act="cert" data-v="' + a.id + '"><img data-cert="' + a.id + '" alt="شهادة"><span><b>' + (a.w === 99 ? '🏆 البرنامج كاملاً' : a.w === 97 ? 'تحدي الخمس' : 'الأسبوع ' + a.w) + '</b><small>' + esc(a.title) + ' • ' + new Date(a.at).toLocaleDateString('ar') + '</small></span></button>').join('') + '</div>'
       : '<div class="empty"><div class="ei">🏅</div><p class="dim">' + (S.chal ? 'أتمّ أهداف تحدي هذا الأسبوع لتحصل على أول شهادة تقدير باسمك.' : 'حين يرسل لك أخصائيك تحدياً أسبوعياً، تظهر هنا شهاداتك عند إتمامه.') + '</p></div>');
 }
 function certSheet() { const a = (S.ach || []).find((x) => x.id === sheet.v); if (!a) return ''; return '<img class="certbig" data-cert="' + a.id + '" alt="شهادة التقدير"><div class="row">' + '<button class="btn sm" data-act="certdl" data-v="png">' + I('share') + ' صورة</button><button class="btn sm sec" data-act="certdl" data-v="pdf">PDF</button>' + (navigator.share ? '<button class="btn sm sec" data-act="certdl" data-v="share">مشاركة</button>' : '') + '</div><p class="dim">' + esc(a.phrase) + '</p>'; }
@@ -1215,13 +1217,13 @@ async function certCanvas(a) {
   g.strokeStyle = '#d4a72c'; g.lineWidth = 3; g.beginPath(); g.moveTo(W / 2 - 170, y + 24); g.lineTo(W / 2 + 170, y + 24); g.stroke();
   g.fillStyle = '#44506b'; g.font = F(400, 34); g.fillText('تُمنح هذه الشهادة ' + (a.sex === 'أنثى' ? 'للمتميّزة' : 'للمتميّز'), W / 2, y + 90);
   g.fillStyle = '#1f8a5b'; g.font = F(700, 92); g.fillText(a.name || 'بطل حصتي', W / 2, y + 200);
-  g.fillStyle = '#12305e'; g.font = F(400, 36); g.fillText((a.sex === 'أنثى' ? 'لإتمامها ' : 'لإتمامه ') + (a.w === 99 ? a.title + ' بنجاح' : a.w === 98 ? a.title : 'تحدي الأسبوع ' + a.w + ': «' + a.title + '»'), W / 2, y + 275);
+  g.fillStyle = '#12305e'; g.font = F(400, 36); g.fillText((a.sex === 'أنثى' ? 'لإتمامها ' : 'لإتمامه ') + (a.w === 99 ? a.title + ' بنجاح' : a.w === 98 || a.w === 97 ? a.title : 'تحدي الأسبوع ' + a.w + ': «' + a.title + '»'), W / 2, y + 275);
   g.fillStyle = '#5b6680'; g.font = F(400, 26); const ln = a.lines.slice(0, 6), rows = [ln.slice(0, 3).join('    '), ln.slice(3).join('    ')].filter(Boolean); rows.forEach((r, i) => g.fillText(r, W / 2, y + 335 + i * 42));
   g.fillStyle = '#b8860b'; g.font = F(700, 38); g.fillText('“ ' + a.phrase + ' ”', W / 2, y + 335 + rows.length * 42 + 60);
   const by = H - 150; g.fillStyle = '#12305e'; g.font = F(700, 32); g.fillText(a.dname || 'أخصائي التغذية', W - 360, by); g.strokeStyle = '#9aa6c0'; g.lineWidth = 2; g.beginPath(); g.moveTo(W - 540, by + 22); g.lineTo(W - 180, by + 22); g.stroke();
   g.fillStyle = '#5b6680'; g.font = F(400, 24); g.fillText('أخصائي التغذية' + (a.clinic ? ' — ' + a.clinic : ''), W - 360, by + 60);
   g.fillStyle = '#12305e'; g.font = F(700, 30); g.fillText(new Date(a.at).toLocaleDateString('ar', { day: 'numeric', month: 'long', year: 'numeric' }), 360, by); g.beginPath(); g.moveTo(180, by + 22); g.lineTo(540, by + 22); g.stroke(); g.fillStyle = '#5b6680'; g.font = F(400, 24); g.fillText('التاريخ', 360, by + 60);
-  g.fillStyle = '#9aa6c0'; g.font = F(400, 20); g.fillText('حصتي • ' + (a.w === 99 ? 'برنامج التحديات الصحية' : 'تحديات العادات الصحية'), W / 2, H - 88);
+  g.fillStyle = '#9aa6c0'; g.font = F(400, 20); g.fillText('حصتي • ' + (a.w === 99 ? 'برنامج التحديات الصحية' : a.w === 97 ? 'تحدي الخمس' : 'تحديات العادات الصحية'), W / 2, H - 88);
   return cv;
 }
 function certUrl(a) { return CERT[a.id] || (CERT[a.id] = certCanvas(a).then((cv) => cv.toDataURL('image/jpeg', 0.9))); }
@@ -1251,7 +1253,8 @@ function celebrateAch(a) {
 function sheetHtml() {
   if (!sheet) return '';
   let h = '', b = '';
-  if (sheet.t === 'swap') {
+  if (String(sheet.t).slice(0, 2) === 'kh') [h, b] = khSheet();
+  else if (sheet.t === 'swap') {
     const [si, li] = sheet.k.split('_').map(Number), l = dayPlan(TODAY).slots[si].lines[li], no = foodsOf('no');
     const alts = (l[3] || []).filter((a) => !no.includes(a[0]));
     h = 'بدّل الصنف'; b = '<p class="dim">بدائل من نفس المجموعة ونفس الحصص، فتبقى خطتك متوازنة.</p><div class="opt" style="opacity:.7">' + I('utensils') + '<span>' + esc(lineT(l)) + ' <span class="dim">(الحالي)</span></span></div>'
@@ -1331,7 +1334,7 @@ function render() {
   const sc = $('.scroll'), key = (S ? S.screen + S.step + S.tab + (S.chat ? 'c' : '') : '') + V.screen, top = sc ? sc.scrollTop : 0;
   let scr;
   if (V.screen === 'boot') scr = scrBoot(); else if (V.screen === 'bad') scr = scrBad(); else if (V.screen === 'start') scr = scrStart(); else if (V.screen === 'moved') scr = scrMoved(); else if (V.screen === 'lock') scr = scrLock(); else if (V.screen === 'pin') scr = scrPin(); else if (V.screen === 'onb') scr = scrOnb();
-  else scr = V.wk ? scrWk() : V.bd ? scrBody() : V.pan != null ? scrPantry() : V.pf != null ? scrProf() : S.rqOpen && window.RL && RL.idx ? scrQuiz() : S.chat ? scrChat() : S.plan && S.screen === 'app' ? scrApp() : { invite: scrInvite, wizard: scrWizard, review: scrReview, sent: scrSent, app: scrSent }[S.screen]();
+  else scr = V.qr ? scrReader() : V.kh && S.kh && S.kh.on ? scrKhams() : V.wk ? scrWk() : V.bd ? scrBody() : V.pan != null ? scrPantry() : V.pf != null ? scrProf() : S.rqOpen && window.RL && RL.idx ? scrQuiz() : S.chat ? scrChat() : S.plan && S.screen === 'app' ? scrApp() : { invite: scrInvite, wizard: scrWizard, review: scrReview, sent: scrSent, app: scrSent }[S.screen]();
   const keep = {}; document.querySelectorAll('video[data-keep]').forEach((n) => { keep[n.dataset.keep] = n; });
   const cmI = $('#cmIn'), cmV = cmI ? [cmI.value, document.activeElement === cmI] : null;          // مسودة التعليق تبقى عند إعادة الرسم (وصول التعليقات مثلاً)
   $('#root').innerHTML = '<div class="stage"><div class="device">' + (V.online ? '' : '<div class="offline">بلا اتصال — تُرسل بياناتك عند عودة الإنترنت</div>') + scr + (S ? sheetHtml() : '') + (toastMsg ? '<div class="toast" role="status">' + I('check') + '<span>' + esc(toastMsg) + '</span></div>' : '') + '</div></div>';
@@ -1405,6 +1408,7 @@ async function boot() {
 document.addEventListener('click', (e) => {
   const el = e.target.closest('[data-act]'); if (!el || el.tagName === 'SELECT' || el.dataset.act === 'consent' || el.disabled) return;
   const a = el.dataset.act, v = el.dataset.v, k = el.dataset.k;
+  if (a.slice(0, 2) === 'kh' && S) { if (khAct(a, v)) render(); return; }
   switch (a) {
     case 'onbNext': onbNextStage(1); return;
     case 'onbPrev': onbNextStage(-1); return;
@@ -1627,6 +1631,6 @@ document.addEventListener('input', (e) => {
 });
 window.addEventListener('online', () => { V.online = true; poll(); });
 window.addEventListener('offline', () => { V.online = false; render(); });
-window.HissatiApp = { state: () => S, poll, flush, feed: () => FD, feedLoad: fdLoad, celebrateTest: (id) => celebrate(id), alarm: (items) => almShow(items), alarmTick: almTick, alarmFire: almFire, remItems, render, prayTimes };     // للاختبارات
+window.HissatiApp = { state: () => S, poll, flush, feed: () => FD, feedLoad: fdLoad, celebrateTest: (id) => celebrate(id), alarm: (items) => almShow(items), alarmTick: almTick, alarmFire: almFire, remItems, render, prayTimes, khams: { portions: khPortions, range: khRange, state: khState, rel: khRel, meta: () => QM } };     // للاختبارات
 boot();
 })();
