@@ -737,7 +737,7 @@ function scrApp() {
 function tabToday() {
   const d = TODAY, L = dl(d), [done, n] = itemsOfDay(d), pct = n ? Math.round(done / n * 100) : 0, C = 2 * Math.PI * 40;
   const first = (S.p.name || '').trim().split(/\s+/)[0] || '';
-  let out = (S.fw === 'pending' ? firstWinCard() : installState() === 'done' || installState() === 'desktop' ? notifCard(true) : installCard('today')) + helloHd(d) + (t2Offer() ? t2Card() : '') + khCard() + chalCard() + prCard() + apCard() + wkCard() + bdCard() + panCard() + pfCard();
+  let out = renameCard() + (S.fw === 'pending' ? firstWinCard() : installState() === 'done' || installState() === 'desktop' ? notifCard(true) : installCard('today')) + helloHd(d) + (t2Offer() ? t2Card() : '') + khCard() + chalCard() + prCard() + apCard() + wkCard() + bdCard() + panCard() + pfCard();
   out += '<section class="card ring"><svg viewBox="0 0 100 100" role="img" aria-label="التزام اليوم ' + pct + '%"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="10"/><circle cx="50" cy="50" r="40" fill="none" stroke="#6fe3a9" stroke-width="10" stroke-linecap="round" stroke-dasharray="' + C + '" stroke-dashoffset="' + (C * (1 - pct / 100)) + '"/></svg><div style="flex:1"><div class="num">' + pct + '%</div><div class="mut">' + done + ' من ' + n + ' أصناف اليوم</div>'
     + (pct === 100 ? '<div class="dim" style="color:var(--mint)">يوم كامل، أحسنت!</div>' : '<div class="dim">علّم ما أكلته باللمس.</div>') + '</div></section>';
   const dp = dayPlan(d), kc = dp.kcal || DATA.kcal, pr = dp.p || DATA.pro, wt = +(dp.water || DATA.water), cups = Math.max(4, Math.min(16, Math.round(wt / CUP)));
@@ -776,9 +776,20 @@ function nextMeal(d) {                                  // الوجبة التي
   for (let si = 0; si < sl.length; si++) if (!fin(si)) return si;
   return Math.max(0, cur);
 }
+// 0.60: «حصتي» صار «زنها» — لمن ثبّت التطبيق قبل الاسم الجديد. أندرويد يحدّث الأيقونة والاسم تلقائياً من البيان؛
+// آيفون يثبّت الأيقونة والاسم وقت الإضافة، والأيقونة الجديدة لها تخزين منفصل، فننقل الحساب برمز النقل الموجود.
+function renameCard() {
+  if (!S || S.zRen || !standalone) return '';
+  const ios = isIOS, xfer = !!S.cid;
+  return '<section class="card stack zren"><div class="row" style="gap:12px;align-items:center"><span class="zrmk" aria-hidden="true">' + (window.HX_LOGO ? '<img alt="" src="/icon-192.png?v=z1" width="44" height="44" style="border-radius:12px">' : '') + '</span><div style="flex:1"><h3>«حصتي» صار «زِنها»</h3><p class="dim">اسم وشكل جديدان، وخطتك وبياناتك كما هي.</p></div></div>'
+    + (ios ? '<p class="mut">آيفون لا يغيّر أيقونة التطبيق المثبّت. الأيقونة القديمة تعمل كما هي، ولتحصل على الأيقونة الجديدة:</p><ol class="steps">' + (xfer ? '<li>أنشئ رمز النقل وانسخه</li>' : '') + '<li>افتح ' + esc(location.host) + ' في Safari، ثم المشاركة ← «إضافة إلى الشاشة الرئيسية»</li><li>افتح «زنها» من الأيقونة الجديدة' + (xfer ? ' واختر «لديّ حساب في متصفح أو جوال آخر» وألصق الرمز' : '') + '</li><li>بعد أن تجد خطتك، احذف الأيقونة القديمة</li></ol>'
+      + '<div class="row" style="gap:8px;flex-wrap:wrap">' + (xfer ? '<button class="btn sm" data-act="xferNew">' + I('phone') + ' أنشئ رمز النقل</button>' : '') + '<button class="btn sm sec" data-act="zRenOk">أبقيت القديمة</button></div>'
+      : '<p class="mut">تتحدث الأيقونة والاسم على جوالك تلقائياً خلال يوم أو يومين. إن لم يتغيرا: من قائمة Chrome ⋮ اختر «تثبيت التطبيق» من جديد، وتبقى بياناتك.</p><button class="btn sm sec" data-act="zRenOk">حسناً</button>')
+    + '</section>';
+}
 function tabToday2() {
   const d = TODAY, [done, n] = itemsOfDay(d), pct = n ? Math.round(done / n * 100) : 0, C = 2 * Math.PI * 40, dp = dayPlan(d), kc = dp.kcal || DATA.kcal, pr = dp.p || DATA.pro;
-  let out = helloHd(d);
+  let out = renameCard() + helloHd(d);
   out += '<section class="card t2ring"><div class="row"><svg viewBox="0 0 100 100" role="img" aria-label="التزام اليوم ' + pct + '%"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="12"/><circle cx="50" cy="50" r="40" fill="none" stroke="#6fe3a9" stroke-width="12" stroke-linecap="round" stroke-dasharray="' + C + '" stroke-dashoffset="' + (C * (1 - pct / 100)) + '"/></svg>'
     + '<div class="t2k"><b class="num">' + pct + '%</b><span class="dim">' + done + ' من ' + n + ' أصناف</span></div><div class="t2m"><b>' + kc + '</b><span class="dim">سعرة' + (dp.type ? ' اليوم' : '') + '</span></div><div class="t2m"><b>' + pr + ' جم</b><span class="dim">بروتين</span></div></div>'
     + (dp.type ? '<p class="dim">' + I('dumbbell') + ' ' + esc(dp.type) + ' • كارب ' + dp.c + ' جم • دهون ' + dp.f + ' جم</p>' : '') + waterRow() + '</section>';
@@ -1584,6 +1595,7 @@ document.addEventListener('click', (e) => {
     case 'toLock': V.screen = 'lock'; V.err = ''; break;
     case 'install': if (bip) { bip.prompt(); bip.userChoice.then((c) => { if (c && c.outcome === 'accepted') toast('جارٍ التثبيت…'); bip = null; render(); }).catch(() => { }); } return;
     case 'instLater': S.instLater = now(); break;
+    case 'zRenOk': S.zRen = now(); save(); break;
     case 'copyInv': copyText(S.tok + '.' + S.fp, 'نُسخ رمز الدعوة — ألصقه في «زنها» بعد فتحه من الشاشة الرئيسية'); return;
     case 'copyLink': copyText(API + '/#t=' + S.tok + '.' + S.fp, 'نُسخ الرابط — افتحه في Chrome أو Safari'); return;
     case 'useInv': {

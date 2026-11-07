@@ -145,7 +145,7 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
   ok('رسالة العميل ← إشعار للأخصائي بلا محتوى، ووصوله يوقظ «حصة» المفتوحة فتجلب الرسالة فوراً وتظهر الشارة');
   // ---- 13) التثبيت من المتصفح: الأيقونات والبيان، ونقل الحساب إلى «التطبيق المثبّت» (تخزين منفصل كآيفون)، ورمز الدعوة داخل التطبيق
   const man = await (await realFetch(RELAY + '/manifest.webmanifest')).json(); assert.strictEqual(man.display, 'standalone'); assert.strictEqual(man.start_url, '/');
-  const sizes = {}; for (const ic of man.icons) { const buf = Buffer.from(await (await realFetch(RELAY + ic.src)).arrayBuffer()); sizes[ic.src] = [buf.readUInt32BE(16), buf.readUInt32BE(20), ic.purpose]; }
+  const sizes = {}; for (const ic of man.icons) { const buf = Buffer.from(await (await realFetch(RELAY + ic.src)).arrayBuffer()); sizes[ic.src.split('?')[0]] = [buf.readUInt32BE(16), buf.readUInt32BE(20), ic.purpose]; }
   assert.deepStrictEqual(sizes, { '/icon-192.png': [192, 192, 'any'], '/icon-512.png': [512, 512, 'any'], '/maskable-512.png': [512, 512, 'maskable'] }); assert.strictEqual((await realFetch(RELAY + '/apple-180.png')).status, 200);
   ok('قابل للتثبيت: البيان كامل (standalone) بأيقونات 192 و512 وأيقونة قابلة للقص لأندرويد، وأيقونة آيفون 180');
   await m2.click('[data-act="chatClose"]').catch(() => { }); await goMe(m2); await m2.click('[data-act="xferNew"]'); await m2.waitForSelector('.xcode'); await shot(m2, 'c10_xfer');
@@ -356,7 +356,7 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
       assert.deepStrictEqual(await lk(), ['/manifest.webmanifest?t=' + t, '/apple-180-' + t + '.png', '/icon-192-' + t + '.png'], 'أيقونة التطبيق وبيانه يتبعان الثيم');
       const mf = await (await realFetch(RELAY + '/manifest.webmanifest?t=' + t)).json(); assert.strictEqual(mf.id, '/'); assert.strictEqual(mf.theme_color, meta); assert(mf.icons.every((x) => x.src.includes('-' + t + '.png')), JSON.stringify(mf.icons));
       const png = async (u) => Buffer.from(await (await realFetch(RELAY + u)).arrayBuffer()); const a = await png('/icon-512-' + t + '.png'), c0 = await png('/icon-512.png'); assert(a.slice(1, 4).toString() === 'PNG' && a.length > 5000 && !a.equals(c0), 'أيقونة ' + t + ' مختلفة عن الحالية'); assert.strictEqual((await realFetch(RELAY + '/apple-180-' + t + '.png')).status, 200);
-      await ip.reload(); assert.strictEqual(await ip.evaluate(() => document.documentElement.getAttribute('data-theme')), t, 'الثيم يُطبَّق قبل الرسم'); assert.deepStrictEqual(await lk(), ['/manifest.webmanifest?t=' + t, '/apple-180-' + t + '.png', '/icon-192-' + t + '.png'], 'وروابط الأيقونة قبل الرسم أيضاً'); await ip.waitForSelector('.pad');
+      await ip.reload(); assert.strictEqual(await ip.evaluate(() => document.documentElement.getAttribute('data-theme')), t, 'الثيم يُطبَّق قبل الرسم'); assert.deepStrictEqual(await lk(), ['/manifest.webmanifest?t=' + t, '/apple-180-' + t + '.png?v=z1', '/icon-192-' + t + '.png?v=z1'], 'وروابط الأيقونة قبل الرسم أيضاً'); await ip.waitForSelector('.pad');
       assert.strictEqual(await ip.evaluate(() => getComputedStyle(document.body).backgroundColor), bg, 'نفس الخلفية على شاشة القفل');
       for (const k of '5678') await ip.click('.pad [data-v="' + k + '"]'); await ip.waitForSelector('.tabbar'); await goMe(ip); await ip.waitForSelector('.hx-themes');
     }
