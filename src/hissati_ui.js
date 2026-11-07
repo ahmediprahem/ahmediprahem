@@ -1,4 +1,4 @@
-// ================= «زنها»: ربط «حصة» بتطبيق العميل عبر المحطة الوسيطة (يُدمج داخل app.js عند /*HXUI*/)
+// ================= «زنها»: ربط «زنها Pro» بتطبيق العميل عبر المحطة الوسيطة (يُدمج داخل app.js عند /*HXUI*/)
 // الأخصائي يدعو العميل برابط (واتساب) ← العميل يسجّل بياناته في «زنها» ← تصل هنا «طلب عميل» فيعتمده الأخصائي كعميل جديد
 // ← تُرسل الخطة إلى جوال العميل ← تعود المتابعة اليومية والوزن والتفضيلات والمحادثة إلى ملف العميل هنا.
 // كل ما يمر بالمحطة مشفّر من طرف إلى طرف (HXC: ECDH + AES-GCM) وكل طلب موقَّع؛ ورمز الدعوة سرّ مشترك داخل كل رسالة فلا تستطيع المحطة انتحال أي طرف.
@@ -16,7 +16,7 @@ function hxLoad() {
 }
 function hxSave() { saveQ = saveQ.then(function () { return dbPut('meta', HX.st); }).catch(function () { }); return saveQ; }
 function hxTimer() { clearInterval(HX.timer); if (hxOn()) { HX.timer = setInterval(function () { if (document.visibilityState !== 'hidden') hxPoll(); }, HX.every); setTimeout(hxPoll, 400); hxPushSetup(false); } }
-// ---------- إشعارات المتصفح للأخصائي (موقع «حصة» على الإنترنت فقط؛ عامل الخدمة sw.js يأتي مع «تصدير موقع للنشر»)
+// ---------- إشعارات المتصفح للأخصائي (موقع «زنها Pro» على الإنترنت فقط؛ عامل الخدمة sw.js يأتي مع «تصدير موقع للنشر»)
 var HXP = { reg: null, err: 0 };
 function hxPushOk() { return (location.protocol === 'https:' || /^(localhost|127\.0\.0\.1)$/.test(location.hostname)) && 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window && !(window.HNative && HNative.isNative()); }
 function hxPushState() { if (!hxPushOk()) return 'na'; if (Notification.permission === 'denied') return 'denied'; return Notification.permission === 'granted' && HX.st && HX.st.pushEp ? 'on' : 'off'; }
@@ -39,9 +39,9 @@ function hxPushSetup(ask) {
 }
 function hxNotifRow(compact) {
   var st = hxPushState();
-  if (st === 'on') return compact ? '' : '<p class="small">🔔 إشعارات المتصفح مفعّلة: يصلك طلب العميل الجديد ورسائله حتى وموقع «حصة» مغلق.</p>';
-  if (st === 'na') return compact ? '' : '<p class="small">🔔 إشعارات المتصفح تعمل من موقع «حصة» على الإنترنت (https) فقط، لا من ملف على الجهاز.</p>';
-  if (st === 'denied') return '<div class="warn">🔕 إشعارات «حصة» محظورة في هذا المتصفح. فعّلها من إعدادات الموقع ← الإشعارات ← السماح.</div>';
+  if (st === 'on') return compact ? '' : '<p class="small">🔔 إشعارات المتصفح مفعّلة: يصلك طلب العميل الجديد ورسائله حتى وموقع «زنها Pro» مغلق.</p>';
+  if (st === 'na') return compact ? '' : '<p class="small">🔔 إشعارات المتصفح تعمل من موقع «زنها Pro» على الإنترنت (https) فقط، لا من ملف على الجهاز.</p>';
+  if (st === 'denied') return '<div class="warn">🔕 إشعارات «زنها Pro» محظورة في هذا المتصفح. فعّلها من إعدادات الموقع ← الإشعارات ← السماح.</div>';
   return '<div class="warn hxnotif">🔔 فعّل إشعارات المتصفح ليصلك طلب العميل الجديد ورسائله حتى والموقع مغلق.' + (HXP.err ? ' (تعذّر التفعيل؛ تأكد أن الموقع صُدّر من الإصدار 0.27 أو أحدث)' : '') + ' <button class="sm" data-a="hxNotif">تفعيل الإشعارات</button></div>';
 }
 document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible' && hxOn() && (!HX.last || Date.now() - HX.last > 20000)) hxPoll(); });
@@ -194,7 +194,7 @@ var HX_HB = { adhkarPm: ['🌙', function (v) { var n = ((v && v.c) || []).reduc
   sugar: ['🍬', function (v) { return v ? 'بلا سكر' : 'تناول سكراً'; }, function (v) { return v === 1; }], move: ['⚡', function (v) { return v + ' د نشاط'; }, function (v) { return v >= 30; }], breath: ['🫧', function (v) { return v + ' جلسة تنفّس'; }, function (v) { return v >= 1; }],
   mindful: ['🍽', function (v) { return (v || []).length + ' وجبات بوعي'; }, function (v) { return (v || []).length >= 2; }], kitchen: ['🌙', function (v) { return v ? 'المطبخ مغلق ليلاً' : 'أكل بعد العشاء'; }, function (v) { return v === 1; }], coffee: ['☕', function (v) { return v + ' كوب قهوة'; }, function (v) { return v <= 3; }] };
 function hxHabits(l) { var h = l.h || {}; return Object.keys(h).filter(function (k) { return HX_HB[k] && h[k] != null; }).map(function (k) { var d = HX_HB[k]; return (d[2](h[k]) ? '✓' : '✗') + d[0] + ' ' + d[1](h[k]); }).join(' • '); }
-// ---------- الاعتماد: الطلب ← عميل جديد في «حصة»
+// ---------- الاعتماد: الطلب ← عميل جديد في «زنها Pro»
 function hxMap(q) {
   var food = q.food || {}, flat = function (o) { return ['B', 'L', 'D', 'S'].reduce(function (a, k) { return a.concat((o || {})[k] || []); }, []); }, act = D.settings.activity[+q.act] || D.settings.activity[2], goal = D.settings.goals[+q.goal] || D.settings.goals[2];
   var nums = function (v, lo, hi, d) { v = +v; return v >= lo && v <= hi ? v : d; }, al = D.allergens.map(function (a) { return a.label; });
@@ -266,7 +266,7 @@ function hxCounts() {
   var r = HX.st ? Object.keys(HX.st.reqs).map(function (k) { return HX.st.reqs[k]; }) : [];
   return { req: r.filter(function (q) { return q.st === 'new'; }).length, msg: S.clients.reduce(function (a, c) { return a + ((c.hx && c.hx.unread) || 0) + (c.hx && c.hx.health ? 1 : 0); }, 0) + r.reduce(function (a, q) { return a + (q.unread || 0); }, 0) };
 }
-function hxBadge() { var n = hxCounts(), t = n.req + n.msg; document.title = (t ? '(' + t + ') ' : '') + 'حصة — Hissa'; return t; }
+function hxBadge() { var n = hxCounts(), t = n.req + n.msg; document.title = (t ? '(' + t + ') ' : '') + 'زنها Pro'; return t; }
 function hxRail() { var t = hxBadge(), b = document.querySelector('[data-a="hxv"] em'); if (b) { b.textContent = t || ''; b.style.display = t ? '' : 'none'; } }
 function hxAgo(ts) { if (!ts) return '—'; var m = Math.round((Date.now() - ts) / 60000); return m < 1 ? 'الآن' : m < 60 ? 'قبل ' + m + ' د' : m < 1440 ? 'قبل ' + Math.round(m / 60) + ' س' : new Date(ts).toLocaleDateString('ar'); }
 function hxSetPage() {
@@ -334,7 +334,7 @@ function hxPage() {
   var st = HX.st, reqs = Object.keys(st.reqs).map(function (k) { return st.reqs[k]; }).sort(function (a, b) { return (b.at || 0) - (a.at || 0); }), inv = Object.keys(st.inv).filter(function (h) { return !st.inv[h].used; });
   var linked = S.clients.filter(function (c) { return c.hx; }).sort(function (a, b) { return ((b.hx.unread || 0) - (a.hx.unread || 0)) || ((b.updated || 0) - (a.updated || 0)); });
   return '<div class="hxpage"><div class="hxtop"><h2>📲 طلبات «زنها»</h2><p class="two"><button data-a="hxInvForm">+ دعوة عميل</button><button class="sec" data-a="hxCheck">↻ تحقق الآن</button></p></div>'
-    + hxNotifRow(true) + '<p class="small">آخر تحقق: ' + hxAgo(HX.last) + ' • يُتحقق تلقائياً كل دقيقة أثناء فتح «حصة»' + (HX.err ? ' • <span style="color:#c0392b">' + esc(HX.err) + '</span>' : '') + '</p>'
+    + hxNotifRow(true) + '<p class="small">آخر تحقق: ' + hxAgo(HX.last) + ' • يُتحقق تلقائياً كل دقيقة أثناء فتح «زنها Pro»' + (HX.err ? ' • <span style="color:#c0392b">' + esc(HX.err) + '</span>' : '') + '</p>'
     + (HX.form ? hxInvForm() : '') + (HX.made ? hxInvCard(HX.made, st.inv[HX.made] || {}).replace('hxinv', 'hxinv made') : '')
     + '<h3>طلبات العملاء (' + reqs.length + ')</h3>' + (reqs.map(hxReqCard).join('') || '<p class="small">لا طلبات الآن. ادعُ عميلاً برابط، وحين يكمل تسجيله يظهر طلبه هنا لتعتمده.</p>')
     + (inv.length ? '<h3>دعوات لم تُفتح (' + inv.length + ')</h3>' + inv.filter(function (h) { return h !== HX.made; }).map(function (h) { return hxInvCard(h, st.inv[h]); }).join('') : '')

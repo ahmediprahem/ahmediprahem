@@ -88,7 +88,7 @@ function wkAgenda() {
   var grp = function (t, list, cls) { return list.length ? '<div class="ucard' + (cls ? ' ' + cls : '') + '"><h3>' + t + ' (' + list.length + ')</h3>' + list.map(function (r) { return wkRowHtml(r[0], r[1], true); }).join('') + '</div>' : ''; };
   var open = rows.filter(function (r) { return !r[1].st; }), late = open.filter(function (r) { return r[1].d < today || (r[1].d === today && wkAt(r[1]) < Date.now() - 3600000); });
   var tday = open.filter(function (r) { return r[1].d === today && late.indexOf(r) < 0; }), tm = open.filter(function (r) { return r[1].d === tmr; }), week = open.filter(function (r) { return r[1].d > tmr && r[1].d <= wk; }), later = open.filter(function (r) { return r[1].d > wk; });
-  return '<div class="wkpage"><div class="hxtop"><h2>📅 المواعيد</h2><small class="small">تذكير داخل «حصة» قبل كل موعد بنصف ساعة، ورسالة تذكير للعميل بواتساب أو «زنها» بضغطة</small></div>'
+  return '<div class="wkpage"><div class="hxtop"><h2>📅 المواعيد</h2><small class="small">تذكير داخل «زنها Pro» قبل كل موعد بنصف ساعة، ورسالة تذكير للعميل بواتساب أو «زنها» بضغطة</small></div>'
     + '<div class="ucard"><h3>+ موعد جديد</h3>' + wkForm(true) + '</div>'
     + grp('⏰ فائتة لم يُسجَّل حضورها', late, 'wklate') + grp('اليوم — ' + wkDate(today), tday, 'wktoday') + grp('غداً', tm) + grp('خلال الأسبوع', week) + grp('لاحقاً', later.slice(0, 60))
     + (open.length ? '' : '<p class="small">لا مواعيد قادمة. أضف موعداً من هنا أو من تبويب «📅 المواعيد» في ملف العميل.</p>') + '</div>';

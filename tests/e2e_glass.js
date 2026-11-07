@@ -10,7 +10,7 @@ const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html'));
   // ---- 1) شاشة الدخول
   await p.goto(ADMIN); await p.waitForSelector('#gate .gcard'); assert.strictEqual(await p.evaluate(() => document.documentElement.dataset.theme), 'glass');
   assert(await vis('#gsp .hxlogo svg .hx-mark')); assert.strictEqual(await p.locator('#gate video').count(), 0); assert.strictEqual(await vis('header'), false);
-  assert(/حصة/.test(await p.getAttribute('#gsp .hxlogo svg', 'aria-label'))); ok('شاشة الدخول: شعار «حصة» الجديد متجهي متحرك (بلا فيديو)، بطاقة زجاجية، والترويسة الفارغة مخفية');
+  assert(/زنها/.test(await p.getAttribute('#gsp .hxlogo svg', 'aria-label'))); ok('شاشة الدخول: شعار «حصة» الجديد متجهي متحرك (بلا فيديو)، بطاقة زجاجية، والترويسة الفارغة مخفية');
   await login(p);
   // ---- 2) الأيقونات الخطية
   const ic = await p.evaluate(() => { const w = [...document.querySelectorAll('.ico-w')]; return { n: w.length, glyphKept: w.every(x => x.querySelector('svg.ico') && x.querySelector('.ico-g').textContent.length > 0), lockText: document.querySelector('header [data-a="lock"]').textContent }; });

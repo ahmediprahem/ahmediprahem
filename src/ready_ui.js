@@ -1,5 +1,5 @@
-// ================= مكتبة الأنظمة الجاهزة (0.42): قسم في «حصة» (يُدمج داخل app.js عند /*READYUI*/)
-// ثلاث طرق: اختيار تلقائي من بيانات العميل (الأمثل + بديلان + المتوقع) • تصفّح المكتبة واختيار يدوي • إنشاء نظام جديد بمحرك «حصة».
+// ================= مكتبة الأنظمة الجاهزة (0.42): قسم في «زنها Pro» (يُدمج داخل app.js عند /*READYUI*/)
+// ثلاث طرق: اختيار تلقائي من بيانات العميل (الأمثل + بديلان + المتوقع) • تصفّح المكتبة واختيار يدوي • إنشاء نظام جديد بمحرك «زنها Pro».
 // المنطق في src/readylib.js (RL)؛ محتوى الخطط مضغوط داخل الصفحة ويُفك عند أول معاينة. مكتبة المنتجات مستبعدة.
 var RDS = { tab: 'auto', client: '', ans: {}, open: '', fam: '', rg: '', lvl: '', guide: '', blob: null, loading: false, err: '', bank: {}, page: {}, alt: '' };
 if (window.DPApp) window.DPApp.RDS = RDS;
@@ -74,7 +74,7 @@ function rdAutoTab(c) {
   r.refer.forEach(function (t) { h += '<div class="warn dxstop">⛔ ' + esc(t) + '</div>'; });
   r.warn.forEach(function (t) { h += '<div class="warn">⚠ ' + esc(t) + '</div>'; });
   h += '<div class="rdcards">' + r.top.map(function (x, i) { return rdCard(x, i, c); }).join('') + '</div>';
-  h += '<div class="dxbox rdother"><b>لا يناسبك أيٌّ منها؟</b> <button class="sm sec" data-a="rdTab" data-v="browse">اختر من المكتبة بنفسك</button> <button class="sm sec" data-a="rdNew">أنشئ نظاماً جديداً بمحرك «حصة»</button></div>';
+  h += '<div class="dxbox rdother"><b>لا يناسبك أيٌّ منها؟</b> <button class="sm sec" data-a="rdTab" data-v="browse">اختر من المكتبة بنفسك</button> <button class="sm sec" data-a="rdNew">أنشئ نظاماً جديداً بمحرك «زنها Pro»</button></div>';
   return h;
 }
 function rdBrowseTab(c) {
@@ -296,7 +296,7 @@ function rdAllHtml(c) { var R = c.ready, d = c.readyDoc; return rdPgSum(c, R, d)
     dlFile(new Blob([doc], { type: 'text/html' }), fileBase(c) + '.html');
   };
 })(A.docx, A.print, A.html);
-(function (g0) {                                                       // «ولّد خطة جديدة» = محرك «حصة»؛ تبقى خطة البنك محفوظة للرجوع إليها
+(function (g0) {                                                       // «ولّد خطة جديدة» = محرك «زنها Pro»؛ تبقى خطة البنك محفوظة للرجوع إليها
   A.gen = function () { var c = cur(), prev = c && c.planSrc; if (c) { c.planSrc = 'engine'; RDS.bank[c.code] = false; } var r = g0.apply(this, arguments); if (c && !c.plan) c.planSrc = prev; return r; };
 })(A.gen);
 document.addEventListener('change', function (e) {

@@ -4,7 +4,7 @@
   'use strict';
   var H = window.HSec, MODE = window.APP_MODE, $ = function (s) { return document.querySelector(s); };
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
-  document.title = 'حصة — Hissa'; var ic = document.createElement('link'); ic.rel = 'icon'; ic.href = window.ASSETS.icon; document.head.appendChild(ic);
+  document.title = 'زنها Pro'; var ic = document.createElement('link'); ic.rel = 'icon'; ic.href = window.ASSETS.icon; document.head.appendChild(ic);
   var reduced = function () { return !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches); };
   // ---------- لا شاشة بيضاء: أي خطأ قبل بدء التطبيق يظهر بوضوح داخل البوابة
   function showFatal(msg) {
@@ -19,13 +19,13 @@
   function bgCss(cfg) { cfg = cfg || gateCfg(); if (cfg.bgType === 'image' && cfg.bgImage) return 'url(' + cfg.bgImage + ') center/cover no-repeat ' + (cfg.bgColor || GATE_DEF.bgColor); if (cfg.bgType === 'color' && cfg.bgColor) return cfg.bgColor; return window.ASSETS.splashBg; }
   function splashHtml(cfg, cls) {                              // 'video' (الافتراضي) = الشعار المتجهي المتحرك؛ 'custom' = فيديو المدير؛ 'logo' = ثابت على لوحة بيضاء
     cfg = cfg || gateCfg(); var m = cfg.splash || 'video'; if (m === 'none') return '';
-    if (m === 'logo') return '<div class="logoplate ' + cls + '"><img src="' + window.ASSETS.light + '" alt="حصة"></div>';
+    if (m === 'logo') return '<div class="logoplate ' + cls + '"><img src="' + window.ASSETS.light + '" alt="زنها Pro"></div>';
     if (m === 'custom' && cfg.video) return '<video class="' + cls + '" src="' + cfg.video + '" ' + (reduced() ? '' : 'autoplay ') + 'muted playsinline preload="auto"></video>';
     return '<div class="hxlogo ' + (reduced() ? '' : 'hxanim ') + cls + '">' + window.ASSETS.logoSvg + '</div>';
   }
   function bindVideo(root) {                                   // إن تعذّر تشغيل الفيديو (ترميز غير مدعوم) يظهر الشعار الثابت بدل فراغ
     [].forEach.call(root.querySelectorAll('video'), function (v) {
-      var swap = function () { if (!v.parentNode) return; var d = document.createElement('div'); d.className = 'logoplate ' + v.className; d.innerHTML = '<img src="' + window.ASSETS.light + '" alt="حصة">'; v.parentNode.replaceChild(d, v); };
+      var swap = function () { if (!v.parentNode) return; var d = document.createElement('div'); d.className = 'logoplate ' + v.className; d.innerHTML = '<img src="' + window.ASSETS.light + '" alt="زنها Pro">'; v.parentNode.replaceChild(d, v); };
       v.addEventListener('error', swap);
     });
   }

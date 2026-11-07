@@ -1,5 +1,5 @@
 // ================= التثقيف: مساحة الأخصائي لنشر التثقيف الغذائي لمراجعيه على «زنها» (يُدمج داخل app.js عند /*FEEDUI*/)
-// منشور «لمراجعيّ» يظهر لعملائك على «زنها» فوراً (مع إشعار)، و«عام» يظهر لكل مراجعي «حصة» بعد موافقة الإدارة.
+// منشور «لمراجعيّ» يظهر لعملائك على «زنها» فوراً (مع إشعار)، و«عام» يظهر لكل مراجعي «زنها Pro» بعد موافقة الإدارة.
 // الأنواع: موضوع، نصيحة، صور (تُضغط هنا قبل الرفع)، فيديو أو ريلز (ملف يحتاج R2 في المحطة، أو رابط يوتيوب).
 // الإدارة = نسخة المدير (admin) المتصلة بالمحطة: تطالب بالإشراف تلقائياً أول مرة، وتراجع المنشورات العامة. الوسائط تُجلب من المحطة كـ blob (سياسة أمان الموقع).
 var FD = { me: null, posts: [], more: false, busy: false, err: '', at: 0, pending: 0, open: {}, cm: {}, blobs: {}, f: { kind: 'text', scope: 'mine', title: '', body: '', link: '' }, files: [], up: '', filter: 'all' };
@@ -51,7 +51,7 @@ function fdComposer() {
     + (vid ? (me.r2 ? '<p><label class="sec sm fdfile">🎬 اختر ملف ' + (f.kind === 'reel' ? 'ريلز (عمودي)' : 'فيديو') + '<input type="file" id="fd_files" accept="video/mp4,video/webm,video/quicktime" hidden></label> <small class="small">MP4 حتى 60 ميغابايت — أو ضع رابط يوتيوب بالأسفل</small></p>' : '<p class="small">رفع ملف فيديو يحتاج تفعيل التخزين (R2) في المحطة — انظر دليل النشر. الآن: ضع رابط يوتيوب' + (f.kind === 'reel' ? ' (Shorts)' : '') + '.</p>') : '')
     + (files ? '<div class="fdfiles">' + files + '</div>' : '')
     + (vid || f.kind === 'link' ? '<input id="fd_link" data-fdf="link" dir="ltr" placeholder="https://www.youtube.com/watch?v=… أو youtube.com/shorts/…" value="' + esc(f.link) + '">' : '')
-    + '<div class="fdfoot"><label>الجمهور <select id="fd_scope" data-fdf="scope"><option value="mine"' + (f.scope === 'mine' ? ' selected' : '') + '>مراجعيّ فقط — يظهر فوراً</option><option value="public"' + (f.scope === 'public' ? ' selected' : '') + '>عام لكل مراجعي «حصة»' + (me.mod ? '' : ' — بعد موافقة الإدارة') + '</option></select></label>'
+    + '<div class="fdfoot"><label>الجمهور <select id="fd_scope" data-fdf="scope"><option value="mine"' + (f.scope === 'mine' ? ' selected' : '') + '>مراجعيّ فقط — يظهر فوراً</option><option value="public"' + (f.scope === 'public' ? ' selected' : '') + '>عام لكل مراجعي «زنها Pro»' + (me.mod ? '' : ' — بعد موافقة الإدارة') + '</option></select></label>'
     + '<button data-a="fdPost"' + (FD.up ? ' disabled' : '') + '>' + (FD.up ? esc(FD.up) : '📣 نشر') + '</button></div>'
     + '<p class="small">المحتوى التثقيفي يُحفظ في المحطة غير مشفّر (يراه جمهوره)، فلا تضع فيه بيانات أي عميل.' + (f.scope === 'public' && !me.mod ? ' المنشور العام يُراجع قبل ظهوره: معلومة علمية، بلا إعلانات أو أرقام تواصل.' : '') + '</p></div>';
 }
@@ -75,7 +75,7 @@ function fdCard(x) {
 }
 function fdPage() {
   if (HX.loaded !== true) return '<p class="small">جارٍ التحميل…</p>';
-  if (!hxOn()) return '<div class="fdpage"><h2>📣 التثقيف</h2><div class="warn">اربط «حصة» بالمحطة أولاً من الإعدادات ← «زنها»، ثم انشر لمراجعيك نصائح ومواضيع وصوراً وفيديوهات يتصفحونها في تبويب «تثقيف» على «زنها» ويعلّقون عليها.</div><p><button data-a="fdSetup">ربط «زنها»</button></p></div>';
+  if (!hxOn()) return '<div class="fdpage"><h2>📣 التثقيف</h2><div class="warn">اربط «زنها Pro» بالمحطة أولاً من الإعدادات ← «زنها»، ثم انشر لمراجعيك نصائح ومواضيع وصوراً وفيديوهات يتصفحونها في تبويب «تثقيف» على «زنها» ويعلّقون عليها.</div><p><button data-a="fdSetup">ربط «زنها»</button></p></div>';
   var me = FD.me || {}, list = FD.posts.filter(function (x) { return FD.filter === 'all' || (FD.filter === 'mine' ? x.own : FD.filter === 'pending' ? x.status === 'pending' : x.scope === 'public' && !x.own); });
   var tab = function (v, t) { return '<button class="' + (FD.filter === v ? '' : 'sec ') + 'sm" data-a="fdFilter" data-v="' + v + '">' + t + '</button>'; };
   return '<div class="fdpage"><div class="hxtop"><h2>📣 التثقيف <small>مساحة مراجعيك على «زنها»</small></h2><button class="sec" data-a="fdRefresh">↻ تحديث</button></div>'
@@ -117,7 +117,7 @@ Object.assign(A, {
     FD.up = 'جارٍ النشر…'; main();
     next().then(function () { return fdApi('POST', '/v1/posts', { kind: f.kind, title: title, body: body, link: yt ? link : '', media: media, scope: f.scope }); }).then(function (j) {
       FD.files.forEach(function (x) { if (x.url) URL.revokeObjectURL(x.url); }); FD.files = []; FD.f = { kind: f.kind, scope: f.scope, title: '', body: '', link: '' }; FD.up = '';
-      toast(j.status === 'pending' ? '⏳ أُرسل المنشور العام للإدارة — يظهر لمراجعي «حصة» بعد الموافقة' : '✓ نُشر — يصل مراجعيك على «زنها» الآن'); return fdLoad();
+      toast(j.status === 'pending' ? '⏳ أُرسل المنشور العام للإدارة — يظهر لمراجعي «زنها Pro» بعد الموافقة' : '✓ نُشر — يصل مراجعيك على «زنها» الآن'); return fdLoad();
     }).catch(function (e) { FD.up = ''; main(); toast('⚠ ' + e.message); });
   },
   fdLike: function (v) { var x = fdPost(v); if (!x) return; fdApi('POST', '/v1/posts/' + x.id + '/like', { on: x.liked ? 0 : 1 }).then(function (j) { x.liked = j.liked; x.likes = j.likes; fdRe(); }).catch(function (e) { toast('⚠ ' + e.message); }); },
@@ -131,7 +131,7 @@ Object.assign(A, {
   fdReview: function (v, el) {
     var ok = el.dataset.ok === '1', note = ok ? '' : prompt('سبب عدم الاعتماد (يراه كاتب المنشور فقط):', 'معلومة تحتاج مصدراً علمياً');
     if (note === null) return;
-    fdApi('POST', '/v1/mod/review', { id: +v, ok: ok ? 1 : 0, note: note }).then(function () { toast(ok ? '✓ اعتُمد ونُشر لكل مراجعي «حصة»' : 'رُفض المنشور وأُبلغ كاتبه'); return fdLoad(); }).catch(function (e) { toast('⚠ ' + e.message); });
+    fdApi('POST', '/v1/mod/review', { id: +v, ok: ok ? 1 : 0, note: note }).then(function () { toast(ok ? '✓ اعتُمد ونُشر لكل مراجعي «زنها Pro»' : 'رُفض المنشور وأُبلغ كاتبه'); return fdLoad(); }).catch(function (e) { toast('⚠ ' + e.message); });
   }
 });
 document.addEventListener('input', function (e) { var t = e.target; if (t.dataset && t.dataset.fdf) FD.f[t.dataset.fdf] = t.value; });
