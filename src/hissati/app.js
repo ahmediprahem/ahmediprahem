@@ -449,6 +449,7 @@ function prCard() { const P = prNow(); if (!P) return ''; const n = new Date(), 
 function stepsWeek() { let tot = 0, nd = 0; for (let i = 0; i < 7; i++) { const L = S.log[dkey(new Date(now() - i * 864e5))], v = L && L.h && +L.h.steps; if (v) { tot += v; nd++; } } return { tot, nd, avg: nd ? Math.round(tot / nd) : 0 }; }
 
 /*KHAMS*/
+/*QURANH*/
 
 // ---------- مساعدات
 function toast(m) { toastMsg = m; clearTimeout(toastT); toastT = setTimeout(() => { toastMsg = ''; render(); }, 3000); render(); }
@@ -1009,6 +1010,7 @@ function remItems() {                              // أوقات اليوم ال
   const R = S.rem || {}, it = []; if (R.water) WATER.forEach((m) => it.push({ m, t: 'water' }));
   if (R.meals && S.plan) dayPlan(TODAY).slots.forEach((s) => { const m = hm2m(s.time); if (m != null) it.push({ m, t: 'meal', label: s.name }); });
   if (R.adhAm) { const m = hm2m(R.adhAmT || '06:00'); if (m != null) it.push({ m, t: 'adhAm' }); }
+  if (S.qk && S.qk.on && S.qk.rt && !qkDoneToday()) { const m = hm2m(S.qk.rt), r = qkRange(qkToday()); if (m != null) it.push({ m, t: 'qk', label: khRange(r.a, r.e) }); }
   if (R.adhPm) { const m = hm2m(R.adhPmT || '17:30'); if (m != null) it.push({ m, t: 'adhPm' }); }
   if (R.med) (R.meds || []).slice(0, MEDMAX).forEach((x) => { const m = hm2m(x.t); if (m != null) it.push({ m, t: 'med', label: String(x.n || '').slice(0, 40) }); });
   const P = R.pray ? prNow() : null, q15 = (m) => Math.min(1425, Math.ceil(m / 15) * 15);   // الأذان ثم أقرب ربع ساعة بعده (لا قبله)
@@ -1132,7 +1134,7 @@ function hCard(id) {
   const h = HB(id), st = hStreak(id), ok = hOkDay(id);
   return '<section class="card hb' + (ok ? ' done' : '') + '" style="--hc:' + h.c + '" data-hb="' + id + '"><div class="hbh"><span class="hbi">' + h.ic + '</span><h3>' + h.n + '</h3>' + (st ? '<span class="hbs" title="أيام متتالية">🔥 ' + st + '</span>' : '') + (ok ? '<span class="hbok">' + I('check') + '</span>' : '') + '</div>' + hWidget(h) + '<div class="hbw" aria-label="آخر 7 أيام">' + hWeek(id) + '</div></section>';
 }
-function habitsHome() { const ls = hList(); return '<div class="row hbhead"><h2>عاداتي</h2><button class="btn sm sec" data-act="habits">' + I('plus') + ' العادات</button></div>' + (ls.length ? ls.map(hCard).join('') : '<div class="card dim">لا عادات في صفحتك. اختر من «العادات» ما تريد تنميته.</div>'); }
+function habitsHome() { const ls = hList(); return '<div class="row hbhead"><h2>عاداتي</h2><button class="btn sm sec" data-act="habits">' + I('plus') + ' العادات</button></div>' + qkCard() + (ls.length ? ls.map(hCard).join('') : '<div class="card dim">لا عادات في صفحتك. اختر من «العادات» ما تريد تنميته.</div>'); }
 function habitsSheet() {
   const ls = hList();
   return '<p class="dim">اختر العادات التي تريد تنميتها؛ تظهر في «اليوم» بتصميمها، ويرى أخصائيك تقدّمك فيها. ابدأ بعادتين أو ثلاث.</p><div class="hlib">' + HABITS.map((h) => { const on = ls.indexOf(h.id) >= 0;
@@ -1192,24 +1194,9 @@ function heartSvg(p, big, pm) {
   return '<svg viewBox="0 0 100 94" class="heart' + (p >= 1 ? ' full' : '') + '" aria-hidden="true"><defs><clipPath id="' + id + '"><path d="' + d + '"/></clipPath><linearGradient id="' + id + 'g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + (pm ? '#b9b2ff' : '#8ff0b8') + '"/><stop offset="1" stop-color="' + (pm ? '#6a5fd6' : '#1fa463') + '"/></linearGradient></defs>'
     + '<path d="' + d + '" fill="rgba(255,255,255,.07)"/><g clip-path="url(#' + id + ')"><rect class="hf" x="0" y="' + y.toFixed(1) + '" width="100" height="100" fill="url(#' + id + 'g)"/>' + (p > 0 && p < 1 ? '<path class="hwave" d="M-10 ' + y.toFixed(1) + ' q15 -5 30 0 t30 0 t30 0 t30 0 v6 h-120z" fill="' + (pm ? '#b9b2ff' : '#8ff0b8') + '" opacity=".6"/>' : '') + '</g><path d="' + d + '" fill="none" stroke="' + (p >= 1 ? '#6fe3a9' : 'rgba(111,227,169,.6)') + '" stroke-width="3"/></svg>';
 }
-function adhOpen(hid) {
-  hid = hid || 'adhkar'; const LST = adhList(hid), TOT = adhTotal(hid), pm = hid === 'adhkarPm';
-  if (document.getElementById('adx')) return; const el = document.createElement('div'); el.id = 'adx'; el.className = 'adx'; document.body.appendChild(el);
-  const draw = (pulse) => {
-    const v = hVal(hid) || { c: [] }, done = adhDone(v, hid), p = done / TOT, nx = LST.findIndex((a, i) => (v.c[i] || 0) < a[1]);
-    el.innerHTML = '<div class="adh"><button class="btn sm sec" id="adclose">' + I('x') + ' إغلاق</button><div class="adheart' + (pulse ? ' pulse' : '') + '">' + heartSvg(p, 1, pm) + '<b>' + Math.round(p * 100) + '%</b></div><small>' + done + ' من ' + TOT + '</small></div>'
-      + '<div class="adlist">' + LST.map((a, i) => { const n = v.c[i] || 0, left = a[1] - n, fin = left <= 0;
-        return '<button class="adk' + (fin ? ' fin' : '') + (i === nx ? ' cur' : '') + '" data-i="' + i + '"' + (fin ? ' aria-disabled="true"' : '') + '>' + (fin ? '<span class="adone">' + (a[2] || a[0].split(/[،,:.]/)[0]) + '</span><span class="adc">✓ تمّ</span>' : (a[2] ? '<span class="adt">' + a[2] + '</span>' : '') + '<span class="adtx">' + a[0] + '</span><span class="adc">' + left + (a[1] > 1 ? ' من ' + a[1] : '') + '</span>') + '</button>'; }).join('') + '</div>';
-    el.querySelector('#adclose').onclick = () => { el.remove(); render(); };
-    const cur = el.querySelector('.adk.cur'); if (cur && (pulse === 'next' || pulse === 0)) cur.scrollIntoView({ block: 'center', behavior: pulse ? 'smooth' : 'auto' });
-  };
-  el.addEventListener('click', (e) => {
-    const b = e.target.closest('.adk'); if (!b || b.classList.contains('fin')) return; const i = +b.dataset.i, v = JSON.parse(JSON.stringify(hVal(hid) || { c: [] })), was = hOkDay(hid);
-    v.c[i] = Math.min(LST[i][1], (v.c[i] || 0) + 1); hSet(hid, v); if (navigator.vibrate) try { navigator.vibrate(12); } catch (x) { }
-    const fin = v.c[i] >= LST[i][1]; draw(fin ? 'next' : 1);
-    if (!was && hOkDay(hid)) { el.remove(); render(); celebrate(hid); }
-  });
-  draw(0);
+function adhOpen(hid) {                                 // 0.61: أذكار «عاداتي» بنظام السبحة (شاشة التحدي نفسها): ذكر واحد في كل مرة، حبّات تضيء، ويبدأ من أول ذكر لم يكتمل
+  hid = hid === 'adhkarPm' ? 'adhkarPm' : 'adhkar'; const L = adhList(hid), v = hVal(hid) || { c: [] }; let i = L.findIndex((a, j) => (v.c[j] || 0) < a[1]); if (i < 0) i = 0;
+  sheet = null; V.az = { k: hid === 'adhkarPm' ? 'pm' : 'am', i, c: v.c[i] || 0, hb: hid }; render();
 }
 // ---------- المنبّه (0.40): التذكير يظهر على الشاشة كمنبّه بتصميم الثيم، لا إشعاراً فقط — رنّة هادئة واهتزاز و«تم» و«غفوة 10 دقائق».
 // يظهر: عند حلول الوقت والتطبيق مفتوح، أو عند لمس إشعار التذكير. (التطبيق المغلق والجوال مقفل: إشعار ثابت يهتز فقط — الرنين فوق القفل يحتاج تطبيقاً أصلياً.)
@@ -1393,6 +1380,7 @@ function sheetHtml() {
   if (!sheet) return '';
   let h = '', b = '';
   if (String(sheet.t).slice(0, 2) === 'kh') [h, b] = khSheet();
+  else if (sheet.t === 'qkSetup') [h, b] = qkSetupSheet();
   else if (sheet.t === 'swap') {
     const [si, li] = sheet.k.split('_').map(Number), l = dayPlan(TODAY).slots[si].lines[li], no = foodsOf('no');
     const alts = (l[3] || []).filter((a) => !no.includes(a[0]));
@@ -1427,7 +1415,7 @@ function sheetHtml() {
   } else if (sheet.t === 'wait') {
     const L = waitItems(), x = sheet.k ? L.filter((q) => q.k === sheet.k) : L.slice(2); h = sheet.k && x.length ? esc(x[0].t) : 'ينتظرك'; b = x.map((q) => q.html).join('') || '<p class="dim">لا شيء ينتظرك الآن.</p>';
   } else if (sheet.t === 'hb') {
-    const ls = hList().filter((id) => id !== 'water'); h = 'عاداتي'; b = (hList().indexOf('water') >= 0 ? '<p class="dim">💧 الماء في بطاقة الالتزام أعلى «اليوم».</p>' : '') + ls.map(hCard).join('') + '<button class="btn sec" data-act="habits">' + I('plus') + ' العادات</button>';
+    const ls = hList().filter((id) => id !== 'water'); h = 'عاداتي'; b = qkCard() + (hList().indexOf('water') >= 0 ? '<p class="dim">💧 الماء في بطاقة الالتزام أعلى «اليوم».</p>' : '') + ls.map(hCard).join('') + '<button class="btn sec" data-act="habits">' + I('plus') + ' العادات</button>';
   } else if (sheet.t === 'wipe') {
     h = 'حذف بياناتي من هذا الجوال'; b = wipeSheet();
   } else if (sheet.t === 'forgot') {
@@ -1482,7 +1470,7 @@ function render() {
   const sc = $('.scroll'), key = (S ? S.screen + S.step + S.tab + (S.chat ? 'c' : '') : '') + V.screen + (V.az ? 'az' + V.az.k : '') + (V.qr ? 'qr' : '') + (V.khg ? 'g' + V.khg.i : ''), top = sc ? sc.scrollTop : 0;
   let scr;
   if (V.khg && (V.screen === 'khg' || S)) scr = scrKhGuide(); else if (V.screen === 'boot') scr = scrBoot(); else if (V.screen === 'bad') scr = scrBad(); else if (V.screen === 'start') scr = scrStart(); else if (V.screen === 'moved') scr = scrMoved(); else if (V.screen === 'lock') scr = scrLock(); else if (V.screen === 'pin') scr = scrPin(); else if (V.screen === 'onb') scr = scrOnb();
-  else scr = V.az ? scrAdhkar() : V.qr ? scrReader() : S.screen === 'khams' ? (S.kh && S.kh.on ? scrKhams() : scrKhRestart()) : V.kh && S.kh && S.kh.on ? scrKhams() : V.wk ? scrWk() : V.bd ? scrBody() : V.pan != null ? scrPantry() : V.pf != null ? scrProf() : S.rqOpen && window.RL && RL.idx ? scrQuiz() : S.chat ? scrChat() : S.plan && S.screen === 'app' ? scrApp() : { invite: scrInvite, wizard: scrWizard, review: scrReview, sent: scrSent, app: scrSent }[S.screen]();
+  else scr = V.az ? scrAdhkar() : V.qr ? scrReader() : V.qfree ? scrQuranFree() : S.screen === 'khams' ? (S.kh && S.kh.on ? scrKhams() : scrKhRestart()) : V.kh && S.kh && S.kh.on ? scrKhams() : V.wk ? scrWk() : V.bd ? scrBody() : V.pan != null ? scrPantry() : V.pf != null ? scrProf() : S.rqOpen && window.RL && RL.idx ? scrQuiz() : S.chat ? scrChat() : S.plan && S.screen === 'app' ? scrApp() : { invite: scrInvite, wizard: scrWizard, review: scrReview, sent: scrSent, app: scrSent }[S.screen]();
   const keep = {}; document.querySelectorAll('video[data-keep]').forEach((n) => { keep[n.dataset.keep] = n; });
   const cmI = $('#cmIn'), cmV = cmI ? [cmI.value, document.activeElement === cmI] : null;          // مسودة التعليق تبقى عند إعادة الرسم (وصول التعليقات مثلاً)
   const fs = S && S.ui && [1.15, 1.3].indexOf(S.ui.fs) >= 0 ? String(S.ui.fs) : '1';          // 0.60 أ2: حجم الخط العام
@@ -1585,6 +1573,7 @@ document.addEventListener('click', (e) => {
   // ورقة «ينتظرك» تُغلق قبل الانتقال إلى شاشة كاملة
   if (sheet && sheet.t === 'wait' && /^(wkGo|pfGo|panGo|bdGo|khOpen|khStart|tab|firstWin|notif)$/.test(a)) sheet = null;
   if (a === 'khgStartG') { V.khg = { i: 0, guest: true }; V.screen = 'khg'; render(); return; }
+  if (a.slice(0, 2) === 'qk' && S) { if (qkAct(a, v, el)) render(); return; }
   if (a.slice(0, 2) === 'kh' && (V.khg || S)) { if (V.khg ? khGuideAct(a, v, el) : khAct(a, v)) render(); return; }
   switch (a) {
     case 'onbNext': onbNextStage(1); return;
@@ -1814,6 +1803,7 @@ document.addEventListener('input', (e) => {               // التقاط أول
 }, true);
 document.addEventListener('input', (e) => {
   const t = e.target;
+  if (t.dataset.qkq) { const q = t.value.trim(); if (V.qfree) V.qfree.q = q; document.querySelectorAll('.qksr').forEach((b) => { b.hidden = !!q && !b.textContent.includes(q); }); return; }   // بحث السور بلا إعادة رسم
   if (t.dataset.bind || t.dataset.cq || t.dataset.schm || t.dataset.scht) {
     if (t.dataset.bind) S.p[t.dataset.bind] = t.value; else if (t.dataset.cq) { S.p.cq = S.p.cq || {}; S.p.cq[t.dataset.cq] = t.value; } else if (t.dataset.schm) sched()[+t.dataset.schm].min = +t.value || 0; else sched()[+t.dataset.scht].time = t.value;
     save(); const btn = $('.foot .btn'); if (btn && S.screen === 'wizard') { mkForm(); btn.disabled = !stepOk(FS[S.step - 1]); }

@@ -134,7 +134,7 @@ function khLoadText() {
   return QTp;
 }
 function scrReader() {
-  const R = V.qr, D = khDay(khT()), PN = khPrNames(khT()), bm = khBm(), KH_BSM = QT ? QT[0] + ' ' : '';   // البسملة كما هي في نص Tanzil (آية الفاتحة الأولى)
+  const R = V.qr, src = R.src || 'kh', isKh = src === 'kh' && S.kh && S.kh.on, D = isKh ? khDay(khT()) : { wd: [] }, PN = khPrNames(khT()), bm = isKh ? khBm() : src === 'qk' ? (S.qk && S.qk.bm != null ? S.qk.bm : -1) : (S.qfreeBm != null ? S.qfreeBm : -1), KH_BSM = QT ? QT[0] + ' ' : '';   // البسملة كما هي في نص Tanzil (آية الفاتحة الأولى)
   let body;
   if (!QT) { if (!R.err) khLoadText().then(() => render()).catch((e) => { R.err = e.message; render(); }); body = R.err ? '<div class="banner warn">' + I('clock') + '<span>' + esc(R.err) + '. يحتاج أول فتح للمصحف اتصالاً بالإنترنت، وبعدها يعمل بلا إنترنت.</span></div><button class="btn sec" data-act="khRetry">حاول مرة أخرى</button>' : '<p class="dim" style="text-align:center">يُحمَّل المصحف أول مرة فقط…</p>'; }
   else {
@@ -144,16 +144,17 @@ function scrReader() {
       if (a === 1) { h += '<div class="qsura">سورة ' + esc(QM.n[s - 1]) + '</div>'; if (s !== 1 && s !== 9 && t.startsWith(KH_BSM)) { h += '<div class="qbsm">' + esc(KH_BSM.trim()) + '</div>'; t = t.slice(KH_BSM.length); } }
       h += '<span class="qa' + (R.cur === i ? ' cur' : '') + (bm === i ? ' bm' : '') + '" id="qa' + i + '" data-act="khBm" data-v="' + i + '" role="button" tabindex="0" aria-label="توقفت هنا: ' + esc(QM.n[s - 1]) + ' ' + a + '">' + esc(t) + ' <span class="qn">﴿' + a + '﴾</span>' + (bm === i ? '<span class="qbm" aria-hidden="true">توقفت هنا</span>' : '') + '</span> ';
     }
-    const pl = R.p != null ? khPortions(D.lv, D.b).find((x) => x.p === R.p) : null, inP = pl && bm >= pl.a && bm <= pl.e, leftP = pl ? (D.wd[R.p] ? 0 : inP ? pl.e - bm : pl.n) : 0, leftD = khLeft(D, khPortions(D.lv, D.b));
-    body = '<div class="qstat" role="status">' + (bm > -1 ? '<b>توقفت عند ' + esc(khPos(bm)) + '</b>' : '<b>المس آخر آية قرأتها لتحفظ موضعك</b>') + '<span>' + (pl ? 'باقي في هذا الورد ' + leftP + ' آية • ' : '') + 'باقي اليوم ' + leftD + ' آية</span></div>'
+    const pl = isKh && R.p != null ? khPortions(D.lv, D.b).find((x) => x.p === R.p) : null, inP = pl && bm >= pl.a && bm <= pl.e, leftP = pl ? (D.wd[R.p] ? 0 : inP ? pl.e - bm : pl.n) : 0, leftD = isKh ? khLeft(D, khPortions(D.lv, D.b)) : 0, inR = bm >= R.a && bm <= R.e;
+    body = '<div class="qstat" role="status">' + (bm > -1 && (isKh || inR) ? '<b>توقفت عند ' + esc(khPos(bm)) + '</b>' : '<b>المس آخر آية قرأتها لتحفظ موضعك</b>') + '<span>' + (isKh ? (pl ? 'باقي في هذا الورد ' + leftP + ' آية • ' : '') + 'باقي اليوم ' + leftD + ' آية' : src === 'qk' ? 'باقي في ورد اليوم ' + (inR ? R.e - bm : R.e - R.a + 1) + ' آية' : (R.e - R.a + 1) + ' آية') + '</span></div>'
       + '<div class="qtext" style="font-size:' + (S.qfs || 26) + 'px">' + h + '</div>';
     if (R.jump != null) { const j = R.jump; R.jump = null; setTimeout(() => { const el = document.getElementById('qa' + j); if (el && el.scrollIntoView) el.scrollIntoView({ block: 'center' }); }, 30); }
   }
   const audio = V.online && navigator.onLine !== false ? '<button class="btn sec" data-act="khPlay">' + (R.play ? '⏸ إيقاف الصوت' : '▶ استمع للورد') + '</button>' : '<span class="dim">الاستماع يحتاج اتصالاً بالإنترنت.</span>';
-  return '<div class="scr khs"><div class="scroll"><div class="stack">' + head(R.p != null ? 'ورد ' + PN[R.p] : 'المصحف', 'khRX', '', esc(khRange(R.a, R.e)))
+  return '<div class="scr khs"><div class="scroll"><div class="stack">' + head(isKh && R.p != null ? 'ورد ' + PN[R.p] : src === 'qk' ? 'وردي من القرآن' : 'المصحف', 'khRX', '', esc(khRange(R.a, R.e)))
     + '<div class="row qtools"><button class="btn sm sec" data-act="khFs" data-v="-2" aria-label="تصغير الخط">أ−</button><button class="btn sm sec" data-act="khFs" data-v="2" aria-label="تكبير الخط">أ+</button>' + audio + '</div>'
     + body
-    + (R.p != null && QT ? '<button class="btn full" data-act="khRDone" data-v="' + R.p + '">' + I('check') + (D.wd[R.p] ? ' قرأت الورد ✓' : ' أتممت الورد') + '</button>' : '')
+    + (src === 'qk' && QT ? '<button class="btn full" data-act="qkDone">' + I('check') + ' أتممت ورد اليوم</button>' : '')
+    + (isKh && R.p != null && QT ? '<button class="btn full" data-act="khRDone" data-v="' + R.p + '">' + I('check') + (D.wd[R.p] ? ' قرأت الورد ✓' : ' أتممت الورد') + '</button>' : '')
     + '<p class="dim qsrc">نص المصحف من مشروع <a href="https://tanzil.net" target="_blank" rel="noopener">Tanzil.net</a> (الرسم العثماني) • الخط Amiri Quran' + (V.online ? ' • التلاوة: مشاري العفاسي من everyayah.com' : '') + '</p>'
     + '</div></div></div>';
 }
@@ -161,7 +162,7 @@ let QA = null;
 function khAudioStop() { if (QA) { QA.pause(); QA.src = ''; QA = null; } if (V.qr) { V.qr.play = 0; V.qr.cur = null; } }
 function khAudioPlay(i) {
   const R = V.qr; if (!R || i > R.e) { khAudioStop(); render(); return; }
-  const [s, a] = khRel(i); R.cur = i; R.play = 1; if (S.kh && i > R.a) S.kh.bm = { i: i - 1, d: khDk(khT()) };   // الاستماع يحرّك نقطة التوقف
+  const [s, a] = khRel(i); R.cur = i; R.play = 1; if (i > R.a) { if ((R.src || 'kh') === 'kh') { if (S.kh) S.kh.bm = { i: i - 1, d: khDk(khT()) }; } else if (R.src === 'qk') { if (S.qk) S.qk.bm = i - 1; } else S.qfreeBm = i - 1; }   // الاستماع يحرّك نقطة التوقف
   if (!QA) { QA = new Audio(); QA.addEventListener('ended', () => khAudioPlay((V.qr || {}).cur + 1)); QA.addEventListener('error', () => { khAudioStop(); toast('تعذّر تشغيل الصوت. تأكد من الإنترنت.'); render(); }); }
   QA.src = KH_RQ + String(s).padStart(3, '0') + String(a).padStart(3, '0') + '.mp3'; QA.play().catch(() => { khAudioStop(); render(); });
   render(); const el = document.getElementById('qa' + i); if (el && el.scrollIntoView) el.scrollIntoView({ block: 'center', behavior: 'smooth' });
@@ -202,7 +203,7 @@ function khAct(a, v) {
     case 'khEnd': sheet = { t: 'khEnd' }; return true;
     case 'khEndOk': S.kh = Object.assign({}, K2, { on: 0 }); V.kh = 0; sheet = null; save(); toast('أوقفنا التحدي. يمكنك البدء من جديد متى شئت'); return true;
     case 'khRead': { const P = khPortions(D.lv, D.b), p = P.find((x) => x.p === i); if (p) { const bm = khBm(); V.qr = { a: p.a, e: p.e, p: p.p, jump: bm >= p.a && bm < p.e ? bm + 1 : null }; } return true; }
-    case 'khBm': { if (!V.qr) return false; K2.bm = { i, d: khDk(khT()) }; const pl = V.qr.p != null ? khPortions(D.lv, D.b).find((x) => x.p === V.qr.p) : null;
+    case 'khBm': { if (!V.qr) return false; if ((V.qr.src || 'kh') !== 'kh') { qkBmSet(i, V.qr.src); save(); return true; } K2.bm = { i, d: khDk(khT()) }; const pl = V.qr.p != null ? khPortions(D.lv, D.b).find((x) => x.p === V.qr.p) : null;
       if (pl && i === pl.e && !D.wd[pl.p]) { D.wd[pl.p] = 1; khAdvance(D); toast('وصلت لنهاية ورد ' + khPrNames(khT())[pl.p] + '. تقبّل الله منك'); } else toast('حُفظ موضعك: ' + khPos(i)); save(); return true; }
     case 'khRX': khAudioStop(); V.qr = null; return true;
     case 'khRetry': if (V.qr) V.qr.err = ''; return true;
@@ -344,7 +345,7 @@ function khSebha(need, c) {                             // السبحة: حلق�
 function khAzAudio(x) { const j = ADHKAR.indexOf(x); if (j > -1) return KH_AZM[j] || 0; return /^أعوذ بكلمات الله التامات/.test(x[0]) ? 97 : 0; }   // أذكار المساء الخاصة بلفظها لا تسجيل مطابقاً لها
 function scrAdhkar() {
   const A = V.az, list = khAzList(A.k), i = Math.min(A.i, list.length - 1), x = list[i], need = A.k === 'free' ? 0 : (+x[1] || 1), left = Math.max(0, need - A.c), au = A.k === 'am' || A.k === 'pm' ? khAzAudio(x) : 0, on = V.online && navigator.onLine !== false;
-  return '<div class="scr khs"><div class="scroll"><div class="stack">' + head(KH_AZN[A.k], 'khAzX', '', A.k === 'free' ? 'المجموع ' + A.c : 'الذكر ' + (i + 1) + ' من ' + list.length)
+  return '<div class="scr khs"><div class="scroll"><div class="stack">' + head(KH_AZN[A.k], 'khAzX', '', A.k === 'free' ? 'المجموع ' + A.c : 'الذكر ' + (i + 1) + ' من ' + list.length + (A.hb ? ' • ' + Math.round(adhDone(hVal(A.hb), A.hb) / adhTotal(A.hb) * 100) + '%' : ''))
     + '<div class="khbar2"><i style="width:' + Math.round(i / list.length * 100) + '%"></i></div>'
     + '<section class="card khazt"><p>' + esc(x[0]) + '</p>' + (x[2] ? '<small class="dim">' + esc(x[2]) + '</small>' : '') + '</section>'
     + '<button class="khcount' + (need && !left ? ' done' : '') + '" data-act="khAzTap" aria-label="' + (need ? 'عدّ مرة: باقي ' + left : 'عدّ مرة: المجموع ' + A.c) + '">' + khSebha(need, A.c) + '</button>'
@@ -356,13 +357,17 @@ function scrAdhkar() {
 let QZ = null;
 function khAzStop() { if (QZ) { QZ.pause(); QZ.src = ''; QZ = null; } if (V.az) V.az.play = 0; }
 function khAzAct(a, v) {
-  const A = V.az, D = khDay(khT()); if (!A) return false; const list = khAzList(A.k), x = list[A.i], need = A.k === 'free' ? 0 : (+x[1] || 1);
-  const go = (d) => { khAzStop(); A.i += d; A.c = 0; if (A.i < 0) A.i = 0; D.azp = Object.assign({}, D.azp, { [A.k]: A.i });
+  const A = V.az; if (!A) return false; const D = A.hb ? {} : khDay(khT()), list = khAzList(A.k), x = list[A.i], need = A.k === 'free' ? 0 : (+x[1] || 1);
+  const hv = () => JSON.parse(JSON.stringify(hVal(A.hb) || { c: [] }));      // «عاداتي»: العدّ يُحفظ في سجل العادة (اليوم) لا في التحدي
+  const go = (d) => { khAzStop(); A.i += d; A.c = 0; if (A.i < 0) A.i = 0;
+    if (A.hb) { if (A.i >= list.length) { V.az = null; toast(KH_AZN[A.k] + ' — ' + (hOkDay(A.hb) ? 'تمت. تقبّل الله منك' : 'بقيت أذكار لم تكتمل')); return; } A.c = hv().c[A.i] || 0; return; } D.azp = Object.assign({}, D.azp, { [A.k]: A.i });
     if (A.i >= list.length) { if (A.k === 'am' || A.k === 'pm') D[A.k] = 1; D.azp[A.k] = 0; V.az = null; save(); toast(KH_AZN[A.k] + ' تمت. تقبّل الله منك'); return; } save(); };
   switch (a) {
     case 'khAzTap': if (navigator.vibrate) try { navigator.vibrate(12); } catch (e) { }
       if (!need) { A.c++; D.freeC = A.c; save(); return true; }
-      if (A.c < need) A.c++; if (A.c >= need) setTimeout(() => { if (V.az === A && A.c >= need) { go(1); render(); } }, 550); return true;
+      if (A.hb && A.c < need) { const was = hOkDay(A.hb), w = hv(); A.c++; w.c[A.i] = A.c; hSet(A.hb, w);
+        if (!was && hOkDay(A.hb)) { const id = A.hb; khAzStop(); V.az = null; setTimeout(() => celebrate(id), 0); return true; } }
+      else if (A.c < need) A.c++; if (A.c >= need) setTimeout(() => { if (V.az === A && A.c >= need) { go(1); render(); } }, 550); return true;
     case 'khAzReset': A.c = 0; D.freeC = 0; save(); return true;
     case 'khAzGo': go(+v); return true;
     case 'khAzX': khAzStop(); V.az = null; return true;

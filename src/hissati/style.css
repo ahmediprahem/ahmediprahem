@@ -688,3 +688,8 @@ body{font-size:var(--t15);line-height:1.6}
 .khday .khpips,.khday p{grid-column:2}
 .khwg{display:flex;flex-wrap:wrap;gap:6px}
 .khwg .chip{min-width:44px;justify-content:center;padding:0 8px}
+/* 0.61: وردي من القرآن والمصحف */
+.qkc h3{margin:0}.qkic{font-size:30px}
+.qklist{display:grid;gap:6px}
+.qksr{display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:10px;min-height:52px;padding:6px 12px;border-radius:14px;background:var(--glass);border:1px solid var(--line);color:var(--text);font:inherit;text-align:right;cursor:pointer}
+.qksr b{font-size:calc(16px*var(--fs,1))}.qkn{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:rgba(111,227,169,.14);color:var(--mint);font-weight:700;font-size:13px}

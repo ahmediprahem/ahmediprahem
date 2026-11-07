@@ -276,10 +276,12 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
     await tap('[data-hb="sleep"] [data-k="8"]', 'نوم هانئ'); for (let i = 0; i < 5; i++) await tap('[data-hb="veg"] path[data-k="' + i + '"]', i === 4 ? 'قوس قزح' : '');
     await tap('[data-hb="sugar"] [data-k="1"]', 'يوم بلا سكر'); await tap('[data-hb="move"] [data-k="2"]', 'مشحونة'); await tap('[data-hb="mindful"] [data-k="0"]'); await tap('[data-hb="mindful"] [data-k="1"]', 'أكلت بوعي');
     await tap('[data-hb="kitchen"] [data-k="1"]', 'المطبخ مغلق'); await ip.click('[data-hb="coffee"] [data-k="3"]');
-    await ip.click('[data-hb="adhkar"] [data-act="adhkar"]'); await ip.waitForSelector('.adk.cur'); assert.strictEqual(await ip.locator('.adk').count(), 18); assert((await ip.textContent('.adk')).includes('آية الكرسي'));
-    await ip.click('.adk[data-i="1"]'); assert((await ip.textContent('.adh small')).startsWith('1 من 254')); assert((await ip.textContent('.adk[data-i="1"] .adc')).includes('2 من 3'));
-    if (process.env.SHOTS) { for (let i = 0; i < 80; i++) await ip.click('.adk.cur'); await ip.screenshot({ path: path.join(process.env.SHOTS, 'c16_adhkar.png') }); }
-    await ip.evaluate(async () => { for (let i = 0; i < 300 && document.querySelector('#adx .adk:not(.fin)'); i++) document.querySelector('#adx .adk:not(.fin)').click(); });
+    await ip.click('[data-hb="adhkar"] [data-act="adhkar"]'); await ip.waitForSelector('.khcount .sebha'); assert((await ip.textContent('.khazt')).includes('الله لا إله إلا هو الحي القيوم')); assert((await ip.textContent('.scr')).includes('الذكر 1 من 18'));
+    await ip.click('.khcount'); await ip.waitForSelector('.scr :text("الذكر 2 من 18")'); await ip.click('.khcount'); assert((await ip.textContent('.khcount .sbn')).trim() === '2', 'السبحة: باقي 2 من 3');
+    assert.deepStrictEqual(await ip.evaluate(() => { const L = window.HissatiApp.state().log, k = Object.keys(L).sort().pop(); return L[k].h.adhkar.c; }), [1, 1]);
+    await ip.click('[data-act="khAzX"]'); await ip.click('[data-hb="adhkar"] [data-act="adhkar"]'); assert((await ip.textContent('.scr')).includes('الذكر 2 من 18'), 'يكمل من أول ذكر لم يكتمل');
+    if (process.env.SHOTS) await ip.screenshot({ path: path.join(process.env.SHOTS, 'c16_adhkar.png') });
+    for (let g = 0; g < 400 && await ip.locator('.khcount').count(); g++) { await ip.click('.khcount', { force: true }).catch(() => { }); await ip.waitForTimeout(g % 20 ? 0 : 1); if (await ip.locator('#cel').count()) break; if (await ip.locator('.khcount.done').count()) await ip.waitForSelector('.khcount:not(.done)', { timeout: 1500 }).catch(() => { }); }
     await ip.waitForSelector('#cel.cel-adhkar .heart.full'); const ct = await ip.textContent('#cel'); assert(ct.includes('في مقربة من ربك') && ct.includes('نحو الجنة'), ct); if (process.env.SHOTS) await ip.screenshot({ path: path.join(process.env.SHOTS, 'c17_adhkar_done.png') }); await ip.click('#cel');
     assert(await ip.isVisible('[data-hb="adhkar"].done'));
     for (const id of ['steps', 'sleep', 'veg', 'sugar', 'move', 'mindful', 'kitchen']) assert(await ip.isVisible('[data-hb="' + id + '"].done'), 'لم تكتمل: ' + id);
@@ -301,8 +303,8 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
       for (let i = 0; i < 3; i++) await ip.click('[data-hb="gratitude"] .petal >> nth=' + i); await cel2('قلب ممتنّ');
       await ip.click('[data-hb="sunlight"] [data-k="15"]'); await cel2('صباح مُشرق'); await ip.click('[data-hb="reading"] [data-k="10"]'); await cel2('ختمتَ يومك بهدوء'); await ip.click('[data-hb="stretch"] [data-k="5"]'); await cel2('جسم مرن');
       for (let i = 0; i < 5; i++) await ip.click('[data-hb="breaks"] .dt >> nth=' + i); await cel2('جسم نشيط'); await ip.click('[data-hb="postwalk"] .wk >> nth=0'); await cel2('خطوات بعد الأكل');
-      await ip.click('[data-hb="adhkarPm"] [data-act="adhkar"]'); await ip.waitForSelector('#adx .adk'); const tot = await ip.evaluate(() => document.querySelectorAll('#adx .adk').length); assert.strictEqual(tot, 20);
-      for (let g = 0; g < 400 && await ip.locator('#adx').count(); g++) { const b = ip.locator('#adx .adk:not(.fin)').first(); if (!(await b.count())) break; await b.click({ force: true }).catch(() => { }); }
+      await ip.click('[data-hb="adhkarPm"] [data-act="adhkar"]'); await ip.waitForSelector('.khcount .sebha'); assert((await ip.textContent('.scr')).includes('الذكر 1 من 20'));
+      for (let g = 0; g < 500 && await ip.locator('.khcount').count(); g++) { await ip.click('.khcount', { force: true }).catch(() => { }); if (await ip.locator('#cel').count()) break; if (await ip.locator('.khcount.done').count()) await ip.waitForSelector('.khcount:not(.done)', { timeout: 1500 }).catch(() => { }); }
       await cel2('اكتملت أذكار المساء'); assert.strictEqual(await ip.locator('.hb.done').count() >= 10, true);
       const hv = await ip.evaluate(() => { const L = window.HissatiApp.state().log, k = Object.keys(L).sort().pop(); return L[k].h; }); assert.strictEqual(hv.social, 1); assert.strictEqual(hv.gratitude, 3); assert.strictEqual(hv.sunlight, 15); assert.strictEqual(hv.breaks, 5); assert.strictEqual(hv.meds, 1); assert.strictEqual(hv.adhkarPm.c.reduce((a, x) => a + x, 0), 259);
       ok('مكتبة العصر: 10 عادات جديدة (أذكار المساء بقلب بنفسجي من 20 ذكراً، سوشيال، شاشات قبل النوم، امتنان، شمس، حركة كل ساعة، قراءة، دواء، تمدّد، مشي بعد الوجبة) لكل منها تصميم وإنجاز واحتفال');
@@ -373,7 +375,7 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
     const w0 = await ip.evaluate(() => { const L = window.HissatiApp.state().log, k = Object.keys(L).sort().pop(); return L[k].water || 0; });
     await ip.evaluate(() => window.HissatiApp.alarm([{ t: 'water', m: 600 }])); await ip.click('[data-alm="done"]'); await ip.waitForSelector('#alm', { state: 'detached' }); assert.strictEqual(await ip.evaluate(() => { const L = window.HissatiApp.state().log, k = Object.keys(L).sort().pop(); return L[k].water; }), w0 + 1);
     await ip.evaluate(() => window.HissatiApp.alarm([{ t: 'med', m: 540, label: 'فيتامين د' }, { t: 'adhAm', m: 540 }])); assert((await ip.textContent('#alm h1')).includes('موعد دوائك — فيتامين د')); assert((await ip.textContent('#alm .alm-more')).includes('أذكار الصباح')); await ip.click('[data-alm="done"]'); assert.strictEqual(await ip.evaluate(() => { const L = window.HissatiApp.state().log, k = Object.keys(L).sort().pop(); return L[k].h.meds; }), 1);
-    await ip.evaluate(() => window.HissatiApp.alarm([{ t: 'adhPm', m: 1050 }])); await ip.click('[data-alm="done"]'); await ip.waitForSelector('#adx .adk'); await ip.click('#adclose');
+    await ip.evaluate(() => window.HissatiApp.alarm([{ t: 'adhPm', m: 1050 }])); await ip.click('[data-alm="done"]'); await ip.waitForSelector('.khcount .sebha'); assert((await ip.textContent('.scr')).includes('أذكار المساء')); await ip.click('[data-act="khAzX"]');
     await ip.evaluate(() => window.HissatiApp.alarm([{ t: 'meal', m: 780, label: 'الغداء' }])); await ip.click('[data-alm="snooze"]'); await ip.waitForSelector('#alm', { state: 'detached' }); await ip.waitForSelector('.toast:has-text("بعد 10 دقائق")');
     const hit = await ip.evaluate(() => { const S = window.HissatiApp.state(), d = new Date(), m = d.getHours() * 60 + d.getMinutes(); S.rem = Object.assign({}, S.rem, { med: true, meds: [{ n: 'اختبار', t: String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0') }] }); window.HissatiApp.alarmTick(); return !!document.getElementById('alm'); });
     assert.strictEqual(hit, false, 'الأوقات تُقرَّب لربع ساعة فلا يطابق الدقيقة الحالية إلا على حدّ الربع'); await ip.evaluate(() => { const S = window.HissatiApp.state(); S.rem = Object.assign({}, S.rem, { med: false }); });
@@ -383,7 +385,7 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
   }
   if (process.env.SHOTS) {      // جولة لقطات لكل شاشات «زنها» بالثيمات (للتصميم فقط؛ لا شروط). SHOT_THEMES=rose,pulse لتحديد الثيمات
     const tour = async (th, sel, name) => { try { await ip.click(sel, { timeout: 3000, force: true }); await ip.waitForTimeout(650); await shot(ip, th + '_' + name); } catch (e) { } };
-    const close = async () => { await ip.click('#adclose', { timeout: 600 }).catch(() => { }); await ip.click('.sheet [data-act="close"]', { timeout: 800 }).catch(() => { }); await ip.click('#cel', { timeout: 400 }).catch(() => { }); await ip.waitForTimeout(450); };
+    const close = async () => { await ip.click('[data-act="khAzX"]', { timeout: 600 }).catch(() => { }); await ip.click('.sheet [data-act="close"]', { timeout: 800 }).catch(() => { }); await ip.click('#cel', { timeout: 400 }).catch(() => { }); await ip.waitForTimeout(450); };
     for (const TH of (process.env.SHOT_THEMES || 'classic,rose,pulse').split(',')) {
       await ip.evaluate((t) => { HxTheme.set(t); }, TH); await ip.waitForTimeout(800); await close();
       for (const [v, nm] of [['today', 't1_today'], ['plan', 't2_plan'], ['prefs', 't3_prefs'], ['feed', 't4_feed'], ['progress', 't5_progress']]) await tour(TH, '[data-act="tab"][data-v="' + v + '"]', nm);
