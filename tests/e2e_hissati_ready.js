@@ -26,6 +26,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   await d.waitForSelector('.hxinv.made .hxlink'); const link = (await d.textContent('.hxinv.made .hxlink')).trim();
   await m.goto(link); await m.waitForSelector('.invite .dr'); await m.click('[data-act="go"][data-v="pin"]'); for (const k of '12341234') await m.click(`.pad [data-v="${k}"]`); await m.waitForSelector('.prog');
   await m.fill('#f_phone', '01001234567'); await m.fill('#f_age', '34'); await m.fill('#f_weight', '88'); await m.fill('#f_height', '162');
+  await m.click('[data-act="set"][data-k="sex"][data-v="أنثى"]');
   for (let i = 0; i < 10 && !(await m.isVisible('#consent')); i++) { if (await m.isDisabled('.foot .btn')) { const t = await m.textContent('.scr h2'); throw new Error('خطوة لا تكتمل: ' + t); } await m.click('.foot .btn'); await m.waitForTimeout(150); }
   await m.check('#consent'); await m.click('[data-act="submit"]'); await m.waitForSelector('text=وصل طلبك إلى أخصائيك'); await cPoll();
   // ---- 1) الأسئلة في «زنها»: سؤال واحد في كل صفحة

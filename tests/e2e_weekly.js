@@ -21,8 +21,9 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   assert(/بعد إخفاء الوجه/.test(await m.textContent('.consent'))); assert(!(await m.isChecked('#bdPub')), 'الموافقة على النشر غير مفعّلة افتراضياً'); await m.check('#bdPub'); await m.click('[data-act="bdSend"]'); await m.waitForSelector('.toast:has-text("صورة التقدم")');
   assert.strictEqual(await m.locator('.wkc').count(), 0, 'البطاقتان تختفيان');
   ok('صورة التقدم: تعليمات ثابتة، موافقة النشر منفصلة وغير مفعّلة افتراضياً وتذكر إخفاء الوجه، والبطاقتان تختفيان بعد الإرسال');
-  await m.click('[data-act="tab"][data-v="progress"]'); const hp = await m.textContent('.hp'); assert(/صفحتي الصحية/.test(hp) && /84.5 كجم/.test(hp) && /خصر 93/.test(hp) && /موعد القياس القادم/.test(hp), hp); assert(await m.locator('.hpb img').count() === 1);
-  ok('«صفحتي الصحية» في «تقدّمي»: بياناتي، القياسات الأسبوعية بالأسهم، موعد القياس القادم، وصور التقدم');
+  // 0.60: «صفحتي الصحية» انتقلت من «تقدّمي» إلى «أنا»
+  await m.click('[data-act="tab"][data-v="today"]'); await m.click('[data-act="tab"][data-v="me"]'); const hp = await m.textContent('.hp'); assert(/صفحتي الصحية/.test(hp) && /84.5 كجم/.test(hp) && /خصر 93/.test(hp) && /موعد القياس القادم/.test(hp), hp); assert(await m.locator('.hpb img').count() === 1);
+  ok('«صفحتي الصحية» في «أنا»: بياناتي، القياسات الأسبوعية بالأسهم، موعد القياس القادم، وصور التقدم');
   await cPoll(); await d.click('main .tabs [data-v="hx"]'); await hxCheck(); let c = await C();
   assert.strictEqual(c.weight, 84.5); assert.strictEqual(c.hx.checks[0].waist, 93); assert.strictEqual(c.hx.wkimgs[0].kind, 'inb'); assert(c.hx.bodies[0].pub); assert(c.med.visits.some((v) => v.w === 84.5 && v.waist === 93));
   await d.click('.rail [data-a="home"]'); const td = await d.textContent('.wktodo'); assert(/قياس أسبوعي جديد/.test(td) && /صورة تقدم جديدة/.test(td), td);
