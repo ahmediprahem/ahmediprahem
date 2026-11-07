@@ -13,8 +13,8 @@ function fmQRow(q, si, qi, n) {
   return '<div class="fmq' + (q.hide ? ' off' : '') + '"><div class="fmql"><input data-fm="q,' + si + ',' + qi + ',label" value="' + esc(q.label) + '" aria-label="نص السؤال">' + extra + '</div><div class="fmqa">' + kind + tog + mv + (q.b ? '' : '<button class="r sm" data-a="fmQDel" data-v="' + si + ',' + qi + '" title="حذف السؤال">×</button>') + '</div></div>';
 }
 function fmAddForm(si) {
-  return '<div class="fmadd"><div class="row"><div><label>نوع السؤال</label><select id="fm_t">' + HForms.TYPES.map(function (t) { return '<option value="' + t[0] + '">' + t[1] + '</option>'; }).join('') + '</select></div><div style="flex:2"><label>نص السؤال</label><input id="fm_l" maxlength="160" placeholder="مثال: كم ساعة تنام يومياً؟"></div></div>'
-    + '<div class="row"><div><label>الخيارات (للاختيار الواحد/المتعدد: خيار في كل سطر)</label><textarea id="fm_o" rows="3" placeholder="صباحاً\nظهراً\nمساءً"></textarea></div><div><label>الوحدة (للرقم)</label><input id="fm_u" placeholder="ساعة، لتر، مرة…"></div><div><label>توضيح يظهر تحت السؤال (اختياري)</label><input id="fm_h" maxlength="200"></div></div>'
+  return '<div class="fmadd"><div class="row"><div><label for="fm_t">نوع السؤال</label><select id="fm_t">' + HForms.TYPES.map(function (t) { return '<option value="' + t[0] + '">' + t[1] + '</option>'; }).join('') + '</select></div><div style="flex:2"><label for="fm_l">نص السؤال</label><input id="fm_l" maxlength="160" placeholder="مثال: كم ساعة تنام يومياً؟"></div></div>'
+    + '<div class="row"><div><label for="fm_o">الخيارات (للاختيار الواحد/المتعدد: خيار في كل سطر)</label><textarea id="fm_o" rows="3" placeholder="صباحاً\nظهراً\nمساءً"></textarea></div><div><label for="fm_u">الوحدة (للرقم)</label><input id="fm_u" placeholder="ساعة، لتر، مرة…"></div><div><label for="fm_h">توضيح يظهر تحت السؤال (اختياري)</label><input id="fm_h" maxlength="200"></div></div>'
     + '<p class="two"><label class="chk"><input type="checkbox" id="fm_r"> إلزامي</label><button data-a="fmQSave" data-v="' + si + '">إضافة السؤال</button><button class="sec" data-a="fmQAdd" data-v="">إلغاء</button></p></div>';
 }
 function formsPage() {

@@ -6,7 +6,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   const b = await chromium.launch(), p = await (await b.newContext({ viewport: { width: 1400, height: 950 } })).newPage(); p.on('pageerror', e => errs.push(String(e))); p.on('dialog', d => d.accept());
   await p.goto(fileUrl(path.resolve(__dirname, '../admin.html'))); await login(p);
   const cl = () => p.evaluate(() => { const S = HApp.state; return JSON.parse(JSON.stringify(S.clients.find(c => c.code === S.cur))); });
-  await p.click('.rail [data-a="new"][data-v="ex"]'); await p.waitForSelector('[data-f="weight"]');
+  await p.click('.rail [data-a="new"][data-v="ex"]'); await p.waitForSelector('[data-f="weight"]'); await p.fill('[data-f="name"]', 'عميل');
   const kinds = await p.evaluate(() => [...document.querySelectorAll('main input')].filter(i => i.dataset.num).map(i => [i.dataset.f, i.type, i.getAttribute('inputmode')]));
   assert.strictEqual(await p.locator('main input[type="number"]').count(), 0); assert(kinds.some(k => k[0] === 'weight' && k[1] === 'text' && k[2] === 'decimal'), JSON.stringify(kinds)); assert(kinds.some(k => k[0] === 'age' && k[2] === 'numeric'));
   ok('حقول الأرقام صارت حقول نص بلوحة أرقام (decimal للكسور، numeric للأعداد الصحيحة)');
@@ -25,6 +25,6 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   const ie = p.locator('.bked input[data-bf="ie"]').first(); await ie.fill('٢٫٥'); assert.strictEqual(await ie.inputValue(), '2.5'); assert.strictEqual(await ie.getAttribute('inputmode'), 'decimal'); ok('محرر الحصص: حصة المكوّن بالأرقام العربية ٢٫٥ تصير 2.5');
   // الجوال: لوحة الأرقام
   const mp = await (await b.newContext({ ...devices['Pixel 7'] })).newPage(); mp.on('pageerror', e => errs.push('m:' + e)); await mp.goto(fileUrl(path.resolve(__dirname, '../admin.html'))); await login(mp);
-  await mp.click('.ghome .qa[data-a="new"][data-v="ex"]'); await mp.fill('[data-f="weight"]', '٧٢'); await mp.waitForTimeout(300); assert.strictEqual(await mp.evaluate(() => { const S = HApp.state; return S.clients.find(c => c.code === S.cur).weight; }), 72); ok('الجوال: الوزن ٧٢ يُقبل ويُحفظ 72');
+  await mp.click('.ghome .qa[data-a="new"][data-v="ex"]'); await mp.fill('[data-f="name"]', 'عميل'); await mp.fill('[data-f="weight"]', '٧٢'); await mp.waitForTimeout(300); assert.strictEqual(await mp.evaluate(() => { const S = HApp.state; return S.clients.find(c => c.code === S.cur).weight; }), 72); ok('الجوال: الوزن ٧٢ يُقبل ويُحفظ 72');
   assert.deepStrictEqual(errs, [], errs.join(' | ')); ok('لا أخطاء في وحدة التحكم'); console.log('\nنجح', n, 'اختبارات الأرقام العربية'); await b.close();
 })().catch(e => { console.log('✘', String(e).slice(0, 1200)); console.log('أخطاء:', JSON.stringify(errs).slice(0, 400)); process.exit(1); });

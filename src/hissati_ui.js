@@ -164,7 +164,10 @@ function hxIn(c, p) {                                              // بعد ا�
     var a = {}, S1 = function (v) { return String(v == null ? '' : v).slice(0, 80); }, AR = function (v) { return Array.isArray(v) ? v.slice(0, 10).map(S1) : []; };
     ['job', 'nat', 'natT', 'mar', 'vitT', 'tr', 'trM', 'fol'].forEach(function (k) { if (p.ans[k]) a[k] = S1(p.ans[k]); }); ['vit', 'trT', 'ch'].forEach(function (k) { if (p.ans[k]) a[k] = AR(p.ans[k]); });
     if (Array.isArray(p.ans.trD)) a.trD = p.ans.trD.filter(function (d) { return d >= 0 && d <= 6; }).map(Number); if (+p.ans.waist > 30 && +p.ans.waist < 300) a.waist = +p.ans.waist;
-    c.prof = Object.assign({ at: Date.now() }, a); if (a.trD && a.trD.length) c.wdays = a.trD.slice(); toast('📋 ' + nm + ' أكمل ملفه'); return 1;
+    c.prof = Object.assign({ at: Date.now() }, a);
+    // 0.60 (T1): إجابة العميل اقتراح يعتمده الأخصائي، لا تكتب فوق «أيام التمرين»
+    if (a.trD && a.trD.length) c.wdaysProp = { v: a.trD.slice(), at: Date.now() };
+    toast('📋 ' + nm + ' أكمل ملفه'); return 1;
   }
   if (p.t === 'weight' && +p.w > 20 && +p.w < 400) { x.weights = (x.weights || []).concat([[p.ts || Date.now(), Math.round(+p.w * 10) / 10]]).slice(-200); c.weight = Math.round(+p.w * 10) / 10; toast('⚖ ' + nm + ' سجّل وزنه: ' + c.weight + ' كجم'); return 1; }
   if (p.t === 'prefs' && p.food) {                                  // ما لا يحبه العميل يُضاف تلقائياً إلى «يتجنبها»، وما يحبه إلى «المفضلة»
@@ -275,8 +278,10 @@ function hxSetPage() {
       : '<div class="ucard"><div class="row"><div><label>عنوان المحطة (Cloudflare Worker)</label><input id="hx_relay" dir="ltr" placeholder="https://hissati.example.workers.dev" value="' + esc(relay) + '"></div><div><label>مفتاح التسجيل (REG_KEY)</label><input id="hx_key" dir="ltr" type="password" autocomplete="off" value="' + esc(d.regKey || '') + '"></div><div><label>اسمك كما يراه العميل</label><input id="hx_name" value="' + esc(st.name || BR().specialist || firstName() || '') + '"></div></div>'
       + '<p><button data-a="hxReg">ربط هذا الجهاز بالمحطة</button></p>' + (HX.err ? '<div class="warn">' + esc(HX.err) + '</div>' : '') + '<p class="small">لا محطة بعد؟ اتبع «worker/relay/DEPLOY_AR.md» (حساب Cloudflare مجاني، 10 دقائق) ثم الصق العنوان والمفتاح هنا.' + (admin ? ' عند الربط يُحفظ العنوان والمفتاح في إعداداتك ويصلان المستخدمين مع «تصدير نسخة المستخدمين» التالي فيربطون أجهزتهم بضغطة.' : '') + '</p></div>');
 }
-function hxInvForm() {
-  return '<div class="ucard hxform"><h3>دعوة عميل إلى «زنها»</h3><div class="row"><div><label>اسم العميل</label><input id="hxi_l" maxlength="80" placeholder="مثال: سارة أحمد"></div><div><label>جوال العميل (للواتساب)</label><input id="hxi_p" type="tel" inputmode="tel" dir="ltr" placeholder="05xxxxxxxx"></div><div><label>نظام الخطة</label><select id="hxi_s"><option value="ex">نظام الحصص</option><option value="g">نظام الجرامات</option></select></div><div><label>صلاحية الرابط</label><select id="hxi_d">' + HX_DAYS.map(function (x) { return '<option value="' + x[0] + '"' + (x[0] === 7 ? ' selected' : '') + '>' + x[1] + '</option>'; }).join('') + '</select></div></div>'
+function hxInvForm(pre) {
+  // 0.60: تُملأ مسبقاً من ملف العميل حين تُفتح من تبويب «زنها» أو «تصدير وإرسال»
+  pre = pre || {};
+  return '<div class="ucard hxform"><h3>دعوة عميل إلى «زنها»</h3><div class="row"><div><label for="hxi_l">اسم العميل</label><input id="hxi_l" maxlength="80" placeholder="مثال: سارة أحمد" value="' + esc(pre.l || '') + '"></div><div><label for="hxi_p">جوال العميل (للواتساب)</label><input id="hxi_p" type="tel" inputmode="tel" dir="ltr" placeholder="05xxxxxxxx" value="' + esc(pre.p || '') + '"></div><div><label for="hxi_s">نظام الخطة</label><select id="hxi_s"><option value="ex">نظام الحصص</option><option value="g"' + (pre.s === 'g' ? ' selected' : '') + '>نظام الجرامات</option></select></div><div><label for="hxi_d">صلاحية الرابط</label><select id="hxi_d">' + HX_DAYS.map(function (x) { return '<option value="' + x[0] + '"' + (x[0] === 7 ? ' selected' : '') + '>' + x[1] + '</option>'; }).join('') + '</select></div></div>'
     + '<p class="two"><button data-a="hxInvMake">إنشاء الرابط</button><button class="sec" data-a="hxInvForm">إلغاء</button></p></div>';
 }
 function hxInvCard(h, v) {
@@ -313,6 +318,15 @@ function hxMini(q) {                                                // محاد�
 }
 function hxThread(msgs) {
   return '<div class="hxthread">' + (msgs || []).map(function (m) { return '<div class="hxb' + (m.from === 'd' ? ' me' : '') + '">' + (m.ctx ? '<small class="hxcx">بخصوص: ' + esc(m.ctx) + '</small>' : '') + esc(m.t) + '<small>' + new Date(m.ts).toLocaleString('ar', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' }) + (m.from === 'd' ? (m.read ? ' ✓✓' : ' ✓') : '') + '</small></div>'; }).join('') + '</div>';
+}
+// 0.60: تبويب «زنها» ظاهر لكل عميل — لغير المرتبط حالة فارغة تشرح ما سيحصل عليه، وزر دعوة واحد يؤدي إلى مسار الدعوة نفسه
+function hxEmptyTab(c) {
+  var nm = String(c.name || '').trim(), on = hxOn(), open = HX.cform === c.code, made = HX.made && HX.madeFor === c.code && HX.st && HX.st.inv[HX.made];
+  return '<div class="hxtab hxempty"><div class="ucard"><h3>عميلك لم يتصل بـ«زنها» بعد</h3><ul class="hxprev">'
+    + '<li><span aria-hidden="true">📱</span> يرى خطته على جواله ويبدّل الأصناف</li><li><span aria-hidden="true">✅</span> يسجّل يومه في 30 ثانية ويصلك الالتزام</li><li><span aria-hidden="true">💬</span> تراسله وتتابع وزنه</li></ul>'
+    + (made ? '' : '<p><button data-a="hxInvC">ادعُ ' + esc(nm || 'العميل') + ' إلى زنها</button></p>')
+    + (open && !on ? '<div class="warn">لإرسال الدعوة اربط هذا الجهاز بمحطة «زنها» أولاً، ثم عد إلى هنا. <button class="sec sm" data-a="hxv">افتح «طلبات زنها»</button></div>' : '')
+    + '</div>' + (open && on && !made ? hxInvForm({ l: nm, p: c.phone || '', s: c.kind === 'athlete' ? 'g' : 'ex' }) : '') + (made ? hxInvCard(HX.made, made).replace('hxinv', 'hxinv made') : '') + '</div>';
 }
 function hxPage() {
   if (HX.loaded !== true) return '<p class="small">جارٍ التحميل…</p>';
@@ -370,10 +384,13 @@ Object.assign(A, {
   hxUnlink: function () { if (!confirm('فصل هذا الجهاز عن «زنها»؟ لن تصل رسائل العملاء المرتبطين إلى هذا الجهاز بعد الآن.')) return; if (HX.st.pushEp) hxFetch('POST', '/v1/push/unsub', { ep: HX.st.pushEp }, true).catch(function () { }); HX.st = { key: 'hx', relay: HX.st.relay, name: HX.st.name, cc: HX.st.cc, after: 0, inv: {}, reqs: {} }; clearInterval(HX.timer); hxSave(); main(); },
   hxCheck: function () { toast('جارٍ التحقق…'); hxPoll().then(function (n) { toast(HX.err ? '⚠ ' + HX.err : n ? 'وصل ' + n + ' جديد' : 'لا جديد'); main(); }); },
   hxInvForm: function () { HX.form = !HX.form; HX.made = null; main(); var i = $('#hxi_l'); if (i) i.focus(); },
+  hxInvC: function () { var c = cur(); if (!c) return; HX.cform = HX.cform === c.code && !HX.made ? null : c.code; HX.made = null; HX.madeFor = null; S.tab = 'hx'; main(); var i = $('#hxi_p'); if (i && !i.value) i.focus(); },
+  hxSendOrInvite: function () { var c = cur(); if (!c) return; if (c.hx) { A.hxSendPlan(); return; } HX.cform = c.code; HX.made = null; HX.madeFor = null; S.tab = 'hx'; main(); window.scrollTo(0, 0); toast('«' + (c.name || 'العميل') + '» لم يتصل بـ«زنها» بعد — أرسل له الدعوة أولاً'); },
   hxInvMake: function () {
     var l = ($('#hxi_l').value || '').trim(), ph = ($('#hxi_p').value || '').trim(), d = +$('#hxi_d').value || 7, sy = ($('#hxi_s') || {}).value === 'g' ? 'g' : 'ex';
     if (!l) { toast('اكتب اسم العميل'); return; }
-    hxInvite(l, ph, d, sy).then(function (inv) { HX.form = false; HX.made = Object.keys(HX.st.inv).filter(function (h) { return HX.st.inv[h] === inv; })[0]; main(); toast('✓ جاهز — أرسل الرابط على واتساب أو انسخه'); }).catch(hxErr);
+    var fc = S.view === 'client' && cur() && S.tab === 'hx' && !cur().hx ? cur().code : null;
+    hxInvite(l, ph, d, sy).then(function (inv) { HX.form = false; HX.made = Object.keys(HX.st.inv).filter(function (h) { return HX.st.inv[h] === inv; })[0]; HX.madeFor = fc; if (fc) HX.cform = null; main(); toast('✓ جاهز — أرسل الرابط على واتساب أو انسخه'); }).catch(hxErr);
   },
   hxCopy: function (h) { var v = HX.st.inv[h]; if (!v) return; var t = hxWaText(v); (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function () { toast('نُسخت الرسالة مع الرابط'); }).catch(function () { prompt('انسخ الرابط:', hxLink(v)); }); },
   hxInvDel: function (h) { if (!confirm('إلغاء هذه الدعوة؟ لن يعمل الرابط بعد الآن.')) return; hxFetch('POST', '/v1/invites/revoke', { h: h }, true).catch(function () { }).then(function () { delete HX.st.inv[h]; if (HX.made === h) HX.made = null; return hxSave(); }).then(main); },

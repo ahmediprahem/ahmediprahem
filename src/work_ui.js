@@ -20,23 +20,37 @@ function wkDate(d) { var x = new Date(d + 'T12:00'); return D.days[x.getDay()] +
 function wkNum(v) { return String(v || '').replace(/[٠-٩]/g, function (d) { return d.charCodeAt(0) - 0x660; }); }
 // ---------- 1) القوالب ونسخ الخطة
 function wkBar(c) {
-  if (c.planSrc === 'ready' || (typeof RDS !== 'undefined' && RDS.bank[c.code])) return '';            // خطة البنك/منتقيها: لا قوالب
-  var kind = wkKind(c), tp = wkTpls().filter(function (t) { return t.kind === kind; }), others = S.clients.filter(function (x) { return x !== c && x.plan && wkKind(x) === kind; });
-  var bar = '<div class="noprint wkbar">' + (c.plan ? '<button class="sec sm" data-a="wkSaveTpl">💾 حفظ كقالب</button> ' : '') + '<button class="sec sm" data-a="wkPick">📋 ' + (c.plan ? 'استبدال من' : 'ابدأ من') + ' قالب أو عميل آخر' + (tp.length ? ' (' + tp.length + ' قالب)' : '') + '</button></div>';
+  if (typeof RDS !== 'undefined' && RDS.bank[c.code]) return '';            // منتقي البنك مفتوح: لا قوالب
+  // 0.60: مع وجود خطة (محرك أو بنك) صارت أزرار القوالب داخل الشريط الموحّد (planBar)، ويبقى هنا زر «ابدأ من قالب» قبل أول خطة ولوحة الاختيار
+  var kind = wkKind(c), tp = wkTpls().filter(function (t) { return t.kind === kind; }), others = S.clients.filter(function (x) { return x !== c && wkHas(x) && wkKind(x) === kind; });
+  var bar = wkHas(c) ? '' : '<div class="noprint wkbar"><button class="sec sm" data-a="wkPick">📋 ابدأ من قالب أو عميل آخر' + (tp.length ? ' (' + tp.length + ' قالب)' : '') + '</button></div>';
   if (!WK.pick) return bar;
   var row = function (src, label, sub, del) { return '<div class="wkrow"><div><b>' + label + '</b><small>' + sub + '</small></div><p class="two"><button class="sm" data-a="wkApply" data-v="' + src + '" data-m="asis" title="نفس السعرات ونفس الأصناف">كما هي</button><button class="o sm" data-a="wkApply" data-v="' + src + '" data-m="fit" title="إعدادات القالب (عدد الوجبات والوجبات المفضلة والماكروز) ثم توليد على بيانات هذا العميل">بسعرات هذا العميل</button>' + (del ? '<button class="sec sm" data-a="wkDelTpl" data-v="' + del + '" aria-label="حذف القالب">🗑</button>' : '') + '</p></div>'; };
   return bar + '<div class="ucard wkpick noprint"><div class="hxtop"><h3>📋 ابدأ من قالب أو انسخ خطة عميل</h3><button class="sec sm" data-a="wkPick">إغلاق</button></div>'
-    + '<p class="small">«كما هي»: نفس السعرات والأصناف (للعائلة أو العملاء المتشابهين) مع تثبيت سعرات القالب لهذا العميل. «بسعرات هذا العميل»: تُنقل الإعدادات (الوجبات والمفضلة والماكروز' + (kind === 'athlete' ? ' والمرحلة وجدول التدريب' : '') + ') ثم تُولَّد خطة جديدة على وزنه وطوله ونشاطه. أصناف «يتجنبها» عنده يُنبَّه إليها. الخطة الحالية تُحفظ إصداراً قبل الاستبدال.</p>'
-    + '<h4>القوالب' + (kind === 'athlete' ? ' — نظام الجرامات' : ' — نظام الحصص') + '</h4>' + (tp.map(function (t) { return row('t:' + t.id, '⭐ ' + esc(t.name), t.kcal + ' سعرة' + (t.meals ? ' • ' + t.meals + ' وجبات' : '') + ' • حُفظ ' + new Date(t.at).toLocaleDateString('ar'), t.id); }).join('') || '<p class="small">لا قوالب بعد. افتح خطة جيدة واضغط «💾 حفظ كقالب».</p>')
-    + '<h4>خطط عملائك</h4>' + (others.sort(function (a, b) { return (b.updated || 0) - (a.updated || 0); }).slice(0, 30).map(function (x) { return row('c:' + x.code, esc(x.name || x.code), x.code + ' • ' + wkKcal(x.plan) + ' سعرة'); }).join('') || '<p class="small">لا عملاء آخرون لديهم خطة في هذا النظام.</p>') + '</div>';
+    + '<p class="two"><button class="sec sm" data-a="genBank">📗 اختر خطة أخرى من البنك</button></p><p class="small">«كما هي»: نفس السعرات والأصناف (للعائلة أو العملاء المتشابهين) مع تثبيت سعرات القالب لهذا العميل. «بسعرات هذا العميل»: تُنقل الإعدادات (الوجبات والمفضلة والماكروز' + (kind === 'athlete' ? ' والمرحلة وجدول التدريب' : '') + ') ثم تُولَّد خطة جديدة على وزنه وطوله ونشاطه. أصناف «يتجنبها» عنده يُنبَّه إليها. الخطة الحالية تُحفظ إصداراً قبل الاستبدال.</p>'
+    + '<h4>القوالب' + (kind === 'athlete' ? ' — نظام الجرامات' : ' — نظام الحصص') + '</h4>' + (tp.map(function (t) { return row('t:' + t.id, '⭐ ' + esc(t.name), (t.src === 'ready' ? '📗 من البنك: ' + esc((t.ready && t.ready.label) || '') : t.kcal + ' سعرة') + (t.meals ? ' • ' + t.meals + ' وجبات' : '') + ' • حُفظ ' + new Date(t.at).toLocaleDateString('ar'), t.id); }).join('') || '<p class="small">لا قوالب بعد. افتح خطة جيدة واضغط «💾 حفظ كقالب».</p>')
+    + '<h4>خطط عملائك</h4>' + (others.sort(function (a, b) { return (b.updated || 0) - (a.updated || 0); }).slice(0, 30).map(function (x) { return row('c:' + x.code, esc(x.name || x.code), x.code + ' • ' + (wkBank(x) ? '📗 ' + esc(x.ready.label || 'خطة بنك') : wkKcal(x.plan) + ' سعرة')); }).join('') || '<p class="small">لا عملاء آخرون لديهم خطة في هذا النظام.</p>') + '</div>';
+}
+function wkBank(c) { return !!c && c.planSrc === 'ready' && !!c.ready && !!c.readyDoc; }
+function wkHas(c) { return !!c && (wkBank(c) || !!c.plan); }
+function wkApplyBank(c, rd, doc, mode, lbl) {                       // 0.60: قالب/نسخة من خطة بنك: «كما هي» تنقل التعديلات، و«بسعرات هذا العميل» تعيد تطبيق خطة المكتبة نفسها عليه
+  var keep = wkHas(c) ? dbPut('versions', wkBank(c) ? { code: c.code, at: Date.now(), note: 'قبل تطبيق ' + lbl, src: 'ready', ready: wkClone(c.ready), readyDoc: wkClone(c.readyDoc), plan: c.plan || null, client: ec(c) } : { code: c.code, at: Date.now(), note: 'قبل تطبيق ' + lbl, plan: c.plan, client: ec(c) }) : Promise.resolve();
+  return keep.then(function () {
+    WK.pick = false;
+    if (mode === 'fit' && typeof rdUse === 'function') { rdUse(c, rd.id, true); return loadVersions(); }
+    c.ready = wkClone(rd); c.ready.at = Date.now(); delete c.ready.sentV; c.readyDoc = wkClone(doc); c.planSrc = 'ready'; if (typeof RDS !== 'undefined') { RDS.bank[c.code] = false; RDS.page[c.code] = 'sum'; }
+    S.tab = 'plan'; persist(c); return loadVersions().then(function () { render(); toast('✓ نُسخت خطة البنك كما هي (' + (rd.label || '') + ')'); });
+  });
 }
 function wkApply(c, src, mode) {
   var s = src.charAt(0) === 't' ? wkTpls().filter(function (t) { return t.id === src.slice(2); })[0] : null, from = s ? null : S.clients.filter(function (x) { return x.code === src.slice(2); })[0];
+  if (s && s.src === 'ready') return wkApplyBank(c, s.ready, s.readyDoc, mode, 'القالب «' + s.name + '»');
+  if (from && wkBank(from)) return wkApplyBank(c, from.ready, from.readyDoc, mode, 'خطة ' + (from.name || from.code));
   var plan = s ? s.plan : from && from.plan, rx = s ? s.rx : from && wkRx(from), kcal = s ? s.kcal : from && wkKcal(from.plan); if (!plan) return Promise.reject(new Error('المصدر غير موجود'));
   var keep = c.plan ? dbPut('versions', { code: c.code, at: Date.now(), note: 'قبل تطبيق ' + (s ? 'القالب «' + s.name + '»' : 'خطة ' + (from.name || from.code)), plan: c.plan, client: ec(c) }) : Promise.resolve();
   return keep.then(function () {
     var r = wkClone(rx || {}); if (mode === 'fit') { delete r.baseCounts; delete r.dayCounts; delete r.kcalManual; if (r.kcalMode === 'fixed') delete r.kcalMode; }
-    Object.assign(c, r);
+    Object.assign(c, r); c.planSrc = 'engine';
     if (mode === 'asis') { if (wkKind(c) === 'ex' && kcal) c.kcalManual = kcal; c.plan = wkClone(plan); c.plan.client = ec(c); c.plan.generated = new Date().toISOString(); }
     else c.plan = c.kind === 'athlete' ? Ath.planWeek(ec(c), AD) : E.planWeek(ec(c), D);
     var fd = wkFoods(c.plan), bad = (c.avoid || []).filter(function (f) { return fd[f]; });
@@ -140,13 +154,19 @@ function wkRe() { if (S.view === 'appts' || (cur() && S.tab === 'appt') || (!cur
 Object.assign(A, {
   wkPick: function () { WK.pick = !WK.pick; main(); },
   wkSaveTpl: function () {
-    var c = cur(); if (!c || !c.plan) return; var kc = wkKcal(c.plan), name = prompt('اسم القالب:', (c.kind === 'athlete' ? 'جرامات ' : '') + kc + ' سعرة' + (c.goal ? ' — ' + c.goal : ''));
+    var c = cur(); if (!c || !wkHas(c)) return;
+    if (wkBank(c)) {
+      var bn = prompt('اسم القالب:', 'بنك — ' + (c.ready.label || '')); if (!bn || !bn.trim()) return; var rd = wkClone(c.ready); delete rd.sentV; delete rd.ans;
+      S.settings.tpls = wkTpls().concat([{ id: 't' + Date.now().toString(36), name: bn.trim().slice(0, 80), kind: wkKind(c), src: 'ready', kcal: 0, at: Date.now(), ready: rd, readyDoc: wkClone(c.readyDoc) }]);
+      saveSettings(); main(); toast('⭐ حُفظ القالب «' + bn.trim() + '» — يظهر في «📋 القوالب» لأي عميل'); return;
+    }
+    var kc = wkKcal(c.plan), name = prompt('اسم القالب:', (c.kind === 'athlete' ? 'جرامات ' : '') + kc + ' سعرة' + (c.goal ? ' — ' + c.goal : ''));
     if (!name || !name.trim()) return; var p = wkClone(c.plan); delete p.client;
     S.settings.tpls = wkTpls().concat([{ id: 't' + Date.now().toString(36), name: name.trim().slice(0, 80), kind: wkKind(c), kcal: kc, meals: c.kind === 'athlete' ? (c.athMeals || []).length : c.meals, at: Date.now(), rx: wkRx(c), plan: p }]);
     saveSettings(); main(); toast('⭐ حُفظ القالب «' + name.trim() + '» — يظهر في «📋 ابدأ من قالب» لأي عميل');
   },
   wkDelTpl: function (v) { var t = wkTpls().filter(function (x) { return x.id === v; })[0]; if (!t || !confirm('حذف القالب «' + t.name + '»؟')) return; S.settings.tpls = wkTpls().filter(function (x) { return x.id !== v; }); saveSettings(); main(); },
-  wkApply: function (v, el) { var c = cur(); if (!c) return; if (c.plan && !confirm('استبدال الخطة الحالية؟ تُحفظ إصداراً يمكنك استرجاعه.')) return; wkApply(c, v, el.dataset.m).catch(function (e) { toast('⚠ ' + e.message); }); },
+  wkApply: function (v, el) { var c = cur(); if (!c) return; if (wkHas(c) && !confirm('استبدال الخطة الحالية؟ تُحفظ إصداراً يمكنك استرجاعه.')) return; wkApply(c, v, el.dataset.m).catch(function (e) { toast('⚠ ' + e.message); }); },
   appts: function () { S.view = 'appts'; S.cur = null; render(); },
   wkOpen: function (v) { A.pick(v).then(function () { S.tab = 'appt'; main(); }); },
   wkGo: function (v, el) { var t = el.dataset.t; if (!v) { A[t](); return; } A.pick(v).then(function () { S.tab = t; main(); if (t === 'hx' && A.hxRead) A.hxRead(); }); },

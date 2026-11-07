@@ -39,7 +39,7 @@ const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html')), PW = 'نسخ-آ
   // ---- 3) B يفعّل النسخ بنفس المعرّف ثم تعديلات على الجهازين
   await connect(B); await enable(B, 'جوال المساء');
   await pick(B, 'سارة'); await B.fill('[data-f="name"]', 'سارة أحمد'); await B.press('[data-f="name"]', 'Tab'); await B.waitForTimeout(400); await newClient(B, 'منى'); await vault(B); await B.click('[data-a="vtNow"]'); await toastWait(B, /أُخذت نسخة/);
-  await newClient(A, 'هند'); await pick(A, 'خالد'); await A.click('[data-a="del"]'); await A.waitForTimeout(300);
+  await newClient(A, 'هند'); await pick(A, 'خالد'); await A.click('.ctabs .cmore summary'); await A.click('[data-a="del"]'); await A.waitForTimeout(300);
   await vault(A); await A.click('[data-a="vtSyncNow"]'); await toastWait(A, /مزامنة من «جوال المساء»/); assert.deepStrictEqual(await names(A), ['سارة أحمد', 'منى', 'هند']);
   const codesA = await A.evaluate(() => DPApp.S.clients.map((c) => c.code)); assert.strictEqual(new Set(codesA).size, 3, 'أكواد مكررة: ' + codesA);
   await A.click('[data-a="vtNow"]'); await toastWait(A, /أُخذت نسخة/);

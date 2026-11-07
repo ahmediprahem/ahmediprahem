@@ -4,7 +4,7 @@
   var A = {}, r1 = function (x) { return Math.round(x * 10) / 10; }, num = function (v, d) { v = parseFloat(v); return isNaN(v) ? (d || 0) : v; };
   var hash = function (s) { var h = 2166136261; s = String(s); for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0) / 4294967296; };
   A.DEFAULT_SCHEDULE = [['تدريب ثقيل', 75, '17:00'], ['تدريب متوسط', 60, '17:00'], ['راحة', 0, ''], ['تدريب ثقيل', 75, '17:00'], ['تدريب متوسط', 60, '17:00'], ['تدريب خفيف', 45, '17:00'], ['راحة', 0, '']].map(function (x) { return { type: x[0], min: x[1], time: x[2] }; });
-  A.newAthlete = function (AD) { return { kind: 'athlete', sex: 'ذكر', age: 28, weight: 80, height: 178, bf: '', sport: 'كمال أجسام', phase: AD.phases[2].n, carbMethod: 'load', schedule: JSON.parse(JSON.stringify(A.DEFAULT_SCHEDULE)), athMeals: JSON.parse(JSON.stringify(AD.meals)) }; };
+  A.newAthlete = function (AD) { return { kind: 'athlete', sex: 'ذكر', age: '', weight: '', height: '', bf: '', sport: 'كمال أجسام', phase: AD.phases[2].n, carbMethod: 'load', schedule: JSON.parse(JSON.stringify(A.DEFAULT_SCHEDULE)), athMeals: JSON.parse(JSON.stringify(AD.meals)) }; };
   A.phase = function (AD, n) { return AD.phases.filter(function (p) { return p.n === n; })[0] || AD.phases[2]; };
   A.dayType = function (AD, n) { return AD.dayTypes.filter(function (d) { return d.n === n; })[0] || AD.dayTypes[0]; };
   // ---------------------------------------------------------------- الأهداف (مطابقة لمعادلات ملف Pro في الإكسل)

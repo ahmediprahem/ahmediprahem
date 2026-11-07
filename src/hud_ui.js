@@ -46,6 +46,9 @@ function hudRender(live) {
     var el = document.getElementById('hud'), q = hudData(), gq = q ? null : hudGrpData();
     if (!q && !gq) { if (el) el.style.display = 'none'; return; }
     if (!el) { el = document.createElement('div'); el.id = 'hud'; el.className = 'hud noprint'; el.setAttribute('role', 'status'); el.setAttribute('aria-live', 'polite'); el.setAttribute('aria-label', 'مؤشر الحصص المطلوبة لليوم'); document.body.appendChild(el); }
+    // 0.60: على الجوال (≤600) يصير المؤشر شريطاً رفيعاً ثابتاً تحت الرأس داخل المحتوى بدل العائم السفلي، فلا يغطي الجدول
+    var mob = window.matchMedia && matchMedia('(max-width:600px)').matches, mm = $('main');
+    if (mob && mm && el.parentNode !== mm) mm.insertBefore(el, mm.firstChild); else if (!mob && el.parentNode !== document.body) document.body.appendChild(el);
     el.style.display = ''; hudApplyPos(el);
     if (gq) { hudGrpDraw(el, gq, live); return; }
     if (HUD.page !== q.di) { HUD.page = q.di; HUD.slot = null; }
