@@ -64,6 +64,24 @@ function trainDays(c) {                                             // أيام 
   if (c.kind === 'athlete' && Array.isArray(c.schedule)) { var t = []; c.schedule.forEach(function (s, i) { if (s && +s.min > 0) t.push(i); }); if (t.length) return t; }
   return Array.isArray(c.wdays) ? c.wdays.slice() : [];
 }
+// ---- 0.60: «أيام التمرين» بكاتب واحد = الأخصائي (T1). ما يجيبه العميل في «أكمل ملفك» يصل اقتراحاً (c.wdaysProp) لا يغيّر c.wdays ولا الخطة قبل «اعتمد»
+function wdSame(a, b) { a = (a || []).slice().sort(); b = (b || []).slice().sort(); return a.length === b.length && a.every(function (x, i) { return x === b[i]; }); }
+function wdNames(v) { return (v || []).slice().sort(function (a, b) { return a - b; }).map(function (i) { return D.days[i]; }).join('، ') || 'لا تمرين'; }
+function wdProp(c) { var pr = c.wdaysProp; return pr && Array.isArray(pr.v) && !wdSame(pr.v, Array.isArray(c.wdays) ? c.wdays : []) ? pr : null; }
+function wdPropHtml(c) {
+  var pr = wdProp(c); if (!pr) return '';
+  return '<div class="ok wdprop" role="status">📲 اقترح ' + esc(String(c.name || 'العميل').trim().split(/\s+/)[0]) + ': ' + esc(wdNames(pr.v)) + ' <button class="sm" data-a="wdOk">اعتمد</button> <button class="sec sm" data-a="wdNo">تجاهل</button></div>';
+}
+function wdaysBox(c) {
+  var w = Array.isArray(c.wdays) ? c.wdays : [];
+  return '<div class="wdbox"><span class="wdl" id="wdl">أيام التمرين <small>(تحدد أيام الكارب الأعلى في الخطط الجاهزة)</small></span><div class="wdays" role="group" aria-labelledby="wdl">'
+    + D.days.map(function (d, i) { var on = w.indexOf(i) >= 0; return '<button type="button" class="wdc' + (on ? ' on' : '') + '" data-a="wday" data-v="' + i + '" aria-pressed="' + on + '">' + esc(d) + '</button>'; }).join('') + '</div>' + wdPropHtml(c) + '</div>';
+}
+Object.assign(A, {
+  wday: function (v) { var c = cur(); if (!c) return; var w = Array.isArray(c.wdays) ? c.wdays.slice() : [], i = w.indexOf(+v); if (i < 0) w.push(+v); else w.splice(i, 1); c.wdays = w.sort(function (a, b) { return a - b; }); save(); main(); },
+  wdOk: function () { var c = cur(), pr = c && c.wdaysProp; if (!pr) return; c.wdays = pr.v.slice(); delete c.wdaysProp; persist(c).then(function () { main(); toast('✓ اعتُمدت أيام التمرين: ' + wdNames(c.wdays) + ' — أعد التوليد أو اختر الخطة لتطبيقها'); }); },
+  wdNo: function () { var c = cur(); if (!c || !c.wdaysProp) return; delete c.wdaysProp; persist(c).then(main); }
+});
 function carbLvl(t) { t = String(t || ''); return /كارب (عالي|مرتفع)/.test(t) ? 3 : /كارب متوسط/.test(t) ? 2 : /كارب منخفض/.test(t) ? 1 : 0; }
 function alignCarb(days, td) {                                      // أيام الكارب الأعلى تقع على أيام التمرين، مع بقاء الترتيب النسبي
   if (!td || !td.length || days.length !== 7 || !days.some(function (d) { return carbLvl(d.t); })) return null;
@@ -182,7 +200,8 @@ document.addEventListener('change', function (e) {
   else if (k === 'rewards') P.rewards = t.value.split('\n').map(function (l) { var m = /^\s*([\d٠-٩]+)\s+(.+)$/.exec(l); return m ? { p: +m[1].replace(/[٠-٩]/g, function (d) { return '٠١٢٣٤٥٦٧٨٩'.indexOf(d); }), n: m[2].trim().slice(0, 60) } : null; }).filter(Boolean).slice(0, 8);
   hxSave().then(function () { ptsSyncAll(); toast('حُفظت إعدادات النقاط'); });
 });
-(function (f) { hxInvForm = function () { return f.apply(this, arguments).replace('placeholder="05xxxxxxxx"></div>', 'placeholder="05xxxxxxxx"></div><div><label>كود دعوة من عميل (اختياري)</label><input id="hxi_r" maxlength="12" dir="ltr" placeholder="مثال: 01AB2C"></div>'); }; })(hxInvForm);
+// 0.60: حقل الجوال صار يحمل value مملوءاً مسبقاً، فيُدرج الحقل بعد أول </div> يلي hxi_p
+(function (f) { hxInvForm = function () { var h = f.apply(this, arguments), i = h.indexOf('id="hxi_p"'), j = i < 0 ? -1 : h.indexOf('</div>', i); return j < 0 ? h : h.slice(0, j + 6) + '<div><label for="hxi_r">كود دعوة من عميل (اختياري)</label><input id="hxi_r" maxlength="12" dir="ltr" placeholder="مثال: 01AB2C"></div>' + h.slice(j + 6); }; })(hxInvForm);
 (function (f) { hxInvite = function () { var r = (($('#hxi_r') || {}).value || '').trim().toUpperCase(); return f.apply(this, arguments).then(function (inv) { if (r && inv) { inv.ref = r.slice(0, 12); hxSave(); } return inv; }); }; })(hxInvite);
 (function (f) { hxApprove = function (cid) {
   var q = HX.st.reqs[cid], inv = q && HX.st.inv[q.h], ref = inv && inv.ref, n0 = S.clients.length;

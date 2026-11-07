@@ -360,3 +360,27 @@ details.tbm:not([open])>.tbp,details.im:not([open])>.imx{display:none}
 .ptset textarea{width:100%}
 /* 0.56: المكملات والأعشاب */
 .supt td{vertical-align:top}.supt td.small{max-width:260px}.dxb.draft{background:#fff1dc;color:#8a4b00}.cisupp ul{margin:6px 0;padding-inline-start:18px;line-height:1.9}
+
+/* 0.60 (ب): الإشعار القصير فوق حبة «المساعد» لا عليها، ولا يغطي شريط التبويب على الجوال */
+.toast{bottom:calc(76px + env(safe-area-inset-bottom,0px));max-width:min(560px,calc(100vw - 36px))}
+/* 0.60: المحتوى يأخذ مسافة سفلية بقدر الزر العائم فلا يغطي «اختر هذه الخطة» وآخر الأزرار */
+@media screen and (min-width:901px){#app{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}}
+header .hdast{display:none!important}
+@media screen and (max-width:600px){
+  body.pgplan .dtfab{display:none!important}
+  body.pgplan header .hdast{display:inline-flex!important;align-items:center;white-space:nowrap}
+  body.pgplan #hud.hud{position:sticky!important;top:calc(var(--hh,0px) + env(safe-area-inset-top,0px) + 4px);left:auto!important;right:auto;bottom:auto!important;width:auto;max-height:45vh;margin:0 0 10px;z-index:40}
+  body.pgplan #hud.hud.hf-min{padding-top:4px;padding-bottom:4px}
+}
+/* 0.60: «⋯» في رأس ملف العميل (حذف العميل بعيداً عن أفعال الخطة) */
+.ctabs .cmore{display:inline-block;margin-inline-start:auto}.ctabs .cmore>summary{min-width:44px;text-align:center}.ctabs .cmore .tbp{inset-inline-start:auto;inset-inline-end:0}
+/* 0.60: تبويب «زنها» لغير المرتبط */
+.hxempty .hxprev{list-style:none;padding:0;margin:10px 0 14px;display:grid;gap:8px}.hxempty .hxprev li{display:flex;gap:10px;align-items:center;font-size:15px}
+/* 0.60: «أيام التمرين» واقتراح العميل */
+.wdbox{margin:10px 0}.wdl{display:block;font-weight:700;margin-bottom:6px}.wdl small{font-weight:400}.wdays{display:flex;flex-wrap:wrap;gap:8px}
+.wdays .wdc{min-height:44px;min-width:64px;background:transparent;color:inherit;border:1px solid rgba(127,140,170,.5)}.wdays .wdc.on{background:#2f6f4f;color:#fff;border-color:#2f6f4f}
+.wdprop{margin-top:8px}
+.tbsplit{display:inline-flex;align-items:stretch;gap:2px}.tbsplit .tbgen>summary{min-width:36px;text-align:center}
+.tbp button small{display:block;font-size:12px;font-weight:400;opacity:.85;margin-top:2px}
+/* 0.60: لون حبة المساعد يتبدّل فوراً مع الثيم (بلا انتقال للخلفية)، فلا تمر بلون وسيط منخفض التباين */
+#dtfab{transition:filter .15s}

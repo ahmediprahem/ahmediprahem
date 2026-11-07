@@ -31,7 +31,10 @@ hx = open(os.path.join(H, 'src', 'hissati', 'template.html'), encoding='utf-8').
 open(os.path.join(H, 'hissati.html'), 'w', encoding='utf-8').write(hx)
 _dm = os.path.join(H, 'src', 'hissati', 'demo_state.json')
 if os.path.exists(_dm):      # نسخة تجريبية للعرض (Artifact): نفس التطبيق بحساب وهمي بلا شبكة
-    open(os.path.join(H, 'hissati_demo.html'), 'w', encoding='utf-8').write(hx.replace('window.HX_DEMO=/*DEMO*/null;', 'window.HX_DEMO=' + open(_dm, encoding='utf-8').read().replace('</', '<\\/') + ';').replace('<title>حصتي</title>', '<title>حصتي — نسخة تجريبية</title>'))
+    # 0.60: العنوان يُقرأ بتعبير منتظم (صار «زنها»)، ويفشل البناء إن لم يحدث الاستبدال حتى لا ينكسر بصمت عند أي تغيير اسم لاحق
+    _dh, _dn = re.subn(r'<title>(.*?)</title>', lambda m: '<title>' + m.group(1) + ' — نسخة تجريبية</title>', hx.replace('window.HX_DEMO=/*DEMO*/null;', 'window.HX_DEMO=' + open(_dm, encoding='utf-8').read().replace('</', '<\\/') + ';'), count=1, flags=re.S)
+    assert _dn == 1 and 'نسخة تجريبية</title>' in _dh, 'لم يُستبدل عنوان نسخة العرض في hissati_demo.html'
+    open(os.path.join(H, 'hissati_demo.html'), 'w', encoding='utf-8').write(_dh)
 jsstr = lambda v: json.dumps(v, ensure_ascii=False).replace('\u2028', '\\u2028').replace('\u2029', '\\u2029')
 wk = open(os.path.join(H, 'worker', 'relay', 'index.mjs'), encoding='utf-8').read()
 wk = re.sub(r'/\*HISSATI_HTML\*/.*?/\*END\*/', lambda m: '/*HISSATI_HTML*/' + jsstr(hx) + '/*END*/', wk, count=1, flags=re.S)

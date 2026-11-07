@@ -236,7 +236,8 @@ function rdPlanView(c) {                                                // خط�
   var R = c.ready, d = c.readyDoc, e = RL.plan(R.id), a = R.ans || {}, P = RL.norm(rdBase(c), a), G = rdIsG(d);
   R.ex = e ? RL.expect(e, P, RL.energy(P), a) : null;
   var pg = RDS.page[c.code] == null ? 'sum' : RDS.page[c.code], pages = [['sum', 'الملخص']].concat(!G && (d.ex || []).length ? [['grp', 'تقسيم الحصص']] : [], d.days.map(function (y, i) { return [String(i), (D.days || [])[i] || 'اليوم ' + (i + 1)]; }), [['all', 'كل الصفحات']]);
-  var h = '<div class="rdplan"><div class="noprint mxrow"><button class="sm sec" data-a="genBank">📗 اختر خطة أخرى من البنك</button> <button class="sm sec" data-a="gen">⚙ ولّد خطة جديدة</button> <button class="sm" data-a="rdDocx">تصدير Word (.docx)</button> <button class="sm" onclick="window.print()">تصدير PDF / طباعة</button>' + (c.hx ? ' <button class="sm" data-a="hxSendPlan">📲 أرسل إلى «زنها»' + (R.sentV ? ' (أُرسل v' + R.sentV + ')' : '') + '</button>' : '') + (d.edited ? ' <button class="sm sec" data-a="rdReset">↺ استعادة الأصل من المكتبة</button>' : '') + '</div>'
+  // 0.60: نفس شريط خطة المحرك (planBar) بنفس الأزرار والترتيب؛ Word وPDF وHTML تُوجَّه إلى صفحات البنك
+  var h = '<div class="rdplan">' + planBar(c)
     + '<div class="dxbox noprint rdph"><b>📗 ' + esc(R.name) + '</b> <span class="dxb">من البنك' + (d.edited ? ' • معدّلة' : '') + '</span> <small>' + esc(R.label) + '</small>' + (R.when ? '<div class="small">💡 ' + esc(R.when) + '</div>' : '') + (R.ex ? '<div class="small"><b>المتوقع:</b> ' + esc(R.ex.head || '') + '</div>' : '') + '</div>'
     + '<div class="pnav noprint">' + pages.map(function (x) { return '<button class="' + (pg === x[0] ? 'on' : 'sec') + '" data-a="rdPage" data-v="' + x[0] + '">' + esc(x[1]) + '</button>'; }).join('') + '</div>';
   if (pg === 'sum') h += rdPgSum(c, R, d); else if (pg === 'grp') h += rdPgGrp(c, R, d); else if (pg === 'all') h += rdPgSum(c, R, d) + (G ? '' : rdPgGrp(c, R, d)) + d.days.map(function (y, i) { return rdPgDay(c, R, d, i, false); }).join('');
@@ -279,6 +280,22 @@ Object.assign(A, {
     } catch (e) { toast('تعذّر التصدير: ' + e.message); }
   }
 });
+// ---- 0.60: أفعال الشريط الموحّد لخطة البنك (نفس data-a لخطة المحرك)
+function rdIsBank(c) { return !!c && c.planSrc === 'ready' && !!c.ready && !!c.readyDoc && !RDS.bank[c.code]; }
+function rdAllHtml(c) { var R = c.ready, d = c.readyDoc; return rdPgSum(c, R, d) + (rdIsG(d) ? '' : rdPgGrp(c, R, d)) + d.days.map(function (y, i) { return rdPgDay(c, R, d, i, false); }).join(''); }
+(function (docx0, print0, html0) {
+  A.docx = function () { if (rdIsBank(cur())) return A.rdDocx(); return docx0.apply(this, arguments); };
+  A.print = function () {
+    var c = cur(); if (!rdIsBank(c)) return print0.apply(this, arguments);
+    if (window.HNative && HNative.isNative()) { toast('داخل التطبيق: يُشارَك ملف HTML للعميل — افتحه في المتصفح ثم اطبع أو احفظ PDF'); A.html(); return; }
+    RDS.page[c.code] = 'all'; main(); toast('في نافذة الطباعة اختر «حفظ كـ PDF»'); setTimeout(function () { window.print(); }, 120);
+  };
+  A.html = function () {
+    var c = cur(); if (!rdIsBank(c)) return html0.apply(this, arguments);
+    var css = document.querySelector('style').textContent, doc = '<!doctype html><html lang="ar" dir="rtl"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>خطة ' + esc(c.name) + '</title><style>' + css + '</style><body><main style="max-width:980px;margin:auto">' + rdAllHtml(c) + '</main></body></html>';
+    dlFile(new Blob([doc], { type: 'text/html' }), fileBase(c) + '.html');
+  };
+})(A.docx, A.print, A.html);
 (function (g0) {                                                       // «ولّد خطة جديدة» = محرك «حصة»؛ تبقى خطة البنك محفوظة للرجوع إليها
   A.gen = function () { var c = cur(), prev = c && c.planSrc; if (c) { c.planSrc = 'engine'; RDS.bank[c.code] = false; } var r = g0.apply(this, arguments); if (c && !c.plan) c.planSrc = prev; return r; };
 })(A.gen);
@@ -314,11 +331,29 @@ function needGA(c) { return !!c && c.kind !== 'athlete' && (!c.goal || !c.activi
 function gaStop(c) {
   if (!needGA(c)) return false;
   var miss = [!c.goal ? 'الهدف' : '', !c.activity ? 'مستوى النشاط' : ''].filter(Boolean).join(' و');
-  toast('حدّد ' + miss + ' أولاً — الخطة تُحسب منهما'); S.view = 'client'; S.tab = 'client'; render();
+  toastWhy('حدّد ' + miss + ' أولاً — الخطة تُحسب منهما', function () { return needGA(cur()); }); S.view = 'client'; S.tab = 'client'; render();
   var f = document.querySelector('[data-f="' + (!c.goal ? 'goal' : 'activity') + '"]'); if (f) { f.focus(); f.scrollIntoView({ block: 'center' }); }
   return true;
 }
-['gen', 'genBank', 'dxApply', 'probApply'].forEach(function (k) { var f = A[k]; if (f) A[k] = function () { var c = k === 'gen' || k === 'genBank' ? cur() : (typeof dxClient === 'function' ? dxClient() : cur()); if (gaStop(c)) return; return f.apply(this, arguments); }; });
+// ---- 0.60: عميل جديد بلا أرقام مسبقة — لا حساب ولا توليد قبل إدخال العمر والوزن والطول (المعادلات نفسها لا تتغير)
+function needBody(c) { return !!c && ['age', 'weight', 'height'].some(function (k) { return !(+c[k] > 0); }); }
+function bodyStop(c) {
+  if (!needBody(c)) return false;
+  toastWhy('أكمل العمر والوزن والطول أولاً', function () { return needBody(cur()); }); S.view = 'client'; S.tab = 'client'; render();
+  var k = ['age', 'weight', 'height'].filter(function (x) { return !(+c[x] > 0); })[0], f = document.querySelector('main [data-f="' + k + '"]'); if (f) { f.focus(); f.scrollIntoView({ block: 'center' }); }
+  return true;
+}
+var NEEDB = '<div class="warn needw nbody">أكمل العمر والوزن والطول</div>';
+(function (tb) { targetsBox = function (c) { return needBody(c) ? NEEDB : tb(c); }; })(targetsBox);
+(function (tb) { athTargetsBox = function (c) { return needBody(c) ? NEEDB : tb(c); }; })(athTargetsBox);
+(function (f) { if (f) A.wkApply = function (v, el) { if (el && el.dataset && el.dataset.m === 'fit' && bodyStop(cur())) return; return f.apply(this, arguments); }; })(A.wkApply);
+document.addEventListener('input', function (e) {
+  // الشارة «مطلوب» تزول حين يُكتب رقم موجب، وتعود إن مُسح
+  var t = e.target; if (!t || !t.dataset || ['age', 'weight', 'height'].indexOf(t.dataset.f) < 0) return;
+  var w = t.parentNode, lb = w && w.querySelector('label'), on = !(+t.value > 0); if (!w || !lb) return;
+  w.classList.toggle('need', on); var b = lb.querySelector('.needb'); if (on && !b) lb.insertAdjacentHTML('beforeend', ' <b class="needb">مطلوب</b>'); if (!on && b) b.remove();
+});
+['gen', 'genBank', 'dxApply', 'probApply'].forEach(function (k) { var f = A[k]; if (f) A[k] = function () { var c = k === 'gen' || k === 'genBank' ? cur() : (typeof dxClient === 'function' ? dxClient() : cur()); if (bodyStop(c) || gaStop(c)) return; return f.apply(this, arguments); }; });
 (function (tb) { targetsBox = function (c) { return (needGA(c) ? '<div class="warn needw">⚠ لم يُحدَّد ' + [!c.goal ? 'الهدف' : '', !c.activity ? 'مستوى النشاط' : ''].filter(Boolean).join(' و') + ' — الأرقام أدناه مبدئية ولن تُولَّد خطة قبل تحديدهما.</div>' : '') + tb(c); }; })(targetsBox);
 // ---- إصدارات خطة البنك (0.45): «حفظ إصدار» يحفظ الخطة المعروضة (بنك أو محرك)، والاسترجاع يعيدها كما كانت
 (function (ver0, vopen0, vt0) {
@@ -333,7 +368,7 @@ function gaStop(c) {
   };
   verTab = function (c) {
     var h = vt0(c); if (!S.versions.some(function (v) { return v.src === 'ready'; }) && c.planSrc !== 'ready') return h;
-    S.versions.forEach(function (v) { h = h.replace('data-a="vopen" data-v="' + v.id + '"', 'data-a="vopen" data-v="' + v.id + '" title="' + (v.src === 'ready' ? 'خطة بنك' : 'خطة محرك') + '"').replace('<td>' + esc(v.note) + '</td><td><button class="sec sm" data-a="vopen" data-v="' + v.id + '"', '<td>' + (v.src === 'ready' ? '<span class="dxb">📗 ' + esc(v.ready.label) + '</span> ' : '<span class="dxb">⚙ المحرك</span> ') + esc(v.note) + '</td><td><button class="sec sm" data-a="vopen" data-v="' + v.id + '"'); });
+    S.versions.forEach(function (v) { h = h.replace('data-a="vopen" data-v="' + v.id + '"', 'data-a="vopen" data-v="' + v.id + '" title="' + (v.src === 'ready' ? 'خطة بنك' : 'خطة محرك') + '"').replace('<td>' + esc(vNote(v)) + '</td><td><button class="sec sm" data-a="vopen" data-v="' + v.id + '"', '<td>' + (v.src === 'ready' ? '<span class="dxb">📗 ' + esc(v.ready.label) + '</span> ' : '<span class="dxb">⚙ المحرك</span> ') + esc(vNote(v)) + '</td><td><button class="sec sm" data-a="vopen" data-v="' + v.id + '"'); });
     return (c.planSrc === 'ready' ? '<p class="small">الخطة المعروضة الآن من البنك: «حفظ إصدار» يحفظها بتعديلاتها.</p>' : '') + h;
   };
 })(A.ver, A.vopen, verTab);

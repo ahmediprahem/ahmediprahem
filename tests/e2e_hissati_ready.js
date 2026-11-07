@@ -57,9 +57,9 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   await d.evaluate(() => { const c = DPApp.S.clients.find((x) => x.code === DPApp.S.cur); if (c && c.kind !== 'athlete') { c.goal = c.goal || DATA.settings.goals[2][0]; c.activity = c.activity || DATA.settings.activity[2][0]; } if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); }).then(() => d.click('main [data-a="genBank"]')); await d.waitForSelector('.rdbank'); assert.strictEqual(await d.inputValue('[data-rdq="style"]'), 'lowcarb'); assert(/اللو كارب/.test(await d.textContent('.rdopt.best')));
   const pk = d.locator('.rdopt', { hasText: '📲 اختيار العميل' }); assert.strictEqual(await pk.count(), 1, 'اختيار العميل مميَّز بين الخيارات'); assert(await d.locator('.rdopt').count() >= 5);
   ok('«اختر خطة جاهزة» يبدأ من إجابات العميل نفسها، واختياره مميَّز «📲 اختيار العميل» بين حتى 7 خيارات');
-  await pk.locator('[data-a="rdApprove"]').click(); await d.waitForSelector('.rdplan [data-a="hxSendPlan"]');
+  await pk.locator('[data-a="rdApprove"]').click(); await d.waitForSelector('.rdplan .pbar [data-a="hxSendOrInvite"]', { state: 'attached' });
   let c = await d.evaluate(() => JSON.parse(JSON.stringify(DPApp.S.clients[0]))); assert.strictEqual(c.ready.id, pickId); assert.strictEqual(c.planSrc, 'ready');
-  await d.click('.rdplan [data-a="hxSendPlan"]'); await d.waitForFunction(() => DPApp.S.clients[0].ready.sentV === 1, null, { timeout: 15000 });
+  await d.click('.rdplan .pbar summary.o'); await d.click('.rdplan .pbar [data-a="hxSendOrInvite"]'); await d.waitForFunction(() => DPApp.S.clients[0].ready.sentV === 1, null, { timeout: 15000 });
   ok('الأخصائي يطبّق اختيار العميل بضغطة فيصير خطته في «الخطة»، و«أرسل إلى «زنها»» يرسلها');
   // ---- 3) «زنها» تستقبل الخطة الجاهزة
   await cPoll(); await m.waitForSelector('.tabbar', { timeout: 10000 }); const st = await m.evaluate(() => { const S = window.HissatiApp.state(); return { days: S.plan.length, ready: S.pm.ready, slots: S.plan[0].slots.length, lines: S.plan[0].slots[0].lines.length, alts: S.plan.some((d) => d.slots.some((s) => s.lines.some((l) => l[3].length))) }; });
