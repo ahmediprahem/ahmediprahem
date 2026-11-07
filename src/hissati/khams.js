@@ -27,10 +27,10 @@ function khDay(t) {                                    // سجل اليوم، و
   if (!K2.days[k]) { if (K2.pos >= 240) { K2.pos = 0; K2.kc = (K2.kc || 0) + 1; } K2.days[k] = { b: K2.pos, lv: K2.lv, pr: [0, 0, 0, 0, 0], wd: [], am: 0, pm: 0, sk: 0, hard: 0, exc: 0 }; }
   return K2.days[k];
 }
-function khWaterGoal(t) { if (!S.plan || !S.plan.length) return (S.kh && S.kh.wg) || 8; const dp = dayPlan(t.getDay()), wt = +(dp.water || DATA.water) || 0; return wt ? Math.max(4, Math.min(16, Math.round(wt / CUP))) : 8; }
+function khWaterGoal(t) { if (!S.plan || !S.plan.length) return (S.kh && S.kh.wg) || null; const dp = dayPlan(t.getDay()), wt = +(dp.water || DATA.water) || 0; return wt ? Math.max(4, Math.min(16, Math.round(wt / CUP))) : 8; }
 function khState(t) {                                  // [الصلاة، الورد، الماء، الأذكار، التطوير] لليوم
   const D = khDay(t), L = KH_LV[D.lv] || KH_LV.b, P = khPortions(D.lv, D.b), exc = D.exc && khFem(), w = (khLog(t).water || 0);
-  return [exc || D.pr.every(Boolean), exc || (D.hard ? P.some((p) => D.wd[p.p]) : P.every((p) => D.wd[p.p])), w >= (D.hard ? 2 : khWaterGoal(t)), D.hard ? !!(D.am || D.pm) : !!(D.am && D.pm), D.sk >= (D.hard ? 10 : L.sk)];
+  return [exc || D.pr.every(Boolean), exc || (D.hard ? P.some((p) => D.wd[p.p]) : P.every((p) => D.wd[p.p])), (D.hard ? w >= 2 : khWaterGoal(t) ? w >= khWaterGoal(t) : false), D.hard ? !!(D.am || D.pm) : !!(D.am && D.pm), D.sk >= (D.hard ? 10 : L.sk)];
 }
 function khScore(k) { const K2 = S.kh, D = (K2.days || {})[k]; if (!D) return -1; if (D.cmp) return 3; return khState(new Date(k + 'T12:00')).filter(Boolean).length; }
 function khAdvance(D) {                                // الموضع = بداية اليوم + أرباع الأوراد المقروءة على التوالي
@@ -67,7 +67,7 @@ function scrKhams() {
   const bm = khBm(), left = khLeft(D, P);
   if (uw) { const inB = bm >= uw.a && bm < uw.e; nx = '<small>التالي</small><b>ورد ' + PN[uw.p] + '</b><span>' + (inB ? 'توقفت عند ' + esc(khPos(bm)) + ' • باقي ' + (uw.e - bm) + ' آية من هذا الورد' : esc(khRange(uw.a, uw.e)) + ' • ' + uw.n + ' آية') + '</span><button class="btn khgo" data-act="khRead" data-v="' + uw.p + '">' + I('book') + (inB ? ' أكمل من ' + esc(khPos(bm + 1)) : ' افتح الورد') + '</button>'; }
   else if (!exc && ni > -1) { const wp = P.find((p) => p.p === ni); nx = '<small>التالي</small><b>صلاة ' + PN[ni] + (PT ? ' • ' + PT[ni] : '') + '</b><span>' + (wp ? (bm >= wp.a && bm < wp.e ? 'وبعدها أكمل ورد ' + PN[ni] + ' من ' + esc(khPos(bm + 1)) : 'وبعدها ورد ' + PN[ni] + ': ' + esc(khRange(wp.a, wp.e))) : 'وكوب ماء') + '</span><button class="btn khgo" data-act="khPr" data-v="' + ni + '">صلّيت ' + PN[ni] + '</button>'; }
-  else if (!st[2]) nx = '<small>التالي</small><b>كوب ماء</b><span>' + w + ' من ' + wg + ' أكواب</span><button class="btn khgo" data-act="khW" data-v="1">شربت كوباً</button>';
+  else if (!st[2] && wg) nx = '<small>التالي</small><b>كوب ماء</b><span>' + w + ' من ' + wg + ' أكواب</span><button class="btn khgo" data-act="khW" data-v="1">شربت كوباً</button>';
   else if (!st[3]) nx = '<small>التالي</small><b>' + (D.am ? 'أذكار المساء' : 'أذكار الصباح') + '</b><span>' + (D.am ? 'بعد العصر' : 'بعد الفجر') + '</span><button class="btn khgo" data-act="khAz" data-v="' + (D.am ? 'pm' : 'am') + '">' + I('play') + ' ابدأ ' + (D.am ? 'أذكار المساء' : 'أذكار الصباح') + '</button>';
   else if (!st[4]) nx = '<small>التالي</small><b>ساعة التطوير' + (K2.skill ? ': ' + esc(K2.skill) : '') + '</b><span>' + D.sk + ' من ' + skG + ' دقيقة</span><button class="btn khgo" data-act="khSk" data-v="10">أضف 10 دقائق</button>';
   else nx = '<small>اليوم</small><b>' + (n === 5 ? 'اكتمل يومك كله' : 'لا شيء متبقٍ') + '</b><span>نلقاك غداً بإذن الله.</span>';
@@ -84,13 +84,14 @@ function scrKhams() {
   const keep = day >= 25 ? '<section class="card stack"><h3>ماذا تكمل بعد التحدي؟</h3><p class="dim">اختر ركنين تحتفظ بهما بعد الشهر.</p><div class="khsub">' + ['الصلاة', 'الورد', 'الماء', 'الأذكار', 'التطوير'].map((x, i) => tog((K2.keep || []).includes(i), 'khKeep', i, x)).join('') + '</div></section>' : '';
   const fin = day >= KH_DAYS ? (K2.cert ? '<button class="btn full sec" data-act="khCertOpen">' + I('share') + ' شهادتي: شارك أو نزّل</button>' : '<section class="card stack"><h3>أتممت الثلاثين يوماً</h3><p class="dim">شهادتك جاهزة، وفيها ما أنجزته بالأرقام. تستطيع مشاركتها أو تنزيلها.</p><button class="btn full" data-act="khCert">' + I('check') + ' استلم شهادتي</button></section>') : '';
   const hd = S.guest ? '<div class="hd"><div class="t"><div class="stepk">اليوم ' + Math.min(day, KH_DAYS) + ' من ' + KH_DAYS + '</div><h2>تحدي الخمس</h2></div><button class="back" data-act="khGuide" aria-label="عن التحدي">؟</button></div>' + khInstallBox(true) : head('تحدي الخمس', 'khX', '', 'اليوم ' + Math.min(day, KH_DAYS) + ' من ' + KH_DAYS);
-  const tab = V.khTab || 'day', T = [['day', 'اليوم'], ['quran', 'القرآن'], ['adhkar', 'الأذكار'], ['prog', 'تقدّمي']];
+  const tab = V.khTab || 'day', T = [['day', 'اليوم'], ['quran', 'القرآن'], ['adhkar', 'الأذكار'], ['prog', 'سجلّي']];
   const tabs = '<div class="segc khtabs" role="tablist">' + T.map((t) => '<button role="tab" class="' + (tab === t[0] ? 'on' : '') + '" aria-selected="' + (tab === t[0]) + '" data-act="khTab" data-v="' + t[0] + '">' + t[1] + '</button>').join('') + '</div>';
   let body = '';
   if (tab === 'day') body = '<div class="card khpil">'
     + row('pr', 'الصلاة في وقتها', exc ? 'خارج الحساب في أيام العذر' : D.pr.filter(Boolean).length + ' من 5', st[0], prSub, exc)
     + row('wd', 'الورد', exc ? 'خارج الحساب في أيام العذر' : (P.length ? (left && left < tot ? 'باقي اليوم ' + left + ' من ' + tot + ' آية' : left ? tot + ' آية اليوم' : 'أتممت ورد اليوم') + ' • ' + L.n + ((K2.kc || 0) ? ' • الختمة ' + (K2.kc + 1) : '') : 'أتممت الختمة'), st[1], wdSub, exc)
-    + row('wa', 'الماء', w + ' من ' + wg + ' أكواب' + (D.hard ? '' : S.plan ? ' • حسب خطتك' : ''), st[2], '<span class="stepper"><button class="btn sm sec" data-act="khW" data-v="-1" aria-label="كوب أقل">−</button><b>' + w + '</b><button class="btn sm sec" data-act="khW" data-v="1" aria-label="كوب أكثر">+</button></span>')
+    + (wg ? row('wa', 'الماء', w + ' من ' + wg + ' أكواب' + (D.hard ? '' : S.plan ? ' • حسب خطتك' : ''), st[2], '<span class="stepper"><button class="btn sm sec" data-act="khW" data-v="-1" aria-label="كوب أقل">−</button><b>' + w + '</b><button class="btn sm sec" data-act="khW" data-v="1" aria-label="كوب أكثر">+</button></span>')
+      : row('wa', 'حدّد هدفك من الماء', 'عدد الأكواب في يومك. حدده بنفسك أو مع طبيبك، ويُحسب يومك من الأركان الأخرى حتى تحدده.', false, '<div class="khwg" role="group" aria-label="هدف الماء بالأكواب">' + Array.from({ length: 13 }, (_, j) => '<button class="chip" data-act="khWgSet" data-v="' + (j + 4) + '">' + (j + 4) + '</button>').join('') + '</div>'))
     + row('az', 'أذكار الصباح والمساء', D.hard ? 'واحد منهما يكفي اليوم' : 'الاثنان', st[3], tog(D.am, 'khAm', '', 'الصباح', 'بعد الفجر') + tog(D.pm, 'khPm', '', 'المساء', 'بعد العصر') + '<button class="khrd" data-act="khTab" data-v="adhkar" aria-label="افتح الأذكار">' + I('play') + '</button>')
     + row('sk', 'ساعة التطوير', (K2.skill ? esc(K2.skill) + ' • ' : '') + D.sk + ' من ' + skG + ' دقيقة', st[4], tog(0, 'khSk', 10, '+ 10 دقائق') + tog(0, 'khSk', -D.sk, 'تصفير') + tog(0, 'khSkill', '', K2.skill ? 'غيّر المهارة' : 'اختر المهارة'))
     + '</div>';
@@ -108,13 +109,13 @@ function scrKhams() {
       + (() => { const x = khStats(); return '<section class="card stack"><h3>حتى الآن</h3><div class="stats3"><div class="st"><b>' + x.ok + '</b><small>يوماً ناجحاً</small></div><div class="st"><b>' + x.juz + '</b><small>جزءاً</small></div><div class="st"><b>' + x.hrs + '</b><small>ساعة تطوير</small></div></div></section>'; })()
       + keep
       + '<section class="card stack"><h3>الإعدادات</h3><div class="row" style="justify-content:space-between"><span>المستوى</span><button class="chip" data-act="khLv">' + L.n + '</button></div>'
-      + (!S.plan ? '<div class="row" style="justify-content:space-between"><span>هدف الماء</span><span class="stepper"><button class="btn sm sec" data-act="khWg" data-v="-1" aria-label="أقل">−</button><b>' + (K2.wg || 8) + '</b><button class="btn sm sec" data-act="khWg" data-v="1" aria-label="أكثر">+</button></span></div>' : '')
+      + (!S.plan ? '<div class="row" style="justify-content:space-between"><span>هدف الماء</span>' + (K2.wg ? '<span class="stepper"><button class="btn sm sec" data-act="khWg" data-v="-1" aria-label="أقل">−</button><b>' + K2.wg + '</b><button class="btn sm sec" data-act="khWg" data-v="1" aria-label="أكثر">+</button></span>' : '<span class="dim">لم يُحدَّد بعد — من ركن الماء</span>') + '</div>' : '')
       + '<button class="btn sec full" data-act="khInvite">' + I('share') + ' ادعُ صديقاً للتحدي</button><button class="btn sm sec" data-act="khEnd" style="justify-self:center">إيقاف التحدي</button></section>';
-  return '<div class="scr khs"><div class="scroll"><div class="stack">' + hd
-    + '<div class="khday"><span class="khbig" aria-hidden="true">' + khMark(n) + '</span><div class="khpips">' + st.map((x, i) => '<i class="' + (x ? (exc && i < 2 ? 'ex' : 'on') : '') + '"></i>').join('') + '</div><h2>' + (n === 5 ? 'اكتمل يومك' : n >= 3 ? 'يومك ناجح' : n ? 'بدأت يومك' : 'يوم جديد') + '</h2><p class="dim">' + (exc ? 'أيام العذر: الصلاة والورد خارج حساب يومك.' : D.hard ? 'يوم صعب: الحد الأدنى يكفي اليوم.' : n >= 3 && n < 5 ? 'باقي ' + (5 - n) + ' لاكتمال الشكل.' : n < 3 ? 'باقي ' + (3 - n) + ' ويصبح يومك ناجحاً.' : 'التحمت الحصتان.') + ' • المستوى ' + L.n + '</p></div>'
+  return '<div class="scr khs"><div class="scroll"><div class="stack">' + hd + tabs
+    + (tab !== 'day' ? '' : '<div class="khday"><span class="khbig" aria-hidden="true">' + khMark(n) + '</span><div class="khpips">' + st.map((x, i) => '<i class="' + (x ? (exc && i < 2 ? 'ex' : 'on') : '') + '"></i>').join('') + '</div><h2>' + (n === 5 ? 'اكتمل يومك' : n >= 3 ? 'يومك ناجح' : n ? 'بدأت يومك' : 'يوم جديد') + '</h2><p class="dim">' + (exc ? 'أيام العذر: الصلاة والورد خارج حساب يومك.' : D.hard ? 'يوم صعب: الحد الأدنى يكفي اليوم.' : n >= 3 && n < 5 ? 'باقي ' + (5 - n) + ' لاكتمال الشكل.' : n < 3 ? 'باقي ' + (3 - n) + ' ويصبح يومك ناجحاً.' : 'التحمت الحصتان.') + ' • المستوى ' + L.n + '</p></div>'
     + '<div class="khnext">' + nx + '</div>'
-    + (twice && day > 2 ? '<div class="banner info">' + I('check') + '<span>فاتك يومان. لا بأس، ابدأ اليوم بركن واحد فقط' + (D.hard ? '' : '، أو فعّل «يوم صعب»') + '.</span></div>' : '')
-    + fin + tabs + body
+    + (twice && day > 2 ? '<div class="banner info">' + I('check') + '<span>فاتك يومان. لا بأس، ابدأ اليوم بركن واحد فقط' + (D.hard ? '' : '، أو فعّل «يوم صعب»') + '.</span></div>' : ''))
+    + fin + body
     + '<div class="row khbar"><button class="btn sec' + (D.hard ? ' on' : '') + '" data-act="khHard">' + (D.hard ? 'رجوع لليوم العادي' : 'يوم صعب') + '</button>' + (fem ? '<button class="btn sec' + (D.exc ? ' on' : '') + '" data-act="khExc">' + (D.exc ? 'إنهاء أيام العذر' : 'أيام العذر') + '</button>' : '') + '</div>'
     + '<p class="dim" style="text-align:center">بيانات عبادتك على جوالك فقط' + (S.guest ? '' : '، ولا تصل لأخصائيك') + '.</p>'
     + '</div></div></div>';
@@ -175,7 +176,8 @@ function khAct(a, v) {
     case 'khInvite': { const t = 'انضم معي إلى «تحدي الخمس» على «زنها»: 30 يوماً للصلاة والورد والماء والأذكار وتطوير النفس. مجاني: ' + KH_LINK(); if (navigator.share) navigator.share({ text: t }).catch(() => { }); else copyText(t, 'نُسخ رابط الدعوة'); return false; }
     case 'khCopyLink': copyText(KH_LINK(), 'نُسخ رابط التحدي — افتحه في Chrome أو Safari'); return false;
     case 'khInstLater': S.instLater = now(); save(); return true;
-    case 'khWg': if (K2) { K2.wg = Math.max(4, Math.min(16, (K2.wg || 8) + i)); save(); } return true;
+    case 'khWg': if (K2 && K2.wg) { K2.wg = Math.max(4, Math.min(16, K2.wg + i)); save(); } return true;
+    case 'khWgSet': if (K2 && i >= 4 && i <= 16) { K2.wg = i; save(); toast('هدفك من الماء: ' + i + ' أكواب'); } return true;
     case 'khLv': sheet = { t: 'khLv' }; return true;
     case 'khSetLv': { const lv = KH_LV[v] ? v : 'b'; if (!K2 || !K2.on) { S.kh = { on: 1, start: khDk(khT()), lv, pos: 0, kc: 0, days: {}, skill: '' }; V.kh = 1; toast('بدأ التحدي. بالتوفيق'); } else { K2.lv = lv; const d = khDay(khT()); if (!d.wd.some(Boolean)) d.lv = lv; toast('المستوى الآن: ' + KH_LV[lv].n); } sheet = null; save(); return true; }
     case 'khOpen': V.kh = 1; return true;
@@ -194,7 +196,7 @@ function khAct(a, v) {
     case 'khHard': if (D) { D.hard = D.hard ? 0 : 1; toast(D.hard ? 'يوم صعب: الحد الأدنى يكفي اليوم' : 'رجعنا لليوم العادي'); save(); } return true;
     case 'khExc': if (D && khFem()) { D.exc = D.exc ? 0 : 1; save(); } return true;
     case 'khCmp': { const d = (K2.days || {})[v]; if (d) { d.cmp = 1; toast('عوّضتَ هذا اليوم. سلسلتك مستمرة'); save(); } return true; }
-    case 'khCert': { const x = khStats(), c = { id: 'k' + now().toString(36), pid: 'khams', w: 97, title: 'تحدي الخمس (30 يوماً)', kh: x, lines: khTiles(x).map((t) => t[0] + ' ' + t[1]), at: now(), name: String(S.p.name || '').trim(), sex: S.p.sex, dname: S.dname, clinic: '', phrase: PHRASES[now() % PHRASES.length] }; S.ach = (S.ach || []).concat([c]); K2.cert = c.id; save(); setTimeout(() => celebrateAch(c), 80); return true; }
+    case 'khCert': { const x = khStats(), c = { id: 'k' + now().toString(36), pid: 'khams', w: 97, title: 'تحدي الخمس (30 يوماً)', kh: x, lines: khTiles(x).map((t) => t[0] + ' ' + t[1]), hide: true, at: now(), name: String(S.p.name || '').trim(), sex: S.p.sex, dname: S.dname, clinic: '', phrase: PHRASES[now() % PHRASES.length] }; S.ach = (S.ach || []).concat([c]); K2.cert = c.id; save(); setTimeout(() => celebrateAch(c), 80); return true; }
     case 'khCertOpen': if (K2 && K2.cert) sheet = { t: 'cert', v: K2.cert }; return true;
     case 'khCertPriv': { const c = (S.ach || []).find((q) => q.id === v); if (c) { c.hide = !c.hide; delete CERT[c.id]; save(); } return true; }
     case 'khEnd': sheet = { t: 'khEnd' }; return true;
@@ -280,13 +282,13 @@ function scrKhGuide() {
       + '<h2>' + p[0] + '</h2><p class="mut">' + p[1] + '</p><ul class="khgl">' + p[2].map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul>'
       + '<div class="row khbar">' + (i ? '<button class="btn sec" data-act="khgPrev">السابق</button>' : '') + '<button class="btn" data-act="khgNext">' + (i === KH_GUIDE.length - 1 ? 'جاهز' : 'التالي') + '</button></div>'
       + (i === 0 && guest ? '<p class="dim" style="text-align:center">مجاني، ولا يحتاج اشتراكاً مع أخصائي.</p>' + khInstallBox(false) : '') + '</div></div></div>'; }
-  const f = G.f = G.f || { sex: 'أنثى', lv: 'b', wg: 8, city: '' };
+  const f = G.f = G.f || { sex: '', lv: 'b', wg: null, city: '' };
   const opt = (k, v, t, s) => '<button class="khopt' + (f[k] === v ? ' on' : '') + '" data-act="khgSet" data-k="' + k + '" data-v="' + esc(v) + '"><b>' + t + '</b>' + (s ? '<small>' + s + '</small>' : '') + '</button>';
   return '<div class="scr khs"><div class="scroll"><div class="stack khg">' + head(guest ? 'ابدأ تحدي الخمس' : 'اختر مستواك', 'khgPrev', '', guest ? 'خطوة أخيرة' : 'تحدي الخمس')
     + (guest ? '<div class="field"><label for="khgN">اسمك (يظهر في شهادتك)</label><input class="inp" id="khgN" maxlength="40" value="' + esc(f.name || '') + '" placeholder="مثال: سارة أحمد"></div>'
-      + '<div class="field"><label>أنا</label><div class="segc">' + ['أنثى', 'ذكر'].map((x) => '<button class="' + (f.sex === x ? 'on' : '') + '" data-act="khgSet" data-k="sex" data-v="' + x + '">' + x + '</button>').join('') + '</div></div>'
+      + '<div class="field"><label>أنا</label><div class="segc" role="radiogroup" aria-label="أنا">' + ['أنثى', 'ذكر'].map((x) => '<button class="' + (f.sex === x ? 'on' : '') + '" role="radio" aria-checked="' + (f.sex === x) + '" data-act="khgSet" data-k="sex" data-v="' + x + '">' + x + '</button>').join('') + '</div></div>'
       + '<div class="field"><label for="khgC">مدينتي (لمواقيت الصلاة، اختياري)</label><select class="inp" id="khgC"><option value="">— بدون —</option>' + CITIES.map((c) => '<option' + (f.city === c[0] ? ' selected' : '') + '>' + c[0] + '</option>').join('') + '</select></div>'
-      + '<div class="field"><label>هدف الماء اليومي</label><div class="segc">' + [6, 8, 10, 12].map((x) => '<button class="' + (+f.wg === x ? 'on' : '') + '" data-act="khgSet" data-k="wg" data-v="' + x + '">' + x + ' أكواب</button>').join('') + '</div><small class="dim">حدده بنفسك أو مع طبيبك، وتستطيع تغييره لاحقاً.</small></div>' : '')
+      + '<div class="field"><label>هدف الماء اليومي (أكواب)</label><div class="khwg" role="radiogroup" aria-label="هدف الماء اليومي بالأكواب">' + Array.from({ length: 13 }, (_, j) => j + 4).map((x) => '<button class="chip' + (+f.wg === x ? ' on' : '') + '" role="radio" aria-checked="' + (+f.wg === x) + '" data-act="khgSet" data-k="wg" data-v="' + x + '">' + x + '</button>').join('') + '</div><small class="dim">حدده بنفسك أو مع طبيبك، وتستطيع تغييره لاحقاً.</small></div>' : '')
     + '<div class="field"><label>المستوى</label>' + Object.keys(KH_LV).map((k) => opt('lv', k, KH_LV[k].n, KH_LV[k].d)).join('') + '<small class="dim">ننصح بـ«بداية» في الأسبوع الأول.</small></div>'
     + (V.err ? '<p class="err">' + esc(V.err) + '</p>' : '')
     + '<button class="btn full" data-act="khGo">' + (guest ? 'ابدأ وأنشئ رمز الدخول' : 'ابدأ التحدي') + '</button>'
@@ -305,9 +307,11 @@ function khGuideAct(a, v, el) {                      // أحداث الإرشا�
     case 'khGo': {
       const f = G.f, name = String(f.name || '').trim().slice(0, 40);
       if (G.guest && !name) { V.err = 'اكتب اسمك ليظهر في شهادتك'; return true; }
-      V.err = ''; const kh = { on: 1, start: khDk(khT()), lv: KH_LV[f.lv] ? f.lv : 'b', pos: 0, kc: 0, days: {}, skill: '', wg: +f.wg || 8 };
-      if (G.guest) { S = fresh(); S.guest = 1; S.screen = 'khams'; S.p.name = name; S.p.sex = f.sex; S.kh = kh; if (f.city) S.rem.prCity = f.city; V.khg = null; V.guest = true; V.screen = 'pin'; V.pin = V.pin1 = ''; return true; }
-      S.kh = Object.assign(kh, { wg: (S.kh || {}).wg || 8 }); V.khg = null; V.kh = 1; save(); toast('بدأ التحدي. بالتوفيق'); return true;
+      if (G.guest && !f.sex) { V.err = 'اختر: أنثى / ذكر'; return true; }
+      if (G.guest && !f.wg) { V.err = 'اختر هدفك من الماء'; return true; }
+      V.err = ''; const kh = { on: 1, start: khDk(khT()), lv: KH_LV[f.lv] ? f.lv : 'b', pos: 0, kc: 0, days: {}, skill: '', wg: +f.wg || null };
+      if (G.guest) { S = fresh(); S.guest = 1; S.ui = { today2: true }; S.screen = 'khams'; S.p.name = name; S.p.sex = f.sex; S.kh = kh; if (f.city) S.rem.prCity = f.city; V.khg = null; V.guest = true; V.screen = 'pin'; V.pin = V.pin1 = ''; return true; }
+      S.kh = Object.assign(kh, { wg: (S.kh || {}).wg || null }); V.khg = null; V.kh = 1; save(); toast('بدأ التحدي. بالتوفيق'); return true;
     }
   }
   return false;
