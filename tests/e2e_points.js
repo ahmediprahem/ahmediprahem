@@ -27,6 +27,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   const { devices } = require('playwright'); const ctx2 = await b.newContext({ ...devices['iPhone 13'] }); await ctx2.addInitScript(() => { try { localStorage.setItem('hissati_onb', '1'); } catch (e) { } }); const m2 = await ctx2.newPage();
   await m2.goto(link2); await m2.waitForSelector('.invite .dr'); await m2.click('[data-act="go"][data-v="pin"]'); for (const k of '56785678') await m2.click(`.pad [data-v="${k}"]`); await m2.waitForSelector('.prog');
   await m2.fill('#f_phone', '01005556667'); await m2.fill('#f_age', '29'); await m2.fill('#f_weight', '70'); await m2.fill('#f_height', '160');
+  await m2.click('[data-act="set"][data-k="sex"][data-v="أنثى"]');
   for (let i = 0; i < 14 && !(await m2.isVisible('#consent')); i++) { await m2.click('.foot .btn'); await m2.waitForTimeout(150); }
   await m2.check('#consent'); await m2.click('[data-act="submit"]'); await m2.waitForSelector('text=وصل طلبك إلى أخصائيك'); await m2.evaluate(() => window.HissatiApp.flush());
   await hxCheck(); await d.waitForSelector('.hxreq:not(.wait)'); await d.click('[data-a="hxOk"]'); await d.waitForTimeout(800);

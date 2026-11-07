@@ -25,12 +25,16 @@ module.exports = async function linked(tag, errs, opts) {
   await m.goto(link); await m.waitForSelector('.invite .dr'); await m.click('[data-act="go"][data-v="pin"]'); for (const k of '12341234') await m.click(`.pad [data-v="${k}"]`); await m.waitForSelector('.prog');
   await m.fill('#f_phone', '01001234567'); await m.fill('#f_age', '34'); await m.fill('#f_weight', '88'); await m.fill('#f_height', '162');
   if (opts.wizard) await opts.wizard(m);
-  for (let i = 0; i < 14 && !(await m.isVisible('#consent')); i++) { if (await m.isDisabled('.foot .btn')) { const t = await m.textContent('.scr h2'); throw new Error('خطوة لا تكتمل: ' + t); } await m.click('.foot .btn'); await m.waitForTimeout(150); }
+  // 0.60: الجنس بلا اختيار مسبق — يُختار صراحة (كان «أنثى» افتراضياً)
+  const pickSex = async () => { if (await m.locator('[data-act="set"][data-k="sex"]').count() && !(await m.locator('[data-act="set"][data-k="sex"].on').count())) { await m.click('[data-act="set"][data-k="sex"][data-v="' + (opts.sex || 'أنثى') + '"]'); await m.waitForSelector('[data-act="set"][data-k="sex"].on'); } };
+  for (let i = 0; i < 14 && !(await m.isVisible('#consent')); i++) { await pickSex(); if (await m.isDisabled('.foot .btn')) await m.waitForTimeout(400); if (await m.isDisabled('.foot .btn')) { const t = await m.textContent('.scr h2'); throw new Error('خطوة لا تكتمل: ' + t); } await m.click('.foot .btn'); await m.waitForTimeout(150); }
   await m.check('#consent'); await m.click('[data-act="submit"]'); await m.waitForSelector('text=وصل طلبك إلى أخصائيك'); await cPoll();
   await hxCheck(); await d.waitForSelector('.hxreq:not(.wait)'); await d.click('[data-a="hxOk"]'); await d.waitForSelector('main [data-a="gen"]');
   await d.evaluate(() => { const c = DPApp.S.clients.find((x) => x.code === DPApp.S.cur); c.goal = c.goal || DATA.settings.goals[2][0]; c.activity = c.activity || DATA.settings.activity[2][0]; if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); });
   await d.click('main [data-a="gen"]'); await d.waitForSelector('.pnav');
   await d.click('main .tabs [data-v="hx"]'); await d.click('main [data-a="hxSendPlan"]'); await d.waitForFunction(() => (DPApp.S.clients[0].hx || {}).planV >= 1, null, { timeout: 15000 });
   await cPoll(); await m.waitForSelector('.tabbar', { timeout: 10000 });
+  // 0.60: الشكل الجديد لـ«اليوم» يُضبط صراحة: الاختبارات القائمة على الشكل الحالي، والجديدة تطلب opts.today2
+  if (!opts.keepUi) await m.evaluate((t2) => { const A = window.HissatiApp, S = A.state(); S.ui = Object.assign({}, S.ui, { today2: t2 }); A.render(); }, !!opts.today2);
   return { b, d, m, env, hxCheck, cPoll, C, RELAY, close: async () => { await b.close(); srv.close(); site.close(); } };
 };

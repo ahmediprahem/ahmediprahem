@@ -12,7 +12,8 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   assert(near(t.cairo.dhuhr, 12, 57) && near(t.cairo.maghrib, 20, 0, 5) && near(t.cairo.fajr, 4, 9, 6), JSON.stringify(t.cairo));
   const order = (x) => x.fajr < x.sunrise && x.sunrise < x.dhuhr && x.dhuhr < x.asr && x.asr < x.maghrib && x.maghrib < x.isha; assert(order(t.mecca) && order(t.cairo) && order(t.riyadhW));
   ok('حساب المواقيت على الجهاز: مكة (أم القرى: العشاء بعد المغرب بـ90 دقيقة) والقاهرة (الهيئة المصرية) قريبة من الجداول الرسمية (±4–6 دقائق) ومرتّبة');
-  await m.click('[data-act="tab"][data-v="progress"]'); await m.waitForSelector('[data-rem="pray"]'); await m.check('[data-rem="pray"]'); await m.waitForSelector('#prCity'); await m.selectOption('#prCity', 'القاهرة');
+  // 0.60: التذكيرات والمدينة في «أنا» (مجموعة «الصلاة والأذكار» تُفتح)
+  await m.click('[data-act="tab"][data-v="me"]'); await m.click('[data-act="remG"][data-v="pray"]'); await m.waitForSelector('[data-rem="pray"]'); await m.check('[data-rem="pray"]'); await m.waitForSelector('#prCity'); await m.selectOption('#prCity', 'القاهرة');
   await m.check('[data-rem="sal"]'); await m.waitForTimeout(200);
   await m.click('[data-act="tab"][data-v="today"]'); await m.waitForSelector('.prc'); const pc = await m.textContent('.prc'); assert(/مواقيت الصلاة • القاهرة/.test(pc) && ['الفجر', 'الظهر', 'العصر', 'المغرب', 'العشاء'].every((w) => pc.includes(w)), pc);
   ok('«التذكيرات ← 🕌 مواقيت الصلاة» باختيار المدينة، وبطاقة المواقيت في «اليوم» مع الصلاة التالية');

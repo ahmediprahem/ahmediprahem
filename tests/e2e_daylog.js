@@ -8,12 +8,14 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   await m.click('#daylog [data-act="allDay"]'); await m.waitForSelector('#daylog:has-text("التزامك 100%")');
   const st = await m.evaluate(() => { const S = window.HissatiApp.state(), k = Object.keys(S.log).sort().pop(); return S.log[k]; }); assert(Object.keys(st.ck).length > 3);
   ok('«التزمت باليوم كله» يعلّم كل أصناف اليوم بلمسة (100%)');
-  for (let i = 0; i < 3; i++) await m.click('#daylog [data-act="wAdd"][data-v="1"]'); await m.click('#daylog [data-act="wAdd"][data-v="-1"]'); assert.strictEqual((await m.textContent('#wv')).trim(), '2');
+  // 0.60 أ8: الماء مصدر إدخال واحد (سطر الماء)، و«تسجيل اليوم» يعرضه فقط و«عدّل» يذهب إليه
+  assert.strictEqual(await m.locator('#daylog [data-act="wAdd"]').count(), 0, 'لا ± في «تسجيل اليوم»'); await m.click('#daylog [data-act="wEdit"]');
+  await m.click('#wrow [data-act="water"][data-v="3"]'); await m.click('#wrow [data-act="water"][data-v="3"]'); assert.strictEqual((await m.textContent('#wv')).trim(), '2');
   await m.click('#daylog [data-act="walkMin"][data-v="30"]'); await m.click('#daylog [data-act="walkSteps"][data-v="5000"]'); await m.fill('#daylog [data-wk="walkM"]', '٣٢٠٠'); await m.press('#daylog [data-wk="walkM"]', 'Tab');
   await m.click('#daylog [data-act="off"][data-v="sweets"]'); await m.click('#daylog [data-act="off"][data-v="sym"]'); await m.waitForSelector('#offT'); await m.fill('#offT', 'قطعة كيك في عزومة وصداع بعد الظهر');
   const L = await m.evaluate(() => { const S = window.HissatiApp.state(), k = Object.keys(S.log).sort().pop(); return S.log[k]; });
   assert.strictEqual(L.water, 2); assert.strictEqual(L.h.walkMin, 30); assert.strictEqual(L.h.steps, 5000); assert.strictEqual(L.h.walkM, 3200); assert(L.off.sweets && L.off.sym);
-  ok('الماء بـ ± أكواب، المشي باختيار سريع (30 دقيقة، 5 آلاف خطوة) أو رقم (٣٢٠٠ متر بأرقام عربية)، و«خارج النظام» باختيارات + نص');
+  ok('الماء من سطر الماء (يظهر في «تسجيل اليوم»)، المشي باختيار سريع (30 دقيقة، 5 آلاف خطوة) أو رقم (٣٢٠٠ متر بأرقام عربية)، و«خارج النظام» باختيارات + نص');
   if (process.env.SHOTS) { await m.locator('#daylog').screenshot({ path: process.env.SHOTS + '/daylog.png' }); }
   await m.click('#daylog [data-act="subDay"]'); await m.waitForSelector('#daylog:has-text("أُرسل تسجيل اليوم ✓")'); await cPoll();
   await d.click('main .tabs [data-v="hx"]'); await hxCheck();
