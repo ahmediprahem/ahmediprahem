@@ -8,11 +8,26 @@ const W = (sex, age, weight, height, act) => ({ sex, age, weight, height, act })
 const rec = (a, P) => RL.recommend(Object.assign({ region: 'eg', cond: [], routine: 'classic' }, a), P);
 const base = (r) => r.top.map((x) => RL.fam(x.fk).b);
 
-t('الفهرس: 33 عائلة (مصري/سعودي) و1128 خطة، بلا مكتبة المنتجات، وكل خطة لها محتوى 7 أيام', () => {
-  assert.strictEqual(Object.keys(IDX.fams).length, 33); assert.strictEqual(IDX.plans.length, 1128);
+t('الفهرس: 34 عائلة (مصري/سعودي) و1170 خطة، بلا مكتبة المنتجات، وكل خطة لها محتوى 7 أيام', () => {
+  assert.strictEqual(Object.keys(IDX.fams).length, 34); assert.strictEqual(IDX.plans.length, 1170);
   assert(!IDX.plans.some((e) => /Products|Golden|Magic|Slim-Black|Ananas|Block/i.test(e.i)), 'تسرّبت خطة منتجات');
   IDX.plans.forEach((e) => { const d = B.plans[e.i]; assert(d, 'لا محتوى: ' + e.i); assert.strictEqual(d.days.length, 7, e.i); assert(d.days.every((y) => y.m.length >= 2 && y.m.every((m) => m[1].length)), 'وجبة فارغة: ' + e.i); assert(e.k > 900 && e.k < 4200, 'سعرات شاذة ' + e.i + ' ' + e.k); assert(B.shared[d.subs] && B.shared[d.subs].length, 'بدائل مفقودة ' + e.i); });
   Object.values(IDX.fams).forEach((f) => assert(f.n && f.who && f.goal && f.sys, f.dir));
+});
+t('العجز الحراري المصري قليل المؤشر الجلايسيمي: 42 نظاماً (3 فئات × 11 مستوى + القولون 9 مستويات) بخمس وجبات وأدلة', () => {
+  const L = IDX.plans.filter((e) => e.f === 'lowgi_eg'); assert.strictEqual(L.length, 42);
+  ['tier_eco', 'tier_mid', 'tier_pre'].forEach((fo) => assert.deepStrictEqual(L.filter((e) => e.fo === fo).map((e) => e.l), [1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000, 2100, 2200]));
+  assert.deepStrictEqual(L.filter((e) => e.fo === 'ibs').map((e) => e.l), [1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000]);
+  L.forEach((e) => { const d = B.plans[e.i]; assert.strictEqual(d.days.length, 7); assert(d.days.every((y) => y.m.length === 5), e.i); assert(Math.abs(e.k - e.l) <= 25, e.i + ' ' + e.k); });
+  assert(IDX.fams.lowgi_eg.goal === 'lose' && IDX.fams.lowgi_eg.sys === 'ex' && IDX.fams.lowgi_eg.rg === 'eg'); assert(B.guides.lowgi_eg.spec.length >= 4 && B.guides.lowgi_eg.spec[0].tb[0].length === 12);
+  const txt = JSON.stringify(B.plans[L.find((e) => e.fo === 'ibs' && e.l === 1600).i].days); assert(!/(^|[\s"،(])(فول|عدس|حمص|بيصارة|طعمية)([\s"،)]|$)/.test(txt.replace(/فول سوداني/g, '')), 'نسخة القولون بلا بقول');
+});
+t('الاقتراح: مقاومة الأنسولين في مصر يضع العجز الحراري قليل المؤشر الجلايسيمي ضمن الثلاثة بعد اللو كارب، والقولون يضيف نسخته، والميزانية تختار الفئة', () => {
+  const P = W('أنثى', 32, 82, 162, 1);
+  const r = rec({ goal: 'lose', cond: ['ir'] }, P); assert(base(r).includes('lowgi'), base(r).join()); assert.strictEqual(RL.fam(r.top[0].fk).b, 'lowcarb', 'قرار المالك: لو كارب أولاً لمقاومة الأنسولين'); assert(r.top.slice(0, 3).some((x) => RL.fam(x.fk).b === 'lowgi'), 'والعجز قليل المؤشر ضمن الثلاثة');
+  const r2 = rec({ goal: 'lose', cond: ['ibs'] }, P); assert(r2.top.some((x) => RL.fam(x.fk).b === 'lowgi' && x.e.fo === 'ibs') || r2.top.some((x) => RL.fam(x.fk).b === 'fodmap'), base(r2).join());
+  const r3 = rec({ goal: 'lose', cond: ['ir'], routine: 'budget' }, P); assert.strictEqual(r3.top.find((x) => RL.fam(x.fk).b === 'lowgi').e.fo, 'tier_eco');
+  const sa = RL.recommend({ goal: 'lose', cond: ['ir'], region: 'sa', routine: 'classic' }, P); assert(!sa.top.some((x) => RL.fam(x.fk).b === 'lowgi'), 'مصري فقط');
 });
 t('الأسئلة ديناميكية: البيانات الناقصة فقط، وأسئلة الهدف تظهر حسبه', () => {
   const P = W('أنثى', 30, 80, 160, 1);
