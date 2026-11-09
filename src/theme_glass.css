@@ -277,3 +277,12 @@ html[data-theme="glass"] .stg .tabs{margin-bottom:0}
 @media (max-width:900px){html[data-theme="glass"] .tabs.ctabs{display:flex;flex-wrap:wrap;overflow:visible}html[data-theme="glass"] .tabs.ctabs button{flex:1 1 30%}
   html[data-theme="glass"] .dtfab{padding:3px 10px 3px 3px;border-radius:20px;gap:6px;font-size:12px;opacity:.92}html[data-theme="glass"] .dtfab span{display:inline}html[data-theme="glass"] .dtfab .dtav{width:28px;height:28px}}
 html[data-theme="glass"] .bakrem{border-color:rgba(245,166,35,.55)}html[data-theme="glass"] .bakrem b{color:#fbbf6a}
+
+/* 0.87: مراجعة الاستعمال على الجوال (أخصائي): تبويبات العميل في صفين مرتّبين، وأزرار «عميل جديد» تحت الترحيب مباشرة، وترويسة الرئيسية مضغوطة */
+@media (max-width:600px){
+  html[data-theme="glass"] .tabs.ctabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;padding:6px}
+  html[data-theme="glass"] .tabs.ctabs>button,html[data-theme="glass"] .tabs.ctabs>.cmore,html[data-theme="glass"] .tabs.ctabs>.cmore>summary{flex:none;min-width:0;min-height:44px;padding:6px 2px;font-size:13px;line-height:1.25;white-space:normal;text-align:center;justify-content:center}
+  html[data-theme="glass"] .ghome .hero .splash,html[data-theme="glass"] .ghome .hero video.splash{display:none}
+  html[data-theme="glass"] .ghome .hero{padding:16px 18px}
+  html[data-theme="glass"] .ghome{display:flex;flex-direction:column}html[data-theme="glass"] .ghome .hero{order:-3}html[data-theme="glass"] .ghome .inboxc{order:-2}html[data-theme="glass"] .ghome .qgrid{order:-1}
+}

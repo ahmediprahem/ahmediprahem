@@ -914,6 +914,15 @@ html[data-theme="glass"] .stg .tabs{margin-bottom:0}
 @media (max-width:900px){html[data-theme="glass"] .tabs.ctabs{display:flex;flex-wrap:wrap;overflow:visible}html[data-theme="glass"] .tabs.ctabs button{flex:1 1 30%}
   html[data-theme="glass"] .dtfab{padding:3px 10px 3px 3px;border-radius:20px;gap:6px;font-size:12px;opacity:.92}html[data-theme="glass"] .dtfab span{display:inline}html[data-theme="glass"] .dtfab .dtav{width:28px;height:28px}}
 html[data-theme="glass"] .bakrem{border-color:rgba(245,166,35,.55)}html[data-theme="glass"] .bakrem b{color:#fbbf6a}
+
+/* 0.87: مراجعة الاستعمال على الجوال (أخصائي): تبويبات العميل في صفين مرتّبين، وأزرار «عميل جديد» تحت الترحيب مباشرة، وترويسة الرئيسية مضغوطة */
+@media (max-width:600px){
+  html[data-theme="glass"] .tabs.ctabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;padding:6px}
+  html[data-theme="glass"] .tabs.ctabs>button,html[data-theme="glass"] .tabs.ctabs>.cmore,html[data-theme="glass"] .tabs.ctabs>.cmore>summary{flex:none;min-width:0;min-height:44px;padding:6px 2px;font-size:13px;line-height:1.25;white-space:normal;text-align:center;justify-content:center}
+  html[data-theme="glass"] .ghome .hero .splash,html[data-theme="glass"] .ghome .hero video.splash{display:none}
+  html[data-theme="glass"] .ghome .hero{padding:16px 18px}
+  html[data-theme="glass"] .ghome{display:flex;flex-direction:column}html[data-theme="glass"] .ghome .hero{order:-3}html[data-theme="glass"] .ghome .inboxc{order:-2}html[data-theme="glass"] .ghome .qgrid{order:-1}
+}
 </style></head>
 <body class="gating"><header id="hd"></header><div id="gate" style="display:flex"><div class="gcard" style="text-align:center"><div style="font-weight:700;color:#253464">حصة — جارٍ التحميل…</div></div></div><div id="app" style="display:none"><aside></aside><main></main></div>
 <noscript><div style="position:fixed;inset:0;background:#092061;color:#fff;padding:24px;text-align:center;font:16px Tahoma,Arial">هذا الملف يحتاج تفعيل JavaScript. افتحه مباشرة في Chrome أو Edge أو Safari (وليس من معاينة واتساب أو البريد).</div></noscript>
@@ -6258,7 +6267,7 @@ function rdQuizNote(c) {                                                // ما 
 }
 function rdGenBtns(c) {                                                 // أسفل «بيانات العميل»: من البنك أو جديدة بالمحرك
   if (!window.RL || !RL.idx) return '<button class="o" data-a="gen">ولّد خطة جديدة ←</button>';
-  return rdQuizNote(c) + '<span class="rdgen"><button class="o" data-a="genBank">📗 اختر خطة جاهزة</button> <button class="sec" data-a="gen">⚙ ولّد خطة جديدة</button></span>';
+  return rdQuizNote(c) + '<span class="rdgen"><button class="o" data-a="gen">⚙ ولّد خطة جديدة</button> <button class="sec" data-a="genBank">📗 اختر خطة جاهزة</button></span>';
 }
 function rdMany(q, a, P) {                                              // اختيار متعدد في قائمة منسدلة مضغوطة
   var v = a[q.id] || [], opts = RL.optsOf(q, a, P), n = v.length;
@@ -6370,7 +6379,7 @@ function rdPlanTab(c) {                                                 // يس�
   if (!window.RL || !RL.idx || !c) return '';
   if (RDS.bank[c.code]) return rdBankPanel(c);
   if (c.planSrc === 'ready' && c.ready && c.readyDoc) return rdPlanView(c);
-  if (!c.plan) return '<p>لم تُولَّد خطة بعد.</p>' + rdQuizNote(c) + '<p class="rdgen"><button class="o" data-a="genBank">📗 اختر خطة جاهزة</button> <button class="sec" data-a="gen">⚙ ولّد خطة جديدة</button></p>';
+  if (!c.plan) return '<p>لم تُولَّد خطة بعد.</p>' + rdQuizNote(c) + '<p class="rdgen"><button class="o" data-a="gen">⚙ ولّد خطة جديدة</button> <button class="sec" data-a="genBank">📗 اختر خطة جاهزة</button></p>';
   return '';
 }
 Object.assign(A, {
