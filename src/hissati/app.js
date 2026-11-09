@@ -1126,7 +1126,7 @@ function mvCard() {
     + '<span class="mvgo">' + (m ? '<span class="pill">' + n + ' من ٧</span>' : '<span class="pill g">🏅 شهادة</span>') + '<span>' + (m ? (mvFocus() >= 0 ? 'فيديو اليوم ‹' : 'يُفتح الغد ‹') : 'التفاصيل والانضمام ‹') + '</span></span></button>';
 }
 function chalCar() {
-  const sd = sdCard(), sl = [mvCard()].concat(sd ? [sd] : []), i = Math.min(V.chi || 0, sl.length - 1);
+  const sd = sdCard(), kh = typeof khCard === 'function' ? khCard() : '', khOn = !!(S.kh && S.kh.on), sl = (khOn && kh ? [kh] : []).concat([mvCard()], sd ? [sd] : [], !khOn && kh ? [kh] : []), i = Math.min(V.chi || 0, sl.length - 1);
   if (sl.length === 1) return '<div class="chcar one">' + sl[0] + '</div>';
   return '<div class="chcar" data-n="' + sl.length + '" role="region" aria-roledescription="شرائح" aria-label="تحدياتي"><div class="chtr" style="transform:translateX(' + (i * 100) + '%)">' + sl.map((x) => '<div class="chsl">' + x + '</div>').join('') + '</div><div class="chdt">' + sl.map((x, k) => '<button class="' + (k === i ? 'on' : '') + '" data-act="chGo" data-v="' + k + '" aria-label="الشريحة ' + (k + 1) + '"></button>').join('') + '</div></div>';
 }
