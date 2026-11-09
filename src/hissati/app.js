@@ -54,6 +54,7 @@ const P = {
   phone:'<rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/>',
   news:'<path d="M4 22h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8M15 18h-5M10 6h8v4h-8z"/>',
   play:'<path d="M6 3l14 9-14 9z"/>',
+  pause:'<path d="M8 5v14M16 5v14"/>',
   camera:'<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3.5"/>',
   book:'<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>',
   bell:'<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
@@ -867,6 +868,19 @@ document.addEventListener('pointerdown', () => { if (S && snd().on && !SND.playi
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') sndStop(); else if (S && snd().on) sndPlay(); });
 setInterval(() => { if (S && SND.playing) sndGain(sndTarget()); }, 700);
 const sndBtn = () => !sndAvail() ? '' : '<button class="sndb" data-act="sndt" aria-pressed="' + !!snd().on + '" aria-label="' + (snd().on ? 'إيقاف الصوت الخلفي' : 'تشغيل صوت خلفي هادئ') + '">' + I(snd().on ? 'vol' : 'mute') + '</button>';
+// ---- 0.85: إذاعة القرآن الكريم (بث مباشر) للمسلم، من «اليوم»؛ الصوت من المحطة /radio/quran (تحويل https) ولا يُسجَّل ولا يُخزَّن
+const RAD = { a: null, on: 0, busy: 0 };
+function radStop() { if (RAD.a) { try { RAD.a.pause(); RAD.a.removeAttribute('src'); RAD.a.load(); } catch (e) { } } RAD.on = 0; RAD.busy = 0; }
+function radToggle() {
+  if (RAD.on || RAD.busy) { radStop(); render(); return; }
+  if (typeof sndStop === 'function') try { sndStop(); } catch (e) { }
+  if (!RAD.a) { RAD.a = new Audio(); RAD.a.preload = 'none'; RAD.a.addEventListener('playing', () => { RAD.on = 1; RAD.busy = 0; render(); }); RAD.a.addEventListener('error', () => { if (RAD.busy || RAD.on) { RAD.on = 0; RAD.busy = 0; toast('تعذّر تشغيل الإذاعة الآن. تأكد من الإنترنت وحاول بعد قليل.'); render(); } }); }
+  RAD.busy = 1; RAD.a.src = '/radio/quran'; const p = RAD.a.play(); if (p && p.catch) p.catch(() => { }); render();
+}
+function radioCard() {
+  if (DEMO || !isMus()) return '';
+  return '<section class="card radc"><button class="radbtn' + (RAD.on ? ' on' : '') + '" data-act="radio" aria-pressed="' + !!RAD.on + '" aria-label="' + (RAD.on ? 'إيقاف إذاعة القرآن الكريم' : 'تشغيل إذاعة القرآن الكريم') + '">' + I(RAD.on ? 'pause' : 'play') + '</button><span style="flex:1"><b>📻 إذاعة القرآن الكريم</b><small class="dim">' + (RAD.busy ? 'جارٍ الاتصال…' : RAD.on ? 'بث مباشر الآن' : 'بث مباشر • يستمر والتطبيق مفتوح') + '</small></span>' + (RAD.on ? '<span class="radeq" aria-hidden="true"><i></i><i></i><i></i></span>' : '') + '</section>';
+}
 function sndInvite() { if (!sndAvail() || snd().on || snd().ask) return ''; return '<section class="card stack sndi"><h3>' + I('vol') + ' تحب خلفية صوتية هادئة؟</h3><p class="mut">أصوات بشرية بلا آلات تعطي التطبيق حياة. تُوقَف بضغطة، ولا تعمل مع الفيديو والأذان والأذكار. </p><div class="row"><button class="btn" data-act="sndask" data-v="1">شغّلها</button><button class="btn sec" data-act="sndask" data-v="0">ليس الآن</button></div></section>'; }
 function sndCard() { if (!sndAvail()) return ''; return '<section class="card stack"><div class="row" style="justify-content:space-between"><div><b>صوت خلفي هادئ</b><div class="dim">أصوات بشرية بلا آلات</div></div><input type="checkbox" class="sw" data-act="sndt" aria-label="صوت خلفي"' + (snd().on ? ' checked' : '') + '></div><label class="dim" for="sndV">مستوى الصوت</label><input type="range" id="sndV" data-snd-vol="1" min="0" max="100" value="' + Math.round(snd().vol * 100) + '" aria-label="مستوى الصوت"></section>'; }
 function sceneHeader(first, d) {
@@ -1146,7 +1160,7 @@ document.addEventListener('touchend', (e) => { if (chX == null) return; const el
 function tabToday() {
   const d = TODAY, L = dl(d), [done, n] = itemsOfDay(d), pct = n ? Math.round(done / n * 100) : 0, C = 2 * Math.PI * 40;
   const first = (S.p.name || '').trim().split(/\s+/)[0] || '';
-  let out = renameCard() + sceneHeader(first, d) + missionCard(d) + sndInvite() + whChip() + chalCar() + (S.fw === 'pending' ? firstWinCard() : installState() === 'done' || installState() === 'desktop' ? notifCard(true) : installCard('today')) + chalCard() + prCard() + apCard() + wkCard() + bdCard() + panCard() + pfCard();
+  let out = renameCard() + sceneHeader(first, d) + missionCard(d) + sndInvite() + radioCard() + whChip() + chalCar() + (S.fw === 'pending' ? firstWinCard() : installState() === 'done' || installState() === 'desktop' ? notifCard(true) : installCard('today')) + chalCard() + prCard() + apCard() + wkCard() + bdCard() + panCard() + pfCard();
   out += '<section class="card ring"><svg viewBox="0 0 100 100" role="img" aria-label="التزام اليوم ' + pct + '%"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="10"/><circle cx="50" cy="50" r="40" fill="none" stroke="#6fe3a9" stroke-width="10" stroke-linecap="round" stroke-dasharray="' + C + '" stroke-dashoffset="' + (C * (1 - pct / 100)) + '"/></svg><div style="flex:1"><div class="num">' + pct + '%</div><div class="mut">' + done + ' من ' + n + ' أصناف اليوم</div>'
     + (pct === 100 ? '<div class="dim" style="color:var(--mint)">يوم كامل، أحسنت!</div>' : '<div class="dim">علّم ما أكلته باللمس.</div>') + '</div></section>';
   const dp = dayPlan(d), kc = dp.kcal || DATA.kcal, pr = dp.p || DATA.pro, wt = +(dp.water || DATA.water), cups = Math.max(4, Math.min(16, Math.round(wt / CUP)));
@@ -2417,6 +2431,7 @@ document.addEventListener('click', (e) => {
     case 'whQ': whs().noQ = el.checked; break;
     case 'whNat': { const w = whs(); w.nat = v; S.p.nat = v; break; }
     case 'theme': if (window.HxTheme) { HxTheme.set(v, el.querySelector('.hx-pv')); document.querySelectorAll('.hx-th').forEach((b) => { const on = b.dataset.v === v; b.setAttribute('aria-checked', String(on)); const l = b.querySelector('.hx-tl'); if (l) l.textContent = l.textContent.replace(' ✓', '') + (on ? ' ✓' : ''); }); applyThemeIcons(v); } return;
+    case 'radio': radToggle(); return;
     case 'sndt': snd().on = snd().on ? 0 : 1; snd().ask = 1; if (snd().on) sndPlay(); else sndStop(); break;
     case 'sndask': snd().ask = 1; if (+v) { snd().on = 1; sndPlay(); } break;
     case 'sub': S.tab = v; if (v === 'feed' && now() - FD.at > 60000) fdLoad().then(render); break;
