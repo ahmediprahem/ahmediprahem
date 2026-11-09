@@ -2976,18 +2976,50 @@ function scrProf() {
 function pfKeep() { const a = V.pfA, n = $('#pfNum'), o = $('#pfOther'), qs = pfQs(a), q = qs[Math.min(V.pf, qs.length - 1)]; if (n) { const x = parseFloat(numOnly(n.value)); if (x > 30 && x < 300) a[q.k] = Math.round(x * 2) / 2; else delete a[q.k]; } if (o && q.other) a[q.other] = o.value.trim().slice(0, 80); }
 
 // ---- 0.53: قياس الأسبوع (الوزن والخصر وصورة الإنبودي والتحاليل)، وصورة التقدم كل أسبوعين بموافقة منفصلة للنشر، و«صفحتي الصحية»
-const WKD = 7 * 864e5, BDD = 14 * 864e5;
+const WKD = 7 * 864e5, BDD = 28 * 864e5;                    // 0.82: صورة التقدم كل شهر (28 يوماً)
 const lastOf = (a) => (a && a.length ? a[a.length - 1].ts : 0);
 function wkBase() { return lastOf(S.checks) || S.planAt || 0; }
+// ---- 0.82: موعد قياس أسبوعي يحدده العميل (يوم وساعة)، وتذكير شهري بالصورة، وزر تأجيل مع سبب يصل الأخصائي
+const MQ_REASONS = ['مسافر', 'متعب أو مريض', 'ظرف خاص', 'الميزان غير متاح', 'نسيت', 'غير ذلك'];
+const mqSet = () => !!(S.mq && S.mq.d >= 0 && S.mq.d <= 6 && /^\d{1,2}:\d{2}$/.test(S.mq.t || ''));
+function mqOcc(from) {                                   // آخر موعد أسبوعي ≤ from
+  const f = new Date(from), [h, m] = S.mq.t.split(':').map(Number), d = new Date(f.getFullYear(), f.getMonth(), f.getDate(), h, m, 0, 0);
+  d.setDate(d.getDate() - ((d.getDay() - S.mq.d + 7) % 7)); if (d.getTime() > from) d.setDate(d.getDate() - 7); return d.getTime();
+}
+function mqNext(from) { const o = mqOcc(from); if (o >= from) return o; const d = new Date(o); d.setDate(d.getDate() + 7); return d.getTime(); }
+const mqSnz = (k) => { const z = S.mqSn && S.mqSn[k]; return z && now() < z.until ? z : null; };
+const mqFmt = (t) => new Date(t).toLocaleDateString('ar', { weekday: 'long', day: 'numeric', month: 'short' });
+function wkDue() {
+  if (!S.plan || !S.planAt || mqSnz('w')) return false;
+  if (mqSet()) { const o = mqOcc(now()); return o > S.planAt && o - lastOf(S.checks) >= 2 * 864e5; }
+  return now() - wkBase() >= WKD - 12 * 36e5;
+}
+function bdDue() { if (!S.plan || !S.planAt || mqSnz('b') || (S.bdSnooze && now() - S.bdSnooze < 3 * 864e5)) return false; return now() - (lastOf(S.bodies) || S.planAt - BDD) >= BDD; }
+function mqEdit(U, saveAct) {                              // أداة اختيار اليوم والساعة (في التهيئة وفي صفحتي الصحية)
+  const hrs = []; for (let h = 5; h <= 23; h++) { hrs.push(String(h).padStart(2, '0') + ':00'); if (h < 23) hrs.push(String(h).padStart(2, '0') + ':30'); }
+  return '<div class="chips">' + DATA.dayNames.map((n, i) => '<button class="chip' + (U.d === i ? ' on' : '') + '" data-act="mqD" data-v="' + i + '" aria-pressed="' + (U.d === i) + '">' + esc(n) + '</button>').join('') + '</div>'
+    + '<div class="row" style="margin-top:8px"><label class="dim" for="mqT">الساعة</label><select class="inp" id="mqT" data-mqt="1">' + hrs.map((x) => '<option value="' + x + '"' + (U.t === x ? ' selected' : '') + '>' + hm12(x) + '</option>').join('') + '</select>' + (saveAct ? '<button class="btn sm" data-act="' + saveAct + '">حفظ الموعد</button>' : '') + '</div>';
+}
 function wkCard() {
-  if (!S.plan || !S.planAt) return ''; const due = now() - wkBase() >= WKD - 12 * 36e5, soon = !due && now() - wkBase() >= WKD - 36 * 36e5;
+  if (!S.plan || !S.planAt) return ''; const z = mqSnz('w');
+  if (z) return '<section class="card stack wkc"><h3>⏸ أجّلتَ قياس الأسبوع</h3><p class="mut">سنذكّرك ' + esc(mqFmt(z.until)) + (z.why ? ' • السبب: ' + esc(z.why) : '') + '.</p><button class="btn sec" data-act="wkGo">قِس الآن</button></section>';
+  if (V.mqE) return '<section class="card stack wkc"><h3>⏰ موعد قياسك الأسبوعي</h3>' + mqEdit(V.mqE, 'mqSave') + '</section>';
+  const nxt = mqSet() ? mqNext(now()) : 0, soon = mqSet() ? (!wkDue() && nxt - now() <= 36 * 36e5 && nxt - now() > 0) : (!wkDue() && now() - wkBase() >= WKD - 36 * 36e5);
   if (soon) return '<section class="card stack wkc"><h3>⏰ غداً موعد قياسك الأسبوعي</h3><p class="mut">قِس على الريق بعد دخول الحمام، بنفس الميزان، وجهّز شريط القياس للخصر.</p></section>';
-  return due ? '<section class="card stack wkc"><h3>⚖ قياس الأسبوع</h3><p class="mut">الوزن والخصر، وصورة الإنبودي أو التحاليل إن وُجدت. دقيقة واحدة.</p><button class="btn full" data-act="wkGo">سجّل قياس الأسبوع</button></section>' : '';
+  if (wkDue()) return '<section class="card stack wkc"><h3>⚖ قياس الأسبوع</h3><p class="mut">الوزن والخصر، وصورة الإنبودي أو التحاليل إن وُجدت. دقيقة واحدة.</p><div class="row"><button class="btn" data-act="wkGo">سجّل قياس الأسبوع</button><button class="btn sec" data-act="postOpen" data-v="w">تأجيل القياس</button></div></section>'
+  if (!mqSet() && now() - S.planAt >= 2 * 864e5) return '<section class="card stack mqp"><h3>⏰ حدّد موعد قياسك الأسبوعي</h3><p class="mut">اختر اليوم والساعة المناسبين لك، فنذكّرك على الشاشة كل أسبوع.</p><button class="btn full" data-act="mqEdit">اختر الموعد</button></section>';
+  return '';
 }
 function bdCard() {
-  if (!S.plan || !S.planAt || now() - (lastOf(S.bodies) || S.planAt - BDD) < BDD || (S.bdSnooze && now() - S.bdSnooze < 3 * 864e5)) return '';
-  const first = !(S.bodies || []).length;
-  return '<section class="card stack wkc"><h3>📸 ' + (first ? 'صورة البداية' : 'صورة التقدم') + '</h3><p class="mut">' + (first ? 'صورة «قبل» الآن تقارنها بعد أسابيع بالفرق الذي لا يظهر في الميزان.' : 'صورة كل أسبوعين تريك الفرق الذي لا يظهر في الميزان.') + ' اختيارية، وتصل أخصائيك وحده مشفّرة.</p><div class="row"><button class="btn sec" data-act="bdGo">التقط صورة</button><button class="btn sm sec" data-act="bdLater">ليس الآن</button></div></section>';
+  if (!bdDue()) return ''; const first = !(S.bodies || []).length;
+  return '<section class="card stack wkc"><h3>📸 ' + (first ? 'صورة البداية' : 'صورة التقدم الشهرية') + '</h3><p class="mut">' + (first ? 'صورة «قبل» الآن تقارنها بعد أسابيع بالفرق الذي لا يظهر في الميزان.' : 'صورة واحدة كل شهر تريك الفرق الذي لا يظهر في الميزان.') + ' اختيارية، وتصل أخصائيك وحده مشفّرة.</p><div class="row"><button class="btn sec" data-act="bdGo">التقط صورة</button><button class="btn sm sec" data-act="postOpen" data-v="b">تأجيل</button></div></section>';
+}
+function postSheet() {
+  const P = V.post || (V.post = { k: 'w', when: 1, why: '' }), t = P.k === 'b' ? 'الصورة الشهرية' : 'قياس الأسبوع';
+  return '<p class="mut">لا بأس بالتأجيل. اختر المدة واكتب السبب ليعرف أخصائيك ويساعدك.</p><h3>أجّل ' + t + ' إلى</h3><div class="chips">' + [[1, 'غداً'], [3, 'بعد 3 أيام'], [7, 'الأسبوع القادم']].map((x) => '<button class="chip' + (P.when === x[0] ? ' on' : '') + '" data-act="postWhen" data-v="' + x[0] + '" aria-pressed="' + (P.when === x[0]) + '">' + x[1] + '</button>').join('') + '</div>'
+    + '<h3>السبب</h3><div class="chips">' + MQ_REASONS.map((x, i) => '<button class="chip' + (P.why === x ? ' on' : '') + '" data-act="postWhy" data-v="' + i + '" aria-pressed="' + (P.why === x) + '">' + esc(x) + '</button>').join('') + '</div>'
+    + '<div class="field"><label for="postNote">ملاحظة بالسبب <span class="dim">(اختياري، تصل أخصائيك)</span></label><textarea class="inp" id="postNote" rows="2" maxlength="200" placeholder="مثال: أنا مسافر حتى الخميس"></textarea></div>'
+    + '<button class="btn full" data-act="postGo">أجّل وأخبر أخصائيّ</button>';
 }
 function scrWk() {
   const x = V.wkD;
@@ -3011,9 +3043,9 @@ function hpTop() {                                   // «صفحتي الصحي�
   const p = S.p, ch = (S.checks || []).slice(-6), bd = (S.bodies || []).slice(-6), a = (S.prof || {}).a || {};
   const facts = [p.age ? p.age + ' سنة' : '', p.height ? p.height + ' سم' : '', (p.cond || []).join('، '), (p.allg || []).length ? 'حساسية: ' + p.allg.join('، ') : '', a.job || '', a.tr === 'نعم' ? 'أتمرن ' + (a.trD || []).length + ' أيام' : ''].filter(Boolean);
   const rows = ch.map((c, i) => { const prev = i ? ch[i - 1].w : null, d = prev != null ? Math.round((c.w - prev) * 10) / 10 : null; return '<div class="hpr"><span>' + new Date(c.ts).toLocaleDateString('ar', { day: 'numeric', month: 'short' }) + '</span><b>' + c.w + ' كجم</b>' + (d != null ? '<span class="' + (d <= 0 ? 'dn' : 'up') + '">' + (d <= 0 ? '↓ ' : '↑ ') + Math.abs(d) + '</span>' : '<span></span>') + '<span class="dim">' + (c.waist ? 'خصر ' + c.waist : '') + '</span></div>'; }).join('');
-  const nxt = S.planAt ? new Date(wkBase() + WKD).toLocaleDateString('ar', { weekday: 'long', day: 'numeric', month: 'short' }) : '';
+  const nxt = S.planAt ? (mqSet() ? mqFmt(mqSnz('w') ? mqSnz('w').until : mqNext(now())) + ' • ' + hm12(S.mq.t) : new Date(wkBase() + WKD).toLocaleDateString('ar', { weekday: 'long', day: 'numeric', month: 'short' })) : '';
   return '<section class="card stack hp"><div class="row"><button class="hpav" data-act="avPic" aria-label="صورتي">' + (S.avatar ? '<img alt="" src="' + S.avatar + '">' : I('user')) + '</button><div style="flex:1"><h2>صفحتي الصحية</h2><div class="dim">' + esc(facts.join(' • ') || 'بياناتي') + '</div></div></div>'
-    + (rows ? '<h3>قياساتي الأسبوعية</h3>' + rows : '<p class="dim">قياسك الأسبوعي يظهر هنا.</p>') + (nxt ? '<p class="dim">موعد القياس القادم: ' + esc(nxt) + '</p>' : '')
+    + (rows ? '<h3>قياساتي الأسبوعية</h3>' + rows : '<p class="dim">قياسك الأسبوعي يظهر هنا.</p>') + (nxt ? '<div class="row"><p class="dim" style="margin:0">موعد القياس القادم: ' + esc(nxt) + '</p><button class="btn sm sec" data-act="mqEdit">تغيير</button></div>' : '') + (V.mqE ? '<div class="stack">' + mqEdit(V.mqE, 'mqSave') + '</div>' : '')
     + (bd.length ? '<h3>صور التقدم</h3><div class="row hpb">' + bd.map((b) => '<img alt="" src="' + b.th + '">').join('') + '</div>' : '') + '</section>';
 }
 function picFile(cb) { const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'; inp.style.display = 'none'; document.body.appendChild(inp); inp.onchange = () => { const f = inp.files && inp.files[0]; inp.remove(); if (f) cb(f); }; inp.click(); }
@@ -3146,7 +3178,7 @@ function scrStart() {                               // بلا حساب ولا ر
 function scrMoved() { return '<div class="scr"><div class="boot"><div class="stack" style="max-width:320px"><div class="empty"><div class="ei" style="background:rgba(111,227,169,.15);color:var(--mint)">' + I('check') + '</div><h1>انتقل حسابك ✓</h1><p class="mut">صار «حصتي» يعمل من التطبيق المثبّت أو الجوال الجديد، ومُسح من هنا. افتح «حصتي» من أيقونته.</p></div></div></div></div>'; }
 // ---- 0.61: أول تسجيل: الديانة ثم التذكيرات التي يريدها العميل (لئلا يبحث عنها في الإعدادات)
 function scrSetup() {
-  const U = V.setup = V.setup || { rel: '', city: '', on: { water: 1, meals: 1, wh: 1, pray: 1, adhAm: 1, adhPm: 1, sal: 1, med: 0 } }, mus = U.rel === 'م';
+  const U = V.setup = V.setup || { rel: '', city: '', mq: { d: 5, t: '08:00' }, on: { water: 1, meals: 1, wh: 1, pray: 1, adhAm: 1, adhPm: 1, sal: 1, med: 0 } }, mus = U.rel === 'م';
   const row = (k, t, d) => '<label class="remrow"><span><b>' + t + '</b><span class="dim">' + d + '</span></span><input type="checkbox" class="sw" data-act="setupTog" data-v="' + k + '"' + (U.on[k] ? ' checked' : '') + '></label>';
   const rel = (v, t) => '<button class="chip' + (U.rel === v ? ' on' : '') + '" data-act="setupRel" data-v="' + v + '">' + t + '</button>';
   return '<div class="scr setup"><div class="scroll"><div class="stack"><div style="padding-top:18px"><h1>نجهّز تطبيقك</h1><p class="mut">اختر ما يناسبك فتصلك التذكيرات التي تريدها دون أن تبحث عنها. تغيّر كل شيء لاحقاً من «تقدّمي».</p></div>'
@@ -3155,12 +3187,14 @@ function scrSetup() {
     + (mus ? '<section class="card stack"><h3>🕌 مدينتك للأذان</h3><select class="inp" id="setupCity" aria-label="مدينتك">' + cityOpts(U.city) + '</select><p class="dim">المواقيت تُحسب على جوالك بلا إنترنت (أم القرى للسعودية، والهيئة المصرية لمصر).</p></section>' : '')
     + '<section class="card stack"><h3>' + I('bell') + ' التذكيرات</h3>' + row('water', 'شرب الماء', 'كل ساعتين نهاراً') + row('meals', 'مواعيد الوجبات', 'في أوقات وجبات خطتك') + row('wh', '🎡 عجلة رسالة اليوم', 'تذكير الساعة 9:00 صباحاً') + row('med', 'موعد الدواء', 'تضيف أوقات أدويتك لاحقاً من «تقدّمي»')
     + (mus ? row('pray', '🕌 مواقيت الصلاة', U.city ? 'تذكير عند كل صلاة في ' + esc(U.city) : 'اختر مدينتك أولاً') + row('adhAm', 'أذكار الصباح', 'كل يوم 6:00 صباحاً') + row('adhPm', 'أذكار المساء', 'كل يوم 5:30 مساءً') + row('sal', 'ﷺ الصلاة على النبي', 'مساءً، والجمعة ثلاث مرات') : '') + '<p class="dim">تحتاج تفعيل الإشعارات ليصلك التذكير والتطبيق مغلق؛ نطلب الإذن عند التشغيل.</p></section>'
+    + '<section class="card stack"><h3>' + I('trend') + ' موعد قياسك الأسبوعي</h3><p class="dim">نذكّرك على الشاشة كل أسبوع بقياس الوزن والخصر في هذا الموعد، وبصورة التقدم مرة كل شهر. تغيّره لاحقاً من «صفحتي الصحية».</p>' + mqEdit(U.mq || { d: 5, t: '08:00' }) + '</section>'
     + '<button class="btn full" data-act="setupGo"' + (U.rel ? '' : ' disabled') + '>متابعة</button><button class="btn ghost full" data-act="setupSkip">تخطّي</button></div></div></div>';
 }
 function setupApply(skip) {
   const U = V.setup || {}; if (!skip && U.rel) {
     const mus = U.rel === 'م'; S.p.rel = U.rel; S.rem = Object.assign({ water: false, meals: false }, S.rem, { water: !!U.on.water, meals: !!U.on.meals, wh: !!U.on.wh, med: !!U.on.med });
     Object.assign(S.rem, mus ? { prCity: U.city || '', pray: !!U.on.pray && !!U.city, adhAm: !!U.on.adhAm, adhPm: !!U.on.adhPm, sal: !!U.on.sal } : { pray: false, adhAm: false, adhPm: false, sal: false });
+    if (U.mq && U.mq.d >= 0) { S.mq = { d: U.mq.d, t: U.mq.t || '08:00' }; S.rem.mq = true; }
     if (mus && U.city) { const c = CITIES.find((x) => x[0] === U.city); if (c && S.rem.prCity === U.city) S.rem.prCity = U.city; }
   }
   S.screen = 'wizard'; S.step = 1; V.setup = null; save(); remSync(true);
@@ -4051,7 +4085,11 @@ function remItems() {                              // أوقات اليوم ال
   if (R.sal && isMus()) { const m = hm2m(R.salT || '21:00'); if (m != null) it.push({ m, t: 'sal' }); if (new Date().getDay() === 5) [10 * 60, 13 * 60 + 30, 17 * 60].forEach((x) => it.push({ m: x, t: 'sal', d: dkey(new Date()) })); }
   const eve = 20 * 60, dk = (t) => dkey(new Date(t));                       // 0.54: تذكير قبل الموعد بيوم (والقياس الأسبوعي) بتاريخ محدد
   (S.appts || []).forEach((a) => { const t = new Date(a.d + 'T12:00').getTime() - 864e5; if (t > now() - 864e5) it.push({ m: eve, t: 'appt', d: dk(t), label: hm12(a.t) + (a.mode ? ' • ' + a.mode : '') }); });
-  if (S.plan && S.planAt) it.push({ m: eve, t: 'wk', d: dk(wkBase() + WKD - 864e5) });
+  if (S.plan && S.planAt && !mqSet()) it.push({ m: eve, t: 'wk', d: dk(wkBase() + WKD - 864e5) });
+  if (S.plan && S.planAt && R.mq && mqSet()) {   // 0.82: موعد القياس الأسبوعي على الشاشة بالساعة التي يحددها العميل، ومعه صورة الشهر إن حان
+    const z = mqSnz('w'), nx = z ? z.until : mqNext(now()), mm = hm2m(S.mq.t), dd = dk(nx);
+    if (mm != null) { it.push({ m: eve, t: 'wk', d: dk(nx - 864e5) }); it.push({ m: mm, t: 'mq', d: dd }); if (!mqSnz('b') && nx - (lastOf(S.bodies) || S.planAt - BDD) >= BDD) it.push({ m: Math.min(1425, mm + 15), t: 'bd', d: dd }); }
+  }
   return remLimit(it);
 }
 async function remSync(force) {
@@ -4064,7 +4102,7 @@ function remCard() {
   const tm = (k, def, lbl) => '<div class="remsub"><label class="dim" for="rt_' + k + '">' + lbl + '</label><input id="rt_' + k + '" class="inp tm" type="time" step="900" data-remt="' + k + '" value="' + esc(R[k] || def) + '"></div>';
   const meds = R.med ? '<div class="remsub meds">' + (R.meds || []).map((x, i) => '<div class="medrow"><input class="inp" type="text" maxlength="40" placeholder="اسم الدواء (اختياري)" aria-label="اسم الدواء ' + (i + 1) + '" data-med="n|' + i + '" value="' + esc(x.n || '') + '"><input class="inp tm" type="time" step="900" aria-label="وقت الدواء ' + (i + 1) + '" data-med="t|' + i + '" value="' + esc(x.t || '08:00') + '"><button class="btn sm sec" data-act="medDel" data-v="' + i + '" aria-label="حذف الموعد ' + (i + 1) + '">' + I('x') + '</button></div>').join('')
     + ((R.meds || []).length < MEDMAX ? '<button class="btn sm sec" data-act="medAdd">' + I('plus') + ' أضف موعد دواء</button>' : '<span class="dim">وصلت للحد الأقصى (' + MEDMAX + ' مواعيد)</span>') + '<span class="dim">اسم الدواء يبقى على جوالك فقط؛ المحطة تعرف الوقت وحده.</span></div>' : '';
-  return '<section class="card stack"><h3>' + I('bell') + ' التذكيرات</h3>' + tg('water', 'شرب الماء', 'كل ساعتين من 10 صباحاً إلى 8 مساءً') + tg('meals', 'مواعيد الوجبات', 'في أوقات وجبات خطتك')
+  return '<section class="card stack"><h3>' + I('bell') + ' التذكيرات</h3>' + tg('water', 'شرب الماء', 'كل ساعتين من 10 صباحاً إلى 8 مساءً') + tg('meals', 'مواعيد الوجبات', 'في أوقات وجبات خطتك') + tg('mq', '⚖ قياس الأسبوع وصورة الشهر', 'تذكير على الشاشة في موعدك الذي حددته')
     + tg('wh', '🎡 عجلة رسالة اليوم', 'تذكير صباحي: عجلتك جاهزة') + (R.wh ? tm('whT', '09:00', 'وقت التذكير') : '')
     + (isMus() ? tg('adhAm', 'أذكار الصباح', 'تذكير يومي بوقتك المفضّل') + (R.adhAm ? tm('adhAmT', '06:00', 'وقت أذكار الصباح') : '') + tg('adhPm', 'أذكار المساء', 'تذكير يومي بوقتك المفضّل') + (R.adhPm ? tm('adhPmT', '17:30', 'وقت أذكار المساء') : '') : '')
     + tg('med', 'موعد الدواء', 'تذكير بأوقات أدويتك أو مكمّلاتك') + meds
@@ -4267,6 +4305,7 @@ const ALM_T = {
   water: ['drop', 'وقت كوب ماء', 'اشرب كوباً الآن ثم سجّله بلمسة.', 'تم، شربت'], meal: ['utensils', 'حان وقت وجبتك', 'افتح خطتك وعلّم ما تأكله.', 'افتح خطتي'],
   adhAm: ['sun', 'أذكار الصباح', 'ابدأ يومك بذكر الله.', 'ابدأ الأذكار'], adhPm: ['moon', 'أذكار المساء', 'حصّن مساءك بذكر الله.', 'ابدأ الأذكار'], med: ['pill', 'موعد دوائك', 'خذ دواءك أو مكمّلك في موعده.', 'أخذته'], wh: ['sparkle', 'عجلة رسالة اليوم', 'عجلتك جاهزة: لفّها لتلقي رسالتك.', 'افتح العجلة']
 };
+ALM_T.mq = ['trend', 'موعد قياسك الأسبوعي', 'الوزن والخصر على الريق: دقيقة واحدة.', 'قِس الآن']; ALM_T.bd = ['camera', 'صورة التقدم الشهرية', 'صورة واحدة كل شهر تريك الفرق الذي لا يظهر في الميزان.', 'التقط الصورة'];
 const ALM = { fired: {}, snz: 0, snd: 0, ctx: null };
 const almIcon = (t) => t === 'pill' ? '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><g transform="rotate(-35 12 12)"><rect x="2" y="7.5" width="20" height="9" rx="4.5"/><path d="M12 7.5v9"/></g></svg>' : I(t);
 const hhmm = (m) => String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
@@ -4282,7 +4321,7 @@ function almShow(items) {
   const el = document.createElement('div'); el.id = 'alm'; el.className = 'alm alm-' + lead.t; el.setAttribute('role', 'alertdialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', T[1]);
   el._items = items;
   el.innerHTML = '<div class="alm-rings" aria-hidden="true"><i></i><i></i><i></i></div><div class="alm-card"><div class="alm-ic" aria-hidden="true">' + almIcon(T[0]) + '</div><div class="alm-time" aria-hidden="true">' + hhmm(m) + '</div><h1>' + T[1] + (lead.label ? ' — ' + esc(lead.label) : '') + '</h1><p>' + T[2] + '</p>' + (more ? '<p class="alm-more">ومعها: ' + esc(more) + '</p>' : '')
-    + '<div class="alm-act"><button class="btn full" data-alm="done">' + T[3] + '</button><div class="alm-two"><button class="btn sec" data-alm="snooze">غفوة 10 دقائق</button><button class="btn sec" data-alm="close">لاحقاً</button></div></div></div>';
+    + '<div class="alm-act"><button class="btn full" data-alm="done">' + T[3] + '</button><div class="alm-two">' + (lead.t === 'mq' || lead.t === 'bd' ? '<button class="btn sec" data-alm="post">تأجيل…</button>' : '<button class="btn sec" data-alm="snooze">غفوة 10 دقائق</button>') + '<button class="btn sec" data-alm="close">لاحقاً</button></div></div></div>';
   document.body.appendChild(el); if (navigator.vibrate) try { navigator.vibrate([300, 120, 300, 120, 500]); } catch (e) { } almChime();
   const b = el.querySelector('[data-alm="done"]'); if (b && !('ontouchstart' in window)) try { b.focus({ preventScroll: true }); } catch (e) { }
 }
@@ -4291,13 +4330,15 @@ function almDone(items) {                              // «تم»: ينفّذ �
   if (x.t === 'water') { const L = dl(TODAY); L.water = Math.min(24, (L.water || 0) + 1); queueLog(dkey(new Date())); save(); toast('💧 سُجّل كوب ماء'); }
   else if (x.t === 'med') { if (!Array.isArray(S.habits)) S.habits = ['water']; if (S.habits.indexOf('meds') < 0) S.habits.push('meds'); hSet('meds', 1); save(); toast('💊 سُجّل التزامك بالدواء'); }
   else if (x.t === 'meal') { S.tab = 'plan'; S.day = TODAY; }
+  else if (x.t === 'mq') { V.wk = 1; V.wkD = {}; }
+  else if (x.t === 'bd') { V.bd = 1; V.bdD = {}; }
   else if (x.t === 'wh') { S.tab = 'today'; WHL.shown = true; setTimeout(() => { const w = whs(); if (w.day === dkey(new Date()) && w.cat >= 0) whOpen('card'); else if (whx() && whCats().length) whOpen('wheel'); }, 150); }
   render(); if (x.t === 'adhAm') adhOpen('adhkar'); else if (x.t === 'adhPm') adhOpen('adhkarPm');
 }
 document.addEventListener('click', (e) => {
   const b = e.target.closest && e.target.closest('[data-alm]'); if (!b) return; const el = document.getElementById('alm'); if (!el) return; const items = el._items || [], k = b.dataset.alm;
   almStop(); el.classList.add('alm-out'); setTimeout(() => el.remove(), 260);
-  if (k === 'done') almDone(items); else if (k === 'snooze') { clearTimeout(ALM.snz); ALM.snz = setTimeout(() => almShow(items), 10 * 60000); toast('سنذكّرك بعد 10 دقائق'); }
+  if (k === 'done') almDone(items); else if (k === 'post') { const x = items[0]; V.post = { k: x && x.t === 'bd' ? 'b' : 'w', when: 1, why: '' }; sheet = { t: 'post' }; render(); } else if (k === 'snooze') { clearTimeout(ALM.snz); ALM.snz = setTimeout(() => almShow(items), 10 * 60000); toast('سنذكّرك بعد 10 دقائق'); }
 });
 function almFire(items) { const fresh = items.filter((x) => { const k = x.t + '|' + x.m, last = ALM.fired[k]; if (last && now() - last < 20 * 60000) return false; ALM.fired[k] = now(); return true; }); if (fresh.length) almShow(fresh); }
 function almTick() {                                   // التطبيق مفتوح: يتحقق كل 20 ثانية من حلول وقت تذكير (لا يعتمد على وصول الإشعار)
@@ -4456,6 +4497,8 @@ function sheetHtml() {
       + '<p class="dim">الرمز صالح 15 دقيقة ولمرة واحدة، ويحمل مفتاح فك التشفير فلا ترسله لأحد. بعد النقل يُمسح الحساب من هنا تلقائياً.</p>';
   } else if (sheet.t === 'rcp') {
     const [d0, s0] = sheet.k.split('_').map(Number); h = esc(dayPlan(d0).slots[s0].meal); b = rcpSheet();
+  } else if (sheet.t === 'post') {
+    h = V.post && V.post.k === 'b' ? 'تأجيل الصورة الشهرية' : 'تأجيل قياس الأسبوع'; b = postSheet();
   } else if (sheet.t === 'achs') {
     h = 'إنجازاتي'; b = achSheet();
   } else if (sheet.t === 'cert') {
@@ -4805,6 +4848,18 @@ document.addEventListener('click', (e) => {
     case 'pfB': pfKeep(); V.pf = Math.max(0, V.pf - 1); break;
     case 'pfN': { pfKeep(); if (V.pf < pfQs(V.pfA).length - 1) { V.pf++; break; } const a = V.pfA; S.prof = { at: now(), a }; V.pf = null; send({ t: 'prof', ans: a }); save(); toast('شكراً! وصل ملفك لأخصائيك ✓'); break; }
     case 'wkGo': V.wk = 1; V.wkD = {}; break;
+    case 'mqEdit': V.mqE = mqSet() ? Object.assign({}, S.mq) : { d: 5, t: '08:00' }; break;
+    case 'mqD': { const U = V.setup ? (V.setup.mq = V.setup.mq || { d: 5, t: '08:00' }) : V.mqE; if (U) U.d = +v; break; }
+    case 'mqSave': if (V.mqE) { S.mq = { d: V.mqE.d, t: V.mqE.t }; S.rem = Object.assign({}, S.rem); if (S.rem.mq === undefined) S.rem.mq = true; V.mqE = null; save(); remSync(true); toast('✓ حُفظ موعد قياسك: ' + DATA.dayNames[S.mq.d] + ' ' + hm12(S.mq.t)); } break;
+    case 'postOpen': V.post = { k: v === 'b' ? 'b' : 'w', when: 1, why: '' }; sheet = { t: 'post' }; break;
+    case 'postWhen': if (V.post) V.post.when = +v; break;
+    case 'postWhy': if (V.post) V.post.why = V.post.why === MQ_REASONS[+v] ? '' : MQ_REASONS[+v]; break;
+    case 'postGo': {
+      const P = V.post, nt = ($('#postNote') || {}).value || ''; if (!P) break; if (!P.why && !nt.trim()) { toast('اختر سبباً أو اكتب ملاحظة'); return; }
+      const tt = (S.mq && S.mq.t) || '08:00', [hh, mm] = tt.split(':').map(Number), d = new Date(); d.setDate(d.getDate() + P.when); d.setHours(hh, mm, 0, 0); const until = d.getTime(), note = nt.trim().slice(0, 200);
+      S.mqSn = S.mqSn || {}; S.mqSn[P.k] = { until, why: P.why, note, ts: now() }; S.post = (S.post || []).concat([{ k: P.k, why: P.why, note, until, ts: now() }]).slice(-20);
+      send({ t: 'qpost', k: P.k, why: P.why, note, until, ts: now() }); sheet = null; V.post = null; save(); remSync(true); toast('أُجّل إلى ' + mqFmt(until) + ' وعرف أخصائيك'); break;
+    }
     case 'wkX': V.wk = 0; break;
     case 'wkPic': { const kind = v; V.wkD.w = $('#wkW').value; V.wkD.waist = $('#wkWs').value; picFile(async (f) => { try { V.wkD[kind] = await picPrep(f); render(); } catch (e) { toast(e.message); } }); break; }
     case 'wkSend': {
@@ -4864,6 +4919,7 @@ document.addEventListener('input', (e) => {               // التقاط أول
 }, true);
 document.addEventListener('input', (e) => {
   if (S && e.target.dataset && e.target.dataset.sndVol != null) { snd().vol = Math.max(0, Math.min(1, (+e.target.value || 0) / 100)); if (SND.playing) sndGain(sndTarget()); return; }
+  if (S && e.target.dataset && e.target.dataset.mqt != null) { const U = V.setup ? (V.setup.mq = V.setup.mq || { d: 5, t: '08:00' }) : V.mqE; if (U) U.t = e.target.value; return; }
   if (S && e.target.dataset && e.target.dataset.lq != null) { const q = e.target.value.trim().toLowerCase(); document.querySelectorAll('.lbi').forEach((r) => { r.hidden = !!q && (r.dataset.q || '').indexOf(q) < 0; }); document.querySelectorAll('.lbf').forEach((f) => { f.hidden = !!q && !f.querySelector('.lbi:not([hidden])'); if (q) f.open = true; }); return; }
   if (S && V.wl && e.target.dataset && e.target.dataset.wl != null) { const [i, f] = e.target.dataset.wl.split('|'); if (V.wl.sets[+i]) V.wl.sets[+i][f] = e.target.value; const o = $('#wlsum'); if (o) o.outerHTML = wlSum(); return; }
   if (S && e.target.dataset && e.target.dataset.px != null) { const v = parseFloat(numOnly(e.target.value)); S.shopPx = S.shopPx || {}; if (v > 0 && v < 1e7) S.shopPx[e.target.dataset.px] = Math.round(v * 100) / 100; else delete S.shopPx[e.target.dataset.px]; const o = $('#shsum'); if (o) o.outerHTML = shopSum(); save(); return; }

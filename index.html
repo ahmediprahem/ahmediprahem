@@ -6456,6 +6456,7 @@ document.addEventListener('change', function (e) { var t = e.target, c; if (!t.h
 // ---- 0.53: قياس الأسبوع وصور الإنبودي والتحاليل وصور التقدم من «حصتي»
 (function (f) { hxIn = function (c, p) {
   var x = c.hx, nm = c.name || x.label || '', okImg = function (s) { return typeof s === 'string' && s.length < 300000 && /^[A-Za-z0-9+/=]+$/.test(s); };
+  if (p.t === 'qpost' && (p.k === 'w' || p.k === 'b')) { var x0 = c.hx; x0.posts = (x0.posts || []).concat([{ k: p.k, why: String(p.why || '').slice(0, 40), note: String(p.note || '').slice(0, 200), until: +p.until || 0, ts: +p.ts || Date.now() }]).slice(-20); return 1; }
   if (p.t === 'wk' && +p.w > 20 && +p.w < 400) {
     var w = Math.round(+p.w * 10) / 10, ws = +p.waist > 30 && +p.waist < 300 ? +p.waist : null, ts = +p.ts || Date.now(), d = new Date(ts), dk = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     x.weights = (x.weights || []).concat([[ts, w]]).slice(-200); x.checks = (x.checks || []).concat([{ ts: ts, w: w, waist: ws }]).slice(-60); c.weight = w;
@@ -6480,6 +6481,7 @@ document.addEventListener('change', function (e) { var t = e.target, c; if (!t.h
 }; })(hxIn);
 function ciProgress(c) {
   var x = c.hx || {}, ch = (x.checks || []).slice(-6), im = (x.wkimgs || []).slice(-6).reverse(), bd = x.bodies || [], h = '';
+  var ps = (c.hx && c.hx.posts) || []; if (ps.length) h += '<section class="ucard"><h3>⏸ تأجيلات القياس</h3><div class="ciws">' + ps.slice(-4).reverse().map(function (q) { return '<span class="ciw">' + (q.k === 'b' ? '📸 الصورة الشهرية' : '⚖ القياس الأسبوعي') + ' <b>' + esc(q.why || '—') + '</b>' + (q.note ? ' <small>«' + esc(q.note) + '»</small>' : '') + ' <small>' + new Date(q.ts).toLocaleDateString('ar', { day: 'numeric', month: 'short' }) + ' ← ' + new Date(q.until).toLocaleDateString('ar', { day: 'numeric', month: 'short' }) + '</small></span>'; }).join('') + '</div></section>';
   if (ch.length) h += '<section class="ucard"><h3>⚖ قياسات «حصتي» الأسبوعية</h3><div class="ciws">' + ch.map(function (q, i) { var dd = i ? q.w - ch[i - 1].w : 0; return '<span class="ciw">' + new Date(q.ts).toLocaleDateString('ar', { day: 'numeric', month: 'short' }) + ' <b>' + num(q.w) + '</b>' + (i ? ' ' + ciArrow(dd) : '') + (q.waist ? ' • خصر ' + num(q.waist) : '') + '</span>'; }).join('') + '</div>'
     + (im.length ? '<div class="ciimgs">' + im.map(function (q) { return '<figure><img alt="" src="' + q.img + '" data-a="ciZoom"><figcaption>' + (q.kind === 'inb' ? 'إنبودي' : 'تحاليل') + ' • ' + new Date(q.ts).toLocaleDateString('ar') + '</figcaption></figure>'; }).join('') + '</div>' : '') + '</section>';
   var ml = x.meas || [], il = x.inb || [], ll = x.labs || [], dd = function (t) { return new Date(t).toLocaleDateString('ar', { day: 'numeric', month: 'short' }); };

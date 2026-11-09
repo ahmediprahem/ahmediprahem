@@ -1,0 +1,34 @@
+// تذكير القياس الأسبوعي بموعد يحدده العميل + صورة شهرية + تأجيل بسبب يصل الأخصائي (0.82)
+const assert = require('assert'), linked = require('./hx_link_helper');
+let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
+(async () => {
+  const { d, m, hxCheck, cPoll, C, close } = await linked('wkremind', errs);
+  await m.evaluate(() => { const S = window.HissatiApp.state(); S.screen = 'setup'; S.step = 1; }); await m.evaluate(() => window.HissatiApp.render());
+  await m.waitForSelector('.setup'); assert(/موعد قياسك الأسبوعي/.test(await m.textContent('.setup'))); assert.strictEqual(await m.locator('.setup [data-act="mqD"]').count(), 7); assert(await m.locator('.setup #mqT').count() === 1);
+  await m.click('.setup [data-act="mqD"][data-v="2"]'); assert.strictEqual(await m.getAttribute('.setup [data-act="mqD"][data-v="2"]', 'aria-pressed'), 'true');
+  ok('شاشة التهيئة: قسم «موعد قياسك الأسبوعي» بسبعة أيام وساعة');
+  await m.click('[data-act="setupSkip"]');
+  await m.evaluate(() => { const S = window.HissatiApp.state(); S.screen = 'app'; S.tab = 'progress'; S.planAt = Date.now() - 20 * 864e5; S.checks = []; S.bodies = [{ ts: Date.now() - 40 * 864e5 }]; S.mq = null; S.mqSn = null; }); await m.evaluate(() => window.HissatiApp.render());
+  await m.click('[data-act="mqEdit"]'); await m.waitForSelector('#mqT'); const wd = await m.evaluate(() => new Date().getDay());
+  await m.click('[data-act="mqD"][data-v="' + ((wd + 3) % 7) + '"]'); await m.selectOption('#mqT', '09:30'); await m.click('[data-act="mqSave"]');
+  const q = await m.evaluate(() => { const S = window.HissatiApp.state(); return { mq: S.mq, rem: S.rem && S.rem.mq }; }); assert.deepStrictEqual(q.mq, { d: (wd + 3) % 7, t: '09:30' }); assert.strictEqual(q.rem, true);
+  ok('تحديد الموعد من «صفحتي الصحية»: اليوم والساعة يُحفظان ويُفعَّل التذكير');
+  await m.evaluate(() => { const S = window.HissatiApp.state(); S.mq = { d: new Date().getDay(), t: '00:00' }; S.tab = 'today'; }); await m.evaluate(() => window.HissatiApp.render());
+  await m.waitForSelector('[data-act="postOpen"][data-v="w"]'); assert(/قياس الأسبوع/.test(await m.textContent('.wkc'))); assert.strictEqual(await m.locator('[data-act="postOpen"][data-v="b"]').count(), 1, 'بطاقة الصورة الشهرية');
+  ok('بالموعد: بطاقة «قياس الأسبوع» وبطاقة «الصورة الشهرية» بزر «تأجيل»');
+  await m.click('[data-act="postOpen"][data-v="w"]'); await m.waitForSelector('#postNote'); await m.click('[data-act="postGo"]'); assert(await m.locator('#postNote').count() === 1, 'لا يُقبل بلا سبب');
+  await m.click('[data-act="postWhen"][data-v="3"]'); await m.click('[data-act="postWhy"][data-v="0"]'); await m.fill('#postNote', 'مسافر حتى الخميس'); await m.click('[data-act="postGo"]');
+  const z = await m.evaluate(() => { const S = window.HissatiApp.state(); return S.mqSn.w; }); assert.strictEqual(z.why, 'مسافر'); assert(z.until > Date.now() + 2 * 864e5 && z.until < Date.now() + 3.6 * 864e5); assert.strictEqual(z.note, 'مسافر حتى الخميس');
+  await m.waitForSelector('.wkc'); assert(/أجّلتَ قياس الأسبوع/.test(await m.textContent('.wkc')) && /مسافر/.test(await m.textContent('.wkc')));
+  const it = await m.evaluate(() => window.HissatiApp.remItems().filter((x) => x.t === 'mq' || x.t === 'bd')); assert(it.some((x) => x.t === 'mq' && x.m === 0 || x.t === 'mq'), JSON.stringify(it)); const want = await m.evaluate((u) => { const x = new Date(u); return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0'); }, z.until); assert(it.find((x) => x.t === 'mq').d === want, 'يعاد التذكير بعد التأجيل');
+  ok('التأجيل: مدة وسبب وملاحظة، ولا يُقبل بلا سبب، وتتحول البطاقة إلى «أجّلتَ…» ويُعاد التذكير في الموعد الجديد');
+  await m.click('[data-act="postOpen"][data-v="b"]'); await m.click('[data-act="postWhy"][data-v="3"]'); await m.click('[data-act="postGo"]'); assert(await m.evaluate(() => !!window.HissatiApp.state().mqSn.b));
+  ok('تأجيل الصورة الشهرية يعمل بنفس الطريقة');
+  await m.evaluate(() => window.HissatiApp.alarm([{ t: 'mq', m: 570 }])); await m.waitForSelector('#alm'); assert(/موعد قياسك الأسبوعي/.test(await m.textContent('#alm')) && /تأجيل…/.test(await m.textContent('#alm')));
+  await m.click('#alm [data-alm="post"]'); await m.waitForSelector('#postNote'); assert(/تأجيل قياس الأسبوع/.test(await m.textContent('.sheet')));
+  ok('التذكير على الشاشة (المنبّه) يعرض «قِس الآن» و«تأجيل…» ويفتح نافذة التأجيل');
+  await m.click('[data-act="postWhy"][data-v="4"]'); await m.click('[data-act="postGo"]');
+  await cPoll(); await hxCheck(); const c = await C(); const ps = c.hx.posts || []; assert(ps.length >= 2 && ps.some((x) => x.k === 'w' && x.why === 'مسافر' && x.note === 'مسافر حتى الخميس') && ps.some((x) => x.k === 'b'), JSON.stringify(ps));
+  ok('«حصة»: تصل الأخصائي التأجيلات بالسبب والملاحظة وتاريخ الموعد الجديد');
+  assert.deepStrictEqual(errs, []); await close(); console.log('\nنجح ' + n + ' اختباراً');
+})().catch((e) => { console.error(e); process.exit(1); });
