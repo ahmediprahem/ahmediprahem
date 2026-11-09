@@ -35,7 +35,7 @@ function homeGlass() {
     + '<div class="qgrid">' + tile('new', 'ex', 'userPlus', 'نظام الحصص', 'عميل جديد: خطة بالحصص والبدائل') + tile('new', 'ath', 'dumbbell', 'نظام الجرامات', 'عميل جديد: خطة بالجرام والماكروز') + tile('bank', '', 'book', 'بنك الوجبات', 'وجبات المولّد وابتكار وجبة') + tile('ready', '', 'package', 'الخطط الجاهزة', 'خطط أسبوعية من مكتبتك + مكتبة الأخصائي') + tile('appts', '', 'calendar', 'المواعيد', 'مواعيد اليوم والأسبوع والمتابعات') + tile('hxv', '', 'phone', 'زنها', 'ادعُ عميلاً برابط واتساب واستقبل طلباته') + tile('feed', '', 'megaphone', 'التثقيف', 'انشر نصائح وفيديوهات لمراجعيك') + tile('settings', '', 'settings', 'إعدادات النظام', 'الألوان والبدائل والشعار والمظهر') + '</div>'
     + (recent ? '<h3>آخر العملاء</h3><div class="recent">' + recent + '</div>' : '<p class="small">لا عملاء بعد — ابدأ بـ«عميل جديد».</p>')
     + '<p class="two mobonly"><button data-a="new" data-v="ex">+ عميل جديد — الحصص</button><button class="o" data-a="new" data-v="ath">+ عميل جديد — الجرامات</button></p>'
-    + bakCard() + vtHomeCard() + appCard() + '</div>';
+    + bakCard() + vtHomeCard() + proInstCard() + appCard() + '</div>';
 }
 function initial(n) { n = String(n || '').trim(); return n ? n.charAt(0) : '؟'; }
 Object.assign(A, {

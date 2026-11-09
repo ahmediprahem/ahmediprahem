@@ -199,6 +199,21 @@ window.DPApp={relist:function(){$('#lst').innerHTML=list()},S:S,A:A};
 /*GYMUI*/
 
 // ================= بطاقة «تطبيق الجوال»: روابط التنزيل والتحديث (يحرّرها المدير وتصل المستخدمين مع نسخة المستخدمين) =================
+// ---- 0.86: تثبيت «زن برو» على جوال الأخصائي كتطبيق (أندرويد: زر مباشر، آيفون: خطوات) من موقعه المنشور، بلا متجر
+var PINST={ev:null};
+window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();PINST.ev=e});
+window.addEventListener('appinstalled',function(){PINST.ev=null;try{toast('ثُبّت «زن برو» ✓ افتحه من أيقونته')}catch(_){}});
+function proStandalone(){return !!((window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true)}
+function proInstCard(){
+  if(S.mode==='admin'||!window.isSecureContext||proStandalone())return'';
+  var ua=navigator.userAgent||'',isIos=/iPhone|iPad|iPod/i.test(ua),isAnd=/Android/i.test(ua),inApp=/FBAN|FBAV|Instagram|WhatsApp|Line\/|; wv\)/i.test(ua),b;
+  if(inApp)b='<p class="small">أنت داخل متصفح تطبيق آخر. افتح رابط الموقع في Chrome (أندرويد) أو Safari (آيفون) لتتمكن من التثبيت.</p>';
+  else if(PINST.ev)b='<p class="small">أيقونة على شاشتك الرئيسية، ويفتح التطبيق كاملاً بلا شريط المتصفح.</p><button data-a="proInst">تثبيت الآن</button>';
+  else if(isIos)b='<ol class="small"><li>اضغط زر المشاركة في Safari</li><li>اختر «إضافة إلى الشاشة الرئيسية»</li><li>افتح «زن برو» من أيقونته</li></ol>';
+  else if(isAnd)b='<ol class="small"><li>اضغط القائمة ⋮ أعلى Chrome</li><li>اختر «تثبيت التطبيق»</li></ol>';
+  else return'';
+  return'<div class="appcard" id="proinst"><h3>📲 ثبّت «زن برو» على جوالك</h3>'+b+'</div>';
+}
 function appCfg(){return eff().app||{}}
 function appHas(){var a=appCfg();return !!(a.apk||a.ios||a.play||a.web)}
 function appUpdate(){var a=appCfg();return a.version&&S.appVer&&window.HNative&&HNative.cmpVersion(S.appVer,a.version)<0?a.version:''}
@@ -215,6 +230,8 @@ function appPage(){
   return'<p class="small">روابط تنزيل وتحديث تطبيق الجوال. تظهر للمستخدمين في صفحتهم الرئيسية وهذا التبويب، وتصلهم عند «تصدير نسخة المستخدمين». الروابط يجب أن تبدأ بـ https://</p><div class="addbox"><div class="row">'+fld2('apk','رابط ملف APK (تنزيل مباشر لأندرويد)','https://example.com/hissa.apk',1)+fld2('play','رابط Google Play','https://play.google.com/store/apps/details?id=…',1)+fld2('ios','رابط App Store أو TestFlight','https://apps.apple.com/…',1)+fld2('web','رابط التثبيت من المتصفح (PWA)','https://example.com/',1)+fld2('version','آخر إصدار (مثال 1.2.0)','1.0.0',1)+fld2('notes','ملاحظة قصيرة (اختيارية)','تحسينات وإصلاحات')+'</div></div><h3>معاينة ما يراه المستخدم</h3>'+(appHas()?appCard():'<p class="small">أضف رابطاً واحداً على الأقل لتظهر البطاقة.</p>')
 }
 Object.assign(A,{
+  proInstHtml:function(){return proInstCard()},
+  proInst:function(){var e=PINST.ev;if(!e)return;e.prompt();e.userChoice.then(function(){PINST.ev=null;var c=$('#proinst');if(c)c.remove()})['catch'](function(){})},
   appOpen:function(v,el){var u=el.dataset.u;if(!httpsOk(u)){toast('الرابط غير صالح');return}HNative.openUrl(u)},
   appCopy:function(v,el){var u=el.dataset.u;(navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(function(){toast('تم نسخ الرابط')},function(){toast('تعذّر النسخ — انسخه يدوياً')})},
   appShare:function(v,el){HNative.share({title:'زنها Pro',text:'حمّل تطبيق «زنها Pro» — '+el.dataset.t,url:el.dataset.u}).then(function(r){toast(r==='copied'?'تم نسخ الرابط':r==='shared'?'تمت المشاركة':'')})}
