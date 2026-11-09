@@ -3812,7 +3812,7 @@ function scrOnb() {
       + '<div class="onb-art">' + art + '</div><div class="onb-txt"><h1>' + T[0] + '</h1><p>' + T[1] + '</p>' + (i === 3 ? '<p class="onb-lock">' + I('lock') + ' بياناتك مشفّرة: لا يقرؤها إلا أخصائيك</p>' : '') + '</div><div class="onb-foot"><button class="btn full" data-act="onbNext">' + (i === 3 ? 'لنبدأ' : 'التالي') + '</button><span class="dim" aria-live="polite">الشاشة ' + i + ' من 3</span></div></div>';
   }
   const cur = window.HxTheme ? HxTheme.get() : 'classic', T = [['classic', 'الحالي'], ['rose', 'وردة'], ['pulse', 'نبض']];
-  return '<div class="scr onb onb-theme"><div class="onb-mesh"><i></i><i></i><i></i></div><button class="onb-skip" data-act="onbFinish">تخطّي</button><div class="onb-txt" style="margin-top:56px"><h1>اختر الشكل الذي يريحك</h1><p>تقدر تغيّره لاحقاً من «أنا». خطتك وبياناتك لا تتغير.</p></div><div class="hx-themes" role="radiogroup" aria-label="مظهر التطبيق">'
+  return '<div class="scr onb onb-theme"><div class="onb-mesh"><i></i><i></i><i></i></div><button class="onb-skip" data-act="onbFinish">تخطّي</button><div class="onb-txt" style="margin-top:56px"><h1>اختر الشكل الذي يريحك</h1><p>تقدر تغيّره لاحقاً من «الإعدادات». خطتك وبياناتك لا تتغير.</p></div><div class="hx-themes" role="radiogroup" aria-label="مظهر التطبيق">'
     + T.map((t) => '<button class="hx-th" role="radio" aria-checked="' + (cur === t[0]) + '" data-act="theme" data-v="' + t[0] + '"><span class="hx-pv" data-theme="' + t[0] + '" aria-hidden="true"><i class="h"></i><i class="k"><b></b></i><i class="k s"></i><i class="c"></i></span><span class="hx-tl">' + t[1] + (cur === t[0] ? ' ✓' : '') + '</span></button>').join('') + '</div><div class="onb-foot"><button class="btn full" data-act="onbFinish">ابدأ</button></div></div>';
 }
 function onbNextStage(d) { const o = V.onb || (V.onb = { i: 0 }); o.i = Math.max(1, Math.min(4, o.i + d)); render(); }
@@ -3849,11 +3849,11 @@ function scrSetup() {
   const U = V.setup = V.setup || { rel: '', city: '', mq: { d: 5, t: '08:00' }, on: { water: 1, meals: 1, wh: 1, pray: 1, adhAm: 1, adhPm: 1, sal: 1, med: 0 } }, mus = U.rel === 'م';
   const row = (k, t, d) => '<label class="remrow"><span><b>' + t + '</b><span class="dim">' + d + '</span></span><input type="checkbox" class="sw" data-act="setupTog" data-v="' + k + '"' + (U.on[k] ? ' checked' : '') + '></label>';
   const rel = (v, t) => '<button class="chip' + (U.rel === v ? ' on' : '') + '" data-act="setupRel" data-v="' + v + '">' + t + '</button>';
-  return '<div class="scr setup"><div class="scroll"><div class="stack"><div style="padding-top:18px"><h1>نجهّز تطبيقك</h1><p class="mut">اختر ما يناسبك فتصلك التذكيرات التي تريدها دون أن تبحث عنها. تغيّر كل شيء لاحقاً من «تقدّمي».</p></div>'
+  return '<div class="scr setup"><div class="scroll"><div class="stack"><div style="padding-top:18px"><h1>نجهّز تطبيقك</h1><p class="mut">اختر ما يناسبك فتصلك التذكيرات التي تريدها دون أن تبحث عنها. تغيّر كل شيء لاحقاً من «الإعدادات».</p></div>'
     + '<section class="card stack"><h3>' + I('user') + ' ديانتك</h3><div class="chips">' + rel('م', 'مسلم') + rel('ك', 'مسيحي') + rel('ن', 'أفضّل عدم التحديد') + '</div>'
     + (mus ? '<div class="banner info">' + I('check') + '<span>سنفعّل لك تلقائياً: مواقيت الصلاة وتذكيرها، وأذكار الصباح والمساء، ورسائل القرآن.</span></div>' : U.rel ? '<p class="dim">لن تظهر لك مواقيت الصلاة ولا الأذكار ولا القرآن.</p>' : '') + '</section>'
     + (mus ? '<section class="card stack"><h3>🕌 مدينتك للأذان</h3><select class="inp" id="setupCity" aria-label="مدينتك">' + cityOpts(U.city) + '</select><p class="dim">المواقيت تُحسب على جوالك بلا إنترنت (أم القرى للسعودية، والهيئة المصرية لمصر).</p></section>' : '')
-    + '<section class="card stack"><h3>' + I('bell') + ' التذكيرات</h3>' + row('water', 'شرب الماء', 'كل ساعتين نهاراً') + row('meals', 'مواعيد الوجبات', 'في أوقات وجبات خطتك') + row('wh', '🎡 عجلة رسالة اليوم', 'تذكير الساعة 9:00 صباحاً') + row('med', 'موعد الدواء', 'تضيف أوقات أدويتك لاحقاً من «تقدّمي»')
+    + '<section class="card stack"><h3>' + I('bell') + ' التذكيرات</h3>' + row('water', 'شرب الماء', 'كل ساعتين نهاراً') + row('meals', 'مواعيد الوجبات', 'في أوقات وجبات خطتك') + row('wh', '🎡 عجلة رسالة اليوم', 'تذكير الساعة 9:00 صباحاً') + row('med', 'موعد الدواء', 'تضيف أوقات أدويتك لاحقاً من «الإعدادات»')
     + (mus ? row('pray', '🕌 مواقيت الصلاة', U.city ? 'تذكير عند كل صلاة في ' + esc(U.city) : 'اختر مدينتك أولاً') + row('adhAm', 'أذكار الصباح', 'كل يوم 6:00 صباحاً') + row('adhPm', 'أذكار المساء', 'كل يوم 5:30 مساءً') + row('sal', 'ﷺ الصلاة على النبي', 'مساءً، والجمعة ثلاث مرات') : '') + '<p class="dim">تحتاج تفعيل الإشعارات ليصلك التذكير والتطبيق مغلق؛ نطلب الإذن عند التشغيل.</p></section>'
     + '<section class="card stack"><h3>' + I('trend') + ' موعد قياسك الأسبوعي</h3><p class="dim">نذكّرك على الشاشة كل أسبوع بقياس الوزن (والخصر إن أحببت) في هذا الموعد، وبصورة التقدم مرة كل شهر. تغيّره لاحقاً من «صفحتي الصحية».</p>' + mqEdit(U.mq || { d: 5, t: '08:00' }) + '</section>'
     + '<button class="btn full" data-act="setupGo"' + (U.rel ? '' : ' disabled') + '>متابعة</button><button class="btn ghost full" data-act="setupSkip">تخطّي</button></div></div></div>';
@@ -4267,7 +4267,7 @@ function whOpen(mode) {              // mode: 'wheel' | 'card'
   const old = document.getElementById('whl'); if (old) old.remove(); const w = whs(), el = document.createElement('div'); el.id = 'whl'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'رسالة اليوم');
   WHL.cs = whCats(); WHL.rm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (mode === 'card' && w.cat >= 0) el.innerHTML = '<div class="whs wcard show">' + whCardHtml(w.cat, w.idx, true) + '</div>';
-  else if (!w.nat) el.innerHTML = '<div class="whs"><div class="eyebrow">رسالة اليوم</div><h2 class="ask">من أي بلد أنت؟</h2><p class="dim" style="max-width:19em">لنختار لك لهجة الرسائل. تغيّرها لاحقاً من «تقدّمي».</p><div class="chips whnat">' + whx().countries.map((x) => '<button class="chip" data-wh="nat" data-v="' + esc(x) + '">' + esc(x) + '</button>').join('') + '</div><button class="btn ghost" data-wh="later">لاحقاً</button></div>';
+  else if (!w.nat) el.innerHTML = '<div class="whs"><div class="eyebrow">رسالة اليوم</div><h2 class="ask">من أي بلد أنت؟</h2><p class="dim" style="max-width:19em">لنختار لك لهجة الرسائل. تغيّرها لاحقاً من «الإعدادات».</p><div class="chips whnat">' + whx().countries.map((x) => '<button class="chip" data-wh="nat" data-v="' + esc(x) + '">' + esc(x) + '</button>').join('') + '</div><button class="btn ghost" data-wh="later">لاحقاً</button></div>';
   else el.innerHTML = '<div class="whs wheel"><div class="eyebrow">رسالة اليوم</div><h2 class="ask" id="whask">لفّ العجلة لتلقي رسالتك</h2><div class="whbox"><svg class="whptr" viewBox="0 0 30 36" id="whptr" aria-hidden="true"><path d="M15 34 4 12a12 12 0 1 1 22 0z" fill="#ffd27a" stroke="#7a5a1c" stroke-width="2"/><circle cx="15" cy="11" r="4" fill="#0b1330"/></svg><svg viewBox="0 0 300 300" id="whsvg" aria-hidden="true">' + whWheelSvg(WHL.cs) + '</svg></div><div class="whbtns"><button class="btn" id="whspin" data-wh="spin">' + (WHL.rm ? 'اكشف رسالتك' : 'لفّ العجلة') + '</button><button class="btn ghost" data-wh="later">لاحقاً</button></div></div><div class="whs wcard" id="whcard"></div>';
   document.body.appendChild(el); WHL.spin = false; const b = el.querySelector('.btn'); if (b && !('ontouchstart' in window)) try { b.focus({ preventScroll: true }); } catch (e) { }
   el.className = WHL.rm ? 'rm' : '';
@@ -4437,7 +4437,7 @@ function tabToday() {
   const dp = dayPlan(d), kc = dp.kcal || DATA.kcal, pr = dp.p || DATA.pro, wt = +(dp.water || DATA.water), cups = Math.max(4, Math.min(16, Math.round(wt / CUP)));
   if (dp.type) out += '<div class="banner info">' + I('dumbbell') + '<span><b>' + esc(dp.type) + '</b> • كارب ' + dp.c + ' جم • دهون ' + dp.f + ' جم</span></div>';
   out += '<div class="stats3"><div class="st"><b>' + kc + '</b><small>سعرة هدفك' + (dp.type ? ' اليوم' : '') + '</small></div><div class="st"><b>' + pr + ' جم</b><small>بروتين</small></div><div class="st"><b>' + (L.water * CUP).toFixed(2).replace(/\.?0+$/, '') + ' / ' + wt.toFixed(1) + '</b><small>لتر ماء</small></div></div>';
-  out += habitsHome() + '<button class="card mvc stack" data-act="tab" data-v="plan"><b class="mvt">🍽 ماء اليوم ووجباتي</b><span class="dim">سجّل الماء وعلّم ما أكلته من «خطتي»</span></button>';
+  out += habitsHome() + (!gateOpen() ? gateCard() : '') + '<button class="card mvc stack" data-act="tab" data-v="plan"><b class="mvt">🍽 ماء اليوم ووجباتي</b><span class="dim">سجّل الماء وعلّم ما أكلته من «خطتي»</span></button>';
   return out + syncLine();
 }
 function syncLine() { return '<p class="sync">' + (!V.online ? '◷ ستُرسل عند عودة الإنترنت' + (S.outbox.length ? ' (' + S.outbox.length + ')' : '') : S.outbox.length ? 'بانتظار الإنترنت لإرسال ' + S.outbox.length + ' تحديث إلى أخصائيك' : 'متابعتك تصل أخصائيك تلقائياً') + ' • الخطة الإصدار ' + S.pv + '</p>'; }
@@ -4445,7 +4445,7 @@ function syncLine() { return '<p class="sync">' + (!V.online ? '◷ ستُرسل
 const T2 = () => false;                                      // 0.85: «اليوم» الجديد من زنها هو الأساس الآن (الرئيسية)
 function t2Offer() { const u = S.ui; return !u || (!u.today2 && !u.t2Off && !!u.t2Later && now() - u.t2Later >= 7 * 864e5); }
 function t2Card() {
-  return '<section class="card stack t2c"><h3>✨ جرّب الشكل الجديد لـ«اليوم»</h3><p class="dim">وجبتك التالية أولاً، والماء بلمسة، و«سجّل يومك» في متناول يدك. تستطيع الرجوع إلى الشكل الحالي من «أنا».</p>'
+  return '<section class="card stack t2c"><h3>✨ جرّب الشكل الجديد لـ«اليوم»</h3><p class="dim">وجبتك التالية أولاً، والماء بلمسة، و«سجّل يومك» في متناول يدك. تستطيع الرجوع إلى الشكل الحالي من «الإعدادات».</p>'
     + '<div class="row"><button class="btn sm" data-act="t2Try">جرّب</button><button class="btn sm sec" data-act="t2Later">لاحقاً</button></div></section>';
 }
 function helloHd(d) {                                   // الرأس في الشكلين: التحية، ثم المحادثة بشارة غير المقروء، ثم زر «أنا»
@@ -4707,7 +4707,7 @@ function tabPlan() {
   const chips = DATA.dayNames.map((n, i) => { const [a, b] = itemsOfDay(i); return '<button class="' + (S.day === i ? 'on' : '') + (i === TODAY ? ' today' : '') + '" data-act="day" data-v="' + i + '"><b>' + esc(String(n).replace('ال', '')) + '</b><span>' + (S.gate && i !== TODAY ? '🔒' : b && i <= TODAY ? Math.round(a / b * 100) + '%' : '—') + '</span></button>'; }).join('');
   return '<div class="row" style="justify-content:space-between"><h2>خطتي</h2></div>' + planSeg()
     + '<div class="dim">من ' + esc(S.dname) + ' • ' + (S.pm && S.pm.sys === 'g' ? 'نظام الجرامات: السعرات حسب نوع كل يوم' : S.pm && S.pm.ready ? esc(S.pm.ready.name) + ' • متوسط ' + DATA.kcal + ' سعرة' : DATA.kcal + ' سعرة يومياً') + ' • الإصدار ' + S.pv + '</div>'
-    + '<div class="daychips">' + chips + '</div>' + (hid ? '<section class="card stack gatec"><div class="gl">🔒</div><p class="mut">' + (S.day !== TODAY ? 'خطتك تظهر يوماً بيوم: يُفتح كل يوم في وقته بعد إرسال تسجيل اليوم السابق.' : 'أرسل تسجيل أمس من «اليوم» ليُفتح جدول اليوم.') + '</p></section>' : '') + (hid || S.day !== TODAY ? '' : waterRow()) + (hid ? '' : (dayPlan(S.day).type ? '<div class="banner info">' + I('dumbbell') + '<span><b>' + esc(dayPlan(S.day).type) + '</b> • ' + dayPlan(S.day).kcal + ' سعرة' + (dayPlan(S.day).p != null ? ' • بروتين ' + dayPlan(S.day).p + ' • كارب ' + dayPlan(S.day).c + ' • دهون ' + dayPlan(S.day).f + ' جم' : '') + '</span></div>' : '') + dayPlan(S.day).slots.map((s, si) => mealCard(S.day, si, s, S.day === TODAY)).join('') + ((dayPlan(S.day).tips || []).length ? '<div class="banner info">' + I('sparkle') + '<span>' + dayPlan(S.day).tips.map(esc).join(' • ') + '</span></div>' : '')) + rqCard(false);
+    + '<div class="daychips">' + chips + '</div>' + (hid ? '<section class="card stack gatec"><div class="gl">🔒</div><p class="mut">' + (S.day !== TODAY ? 'خطتك تظهر يوماً بيوم: يُفتح كل يوم في وقته بعد إرسال تسجيل اليوم السابق.' : 'أرسل تسجيل أمس من «اليوم» ليُفتح جدول اليوم.') + '</p></section>' : '') + (hid || S.day !== TODAY ? '' : waterRow()) + (hid ? '' : (dayPlan(S.day).type ? '<div class="banner info">' + I('dumbbell') + '<span><b>' + esc(dayPlan(S.day).type) + '</b> • ' + dayPlan(S.day).kcal + ' سعرة' + (dayPlan(S.day).p != null ? ' • بروتين ' + dayPlan(S.day).p + ' • كارب ' + dayPlan(S.day).c + ' • دهون ' + dayPlan(S.day).f + ' جم' : '') + '</span></div>' : '') + dayPlan(S.day).slots.map((s, si) => mealCard(S.day, si, s, S.day === TODAY)).join('') + (S.day === TODAY && !(sheet && sheet.t === 'daylog') ? dayLogCard(TODAY) : '') + ((dayPlan(S.day).tips || []).length ? '<div class="banner info">' + I('sparkle') + '<span>' + dayPlan(S.day).tips.map(esc).join(' • ') + '</span></div>' : '')) + rqCard(false);
 }
 function tabPrefs() {
   const lv = foodsOf('love').length, no = foodsOf('no').length;
@@ -4946,7 +4946,7 @@ const HABITS = [
   { id: 'sunlight', n: 'شمس الصباح', ic: '☀️', c: '#ffd166', why: '15 دقيقة من ضوء النهار صباحاً تضبط ساعتك الداخلية فتنعكس على نومك وطاقتك ومزاجك.', ok: (v) => v >= 15 },
   { id: 'breaks', n: 'حركة كل ساعة', ic: '⏱', c: '#7be0c3', why: 'الجلوس الطويل يُبطئ الجسم: قم وتحرّك دقيقتين كل ساعة (تمشَّ، تمدّد، اشرب ماء). الهدف 5 مرات في يومك.', ok: (v) => v >= 5 },
   { id: 'reading', n: 'قراءة أو وِرد هادئ', ic: '📖', c: '#c4a8ff', why: '10 دقائق من القراءة أو وِردك اليومي بدل التصفّح: هدوء يختم يومك ويبني عادة تدوم.', ok: (v) => v >= 10 },
-  { id: 'meds', n: 'الدواء والمكمّلات في موعدها', ic: '💊', c: '#7fc8ff', why: 'التزامك بدوائك أو مكمّلاتك كما وصفها طبيبك أو أخصائيك أهم من كل عادة. فعّل تذكير الدواء من «أنا».', ok: (v) => v === 1 },
+  { id: 'meds', n: 'الدواء والمكمّلات في موعدها', ic: '💊', c: '#7fc8ff', why: 'التزامك بدوائك أو مكمّلاتك كما وصفها طبيبك أو أخصائيك أهم من كل عادة. فعّل تذكير الدواء من «الإعدادات».', ok: (v) => v === 1 },
   { id: 'stretch', n: 'تمدّد وإطالة', ic: '🧘', c: '#8de0a0', why: '5 دقائق من التمدّد تخفّف شدّ الظهر والرقبة وتحسّن مرونتك — مناسب لمن يجلس كثيراً.', ok: (v) => v >= 5 },
   { id: 'postwalk', n: 'مشي بعد الوجبة', ic: '🚶‍♀️', c: '#f0a36b', why: 'مشي هادئ 10 دقائق بعد الوجبة يساعد على ضبط سكر الدم بعدها ويخفّف الثقل. (لمرضى السكري: استشر أخصائيك.)', ok: (v) => v >= 1 }
 ];
@@ -5726,7 +5726,7 @@ document.addEventListener('click', (e) => {
     case 'wdone': { const k = dkey(new Date()); S.wlog = S.wlog || {}; const o = S.wlog[k] = S.wlog[k] || {}; if (o[v]) delete o[v]; else o[v] = 1; break; }
     case 'shk': { S.shopOk = S.shopOk || {}; if (S.shopOk[v]) delete S.shopOk[v]; else S.shopOk[v] = now(); break; }
     case 'shreset': S.shopOk = {}; break;
-    case 't2Try': S.ui = Object.assign({}, S.ui, { today2: true, t2Off: 0 }); S.tab = 'today'; toast('هذا «اليوم» الجديد. ترجع إلى الشكل الحالي من «أنا»'); break;
+    case 't2Try': S.ui = Object.assign({}, S.ui, { today2: true, t2Off: 0 }); S.tab = 'today'; toast('هذا «اليوم» الجديد. ترجع إلى الشكل الحالي من «الإعدادات»'); break;
     case 't2Later': S.ui = Object.assign({ today2: false }, S.ui, { t2Later: now() }); break;
     case 'fsSet': S.ui = Object.assign({}, S.ui, { fs: [1, 1.15, 1.3].indexOf(+v) >= 0 ? +v : 1 }); break;
     case 'logOpen': sheet = { t: 'daylog' }; break;

@@ -4,7 +4,7 @@ const assert = require('assert'), linked = require('./hx_link_helper');
 let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
 (async () => {
   const { d, m, hxCheck, cPoll, C, close } = await linked('daylog', errs);
-  await m.waitForSelector('#daylog'); assert(/تسجيل اليوم/.test(await m.textContent('#daylog')));
+  await m.click('[data-act="tab"][data-v="plan"]'); await m.waitForSelector('#daylog'); assert(/تسجيل اليوم/.test(await m.textContent('#daylog')));
   await m.click('#daylog [data-act="allDay"]'); await m.waitForSelector('#daylog:has-text("التزامك 100%")');
   const st = await m.evaluate(() => { const S = window.HissatiApp.state(), k = Object.keys(S.log).sort().pop(); return S.log[k]; }); assert(Object.keys(st.ck).length > 3);
   ok('«التزمت باليوم كله» يعلّم كل أصناف اليوم بلمسة (100%)');
