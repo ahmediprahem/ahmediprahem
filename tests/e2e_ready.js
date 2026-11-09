@@ -9,7 +9,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   const C = () => p.evaluate(() => JSON.parse(JSON.stringify(DPApp.S.clients.find((x) => x.code === DPApp.S.cur))));
   await p.click('.rail [data-a="new"][data-v="ex"]'); await p.fill('[data-f="name"]', 'منى'); await p.selectOption('[data-f="sex"]', 'ذكر').catch(() => { }); await p.selectOption('[data-f="sex"]', 'أنثى'); await p.fill('[data-f="weight"]', '88'); await p.fill('[data-f="height"]', '162'); await p.fill('[data-f="age"]', '34'); await p.press('[data-f="age"]', 'Tab'); await p.waitForTimeout(200);
   // ---- صفحة بيانات العميل المضغوطة
-  assert.strictEqual(await p.locator('main .need').count(), 2, 'الهدف والنشاط بلا قيمة افتراضية'); assert(/لم يُحدَّد الهدف ومستوى النشاط/.test(await p.textContent('#tg')));
+  assert.strictEqual(await p.locator('main .need').count(), 3, 'الجنس والهدف والنشاط بلا قيمة افتراضية'); assert(/لم يُحدَّد الهدف ومستوى النشاط/.test(await p.textContent('#tg')));
   await p.click('main [data-a="genBank"]'); await p.waitForTimeout(200); assert.strictEqual(await p.locator('.rdbank').count(), 0, 'لا بنك قبل الهدف'); assert(/حدّد الهدف ومستوى النشاط أولاً/.test(await p.textContent('.toast')));
   await p.click('main [data-a="gen"]'); await p.waitForTimeout(200); assert(!(await C()).plan, 'لا محرك قبل الهدف');
   await p.selectOption('[data-f="goal"]', { index: 2 }); await p.selectOption('[data-f="activity"]', { index: 3 }); await p.waitForTimeout(150); assert.strictEqual(await p.locator('main .need').count(), 0); assert(!/لم يُحدَّد/.test(await p.textContent('#tg')));

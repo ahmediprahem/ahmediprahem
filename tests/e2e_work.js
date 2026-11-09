@@ -8,7 +8,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   let answer = 'قالب إنقاص الوزن'; p.on('dialog', (d) => d.accept(d.type() === 'prompt' ? answer : undefined));
   await p.goto(fileUrl(path.resolve(__dirname, '../admin.html'))); await login(p);
   const C = () => p.evaluate(() => JSON.parse(JSON.stringify(DPApp.S.clients.find((x) => x.code === DPApp.S.cur))));
-  const mk = async (kind, name, w) => { await p.click('.rail [data-a="new"][data-v="' + kind + '"]'); await p.fill('[data-f="name"]', name); await p.fill('[data-f="age"]', kind === 'ath' ? '28' : '30'); await p.fill('[data-f="weight"]', String(w || 80)); await p.fill('[data-f="height"]', kind === 'ath' ? '178' : '175'); await p.press('[data-f="name"]', 'Tab'); await p.waitForTimeout(250); };
+  const mk = async (kind, name, w) => { await p.click('.rail [data-a="new"][data-v="' + kind + '"]'); await p.fill('[data-f="name"]', name); await p.selectOption('[data-f="sex"]', 'ذكر').catch(() => { }); await p.fill('[data-f="age"]', kind === 'ath' ? '28' : '30'); await p.fill('[data-f="weight"]', String(w || 80)); await p.fill('[data-f="height"]', kind === 'ath' ? '178' : '175'); await p.press('[data-f="name"]', 'Tab'); await p.waitForTimeout(250); };
   const planTab = async () => { await p.click('main .tabs [data-v="plan"]'); };
   const kcal = (c) => Math.round(c.plan.targets ? c.plan.targets.kcal : c.plan.T.days.reduce((a, d) => a + d.kcal, 0) / 7);
   // ---- 1) القالب
