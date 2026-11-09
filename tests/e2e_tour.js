@@ -1,0 +1,42 @@
+// 0.83: الجولة التعريفية بالتظليل بلهجة العميل + شاشة «جاهز للبداية» + صفحة تنزيل التطبيق
+const assert = require('assert'), linked = require('./hx_link_helper');
+let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
+(async () => {
+  const { b, d, m, RELAY, close } = await linked('tour', errs);
+  await m.evaluate(() => { localStorage.setItem('hx_tour_e2e', '1'); const S = window.HissatiApp.state(); S.screen = 'app'; S.tab = 'today'; S.planAt = Date.now() - 3600e3; S.tour = null; S.wh = S.wh || { on: true, nat: '', day: '', cat: -1, idx: -1, seen: {}, fav: [], noQ: false, last: -1 }; S.wh.nat = ''; });
+  await m.evaluate(() => window.HissatiApp.render());
+  await m.waitForSelector('#tour .tr-ask', { timeout: 5000 });
+  ok('أول دخول: تظهر الجولة وتسأل عن البلد');
+  await m.click('#tour [data-tr="nat"][data-v="مصر"]'); await m.waitForSelector('#tour .tr-hole');
+  assert(await m.locator('#tour .tr-dim').count() === 1);
+  assert(/راسل أخصائيك/.test(await m.textContent('#tour .tr-bub')) && /هيرد|هتلاقي|اكتب/.test(await m.textContent('#tour .tr-bub')));
+  ok('تظليل خفيف + فقاعة شرح بالمصري على زر المراسلة');
+  await m.click('#tour [data-tr="next"]'); await m.click('#tour [data-tr="next"]');
+  const t3 = await m.textContent('#tour .tr-bub'); assert(/هتلاقي خطة أكلك وتمرينك/.test(t3), t3);
+  ok('على «رحلتي/خطتي»: «هنا هتلاقي خطة أكلك وتمرينك الأسبوعية» بلهجة العميل');
+  for (let i = 0; i < 3; i++) await m.click('#tour [data-tr="next"]');
+  await m.waitForSelector('#tour [data-tr="next"]'); await m.click('#tour [data-tr="next"]');
+  await m.waitForSelector('[data-act="rdDone"]');
+  assert(/جاهز تبدأ/.test(await m.textContent('.scr')) && /قياساتك/.test(await m.textContent('.scr')) && /اختياري/.test(await m.textContent('.scr')) && /وجهك/.test(await m.textContent('.scr')));
+  ok('بعد الجولة: «جاهز تبدأ» بثلاث خطوات: القياسات، موعد القياس، الصورة (اختياري وبموافقة)');
+  await m.click('[data-act="mqSave"]');
+  assert(await m.evaluate(() => !!window.HissatiApp.state().mq)); ok('تحديد موعد القياس القادم من الشاشة');
+  await m.click('[data-act="rdWk"]'); await m.waitForSelector('#wkW, [data-act="wkSave"], .scr input'); await m.evaluate(() => { const A = window.HissatiApp; A.state(); });
+  ok('زر «سجّل قياساتك» يفتح شاشة القياس');
+  await m.evaluate(() => { const S = window.HissatiApp.state(); S.tab = 'today'; }); 
+  await m.reload(); 
+  // صفحة التنزيل ?i=1&u=
+  const mk = async (ua, init) => { const c = await b.newContext({ viewport: { width: 390, height: 844 }, userAgent: ua }); if (init) await c.addInitScript(init); const p = await c.newPage(); p.on('pageerror', (e) => errs.push(String(e))); await p.goto(RELAY + '/?i=1&u=hsabc123'); return p; };
+  let p = await mk('Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 Chrome/120 Mobile Safari/537.36', () => { setTimeout(() => { const e = new Event('beforeinstallprompt'); e.prompt = () => { window.__pr = 1; }; e.userChoice = Promise.resolve({ outcome: 'accepted' }); window.dispatchEvent(e); }, 300); });
+  await p.waitForSelector('[data-act="instGo"]'); assert(/نزّل تطبيق/.test(await p.textContent('.scr')));
+  await p.click('[data-act="instGo"]'); await p.waitForFunction(() => window.__pr === 1); await p.waitForSelector('text=تم تنزيل التطبيق'); assert(/hsabc123/.test(await p.textContent('.scr')));
+  ok('أندرويد: زر «تنزيل التطبيق» بضغطة واحدة ثم تعليمات الدخول باسم المستخدم');
+  p = await mk('Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 Version/16.0 Mobile/15E148 Safari/604.1'); await p.waitForSelector('.steps'); assert(/الشاشة الرئيسية/.test(await p.textContent('.steps')));
+  ok('آيفون: خطوات «إضافة إلى الشاشة الرئيسية»');
+  p = await mk('Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 Chrome/120 Mobile Safari/537.36 FBAN/FB4A'); await p.waitForSelector('text=افتح الرابط في Chrome'); assert(await p.locator('a[href^="intent://"]').count() === 1);
+  ok('داخل متصفح واتساب/فيسبوك: زر «فتح في Chrome»');
+  await p.click('[data-act="instSkip"]'); await p.waitForSelector('#crU'); 
+  p = await mk('Mozilla/5.0 (Linux; Android 13) Chrome/120 Mobile Safari/537.36'); await p.click('[data-act="instSkip"]'); await p.waitForSelector('#crU'); assert.strictEqual(await p.inputValue('#crU'), 'hsabc123');
+  ok('«متابعة بدون تنزيل» تفتح شاشة الدخول واسم المستخدم معبّأ');
+  assert.deepStrictEqual(errs, []); await close(); console.log('\nنجح ' + n + ' اختباراً');
+})().catch((e) => { console.error(e); process.exit(1); });

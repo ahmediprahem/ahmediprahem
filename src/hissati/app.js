@@ -189,8 +189,8 @@ function notifCard(compact) {                       // بطاقة حالة ال�
 }
 // ---------- التثبيت من المتصفح (بلا متجر): زر التثبيت في Chrome/أندرويد، وخطوات «إضافة إلى الشاشة الرئيسية» على آيفون
 let bip = null;
-window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); bip = e; if (S) render(); });
-window.addEventListener('appinstalled', () => { bip = null; if (S) toast('ثُبّت «حصتي» على جهازك ✓ افتحه من أيقونته'); });
+window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); bip = e; if (S || V.screen === 'inst') render(); });
+window.addEventListener('appinstalled', () => { bip = null; if (V.screen === 'inst') { V.instDone = 1; render(); } else if (S) toast('ثُبّت «حصتي» على جهازك ✓ افتحه من أيقونته'); });
 const inApp = /FBAN|FBAV|Instagram|Line\/|Snapchat|TikTok|WhatsApp/i.test(navigator.userAgent), isAndroid = /Android/i.test(navigator.userAgent);
 function installState() { if (DEMO) return 'desktop'; if (standalone) return 'done'; if (inApp) return 'inapp'; if (bip) return 'prompt'; if (isIOS) return 'ios'; if (isAndroid) return 'android'; return 'desktop'; }
 function installCard(where) {                       // where: invite | today | sent | acct
@@ -563,7 +563,7 @@ function firstWinCard() {
 function scrStart() {                               // بلا حساب ولا رابط (مثل فتح التطبيق المثبّت أول مرة): رمز الدعوة أو رمز النقل
   return '<div class="scr"><div class="scroll"><div class="stack" style="padding-top:22px"><div class="logo" style="width:180px;margin:0 auto;color:#fff">' + LOGO + '</div>'
     + '<section class="card stack"><h3>لديّ رابط دعوة من أخصائيي</h3><p class="dim">ألصق الرابط أو رمز الدعوة كما وصلك على واتساب.</p><input class="inp" id="invIn" dir="ltr" autocomplete="off" placeholder="https://… أو رمز الدعوة"><button class="btn" data-act="useInv">متابعة</button></section>'
-    + '<section class="card stack"><h3>لديّ اسم مستخدم وكلمة سر</h3><p class="dim">من أخصائيك بدل الرابط: اكتبهما كما وصلاك.</p><input class="inp" id="crU" dir="ltr" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="اسم المستخدم"><input class="inp" id="crP" dir="ltr" type="password" autocomplete="current-password" placeholder="كلمة السر"><button class="btn" data-act="useCred"' + (V.busy ? ' disabled' : '') + '>' + (V.busy ? 'جارٍ التحقق…' : 'دخول') + '</button></section>'
+    + '<section class="card stack"><h3>لديّ اسم مستخدم وكلمة سر</h3><p class="dim">من أخصائيك بدل الرابط: اكتبهما كما وصلاك.</p><input class="inp" id="crU" dir="ltr" value="' + esc(V.inst && V.inst.u || '') + '" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="اسم المستخدم"><input class="inp" id="crP" dir="ltr" type="password" autocomplete="current-password" placeholder="كلمة السر"><button class="btn" data-act="useCred"' + (V.busy ? ' disabled' : '') + '>' + (V.busy ? 'جارٍ التحقق…' : 'دخول') + '</button></section>'
     + '<section class="card stack"><h3>لديّ حساب في متصفح أو جوال آخر</h3><p class="dim">من «حصتي» القديم: تقدّمي ← «نقل حسابي» ← انسخ الرمز وألصقه هنا.</p><input class="inp" id="xferIn" dir="ltr" autocomplete="off" placeholder="HX1-…"><button class="btn sec" data-act="useXfer"' + (V.busy ? ' disabled' : '') + '>' + (V.busy ? 'جارٍ النقل…' : 'نقل حسابي إلى هنا') + '</button></section>'
     + (V.err ? '<p class="err">' + esc(V.err) + '</p>' : '') + '</div></div></div>';
 }
@@ -1380,7 +1380,7 @@ function tabProgress() {
   return hpTop() + (sw.nd ? '<section class="card stack"><h3>👣 خطواتي آخر 7 أيام</h3><div class="stats3"><div class="st"><b>' + sw.tot.toLocaleString('ar') + '</b><small>خطوة</small></div><div class="st"><b>' + sw.avg.toLocaleString('ar') + '</b><small>متوسط يومي</small></div><div class="st"><b>' + sw.nd + '</b><small>أيام مسجّلة</small></div></div><p class="dim">سجّلها من «تسجيل اليوم» كما يعرضها عدّاد جوالك أو ساعتك.</p></section>' : '') + suppCard() + ptsCard() + '<h2>تقدّمي</h2><section class="card stack"><div class="row" style="justify-content:space-between"><h3>الوزن</h3><span class="dim">' + (W.length > 1 ? (diff <= 0 ? diff + ' كجم منذ البداية' : '+' + diff + ' كجم') : '') + '</span></div>' + chart
     + '<div class="row"><input class="inp" id="wIn" type="text" data-numf="1" autocomplete="off" inputmode="decimal" placeholder="وزن اليوم (كجم)" style="flex:1"><button class="btn sm" data-act="weigh">' + I('scale') + ' سجّل</button></div></section>'
     + '<section class="card stack"><div class="row" style="justify-content:space-between"><h3>الالتزام آخر 7 أيام</h3><span class="dim">% من الأصناف</span></div><div class="wk">' + bars + '</div></section>'
-    + '<section class="card achcard"><div class="row" style="justify-content:space-between"><h3>🏅 إنجازاتي</h3><span class="dim">' + (S.ach || []).length + ' شهادة</span></div><button class="btn sm" data-act="achs">' + I('sparkle') + ' عرض إنجازاتي وشهاداتي</button></section>' + habitsProgress() + themeCard() + whCard() + remCard() + '<section class="card stack"><h3>الحساب</h3><p class="dim">ملفك لدى ' + esc(S.dname) + (S.code ? ' • رقم ' + esc(S.code) : '') + '. بياناتك محفوظة مشفّرة على هذا الجوال فقط.</p>' + installCard('acct') + notifCard(false) + '<div class="row"><button class="btn sm sec" data-act="lock">' + I('lock') + ' قفل التطبيق</button><button class="btn sm sec" data-act="xferNew">' + I('phone') + ' نقل حسابي</button></div><button class="link" data-act="wipe" style="color:var(--coral)">حذف بياناتي من هذا الجوال</button></section>';
+    + '<section class="card achcard"><div class="row" style="justify-content:space-between"><h3>🏅 إنجازاتي</h3><span class="dim">' + (S.ach || []).length + ' شهادة</span></div><button class="btn sm" data-act="achs">' + I('sparkle') + ' عرض إنجازاتي وشهاداتي</button></section>' + habitsProgress() + themeCard() + whCard() + remCard() + '<section class="card stack"><h3>جولة تعريفية</h3><p class="dim">شرح سريع لأجزاء التطبيق.</p><button class="btn sec" data-act="tourGo">' + I('compass') + ' أعد الجولة</button></section><section class="card stack"><h3>الحساب</h3><p class="dim">ملفك لدى ' + esc(S.dname) + (S.code ? ' • رقم ' + esc(S.code) : '') + '. بياناتك محفوظة مشفّرة على هذا الجوال فقط.</p>' + installCard('acct') + notifCard(false) + '<div class="row"><button class="btn sm sec" data-act="lock">' + I('lock') + ' قفل التطبيق</button><button class="btn sm sec" data-act="xferNew">' + I('phone') + ' نقل حسابي</button></div><button class="link" data-act="wipe" style="color:var(--coral)">حذف بياناتي من هذا الجوال</button></section>';
 }
 
 // ---------- التثقيف: منشورات أخصائيك (ومنشورات عامة لمراجعي «حصة» توافق عليها الإدارة) — إعجاب وتعليق
@@ -1949,8 +1949,8 @@ function render() {
   if (S && S.chat && (S.unreadC || S.msgs.some((m) => m.from === 'd' && !m.rr))) readReceipt();
   const sc = $('.scroll'), key = (S ? S.screen + S.step + S.tab + (S.chat ? 'c' : '') : '') + V.screen, top = sc ? sc.scrollTop : 0;
   let scr;
-  if (V.screen === 'boot') scr = scrBoot(); else if (V.screen === 'bad') scr = scrBad(); else if (V.screen === 'start') scr = scrStart(); else if (V.screen === 'moved') scr = scrMoved(); else if (V.screen === 'lock') scr = scrLock(); else if (V.screen === 'pin') scr = scrPin(); else if (V.screen === 'onb') scr = scrOnb();
-  else scr = V.mv ? scrMv() : V.sd != null && S.sd && S.sd.st ? scrSd() : V.hf ? scrHF() : V.wk ? scrWk() : V.bd ? scrBody() : V.pan != null ? scrPantry() : V.pf != null ? scrProf() : S.rqOpen && window.RL && RL.idx ? scrQuiz() : S.chat ? scrChat() : S.plan && S.screen === 'app' ? scrApp() : { invite: scrInvite, setup: scrSetup, wizard: scrWizard, review: scrReview, sent: scrSent, app: scrSent }[S.screen]();
+  if (V.screen === 'boot') scr = scrBoot(); else if (V.screen === 'bad') scr = scrBad(); else if (V.screen === 'start') scr = scrStart(); else if (V.screen === 'inst') scr = scrInst(); else if (V.screen === 'moved') scr = scrMoved(); else if (V.screen === 'lock') scr = scrLock(); else if (V.screen === 'pin') scr = scrPin(); else if (V.screen === 'onb') scr = scrOnb();
+  else scr = V.rd && !V.wk && !V.bd && S && S.plan && S.screen === 'app' ? scrReady() : V.mv ? scrMv() : V.sd != null && S.sd && S.sd.st ? scrSd() : V.hf ? scrHF() : V.wk ? scrWk() : V.bd ? scrBody() : V.pan != null ? scrPantry() : V.pf != null ? scrProf() : S.rqOpen && window.RL && RL.idx ? scrQuiz() : S.chat ? scrChat() : S.plan && S.screen === 'app' ? scrApp() : { invite: scrInvite, setup: scrSetup, wizard: scrWizard, review: scrReview, sent: scrSent, app: scrSent }[S.screen]();
   const keep = {}; document.querySelectorAll('video[data-keep]').forEach((n) => { keep[n.dataset.keep] = n; });
   const cmI = $('#cmIn'), cmV = cmI ? [cmI.value, document.activeElement === cmI] : null;          // مسودة التعليق تبقى عند إعادة الرسم (وصول التعليقات مثلاً)
   $('#root').innerHTML = '<div class="stage"><div class="device">' + (V.online ? '' : '<div class="offline">بلا اتصال — تُرسل بياناتك عند عودة الإنترنت</div>') + scr + (S ? sheetHtml() : '') + (toastMsg ? '<div class="toast" role="status">' + I('check') + '<span>' + esc(toastMsg) + '</span></div>' : '') + '</div></div>';
@@ -1960,6 +1960,7 @@ function render() {
   const th = $('#thread'); if (th) th.scrollTop = th.scrollHeight;
   onbSplashTimer(); fillCerts(); if (window.HxMotion) HxMotion.after(); if (S && S.chal && S.screen === 'app' && V.screen === '') chalCheck(); chalCheck(); whMaybe(); actMaybe(); badgeSync(); { const c = $('#chatIn'); if (c) c.focus(); focusChat = false; }
   if (S && K) save();
+  if (!V.trSched && tourAuto()) { V.trSched = 1; setTimeout(() => { V.trSched = 0; if (tourAuto()) tourStart(); }, 900); }
 }
 let focusChat = false;
 function startLoop() { clearInterval(V.timer); V.timer = setInterval(() => { if (!document.hidden) { poll(); if (now() - FD.at > 5 * 60000) fdLoad().then(render); } }, POLL); poll(); fdLoad().then(render); pushSetup(false).then((st) => { if (st === 'on') render(); remSync(); }); almCheck(); }
@@ -2000,12 +2001,65 @@ async function onPin() {
   }
 }
 // ---------- البداية
+// ---- 0.83: رابط تنزيل التطبيق (?i=1) بضغطة واحدة، وجولة تعريفية بتظليل أول دخول، وشاشة «جاهز للبداية»
+const TD = {
+  eg: { ask: ['أهلاً بيك! 👋', 'من أنهي بلد؟ علشان نكلمك بلهجتك.'], chat: ['راسل أخصائيك', 'اضغط هنا واكتب لأخصائيك في أي وقت، وهيرد عليك.'], today: ['اليوم', 'ده يومك: مهمتك دلوقتي، وتحدياتك، والماء.'], plan: ['خطتي', 'هنا هتلاقي خطة أكلك وتمرينك الأسبوعية وقايمة التسوق.'], feed: ['استكشف', 'منشورات تثقيف من أخصائيك ومكتبة تمارين بالفيديو.'], me: ['نسختي', 'قياساتك وصور تقدمك وشهاداتك وملفك الصحي.'], you: ['أنا', 'تفضيلاتك وإعداداتك وتذكيراتك.'], next: 'التالي', skip: 'تخطّي', go: 'يلا نبدأ',
+    rd: ['جاهز تبدأ 🎉', 'خلّي أول خطوة دلوقتي:'], r1: ['سجّل قياساتك دلوقتي', 'وزنك وخصرك، علشان نعرف نقطة البداية.'], r2: ['حدّد موعد قياسك الجاي', 'نذكّرك كل أسبوع في اليوم والساعة اللي تختارهم.'], r3: ['ابعت صورتك دلوقتي (اختياري)', 'علشان تقارنها بصورتك بعد كام أسبوع. تصل أخصائيك لوحده، وإنت اللي بتقرر لو توافق إنها تُستخدم بعد إخفاء وجهك، أو لأ.'], start: 'ابدأ استخدام التطبيق' },
+  gulf: { ask: ['حيّاك الله! 👋', 'من أي بلد أنت؟ نكلمك بلهجتك.'], chat: ['راسل أخصائيك', 'اضغط هنا واكتب لأخصائيك في أي وقت، وبيرد عليك.'], today: ['اليوم', 'هذا يومك: مهمتك الحين، وتحدياتك، والماء.'], plan: ['خطتي', 'هنا تلقى خطة أكلك وتمرينك الأسبوعية وقائمة التسوق.'], feed: ['استكشف', 'منشورات تثقيف من أخصائيك ومكتبة تمارين بالفيديو.'], me: ['نسختي', 'قياساتك وصور تقدمك وشهاداتك وملفك الصحي.'], you: ['أنا', 'تفضيلاتك وإعداداتك وتذكيراتك.'], next: 'التالي', skip: 'تخطّي', go: 'يلا نبدأ',
+    rd: ['جاهز للبداية 🎉', 'خل أول خطوة الحين:'], r1: ['سجّل قياساتك الحين', 'وزنك وخصرك، عشان نعرف نقطة البداية.'], r2: ['حدّد موعد قياسك الجاي', 'نذكّرك كل أسبوع في اليوم والساعة اللي تختارهم.'], r3: ['أرسل صورتك الحين (اختياري)', 'عشان تقارنها بصورتك بعد كم أسبوع. تصل أخصائيك وحده، وأنت اللي تقرر توافق تُستخدم بعد إخفاء وجهك، أو لا.'], start: 'ابدأ استخدام التطبيق' },
+  msa: { ask: ['مرحباً بك 👋', 'من أي بلد أنت؟ لنخاطبك بلهجتك.'], chat: ['راسل أخصائيك', 'اضغط هنا واكتب لأخصائيك في أي وقت.'], today: ['اليوم', 'هذا يومك: مهمتك الآن، وتحدياتك، والماء.'], plan: ['خطتي', 'هنا تجد خطتك الغذائية والتمرينية الأسبوعية وقائمة التسوق.'], feed: ['استكشف', 'منشورات تثقيف من أخصائيك ومكتبة تمارين بالفيديو.'], me: ['نسختي', 'قياساتك وصور تقدمك وشهاداتك وملفك الصحي.'], you: ['أنا', 'تفضيلاتك وإعداداتك وتذكيراتك.'], next: 'التالي', skip: 'تخطّي', go: 'هيّا نبدأ',
+    rd: ['أنت جاهز للبداية 🎉', 'ابدأ بهذه الخطوات الآن:'], r1: ['سجّل قياساتك الآن', 'وزنك وخصرك لنعرف نقطة البداية.'], r2: ['حدّد موعد قياسك القادم', 'نذكّرك كل أسبوع في اليوم والساعة اللذين تختارهما.'], r3: ['أرسل صورتك الآن (اختياري)', 'لمقارنتها بصورتك المستقبلية. تصل أخصائيك وحده، وأنت من يقرر الموافقة على استخدامها بعد إخفاء وجهك أو عدمها.'], start: 'ابدأ استخدام التطبيق' }
+};
+TD.lev = TD.msa;
+const tdx = () => TD[whDia()] || TD.msa;
+const TOUR = [['chat', '.chatbtn'], ['today', '.tabbar [data-v="today"]'], ['plan', '.tabbar [data-v="plan"]'], ['feed', '.tabbar [data-v="feed"]'], ['me', '.tabbar [data-v="progress"]'], ['you', '.tabbar [data-v="prefs"]']];
+function tourAuto() { try { if (navigator.webdriver && !localStorage.getItem('hx_tour_e2e')) return false; } catch (e) { } return !!(S && S.screen === 'app' && S.plan && !S.tour && S.planAt && now() - S.planAt < 3 * 864e5 && V.screen === '' && !V.rd && !V.trSched && !document.getElementById('tour') && !document.getElementById('alm')); }
+function tourStart(force) { if (force) { S.tab = 'today'; render(); } V.tr = { i: whs().nat ? 0 : -1 }; tourDraw(); }
+function tourEnd(toReady) { const el = document.getElementById('tour'); if (el) el.remove(); V.tr = null; if (toReady) { V.rd = 1; V.mqE = V.mqE || (mqSet() ? Object.assign({}, S.mq) : { d: 5, t: '08:00' }); } else { S.tour = { done: now() }; save(); } render(); }
+function tourDraw() {
+  if (!V.tr || !S) return; const T = tdx(); let el = document.getElementById('tour'); if (!el) { el = document.createElement('div'); el.id = 'tour'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); document.body.appendChild(el); }
+  if (V.tr.i < 0) { el.innerHTML = '<div class="tr-dim"></div><div class="tr-ask"><h2>' + T.ask[0] + '</h2><p class="mut">' + T.ask[1] + '</p><div class="chips">' + ['مصر', 'السعودية', 'الإمارات', 'الكويت', 'الأردن', 'دولة أخرى'].map((c) => '<button class="chip" data-tr="nat" data-v="' + c + '">' + c + '</button>').join('') + '</div><button class="btn sec sm" data-tr="skip">' + T.skip + '</button></div>'; return; }
+  const st = TOUR[V.tr.i]; if (!st) return tourEnd(true); const tgt = document.querySelector(st[1]); if (!tgt) { V.tr.i++; return tourDraw(); }
+  const r = tgt.getBoundingClientRect(), pad = 7, W = Math.min(340, innerWidth - 28), lb = tgt.textContent.replace(/\s+/g, ' ').trim().replace(/\d+$/, '').trim(), txt = T[st[0]] || ['', ''];
+  const left = Math.max(14, Math.min(innerWidth - W - 14, r.left + r.width / 2 - W / 2)), below = r.top < innerHeight / 2, pos = below ? 'top:' + (r.bottom + pad + 12) + 'px' : 'bottom:' + (innerHeight - r.top + pad + 12) + 'px', ax = Math.max(18, Math.min(W - 18, r.left + r.width / 2 - left));
+  el.innerHTML = '<div class="tr-dim"></div><div class="tr-hole" style="left:' + (r.left - pad) + 'px;top:' + (r.top - pad) + 'px;width:' + (r.width + pad * 2) + 'px;height:' + (r.height + pad * 2) + 'px"></div>'
+    + '<div class="tr-bub' + (below ? ' dn' : ' up') + '" style="left:' + left + 'px;width:' + W + 'px;' + pos + ';--ax:' + ax + 'px"><div class="dim">' + (V.tr.i + 1) + ' من ' + TOUR.length + '</div><b>' + esc(st[0] === 'chat' ? txt[0] : (lb || txt[0])) + '</b><p>' + txt[1] + '</p><div class="row"><button class="btn sm sec" data-tr="skip">' + T.skip + '</button><button class="btn sm" data-tr="next">' + (V.tr.i === TOUR.length - 1 ? T.go : T.next) + '</button></div></div>';
+}
+document.addEventListener('click', (e) => {
+  const b = e.target.closest && e.target.closest('[data-tr]'); if (!b || !V.tr) return; const k = b.dataset.tr;
+  if (k === 'nat') { const w = whs(); w.nat = b.dataset.v; S.p.nat = w.nat; save(); V.tr.i = 0; tourDraw(); }
+  else if (k === 'next') { V.tr.i++; if (V.tr.i >= TOUR.length) tourEnd(true); else tourDraw(); }
+  else if (k === 'skip') tourEnd(false);
+});
+window.addEventListener('resize', () => { if (V && V.tr) tourDraw(); });
+function scrReady() {
+  const T = tdx(), d1 = (S.checks || []).length > 0, d2 = mqSet(), d3 = (S.bodies || []).length > 0, mk = (ok, n) => '<span class="rdn' + (ok ? ' ok' : '') + '">' + (ok ? '✓' : n) + '</span>';
+  return '<div class="scr"><div class="scroll"><div class="stack"><div class="empty"><div class="ei" style="background:rgba(111,227,169,.15);color:var(--mint)">' + I('check') + '</div><h1>' + T.rd[0] + '</h1><p class="mut">' + T.rd[1] + '</p></div>'
+    + '<section class="card stack rdc' + (d1 ? ' done' : '') + '"><div class="row">' + mk(d1, 1) + '<div style="flex:1"><h3>' + T.r1[0] + '</h3><p class="dim">' + T.r1[1] + '</p></div></div>' + (d1 ? '' : '<button class="btn full" data-act="rdWk">' + T.r1[0] + '</button>') + '</section>'
+    + '<section class="card stack rdc' + (d2 ? ' done' : '') + '"><div class="row">' + mk(d2, 2) + '<div style="flex:1"><h3>' + T.r2[0] + '</h3><p class="dim">' + T.r2[1] + '</p></div></div>' + (d2 ? '<p class="dim">✓ ' + esc(DATA.dayNames[S.mq.d]) + ' • ' + hm12(S.mq.t) + '</p>' : mqEdit(V.mqE || (V.mqE = { d: 5, t: '08:00' }), 'mqSave')) + '</section>'
+    + '<section class="card stack rdc' + (d3 ? ' done' : '') + '"><div class="row">' + mk(d3, 3) + '<div style="flex:1"><h3>' + T.r3[0] + '</h3><p class="dim">' + T.r3[1] + '</p></div></div>' + (d3 ? '' : '<button class="btn sec full" data-act="rdBd">' + I('camera') + ' التقط أو اختر صورة</button>') + '</section>'
+    + '</div></div><div class="foot"><button class="btn" data-act="rdDone">' + T.start + '</button></div></div>';
+}
+function scrInst() {
+  const st = installState(), u = V.inst && V.inst.u, host = location.host, ch = 'intent://' + host + '/?i=1' + (u ? '&u=' + encodeURIComponent(u) : '') + '#Intent;scheme=https;package=com.android.chrome;end';
+  let body;
+  if (V.instDone) body = '<div class="empty"><div class="ei" style="background:rgba(111,227,169,.15);color:var(--mint)">' + I('check') + '</div><h1>تم تنزيل التطبيق ✓</h1><p class="mut">افتح «حصتي» من الشاشة الرئيسية في جوالك، ثم اختر «لديّ اسم مستخدم وكلمة سر»' + (u ? ' واكتب اسم المستخدم: <b dir="ltr">' + esc(u) + '</b>' : '') + '.</p></div>';
+  else if (st === 'prompt') body = '<p class="mut">اضغط الزر وسيُنزَّل «حصتي» على جوالك ويظهر على شاشتك الرئيسية كأي تطبيق.</p><button class="btn full big" data-act="instGo">' + I('plusSq') + ' تنزيل التطبيق على جوالك</button>';
+  else if (st === 'inapp') body = '<div class="banner info">' + I('phone') + '<span>أنت داخل متصفح تطبيق آخر (مثل واتساب)، والتنزيل لا يعمل من هنا. افتح الرابط في Chrome.</span></div>' + (isAndroid ? '<a class="btn full" href="' + esc(ch) + '">فتح في Chrome</a>' : '') + '<button class="btn sec full" data-act="copyLink">' + I('copy') + ' نسخ الرابط</button>';
+  else if (st === 'ios') body = '<ol class="steps"><li>اضغط زر المشاركة ' + I('share') + ' في Safari</li><li>اختر «إضافة إلى الشاشة الرئيسية» ' + I('plusSq') + '</li><li>افتح «حصتي» من أيقونته</li></ol>';
+  else if (st === 'android') body = '<ol class="steps"><li>اضغط على القائمة ⋮ أعلى المتصفح</li><li>اختر «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية»</li><li>افتح «حصتي» من أيقونته</li></ol>';
+  else if (st === 'done') body = '<p class="mut">«حصتي» مثبّت على هذا الجهاز بالفعل.</p>';
+  else body = '<div class="banner info">' + I('phone') + '<span>افتح هذا الرابط من جوالك لتنزيل التطبيق عليه.</span></div><button class="btn sec full" data-act="copyLink">' + I('copy') + ' نسخ الرابط</button>';
+  return '<div class="scr"><div class="boot"><div class="stack instl" style="max-width:340px"><div class="empty"><div class="ei"><img alt="" src="/icon.png" width="64" height="64" style="border-radius:16px"></div><h1>نزّل تطبيق «حصتي»</h1><p class="mut">أرسل لك أخصائيك التطبيق جاهزاً. بعد التنزيل تدخل باسم مستخدم وكلمة سر وتجد خطتك وتمرينك.</p></div>' + body + '<button class="link" data-act="instSkip" style="margin-top:6px">متابعة بدون تنزيل</button></div></div></div>';
+}
 async function boot() {
   if (DEMO) { S = Object.assign(fresh(), JSON.parse(JSON.stringify(DEMO.state))); S.chat = false; S.day = TODAY; S.screen = 'app'; S.cid = 'demo'; mkData(); V.screen = onbSeen() ? '' : 'onb'; V.onb = { i: 0 }; return render(); }
   const m = /#t=([A-Za-z0-9_-]{16,40})\.([A-Za-z0-9_-]{11})\b/.exec(location.hash);
   if (m) { try { sessionStorage.setItem(TKEY, m[1] + '.' + m[2]); } catch (e) { } history.replaceState(null, '', location.pathname); }
+  try { const q = new URLSearchParams(location.search); if (q.get('i') === '1') { V.inst = { u: String(q.get('u') || '').replace(/[^A-Za-z0-9._-]/g, '').slice(0, 30) }; history.replaceState(null, '', location.pathname + location.hash); } } catch (e) { }
   if (localStorage.getItem(KEY)) { V.screen = 'lock'; return render(); }
   let t = m ? m[1] + '.' + m[2] : null; try { t = t || sessionStorage.getItem(TKEY); } catch (e) { }
+  if (!t && V.inst && !standalone) { V.screen = 'inst'; return render(); }
   if (!t) { V.err = ''; V.screen = 'start'; return render(); }
   const [tok, fp] = t.split('.'); V.screen = 'boot'; V.retry = false; render();
   try {
@@ -2032,8 +2086,14 @@ document.addEventListener('click', (e) => {
     case 'toLock': V.screen = 'lock'; V.err = ''; break;
     case 'install': if (bip) { bip.prompt(); bip.userChoice.then((c) => { if (c && c.outcome === 'accepted') toast('جارٍ التثبيت…'); bip = null; render(); }).catch(() => { }); } return;
     case 'instLater': S.instLater = now(); break;
+    case 'instGo': if (bip) { bip.prompt(); bip.userChoice.then((c) => { if (c && c.outcome === 'accepted') V.instDone = 1; bip = null; render(); }).catch(() => { }); } return;
+    case 'instSkip': V.screen = 'start'; break;
+    case 'rdWk': V.wk = 1; V.wkD = {}; break;
+    case 'rdBd': V.bd = 1; V.bdD = {}; break;
+    case 'rdDone': V.rd = 0; S.tour = { done: now() }; save(); break;
+    case 'tourGo': tourStart(true); return;
     case 'copyInv': copyText(S.tok + '.' + S.fp, 'نُسخ رمز الدعوة — ألصقه في «حصتي» بعد فتحه من الشاشة الرئيسية'); return;
-    case 'copyLink': copyText(API + '/#t=' + S.tok + '.' + S.fp, 'نُسخ الرابط — افتحه في Chrome أو Safari'); return;
+    case 'copyLink': copyText(V.screen === 'inst' ? API + '/?i=1' + (V.inst && V.inst.u ? '&u=' + encodeURIComponent(V.inst.u) : '') : API + '/#t=' + S.tok + '.' + S.fp, 'نُسخ الرابط — افتحه في Chrome أو Safari'); return;
     case 'useInv': {
       const v = ($('#invIn') || {}).value || '', m = /(?:#t=)?([A-Za-z0-9_-]{16,40})\.([A-Za-z0-9_-]{11})(?![A-Za-z0-9_-])/.exec(v.trim());
       if (!m) { V.err = 'الرابط أو الرمز غير صحيح. انسخه كاملاً من رسالة أخصائيك.'; break; }
