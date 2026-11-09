@@ -71,15 +71,15 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
   await d.click('main .tabs [data-v="plan"]'); await d.evaluate(() => { const c = DPApp.S.clients.find((x) => x.code === DPApp.S.cur); if (c && c.kind !== 'athlete') { c.goal = c.goal || DATA.settings.goals[2][0]; c.activity = c.activity || DATA.settings.activity[2][0]; } if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); }).then(() => d.click('button:has-text("ولّد خطة جديدة")')); await d.waitForSelector('.pnav button');
   const planHas = await d.evaluate((f) => { const c = DPApp.S.clients.filter((x) => x.code === DPApp.S.cur)[0]; return c.plan.days.some((d) => d.slots.some((s) => s.lines.some((l) => l.name === f))); }, hate); assert.strictEqual(planHas, false, 'المحرك تجاهل «يتجنبها»');
   await d.click('main .tabs [data-v="hx"]'); await d.click('[data-a="hxSendPlan"]'); await d.waitForSelector('text=آخر خطة أُرسلت: v1');
-  await cPoll(); await m.waitForSelector('.tabbar'); await m.evaluate(() => { const A = window.HissatiApp; A.state().ui = { today2: false }; A.render(); }); const meals = await m.locator('.card.meal').count(); assert(meals >= 3, String(meals));
+  await cPoll(); await m.waitForSelector('.tabbar'); await m.evaluate(() => { const A = window.HissatiApp; A.state().ui = { today2: false }; A.render(); }); await m.click('[data-act="tab"][data-v="plan"]'); const meals = await m.locator('.card.meal').count(); assert(meals >= 3, String(meals)); await m.click('[data-act="tab"][data-v="today"]');
   const inst = await m.textContent('.inst'); assert(inst.includes('إضافة إلى الشاشة الرئيسية') && inst.includes('إنشاء رمز النقل'), inst); await shot(m, 'c5_today'); const today = await m.evaluate(() => { const S = window.HissatiApp.state(); return { kcal: S.pm.kcal, days: S.plan.length, alts: S.plan[0].slots[0].lines[0][3].length }; }); assert(today.kcal > 1000 && today.days === 7 && today.alts > 0, JSON.stringify(today));
   ok('الخطة تُرسل من تبويب «زنها» في ملف العميل وتصل كاملة (7 أيام ووجبات وبدائل لكل صنف) فتفتح «زنها» على شاشة «اليوم»');
   // ---- 7) المتابعة اليومية والملاحظة والماء والوزن والمحادثة ← «حصة»
-  await m.locator('.it .ck').nth(0).click(); await m.locator('.it .ck').nth(1).click(); await m.locator('.cups button').nth(2).click();
+  await m.click('[data-act="tab"][data-v="plan"]'); await m.locator('.it .ck').nth(0).click(); await m.locator('.it .ck').nth(1).click(); await m.locator('.cups button').nth(2).click();
   await m.locator('[data-act="note"]').first().click(); await m.click('.sheet .chip >> nth=0'); await m.click('[data-act="savenote"]');
   await m.locator('.it .sw').first().click(); const swTo = (await m.textContent('.sheet button.opt >> nth=0')).trim(); await m.click('.sheet button.opt >> nth=0');
-  await m.click('.chatbtn'); await m.fill('#chatIn', 'هل أقدر أبدّل الأرز بالبطاطس؟'); await m.press('#chatIn', 'Enter'); await m.click('[data-act="chatClose"]');
-  await m.click('[data-act="tab"][data-v="progress"]'); await m.click('#wIn'); await m.keyboard.type('٧١٫٨'); await m.click('[data-act="weigh"]');
+  await m.click('[data-act="tab"][data-v="today"]'); await m.click('.chatbtn'); await m.fill('#chatIn', 'هل أقدر أبدّل الأرز بالبطاطس؟'); await m.press('#chatIn', 'Enter'); await m.click('[data-act="chatClose"]');
+  await m.click('[data-act="tab"][data-v="today"]'); await m.click('[data-act="sub"][data-v="progress"]'); await m.click('#wIn'); await m.keyboard.type('٧١٫٨'); await m.click('[data-act="weigh"]');
   await m.waitForTimeout(2800); await cPoll();
   await d.click('main .tabs [data-v="client"]'); await hxCheck().catch(() => { }); await d.click('.rail [data-a="hxv"]'); await hxCheck(); await d.waitForSelector('.hxlinked .hxnb');
   await d.click('.hxlinked .cl'); await d.waitForSelector('.hxtab .hxday');
@@ -95,12 +95,12 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
   ok('رد الأخصائي يصل «زنها» بشارة على «راسل الأخصائي»، وفتح المحادثة يرسل علامة القراءة (✓✓) إلى «حصة»');
   // ---- 9) «لا أحب» بعد الخطة: يُستبدل في الجوال فوراً ويُضاف في «حصة» إلى «يتجنبها»
   const inPlan = await m.evaluate(() => { const S = window.HissatiApp.state(); return S.plan[0].slots[0].lines.find((l) => l[3].length)[1]; });
-  await m.click('[data-act="tab"][data-v="prefs"]'); await m.fill('#fq_prefCat', inPlan); await m.waitForTimeout(100); await m.locator('.food', { hasText: inPlan }).first().click(); await m.locator('.food', { hasText: inPlan }).first().click();
+  await m.click('[data-act="tab"][data-v="today"]'); await m.click('[data-act="sub"][data-v="prefs"]'); await m.fill('#fq_prefCat', inPlan); await m.waitForTimeout(100); await m.locator('.food', { hasText: inPlan }).first().click(); await m.locator('.food', { hasText: inPlan }).first().click();
   assert((await m.textContent('.toast')).includes('موضعاً')); assert.strictEqual(await m.evaluate((f) => window.HissatiApp.state().plan.some((d) => d.slots.some((s) => s.lines.some((l) => l[1] === f))), inPlan), false);
   await cPoll(); await hxCheck(); assert(await d.evaluate((f) => DPApp.S.clients.filter((x) => x.code === DPApp.S.cur)[0].avoid.includes(f), inPlan)); assert((await d.textContent('.hxpl')).includes(inPlan));
   ok('«لا أحب» في «زنها» يحذف الصنف من الخطة فوراً ببديل من نفس المجموعة، ويصل «حصة» فيُضاف إلى «أصناف يتجنبها»');
   // ---- 10) القفل وإعادة الفتح، والمحطة لا تحتفظ بما استُلم
-  await m.click('[data-act="tab"][data-v="progress"]'); await shot(m, 'c7_progress');
+  await m.click('[data-act="tab"][data-v="today"]'); await m.click('[data-act="sub"][data-v="progress"]'); await shot(m, 'c7_progress');
   // تجهيز الإشعارات قبل إعادة الفتح: السماح بالإشعارات، واشتراك بديل (Chromium بلا واجهة لا يتصل بخدمة Google)، واعتراض إرسال المحطة إلى خدمة الإشعارات
   await mctx.grantPermissions(['notifications'], { origin: RELAY });
   await mctx.addInitScript(() => { if (window.PushManager) { PushManager.prototype.subscribe = async function () { return { endpoint: 'https://fcm.googleapis.com/fcm/send/e2e-device-0001', unsubscribe: async () => true }; }; } });
@@ -172,7 +172,7 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
     for (let i = 0; i < 4; i++) await jp.click('[data-onb="cup"]'); assert((await jp.textContent('.onb-cup .oc')).trim() === '4 / 4'); assert(await jp.locator('.onb-cup.full').count() === 1); for (let i = 0; i < 4; i++) await jp.click('[data-onb="heart"]'); assert((await jp.textContent('.onb-heart .oh')).trim() === '100%'); await shot(jp, 'o3_story2');
     const b2 = await jp.locator('.onb-art').boundingBox(); await jp.mouse.move(b2.x + 20, b2.y + 20); await jp.mouse.down(); await jp.mouse.move(b2.x + 160, b2.y + 24, { steps: 6 }); await jp.mouse.up(); await jp.waitForSelector('.onb-story.s3');
     assert(await jp.locator('.cb.a').count() === 1 && await jp.locator('.cert').count() === 1); assert((await jp.textContent('.onb-lock')).includes('مشفّرة')); await jp.waitForTimeout(1500); await shot(jp, 'o4_story3');
-    await jp.click('.onb-foot [data-act="onbNext"]'); await jp.waitForSelector('.onb-theme'); assert.strictEqual(await jp.locator('.hx-th').count(), 4);
+    await jp.click('.onb-foot [data-act="onbNext"]'); await jp.waitForSelector('.onb-theme'); assert.strictEqual(await jp.locator('.hx-th').count(), 3);
     await jp.click('.hx-th[data-v="rose"]'); await jp.waitForFunction(() => document.documentElement.getAttribute('data-theme') === 'rose'); assert.strictEqual(await jp.getAttribute('link[rel=manifest]', 'href'), '/manifest.webmanifest?t=rose'); await jp.waitForTimeout(700); await shot(jp, 'o5_theme');
     await jp.click('.onb-foot [data-act="onbFinish"]'); await jp.waitForSelector('.invite .dr'); assert.strictEqual(await jp.evaluate(() => localStorage.getItem('hissati_onb')), '1');
     await jp.click('.hx-th, [data-act="theme"]', { timeout: 500 }).catch(() => { }); await jp.evaluate(() => HxTheme.set('classic'));
@@ -230,7 +230,7 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
     await d.evaluate((code) => DPApp.A.pick(code), tgt.code); await d.click('main .tabs [data-v="hx"]'); const m0 = env.DB._raw.prepare('SELECT COUNT(*) AS n FROM media').get().n;
     await d.click('[data-a="hxSendPlan"]'); await d.waitForSelector('text=آخر خطة أُرسلت: v2'); assert.strictEqual(env.DB._raw.prepare('SELECT COUNT(*) AS n FROM media').get().n, m0 + 1, 'صورة الوصفة رُفعت مرة');
     assert(await d.evaluate(() => Object.values(DPApp.S.settings.recipes)[0].key.length === 24));
-    await ip.evaluate(() => window.HissatiApp.poll()); await ip.click('[data-act="tab"][data-v="today"]'); await ip.waitForSelector('[data-act="rcp"]');
+    await ip.evaluate(() => window.HissatiApp.poll()); await ip.click('[data-act="tab"][data-v="plan"]'); await ip.waitForSelector('[data-act="rcp"]');
     await ip.locator('[data-act="rcp"]').first().click(); await ip.waitForSelector('.rcp'); const rt = await ip.textContent('.rcp'); assert(rt.includes('أضف المكونات وقلّب') && rt.includes('15 دقيقة') && rt.includes('المقادير لك'), rt);
     await ip.waitForFunction(() => { const i = document.querySelector('.rcp img'); return i && i.complete && i.naturalWidth > 100; }); await shot(ip, 'c13_recipe'); await ip.click('.sheet [data-act="close"]');
     ok('الوصفات: تُكتب لوجبة البنك بخطوات ووقت (أرقام عربية) وصورة تُضغط، وتُرفع صورتها مرة عند إرسال الخطة، وتظهر في «زنها» بلمس «الوصفة» مع مقادير العميل من خطته');
@@ -290,7 +290,7 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
     await ip.click('[data-hb="breath"] [data-act="breathe"]', { force: true }); await ip.waitForSelector('#brx .brring.in', { timeout: 3000 }); await ip.click('#brstop'); assert.strictEqual(await ip.locator('#brx').count(), 0);
     if (process.env.SHOTS) for (const id of ['adhkar', 'water', 'steps', 'sleep', 'veg', 'sugar', 'move', 'breath', 'mindful', 'kitchen', 'coffee']) await ip.locator('[data-hb="' + id + '"]').screenshot({ path: path.join(process.env.SHOTS, 'h_' + id + '.png') }); await ip.evaluate(() => { const S = window.HissatiApp.state(), d = new Date(Date.now() - 86400000), k = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); S.log[k] = Object.assign(S.log[k] || { ck: {}, sw: {}, note: {}, skip: {}, water: 0 }, { h: { sugar: 1 } }); });
     await ip.click('[data-hb="sleep"] [data-k="8"]'); await ip.click('[data-hb="sleep"] [data-k="8"]'); assert((await ip.textContent('[data-hb="sugar"] .hbs')).includes('2'), 'سلسلة يومين');
-    await ip.click('[data-act="tab"][data-v="progress"]'); assert((await ip.textContent('.hgrid')).includes('المشي اليومي'));
+    await ip.click('[data-act="tab"][data-v="today"]'); await ip.click('[data-act="sub"][data-v="progress"]'); assert((await ip.textContent('.hgrid')).includes('المشي اليومي'));
     await ip.waitForTimeout(2800); await ip.evaluate(() => window.HissatiApp.flush()); await hxCheck(); await d.click('main .tabs [data-v="hx"]').catch(() => { });
     const tx = await d.textContent('.hxday'); assert(tx.includes('✓🚶 9000 خطوة') && tx.includes('✓😴 8 س نوم') && tx.includes('✗☕ 4 كوب قهوة') && tx.includes('✓📿 أذكار الصباح'), tx.slice(0, 400));
     ok('العادات: مكتبة من 10 عادات صحية تُضاف لـ«اليوم» بتصميم لكل عادة (قارورة الماء، عدّاد الخطوات، سماء النوم، صحن الخضار، شعلة السلسلة، بطارية النشاط، جلسة تنفّس، أكواب القهوة)، والإنجاز والسلسلة والأسبوع، وتصل الأخصائي في المتابعة اليومية');
@@ -335,7 +335,7 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
     assert(pdf.slice(0, 8).toString() === '%PDF-1.4' && pdf.length > 50000 && pdf.toString('latin1').includes('/DCTDecode'));
     const pages = +require('child_process').execSync(`pdfinfo "${pf}" | grep Pages | awk '{print $2}'`).toString(); assert.strictEqual(pages, 1, 'PDF صالح بصفحة واحدة');
     await ip.click('.sheet [data-act="close"]'); await ip.click('[data-act="tab"][data-v="today"]'); assert((await ip.textContent('.chal')).includes('أنجزته')); await shot(ip, 'c19_chal');
-    await ip.click('[data-act="tab"][data-v="progress"]'); await ip.click('[data-act="achs"]'); await ip.waitForSelector('.cthumb img[src^="data:image"]'); assert((await ip.textContent('.astats')).includes('شهادة'));
+    await ip.click('[data-act="tab"][data-v="today"]'); await ip.click('[data-act="sub"][data-v="progress"]'); await ip.click('[data-act="achs"]'); await ip.waitForSelector('.cthumb img[src^="data:image"]'); assert((await ip.textContent('.astats')).includes('شهادة'));
     await ip.click('.sheet [data-act="close"]'); await ip.evaluate(() => window.HissatiApp.flush()); await hxCheck(); await d.waitForSelector('.chrow.done'); assert((await d.textContent('.chcard')).includes('🏅 1 شهادة'));
     ok('التحديات: 4 قوالب جاهزة يعدّلها الأخصائي ويعدّل لكل عميل قبل الإرسال (أرقام عربية)، بطاقة تحدي الأسبوع في «اليوم» بالأيام والنقاط، إتمامه يولّد شهادة تقدير باسم العميل وشعار الأخصائي واسمه تُنزَّل صورة وPDF، وتظهر في «إنجازاتي»، ويصل الإنجاز للأخصائي');
     {     // مكتبة 10 تحديات في «حصة»: تُختار ثم تُعدَّل كأي تحدٍّ
@@ -350,7 +350,7 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
     await goMe(ip); await ip.waitForSelector('.hx-themes'); assert.strictEqual(await ip.locator('.hx-th').count(), 3);
     assert.strictEqual(await ip.getAttribute('.hx-th[data-v="classic"]', 'aria-checked'), 'true'); assert.strictEqual(await ip.evaluate(() => document.documentElement.getAttribute('data-theme')), null);
     const bgOf = () => ip.evaluate(() => getComputedStyle(document.body).backgroundColor), classicBg = await bgOf();
-    for (const [t, meta, light] of [['rose', '#FAF6F2', true], ['pulse', '#0A0C0F', false], ['firoz', '#031A1F', false]]) {
+    for (const [t, meta, light] of [['rose', '#FAF6F2', true], ['pulse', '#0A0C0F', false]]) {
       await ip.click('.hx-th[data-v="' + t + '"]'); await ip.waitForFunction((x) => document.documentElement.getAttribute('data-theme') === x, t); await ip.waitForTimeout(700);
       assert.strictEqual(await ip.getAttribute('.hx-th[data-v="' + t + '"]', 'aria-checked'), 'true'); assert.strictEqual(await ip.getAttribute('meta[name="theme-color"]', 'content'), meta); assert.strictEqual(await ip.evaluate(() => localStorage.getItem('hissati_theme')), t);
       const bg = await bgOf(); assert.notStrictEqual(bg, classicBg); const rgb = bg.match(/\d+/g).map(Number); assert.strictEqual(rgb[0] + rgb[1] + rgb[2] > 600, light, 'خلفية ' + t + ' ' + bg);
@@ -392,7 +392,7 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
       await ip.click('[data-act="tab"][data-v="today"]').catch(() => { }); await ip.waitForTimeout(400);
       await tour(TH, '[data-act="habits"]', 's1_habits'); await close(); await tour(TH, '[data-act="adhkar"]', 's2_adhkar'); await close(); await tour(TH, '[data-act="chat"]', 's5_chat'); await ip.click('[data-act="chatClose"]', { timeout: 1500 }).catch(() => { });
       await ip.click('[data-act="tab"][data-v="plan"]').catch(() => { }); await tour(TH, '[data-act="swap"]', 's8_swap'); await close();
-      await ip.click('[data-act="tab"][data-v="progress"]').catch(() => { }); await tour(TH, '[data-act="achs"]', 's9_achievements'); await close(); await ip.evaluate(() => { window.HissatiApp.celebrateTest && window.HissatiApp.celebrateTest('water'); }).catch(() => { }); await ip.waitForTimeout(900); await shot(ip, TH + '_s10_celebrate'); await close();
+      await ip.click('[data-act="tab"][data-v="today"]'); await ip.click('[data-act="sub"][data-v="progress"]').catch(() => { }); await tour(TH, '[data-act="achs"]', 's9_achievements'); await close(); await ip.evaluate(() => { window.HissatiApp.celebrateTest && window.HissatiApp.celebrateTest('water'); }).catch(() => { }); await ip.waitForTimeout(900); await shot(ip, TH + '_s10_celebrate'); await close();
     }
   }
   if (process.env.DEMO_OUT) {      // حالة حساب تجريبي للعرض (Artifact): من حساب الاختبار بعد تنظيف الهوية والمفاتيح والصور

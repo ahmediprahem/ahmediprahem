@@ -25,7 +25,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   ok('بعد الوجبات يأتي الماء كوباً كوباً ثم رسالة «أنجزت مهام اليوم» بلا زر، وتظهر سلسلة الأيام');
   await m.click('[data-act="tab"][data-v="feed"]'); await m.waitForSelector('.empty .ea svg'); assert(/لا منشورات بعد|جارٍ التحميل/.test(await m.textContent('.empty h3')), 'حالة التثقيف الفارغة برسم');
   assert(require('fs').readFileSync(require('path').join(__dirname, '../hissati.html'), 'utf8').includes("emptyArt('weight')"), 'رسم منحنى الوزن الفارغ مبنيّ في التطبيق');
-  await m.click('[data-act="tab"][data-v="today"]'); await m.waitForSelector('.meal .mti svg'); assert(await m.locator('.meal .mti').count() >= 2, 'أيقونة لكل وجبة معروفة الاسم');
+  await m.click('[data-act="tab"][data-v="plan"]'); await m.waitForSelector('.meal .mti svg'); assert(await m.locator('.meal .mti').count() >= 2, 'أيقونة لكل وجبة معروفة الاسم'); await m.click('[data-act="tab"][data-v="today"]');
   await m.click('.scn [data-act="chat"]'); await m.waitForSelector('.empty .ea svg'); assert(/ابدأ الحديث/.test(await m.textContent('.empty h3')));
   ok('الحالات الفارغة برسوم وجمل تدعو للفعل (التثقيف، الوزن، المحادثة)، وأيقونة لكل وجبة');
   assert.deepStrictEqual(errs, []); await close(); console.log('\nنجح ' + n + ' اختباراً');

@@ -11,7 +11,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   await m.click('.sndb'); await m.waitForFunction(() => !window.HissatiApp.sound.playing()); assert.strictEqual(await m.getAttribute('.sndb', 'aria-pressed'), 'false');
   ok('زر الصوت يوقفه فوراً (خيار الإيقاف أمام العميل)');
   await m.click('.sndb'); await m.waitForFunction(() => window.HissatiApp.sound.playing());
-  await m.click('[data-act="tab"][data-v="prefs"]'); await m.waitForSelector('#sndV'); await m.fill('#sndV', '20'); assert.strictEqual(await m.evaluate(() => window.HissatiApp.sound.vol()), 0.2);
+  await m.click('[data-act="tab"][data-v="today"]'); await m.click('[data-act="sub"][data-v="prefs"]'); await m.waitForSelector('#sndV'); await m.fill('#sndV', '20'); assert.strictEqual(await m.evaluate(() => window.HissatiApp.sound.vol()), 0.2);
   await m.click('[data-act="sndt"][type="checkbox"]'); await m.waitForFunction(() => !window.HissatiApp.sound.playing());
   ok('«أنا»: مفتاح ومستوى صوت يُحفظان، والمفتاح يوقف الصوت');
   const q = await m.evaluate(() => { const S = window.HissatiApp.state(); S.rem = S.rem || {}; S.rem.prCity = 'القاهرة'; S.p.rel = 'م'; const P = window.HissatiApp.sound.times(); const f = (k) => [window.HissatiApp.sound.quiet(P[k] - 8), window.HissatiApp.sound.quiet(P[k] + 10), window.HissatiApp.sound.quiet(P[k] + 40), window.HissatiApp.sound.quiet(P[k] - 30)]; S.p.rel = 'ك'; const nm = window.HissatiApp.sound.quiet(P.dhuhr + 3); S.p.rel = 'م'; return { f: f('dhuhr'), isha: f('isha'), nm }; });

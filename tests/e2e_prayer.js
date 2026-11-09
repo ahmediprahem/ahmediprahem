@@ -24,7 +24,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   assert(it.some((x) => x.t === 'sal' && !x.d && x.m === 1260));
   ok('تذكير عند كل صلاة بعد الأذان مباشرة (أقرب ربع ساعة بعده) ولا تحذفه ساعات الهدوء، والصلاة على النبي ﷺ يومياً الساعة 9 مساءً (وثلاث مرات يوم الجمعة)');
   await m.evaluate(() => { const S = window.HissatiApp.state(), k = (i) => { const d = new Date(Date.now() - i * 864e5); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }; [6000, 8000, 7000].forEach((v, i) => { const L = S.log[k(i)] = S.log[k(i)] || { ck: {}, sw: {}, note: {}, skip: {}, water: 0 }; L.h = Object.assign({}, L.h, { steps: v }); }); });
-  await m.click('[data-act="tab"][data-v="progress"]'); const sw = await m.textContent('.scroll'); assert(/خطواتي آخر 7 أيام/.test(sw) && /٢١٬٠٠٠|21,000|21٬000/.test(sw) && /٧٬٠٠٠|7,000|7٬000/.test(sw), sw.slice(0, 400));
+  await m.click('[data-act="tab"][data-v="today"]'); await m.click('[data-act="sub"][data-v="progress"]'); const sw = await m.textContent('.scroll'); assert(/خطواتي آخر 7 أيام/.test(sw) && /٢١٬٠٠٠|21,000|21٬000/.test(sw) && /٧٬٠٠٠|7,000|7٬000/.test(sw), sw.slice(0, 400));
   ok('«👣 خطواتي آخر 7 أيام»: المجموع والمتوسط وعدد الأيام من «تسجيل اليوم»');
   assert.deepStrictEqual(errs, []); await close(); console.log('\nنجح ' + n + ' اختبارات الصلاة والخطوات');
 })().catch((e) => { console.log('✘', String(e && e.stack || e).slice(0, 1500)); console.log('أخطاء:', JSON.stringify(errs).slice(0, 600)); process.exit(1); });

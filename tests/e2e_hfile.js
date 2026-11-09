@@ -3,7 +3,7 @@ const assert = require('assert'), linked = require('./hx_link_helper');
 let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
 (async () => {
   const { d, m, hxCheck, cPoll, C, close } = await linked('hfile', errs);
-  assert.strictEqual(await m.locator('.tabbar button').count(), 5); await m.click('[data-act="tab"][data-v="progress"]'); await m.click('[data-act="sub"][data-v="file"]'); await m.waitForSelector('.hfs');
+  assert.strictEqual(await m.locator('.tabbar button').count(), 5); await m.click('[data-act="tab"][data-v="today"]'); await m.click('[data-act="sub"][data-v="progress"]'); await m.click('[data-act="sub"][data-v="file"]'); await m.waitForSelector('.hfs');
   assert((await m.textContent('h2')).includes('ملفي الصحي')); assert.strictEqual(await m.locator('.hfs').count(), 5, 'خمسة أقسام: الوزن والقياسات وInBody والفحوصات وصور التحول');
   const tiles = await m.textContent('.card.stack .stats3'); assert(/88/.test(tiles) && /مؤشر الكتلة/.test(tiles), 'ملخص: الوزن ومؤشر الكتلة'); assert(/33\.5|33.5/.test(await m.textContent('.card.stack .stats3')) , 'مؤشر الكتلة 88 كجم و162 سم');
   ok('تبويب «ملفي» (٦ تبويبات): ملخص بالوزن ومؤشر الكتلة وخمسة أقسام');

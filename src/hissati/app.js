@@ -802,15 +802,15 @@ function scrSent() {
 
 // ---------- التطبيق بعد وصول الخطة
 // ---- 0.80: خمسة تبويبات (اليوم، رحلتي، استكشف، نسختي، أنا). التبويبات الداخلية القديمة تبقى كما هي وتُجمَّع في مجموعات
-const TGRP = [['today', 'today', 'اليوم', ['today']], ['plan', 'trip', 'رحلتي', ['plan']], ['feed', 'compass', 'استكشف', ['feed', 'lib']], ['progress', 'star', 'نسختي', ['progress', 'file']], ['prefs', 'user', 'أنا', ['prefs']]];
-const TSUB = { feed: [['feed', 'التثقيف'], ['lib', 'مكتبة التمارين']], progress: [['progress', 'تقدّمي'], ['file', 'ملفي الصحي']] };
+const TGRP = [['today', 'user', 'صفحتي', ['today', 'progress', 'file', 'prefs']], ['plan', 'cal', 'خطتي', ['plan']], ['feed', 'news', 'تثقيف', ['feed', 'lib']], ['me', 'heart', 'الإعدادات', ['me']]];
+const TSUB = { today: [['today', 'الرئيسية'], ['progress', 'تقدّمي'], ['file', 'ملفي الصحي'], ['prefs', 'تفضيلاتي']], feed: [['feed', 'التثقيف'], ['lib', 'مكتبة التمارين']] };
 function scrApp() {
   if (!{ today: 1, plan: 1, prefs: 1, progress: 1, feed: 1, file: 1, lib: 1, me: 1 }[S.tab]) S.tab = 'today';
   const T = { today: T2() ? tabToday2 : tabToday, plan: tabPlan, prefs: tabPrefs, progress: tabProgress, feed: tabFeed, me: tabMe, file: tabFile, lib: tabLib }, g = TGRP.find((x) => x[3].includes(S.tab)), sub = g && TSUB[g[0]];
   const segHtml = sub ? '<div class="segc ptseg subseg" role="tablist" aria-label="أقسام ' + g[2] + '">' + sub.map((x) => '<button role="tab" class="' + (S.tab === x[0] ? 'on' : '') + '" aria-selected="' + (S.tab === x[0]) + '" data-act="sub" data-v="' + x[0] + '">' + x[1] + '</button>').join('') + '</div>' : '';
   const body = (T[S.tab] ? segHtml + T[S.tab]() : tabToday());
   const tb = TGRP.map((t) => { const on = t[3].includes(S.tab); return '<button class="' + (on ? 'on' : '') + (on && V.tp === t[0] ? ' pop' : '') + '" data-act="tab" data-v="' + t[0] + '"' + (on ? ' aria-current="page"' : '') + '>' + I(t[1]) + '<span>' + t[2] + '</span>' + (t[0] === 'feed' && fdNew() ? '<span class="nb" aria-label="' + fdNew() + ' جديد">' + fdNew() + '</span>' : '') + '</button>'; }).join('');
-  const lb = S.tab === 'today' && gateOpen() ? logBar() : '';
+  const lb = (S.tab === 'today' || S.tab === 'plan') && gateOpen() ? logBar() : '';
   const wm = S.wm && (S.tab === 'today' || S.tab === 'plan') ? '<div class="wmk" aria-hidden="true">' + Array(18).fill('<span>' + esc(S.wm) + '</span>').join('') + '</div>' : '';   // 0.51: علامة مائية باسم العميل على الجدول
   return '<div class="scr hasTabs' + (lb ? ' hasLog' : '') + (T2() ? ' t2' : '') + '">' + wm + '<div class="scroll"><div class="stack">' + (S.removed ? '<div class="banner warn">' + I('alert') + '<span>أوقف أخصائيك ربط حسابك؛ خطتك الحالية تبقى معروضة لكن لا تصله متابعتك.</span></div>' : '') + body + '</div></div>' + lb + '<nav class="tabbar" aria-label="التنقل">' + tb + '</nav></div>';
 }
@@ -1166,12 +1166,12 @@ function tabToday() {
   const dp = dayPlan(d), kc = dp.kcal || DATA.kcal, pr = dp.p || DATA.pro, wt = +(dp.water || DATA.water), cups = Math.max(4, Math.min(16, Math.round(wt / CUP)));
   if (dp.type) out += '<div class="banner info">' + I('dumbbell') + '<span><b>' + esc(dp.type) + '</b> • كارب ' + dp.c + ' جم • دهون ' + dp.f + ' جم</span></div>';
   out += '<div class="stats3"><div class="st"><b>' + kc + '</b><small>سعرة هدفك' + (dp.type ? ' اليوم' : '') + '</small></div><div class="st"><b>' + pr + ' جم</b><small>بروتين</small></div><div class="st"><b>' + (L.water * CUP).toFixed(2).replace(/\.?0+$/, '') + ' / ' + wt.toFixed(1) + '</b><small>لتر ماء</small></div></div>';
-  out += (hList().indexOf('water') < 0 ? waterRow() : '') + habitsHome() + (gateOpen() ? '<h2 class="mealsh">وجباتي</h2>' + dayPlan(d).slots.map((s, si) => mealCard(d, si, s, true)).join('') + (sheet && sheet.t === 'daylog' ? '' : dayLogCard(d)) : gateCard());
+  out += habitsHome() + '<button class="card mvc stack" data-act="tab" data-v="plan"><b class="mvt">🍽 ماء اليوم ووجباتي</b><span class="dim">سجّل الماء وعلّم ما أكلته من «خطتي»</span></button>';
   return out + syncLine();
 }
 function syncLine() { return '<p class="sync">' + (!V.online ? '◷ ستُرسل عند عودة الإنترنت' + (S.outbox.length ? ' (' + S.outbox.length + ')' : '') : S.outbox.length ? 'بانتظار الإنترنت لإرسال ' + S.outbox.length + ' تحديث إلى أخصائيك' : 'متابعتك تصل أخصائيك تلقائياً') + ' • الخطة الإصدار ' + S.pv + '</p>'; }
 // ---- 0.60: «اليوم» الجديد خلف المفتاح S.ui.today2 (افتراضي للحساب الجديد والزائر؛ العميل الحالي يرى بطاقة «جرّب»)، و«أنا»، وزر «سجّل يومك» الثابت
-const T2 = () => !!(S && S.ui && S.ui.today2);
+const T2 = () => false;                                      // 0.85: «اليوم» الجديد من زنها هو الأساس الآن (الرئيسية)
 function t2Offer() { const u = S.ui; return !u || (!u.today2 && !u.t2Off && !!u.t2Later && now() - u.t2Later >= 7 * 864e5); }
 function t2Card() {
   return '<section class="card stack t2c"><h3>✨ جرّب الشكل الجديد لـ«اليوم»</h3><p class="dim">وجبتك التالية أولاً، والماء بلمسة، و«سجّل يومك» في متناول يدك. تستطيع الرجوع إلى الشكل الحالي من «أنا».</p>'
@@ -1263,10 +1263,9 @@ function healthCard() {
     + (S.pending.length ? '<div class="banner warn">' + I('clock') + '<span>بانتظار الأخصائي: ' + S.pending.map(esc).join('، ') + '</span></div>' : '') + '</section>';
 }
 function tabMe() {
-  return '<div class="row mehd"><h2>أنا</h2></div>' + hpTop() + healthCard()
+  return '<div class="row mehd"><h2>الإعدادات</h2></div>'
     + '<h3 class="mesec">العرض</h3>' + themeCard() + fsCard()
-    + '<section class="card stack"><label class="remrow"><span><b>الشكل الجديد لـ«اليوم»</b><span class="dim">الوجبة التالية أولاً، و«سجّل يومك» بلمسة. أطفئه لترجع إلى الشكل الحالي.</span></span><input type="checkbox" class="sw" data-t2="1"' + (T2() ? ' checked' : '') + '></label></section>'
-    + '<h3 class="mesec">التذكيرات</h3>' + remCard()
+    + '<h3 class="mesec">التذكيرات</h3>' + remCard() + whCard()
     + '<h3 class="mesec">الإشعارات والتثبيت</h3><section class="card stack">' + notifCard(false) + installCard('acct') + '</section>'
     + '<h3 class="mesec">الحساب</h3><section class="card stack"><p class="dim">ملفك لدى ' + esc(S.dname) + (S.code ? ' • رقم ' + esc(S.code) : '') + '. بياناتك محفوظة مشفّرة على هذا الجوال فقط.</p><div class="row"><button class="btn sm sec" data-act="lock">' + I('lock') + ' قفل التطبيق</button><button class="btn sm sec" data-act="xferNew">' + I('phone') + ' نقل حسابي</button></div></section>'
     + '<section class="medanger"><button class="btn sec full danger" data-act="wipe">حذف بياناتي من هذا الجوال</button><p class="dim">يمسح «زنها» وبياناتك من هذا الجوال فقط، ويطلب كتابة كلمة «احذف» للتأكيد.</p></section>';
@@ -1436,7 +1435,7 @@ function tabPlan() {
   const chips = DATA.dayNames.map((n, i) => { const [a, b] = itemsOfDay(i); return '<button class="' + (S.day === i ? 'on' : '') + (i === TODAY ? ' today' : '') + '" data-act="day" data-v="' + i + '"><b>' + esc(String(n).replace('ال', '')) + '</b><span>' + (S.gate && i !== TODAY ? '🔒' : b && i <= TODAY ? Math.round(a / b * 100) + '%' : '—') + '</span></button>'; }).join('');
   return '<div class="row" style="justify-content:space-between"><h2>خطتي</h2></div>' + planSeg()
     + '<div class="dim">من ' + esc(S.dname) + ' • ' + (S.pm && S.pm.sys === 'g' ? 'نظام الجرامات: السعرات حسب نوع كل يوم' : S.pm && S.pm.ready ? esc(S.pm.ready.name) + ' • متوسط ' + DATA.kcal + ' سعرة' : DATA.kcal + ' سعرة يومياً') + ' • الإصدار ' + S.pv + '</div>'
-    + '<div class="daychips">' + chips + '</div>' + (hid ? '<section class="card stack gatec"><div class="gl">🔒</div><p class="mut">' + (S.day !== TODAY ? 'خطتك تظهر يوماً بيوم: يُفتح كل يوم في وقته بعد إرسال تسجيل اليوم السابق.' : 'أرسل تسجيل أمس من «اليوم» ليُفتح جدول اليوم.') + '</p></section>' : '') + (hid ? '' : (dayPlan(S.day).type ? '<div class="banner info">' + I('dumbbell') + '<span><b>' + esc(dayPlan(S.day).type) + '</b> • ' + dayPlan(S.day).kcal + ' سعرة' + (dayPlan(S.day).p != null ? ' • بروتين ' + dayPlan(S.day).p + ' • كارب ' + dayPlan(S.day).c + ' • دهون ' + dayPlan(S.day).f + ' جم' : '') + '</span></div>' : '') + dayPlan(S.day).slots.map((s, si) => mealCard(S.day, si, s, false)).join('') + ((dayPlan(S.day).tips || []).length ? '<div class="banner info">' + I('sparkle') + '<span>' + dayPlan(S.day).tips.map(esc).join(' • ') + '</span></div>' : '')) + rqCard(false);
+    + '<div class="daychips">' + chips + '</div>' + (hid ? '<section class="card stack gatec"><div class="gl">🔒</div><p class="mut">' + (S.day !== TODAY ? 'خطتك تظهر يوماً بيوم: يُفتح كل يوم في وقته بعد إرسال تسجيل اليوم السابق.' : 'أرسل تسجيل أمس من «اليوم» ليُفتح جدول اليوم.') + '</p></section>' : '') + (hid || S.day !== TODAY ? '' : waterRow()) + (hid ? '' : (dayPlan(S.day).type ? '<div class="banner info">' + I('dumbbell') + '<span><b>' + esc(dayPlan(S.day).type) + '</b> • ' + dayPlan(S.day).kcal + ' سعرة' + (dayPlan(S.day).p != null ? ' • بروتين ' + dayPlan(S.day).p + ' • كارب ' + dayPlan(S.day).c + ' • دهون ' + dayPlan(S.day).f + ' جم' : '') + '</span></div>' : '') + dayPlan(S.day).slots.map((s, si) => mealCard(S.day, si, s, S.day === TODAY)).join('') + ((dayPlan(S.day).tips || []).length ? '<div class="banner info">' + I('sparkle') + '<span>' + dayPlan(S.day).tips.map(esc).join(' • ') + '</span></div>' : '')) + rqCard(false);
 }
 function tabPrefs() {
   const lv = foodsOf('love').length, no = foodsOf('no').length;
@@ -1451,7 +1450,7 @@ function applyThemeIcons(t) {                         // أيقونة التطب
   set('link[rel=manifest]', '/manifest.webmanifest' + (sf ? '?t=' + t : '')); set('link[rel=apple-touch-icon]', '/apple-180' + sf + '.png'); set('link[rel=icon]', '/icon-192' + sf + '.png');
 }
 function themeCard() {
-  const cur = window.HxTheme ? HxTheme.get() : 'classic', T = [['classic', 'الحالي'], ['rose', 'وردة'], ['pulse', 'نبض'], ['firoz', 'فيروز']];
+  const cur = window.HxTheme ? HxTheme.get() : 'classic', T = [['classic', 'الحالي'], ['rose', 'وردة'], ['pulse', 'نبض']];
   return '<section class="card stack"><h3>' + I('sparkle') + ' مظهر التطبيق</h3><div class="hx-themes" role="radiogroup" aria-label="مظهر التطبيق">'
     + T.map((t) => '<button class="hx-th" role="radio" aria-checked="' + (cur === t[0]) + '" data-act="theme" data-v="' + t[0] + '"><span class="hx-pv" data-theme="' + t[0] + '" aria-hidden="true"><i class="h"></i><i class="k"><b></b></i><i class="k s"></i><i class="c"></i></span><span class="hx-tl">' + t[1] + (cur === t[0] ? ' ✓' : '') + '</span></button>').join('')
     + '</div><p class="dim">خطتك وبياناتك لا تتغير، يتغير الشكل فقط. يُحفظ على هذا الجوال. أيقونة التطبيق تتبع الثيم أيضاً: عند التثبيت تُؤخذ أيقونة ثيمك الحالي (أندرويد يحدّثها لاحقاً من تلقاء نفسه، وآيفون يحتاج حذف الأيقونة وإعادة إضافتها).</p></section>';
@@ -1522,7 +1521,7 @@ function tabProgress() {
   return (sw.nd ? '<section class="card stack"><h3>👣 خطواتي آخر 7 أيام</h3><div class="stats3"><div class="st"><b>' + sw.tot.toLocaleString('ar') + '</b><small>خطوة</small></div><div class="st"><b>' + sw.avg.toLocaleString('ar') + '</b><small>متوسط يومي</small></div><div class="st"><b>' + sw.nd + '</b><small>أيام مسجّلة</small></div></div><p class="dim">سجّلها من «تسجيل اليوم» كما يعرضها عدّاد جوالك أو ساعتك.</p></section>' : '') + suppCard() + ptsCard() + '<h2>تقدّمي</h2><section class="card stack"><div class="row" style="justify-content:space-between"><h3>الوزن</h3><span class="dim">' + (W.length > 1 ? (diff <= 0 ? diff + ' كجم منذ البداية' : '+' + diff + ' كجم') : '') + '</span></div>' + chart
     + '<div class="row"><input class="inp" id="wIn" type="text" data-numf="1" autocomplete="off" inputmode="decimal" placeholder="وزن اليوم (كجم)" style="flex:1"><button class="btn sm" data-act="weigh">' + I('scale') + ' سجّل</button></div></section>'
     + '<section class="card stack"><div class="row" style="justify-content:space-between"><h3>الالتزام آخر 7 أيام</h3><span class="dim">% من الأصناف</span></div><div class="wk">' + bars + '</div></section>'
-    + '<section class="card achcard"><div class="row" style="justify-content:space-between"><h3>🏅 إنجازاتي</h3><span class="dim">' + (S.ach || []).length + ' شهادة</span></div><button class="btn sm" data-act="achs">' + I('sparkle') + ' عرض إنجازاتي وشهاداتي</button></section>' + habitsProgress() + themeCard() + whCard() + remCard() + '<section class="card stack"><h3>جولة تعريفية</h3><p class="dim">شرح سريع لأجزاء التطبيق.</p><button class="btn sec" data-act="tourGo">' + I('compass') + ' أعد الجولة</button></section><section class="card stack"><h3>الحساب</h3><p class="dim">ملفك لدى ' + esc(S.dname) + (S.code ? ' • رقم ' + esc(S.code) : '') + '. بياناتك محفوظة مشفّرة على هذا الجوال فقط.</p>' + installCard('acct') + notifCard(false) + '<div class="row"><button class="btn sm sec" data-act="lock">' + I('lock') + ' قفل التطبيق</button><button class="btn sm sec" data-act="xferNew">' + I('phone') + ' نقل حسابي</button></div><button class="link" data-act="wipe" style="color:var(--coral)">حذف بياناتي من هذا الجوال</button></section>';
+    + '<section class="card achcard"><div class="row" style="justify-content:space-between"><h3>🏅 إنجازاتي</h3><span class="dim">' + (S.ach || []).length + ' شهادة</span></div><button class="btn sm" data-act="achs">' + I('sparkle') + ' عرض إنجازاتي وشهاداتي</button></section>' + habitsProgress() + '<section class="card stack"><h3>جولة تعريفية</h3><p class="dim">شرح سريع لأجزاء التطبيق.</p><button class="btn sec" data-act="tourGo">' + I('compass') + ' أعد الجولة</button></section><section class="card stack"><h3>الحساب</h3><p class="dim">ملفك لدى ' + esc(S.dname) + (S.code ? ' • رقم ' + esc(S.code) : '') + '. بياناتك محفوظة مشفّرة على هذا الجوال فقط.</p>' + installCard('acct') + notifCard(false) + '<div class="row"><button class="btn sm sec" data-act="lock">' + I('lock') + ' قفل التطبيق</button><button class="btn sm sec" data-act="xferNew">' + I('phone') + ' نقل حسابي</button></div><button class="link" data-act="wipe" style="color:var(--coral)">حذف بياناتي من هذا الجوال</button></section>';
 }
 
 // ---------- التثقيف: منشورات أخصائيك (ومنشورات عامة لمستخدمي «زنها» توافق عليها الإدارة) — إعجاب وتعليق

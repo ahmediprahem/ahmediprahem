@@ -14,7 +14,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   const opts = await d.$$eval('#cs_s option', (o) => o.map((x) => x.textContent)); assert.deepStrictEqual(opts, ['💊 فيتامين د', '🌿 خل التفاح'], JSON.stringify(opts));
   ok('الترشيح يقتصر على المعتمد (فيتامين د) وما أضافه الأخصائي (خل التفاح)؛ المسودات لا تظهر');
   await d.fill('#cs_d', '1000 وحدة يومياً لمدة 3 أشهر'); await d.fill('#cs_n', 'بعد تحليل 25-OH'); await d.click('[data-a="suppPick"]'); await d.click('[data-a="suppSend"]'); await d.waitForSelector('.toast:has-text("وصلت المكملات")');
-  await cPoll(); await m.click('[data-act="tab"][data-v="progress"]'); const sc = await m.textContent('.supi'); assert(/فيتامين د/.test(sc) && /1000 وحدة يومياً/.test(sc) && /بعد تحليل/.test(sc) && /الكالسيوم/.test(sc), sc);
+  await cPoll(); await m.click('[data-act="tab"][data-v="today"]'); await m.click('[data-act="sub"][data-v="progress"]'); const sc = await m.textContent('.supi'); assert(/فيتامين د/.test(sc) && /1000 وحدة يومياً/.test(sc) && /بعد تحليل/.test(sc) && /الكالسيوم/.test(sc), sc);
   ok('«أرسل إلى زنها»: يظهر في «💊 مكملاتي من أخصائيك» بالجرعة والملاحظة والتنبيه');
   assert.deepStrictEqual(errs, []); await close(); console.log('\nنجح ' + n + ' اختبارات المكملات والأعشاب');
 })().catch((e) => { console.log('✘', String(e && e.stack || e).slice(0, 1500)); console.log('أخطاء:', JSON.stringify(errs).slice(0, 600)); process.exit(1); });
