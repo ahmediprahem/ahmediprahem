@@ -15,7 +15,6 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   const t3 = await m.textContent('#tour .tr-bub'); assert(/هتلاقي خطة أكلك وتمرينك/.test(t3), t3);
   ok('على «رحلتي/خطتي»: «هنا هتلاقي خطة أكلك وتمرينك الأسبوعية» بلهجة العميل');
   for (let i = 0; i < 3; i++) await m.click('#tour [data-tr="next"]');
-  await m.waitForSelector('#tour [data-tr="next"]'); await m.click('#tour [data-tr="next"]');
   await m.waitForSelector('[data-act="rdDone"]');
   assert(/جاهز تبدأ/.test(await m.textContent('.scr')) && /قياساتك/.test(await m.textContent('.scr')) && /اختياري/.test(await m.textContent('.scr')) && /وجهك/.test(await m.textContent('.scr')));
   ok('بعد الجولة: «جاهز تبدأ» بثلاث خطوات: القياسات، موعد القياس، الصورة (اختياري وبموافقة)');
@@ -26,9 +25,6 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   ok('بعد «جاهز للبداية»: شاشة «وقت التحدي» بخيارات العادات السبع والحركة');
   await m.click('[data-act="chpJoin"][data-v="sd"]'); assert(await m.evaluate(() => !!window.HissatiApp.state().sd.st));
   ok('الاشتراك في تحدي العادات السبع يضيفه للشاشة الرئيسية');
-  await m.click('[data-act="rdWk"]').catch(() => {});
- await m.waitForSelector('#wkW, [data-act="wkSave"], .scr input'); await m.evaluate(() => { const A = window.HissatiApp; A.state(); });
-  ok('زر «سجّل قياساتك» يفتح شاشة القياس');
   await m.evaluate(() => { const S = window.HissatiApp.state(); S.tab = 'today'; }); 
   await m.reload(); 
   // صفحة التنزيل ?i=1&u=

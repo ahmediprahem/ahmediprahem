@@ -3,7 +3,7 @@ const assert = require('assert'), linked = require('./hx_link_helper');
 let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
 (async () => {
   const { d, m, hxCheck, cPoll, C, close } = await linked('move', errs);
-  await m.click('[data-act="tab"][data-v="today"]'); await m.waitForSelector('.chcar'); assert.strictEqual(await m.locator('.chsl').count(), 2); assert(/تحدي الحركة/.test(await m.textContent('.mvc'))); assert.strictEqual(await m.locator('.mvp i').count(), 7);
+  await m.click('[data-act="tab"][data-v="today"]'); await m.waitForSelector('.chcar'); assert.strictEqual(await m.locator('.chsl').count(), 3); assert(/تحدي الحركة/.test(await m.textContent('.mvc'))); assert.strictEqual(await m.locator('.mvp i').count(), 7);
   await m.click('.chdt button >> nth=1'); assert(/translateX\(100%\)/.test(await m.getAttribute('.chtr', 'style'))); assert(/العادات السبع/.test(await m.textContent('.chsl >> nth=1'))); await m.click('.chdt button >> nth=0');
   ok('«اليوم»: شريحة متحركة فيها تحدي الحركة (بمسار ٧ محطات) وتحدي العادات، ونقاط للتنقل');
   await m.click('[data-act="mvOpen"]'); await m.waitForSelector('.mvlv'); assert.strictEqual(await m.locator('.mvlv button').count(), 4); assert(/المطلوب منك/.test(await m.textContent('.scroll')) && /ما يعود عليك/.test(await m.textContent('.scroll')) && /شهادة إتمام/.test(await m.textContent('.mvcert')) && /استشر طبيبك/.test(await m.textContent('.scroll')));
