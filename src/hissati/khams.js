@@ -3,9 +3,9 @@
 // نص المصحف من Tanzil بلا أي تعديل: يُطلب من /q/v1/quran.txt عند فتح القارئ فقط ويُحفظ على الجوال. الصوت اختياري ومع الإنترنت فقط.
 const QM = /*QMETA*/null;                               // {n: أسماء السور، s: [بداية السورة، عدد آياتها]، hq: 241 حدّ ربع حزب [سورة، آية]}
 const KH_LV = {
-  b: { n: 'بداية', r: 1, sp: [1], sk: 20, d: 'ربع حزب بعد الفجر • 20 دقيقة تطوير • ختمة في 8 أشهر' },
-  s: { n: 'ثابت', r: 4, sp: [1, 1, 1, 1], sk: 40, d: 'نصف جزء على 4 صلوات • 40 دقيقة • ختمة في شهرين' },
-  k: { n: 'كامل', r: 8, sp: [2, 2, 2, 1, 1], sk: 60, d: 'جزء على 5 صلوات • ساعة • ختمة في شهر' }
+  b: { n: 'بداية', r: 1, sp: [1], sk: 30, d: 'ربع حزب بعد الفجر • 30 دقيقة حركة • ختمة في 8 أشهر' },
+  s: { n: 'ثابت', r: 4, sp: [1, 1, 1, 1], sk: 30, d: 'نصف جزء على 4 صلوات • 30 دقيقة حركة • ختمة في شهرين' },
+  k: { n: 'كامل', r: 8, sp: [2, 2, 2, 1, 1], sk: 30, d: 'جزء على 5 صلوات • 30 دقيقة حركة • ختمة في شهر' }
 };
 const KH_PR = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'], KH_DAYS = 30, KH_RQ = 'https://everyayah.com/data/Alafasy_128kbps/';
 const khT = () => new Date();
@@ -50,7 +50,7 @@ function khPrTimes() { const P = typeof prNow === 'function' ? prNow() : null; r
 // ---- بطاقة الرئيسية: مختصرة، والشاشة الكاملة عند اللمس
 function khCard() {
   const K2 = S.kh;
-  if (!K2 || !K2.on) return (K2 && K2.offer) || !K2 ? '<section class="card stack khc"><div class="row"><span class="khmk" aria-hidden="true">' + khMark(0) + '</span><div style="flex:1"><h3>تحدي الخمس</h3><div class="dim">شهر: الصلاة في وقتها، ختمة بالآيات، الماء، الأذكار، وساعة تطوير يومياً.</div></div></div><button class="btn full" data-act="khStart">ابدأ التحدي</button></section>' : '';
+  if (!K2 || !K2.on) return (K2 && K2.offer) || !K2 ? '<section class="card stack khc"><div class="row"><span class="khmk" aria-hidden="true">' + khMark(0) + '</span><div style="flex:1"><h3>تحدي الخمس</h3><div class="dim">شهر: الصلاة في وقتها، ختمة بالآيات، الماء، الأذكار، و30 دقيقة حركة يومياً.</div></div></div><button class="btn full" data-act="khStart">ابدأ التحدي</button></section>' : '';
   const n = khState(khT()).filter(Boolean).length, day = Math.min(KH_DAYS, khDayNo(khT()));
   return '<button class="card khc khmini" data-act="khOpen"><span class="khmk" aria-hidden="true">' + khMark(n) + '</span><span style="flex:1;text-align:right"><b>تحدي الخمس • اليوم ' + day + ' من ' + KH_DAYS + '</b><small class="dim">' + (n === 5 ? 'اكتمل يومك' : n >= 3 ? 'يومك ناجح • باقي ' + (5 - n) : n + ' من 5') + (() => { const D = khDay(khT()), l = khLeft(D, khPortions(D.lv, D.b)), b = khBm(); return l ? ' • باقي ' + l + ' آية' + (b > -1 ? ' (توقفت عند ' + esc(khPos(b)) + ')' : '') : ''; })() + '</small></span>' + I('back') + '</button>';
 }
@@ -69,7 +69,7 @@ function scrKhams() {
   else if (!exc && ni > -1) { const wp = P.find((p) => p.p === ni); nx = '<small>التالي</small><b>صلاة ' + PN[ni] + (PT ? ' • ' + PT[ni] : '') + '</b><span>' + (wp ? (bm >= wp.a && bm < wp.e ? 'وبعدها أكمل ورد ' + PN[ni] + ' من ' + esc(khPos(bm + 1)) : 'وبعدها ورد ' + PN[ni] + ': ' + esc(khRange(wp.a, wp.e))) : 'وكوب ماء') + '</span><button class="btn khgo" data-act="khPr" data-v="' + ni + '">صلّيت ' + PN[ni] + '</button>'; }
   else if (!st[2] && wg) nx = '<small>التالي</small><b>كوب ماء</b><span>' + w + ' من ' + wg + ' أكواب</span><button class="btn khgo" data-act="khW" data-v="1">شربت كوباً</button>';
   else if (!st[3]) nx = '<small>التالي</small><b>' + (D.am ? 'أذكار المساء' : 'أذكار الصباح') + '</b><span>' + (D.am ? 'بعد العصر' : 'بعد الفجر') + '</span><button class="btn khgo" data-act="khAz" data-v="' + (D.am ? 'pm' : 'am') + '">' + I('play') + ' ابدأ ' + (D.am ? 'أذكار المساء' : 'أذكار الصباح') + '</button>';
-  else if (!st[4]) nx = '<small>التالي</small><b>ساعة التطوير' + (K2.skill ? ': ' + esc(K2.skill) : '') + '</b><span>' + D.sk + ' من ' + skG + ' دقيقة</span><button class="btn khgo" data-act="khSk" data-v="10">أضف 10 دقائق</button>';
+  else if (!st[4]) nx = '<small>التالي</small><b>الحركة</b><span>' + skG + ' دقيقة حركة اليوم</span><button class="btn khgo" data-act="khMv">شاهد فيديو الحركة</button>';
   else nx = '<small>اليوم</small><b>' + (n === 5 ? 'اكتمل يومك كله' : 'لا شيء متبقٍ') + '</b><span>نلقاك غداً بإذن الله.</span>';
   // الأركان
   const prSub = PN.map((p, i) => tog(D.pr[i], 'khPr', i, p, PT ? PT[i] : '', exc)).join('');
@@ -81,7 +81,7 @@ function scrKhams() {
   const missed = wk.filter((x) => !x[3] && x[1] >= -1 && x[1] < 3 && x[1] !== -2), wkStart = khDk(new Date(khT().getTime() - ((khT().getDay() + 1) % 7) * 864e5)), cmpUsed = Object.keys(K2.days || {}).some((k) => k >= wkStart && K2.days[k].cmp);
   const lastMiss = missed.filter((x) => x[0] >= wkStart).pop();
   const twice = wk.slice(-3, -1).every((x) => x[1] >= -1 && x[1] < 3 && x[1] !== -2);
-  const keep = day >= 25 ? '<section class="card stack"><h3>ماذا تكمل بعد التحدي؟</h3><p class="dim">اختر ركنين تحتفظ بهما بعد الشهر.</p><div class="khsub">' + ['الصلاة', 'الورد', 'الماء', 'الأذكار', 'التطوير'].map((x, i) => tog((K2.keep || []).includes(i), 'khKeep', i, x)).join('') + '</div></section>' : '';
+  const keep = day >= 25 ? '<section class="card stack"><h3>ماذا تكمل بعد التحدي؟</h3><p class="dim">اختر ركنين تحتفظ بهما بعد الشهر.</p><div class="khsub">' + ['الصلاة', 'الورد', 'الماء', 'الأذكار', 'الحركة'].map((x, i) => tog((K2.keep || []).includes(i), 'khKeep', i, x)).join('') + '</div></section>' : '';
   const fin = day >= KH_DAYS ? (K2.cert ? '<button class="btn full sec" data-act="khCertOpen">' + I('share') + ' شهادتي: شارك أو نزّل</button>' : '<section class="card stack"><h3>أتممت الثلاثين يوماً</h3><p class="dim">شهادتك جاهزة، وفيها ما أنجزته بالأرقام. تستطيع مشاركتها أو تنزيلها.</p><button class="btn full" data-act="khCert">' + I('check') + ' استلم شهادتي</button></section>') : '';
   const hd = S.guest ? '<div class="hd"><div class="t"><div class="stepk">اليوم ' + Math.min(day, KH_DAYS) + ' من ' + KH_DAYS + '</div><h2>تحدي الخمس</h2></div><button class="back" data-act="khGuide" aria-label="عن التحدي">؟</button></div>' + khInstallBox(true) : head('تحدي الخمس', 'khX', '', 'اليوم ' + Math.min(day, KH_DAYS) + ' من ' + KH_DAYS);
   const tab = V.khTab || 'day', T = [['day', 'اليوم'], ['quran', 'القرآن'], ['adhkar', 'الأذكار'], ['prog', 'سجلّي']];
@@ -93,7 +93,7 @@ function scrKhams() {
     + (wg ? row('wa', 'الماء', w + ' من ' + wg + ' أكواب' + (D.hard ? '' : S.plan ? ' • حسب خطتك' : ''), st[2], '<span class="stepper"><button class="btn sm sec" data-act="khW" data-v="-1" aria-label="كوب أقل">−</button><b>' + w + '</b><button class="btn sm sec" data-act="khW" data-v="1" aria-label="كوب أكثر">+</button></span>')
       : row('wa', 'حدّد هدفك من الماء', 'عدد الأكواب في يومك. حدده بنفسك أو مع طبيبك، ويُحسب يومك من الأركان الأخرى حتى تحدده.', false, '<div class="khwg" role="group" aria-label="هدف الماء بالأكواب">' + Array.from({ length: 13 }, (_, j) => '<button class="chip" data-act="khWgSet" data-v="' + (j + 4) + '">' + (j + 4) + '</button>').join('') + '</div>'))
     + row('az', 'أذكار الصباح والمساء', D.hard ? 'واحد منهما يكفي اليوم' : 'الاثنان', st[3], tog(D.am, 'khAm', '', 'الصباح', 'بعد الفجر') + tog(D.pm, 'khPm', '', 'المساء', 'بعد العصر') + '<button class="khrd" data-act="khTab" data-v="adhkar" aria-label="افتح الأذكار">' + I('play') + '</button>')
-    + row('sk', 'ساعة التطوير', (K2.skill ? esc(K2.skill) + ' • ' : '') + D.sk + ' من ' + skG + ' دقيقة', st[4], tog(0, 'khSk', 10, '+ 10 دقائق') + tog(0, 'khSk', -D.sk, 'تصفير') + tog(0, 'khSkill', '', K2.skill ? 'غيّر المهارة' : 'اختر المهارة'))
+    + row('sk', 'الحركة ' + skG + ' دقيقة', D.sk >= skG ? 'أتممتَ حركة اليوم' : 'اضغط لمشاهدة فيديو الحركة ثم علّم عند الانتهاء', st[4], tog(0, 'khMv', '', D.sk >= skG ? 'شاهد مرة أخرى' : 'شاهد فيديو الحركة') + (D.sk ? tog(0, 'khSk', -D.sk, 'تصفير') : ''))
     + '</div>';
   else if (tab === 'quran') { const rubs = (K2.pos || 0), pct = Math.round(Math.min(240, rubs) / 240 * 100), jz = Math.floor(Math.min(240, rubs) / 8);
     body = '<section class="card stack"><div class="row" style="justify-content:space-between"><h3>الختمة' + ((K2.kc || 0) ? ' ' + (K2.kc + 1) : '') + '</h3><b>' + pct + '%</b></div><div class="khbar2"><i style="width:' + pct + '%"></i></div><p class="dim">قرأت ' + jz + ' جزءاً من 30' + (bm > -1 ? ' • توقفت عند ' + esc(khPos(bm)) : '') + '</p></section>'
@@ -174,7 +174,7 @@ function khAct(a, v) {
   switch (a) {
     case 'khStart': V.khg = { i: 0, guest: false }; return true;
     case 'khGuide': V.khg = { i: 0, guest: false, view: 1 }; return true;
-    case 'khInvite': { const t = 'انضم معي إلى «تحدي الخمس» على «زنها»: 30 يوماً للصلاة والورد والماء والأذكار وتطوير النفس. مجاني: ' + KH_LINK(); if (navigator.share) navigator.share({ text: t }).catch(() => { }); else copyText(t, 'نُسخ رابط الدعوة'); return false; }
+    case 'khInvite': { const t = 'انضم معي إلى «تحدي الخمس» على «زنها»: 30 يوماً للصلاة والورد والماء والأذكار والحركة. مجاني: ' + KH_LINK(); if (navigator.share) navigator.share({ text: t }).catch(() => { }); else copyText(t, 'نُسخ رابط الدعوة'); return false; }
     case 'khCopyLink': copyText(KH_LINK(), 'نُسخ رابط التحدي — افتحه في Chrome أو Safari'); return false;
     case 'khInstLater': S.instLater = now(); save(); return true;
     case 'khWg': if (K2 && K2.wg) { K2.wg = Math.max(4, Math.min(16, K2.wg + i)); save(); } return true;
@@ -191,6 +191,8 @@ function khAct(a, v) {
     case 'khAm': if (D) { D.am = D.am ? 0 : 1; save(); } return true;
     case 'khPm': if (D) { D.pm = D.pm ? 0 : 1; save(); } return true;
     case 'khSk': if (D) { D.sk = Math.max(0, Math.min(240, D.sk + i)); save(); } return true;
+    case 'khMv': sheet = { t: 'khMv' }; return true;
+    case 'khMvDone': if (D) { D.sk = Math.max(D.sk, D.hard ? 10 : (KH_LV[D.lv] || KH_LV.b).sk); sheet = null; save(); toast('✓ أحسنت! أتممت حركة اليوم'); } return true;
     case 'khSkill': sheet = { t: 'khSkill' }; return true;
     case 'khSkillSave': { const t = (($('#khSkIn') || {}).value || '').trim().slice(0, 40); if (K2) K2.skill = t; sheet = null; save(); return true; }
     case 'khKeep': { const k = K2.keep = (K2.keep || []).slice(), j = k.indexOf(i); j > -1 ? k.splice(j, 1) : k.length < 2 ? k.push(i) : toast('اختر ركنين فقط'); save(); return true; }
@@ -215,6 +217,7 @@ function khAct(a, v) {
 }
 function khSheet() {                                   // تُستدعى من sheetHtml
   if (sheet.t === 'khLv') return [sheet.start ? 'اختر مستواك للبداية' : 'اختر مستواك', Object.keys(KH_LV).map((k) => '<button class="khopt' + ((S.kh || {}).lv === k ? ' on' : '') + '" data-act="khSetLv" data-v="' + k + '"><b>' + KH_LV[k].n + '</b><small>' + KH_LV[k].d + '</small></button>').join('') + '<p class="dim">ننصح بـ«بداية» في الأسبوع الأول، وترفع المستوى متى شئت. الورد يكمل دائماً من حيث توقفت.</p>'];
+  if (sheet.t === 'khMv') return ['حركة اليوم (30 دقيقة)', '<p class="dim" dir="ltr" style="text-align:right">30 Minute Walking Exercise — 2 Mile</p><div class="pyt"><iframe src="https://www.youtube-nocookie.com/embed/AEREJOT_Mpc?rel=0&playsinline=1&autoplay=1" title="فيديو الحركة" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div><button class="btn full" data-act="khMvDone">أنهيتُ الحركة ✓</button><p class="dim">استشر طبيبك قبل البدء إن كان لديك مرض في القلب أو الركبتين. توقف إذا شعرت بألم أو دوار.</p>'];
   if (sheet.t === 'khSkill') return ['ماذا تريد أن تطوّر؟', '<input class="inp" id="khSkIn" maxlength="40" placeholder="مثال: اللغة الإنجليزية" value="' + esc((S.kh || {}).skill || '') + '"><button class="btn full" data-act="khSkillSave">حفظ</button>'];
   if (sheet.t === 'khEnd') return ['إيقاف التحدي؟', '<p class="dim">يبقى سجلك وموضع وردك محفوظين على جوالك.</p><button class="btn full" data-act="khEndOk">إيقاف</button><button class="btn full sec" data-act="close">رجوع</button>'];
   return ['', ''];
@@ -232,7 +235,7 @@ const khNum = (n) => Number(n).toLocaleString('en-US');
 function khTiles(x, hide) {                            // البطاقات المسجلة في الشهادة؛ أرقام العبادة تُخفى إن اختار العميل ذلك عند المشاركة
   const t = [[x.ok + ' / 30', 'الأيام الناجحة'], [x.full + '', 'الأيام الكاملة بالأركان الخمسة']];
   if (!hide) t.push([khNum(x.pr), 'الصلوات في وقتها'], [x.khatma ? (x.khatma > 1 ? x.khatma + ' ختمات' : 'ختمة كاملة') : x.juz + ' / 30', x.khatma ? khNum(x.ayat) + ' آية' : 'الأجزاء المقروءة • ' + khNum(x.ayat) + ' آية'], [x.az + '', 'أيام أذكار الصباح والمساء']);
-  t.push([khNum(x.wa), 'أكواب الماء'], [x.hrs + '', x.skill ? 'ساعات التطوير: ' + x.skill : 'ساعات التطوير']);
+  t.push([khNum(x.wa), 'أكواب الماء'], [x.hrs + '', x.skill ? 'ساعات الحركة: ' + x.skill : 'ساعات الحركة']);
   return t.filter((q) => q[0] !== '0');                 // لا نطبع إنجازاً بصفر
 }
 async function khCertCanvas(a, fmt) {
@@ -270,7 +273,7 @@ async function khCertCanvas(a, fmt) {
 const KH_LINK = () => location.origin + '/#khams';
 const KH_GUIDE = [
   ['هدف التحدي', 'ثلاثون يوماً تبني فيها خمس عادات صغيرة للجسد والروح والعقل، حتى تصبح جزءاً من يومك بعد انتهاء الشهر.', ['ليس سباقاً ولا مقارنة بأحد', 'تقيس نفسك بنفسك، يوماً بيوم', 'في النهاية شهادة بما أنجزته']],
-  ['الأركان الخمسة', 'كل يوم فيه خمسة أركان، وكلها خطوات صغيرة:', ['الصلاة في وقتها: الصلوات الخمس', 'الورد: آيات بعد كل صلاة حتى تختم القرآن', 'الماء: عدد أكواب تحدده', 'الأذكار: أذكار الصباح والمساء', 'التطوير: وقت يومي لمهارة تختارها، مثل الإنجليزية']],
+  ['الأركان الخمسة', 'كل يوم فيه خمسة أركان، وكلها خطوات صغيرة:', ['الصلاة في وقتها: الصلوات الخمس', 'الورد: آيات بعد كل صلاة حتى تختم القرآن', 'الماء: عدد أكواب تحدده', 'الأذكار: أذكار الصباح والمساء', 'الحركة: 30 دقيقة يومياً مع فيديو داخل التطبيق، وتعلّم عند الانتهاء منها']],
   ['كيف يمشي يومك', 'تفتح التحدي فتجد فعلاً واحداً تفعله الآن في بطاقة «التالي».', ['3 أركان من 5 = يوم ناجح', 'الخمسة = تكتمل قطعتا الشكل', 'الورد يكمل دائماً من حيث توقفت، والمس آخر آية قرأتها لتحفظ موضعك', 'تستطيع القراءة بلا إنترنت، والاستماع مع الإنترنت']],
   ['مرونة لا تكسرك', 'الهدف الاستمرار لا الكمال:', ['لا تفوّت يومين متتاليين؛ يوم فائت عادي', 'يوم تعويض واحد كل أسبوع', '«يوم صعب»: الحد الأدنى يكفي في السفر أو المرض', 'ثلاثة مستويات: بداية، ثابت، كامل — ابدأ صغيراً']],
   ['خصوصيتك', 'بيانات عبادتك تبقى على جوالك فقط، محمية برمز دخول، ولا تصل لأحد.', ['لا نقاط ولا ترتيب على العبادة', 'الشهادة تشاركها أنت إن أردت، ويمكنك إخفاء أرقام العبادة منها']]

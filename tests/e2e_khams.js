@@ -51,10 +51,10 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   for (let i = 1; i < 5; i++) { await m.click('[data-act="khPr"][data-v="' + i + '"]'); await m.click('[data-act="khWd"][data-v="' + i + '"]'); }
   await m.evaluate(() => { const A = window.HissatiApp; A.state().log = A.state().log || {}; }); const wg = await m.evaluate(() => +document.querySelector('.khrow:nth-child(3) small').textContent.match(/من (\d+)/)[1]);
   for (let i = 0; i < wg; i++) await m.click('.khrow [data-act="khW"][data-v="1"]');
-  await m.click('[data-act="khAm"]'); await m.click('[data-act="khPm"]'); for (let i = 0; i < 6; i++) await m.click('.khrow [data-act="khSk"][data-v="10"]');
+  await m.click('[data-act="khAm"]'); await m.click('[data-act="khPm"]'); await m.click('.khrow [data-act="khMv"]'); await m.waitForSelector('iframe[src*="youtube-nocookie"]'); await m.click('[data-act="khMvDone"]');
   await m.waitForTimeout(200); const h2 = await m.textContent('.khday h2'); assert.strictEqual(h2, 'اكتمل يومك');
   S = await m.evaluate(() => window.HissatiApp.state().kh.pos); assert.strictEqual(S, 8, 'جزء كامل = 8 أرباع');
-  ok('الأركان الخمسة (الصلوات، الأوراد، الماء حسب الخطة، الأذكار، ساعة التطوير) ← «اكتمل يومك»، والختمة تقدّمت جزءاً');
+  ok('الأركان الخمسة (الصلوات، الأوراد، الماء حسب الخطة، الأذكار، الحركة ٣٠ دقيقة بفيديو) ← «اكتمل يومك»، والختمة تقدّمت جزءاً');
   await m.evaluate(() => { const S = window.HissatiApp.state(), K = S.kh, k = Object.keys(K.days)[0]; delete K.days[k]; K.pos = 3; window.HissatiApp.render(); });
   tx = await m.evaluate(() => document.querySelector('.khrow:nth-child(2) .khsub').textContent); assert(/البقرة 60/.test(tx), tx);
   await m.evaluate(() => { const K = window.HissatiApp.state().kh, Q = window.HissatiApp.khams.meta(); K.bm = { i: Q.s[1][0] + 65, d: '2000-01-01' }; window.HissatiApp.render(); });
