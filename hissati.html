@@ -3662,7 +3662,7 @@ const SD7 = [
   { k: 'venn', n: 'فكّر بعقلية الكل رابح', why: 'أفضل الاتفاقات تُرضي الطرفين: لا تربح على حساب أحد، ولا تخسر لترضي أحداً.', t: ['في أي اتفاق اليوم اسأل: ما الحل الذي يناسبنا نحن الاثنين؟', 'قدّم لشخص ما ينفعه دون مقابل', 'افرح بنجاح شخص آخر وقل له ذلك'], q: 'أين وجدتَ حلاً يربح فيه الطرفان؟' },
   { k: 'listen', n: 'افهم أولاً ثم اطلب أن تُفهَم', why: 'الإصغاء الحقيقي يغيّر العلاقات أكثر من أي كلام.', t: ['استمع لشخص ١٠ دقائق دون مقاطعة أو نصيحة', 'أعد صياغة ما قاله: «فهمتُ أنك…»', 'اسأل سؤالاً واحداً لتفهمه أكثر'], q: 'ماذا اكتشفتَ حين أنصتّ؟' },
   { k: 'syn', n: 'التكاتف', why: 'اجتماع المختلفين يصنع ما لا يصنعه كل واحد وحده.', t: ['اعمل اليوم مع شخص مختلف عنك على شيء مشترك', 'اطلب رأي من يخالفك في أمر تعمل عليه', 'سمِّ ميزة عند شخص قريب تكمّل نقصاً فيك'], q: 'ما الذي صنعتَه مع غيرك ولم تكن لتصنعه وحدك؟' },
-  { k: 'saw', n: 'اشحذ المنشار', why: 'أنت أهم أداة عندك: جدّد جسمك وعقلك وعلاقاتك وروحك باستمرار.', t: ['جسمي: تحرّك ٢٠ دقيقة أو نم مبكراً', 'عقلي: اقرأ أو تعلّم شيئاً جديداً ١٥ دقيقة', 'علاقاتي وروحي: تواصل مع من تحب، وخصّص وقتاً لما يغذي روحك'], q: 'أي جانب من نفسك أحوج للتجديد هذا الشهر؟' }
+  { k: 'saw', n: 'اشحذ المنشار', why: 'أنت أهم أداة عندك: جدّد جسمك وعقلك وعلاقاتك وروحك باستمرار.', t: ['جسمي: حرّك جسمك ٣٠ دقيقة (اضغط لتشاهد فيديو الحركة)', 'عقلي: اقرأ أو تعلّم شيئاً جديداً ١٥ دقيقة', 'علاقاتي وروحي: تواصل مع من تحب، وخصّص وقتاً لما يغذي روحك'], q: 'أي جانب من نفسك أحوج للتجديد هذا الشهر؟' }
 ];
 function sdSt() { return S.sd && S.sd.st ? S.sd : null; }
 function sdAvail() { const d = sdSt(); if (!d) return -1; return Math.max(0, Math.min(6, Math.round((new Date(dkey(new Date()) + 'T12:00') - new Date(d.st + 'T12:00')) / 864e5))); }
@@ -3696,6 +3696,7 @@ function scrSd() {
     + '<div class="card sdday"><div class="sdcvw">' + sdCover(x.k) + '</div><div class="sdno">العادة ' + (i + 1) + ' من ٧</div><h3>' + esc(x.n) + '</h3><p class="mut">' + esc(x.why) + '</p>'
     + '<div class="sdt">' + x.t.map((t, j) => '<button class="sdtk' + (dn.t[j] ? ' on' : '') + '" data-act="sdTask" data-v="' + j + '" aria-pressed="' + !!dn.t[j] + '"><span class="ck">' + (dn.t[j] ? '✓' : '') + '</span><span>' + esc(t) + '</span></button>').join('') + '</div>'
     + '<div class="field"><label for="sdNote">' + esc(x.q) + ' <span class="dim">(اختياري، يبقى على جوالك)</span></label><textarea class="inp" id="sdNote" rows="3" maxlength="600">' + esc(dn.n || '') + '</textarea></div>'
+    + (V.sdv && x.k === 'saw' && !dn.ok ? '<section class="card stack"><h3>فيديو الحركة (٣٠ دقيقة)</h3><p class="dim" dir="ltr" style="text-align:right">' + esc(MVL[2].v[0][1]) + '</p>' + wvid({ yt: MVL[2].v[0][0] }) + '<button class="btn full" data-act="sdVidDone">أنهيتُ الحركة ✓</button><button class="btn sec sm" data-act="sdVidX">لاحقاً</button></section>' : '')
     + (dn.ok ? '<div class="banner info">' + I('check') + '<span>أتممتَ هذا اليوم. أحسنت!</span></div>' : '<button class="btn full" data-act="sdDone"' + (x.t.every((t, j) => dn.t[j]) ? '' : ' disabled') + '>أتممتُ اليوم ' + (i + 1) + '</button>' + (i > a ? '' : '')) + '</div><p class="dim">مستوحى من أفكار كتاب «العادات السبع للناس الأكثر فعالية» لستيفن كوفي؛ الصياغة والمهام لنا.</p></div></div></div>';
 }
 function sdAchieve() {
@@ -4575,7 +4576,7 @@ function render() {
   const sc = $('.scroll'), key = (S ? S.screen + S.step + S.tab + (S.chat ? 'c' : '') : '') + V.screen, top = sc ? sc.scrollTop : 0;
   let scr;
   if (V.screen === 'boot') scr = scrBoot(); else if (V.screen === 'bad') scr = scrBad(); else if (V.screen === 'start') scr = scrStart(); else if (V.screen === 'inst') scr = scrInst(); else if (V.screen === 'moved') scr = scrMoved(); else if (V.screen === 'lock') scr = scrLock(); else if (V.screen === 'pin') scr = scrPin(); else if (V.screen === 'onb') scr = scrOnb();
-  else scr = V.rd && !V.wk && !V.bd && S && S.plan && S.screen === 'app' ? scrReady() : V.mv ? scrMv() : V.sd != null && S.sd && S.sd.st ? scrSd() : V.hf ? scrHF() : V.wk ? scrWk() : V.bd ? scrBody() : V.pan != null ? scrPantry() : V.pf != null ? scrProf() : S.rqOpen && window.RL && RL.idx ? scrQuiz() : S.chat ? scrChat() : S.plan && S.screen === 'app' ? scrApp() : { invite: scrInvite, setup: scrSetup, wizard: scrWizard, review: scrReview, sent: scrSent, app: scrSent }[S.screen]();
+  else scr = V.rd && !V.wk && !V.bd && S && S.plan && S.screen === 'app' ? scrReady() : V.cpk && S && S.plan && S.screen === 'app' ? scrChp() : V.mv ? scrMv() : V.sd != null && S.sd && S.sd.st ? scrSd() : V.hf ? scrHF() : V.wk ? scrWk() : V.bd ? scrBody() : V.pan != null ? scrPantry() : V.pf != null ? scrProf() : S.rqOpen && window.RL && RL.idx ? scrQuiz() : S.chat ? scrChat() : S.plan && S.screen === 'app' ? scrApp() : { invite: scrInvite, setup: scrSetup, wizard: scrWizard, review: scrReview, sent: scrSent, app: scrSent }[S.screen]();
   const keep = {}; document.querySelectorAll('video[data-keep]').forEach((n) => { keep[n.dataset.keep] = n; });
   const cmI = $('#cmIn'), cmV = cmI ? [cmI.value, document.activeElement === cmI] : null;          // مسودة التعليق تبقى عند إعادة الرسم (وصول التعليقات مثلاً)
   $('#root').innerHTML = '<div class="stage"><div class="device">' + (V.online ? '' : '<div class="offline">بلا اتصال — تُرسل بياناتك عند عودة الإنترنت</div>') + scr + (S ? sheetHtml() : '') + (toastMsg ? '<div class="toast" role="status">' + I('check') + '<span>' + esc(toastMsg) + '</span></div>' : '') + '</div></div>';
@@ -4665,6 +4666,13 @@ function scrReady() {
     + '<section class="card stack rdc' + (d3 ? ' done' : '') + '"><div class="row">' + mk(d3, 3) + '<div style="flex:1"><h3>' + T.r3[0] + '</h3><p class="dim">' + T.r3[1] + '</p></div></div>' + (d3 ? '' : '<button class="btn sec full" data-act="rdBd">' + I('camera') + ' التقط أو اختر صورة</button>') + '</section>'
     + '</div></div><div class="foot"><button class="btn" data-act="rdDone">' + T.start + '</button></div></div>';
 }
+function scrChp() {
+  const T = tdx(), card = (ic, t, d, tags, a) => '<section class="card stack chpc"><div class="row"><span class="rdn">' + ic + '</span><div style="flex:1"><h3>' + t + '</h3><p class="dim">' + d + '</p></div></div><button class="btn full" data-act="chpJoin" data-v="' + a + '">اشترك في هذا التحدي</button></section>';
+  return '<div class="scr"><div class="scroll"><div class="stack"><div class="empty"><div class="ei" style="background:rgba(255,200,87,.15);color:var(--amber)">🏆</div><h1>وقت التحدي</h1><p class="mut">اشترك في التحدي المناسب لك، وتابعه من شاشتك الرئيسية. يمكنك تغييره لاحقاً.</p></div>'
+    + card('🌱', 'تحدي العادات السبع', '٧ أيام لتطوير نفسك، عادة كل يوم بمهام صغيرة، وفي اليوم السابع ٣٠ دقيقة حركة بفيديو.', '', 'sd')
+    + card('🚶', 'تحدي الحركة', '٧ أيام، كل يوم فيديو مشي في بيتك مدته نحو ٣٠ دقيقة، وشهادة عند الإتمام.', '', 'mv')
+    + '</div></div><div class="foot"><button class="btn sec" data-act="chpSkip">ليس الآن</button></div></div>';
+}
 function scrInst() {
   const st = installState(), u = V.inst && V.inst.u, host = location.host, ch = 'intent://' + host + '/?i=1' + (u ? '&u=' + encodeURIComponent(u) : '') + '#Intent;scheme=https;package=com.android.chrome;end';
   let body;
@@ -4715,7 +4723,7 @@ document.addEventListener('click', (e) => {
     case 'instSkip': V.screen = 'start'; break;
     case 'rdWk': V.wk = 1; V.wkD = {}; break;
     case 'rdBd': V.bd = 1; V.bdD = {}; break;
-    case 'rdDone': V.rd = 0; S.tour = { done: now() }; save(); break;
+    case 'rdDone': V.rd = 0; S.tour = { done: now() }; if (!S.cpk && !S.sd && !S.mv && !S.chal) V.cpk = 1; save(); break;
     case 'tourGo': tourStart(true); return;
     case 'copyInv': copyText(S.tok + '.' + S.fp, 'نُسخ رمز الدعوة — ألصقه في «حصتي» بعد فتحه من الشاشة الرئيسية'); return;
     case 'copyLink': copyText(V.screen === 'inst' ? API + '/?i=1' + (V.inst && V.inst.u ? '&u=' + encodeURIComponent(V.inst.u) : '') : API + '/#t=' + S.tok + '.' + S.fp, 'نُسخ الرابط — افتحه في Chrome أو Safari'); return;
@@ -4852,9 +4860,13 @@ document.addEventListener('click', (e) => {
     case 'mvJoin': S.mv = { l: V.mvl == null ? 2 : V.mvl, st: dkey(new Date()), dn: {} }; V.mvl = null; toast('انضممت! التحدي على شاشتك الرئيسية'); break;
     case 'mvQuit': if (confirm('إيقاف التحدي؟ سيُحذف تقدّمك فيه.')) { S.mv = null; V.mv = 0; } break;
     case 'mvDone': { const f = mvFocus(); if (f < 0 || !mvSt()) break; S.mv.dn[f] = now(); if (mvN() >= 7) { S.mv.fin = now(); const c = mvAchieve(); setTimeout(() => celebrateAch(c), 80); } else toast('✓ أحسنت! تبقى ' + (7 - mvN()) + ' أيام'); break; }
-    case 'sdX': V.sd = null; break;
-    case 'sdDay': { const i = +v; if (i > sdAvail()) { toast('تُفتح عادة هذا اليوم في موعدها: خطوة كل يوم.'); return; } V.sd = i; break; }
-    case 'sdTask': { const i = V.sd, dn = (S.sd.dn[i] = S.sd.dn[i] || { t: [], n: '' }); if (dn.ok) break; dn.t[+v] = dn.t[+v] ? 0 : 1; break; }
+    case 'sdX': V.sd = null; V.sdv = 0; break;
+    case 'sdDay': { const i = +v; if (i > sdAvail()) { toast('تُفتح عادة هذا اليوم في موعدها: خطوة كل يوم.'); return; } V.sd = i; V.sdv = 0; break; }
+    case 'sdTask': { const i = V.sd, dn = (S.sd.dn[i] = S.sd.dn[i] || { t: [], n: '' }); if (dn.ok) break; if (SD7[i].k === 'saw' && +v === 0 && !dn.t[0]) { V.sdv = 1; break; } dn.t[+v] = dn.t[+v] ? 0 : 1; break; }
+    case 'sdVidDone': { const i = V.sd, dn = (S.sd.dn[i] = S.sd.dn[i] || { t: [], n: '' }); dn.t[0] = 1; V.sdv = 0; toast('✓ أحسنت! ٣٠ دقيقة حركة'); break; }
+    case 'sdVidX': V.sdv = 0; break;
+    case 'chpJoin': { if (v === 'sd') { S.sd = { st: dkey(new Date()), dn: {} }; } else if (v === 'mv') { S.mv = { l: 2, st: dkey(new Date()), dn: {} }; } S.cpk = now(); V.cpk = 0; toast('انضممت! التحدي على شاشتك الرئيسية'); break; }
+    case 'chpSkip': S.cpk = now(); V.cpk = 0; break;
     case 'sdDone': { const i = V.sd, x = SD7[i], dn = (S.sd.dn[i] = S.sd.dn[i] || { t: [], n: '' }); if (dn.ok || !x.t.every((t, j) => dn.t[j])) break; dn.ok = now();
       if (SD7.every((y, j) => sdDone(j))) { S.sd.fin = now(); const c = sdAchieve(); V.sd = null; setTimeout(() => celebrateAch(c), 80); }
       else { toast('أحسنت! أتممتَ عادة «' + x.n + '».'); if (navigator.vibrate) try { navigator.vibrate([20, 40, 30]); } catch (e) { } } break; }
