@@ -6,7 +6,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   const b = await chromium.launch(), p = await (await b.newContext({ viewport: { width: 1400, height: 950 } })).newPage(); p.on('pageerror', e => errs.push(String(e))); p.on('dialog', d => d.accept());
   await p.goto(fileUrl(path.resolve(__dirname, '../admin.html'))); await login(p);
   const cl = () => p.evaluate(() => { const S = HApp.state; return JSON.parse(JSON.stringify(S.clients.find(c => c.code === S.cur))); });
-  await p.click('.rail [data-a="new"][data-v="ex"]'); await p.waitForSelector('[data-f="weight"]'); await p.fill('[data-f="name"]', 'عميل');
+  await p.click('.rail [data-a="new"][data-v="ex"]'); await p.waitForSelector('[data-f="weight"]'); await p.fill('[data-f="name"]', 'عميل'); await p.selectOption('[data-f="sex"]', 'ذكر').catch(() => { });
   const kinds = await p.evaluate(() => [...document.querySelectorAll('main input')].filter(i => i.dataset.num).map(i => [i.dataset.f, i.type, i.getAttribute('inputmode')]));
   assert.strictEqual(await p.locator('main input[type="number"]').count(), 0); assert(kinds.some(k => k[0] === 'weight' && k[1] === 'text' && k[2] === 'decimal'), JSON.stringify(kinds)); assert(kinds.some(k => k[0] === 'age' && k[2] === 'numeric'));
   ok('حقول الأرقام صارت حقول نص بلوحة أرقام (decimal للكسور، numeric للأعداد الصحيحة)');
@@ -19,12 +19,12 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   await p.click('[data-f="age"]', { clickCount: 3 }); await p.keyboard.type('abc٣x'); assert.strictEqual(await p.inputValue('[data-f="age"]'), '3'); await p.keyboard.press('ArrowUp'); await p.keyboard.press('ArrowUp'); assert.strictEqual(await p.inputValue('[data-f="age"]'), '5');
   await p.fill('[data-f="weight"]', '٨٠'); await p.press('[data-f="weight"]', 'ArrowDown'); assert.strictEqual(await p.inputValue('[data-f="weight"]'), '79.9'); await p.waitForTimeout(300); assert.strictEqual((await cl()).weight, 79.9);
   ok('الحروف تُرفض كما في حقل الأرقام، والسهمان ↑↓ يغيّران بالخطوة (1 للعمر، 0.1 للوزن) ويُحفظان');
-  await p.fill('[data-f="name"]', 'عميل ٣'); await p.waitForTimeout(300); assert.strictEqual((await cl()).name, 'عميل ٣'); ok('الحقول النصية (الاسم والملاحظات) تبقى كما كُتبت بلا تحويل');
+  await p.fill('[data-f="name"]', 'عميل ٣'); await p.selectOption('[data-f="sex"]', 'ذكر').catch(() => { }); await p.waitForTimeout(300); assert.strictEqual((await cl()).name, 'عميل ٣'); ok('الحقول النصية (الاسم والملاحظات) تبقى كما كُتبت بلا تحويل');
   // محرر الحصص: حصص المكوّنات
   await p.click('.rail [data-a="bank"]'); await p.waitForSelector('.bank .bk'); await p.click('.bank .bkh[data-v="B"]'); await p.locator('.bank .bk[data-c="B"] [data-a="bkEdit"]').first().click(); await p.waitForSelector('.bked');
   const ie = p.locator('.bked input[data-bf="ie"]').first(); await ie.fill('٢٫٥'); assert.strictEqual(await ie.inputValue(), '2.5'); assert.strictEqual(await ie.getAttribute('inputmode'), 'decimal'); ok('محرر الحصص: حصة المكوّن بالأرقام العربية ٢٫٥ تصير 2.5');
   // الجوال: لوحة الأرقام
   const mp = await (await b.newContext({ ...devices['Pixel 7'] })).newPage(); mp.on('pageerror', e => errs.push('m:' + e)); await mp.goto(fileUrl(path.resolve(__dirname, '../admin.html'))); await login(mp);
-  await mp.click('.ghome .qa[data-a="new"][data-v="ex"]'); await mp.fill('[data-f="name"]', 'عميل'); await mp.fill('[data-f="weight"]', '٧٢'); await mp.waitForTimeout(300); assert.strictEqual(await mp.evaluate(() => { const S = HApp.state; return S.clients.find(c => c.code === S.cur).weight; }), 72); ok('الجوال: الوزن ٧٢ يُقبل ويُحفظ 72');
+  await mp.click('.ghome .qa[data-a="new"][data-v="ex"]'); await mp.fill('[data-f="name"]', 'عميل'); await mp.selectOption('[data-f="sex"]', 'ذكر').catch(() => { }); await mp.fill('[data-f="weight"]', '٧٢'); await mp.waitForTimeout(300); assert.strictEqual(await mp.evaluate(() => { const S = HApp.state; return S.clients.find(c => c.code === S.cur).weight; }), 72); ok('الجوال: الوزن ٧٢ يُقبل ويُحفظ 72');
   assert.deepStrictEqual(errs, [], errs.join(' | ')); ok('لا أخطاء في وحدة التحكم'); console.log('\nنجح', n, 'اختبارات الأرقام العربية'); await b.close();
 })().catch(e => { console.log('✘', String(e).slice(0, 1200)); console.log('أخطاء:', JSON.stringify(errs).slice(0, 400)); process.exit(1); });

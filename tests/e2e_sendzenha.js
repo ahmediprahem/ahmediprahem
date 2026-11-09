@@ -7,7 +7,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   // ---- 0) جهاز غير مربوط بالمحطة: التبويب ظاهر والزر يشرح الخطوة الناقصة
   const b0 = await chromium.launch(), p0 = await (await b0.newContext({ viewport: { width: 1440, height: 900 } })).newPage(); p0.on('pageerror', (e) => errs.push(String(e)));
   await p0.goto(fileUrl(path.resolve(__dirname, '../admin.html'))); await login(p0);
-  await p0.click('.rail [data-a="new"][data-v="ex"]'); await p0.fill('[data-f="name"]', 'ريم'); await p0.press('[data-f="name"]', 'Tab'); await p0.waitForTimeout(150);
+  await p0.click('.rail [data-a="new"][data-v="ex"]'); await p0.fill('[data-f="name"]', 'ريم'); await p0.selectOption('[data-f="sex"]', 'ذكر').catch(() => { }); await p0.press('[data-f="name"]', 'Tab'); await p0.waitForTimeout(150);
   await p0.click('main .tabs [data-v="hx"]'); await p0.waitForSelector('.hxempty'); await p0.click('.hxempty [data-a="hxInvC"]'); await p0.waitForSelector('.hxempty .warn [data-a="hxv"]');
   ok('جهاز غير مربوط: تبويب «زنها» ظاهر، و«ادعُ» يشرح أن الربط بالمحطة أولاً مع زر إليها');
   await b0.close();
@@ -16,7 +16,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   const C = () => d.evaluate(() => JSON.parse(JSON.stringify(DPApp.S.clients.find((x) => x.code === DPApp.S.cur))));
   const tabs = () => d.evaluate(() => [...document.querySelectorAll('main .tabs.ctabs > button')].map((x) => x.dataset.v));
   // ---- 2) عميل غير مرتبط: التبويب ظاهر بمعايناته وزر الدعوة
-  await d.click('.rail [data-a="new"][data-v="ex"]'); await d.fill('[data-f="name"]', 'سلمى حسن'); await d.fill('[data-f="phone"]', '0509876543'); await d.fill('[data-f="age"]', '31'); await d.fill('[data-f="weight"]', '72'); await d.fill('[data-f="height"]', '165');
+  await d.click('.rail [data-a="new"][data-v="ex"]'); await d.fill('[data-f="name"]', 'سلمى حسن'); await d.selectOption('[data-f="sex"]', 'ذكر').catch(() => { }); await d.fill('[data-f="phone"]', '0509876543'); await d.fill('[data-f="age"]', '31'); await d.fill('[data-f="weight"]', '72'); await d.fill('[data-f="height"]', '165');
   await d.selectOption('[data-f="goal"]', { index: 2 }); await d.selectOption('[data-f="activity"]', { index: 3 }); await d.press('[data-f="height"]', 'Tab'); await d.waitForTimeout(200);
   assert((await tabs()).includes('hx'), 'لا تبويب «زنها» لغير المرتبط'); await d.click('main .tabs [data-v="hx"]'); await d.waitForSelector('.hxempty');
   const em = await d.textContent('.hxempty'); for (const w of ['عميلك لم يتصل بـ«زنها» بعد', 'يرى خطته على جواله ويبدّل الأصناف', 'يسجّل يومه في 30 ثانية ويصلك الالتزام', 'تراسله وتتابع وزنه', 'ادعُ سلمى حسن إلى زنها']) assert(em.includes(w), w + '\n' + em);

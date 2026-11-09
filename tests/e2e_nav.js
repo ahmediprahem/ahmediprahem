@@ -12,7 +12,7 @@ assert(await p.evaluate(() => document.body.classList.contains('clx')), 'عمو�
   await p.click('.rail [data-a="bank"]'); await p.waitForSelector('.bank h2'); assert(/بنك الوجبات/.test(await p.textContent('.bank h2')));
   await p.click('.rail [data-a="ready"]'); await p.waitForSelector('.rdl'); assert(/الخطط الجاهزة/.test(await p.textContent('.rdl h2'))); await p.click('[data-a="rdTab"][data-v="lib"]'); await p.waitForSelector('.dxc'); assert.strictEqual(await p.locator('.dxc').count(), 10);
   ok('التنقل: «بنك الوجبات» و«الخطط الجاهزة» (بداخلها «مكتبة الأخصائي» تبويباً) بدل ثلاثة أقسام متشابهة الأسماء');
-  await p.click('.rail [data-a="new"][data-v="ex"]'); await p.fill('[data-f="name"]', 'ريم'); await p.press('[data-f="name"]', 'Tab'); await p.waitForTimeout(150);
+  await p.click('.rail [data-a="new"][data-v="ex"]'); await p.fill('[data-f="name"]', 'ريم'); await p.selectOption('[data-f="sex"]', 'ذكر').catch(() => { }); await p.press('[data-f="name"]', 'Tab'); await p.waitForTimeout(150);
   assert(/اختر خطة جاهزة/.test(await p.textContent('main [data-a="genBank"]'))); assert(/من بنك الوجبات/.test(await p.textContent('main')));
   await p.click('.rail [data-a="home"]'); await p.waitForSelector('.qgrid'); assert(!(await p.evaluate(() => document.body.classList.contains('clx'))), 'عمود العملاء يظهر بعد أول عميل');
   ok('بيانات العميل: «📗 اختر خطة جاهزة» و«من بنك الوجبات»، وعمود العملاء يظهر بعد أول عميل');

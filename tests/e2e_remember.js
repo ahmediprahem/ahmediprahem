@@ -10,7 +10,7 @@ const idbRaw = (p, db, key, fn) => p.evaluate(({ db, key, fn }) => new Promise((
   const setBox = async (p, id, want) => { if ((await p.isChecked(id)) !== want) await p.click(id); };
   const gateOrApp = (p) => p.waitForSelector('aside .sidebtn, #lu', { state: 'attached' }).then(() => p.locator('#lu').count());
   // 1) بقاء + حفظ: بعد التحديث يفتح التطبيق مباشرة وبياناته المشفّرة سليمة
-  await enter(U, true, true); await U.click('button:has-text("عميل جديد")'); await U.fill('[data-f="name"]', 'عميلة البقاء'); await U.waitForTimeout(700);
+  await enter(U, true, true); await U.click('button:has-text("عميل جديد")'); await U.fill('[data-f="name"]', 'عميلة البقاء'); await U.selectOption('[data-f="sex"]', 'ذكر').catch(() => { }); await U.waitForTimeout(700);
   await U.reload(); assert.strictEqual(await gateOrApp(U), 0, 'ظهرت شاشة الدخول رغم البقاء مسجلاً'); assert((await U.textContent('#hd')).includes('سارة')); await U.waitForSelector('aside :text("عميلة البقاء")', { timeout: 8000 }); ok('«البقاء مسجلاً»: تحديث الصفحة يفتح التطبيق مباشرة دون كلمة سر، وبيانات المستخدم المشفّرة كما هي');
   // 2) التخزين: كلمة السر مشفّرة بمفتاح جهاز غير قابل للتصدير، ولا نص صريح في أي مكان
   const rec = await idbRec(U, 'hissa_device', 'rem:sara'), dk = await idbRec(U, 'hissa_device', 'devkey'); assert(rec && rec.stay && rec.fill && rec.ct && rec.iv); assert(!JSON.stringify(rec).includes(PW)); assert.strictEqual(dk.k, '[CryptoKey]');
