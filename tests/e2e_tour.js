@@ -21,7 +21,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   await m.click('[data-act="mqSave"]');
   assert(await m.evaluate(() => !!window.HissatiApp.state().mq)); ok('تحديد موعد القياس القادم من الشاشة');
   await m.click('[data-act="rdDone"]'); await m.waitForSelector('[data-act="chpJoin"]');
-  assert(/وقت التحدي/.test(await m.textContent('.scr')) && /اشترك في التحدي المناسب/.test(await m.textContent('.scr')) && await m.locator('[data-act="chpJoin"]').count() === 2);
+  assert(/وقت التحدي/.test(await m.textContent('.scr')) && /اشترك في التحدي المناسب/.test(await m.textContent('.scr')) && await m.locator('[data-act="chpJoin"]').count() === 3);
   ok('بعد «جاهز للبداية»: شاشة «وقت التحدي» بخيارات العادات السبع والحركة');
   await m.click('[data-act="chpJoin"][data-v="sd"]'); assert(await m.evaluate(() => !!window.HissatiApp.state().sd.st));
   ok('الاشتراك في تحدي العادات السبع يضيفه للشاشة الرئيسية');

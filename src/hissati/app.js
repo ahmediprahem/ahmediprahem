@@ -1199,12 +1199,12 @@ function nextMeal(d) {                                  // الوجبة التي
   for (let si = 0; si < sl.length; si++) if (!fin(si)) return si;
   return Math.max(0, cur);
 }
-// 0.60: «حصتي» صار «زنها» — لمن ثبّت التطبيق قبل الاسم الجديد. أندرويد يحدّث الأيقونة والاسم تلقائياً من البيان؛
+// 0.60: «زنها» صار «زنها» — لمن ثبّت التطبيق قبل الاسم الجديد. أندرويد يحدّث الأيقونة والاسم تلقائياً من البيان؛
 // آيفون يثبّت الأيقونة والاسم وقت الإضافة، والأيقونة الجديدة لها تخزين منفصل، فننقل الحساب برمز النقل الموجود.
 function renameCard() {
   if (!S || S.zRen || !standalone) return '';
   const ios = isIOS, xfer = !!S.cid;
-  return '<section class="card stack zren"><div class="row" style="gap:12px;align-items:center"><span class="zrmk" aria-hidden="true">' + (window.HX_LOGO ? '<img alt="" src="/icon-192.png?v=z1" width="44" height="44" style="border-radius:12px">' : '') + '</span><div style="flex:1"><h3>«حصتي» صار «زِنها»</h3><p class="dim">اسم وشكل جديدان، وخطتك وبياناتك كما هي.</p></div></div>'
+  return '<section class="card stack zren"><div class="row" style="gap:12px;align-items:center"><span class="zrmk" aria-hidden="true">' + (window.HX_LOGO ? '<img alt="" src="/icon-192.png?v=z1" width="44" height="44" style="border-radius:12px">' : '') + '</span><div style="flex:1"><h3>«زنها» صار «زِنها»</h3><p class="dim">اسم وشكل جديدان، وخطتك وبياناتك كما هي.</p></div></div>'
     + (ios ? '<p class="mut">آيفون لا يغيّر أيقونة التطبيق المثبّت. الأيقونة القديمة تعمل كما هي، ولتحصل على الأيقونة الجديدة:</p><ol class="steps">' + (xfer ? '<li>أنشئ رمز النقل وانسخه</li>' : '') + '<li>افتح ' + esc(location.host) + ' في Safari، ثم المشاركة ← «إضافة إلى الشاشة الرئيسية»</li><li>افتح «زنها» من الأيقونة الجديدة' + (xfer ? ' واختر «لديّ حساب في متصفح أو جوال آخر» وألصق الرمز' : '') + '</li><li>بعد أن تجد خطتك، احذف الأيقونة القديمة</li></ol>'
       + '<div class="row" style="gap:8px;flex-wrap:wrap">' + (xfer ? '<button class="btn sm" data-act="xferNew">' + I('phone') + ' أنشئ رمز النقل</button>' : '') + '<button class="btn sm sec" data-act="zRenOk">أبقيت القديمة</button></div>'
       : '<p class="mut">تتحدث الأيقونة والاسم على جوالك تلقائياً خلال يوم أو يومين. إن لم يتغيرا: من قائمة Chrome ⋮ اختر «تثبيت التطبيق» من جديد، وتبقى بياناتك.</p><button class="btn sm sec" data-act="zRenOk">حسناً</button>')
@@ -2203,20 +2203,21 @@ function scrChp() {
   const T = tdx(), card = (ic, t, d, tags, a) => '<section class="card stack chpc"><div class="row"><span class="rdn">' + ic + '</span><div style="flex:1"><h3>' + t + '</h3><p class="dim">' + d + '</p></div></div><button class="btn full" data-act="chpJoin" data-v="' + a + '">اشترك في هذا التحدي</button></section>';
   return '<div class="scr"><div class="scroll"><div class="stack"><div class="empty"><div class="ei" style="background:rgba(255,200,87,.15);color:var(--amber)">🏆</div><h1>وقت التحدي</h1><p class="mut">اشترك في التحدي المناسب لك، وتابعه من شاشتك الرئيسية. يمكنك تغييره لاحقاً.</p></div>'
     + card('🌱', 'تحدي العادات السبع', '٧ أيام لتطوير نفسك، عادة كل يوم بمهام صغيرة، ومهام صغيرة تناسب يومك.', '', 'sd')
+    + (typeof khCard === 'function' && !(S.kh && S.kh.on) ? card('🌙', 'تحدي الخمس', '٣٠ يوماً: الصلاة في وقتها، وورد من القرآن، والماء، والأذكار، و٣٠ دقيقة حركة يومياً.', '', 'kh') : '')
     + card('🚶', 'تحدي الحركة', '٧ أيام، كل يوم فيديو مشي في بيتك مدته نحو ٣٠ دقيقة، وشهادة عند الإتمام.', '', 'mv')
     + '</div></div><div class="foot"><button class="btn sec" data-act="chpSkip">ليس الآن</button></div></div>';
 }
 function scrInst() {
   const st = installState(), u = V.inst && V.inst.u, host = location.host, ch = 'intent://' + host + '/?i=1' + (u ? '&u=' + encodeURIComponent(u) : '') + '#Intent;scheme=https;package=com.android.chrome;end';
   let body;
-  if (V.instDone) body = '<div class="empty"><div class="ei" style="background:rgba(111,227,169,.15);color:var(--mint)">' + I('check') + '</div><h1>تم تنزيل التطبيق ✓</h1><p class="mut">افتح «حصتي» من الشاشة الرئيسية في جوالك، ثم اختر «لديّ اسم مستخدم وكلمة سر»' + (u ? ' واكتب اسم المستخدم: <b dir="ltr">' + esc(u) + '</b>' : '') + '.</p></div>';
-  else if (st === 'prompt') body = '<p class="mut">اضغط الزر وسيُنزَّل «حصتي» على جوالك ويظهر على شاشتك الرئيسية كأي تطبيق.</p><button class="btn full big" data-act="instGo">' + I('plusSq') + ' تنزيل التطبيق على جوالك</button>';
+  if (V.instDone) body = '<div class="empty"><div class="ei" style="background:rgba(111,227,169,.15);color:var(--mint)">' + I('check') + '</div><h1>تم تنزيل التطبيق ✓</h1><p class="mut">افتح «زنها» من الشاشة الرئيسية في جوالك، ثم اختر «لديّ اسم مستخدم وكلمة سر»' + (u ? ' واكتب اسم المستخدم: <b dir="ltr">' + esc(u) + '</b>' : '') + '.</p></div>';
+  else if (st === 'prompt') body = '<p class="mut">اضغط الزر وسيُنزَّل «زنها» على جوالك ويظهر على شاشتك الرئيسية كأي تطبيق.</p><button class="btn full big" data-act="instGo">' + I('plusSq') + ' تنزيل التطبيق على جوالك</button>';
   else if (st === 'inapp') body = '<div class="banner info">' + I('phone') + '<span>أنت داخل متصفح تطبيق آخر (مثل واتساب)، والتنزيل لا يعمل من هنا. افتح الرابط في Chrome.</span></div>' + (isAndroid ? '<a class="btn full" href="' + esc(ch) + '">فتح في Chrome</a>' : '') + '<button class="btn sec full" data-act="copyLink">' + I('copy') + ' نسخ الرابط</button>';
-  else if (st === 'ios') body = '<ol class="steps"><li>اضغط زر المشاركة ' + I('share') + ' في Safari</li><li>اختر «إضافة إلى الشاشة الرئيسية» ' + I('plusSq') + '</li><li>افتح «حصتي» من أيقونته</li></ol>';
-  else if (st === 'android') body = '<ol class="steps"><li>اضغط على القائمة ⋮ أعلى المتصفح</li><li>اختر «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية»</li><li>افتح «حصتي» من أيقونته</li></ol>';
-  else if (st === 'done') body = '<p class="mut">«حصتي» مثبّت على هذا الجهاز بالفعل.</p>';
+  else if (st === 'ios') body = '<ol class="steps"><li>اضغط زر المشاركة ' + I('share') + ' في Safari</li><li>اختر «إضافة إلى الشاشة الرئيسية» ' + I('plusSq') + '</li><li>افتح «زنها» من أيقونته</li></ol>';
+  else if (st === 'android') body = '<ol class="steps"><li>اضغط على القائمة ⋮ أعلى المتصفح</li><li>اختر «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية»</li><li>افتح «زنها» من أيقونته</li></ol>';
+  else if (st === 'done') body = '<p class="mut">«زنها» مثبّت على هذا الجهاز بالفعل.</p>';
   else body = '<div class="banner info">' + I('phone') + '<span>افتح هذا الرابط من جوالك لتنزيل التطبيق عليه.</span></div><button class="btn sec full" data-act="copyLink">' + I('copy') + ' نسخ الرابط</button>';
-  return '<div class="scr"><div class="boot"><div class="stack instl" style="max-width:340px"><div class="empty"><div class="ei"><img alt="" src="/icon.png" width="64" height="64" style="border-radius:16px"></div><h1>نزّل تطبيق «حصتي»</h1><p class="mut">أرسل لك أخصائيك التطبيق جاهزاً. بعد التنزيل تدخل باسم مستخدم وكلمة سر وتجد خطتك وتمرينك.</p></div>' + body + '<button class="link" data-act="instSkip" style="margin-top:6px">متابعة بدون تنزيل</button></div></div></div>';
+  return '<div class="scr"><div class="boot"><div class="stack instl" style="max-width:340px"><div class="empty"><div class="ei"><img alt="" src="/icon.png" width="64" height="64" style="border-radius:16px"></div><h1>نزّل تطبيق «زنها»</h1><p class="mut">أرسل لك أخصائيك التطبيق جاهزاً. بعد التنزيل تدخل باسم مستخدم وكلمة سر وتجد خطتك وتمرينك.</p></div>' + body + '<button class="link" data-act="instSkip" style="margin-top:6px">متابعة بدون تنزيل</button></div></div></div>';
 }
 async function boot() {
   if (DEMO) { S = Object.assign(fresh(), JSON.parse(JSON.stringify(DEMO.state))); S.chat = false; S.day = TODAY; S.screen = 'app'; S.cid = 'demo'; mkData(); V.screen = onbSeen() ? '' : 'onb'; V.onb = { i: 0 }; return render(); }
@@ -2269,7 +2270,7 @@ document.addEventListener('click', (e) => {
     case 'rdBd': V.bd = 1; V.bdD = {}; break;
     case 'rdDone': V.rd = 0; S.tour = { done: now() }; if (!S.cpk && !S.sd && !S.mv && !S.chal) V.cpk = 1; save(); break;
     case 'tourGo': tourStart(true); return;
-    case 'copyInv': copyText(S.tok + '.' + S.fp, 'نُسخ رمز الدعوة — ألصقه في «حصتي» بعد فتحه من الشاشة الرئيسية'); return;
+    case 'copyInv': copyText(S.tok + '.' + S.fp, 'نُسخ رمز الدعوة — ألصقه في «زنها» بعد فتحه من الشاشة الرئيسية'); return;
     case 'copyLink': copyText(V.screen === 'inst' ? API + '/?i=1' + (V.inst && V.inst.u ? '&u=' + encodeURIComponent(V.inst.u) : '') : API + '/#t=' + S.tok + '.' + S.fp, 'نُسخ الرابط — افتحه في Chrome أو Safari'); return;
     case 'useInv': {
       const v = ($('#invIn') || {}).value || '', m = /(?:#t=)?([A-Za-z0-9_-]{16,40})\.([A-Za-z0-9_-]{11})(?![A-Za-z0-9_-])/.exec(v.trim());
@@ -2409,7 +2410,7 @@ document.addEventListener('click', (e) => {
     case 'sdX': V.sd = null; break;
     case 'sdDay': { const i = +v; if (i > sdAvail()) { toast('تُفتح عادة هذا اليوم في موعدها: خطوة كل يوم.'); return; } V.sd = i; break; }
     case 'sdTask': { const i = V.sd, dn = (S.sd.dn[i] = S.sd.dn[i] || { t: [], n: '' }); if (dn.ok) break; dn.t[+v] = dn.t[+v] ? 0 : 1; break; }
-    case 'chpJoin': { if (v === 'sd') { S.sd = { st: dkey(new Date()), dn: {} }; } else if (v === 'mv') { S.mv = { l: 2, st: dkey(new Date()), dn: {} }; } S.cpk = now(); V.cpk = 0; toast('انضممت! التحدي على شاشتك الرئيسية'); break; }
+    case 'chpJoin': { if (v === 'kh') { S.cpk = now(); V.cpk = 0; V.khg = { i: 0, guest: false }; break; } if (v === 'sd') { S.sd = { st: dkey(new Date()), dn: {} }; } else if (v === 'mv') { S.mv = { l: 2, st: dkey(new Date()), dn: {} }; } S.cpk = now(); V.cpk = 0; toast('انضممت! التحدي على شاشتك الرئيسية'); break; }
     case 'chpSkip': S.cpk = now(); V.cpk = 0; break;
     case 'sdDone': { const i = V.sd, x = SD7[i], dn = (S.sd.dn[i] = S.sd.dn[i] || { t: [], n: '' }); if (dn.ok || !x.t.every((t, j) => dn.t[j])) break; dn.ok = now();
       if (SD7.every((y, j) => sdDone(j))) { S.sd.fin = now(); const c = sdAchieve(); V.sd = null; setTimeout(() => celebrateAch(c), 80); }
