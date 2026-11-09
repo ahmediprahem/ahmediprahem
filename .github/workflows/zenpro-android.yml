@@ -1,0 +1,38 @@
+# بناء «زن برو» لأندرويد (APK) — يدوي فقط (workflow_dispatch) ولا يعمل تلقائياً.
+# يبني APK تجريبياً (debug) يفتح موقع الأخصائيين داخل غلاف Capacitor. لم يُشغَّل بعد على خادم GitHub، فأبلغ بأي خطأ.
+# التوقيع للنشر (APK موقّع) غير موصول بعد: يحتاج مفتاحاً تنشئه أنت (keytool) وأسراراً في المستودع. معرّف الحزمة: com.zenha.pro (لا يتغير بعد أول نشر).
+name: zenpro-android
+on:
+  workflow_dispatch:
+    inputs:
+      site_url:
+        description: عنوان موقع الأخصائيين (https) الذي يفتحه التطبيق
+        default: https://hessanu.ah6171317.workers.dev
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 17 }
+      - uses: android-actions/setup-android@v3
+      - name: تهيئة Capacitor
+        working-directory: native
+        run: |
+          node -e "const f='capacitor.config.json',c=require('./'+f);c.appId='com.zenha.pro';c.appName='زن برو';c.server={url:'${{ github.event.inputs.site_url }}',androidScheme:'https',cleartext:false};require('fs').writeFileSync(f,JSON.stringify(c,null,2))"
+          npm run setup
+          mkdir -p www && echo '<!doctype html><title>زن برو</title>' > www/index.html
+          npm run add:android
+          npm run assets || true
+          npx cap sync android
+      - name: بناء APK
+        working-directory: native/android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zenpro-apk
+          path: native/android/app/build/outputs/apk/debug/*.apk

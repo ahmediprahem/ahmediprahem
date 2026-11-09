@@ -25,13 +25,18 @@ function tabbar() {                                                // شريط �
   t.innerHTML = it('home', 'home', 'الرئيسية', home) + it('menu', 'users', 'العملاء', menu || (v === 'client' && !!S.cur)) + it('bank', 'book', 'بنك الوجبات', v === 'bank' && !menu) + it('settings', 'settings', 'الإعدادات', v === 'settings' && !menu);
 }
 function firstName() { return String(CFG.userLabel || '').replace(/^المدير:\s*/, '').trim(); }
+function inboxCard() {                               // 0.86: «الوارد» في أول الرئيسية: طلبات التسجيل الجديدة ورسائل العملاء، بلمسة تفتح تبويب «زنها»
+  if (typeof hxOn !== 'function' || !hxOn() || typeof hxCounts !== 'function') return '';
+  var n = hxCounts(); if (!n.req && !n.msg) return '';
+  return '<button class="qa inboxc" data-a="hxv"><span class="qai">' + IC('bell') + '</span><b>الوارد من «زنها»</b><small>' + (n.req ? n.req + ' طلب تسجيل جديد' : '') + (n.req && n.msg ? ' • ' : '') + (n.msg ? n.msg + ' رسالة أو تنبيه' : '') + '</small></button>';
+}
 function homeGlass() {
   var cs = S.clients.slice().sort(function (a, b) { return (b.updated || b.created) - (a.updated || a.created); }), withPlan = cs.filter(function (c) { return c.plan || c.planSrc === 'ready'; }).length, ath = cs.filter(function (c) { return c.kind === 'athlete'; }).length;
   var tile = function (a, v, icon, t, d) { return '<button class="qa" data-a="' + a + '"' + (v ? ' data-v="' + v + '"' : '') + '><span class="qai">' + IC(icon) + '</span><b>' + t + '</b><small>' + d + '</small></button>'; };
   var recent = cs.slice(0, 6).map(function (c) { return '<div class="cl" data-a="pick" data-v="' + c.code + '"><span class="cav">' + esc(initial(c.name)) + '</span><b>' + esc(c.name || '(بلا اسم)') + '</b><small>' + c.code + (c.phone ? ' • ' + esc(c.phone) : '') + (c.plan ? ' • له خطة' : '') + '</small></div>'; }).join('');
   return '<div class="home ghome">'
     + '<section class="hero"><div class="herot"><h2>أهلاً بك' + (firstName() ? '، ' + esc(firstName()) : '') + '</h2><p>اختر عميلاً أو ابدأ خطة جديدة. كل بياناتك محفوظة ومشفّرة على هذا الجهاز.</p></div>' + (window.HK ? HK.splashHtml(HK.gateCfg(), 'splash') : '') + '</section>'
-    + wkToday() + '<div class="stats"><div><b>' + cs.length + '</b><small>عميل</small></div><div><b>' + withPlan + '</b><small>له خطة</small></div><div><b>' + ath + '</b><small>بالجرامات</small></div></div>'
+    + inboxCard() + wkToday() + '<div class="stats"><div><b>' + cs.length + '</b><small>عميل</small></div><div><b>' + withPlan + '</b><small>له خطة</small></div><div><b>' + ath + '</b><small>بالجرامات</small></div></div>'
     + '<div class="qgrid">' + tile('new', 'ex', 'userPlus', 'نظام الحصص', 'عميل جديد: خطة بالحصص والبدائل') + tile('new', 'ath', 'dumbbell', 'نظام الجرامات', 'عميل جديد: خطة بالجرام والماكروز') + tile('bank', '', 'book', 'بنك الوجبات', 'وجبات المولّد وابتكار وجبة') + tile('ready', '', 'package', 'الخطط الجاهزة', 'خطط أسبوعية من مكتبتك + مكتبة الأخصائي') + tile('appts', '', 'calendar', 'المواعيد', 'مواعيد اليوم والأسبوع والمتابعات') + tile('hxv', '', 'phone', 'زنها', 'ادعُ عميلاً برابط واتساب واستقبل طلباته') + tile('feed', '', 'megaphone', 'التثقيف', 'انشر نصائح وفيديوهات لمراجعيك') + tile('settings', '', 'settings', 'إعدادات النظام', 'الألوان والبدائل والشعار والمظهر') + '</div>'
     + (recent ? '<h3>آخر العملاء</h3><div class="recent">' + recent + '</div>' : '<p class="small">لا عملاء بعد — ابدأ بـ«عميل جديد».</p>')
     + '<p class="two mobonly"><button data-a="new" data-v="ex">+ عميل جديد — الحصص</button><button class="o" data-a="new" data-v="ath">+ عميل جديد — الجرامات</button></p>'
