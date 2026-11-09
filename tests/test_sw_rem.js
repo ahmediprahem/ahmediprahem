@@ -16,6 +16,10 @@ const nowM = () => { const d = new Date(); return d.getHours() * 60 + d.getMinut
     const m = nowM(), r = await run([{ m, t: 'adhAm' }, { m: wrap(m + 5), t: 'med', label: 'فيتامين د' }, { m: wrap(m + 60), t: 'water' }], 'rem', false);
     assert.strictEqual(r.shown.length, 1); const b = r.shown[0].body; assert(b.includes('أذكار الصباح') && b.includes('💊 موعد دوائك — فيتامين د') && !b.includes('كوب ماء'), b); assert.strictEqual(r.shown[0].tag, 'hissati-rem');
   });
+  await t('موعد القياس الأسبوعي والصورة الشهرية: إشعار بنصه وعنوانه (0.82)', async () => {
+    const m = nowM(); let r = await run([{ m, t: 'mq' }], 'rem', false); assert.strictEqual(r.shown.length, 1); assert(r.shown[0].body.includes('موعد قياسك الأسبوعي') && /قياس الأسبوع/.test(r.shown[0].title), r.shown[0].title + ' | ' + r.shown[0].body);
+    r = await run([{ m, t: 'bd' }], 'rem', false); assert(r.shown[0].body.includes('صورة التقدم الشهرية') && /صورة التقدم/.test(r.shown[0].title), r.shown[0].title);
+  });
   await t('أذكار المساء والدواء بلا اسم', async () => {
     const m = nowM(); let r = await run([{ m, t: 'adhPm' }], 'rem', false); assert(r.shown[0].body.includes('أذكار المساء'));
     r = await run([{ m, t: 'med', label: '' }], 'rem', false); assert.strictEqual(r.shown[0].body, '💊 موعد دوائك');

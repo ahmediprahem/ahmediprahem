@@ -56,7 +56,13 @@
   function wrap(pin, obj) { var salt = rand(16), iv = rand(12); return pinKey(pin, salt).then(function (k) { return S.encrypt({ name: 'AES-GCM', iv: iv }, k, enc.encode(JSON.stringify(obj))); }).then(function (c) { return { s: b64u(salt), iv: b64u(iv), c: b64u(c) }; }); }
   function unwrap(pin, w) { return pinKey(pin, unb64u(w.s)).then(function (k) { return S.decrypt({ name: 'AES-GCM', iv: unb64u(w.iv) }, k, unb64u(w.c)); }).then(function (pt) { return JSON.parse(dec.decode(pt)); }); }
   function pinKey(pin, salt) { return S.importKey('raw', enc.encode(String(pin)), 'PBKDF2', false, ['deriveKey']).then(function (k) { return S.deriveKey({ name: 'PBKDF2', hash: 'SHA-256', salt: salt, iterations: 200000 }, k, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']); }); }
+  // 0.67: الدخول باسم مستخدم وكلمة سر بدل الرابط: رمز الدعوة يُغلَّف بمفتاح مشتق من كلمة السر (PBKDF2) فلا تراه المحطة ولا تعرف كلمة السر
+  var CRED_ITER = 310000;
+  function userHash(u) { return sha256('hissati-user|' + String(u).trim().toLowerCase()).then(function (h) { return b64u(h); }); }
+  function credKey(pw, salt, iter) { return S.importKey('raw', enc.encode(String(pw).trim()), 'PBKDF2', false, ['deriveKey']).then(function (k) { return S.deriveKey({ name: 'PBKDF2', hash: 'SHA-256', salt: salt, iterations: iter }, k, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']); }); }
+  function credSeal(pw, text) { var salt = rand(16), iv = rand(12); return credKey(pw, salt, CRED_ITER).then(function (k) { return S.encrypt({ name: 'AES-GCM', iv: iv }, k, enc.encode(text)); }).then(function (c) { var all = new Uint8Array(12 + c.byteLength); all.set(iv, 0); all.set(new Uint8Array(c), 12); return { salt: b64u(salt), iter: CRED_ITER, blob: b64u(all) }; }); }
+  function credOpen(pw, o) { var raw = unb64u(o.blob), iter = +o.iter; if (!(iter >= 100000 && iter <= 1000000) || raw.length < 29) return Promise.reject(new Error('bad')); return credKey(pw, unb64u(o.salt), iter).then(function (k) { return S.decrypt({ name: 'AES-GCM', iv: raw.slice(0, 12) }, k, raw.slice(12)); }).then(function (pt) { return dec.decode(pt); }); }
   function token() { return b64u(rand(18)); }                  // رمز الدعوة (144 بت)
   function tokenHash(t) { return sha256('inv.' + t).then(function (h) { return b64u(h).slice(0, 32); }); }
-  return { b64u: b64u, unb64u: unb64u, sha256: sha256, hex: hex, idOf: idOf, fpOf: fpOf, genIdentity: genIdentity, signReq: signReq, parseAuth: parseAuth, verifyReq: verifyReq, seal: seal, open: open, wrap: wrap, unwrap: unwrap, token: token, tokenHash: tokenHash, pubOnly: pubOnly };
+  return { userHash: userHash, credSeal: credSeal, credOpen: credOpen, b64u: b64u, unb64u: unb64u, sha256: sha256, hex: hex, idOf: idOf, fpOf: fpOf, genIdentity: genIdentity, signReq: signReq, parseAuth: parseAuth, verifyReq: verifyReq, seal: seal, open: open, wrap: wrap, unwrap: unwrap, token: token, tokenHash: tokenHash, pubOnly: pubOnly };
 });

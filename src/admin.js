@@ -15,7 +15,7 @@
   }
   async function doLogin(db, auth, pw, stay) {                    // يفتح مفتاح التوقيع بكلمة السر ويشغّل التطبيق؛ يعيد false إن كانت الكلمة خاطئة
     var priv; try { priv = await H.unwrapPriv(auth.wrap, pw); } catch (e) { return false; }
-    K.resetFails(); var users = await kvAll(db, 'users'), key = await H.dataKey(pw, auth.saltD, auth.wrap.iter), REM = K.makeRem(db); HAD = { db: db, auth: auth, priv: priv, users: users, last: null, REM: REM }; window.HAD = HAD;
+    K.resetFails(); var users = await kvAll(db, 'users'), key = await H.dataKey(pw, auth.saltD, auth.wrap.iter), REM = K.makeRem(db); HAD = { db: db, auth: auth, priv: priv, users: users, last: null, REM: REM }; try { window.HAD_PUB = HAD.auth.pub; } catch (e) { } window.HAD = HAD;
     window.HGate = { save: function (cfg) { window.HGateCfg = cfg; return kvPut(db, 'kv', { key: 'gatecfg', cfg: cfg }); } }; openGate();
     window.HApp.start({ mode: 'admin', dbName: 'hissa_admin_data', key: key, base: null, userLabel: 'المدير: ' + auth.user, lockMin: 30, stay: !!stay, signOut: function () { return REM.signOut(auth.user); },
       aiToken: async function () { var now = Math.floor(Date.now() / 1000); return H.sign(HAD.priv, { v: 1, u: 'admin:' + auth.user, n: auth.user, role: 'admin', iat: now, exp: now + 300 }); } });

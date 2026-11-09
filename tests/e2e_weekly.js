@@ -4,12 +4,12 @@ const assert = require('assert'), path = require('path'), linked = require('./hx
 let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
 (async () => {
   const { d, m, hxCheck, cPoll, C, close } = await linked('weekly', errs);
-  assert.strictEqual(await m.locator('.wkc').count(), 1, 'في البداية: صورة البداية فقط'); assert(/صورة البداية/.test(await m.textContent('.wkc'))); await m.click('[data-act="bdLater"]'); assert.strictEqual(await m.locator('.wkc').count(), 0, '«ليس الآن» يؤجلها');
+  assert.strictEqual(await m.locator('.wkc').count(), 1, 'في البداية: صورة البداية فقط'); assert(/صورة البداية/.test(await m.textContent('.wkc'))); await m.click('[data-act="postOpen"][data-v="b"]'); await m.click('[data-act="postWhy"][data-v="1"]'); await m.click('[data-act="postGo"]'); assert.strictEqual(await m.locator('.wkc').count(), 0, '«تأجيل» بسبب يؤجلها');
   await m.evaluate(() => { window.HissatiApp.state().planAt = Date.now() - 6.2 * 864e5; }); await m.click('[data-act="tab"][data-v="plan"]'); await m.click('[data-act="tab"][data-v="today"]');
-  assert(/غداً موعد قياسك الأسبوعي/.test(await m.textContent('.wkc'))); await m.evaluate(() => { delete window.HissatiApp.state().bdSnooze; });
+  assert(/غداً موعد قياسك الأسبوعي/.test(await m.textContent('.wkc'))); await m.evaluate(() => { delete window.HissatiApp.state().bdSnooze; delete window.HissatiApp.state().mqSn; });
   await m.evaluate(() => { window.HissatiApp.state().planAt = Date.now() - 15 * 864e5; }); await m.click('[data-act="tab"][data-v="plan"]'); await m.click('[data-act="tab"][data-v="today"]');
   assert.strictEqual(await m.locator('.wkc').count(), 2, 'القياس + صورة التقدم');
-  ok('«زنها»: «📸 صورة البداية» من أول يوم (و«ليس الآن» يؤجلها)، وقبل الموعد بيوم «⏰ غداً موعد قياسك»، وبعد 7 أيام «⚖ قياس الأسبوع»، وكل أسبوعين «📸 صورة التقدم»');
+  ok('«زنها»: «📸 صورة البداية» من أول يوم (و«تأجيل» بسبب يؤجلها)، وقبل الموعد بيوم «⏰ غداً موعد قياسك»، وبعد 7 أيام «⚖ قياس الأسبوع»، وكل شهر «📸 صورة التقدم»');
   await m.click('[data-act="wkGo"]'); await m.waitForSelector('#wkW'); assert(/على الريق بعد دخول الحمام/.test(await m.textContent('.scr')));
   await m.click('[data-act="wkSend"]'); await m.waitForSelector('.toast:has-text("اكتب وزنك")');
   await m.fill('#wkW', '٨٤٫٥'); await m.fill('#wkWs', '93');

@@ -6,6 +6,7 @@ const A = (p) => path.join(__dirname, p), raw = fs.readFileSync(A('hissa_mark.sv
 const THEMES = {
   '': { mark: '#ffffff', bg: 'radial-gradient(70% 60% at 30% 25%,#2d4a9a 0%,transparent 70%),radial-gradient(60% 55% at 75% 85%,#1f6f6a 0%,transparent 70%),linear-gradient(160deg,#1d2c63,#101a40)', fx: '' },
   '-rose': { mark: '#A3456A', bg: 'radial-gradient(60% 50% at 82% 12%,#F3C7D4 0%,transparent 70%),radial-gradient(55% 45% at 10% 95%,#CFE0D3 0%,transparent 72%),linear-gradient(165deg,#FFF9F5,#F4E4E3)', fx: 'drop-shadow(0 3px 6px rgba(122,40,72,.28))' },
+  '-firoz': { mark: '#3FE0CF', bg: 'radial-gradient(60% 50% at 85% 8%,rgba(63,224,207,.30) 0%,transparent 70%),radial-gradient(50% 40% at 10% 95%,rgba(233,191,98,.22) 0%,transparent 72%),linear-gradient(165deg,#06454C,#031A1F)', fx: 'drop-shadow(0 0 10px rgba(63,224,207,.5))' },
   '-pulse': { mark: '#D2FF3A', bg: 'radial-gradient(60% 50% at 85% 8%,rgba(210,255,58,.22) 0%,transparent 70%),linear-gradient(165deg,#161B21,#0A0C0F)', fx: 'drop-shadow(0 0 10px rgba(210,255,58,.45))' }
 };
 const sizes = [['icon-192', 192, 42, 66, true], ['icon-512', 512, 112, 66, true], ['maskable-512', 512, 0, 50, false], ['apple-180', 180, 0, 64, false]];

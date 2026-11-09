@@ -23,6 +23,13 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); };
   assert.strictEqual((await call(dr, 'POST', '/v1/register', { sigPub: dr.sigPub, encPub: dr.encPub, name: 'د. أحمد حامد', regKey: 'clinic-secret' })).j.id, dr.id);
   assert.strictEqual((await call(dr2, 'POST', '/v1/register', { sigPub: dr2.sigPub, encPub: dr2.encPub, name: 'أخصائي آخر', regKey: 'clinic-secret' })).s, 200);
   ok('التسجيل: يحتاج مفتاح التسجيل الصحيح، ولا يسجّل أحد بمفتاح غيره (التوقيع يطابق المفتاح)');
+  // 2ب) رخصة الأخصائي: كود تفعيل موقَّع بمفتاح المدير يغني عن مفتاح التسجيل (بلا سر في الموقع)
+  const HS = require('../src/sec.js'), kp = await HS.genKeys(), other = await HS.genKeys(), now = Math.floor(Date.now() / 1000), mk = (priv, o) => HS.sign(priv, Object.assign({ v: 1, u: 'dr1', iat: now }, o || {}));
+  env.ADMIN_PUB = JSON.stringify(kp.pub); const dr3 = await HXC.genIdentity(), reg3 = async (lic, id) => (await call(id || dr3, 'POST', '/v1/register', { sigPub: (id || dr3).sigPub, encPub: (id || dr3).encPub, name: 'أخصائي برخصة', regKey: '', lic })).s;
+  assert.strictEqual((await call(null, 'GET', '/v1/health')).j.lic, true);
+  assert.strictEqual(await reg3(''), 403); assert.strictEqual(await reg3(await mk(other.priv)), 403, 'توقيع مفتاح آخر'); assert.strictEqual(await reg3(await mk(kp.priv, { exp: now - 10 })), 403, 'منتهية'); assert.strictEqual(await reg3('abc.def'), 403);
+  assert.strictEqual(await reg3(await mk(kp.priv, { exp: now + 3600 })), 200); delete env.ADMIN_PUB; assert.strictEqual(await reg3(await mk(kp.priv)), 403, 'بلا ADMIN_PUB لا تُقبل الرخصة');
+  ok('رخصة الأخصائي: كود موقَّع بمفتاح المدير يسجّل الأخصائي بلا مفتاح تسجيل؛ ترفض الرخصة المزوَّرة والمنتهية وغير الصالحة');
   // 3) الدعوة
   const tok = HXC.token(), h = await HXC.tokenHash(tok), cat = { meals: [['شوفان بالحليب', [1, 0, 0, 0], 'شوفان']], foods: [['أرز أبيض', 0]] };
   assert.strictEqual((await call(cl, 'POST', '/v1/invites', { h, label: 'سارة' })).s, 401);
