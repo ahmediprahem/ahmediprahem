@@ -6328,12 +6328,12 @@ window.CHX = { unread: chUnread, thread: chThread, day: ctDay };       // للا
 // عند حذف عضو تُجدَّد هوية المجموعة (gid/مفتاح/سر) فلا يبقى له أي وصول، ويُحوَّل الباقون إليها تلقائياً.
 var GP = { tab: 'chat', open: '', busy: false, seen: {}, edit: null };
 var GP_EMOJI = ['👥', '🏆', '🔥', '🌿', '💪', '🥗', '🌙', '⭐'];
-function gpAll() { HX.st.groups = HX.st.groups || {}; return HX.st.groups; }
+function gpAll() { if (!HX.st) return {}; HX.st.groups = HX.st.groups || {}; return HX.st.groups; }
 function gpList() { var a = gpAll(); return Object.keys(a).map(function (k) { return a[k]; }).sort(function (x, y) { return gpLastTs(y) - gpLastTs(x); }); }
 function gpGet(id) { return gpAll()[id] || null; }
 function gpCur() { return String(CHT.sel).indexOf('g:') === 0 ? gpGet(CHT.sel.slice(2)) : null; }
 function gpLastTs(g) { var m = g.msgs && g.msgs[g.msgs.length - 1]; return m ? m.ts * 1000 : g.created || 0; }
-function gpMe() { return HX.st.ident.id; }
+function gpMe() { return HX.st && HX.st.ident ? HX.st.ident.id : ''; }
 function gpName() { return String(HX.st.name || 'الأخصائي').slice(0, 30); }
 function gpUnread() { return gpList().reduce(function (a, g) { return a + (g.unread || 0); }, 0); }
 function gpMeta(g) { return { gid: g.gid, key: g.key, ga: g.ga, name: g.name, emoji: g.emoji, kind: g.kind, members: g.members, chal: g.chal || null, v: g.v || 1, did: gpMe(), old: g.old || '' }; }
