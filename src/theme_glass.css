@@ -351,3 +351,5 @@ html[data-theme="glass"] .chcomp button{min-width:44px;width:44px;height:44px;bo
   html[data-theme="glass"] .chcomp button{width:48px;height:48px;min-width:48px}
   .chb{max-width:85%}
 }
+
+html[data-theme="glass"] .hxdc.ok{color:#6fe3a9}html[data-theme="glass"] .hxdc.no{color:#ff8a80}html[data-theme="glass"] .hxdc.pt{color:#ffc457}

@@ -402,4 +402,3 @@ header .hdast{display:none!important}
 .hxdm li.ok>span{background:#2e9e5e;color:#fff}.hxdm li.no>span{background:#c0392b;color:#fff}.hxdm li.no{opacity:.92}.hxdm li.sk{opacity:.6;text-decoration:line-through}
 .hxdm li small{opacity:.7}.hxdn{margin:8px 0 0;font-size:13px;opacity:.9}
 .hxcups{display:flex;flex-wrap:wrap;gap:4px;margin:8px 0 2px}.hxcups i{width:16px;height:20px;border-radius:3px 3px 6px 6px;border:1.5px solid #5b8fd6;display:block}.hxcups i.on{background:#5b8fd6}
-html[data-theme="glass"] .hxdc.ok{color:#6fe3a9}html[data-theme="glass"] .hxdc.no{color:#ff8a80}html[data-theme="glass"] .hxdc.pt{color:#ffc457}
