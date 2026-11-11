@@ -391,3 +391,15 @@ header .hdast{display:none!important}
 
 /* 0.86: الوارد في الرئيسية */
 .inboxc{display:flex;align-items:center;gap:12px;width:100%;text-align:right;min-height:56px;margin:10px 0;border:1.5px solid rgba(111,227,169,.55);background:rgba(111,227,169,.1)}.inboxc small{display:block}
+
+/* 0.90: المتابعة اليومية المفصّلة */
+.hxdd{margin:2px 0 10px;border-bottom:1px solid var(--line);padding-bottom:8px}.hxdd>summary{cursor:pointer;font-size:13px;font-weight:700;padding:6px 0;min-height:32px}
+.hxdm{border:1px solid var(--line);border-radius:12px;padding:10px;margin:8px 0}.hxdm.warnb{border-color:#c97a00}
+.hxdmh{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.hxdmh small{opacity:.75}.hxdc{margin-inline-start:auto;border-radius:99px;padding:1px 10px;font-size:12px;font-weight:700;background:rgba(127,140,170,.2)}
+.hxdc.ok{background:rgba(46,158,94,.2);color:#1f8a52}.hxdc.no{background:rgba(200,60,50,.16);color:#c0392b}.hxdc.pt{background:rgba(201,122,0,.18);color:#b06a00}
+.hxdm ul{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:5px}.hxdm li{display:flex;gap:8px;align-items:baseline;font-size:14px;line-height:1.6}
+.hxdm li>span{flex:none;width:20px;height:20px;border-radius:50%;display:inline-grid;place-items:center;font-size:12px;font-weight:700;background:rgba(127,140,170,.25)}
+.hxdm li.ok>span{background:#2e9e5e;color:#fff}.hxdm li.no>span{background:#c0392b;color:#fff}.hxdm li.no{opacity:.92}.hxdm li.sk{opacity:.6;text-decoration:line-through}
+.hxdm li small{opacity:.7}.hxdn{margin:8px 0 0;font-size:13px;opacity:.9}
+.hxcups{display:flex;flex-wrap:wrap;gap:4px;margin:8px 0 2px}.hxcups i{width:16px;height:20px;border-radius:3px 3px 6px 6px;border:1.5px solid #5b8fd6;display:block}.hxcups i.on{background:#5b8fd6}
+html[data-theme="glass"] .hxdc.ok{color:#6fe3a9}html[data-theme="glass"] .hxdc.no{color:#ff8a80}html[data-theme="glass"] .hxdc.pt{color:#ffc457}

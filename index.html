@@ -391,6 +391,18 @@ header .hdast{display:none!important}
 
 /* 0.86: الوارد في الرئيسية */
 .inboxc{display:flex;align-items:center;gap:12px;width:100%;text-align:right;min-height:56px;margin:10px 0;border:1.5px solid rgba(111,227,169,.55);background:rgba(111,227,169,.1)}.inboxc small{display:block}
+
+/* 0.90: المتابعة اليومية المفصّلة */
+.hxdd{margin:2px 0 10px;border-bottom:1px solid var(--line);padding-bottom:8px}.hxdd>summary{cursor:pointer;font-size:13px;font-weight:700;padding:6px 0;min-height:32px}
+.hxdm{border:1px solid var(--line);border-radius:12px;padding:10px;margin:8px 0}.hxdm.warnb{border-color:#c97a00}
+.hxdmh{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.hxdmh small{opacity:.75}.hxdc{margin-inline-start:auto;border-radius:99px;padding:1px 10px;font-size:12px;font-weight:700;background:rgba(127,140,170,.2)}
+.hxdc.ok{background:rgba(46,158,94,.2);color:#1f8a52}.hxdc.no{background:rgba(200,60,50,.16);color:#c0392b}.hxdc.pt{background:rgba(201,122,0,.18);color:#b06a00}
+.hxdm ul{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:5px}.hxdm li{display:flex;gap:8px;align-items:baseline;font-size:14px;line-height:1.6}
+.hxdm li>span{flex:none;width:20px;height:20px;border-radius:50%;display:inline-grid;place-items:center;font-size:12px;font-weight:700;background:rgba(127,140,170,.25)}
+.hxdm li.ok>span{background:#2e9e5e;color:#fff}.hxdm li.no>span{background:#c0392b;color:#fff}.hxdm li.no{opacity:.92}.hxdm li.sk{opacity:.6;text-decoration:line-through}
+.hxdm li small{opacity:.7}.hxdn{margin:8px 0 0;font-size:13px;opacity:.9}
+.hxcups{display:flex;flex-wrap:wrap;gap:4px;margin:8px 0 2px}.hxcups i{width:16px;height:20px;border-radius:3px 3px 6px 6px;border:1.5px solid #5b8fd6;display:block}.hxcups i.on{background:#5b8fd6}
+html[data-theme="glass"] .hxdc.ok{color:#6fe3a9}html[data-theme="glass"] .hxdc.no{color:#ff8a80}html[data-theme="glass"] .hxdc.pt{color:#ffc457}
 </style><style id="thm">/* ===== ثيم «Linear داكن» (وهو أيضاً أساس الثيم «الزجاجي» الذي يضيف فوقه theme_glass.css) — طبقة إضافية فقط، لا تُحذف قواعد القالب الكلاسيكي ولا تُعطَّل. يعمل عند html:is([data-theme="linear"],[data-theme="glass"]) وعلى الشاشة فقط (الطباعة والتصدير كما هما). ===== */
 @media screen{
 html:is([data-theme="linear"],[data-theme="glass"]){color-scheme:dark;--lbg:#0b1329;--lpanel:rgba(255,255,255,.045);--lpanel2:rgba(255,255,255,.08);--lline:rgba(255,255,255,.10);--lline2:rgba(255,255,255,.2);--ltext:#f4f6fc;--lmut:#a3b2d6;--lacc:#22c55e;--lacc-d:#052e16;--lglow:rgba(34,197,94,.22);--lerr:#fca5a5;--lwarn:#fde68a}
@@ -5031,6 +5043,34 @@ var HX_OFF = { sweets: 'حلويات', out: 'أكل من الخارج', extra: '
 function hxOff(o) { var r = {}; if (o && typeof o === 'object') Object.keys(o).forEach(function (k) { if (HX_OFF[k]) r[k] = 1; }); return r; }
 function hxWalk(h) { h = h || {}; var a = []; if (+h.walkMin) a.push(+h.walkMin + ' دقيقة'); if (+h.steps && !HX_HB.steps) a.push(+h.steps + ' خطوة'); if (+h.walkM) a.push(+h.walkM + ' متر'); return a.length ? '🚶 ' + a.join(' • ') : ''; }
 function hxToday(c) { var d = new Date(), k = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'), l = (c.hx.logs || {})[k]; return l && l.n ? Math.round(l.done / l.n * 100) : 0; }
+// ---- 0.90: المتابعة اليومية المفصّلة: خطة اليوم صنفاً صنفاً (عمله / لم يعمله / بدّله)، والماء بالأكواب، والعادات، وما خرج به عن النظام
+function hxSlim(sn) { return { water: +sn.water || 0, days: (sn.days || []).map(function (d) { return { water: +d.water || 0, slots: (d.slots || []).map(function (q) { return { n: q.name || '', t: q.time || '', l: (q.lines || []).map(function (l) { return String(l[2] || l[1] || ''); }) }; }) }; }) }; }
+function hxSnapOf(c) {
+  var x = c.hx; if (x.snap && x.snap.days) return x.snap; HX.snapC = HX.snapC || {}; var key = c.code + ':' + (x.planV || 0) + ':' + (c.updated || 0); if (HX.snapC[key] !== undefined) return HX.snapC[key];
+  var sn = null; try { var rd = c.planSrc === 'ready' && c.ready && c.readyDoc && window.RL; sn = c.rawSnap ? c.rawSnap : rd ? RL.toHissati(c.readyDoc, RL.plan(c.ready.id)) : c.plan ? (c.kind === 'athlete' ? hxSnapG(c) : hxSnap(c)) : null; sn = sn ? hxSlim(sn) : null; } catch (e) { sn = null; }
+  return (HX.snapC[key] = sn);
+}
+function hxDayDetail(c, k, l) {
+  var x = c.hx, sp = hxSnapOf(c), h = '', done = 0, miss = 0, ck = l.ck || {}, sw = l.sw || {}, nt = l.note || {}, sk = l.skip || {};
+  if (sp && sp.days.length) {
+    var day = sp.days[(+l.dow || 0) % sp.days.length];
+    h += day.slots.map(function (q, si) {
+      var rows = q.l.map(function (t, li) { var key = si + '_' + li, on = !!ck[key]; if (sk[si]) return '<li class="sk"><span>⤼</span>' + esc(t) + '</li>'; if (on) done++; else miss++; return '<li class="' + (on ? 'ok' : 'no') + '"><span>' + (on ? '✓' : '✗') + '</span>' + esc(sw[key] ? sw[key] : t) + (sw[key] ? ' <small>⇄ بدل: ' + esc(t) + '</small>' : '') + '</li>'; }).join('');
+      var n1 = q.l.filter(function (t, li) { return ck[si + '_' + li]; }).length;
+      return '<div class="hxdm"><div class="hxdmh"><b>' + esc(q.n) + '</b>' + (q.t ? '<small>' + esc(q.t) + '</small>' : '') + '<span class="hxdc ' + (sk[si] ? 'sk' : n1 === q.l.length ? 'ok' : n1 ? 'pt' : 'no') + '">' + (sk[si] ? 'تخطّى الوجبة' : n1 + ' من ' + q.l.length) + '</span></div><ul>' + rows + '</ul>' + (nt[si] ? '<p class="hxdn">✎ ملاحظته: ' + esc(nt[si]) + '</p>' : '') + '</div>';
+    }).join('');
+    var wt = (day.water || sp.water || 0), cupsT = wt ? Math.max(4, Math.min(16, Math.round(wt / 0.25))) : 0, cups = +l.water || 0;
+    h += '<div class="hxdm"><div class="hxdmh"><b>💧 الماء</b><span class="hxdc ' + (cupsT && cups >= cupsT ? 'ok' : cups ? 'pt' : 'no') + '">' + cups + (cupsT ? ' من ' + cupsT : '') + ' كوباً</span></div><p class="hxcups">' + Array.from({ length: Math.max(cupsT, Math.min(cups, 20)) }, function (_, i) { return '<i class="' + (i < cups ? 'on' : '') + '"></i>'; }).join('') + '</p><p class="small">' + (cups * 0.25).toFixed(2).replace(/\.?0+$/, '') + ' لتر' + (wt ? ' من ' + wt + ' لتر مطلوبة' : '') + '</p></div>';
+  } else h += '<p class="small">تفاصيل الأصناف تظهر بعد إرسال الخطة إلى «زنها».</p>';
+  var hb = l.h || {}, hs = (l.hs || []).filter(function (q) { return q !== 'water'; }), hl = hs.concat(Object.keys(hb).filter(function (q) { return hs.indexOf(q) < 0 && HX_HB[q]; })).map(function (q) {
+    var d = HX_HB[q]; if (!d) return ''; var v = hb[q], has = v != null, okv = false, tx = ''; try { okv = has && d[2](v); tx = has ? d[1](v) : ''; } catch (e) { }
+    return '<li class="' + (okv ? 'ok' : 'no') + '"><span>' + (okv ? '✓' : '✗') + '</span>' + d[0] + ' ' + esc(tx || 'لم يسجّلها') + '</li>';
+  }).join('');
+  var wk = hxWalk(hb); if (hl || wk) h += '<div class="hxdm"><div class="hxdmh"><b>العادات والحركة</b></div><ul>' + hl + (wk ? '<li class="ok"><span>✓</span>' + esc(wk) + '</li>' : '') + '</ul></div>';
+  var of = Object.keys(l.off || {}).map(function (q) { return HX_OFF[q] || q; }); if (of.length || l.offT) h += '<div class="hxdm warnb"><div class="hxdmh"><b>⚠ خرج عن النظام</b></div><p>' + esc(of.join('، ')) + (l.offT ? ' — ' + esc(l.offT) : '') + '</p></div>';
+  var foot = (l.sub ? 'أرسل تسجيل اليوم ✓' : 'لم يرسل تسجيل اليوم بعد') + (l.ts ? ' • آخر تحديث ' + hxAgo(l.ts) : '') + (l.pv && x.planV && l.pv !== x.planV ? ' • سُجّل على إصدار خطة سابق (v' + l.pv + ')، والأصناف المعروضة من الخطة الحالية' : '');
+  return '<details class="hxdd"><summary>تفاصيل اليوم' + (sp && sp.days.length ? ': عمل ' + done + ' ولم يعمل ' + miss : '') + '</summary>' + h + '<p class="small">' + esc(foot) + '</p></details>';
+}
 function hxTab(c) {                                                // تبويب «زنها» داخل ملف العميل
   var x = c.hx, ath = c.kind === 'athlete', logs = x.logs || {}, days = Object.keys(logs).sort().reverse().slice(0, 7), w = (x.weights || []).slice(-8);
   var adh = days.map(function (k) {
@@ -5038,7 +5078,7 @@ function hxTab(c) {                                                // تبويب
     Object.keys(l.sw || {}).forEach(function (q) { extra.push('⇄ ' + l.sw[q]); }); Object.keys(l.note || {}).forEach(function (q) { extra.push('✎ ' + l.note[q]); }); Object.keys(l.skip || {}).forEach(function (q) { extra.push('⤼ تخطّى وجبة ' + (+q + 1)); });
     var hb = hxHabits(l); if (hb) extra.unshift(hb);
     var wk = hxWalk(l.h); if (wk) extra.unshift(wk); var of = Object.keys(l.off || {}).map(function (q) { return HX_OFF[q] || q; }); if (of.length || l.offT) extra.push('⚠ خارج النظام: ' + of.join('، ') + (l.offT ? ' — ' + l.offT : ''));
-    return '<div class="hxday"><b>' + esc((D.days[l.dow] || '') + ' ' + k.slice(5)) + '</b><span class="hxbar"><i style="width:' + pct + '%"></i></span><span>' + pct + '%' + (l.sub ? ' <em title="أرسل تسجيل اليوم">✓</em>' : '') + '</span><small>💧 ' + (l.water * 0.25).toFixed(2).replace(/\.?0+$/, '') + ' ل</small>' + (extra.length ? '<small class="hxex">' + esc(extra.join(' • ')) + '</small>' : '') + '</div>';
+    return '<div class="hxday"><b>' + esc((D.days[l.dow] || '') + ' ' + k.slice(5)) + '</b><span class="hxbar"><i style="width:' + pct + '%"></i></span><span>' + pct + '%' + (l.sub ? ' <em title="أرسل تسجيل اليوم">✓</em>' : '') + '</span><small>💧 ' + (l.water * 0.25).toFixed(2).replace(/\.?0+$/, '') + ' ل</small>' + (extra.length ? '<small class="hxex">' + esc(extra.join(' • ')) + '</small>' : '') + '</div>' + hxDayDetail(c, k, l);
   }).join('');
   return '<div class="hxtab"><div class="ucard"><div class="hxtop"><h3>📲 «زنها» <small>مرتبط منذ ' + new Date(x.since || Date.now()).toLocaleDateString('ar') + ' • آخر تحقق ' + hxAgo(HX.last) + '</small></h3><button class="sec sm" data-a="hxCheck">↻ تحقق الآن</button></div>'
     + (!c.plan && c.planSrc !== 'ready' && !c.rawSnap ? '<p class="small">ولّد الخطة (من البنك أو جديدة) من «بيانات العميل» ثم أرسلها من هنا.</p>' : '<p>' + (x.planV ? 'آخر خطة أُرسلت: v' + x.planV + ' ' + hxAgo(x.sentAt) + '. ' : '') + '<button data-a="hxSendPlan">' + (x.planV ? '↻ أرسل الخطة المحدَّثة إلى «زنها»' : '➤ أرسل الخطة إلى «زنها»') + '</button></p><p class="small">' + (ath ? 'تصل الخطة بالجرامات لكل يوم (حسب نوع التدريب) مع ماكروز كل وجبة وبدائل كل صنف بجرامات تعادل الماكرو الرئيسي.' : 'تصل الخطة بكل أيامها ووجباتها مع بدائل كل صنف من نفس المجموعة.') + ' ما لا يحبه العميل يُستبدل تلقائياً في جواله.</p>')
@@ -5105,7 +5145,7 @@ Object.assign(A, {
     try { snap = c.rawSnap ? JSON.parse(JSON.stringify(c.rawSnap)) : rd ? RL.toHissati(c.readyDoc, RL.plan(c.ready.id)) : c.kind === 'athlete' ? hxSnapG(c) : hxSnap(c); } catch (e) { toast('تعذّر تجهيز الخطة: ' + e.message); return; }
     var v = (c.hx.planV || 0) + 1; toast('جارٍ الإرسال…');
     if (c.work) snap.work = c.work; if (c.shop) snap.shop = c.shop; if (S.settings && (S.settings.exlib || []).length) snap.lib = S.settings.exlib; snap.gate = c.hx.gate ? { on: 1, hour: c.hx.gateH || 12 } : null; snap.wm = (c.name || '') + ' • ' + (c.code || '');
-    hxSend(c, { t: 'plan', v: v, plan: snap, note: '' }).then(function () { c.hx.planV = v; c.hx.sentAt = Date.now(); if (rd) c.ready.sentV = v; persist(c); main(); toast('✓ وصلت الخطة v' + v + ' إلى «زنها» مع إشعار للعميل'); }).catch(hxErr);
+    hxSend(c, { t: 'plan', v: v, plan: snap, note: '' }).then(function () { c.hx.planV = v; c.hx.sentAt = Date.now(); try { c.hx.snap = hxSlim(snap); c.hx.snap.v = v; } catch (e) { } if (rd) c.ready.sentV = v; persist(c); main(); toast('✓ وصلت الخطة v' + v + ' إلى «زنها» مع إشعار للعميل'); }).catch(hxErr);
   },
   hxSendMsg: function () {
     var c = cur(), ta = $('#hxMsg'), t = ta && ta.value.trim(); if (!c || !t) return;
