@@ -193,6 +193,7 @@ window.DPApp={relist:function(){$('#lst').innerHTML=list()},S:S,A:A};
 /*WORKUI*/
 /*SUBUI*/
 /*CHATUI*/
+/*GRPUI*/
 /*RICHUI*/
 /*CHALUI*/
 /*DIETSUI*/

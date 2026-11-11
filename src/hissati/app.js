@@ -145,6 +145,7 @@ async function poll() {
       let p = null; try { p = await HXC.open(S.ident, m.body); } catch (e) { continue; }
       if (p && p.a === S.tok) ch += handle(p) ? 1 : 0;
     }
+    try { ch += await zcPoll(); } catch (e) { }
     if (j.msgs.length) { S.after = mx; await persist(); api('POST', '/v1/ack', { upTo: mx }).catch(() => { }); }
     if (ch || !V.online) { V.online = true; render(); }
     if (j.more) setTimeout(poll, 300);
@@ -235,6 +236,7 @@ async function xferDone() {                         // الحساب انتقل: 
 }
 function notify(t, b) { toast(t); try { if (document.hidden && 'Notification' in window && Notification.permission === 'granted') new Notification(t, { body: b || '', icon: '/icon.png', lang: 'ar', dir: 'rtl' }); } catch (e) { } }
 function handle(p) {
+  if (p.t === 'grp' || p.t === 'grpx') return zcIn(p);
   if (p.t === 'status') {
     if (p.st === 'approved') { S.req = 'approved'; S.code = String(p.code || ''); if (p.dname) S.dname = p.dname; notify('اعتمدك ' + S.dname, 'خطتك قيد الإعداد'); }
     else if (p.st === 'changes') { S.req = 'changes'; S.reqMsg = String(p.msg || ''); notify(S.dname + ' طلب تعديلاً', S.reqMsg); }
@@ -907,7 +909,7 @@ function mcLeft(t, cm) {
 function badgeSync() {
   if (!S || !navigator.setAppBadge) return; let n = 0;
   if (S.plan && S.screen === 'app') { const L = S.log[dkey(new Date())] || { ck: {}, skip: {} }; dayPlan(TODAY).slots.forEach((s, i) => { if (s.lines.length && !(L.skip || {})[i] && !s.lines.every((l, li) => (L.ck || {})[i + '_' + li])) n++; }); }
-  n += +S.unreadC || 0; if (V.badge === n) return; V.badge = n;
+  n += zcN(); if (V.badge === n) return; V.badge = n;
   try { (n ? navigator.setAppBadge(n) : navigator.clearAppBadge()).catch(() => { }); } catch (e) { }
 }
 setInterval(() => { document.querySelectorAll('.mcd[data-t]').forEach((e) => { e.textContent = mcLeft(e.dataset.t); }); }, 30000);
@@ -2043,7 +2045,8 @@ function sheetHtml() {
 // ---------- المحادثة مع الأخصائي
 const CLIENT_Q = ['عندي سؤال عن خطتي', 'لم أستطع الالتزام اليوم', 'أريد تبديل وجبة', 'أشعر بالجوع بين الوجبات'];
 const hm = (ts) => { const d = new Date(ts); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); };
-function chatBtn() { return '<button class="chatbtn" data-act="chat">' + I('msg') + 'راسل الأخصائي' + (S.unreadC ? '<span class="nb" aria-label="' + S.unreadC + ' رسائل جديدة">' + S.unreadC + '</span>' : '') + '</button>'; }
+const zcN = () => (+S.unreadC || 0) + zcUnread();
+function chatBtn() { return '<button class="chatbtn" data-act="chat">' + I('msg') + (S.grp && Object.keys(S.grp).length ? 'شات زنها' : 'راسل الأخصائي') + (zcN() ? '<span class="nb" aria-label="' + zcN() + ' رسائل جديدة">' + zcN() + '</span>' : '') + '</button>'; }
 function bubbles() {
   let last = '', prev = null;
   return S.msgs.map((m) => {
@@ -2247,6 +2250,7 @@ document.addEventListener('click', (e) => {
   const el = e.target.closest('[data-act]'); if (!el || el.tagName === 'SELECT' || el.dataset.act === 'consent' || el.disabled) return;
   const a = el.dataset.act, v = el.dataset.v, k = el.dataset.k;
   if (a === 'toastX') { clearTimeout(toastT); toastMsg = ''; render(); return; }
+  if (S && zcActs2(a, v)) return;
   // ورقة «ينتظرك» تُغلق قبل الانتقال إلى شاشة كاملة
   if (sheet && sheet.t === 'wait' && /^(wkGo|pfGo|panGo|bdGo|khOpen|khStart|tab|firstWin|notif)$/.test(a)) sheet = null;
   if (a === 'khgStartG') { V.khg = { i: 0, guest: true }; V.screen = 'khg'; render(); return; }
@@ -2583,6 +2587,7 @@ document.addEventListener('input', (e) => {
   if (t.dataset.panq) { V.panQ = t.value; const pos = t.selectionStart; render(); const n = document.getElementById('panQ'); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (x) { } } return; }
   if (t.dataset.q) { S[t.dataset.q] = t.value; const pos = t.selectionStart; render(); const n = document.getElementById(t.id); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (x) { } } }
 });
+/*GRPCL*/
 window.addEventListener('online', () => { V.online = true; poll(); });
 window.addEventListener('offline', () => { V.online = false; render(); });
 window.HissatiApp = { mcLeft, remItems, whDayOk, badge: () => V.badge, wheel: { dayOk: whDayOk, cats: () => whCats().map((i) => whx().cats[i].id), dia: whDia, text: (id, i) => { const ci = whx().cats.findIndex((c) => c.id === id); return whText(ci, i); }, maybe: () => { WHL.shown = false; whMaybe(); }, open: (m) => whOpen(m) }, state: () => S, toast, poll, flush, feed: () => FD, feedLoad: fdLoad, celebrateTest: (id) => celebrate(id), sound: { avail: sndAvail, quiet: sndPrayerQuiet, times: prNow, playing: () => SND.playing, state: () => (SND.ctx ? SND.ctx.state : 'none'), vol: () => snd().vol, level: () => { if (!SND.an) return 0; const b = new Float32Array(SND.an.fftSize); SND.an.getFloatTimeDomainData(b); let t = 0, pk = 0; for (const x of b) { t += x * x; pk = Math.max(pk, Math.abs(x)); } return { rms: Math.sqrt(t / b.length), peak: pk }; } },  alarm: (items) => almShow(items), alarmTick: almTick, alarmFire: almFire, remItems, render, prayTimes, khams: { portions: khPortions, range: khRange, state: khState, rel: khRel, meta: () => QM, cert: khCertCanvas, stats: khStats } };     // للاختبارات

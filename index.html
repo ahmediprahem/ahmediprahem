@@ -402,6 +402,14 @@ header .hdast{display:none!important}
 .hxdm li.ok>span{background:#2e9e5e;color:#fff}.hxdm li.no>span{background:#c0392b;color:#fff}.hxdm li.no{opacity:.92}.hxdm li.sk{opacity:.6;text-decoration:line-through}
 .hxdm li small{opacity:.7}.hxdn{margin:8px 0 0;font-size:13px;opacity:.9}
 .hxcups{display:flex;flex-wrap:wrap;gap:4px;margin:8px 0 2px}.hxcups i{width:16px;height:20px;border-radius:3px 3px 6px 6px;border:1.5px solid #5b8fd6;display:block}.hxcups i.on{background:#5b8fd6}
+
+/* مجموعات شات زنها (0.93) */
+.gpnew .cav{background:var(--g,#1e6b3a);color:#fff;font-size:20px}.chun{background:#25d366;color:#fff;border-radius:11px;min-width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;padding:0 6px;margin-inline-start:auto}
+.gptabs{display:flex;gap:6px;padding:6px 10px;overflow-x:auto;border-bottom:1px solid var(--line,#e3e6ea)}.gpbody{padding:12px;overflow:auto}.gpbody .ucard{margin-bottom:12px}
+.gpwho{display:block;font-weight:700;font-size:12px;opacity:.8;margin-bottom:2px}.gpim{max-width:240px;width:100%;min-height:60px;border-radius:10px;display:block;background:rgba(127,127,127,.15)}.gpim.gone{min-height:0;padding:8px;font-size:12px}
+.gpact{display:flex;gap:10px;align-items:center;background:rgba(37,211,102,.14);border:1px solid rgba(37,211,102,.4);border-radius:14px;padding:8px 12px;margin:6px auto;max-width:92%;width:fit-content}.gpact>span{font-size:26px}.gprank{background:rgba(255,193,7,.14);border:1px solid rgba(255,193,7,.5);border-radius:14px;padding:10px 14px;margin:8px auto;max-width:92%;width:fit-content}.gprank pre{margin:0;font:inherit;white-space:pre-wrap}
+.gprows{list-style:none;margin:0;padding:0}.gprows li{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line,rgba(127,127,127,.25))}.gprows li.me{font-weight:700;background:rgba(37,211,102,.12);border-radius:10px;padding-inline:8px}.gprows .cav{width:34px;height:34px;flex:none}.gpr{width:30px;text-align:center;font-size:20px}.gpp{margin-inline-start:auto;font-weight:700}
+.gpfld{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px}.gpfld label{display:flex;flex-direction:column;gap:4px;font-size:13px}.gptools{width:100%;border-collapse:collapse;margin:8px 0}.gptools td,.gptools th{padding:6px;text-align:start;border-bottom:1px solid var(--line,rgba(127,127,127,.25))}.gprwr{display:flex;gap:8px;align-items:center;margin:6px 0;flex-wrap:wrap}.gpm{display:block;padding:6px 0}.gpbtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.gprw{margin:0;padding-inline-start:18px}
 </style><style id="thm">/* ===== ثيم «Linear داكن» (وهو أيضاً أساس الثيم «الزجاجي» الذي يضيف فوقه theme_glass.css) — طبقة إضافية فقط، لا تُحذف قواعد القالب الكلاسيكي ولا تُعطَّل. يعمل عند html:is([data-theme="linear"],[data-theme="glass"]) وعلى الشاشة فقط (الطباعة والتصدير كما هما). ===== */
 @media screen{
 html:is([data-theme="linear"],[data-theme="glass"]){color-scheme:dark;--lbg:#0b1329;--lpanel:rgba(255,255,255,.045);--lpanel2:rgba(255,255,255,.08);--lline:rgba(255,255,255,.10);--lline2:rgba(255,255,255,.2);--ltext:#f4f6fc;--lmut:#a3b2d6;--lacc:#22c55e;--lacc-d:#052e16;--lglow:rgba(34,197,94,.22);--lerr:#fca5a5;--lwarn:#fde68a}
@@ -3702,6 +3710,152 @@ E.ctx = function (client, D) {
   function gOpenBytes(k, str) { var raw = unb64u(str); return gKey(k).then(function (key) { return S.decrypt({ name: 'AES-GCM', iv: raw.slice(0, 12) }, key, raw.slice(12)); }).then(function (pt) { return new Uint8Array(pt); }); }
   return { gNew: gNew, gah: gah, gSeal: gSeal, gOpen: gOpen, gSealBytes: gSealBytes, gOpenBytes: gOpenBytes, userHash: userHash, credSeal: credSeal, credOpen: credOpen, b64u: b64u, unb64u: unb64u, sha256: sha256, hex: hex, idOf: idOf, fpOf: fpOf, genIdentity: genIdentity, signReq: signReq, parseAuth: parseAuth, verifyReq: verifyReq, seal: seal, open: open, wrap: wrap, unwrap: unwrap, token: token, tokenHash: tokenHash, pubOnly: pubOnly };
 });
+
+// ================= مجموعات «شات زنها» والتحديات (0.93) — منطق مشترك بين «زنها Pro» و«زنها» (ES5 بلا اعتماد على الواجهة)
+// رسائل المجموعة المشفّرة بمفتاح المجموعة (انظر hx_crypto.js): {t:'m',nm,x,ts} نص · {t:'img',nm,k,cap,ts} صورة · {t:'act',nm,tool,ts,note,k?} إنجاز في تحدٍّ.
+// النقاط لا تُصدَّق من المرسل: كل طرف يحسبها محلياً من تعريف التحدي (النقاط لكل أداة وحدّها اليومي)، فلا يستطيع أحد تضخيم نقاطه.
+(function (root, factory) { var api = factory(); if (typeof module === 'object' && module.exports) module.exports = api; else root.GRP = api; })(typeof self !== 'undefined' ? self : this, function () {
+  // أدوات التطبيق التي يمكن جعلها تحدياً: pts = نقاط المرة، max = أقصى مرات في اليوم، photo = تحتاج صورة
+  var TOOLS = [
+    { id: 'meal', ico: '🍽', name: 'صوّر وجبتك', pts: 10, max: 4, photo: true, fx: 'meal', say: 'صوّر وجبته' },
+    { id: 'water', ico: '💧', name: 'كوب ماء', pts: 2, max: 8, fx: 'water', say: 'شرب ماءً' },
+    { id: 'walk', ico: '🚶', name: 'مشي', pts: 15, max: 2, fx: 'walk', say: 'أنهى مشياً' },
+    { id: 'gym', ico: '🏋', name: 'تمرين رياضي', pts: 20, max: 1, fx: 'sport', say: 'أنهى تمرينه' },
+    { id: 'video', ico: '🎬', name: 'فيديو تمرين أو مشي', pts: 8, max: 1, fx: 'sport', say: 'شاهد فيديو التمرين' },
+    { id: 'adhkar_m', ico: '🌅', name: 'أذكار الصباح', pts: 5, max: 1, fx: 'adhkar', say: 'قرأ أذكار الصباح' },
+    { id: 'adhkar_e', ico: '🌙', name: 'أذكار المساء', pts: 5, max: 1, fx: 'adhkar', say: 'قرأ أذكار المساء' },
+    { id: 'wird', ico: '📖', name: 'ورد القرآن', pts: 8, max: 1, fx: 'adhkar', say: 'أتمّ وِرده' },
+    { id: 'sleep', ico: '😴', name: 'نوم مبكر', pts: 5, max: 1, fx: 'sleep', say: 'نام مبكراً' },
+    { id: 'day', ico: '✅', name: 'إغلاق يوم الخطة', pts: 10, max: 1, fx: 'day', say: 'أغلق يوم خطته' }
+  ];
+  var BYID = {}; TOOLS.forEach(function (t) { BYID[t.id] = t; });
+  var PRESETS = [   // قوالب جاهزة تُنشأ بنقرة (النقاط قابلة للتعديل)
+    { id: 'meals', name: 'تحدي الوجبات', ico: '🍽', desc: 'صوّر وجباتك واكسب نقاطاً', tools: ['meal', 'water', 'day'], days: 7 },
+    { id: 'move', name: 'تحدي الحركة', ico: '🚶', desc: 'مشي وتمرين وفيديوهات', tools: ['walk', 'gym', 'video', 'water'], days: 7 },
+    { id: 'spirit', name: 'تحدي الروح', ico: '🌙', desc: 'أذكار وورد ونوم مبكر', tools: ['adhkar_m', 'adhkar_e', 'wird', 'sleep'], days: 7 },
+    { id: 'all', name: 'التحدي الشامل', ico: '🏆', desc: 'كل الأدوات معاً', tools: TOOLS.map(function (t) { return t.id; }), days: 30 }
+  ];
+  var REWARDS = [   // أنماط الجوائز الجاهزة
+    { id: 'first', name: 'الأول فقط', ico: '🥇', mode: 'first', items: [{ kind: 'disc', val: 10 }] },
+    { id: 'top2', name: 'الأول والثاني', ico: '🥈', mode: 'top2', items: [{ kind: 'disc', val: 10 }, { kind: 'disc', val: 5 }] },
+    { id: 'all', name: 'كل المراتب', ico: '🎁', mode: 'all', items: [{ kind: 'disc', val: 15 }, { kind: 'disc', val: 10 }, { kind: 'disc', val: 5 }, { kind: 'text', label: 'شهادة مشاركة' }] },
+    { id: 'pts', name: 'حسب النقاط', ico: '⭐', mode: 'pts', items: [{ min: 300, kind: 'disc', val: 10 }, { min: 150, kind: 'disc', val: 5 }, { min: 50, kind: 'text', label: 'شهادة مشاركة' }] }
+  ];
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function dayKey(ts) { var d = new Date(ts); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+  function addDays(key, n) { var p = key.split('-'), d = new Date(+p[0], +p[1] - 1, +p[2] + n); return dayKey(d.getTime()); }
+  // تعريف تحدٍّ: {name, ico, tools:[{id,pts,max}], start:'YYYY-MM-DD', days, reward:{mode,items}}
+  function tool(chal, id) { var t = ((chal && chal.tools) || []).filter(function (x) { return x.id === id; })[0]; return t ? { id: id, pts: Math.max(0, +t.pts || 0), max: Math.max(1, +t.max || 1) } : null; }
+  function makeChal(preset, start, days) {
+    var p = PRESETS.filter(function (x) { return x.id === preset; })[0] || PRESETS[0];
+    return { name: p.name, ico: p.ico, start: start || dayKey(Date.now()), days: days || p.days, tools: p.tools.map(function (id) { var t = BYID[id]; return { id: id, pts: t.pts, max: t.max }; }), reward: copy(REWARDS[0]) };
+  }
+  function copy(o) { return JSON.parse(JSON.stringify(o)); }
+  function range(chal) { return { from: chal.start, to: addDays(chal.start, Math.max(1, +chal.days || 1) - 1) }; }
+  function state(chal, now) { var r = range(chal), t = dayKey(now || Date.now()); return t < r.from ? 'soon' : t > r.to ? 'ended' : 'live'; }
+  function daysLeft(chal, now) { var r = range(chal), a = dayKey(now || Date.now()), x = new Date(r.to + 'T00:00:00'), y = new Date(a + 'T00:00:00'); return Math.max(0, Math.round((x - y) / 864e5) + 1); }
+  // الترتيب: msgs = رسائل المجموعة المفتوحة [{from,body:{t,tool,nm,ts}}], opt.day = حصر في يوم واحد
+  function board(msgs, chal, opt) {
+    opt = opt || {}; var r = range(chal), per = {}, names = {};
+    msgs.forEach(function (m) {
+      var b = m.body || m; if (!b || b.t !== 'act') return; var t = tool(chal, b.tool); if (!t) return; var ts = b.ts || m.ts * 1000, k = dayKey(ts);
+      if (k < r.from || k > r.to || (opt.day && k !== opt.day)) return;
+      var id = m.from || b.from; if (!id) return; names[id] = b.nm || names[id] || ''; var u = per[id] = per[id] || { id: id, nm: '', pts: 0, last: 0, tools: {}, days: {} };
+      var dk = u.days[k] = u.days[k] || {}; dk[t.id] = (dk[t.id] || 0) + 1; if (dk[t.id] > t.max) return;           // حدّ الأداة اليومي
+      u.pts += t.pts; u.tools[t.id] = (u.tools[t.id] || 0) + 1; u.last = Math.max(u.last, ts);
+    });
+    var rows = Object.keys(per).map(function (id) { var u = per[id]; u.nm = names[id] || 'عضو'; u.act = Object.keys(u.days).length; return u; });
+    rows.sort(function (a, b) { return b.pts - a.pts || a.last - b.last; });
+    var rk = 0, prev = null; rows.forEach(function (u, i) { if (prev === null || u.pts !== prev) rk = i + 1; u.rank = rk; prev = u.pts; });
+    return rows;
+  }
+  // ما بقي للعضو اليوم من نقاط ممكنة لكل أداة (لإظهار الأزرار المتاحة)
+  function todayLeft(msgs, chal, id, now) {
+    var k = dayKey(now || Date.now()), used = {}; msgs.forEach(function (m) { var b = m.body || m; if (b && b.t === 'act' && (m.from || b.from) === id && dayKey(b.ts || m.ts * 1000) === k) used[b.tool] = (used[b.tool] || 0) + 1; });
+    return (chal.tools || []).map(function (t) { var d = tool(chal, t.id); return { id: t.id, left: Math.max(0, d.max - (used[t.id] || 0)), pts: d.pts }; });
+  }
+  function rewardLabel(it) { if (!it) return ''; return it.kind === 'disc' ? 'خصم ' + (+it.val || 0) + '٪ على التجديد القادم' : it.kind === 'days' ? (+it.val || 0) + ' أيام هدية على الاشتراك' : String(it.label || '').slice(0, 80); }
+  // الجوائز المستحقة من ترتيب نهائي. تُسجَّل لدى الأخصائي «بانتظار الاعتماد»
+  function rewards(rows, rw) {
+    var out = [], items = (rw && rw.items) || [], mode = rw && rw.mode;
+    rows.forEach(function (u) {
+      var it = null;
+      if (mode === 'first') it = u.rank === 1 ? items[0] : null;
+      else if (mode === 'top2') it = u.rank <= 2 ? items[u.rank - 1] || items[items.length - 1] : null;
+      else if (mode === 'all') it = items.length ? items[Math.min(u.rank - 1, items.length - 1)] : null;
+      else if (mode === 'pts') it = items.slice().sort(function (a, b) { return (+b.min || 0) - (+a.min || 0); }).filter(function (x) { return u.pts >= (+x.min || 0); })[0] || null;
+      if (it && u.pts > 0) out.push({ id: u.id, nm: u.nm, rank: u.rank, pts: u.pts, kind: it.kind || 'text', val: +it.val || 0, label: rewardLabel(it) });
+    });
+    return out;
+  }
+  var MEDAL = ['🥇', '🥈', '🥉'];
+  function rankText(rows, label, max) {
+    var top = rows.slice(0, max || 5); if (!top.length) return 'لا نشاط في ' + label + ' بعد — كن أول من يبدأ! 💪';
+    return '🏁 ترتيب ' + label + '\n' + top.map(function (u) { return (MEDAL[u.rank - 1] || (u.rank + '.')) + ' ' + u.nm + ' — ' + u.pts + ' نقطة'; }).join('\n');
+  }
+  // رمز «رفيق الرحلة»: مشتق من معرّف العضو ثابتاً، بلا أحرف ملتبسة، ويُقارَن بلا حساسية لحالة الأحرف
+  var AL = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+  function codeOf(id) { var h1 = 2166136261, h2 = 5381, s = String(id); for (var i = 0; i < s.length; i++) { h1 = Math.imul(h1 ^ s.charCodeAt(i), 16777619) >>> 0; h2 = (Math.imul(h2, 33) + s.charCodeAt(i)) >>> 0; } var o = ''; for (var j = 0; j < 3; j++) { o += AL[h1 % 31]; h1 = Math.floor(h1 / 31); o += AL[h2 % 31]; h2 = Math.floor(h2 / 31); } return 'Z-' + o; }
+  function normCode(c) { c = String(c || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); if (c.indexOf('Z') === 0) c = c.slice(1); return 'Z-' + c; }
+  // ---------- مؤثرات مرئية وصوتية تظهر للجميع عند نشر إنجاز
+  var ctx = null, muted = false;
+  function audio() { try { if (!ctx) { var C = window.AudioContext || window.webkitAudioContext; if (C) ctx = new C(); } if (ctx && ctx.state === 'suspended') ctx.resume(); } catch (e) { ctx = null; } return ctx; }
+  var TUNES = { meal: [523, 659, 784], water: [659, 880], walk: [392, 523, 659], sport: [440, 554, 659, 880], adhkar: [392, 494, 587], sleep: [330, 262], day: [523, 659, 784, 1047], rank: [523, 659, 784, 659, 880, 1047], lead: [784, 988, 1175] };
+  function chime(kind) {
+    if (muted) return; var a = audio(); if (!a) return; var seq = TUNES[kind] || TUNES.meal, t = a.currentTime + 0.02;
+    seq.forEach(function (f, i) { try { var o = a.createOscillator(), g = a.createGain(); o.type = kind === 'adhkar' ? 'sine' : 'triangle'; o.frequency.value = f; g.gain.setValueAtTime(0.0001, t + i * 0.11); g.gain.exponentialRampToValueAtTime(0.16, t + i * 0.11 + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + i * 0.11 + 0.3); o.connect(g); g.connect(a.destination); o.start(t + i * 0.11); o.stop(t + i * 0.11 + 0.32); } catch (e) { } });
+  }
+  var CONF = { meal: ['🍎', '🥗', '✨'], water: ['💧', '🫧', '✨'], walk: ['👟', '✨', '🌿'], sport: ['💪', '🔥', '⚡'], adhkar: ['🌙', '✨', '🤍'], sleep: ['🌙', '💤', '⭐'], day: ['🎉', '⭐', '✨'], rank: ['🏆', '🎉', '🥇', '✨'], lead: ['👑', '🔥', '✨'] };
+  var cssDone = false;
+  function css() {
+    if (cssDone || typeof document === 'undefined') return; cssDone = true; var s = document.createElement('style');
+    s.textContent = '.gfx{position:fixed;inset-inline:0;top:max(12px,env(safe-area-inset-top));z-index:99999;display:flex;justify-content:center;pointer-events:none}.gfx>div{background:#14532d;color:#fff;border-radius:16px;padding:10px 16px;font:600 14px/1.4 inherit;box-shadow:0 10px 30px rgba(0,0,0,.28);animation:gfxIn .5s cubic-bezier(.2,1.4,.4,1) both;max-width:92vw;text-align:center}.gfx.out>div{animation:gfxOut .4s ease both}.gfx small{display:block;font-weight:400;opacity:.85}.gfxp{position:fixed;top:-30px;z-index:99998;pointer-events:none;animation:gfxFall linear forwards}@keyframes gfxIn{from{transform:translateY(-30px) scale(.8);opacity:0}to{transform:none;opacity:1}}@keyframes gfxOut{to{transform:translateY(-20px);opacity:0}}@keyframes gfxFall{to{transform:translateY(105vh) rotate(360deg);opacity:.9}}@media (prefers-reduced-motion:reduce){.gfxp{display:none}}';
+    document.head.appendChild(s);
+  }
+  function fx(kind, text, sub, opt) {
+    if (typeof document === 'undefined') return; opt = opt || {}; css(); chime(kind);
+    var host = document.createElement('div'); host.className = 'gfx'; host.setAttribute('role', 'status'); host.innerHTML = '<div></div>'; var box = host.firstChild; box.textContent = text; if (sub) { var sm = document.createElement('small'); sm.textContent = sub; box.appendChild(sm); }
+    document.body.appendChild(host); setTimeout(function () { host.className = 'gfx out'; }, opt.ms || 3200); setTimeout(function () { if (host.parentNode) host.parentNode.removeChild(host); }, (opt.ms || 3200) + 500);
+    var set = CONF[kind] || CONF.meal, n = opt.n || 14;
+    for (var i = 0; i < n; i++) { var p = document.createElement('span'); p.className = 'gfxp'; p.textContent = set[i % set.length]; p.style.left = Math.round(Math.random() * 96) + 'vw'; p.style.fontSize = (16 + Math.round(Math.random() * 16)) + 'px'; p.style.animationDuration = (1.6 + Math.random() * 1.6) + 's'; p.style.animationDelay = (Math.random() * 0.5) + 's'; document.body.appendChild(p); (function (q) { setTimeout(function () { if (q.parentNode) q.parentNode.removeChild(q); }, 3800); })(p); }
+  }
+
+  // ---------- صور المجموعة: تُضغط على الجهاز ثم تُشفَّر بمفتاح المجموعة قبل الرفع، ولا تفكّها إلا أجهزة الأعضاء
+  function H() { return (typeof self !== 'undefined' ? self : this).HXC; }
+  function shrink(file, maxBytes) {
+    return new Promise(function (ok, no) {
+      var url = URL.createObjectURL(file), im = new Image(); im.onerror = function () { URL.revokeObjectURL(url); no(new Error('تعذّر قراءة الصورة')); };
+      im.onload = function () {
+        URL.revokeObjectURL(url); var side = 960, q = 0.72;
+        (function tryIt() {
+          var k = Math.min(1, side / Math.max(im.width, im.height)), cv = document.createElement('canvas'); cv.width = Math.max(1, Math.round(im.width * k)); cv.height = Math.max(1, Math.round(im.height * k)); cv.getContext('2d').drawImage(im, 0, 0, cv.width, cv.height);
+          cv.toBlob(function (b) {
+            if (!b) return no(new Error('تعذّر ضغط الصورة'));
+            if (b.size > maxBytes && (q > 0.4 || side > 400)) { if (q > 0.4) q -= 0.1; else side -= 160; return tryIt(); }
+            if (b.size > maxBytes) return no(new Error('الصورة كبيرة جداً'));
+            var fr = new FileReader(); fr.onload = function () { ok(new Uint8Array(fr.result)); }; fr.onerror = function () { no(new Error('تعذّر قراءة الصورة')); }; fr.readAsArrayBuffer(b);
+          }, 'image/jpeg', q);
+        })();
+      };
+      im.src = url;
+    });
+  }
+  var IMGS = {};
+  function imgGet(base, gkey, mkey) {
+    var id = gkey.slice(0, 8) + mkey; if (IMGS[id]) return IMGS[id];
+    return (IMGS[id] = fetch(base + '/m/' + mkey).then(function (r) { if (!r.ok) throw new Error('انتهت صلاحية الصورة'); return r.arrayBuffer(); }).then(function (buf) { var x = H(); return x.gOpenBytes(gkey, x.b64u(new Uint8Array(buf))); }).then(function (u8) { return URL.createObjectURL(new Blob([u8], { type: 'image/jpeg' })); }).catch(function (e) { delete IMGS[id]; throw e; }));
+  }
+  function hydrate(el, base, gkey) {
+    if (!el) return; [].forEach.call(el.querySelectorAll('img[data-gk]'), function (im) {
+      var k = im.getAttribute('data-gk'); im.removeAttribute('data-gk');
+      imgGet(base, gkey, k).then(function (u) { im.src = u; im.classList.add('ok'); }).catch(function () { im.alt = 'انتهت صلاحية الصورة (تُحذف بعد 7 أيام)'; im.classList.add('gone'); });
+    });
+  }
+  function resize(file, maxBytes) { return shrink(file, maxBytes || 240000); }
+  // رسالة الترتيب اليومي تُنشر من أي جهاز يفتح بعد التاسعة مساءً؛ تُعرض الأولى لكل يوم فقط فلا تتكرر
+  function visible(msgs) { var seen = {}; return msgs.filter(function (m) { var b = m.body || m; if (!b || b.t !== 'rank') return true; var k = (b.fin ? 'f' : 'd') + (b.day || ''); if (seen[k]) return false; seen[k] = 1; return true; }); }
+  return { shrink: resize, imgGet: imgGet, hydrate: hydrate, visible: visible, TOOLS: TOOLS, PRESETS: PRESETS, REWARDS: REWARDS, tool: tool, byId: function (id) { return BYID[id] || null; }, makeChal: makeChal, dayKey: dayKey, addDays: addDays, range: range, state: state, daysLeft: daysLeft, board: board, todayLeft: todayLeft, rewards: rewards, rewardLabel: rewardLabel, rankText: rankText, codeOf: codeOf, normCode: normCode, fx: fx, chime: chime, mute: function (m) { muted = !!m; }, copy: copy };
+});
 </script><script>// ================= استبيانات التسجيل في «زنها» (مشترك بين «زنها Pro» و«زنها» والاختبارات)
 // لكل نظام استبيان: الحصص (ex) والجرامات (g). الاستبيان = أقسام (خطوات) فيها أسئلة:
 //   - أسئلة أساسية (b:1) لها مكان ثابت في ملف العميل (الاسم، الوزن، جدول التدريب…): يغيّر الأخصائي نصها أو يخفيها، والأساسية جداً (lock) لا تُخفى.
@@ -6106,7 +6260,7 @@ function chClients() { return S.clients.filter(function (c) { return c.hx; }); }
 function chUnread() { return chClients().reduce(function (a, c) { return a + ((c.hx && c.hx.unread) || 0); }, 0); }
 function chList() {
   var q = String(CHT.q || '').trim().toLowerCase(), rows = chClients().filter(function (c) { return !q || String(c.name || c.code).toLowerCase().indexOf(q) >= 0; }).sort(function (a, b) { var x = chLast(a), y = chLast(b); return (y ? y.ts : 0) - (x ? x.ts : 0) || String(a.name).localeCompare(String(b.name), 'ar'); });
-  return rows.map(function (c) {
+  return (q ? '' : gpRows()) + rows.map(function (c) {
     var m = chLast(c), un = (c.hx && c.hx.unread) || 0;
     return '<button class="chrow' + (CHT.sel === c.code ? ' on' : '') + '" data-a="czOpen" data-v="' + esc(c.code) + '"><span class="cav">' + esc(initial(c.name)) + '</span><span class="cht2"><b>' + esc(c.name || c.code) + '</b><small>' + (m ? (m.from === 'd' ? (m.read ? '✓✓ ' : '✓ ') : '') + esc(String(m.t || '').slice(0, 60)) : 'ابدأ المحادثة') + '</small></span><span class="chmeta">' + (m ? '<small' + (un ? ' class="un"' : '') + '>' + esc(ctDay(m.ts) === 'اليوم' ? chTime(m.ts) : ctDay(m.ts)) + '</small>' : '') + (un ? '<em class="hxnb">' + un + '</em>' : '') + '</span></button>';
   }).join('') || '<p class="small" style="padding:12px">لا عملاء مرتبطون بـ«زنها» بعد. ادعُ عميلاً من تبويب «📲 زنها» في ملفه ليظهر هنا.</p>';
@@ -6122,13 +6276,13 @@ function chThread(c) {
   return out || '<div class="empty chempty"><p class="small">لا رسائل بعد. ما يكتبه العميل من «راسل الأخصائي» يظهر هنا مع إشعار، وتستطيع أن تبدأ أنت.</p></div>';
 }
 function chPage() {
-  var c = S.clients.filter(function (x) { return x.code === CHT.sel && x.hx; })[0];
+  var gsel = String(CHT.sel).indexOf('g:') === 0, c = gsel ? null : S.clients.filter(function (x) { return x.code === CHT.sel && x.hx; })[0];
   var side = '<div class="chl"><div class="chsearch"><input id="chQ" type="search" placeholder="ابحث عن عميل" value="' + esc(CHT.q) + '" aria-label="بحث في المحادثات"></div><div class="chrows">' + chList() + '</div></div>';
-  var main = c ? '<section class="chm"><header class="chh"><button class="sec sm chback" data-a="czBack" aria-label="رجوع إلى المحادثات">›</button><span class="cav">' + esc(initial(c.name)) + '</span><div><b>' + esc(c.name || c.code) + '</b><small>' + (c.hx.sentAt ? 'خطته v' + (c.hx.planV || 1) + ' • ' : '') + 'آخر تحقق ' + hxAgo(HX.last) + '</small></div><button class="sec sm" data-a="czFile" data-v="' + esc(c.code) + '" style="margin-inline-start:auto">فتح ملفه</button></header>'
+  var main = gsel ? gpMain() : c ? '<section class="chm"><header class="chh"><button class="sec sm chback" data-a="czBack" aria-label="رجوع إلى المحادثات">›</button><span class="cav">' + esc(initial(c.name)) + '</span><div><b>' + esc(c.name || c.code) + '</b><small>' + (c.hx.sentAt ? 'خطته v' + (c.hx.planV || 1) + ' • ' : '') + 'آخر تحقق ' + hxAgo(HX.last) + '</small></div><button class="sec sm" data-a="czFile" data-v="' + esc(c.code) + '" style="margin-inline-start:auto">فتح ملفه</button></header>'
     + '<div class="chbody" id="chBody">' + chThread(c) + '</div><div class="chquick">' + CH_QUICK.map(function (q, i) { return '<button class="chip" data-a="czQuick" data-v="' + i + '">' + esc(q) + '</button>'; }).join('') + '</div>'
     + '<div class="chcomp"><textarea id="chIn" rows="1" maxlength="2000" placeholder="اكتب رسالة…" aria-label="رسالة للعميل"></textarea><button data-a="czSend" aria-label="إرسال">➤</button></div></section>'
     : '<section class="chm chnone"><div class="empty"><p><b>شات زنها</b></p><p class="small">اختر عميلاً من القائمة لتبدأ المحادثة. كل الرسائل مشفّرة بين جوالك وجواله.</p></div></section>';
-  return '<div class="chwrap' + (c ? ' open' : '') + '"><div class="chlbar"><button class="chexit" data-a="home" aria-label="رجوع إلى زنها برو">›</button><b>شات زنها</b></div><div class="hxtop"><h2>💬 شات زنها</h2><small class="small">محادثات الأخصائي مع عملائه، مشفّرة طرفاً لطرف.</small></div><div class="chgrid">' + side + main + '</div></div>';
+  return '<div class="chwrap' + (c || gsel ? ' open' : '') + '"><div class="chlbar"><button class="chexit" data-a="home" aria-label="رجوع إلى زنها برو">›</button><b>شات زنها</b></div><div class="hxtop"><h2>💬 شات زنها</h2><small class="small">محادثات الأخصائي مع عملائه، مشفّرة طرفاً لطرف.</small></div><div class="chgrid">' + side + main + '</div></div>';
 }
 function chRe(keep) { if (S.view !== 'chat') return; CHT.keep = !!keep; main(); }
 function chPaint() {                                                   // رسم الصفحة مع الإبقاء على ما يكتبه الأخصائي وموضع التمرير
@@ -6168,6 +6322,224 @@ document.addEventListener('keydown', function (e) { var t = e.target; if (t && t
 (function (f) { hxRe = function () { if (S.view === 'chat') { var c = S.clients.filter(function (x) { return x.code === CHT.sel; })[0]; if (c && c.hx && c.hx.unread && !document.hidden) chRead(c); main(); chRail(); return; } return f.apply(this, arguments); }; })(hxRe);
 (function (f) { if (typeof hxRail === 'function') hxRail = function () { f.apply(this, arguments); chRail(); }; })(typeof hxRail === 'function' ? hxRail : null);
 window.CHX = { unread: chUnread, thread: chThread, day: ctDay };       // للاختبارات
+
+// ================= المجموعات والتحديات في «شات زنها» عند الأخصائي (0.93) — يُدمج داخل app.js عند /*GRPUI*/
+// المجموعة = مفتاح مشترك (AES) + سر تحقق للمحطة، يصل الأعضاءَ عبر الرسالة الفردية المشفّرة {t:'grp'}. الأخصائي وحده يضيف الأعضاء ويحذفهم.
+// عند حذف عضو تُجدَّد هوية المجموعة (gid/مفتاح/سر) فلا يبقى له أي وصول، ويُحوَّل الباقون إليها تلقائياً.
+var GP = { tab: 'chat', open: '', busy: false, seen: {}, edit: null };
+var GP_EMOJI = ['👥', '🏆', '🔥', '🌿', '💪', '🥗', '🌙', '⭐'];
+function gpAll() { HX.st.groups = HX.st.groups || {}; return HX.st.groups; }
+function gpList() { var a = gpAll(); return Object.keys(a).map(function (k) { return a[k]; }).sort(function (x, y) { return gpLastTs(y) - gpLastTs(x); }); }
+function gpGet(id) { return gpAll()[id] || null; }
+function gpCur() { return String(CHT.sel).indexOf('g:') === 0 ? gpGet(CHT.sel.slice(2)) : null; }
+function gpLastTs(g) { var m = g.msgs && g.msgs[g.msgs.length - 1]; return m ? m.ts * 1000 : g.created || 0; }
+function gpMe() { return HX.st.ident.id; }
+function gpName() { return String(HX.st.name || 'الأخصائي').slice(0, 30); }
+function gpUnread() { return gpList().reduce(function (a, g) { return a + (g.unread || 0); }, 0); }
+function gpMeta(g) { return { gid: g.gid, key: g.key, ga: g.ga, name: g.name, emoji: g.emoji, kind: g.kind, members: g.members, chal: g.chal || null, v: g.v || 1, did: gpMe(), old: g.old || '' }; }
+function gpPushMeta(g, only) {
+  return Promise.all(g.members.filter(function (m) { return !only || m.id === only; }).map(function (m) { var c = hxClientOf(m.id); return c ? hxSend(c, { t: 'grp', g: gpMeta(g) }).catch(function () { }) : 0; }));
+}
+function gpPost(g, obj) {
+  obj.nm = obj.nm || gpName(); obj.ts = Date.now();
+  return HXC0.gSeal(g.key, obj).then(function (box) { return hxFetch('POST', '/v1/g/send', { gid: g.gid, ga: g.ga, box: box }, true); });
+}
+function gpLabel(g, id, b) {
+  var p = g.prof && g.prof[id], m = g.members.filter(function (x) { return x.id === id; })[0];
+  return id === gpMe() ? gpName() : (m && m.nm) || (p && p.nm) || (b && b.nm) || 'عضو';
+}
+function gpAv(g, id, nm) { var p = g.prof && g.prof[id]; return p && p.ph ? '<span class="cav"><img src="' + esc(p.ph) + '" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover"></span>' : '<span class="cav">' + esc(initial(nm)) + '</span>'; }
+// ---------- القائمة الجانبية
+function gpRows() {
+  var gs = gpList(), out = '<button class="sec sm gpnewb" data-a="gpNew" style="margin:8px 12px;width:calc(100% - 24px)">＋ مجموعة أو تحدٍّ جديد</button>';
+  gs.forEach(function (g) {
+    var m = g.msgs && g.msgs[g.msgs.length - 1], b = m && m.body, prev = !b ? 'ابدأ المحادثة' : b.t === 'img' ? '📷 صورة' : b.t === 'act' ? (GRP.byId(b.tool) ? GRP.byId(b.tool).ico + ' ' + GRP.byId(b.tool).say : 'إنجاز') : b.t === 'rank' ? '🏁 ترتيب' : String(b.x || '').slice(0, 40);
+    out += '<button class="chrow' + (CHT.sel === 'g:' + g.gid ? ' on' : '') + '" data-a="gpOpen" data-v="' + esc(g.gid) + '"><span class="cav">' + esc(g.emoji || '👥') + '</span><span class="cht2"><b>' + esc(g.name) + (g.chal ? ' 🏆' : '') + '</b><small>' + esc(prev) + '</small></span>' + (g.unread ? '<span class="chun">' + g.unread + '</span>' : '') + '</button>';
+  });
+  return out;
+}
+// ---------- الصفحة الرئيسية للمجموعة
+function gpMain() {
+  var id = CHT.sel.slice(2); if (id === 'new') return gpNewForm(); var g = gpGet(id); if (!g) return '<section class="chm chnone"><div class="empty"><p class="small">المجموعة غير موجودة</p></div></section>';
+  var tabs = [['chat', '💬 الدردشة'], ['rank', '🏆 الترتيب'], ['set', '⚙ الإعدادات']].map(function (t) { return '<button class="chip' + (GP.tab === t[0] ? ' on' : '') + '" data-a="gpTab" data-v="' + t[0] + '">' + t[1] + '</button>'; }).join('');
+  var head = '<header class="chh"><button class="sec sm chback" data-a="czBack" aria-label="رجوع إلى المحادثات">›</button><span class="cav">' + esc(g.emoji || '👥') + '</span><div><b>' + esc(g.name) + '</b><small>' + g.members.length + ' عضو' + (g.chal ? ' • ' + esc(g.chal.name) : '') + '</small></div></header><div class="chquick gptabs">' + tabs + '</div>';
+  if (GP.tab === 'rank') return '<section class="chm">' + head + '<div class="chbody gpbody">' + gpRank(g) + '</div></section>';
+  if (GP.tab === 'set') return '<section class="chm">' + head + '<div class="chbody gpbody">' + gpSettings(g) + '</div></section>';
+  return '<section class="chm">' + head + '<div class="chbody" id="chBody">' + gpThread(g) + '</div><div class="chcomp"><input type="file" id="gpImg" accept="image/*" capture="environment" hidden><button data-a="gpPhoto" aria-label="إرفاق صورة">📷</button><textarea id="chIn" rows="1" maxlength="1500" placeholder="اكتب للمجموعة…" aria-label="رسالة للمجموعة"></textarea><button data-a="czSend" aria-label="إرسال">➤</button></div></section>';
+}
+function gpBubble(g, m, cont) {
+  var b = m.body || {}, me = m.from === gpMe(), nm = gpLabel(g, m.from, b), tm = chTime(m.ts * 1000), who = me ? '' : '<small class="gpwho">' + esc(nm) + '</small>';
+  if (b.t === 'sys') return '<div class="chsep"><span>' + esc(b.x) + '</span></div>';
+  if (b.t === 'rank') return '<div class="gprank"><pre>' + esc(b.x || '') + '</pre><small class="chtm">' + tm + '</small></div>';
+  if (b.t === 'act') { var t = GRP.byId(b.tool) || { ico: '⭐', say: 'أنجز' }; return '<div class="gpact"><span>' + t.ico + '</span><div><b>' + esc(nm) + '</b> ' + esc(t.say) + (b.note ? ' — ' + esc(b.note) : '') + (b.k ? '<img data-gk="' + esc(b.k) + '" alt="صورة" class="gpim">' : '') + '</div><small class="chtm">' + tm + '</small></div>'; }
+  if (b.t === 'prof') return '';
+  var inner = b.t === 'img' ? '<img data-gk="' + esc(b.k) + '" alt="صورة" class="gpim">' + (b.cap ? '<span class="cht3">' + esc(b.cap) + '</span>' : '') : '<span class="cht3">' + esc(b.x || '').replace(/\n/g, '<br>') + '</span>';
+  return '<div class="chb' + (me ? ' me' : '') + (cont ? ' cont' : '') + '">' + (cont ? '' : who) + inner + '<small class="chtm">' + tm + '</small></div>';
+}
+function gpThread(g) {
+  var out = '', last = '', prev = null; GRP.visible(g.msgs || []).forEach(function (m) {
+    var d = ctDay(m.ts * 1000); if (d !== last) { out += '<div class="chsep"><span>' + esc(d) + '</span></div>'; last = d; prev = null; }
+    var cont = prev && prev.from === m.from && m.ts - prev.ts < 120 && (m.body || {}).t === 'm' && (prev.body || {}).t === 'm'; prev = m; out += gpBubble(g, m, cont);
+  });
+  return out || '<div class="empty chempty"><p class="small">لا رسائل بعد. اكتب أول رسالة للمجموعة' + (g.chal ? '، وسيظهر هنا كل إنجاز يسجّله الأعضاء.' : '.') + '</p></div>';
+}
+// ---------- الترتيب
+function gpRowsHtml(rows, g, me) {
+  if (!rows.length) return '<p class="small">لا نشاط بعد.</p>';
+  return '<ol class="gprows">' + rows.map(function (u) { return '<li class="' + (u.id === me ? 'me' : '') + '"><span class="gpr">' + (['🥇', '🥈', '🥉'][u.rank - 1] || u.rank) + '</span>' + gpAv(g, u.id, gpLabel(g, u.id, u)) + '<b>' + esc(gpLabel(g, u.id, u)) + '</b><span class="gpp">' + u.pts + ' نقطة</span></li>'; }).join('') + '</ol>';
+}
+function gpRank(g) {
+  if (!g.chal) return '<div class="ucard"><h3>🏆 لا يوجد تحدٍّ في هذه المجموعة</h3><p class="small">حوّلها إلى تحدٍّ ليكسب الأعضاء نقاطاً من أدوات «زنها» ويظهر الترتيب اليومي.</p><button data-a="gpTab" data-v="set">إعداد تحدٍّ</button></div>';
+  var ch = g.chal, st = GRP.state(ch), msgs = g.msgs || [], all = GRP.board(msgs, ch), today = GRP.board(msgs, ch, { day: GRP.dayKey(Date.now()) }), rw = GRP.rewards(all, ch.reward);
+  var stT = st === 'live' ? 'جارٍ — باقي ' + GRP.daysLeft(ch) + ' يوماً' : st === 'soon' ? 'يبدأ ' + ch.start : 'انتهى';
+  return '<div class="ucard"><div class="hxtop"><h3>' + esc(ch.ico || '🏆') + ' ' + esc(ch.name) + '</h3><span class="sbchip ' + (st === 'live' ? 'ok' : 'n') + '">' + stT + '</span></div>'
+    + '<p class="small">الأدوات: ' + ch.tools.map(function (t) { var d = GRP.byId(t.id); return d ? d.ico + ' ' + d.name + ' (' + t.pts + ')' : ''; }).join(' • ') + '</p></div>'
+    + '<div class="ucard"><h3>ترتيب اليوم</h3>' + gpRowsHtml(today, g, '') + '<button class="sec sm" data-a="gpPostRank" data-v="d">📣 انشر ترتيب اليوم في المجموعة</button></div>'
+    + '<div class="ucard"><h3>الترتيب الإجمالي</h3>' + gpRowsHtml(all, g, '') + '</div>'
+    + '<div class="ucard"><h3>🎁 الجوائز المستحقة (' + esc(gpModeName(ch.reward)) + ')</h3>' + (rw.length ? '<ul class="gprw">' + rw.map(function (r) { return '<li>' + (['🥇', '🥈', '🥉'][r.rank - 1] || r.rank + '.') + ' <b>' + esc(r.nm) + '</b> — ' + esc(r.label) + '</li>'; }).join('') + '</ul>' : '<p class="small">لا مستحقين بعد.</p>')
+    + (g.closed && g.closed[ch.start] ? '<p class="small">✅ سُجّلت جوائز هذا التحدي في اشتراكات العملاء.</p>' : '<button data-a="gpClose">🏁 اعتماد النتيجة وتسجيل الجوائز</button><p class="small">تُسجَّل الجوائز في «الاشتراكات» عند كل عميل بحالة «بانتظار اعتمادك»، ولا يُطبَّق خصم قبل موافقتك.</p>') + '</div>';
+}
+function gpModeName(rw) { var m = rw && rw.mode; return m === 'first' ? 'الأول فقط' : m === 'top2' ? 'الأول والثاني' : m === 'all' ? 'كل المراتب' : m === 'pts' ? 'حسب النقاط' : 'بلا جوائز'; }
+// ---------- الإعدادات: الاسم والأعضاء والتحدي والجوائز
+function gpEd(g) { if (!GP.edit || GP.edit.gid !== g.gid) GP.edit = { gid: g.gid, chal: g.chal ? GRP.copy(g.chal) : null }; return GP.edit; }
+function gpRewardRows(rw) {
+  var items = rw.items || [], pts = rw.mode === 'pts', max = rw.mode === 'first' ? 1 : rw.mode === 'top2' ? 2 : 8;
+  return items.slice(0, max).map(function (it, i) {
+    return '<div class="gprwr"><b>' + (pts ? '≥ <input type="number" min="0" data-gk2="min" data-i="' + i + '" value="' + (+it.min || 0) + '" style="width:70px"> نقطة' : (['🥇', '🥈', '🥉'][i] || (i + 1) + '.') + ' المرتبة ' + (i + 1)) + '</b>'
+      + '<select data-gk2="kind" data-i="' + i + '"><option value="disc"' + (it.kind === 'disc' ? ' selected' : '') + '>خصم ٪</option><option value="days"' + (it.kind === 'days' ? ' selected' : '') + '>أيام هدية</option><option value="text"' + (it.kind === 'text' ? ' selected' : '') + '>جائزة نصية</option></select>'
+      + (it.kind === 'text' ? '<input data-gk2="label" data-i="' + i + '" value="' + esc(it.label || '') + '" maxlength="60" placeholder="مثال: وجبة مجانية" style="flex:1">' : '<input type="number" min="1" data-gk2="val" data-i="' + i + '" value="' + (+it.val || 0) + '" style="width:80px">') + '</div>';
+  }).join('') + ((rw.mode === 'all' || rw.mode === 'pts') && items.length < 8 ? '<button class="sec sm" data-a="gpRwAdd">＋ مرتبة</button>' : '');
+}
+function gpChalForm(g) {
+  var e = gpEd(g), ch = e.chal;
+  var pre = '<div class="chquick">' + GRP.PRESETS.map(function (p) { return '<button class="chip" data-a="gpPreset" data-v="' + p.id + '">' + p.ico + ' ' + esc(p.name) + '</button>'; }).join('') + '</div>';
+  if (!ch) return '<div class="ucard"><h3>🏆 تحويل المجموعة إلى تحدٍّ</h3><p class="small">اختر قالباً جاهزاً (تقدر تعدّل كل شيء بعده):</p>' + pre + '</div>';
+  var tools = GRP.TOOLS.map(function (t) {
+    var x = GRP.tool(ch, t.id); return '<tr><td><label><input type="checkbox" data-gt="' + t.id + '"' + (x ? ' checked' : '') + '> ' + t.ico + ' ' + esc(t.name) + '</label></td><td><input type="number" min="0" max="100" data-gp="' + t.id + '" value="' + (x ? x.pts : t.pts) + '" style="width:64px"></td><td><input type="number" min="1" max="12" data-gm="' + t.id + '" value="' + (x ? x.max : t.max) + '" style="width:56px"></td></tr>';
+  }).join('');
+  var rm = GRP.REWARDS.map(function (r) { return '<button class="chip' + (ch.reward && ch.reward.mode === r.mode ? ' on' : '') + '" data-a="gpRwMode" data-v="' + r.id + '">' + r.ico + ' ' + esc(r.name) + '</button>'; }).join('');
+  return '<div class="ucard"><h3>🏆 إعداد التحدي</h3>' + pre
+    + '<div class="gpfld"><label>اسم التحدي <input id="gcName" maxlength="40" value="' + esc(ch.name) + '"></label><label>يبدأ <input id="gcStart" type="date" value="' + esc(ch.start) + '"></label><label>المدة <select id="gcDays">' + [[1, 'يوم واحد'], [7, 'أسبوع'], [14, 'أسبوعان'], [30, 'شهر']].map(function (d) { return '<option value="' + d[0] + '"' + (+ch.days === d[0] ? ' selected' : '') + '>' + d[1] + '</option>'; }).join('') + '</select></label></div>'
+    + '<table class="gptools"><thead><tr><th>الأداة</th><th>نقاط المرة</th><th>أقصى مرات يومياً</th></tr></thead><tbody>' + tools + '</tbody></table>'
+    + '<h3>🎁 الجوائز</h3><p class="small">اختر نمط التوزيع ثم عدّل القيم:</p><div class="chquick">' + rm + '</div>' + gpRewardRows(ch.reward || { mode: 'first', items: [] })
+    + '<div class="gpbtns"><button data-a="gpSaveChal">💾 حفظ التحدي وإرساله للأعضاء</button><button class="sec" data-a="gpDropChal">إلغاء التحدي</button></div></div>';
+}
+function gpSettings(g) {
+  var mem = S.clients.filter(function (c) { return c.hx; }).map(function (c) { var on = g.members.some(function (m) { return m.id === c.hx.cid; }); return '<label class="gpm"><input type="checkbox" data-gmem="' + esc(c.hx.cid) + '"' + (on ? ' checked' : '') + '> ' + esc(c.name || c.code) + '</label>'; }).join('') || '<p class="small">لا عملاء مرتبطون بـ«زنها» بعد.</p>';
+  return '<div class="ucard"><h3>⚙ المجموعة</h3><div class="gpfld"><label>الاسم <input id="gsName" maxlength="40" value="' + esc(g.name) + '"></label><label>الرمز <select id="gsEmoji">' + GP_EMOJI.map(function (x) { return '<option' + (x === g.emoji ? ' selected' : '') + '>' + x + '</option>'; }).join('') + '</select></label></div><button data-a="gpSaveInfo">حفظ</button></div>'
+    + '<div class="ucard"><h3>👥 الأعضاء (الأخصائي وحده يضيف ويحذف)</h3><div class="gpmem">' + mem + '</div><button data-a="gpSaveMem">تحديث الأعضاء</button><p class="small">عند حذف عضو تُجدَّد مفاتيح المجموعة تلقائياً فلا يعود يرى رسائلها.</p></div>'
+    + gpChalForm(g) + '<div class="ucard"><button class="sec dng" data-a="gpDelete">🗑 حذف المجموعة</button></div>';
+}
+function gpNewForm() {
+  var mem = S.clients.filter(function (c) { return c.hx; }).map(function (c) { return '<label class="gpm"><input type="checkbox" data-gnm="' + esc(c.hx.cid) + '"> ' + esc(c.name || c.code) + '</label>'; }).join('') || '<p class="small">اربط عملاء بـ«زنها» أولاً.</p>';
+  return '<section class="chm"><header class="chh"><button class="sec sm chback" data-a="czBack" aria-label="رجوع">›</button><b>مجموعة جديدة</b></header><div class="chbody gpbody"><div class="ucard"><div class="gpfld"><label>اسم المجموعة <input id="gnName" maxlength="40" placeholder="مثال: تحدي رمضان"></label><label>النوع <select id="gnKind"><option value="chal">تحدٍّ بنقاط وجوائز</option><option value="chat">دردشة فقط</option></select></label></div><h3>الأعضاء</h3><div class="gpmem">' + mem + '</div><button data-a="gpCreate">إنشاء المجموعة</button></div></div></section>';
+}
+// ---------- الاستقبال
+function gpHandle(g, m) {
+  var b = m.body, mine = m.from === gpMe(); if (b.t === 'prof') { g.prof = g.prof || {}; g.prof[m.from] = { nm: String(b.nm || '').slice(0, 30), ph: typeof b.ph === 'string' && /^data:image\/jpeg;base64,/.test(b.ph) && b.ph.length < 20000 ? b.ph : '' }; return; }
+  if (mine) return;
+  var fresh = Date.now() - m.ts * 1000 < 90000 && !GP.seen[g.gid + ':' + m.id]; GP.seen[g.gid + ':' + m.id] = 1;
+  if (!(CHT.sel === 'g:' + g.gid && S.view === 'chat' && !document.hidden)) g.unread = (g.unread || 0) + 1;
+  if (!fresh) return; var nm = gpLabel(g, m.from, b);
+  if (b.t === 'act') { var t = GRP.byId(b.tool); if (t) GRP.fx(t.fx, nm + ' ' + t.say + ' ' + t.ico, g.name); }
+  else if (b.t === 'rank' && b.fin) GRP.fx('rank', '🏆 النتيجة النهائية — ' + g.name);
+}
+function gpPollOne(g) {
+  return hxFetch('POST', '/v1/g/poll', { gid: g.gid, ga: g.ga, after: g.after || 0 }, true).then(function (j) {
+    return (j.msgs || []).reduce(function (p, m) {
+      return p.then(function () { g.after = Math.max(g.after || 0, m.id); return HXC0.gOpen(g.key, m.body).then(function (b) { var x = { id: m.id, from: m.from, body: b, ts: m.ts }; g.msgs = (g.msgs || []).concat([x]).slice(-400); gpHandle(g, x); }).catch(function () { }); });
+    }, Promise.resolve()).then(function () { return j.more ? gpPollOne(g) : 0; });
+  });
+}
+function gpPoll() {
+  if (!hxOn() || GP.busy) return Promise.resolve(0); GP.busy = true; var got = 0;
+  return gpList().reduce(function (p, g) { return p.then(function () { var b = (g.msgs || []).length, a = g.after; return gpPollOne(g).catch(function () { }).then(function () { got += (g.msgs || []).length - b; if (a !== g.after) HX.dirty = 1; }); }); }, Promise.resolve())
+    .then(function () { gpAutoRank(); if (HX.dirty) { HX.dirty = 0; return hxSave(); } }).catch(function () { }).then(function () { GP.busy = false; if (got) { if (S.view === 'chat' && (CHT.sel + '').indexOf('g:') === 0) { var g = gpCur(); if (g && !document.hidden) g.unread = 0; chRe(true); } chRail(); } return got; });
+}
+// الترتيب اليومي التلقائي بعد التاسعة مساءً (يُنشر مرة واحدة لليوم؛ ولو نشره جهاز آخر تُعرض الأولى فقط)
+function gpAutoRank() {
+  var now = new Date(), day = GRP.dayKey(now.getTime()); if (now.getHours() < 21) return;
+  gpList().forEach(function (g) {
+    if (!g.chal || GRP.state(g.chal) !== 'live' || g.rankDay === day) return; g.rankDay = day;
+    if ((g.msgs || []).some(function (m) { return m.body && m.body.t === 'rank' && m.body.day === day; })) return;
+    var rows = GRP.board(g.msgs || [], g.chal, { day: day }); if (!rows.length) return;
+    rows.forEach(function (u) { u.nm = gpLabel(g, u.id, u); }); gpPost(g, { t: 'rank', day: day, x: GRP.rankText(rows, 'اليوم', 5) }).catch(function () { });
+  });
+}
+// ---------- الإجراءات
+function gpSel(id) { CHT.sel = 'g:' + id; GP.tab = 'chat'; GP.edit = null; var g = gpGet(id); if (g) g.unread = 0; chRail(); }
+function gpRead(sel) { return Array.prototype.slice.call(document.querySelectorAll(sel)); }
+function gpSaveAll() { return hxSave(); }
+Object.assign(A, {
+  gpNew: function () { CHT.sel = 'g:new'; chRe(); },
+  gpOpen: function (v) { gpSel(v); chRe(true); gpHydrate(); },
+  gpTab: function (v) { GP.tab = v; chRe(); gpHydrate(); },
+  gpCreate: function () {
+    var name = ($('#gnName').value || '').trim(); if (!name) return toast('اكتب اسم المجموعة'); var kind = $('#gnKind').value, ids = gpRead('[data-gnm]:checked').map(function (x) { return x.getAttribute('data-gnm'); });
+    var gx = HXC0.gNew(); HXC0.gah(gx.ga).then(function (ah) { return hxFetch('POST', '/v1/g/new', { gid: gx.gid, ah: ah }, true); }).then(function () {
+      var g = { gid: gx.gid, key: gx.key, ga: gx.ga, name: name, emoji: kind === 'chal' ? '🏆' : '👥', kind: kind, members: ids.map(function (id) { var c = hxClientOf(id); return { id: id, nm: c ? c.name || c.code : 'عضو' }; }), chal: kind === 'chal' ? GRP.makeChal('meals') : null, v: 1, after: 0, msgs: [], unread: 0, created: Date.now() };
+      gpAll()[g.gid] = g; return gpSaveAll().then(function () { return gpPushMeta(g); }).then(function () { return gpPost(g, { t: 'sys', x: 'أُنشئت المجموعة «' + name + '»' + (g.chal ? ' — بدأ التحدي 🏆' : '') }); }).then(function () { gpSel(g.gid); if (kind === 'chal') GP.tab = 'set'; chRe(); return gpPoll(); });
+    }).catch(hxErr);
+  },
+  gpPhoto: function () { var f = $('#gpImg'); if (f) f.click(); },
+  gpSaveInfo: function () { var g = gpCur(); if (!g) return; g.name = ($('#gsName').value || '').trim() || g.name; g.emoji = $('#gsEmoji').value; g.v++; gpSaveAll().then(function () { return gpPushMeta(g); }).then(function () { toast('تم الحفظ'); chRe(); }); },
+  gpSaveMem: function () {
+    var g = gpCur(); if (!g) return; var want = gpRead('[data-gmem]:checked').map(function (x) { return x.getAttribute('data-gmem'); }), have = g.members.map(function (m) { return m.id; });
+    var added = want.filter(function (id) { return have.indexOf(id) < 0; }), removed = have.filter(function (id) { return want.indexOf(id) < 0; });
+    if (!added.length && !removed.length) return toast('لا تغيير');
+    g.members = want.map(function (id) { var c = hxClientOf(id); return { id: id, nm: c ? c.name || c.code : 'عضو' }; }); g.v++;
+    var rekey = removed.length ? (function () { var gx = HXC0.gNew(); return HXC0.gah(gx.ga).then(function (ah) { return hxFetch('POST', '/v1/g/new', { gid: gx.gid, ah: ah }, true); }).then(function () { delete gpAll()[g.gid]; g.old = g.gid; g.gid = gx.gid; g.key = gx.key; g.ga = gx.ga; g.after = 0; gpAll()[g.gid] = g; CHT.sel = 'g:' + g.gid; }); })() : Promise.resolve();
+    rekey.then(function () { removed.forEach(function (id) { var c = hxClientOf(id); if (c) hxSend(c, { t: 'grpx', gid: g.old || g.gid }).catch(function () { }); }); return gpSaveAll(); }).then(function () { return gpPushMeta(g); }).then(function () { g.old = ''; return gpPost(g, { t: 'sys', x: removed.length ? 'تغيّر أعضاء المجموعة' : 'انضمّ أعضاء جدد' }); }).then(function () { toast('تم تحديث الأعضاء'); chRe(); }).catch(hxErr);
+  },
+  gpPreset: function (v) { var g = gpCur(); if (!g) return; var e = gpEd(g), old = e.chal; e.chal = GRP.makeChal(v); if (old) e.chal.reward = old.reward; chRe(); },
+  gpRwMode: function (v) { var g = gpCur(); if (!g) return; gpReadChal(g); var e = gpEd(g), r = GRP.REWARDS.filter(function (x) { return x.id === v; })[0]; e.chal.reward = { mode: r.mode, items: GRP.copy(r.items) }; chRe(); },
+  gpRwAdd: function () { var g = gpCur(); if (!g) return; gpReadChal(g); var rw = gpEd(g).chal.reward; rw.items.push(rw.mode === 'pts' ? { min: 20, kind: 'text', label: 'شهادة تقدير' } : { kind: 'text', label: 'جائزة تشجيعية' }); chRe(); },
+  gpDropChal: function () { var g = gpCur(); if (!g || !confirm('إلغاء التحدي؟ تبقى المجموعة للدردشة.')) return; g.chal = null; GP.edit = null; g.v++; gpSaveAll().then(function () { return gpPushMeta(g); }).then(function () { chRe(); }); },
+  gpSaveChal: function () {
+    var g = gpCur(); if (!g) return; gpReadChal(g); var ch = gpEd(g).chal; if (!ch.tools.length) return toast('اختر أداة واحدة على الأقل');
+    g.chal = GRP.copy(ch); g.kind = 'chal'; g.v++; gpSaveAll().then(function () { return gpPushMeta(g); }).then(function () { return gpPost(g, { t: 'sys', x: '🏆 تحدي «' + ch.name + '» — يبدأ ' + ch.start + ' ولمدة ' + ch.days + ' يوم' }); }).then(function () { toast('أُرسل التحدي للأعضاء'); GP.tab = 'rank'; chRe(); return gpPoll(); }).catch(hxErr);
+  },
+  gpDelete: function () { var g = gpCur(); if (!g || !confirm('حذف المجموعة من جهازك ومن أجهزة أعضائها؟')) return; g.members.forEach(function (m) { var c = hxClientOf(m.id); if (c) hxSend(c, { t: 'grpx', gid: g.gid }).catch(function () { }); }); delete gpAll()[g.gid]; CHT.sel = ''; gpSaveAll().then(function () { chRe(); chRail(); }); },
+  gpPostRank: function () {
+    var g = gpCur(); if (!g || !g.chal) return; var day = GRP.dayKey(Date.now()), rows = GRP.board(g.msgs || [], g.chal, { day: day }); if (!rows.length) return toast('لا نشاط اليوم بعد');
+    rows.forEach(function (u) { u.nm = gpLabel(g, u.id, u); }); gpPost(g, { t: 'rank', day: day, x: GRP.rankText(rows, 'اليوم', 5) }).then(function () { toast('نُشر الترتيب'); return gpPoll(); }).catch(hxErr);
+  },
+  gpClose: function () {
+    var g = gpCur(); if (!g || !g.chal) return; var ch = g.chal, st = GRP.state(ch); if (st !== 'ended' && !confirm('التحدي لم ينتهِ بعد. تسجيل الجوائز الآن؟')) return;
+    var rows = GRP.board(g.msgs || [], ch); rows.forEach(function (u) { u.nm = gpLabel(g, u.id, u); }); var rw = GRP.rewards(rows, ch.reward), n = 0;
+    rw.forEach(function (r) { var c = hxClientOf(r.id); if (!c) return; c.rewards = c.rewards || []; c.rewards.push({ id: 'r' + Date.now().toString(36) + n, gid: g.gid, ch: ch.name, rank: r.rank, pts: r.pts, kind: r.kind, val: r.val, label: r.label, ts: Date.now(), st: 'pending' }); persist(c); n++; hxSend(c, { t: 'msg', text: '🎉 فزت في «' + ch.name + '» بالمركز ' + r.rank + ' (' + r.pts + ' نقطة). جائزتك: ' + r.label + ' — سنتواصل معك لتفعيلها.' }).catch(function () { }); });
+    g.closed = g.closed || {}; g.closed[ch.start] = 1; gpSaveAll();
+    gpPost(g, { t: 'rank', fin: 1, day: ch.start, x: GRP.rankText(rows, 'تحدي «' + ch.name + '» (النهائي)', 5) + (rw.length ? '\n\n🎁 الجوائز:\n' + rw.map(function (r) { return r.nm + ': ' + r.label; }).join('\n') : '') }).then(function () { toast('سُجّلت ' + n + ' جائزة في اشتراكات العملاء بانتظار اعتمادك'); chRe(); return gpPoll(); }).catch(hxErr);
+  },
+  gpRw: function (v) {                                                   // اعتماد جائزة أو رفضها من ملف العميل
+    var p = String(v).split('|'), c = S.clients.filter(function (x) { return x.code === p[0]; })[0], r = c && (c.rewards || []).filter(function (x) { return x.id === p[1]; })[0]; if (!r) return;
+    if (p[2] === 'ok') { r.st = 'ok'; if (r.kind === 'days' && typeof sbHas === 'function' && sbHas(c)) { sbExtend(c, r.val, 'جائزة تحدي «' + r.ch + '»'); r.st = 'done'; } } else r.st = 'no'; persist(c); main();
+  }
+});
+function gpReadChal(g) {
+  var e = gpEd(g), ch = e.chal; if (!ch || !$('#gcName')) return; ch.name = ($('#gcName').value || '').trim() || ch.name; ch.start = $('#gcStart').value || ch.start; ch.days = +$('#gcDays').value || ch.days;
+  ch.tools = gpRead('[data-gt]:checked').map(function (x) { var id = x.getAttribute('data-gt'); return { id: id, pts: Math.max(0, Math.min(100, +($('[data-gp="' + id + '"]').value) || 0)), max: Math.max(1, Math.min(12, +($('[data-gm="' + id + '"]').value) || 1)) }; });
+  var rw = ch.reward; if (rw) gpRead('[data-gk2]').forEach(function (x) { var it = rw.items[+x.getAttribute('data-i')]; if (!it) return; var k = x.getAttribute('data-gk2'); it[k] = (k === 'label' || k === 'kind') ? x.value : +x.value || 0; if (k === 'kind' && x.value !== 'text') { it.val = it.val || 10; } });
+}
+function gpHydrate() { var bd = $('#chBody'), g = gpCur(); if (bd && g) GRP.hydrate(bd, hxRelay(), g.key); }
+document.addEventListener('change', function (e) { var t = e.target; if (t && t.getAttribute && t.getAttribute('data-gk2') === 'kind') { var g = gpCur(); if (g) { gpReadChal(g); var it = gpEd(g).chal.reward.items[+t.getAttribute('data-i')]; if (it.kind === 'text' && !it.label) it.label = 'جائزة تشجيعية'; if (it.kind !== 'text' && !it.val) it.val = 10; chRe(true); } } });
+document.addEventListener('change', function (e) {
+  var t = e.target; if (!t || t.id !== 'gpImg' || !t.files || !t.files[0]) return; var g = gpCur(), f = t.files[0]; t.value = ''; if (!g) return; toast('جارٍ ضغط الصورة وتشفيرها…');
+  GRP.shrink(f, 240000).then(function (u8) { return HXC0.gSealBytes(g.key, u8); }).then(function (c) { return hxFetch('POST', '/v1/g/media', { gid: g.gid, ga: g.ga, c: c }, true); }).then(function (r) { return gpPost(g, { t: 'img', k: r.key }); }).then(function () { return gpPoll(); }).catch(function (er) { toast('⚠ ' + er.message); });
+});
+// ---------- تكامل
+(function (f) { var c0 = A.czSend; A.czSend = function () {
+  var g = gpCur(); if (!g) return c0.apply(this, arguments); var ta = $('#chIn'), t = ta && ta.value.trim(); if (!t) return; ta.disabled = true;
+  gpPost(g, { t: 'm', x: t.slice(0, 1500) }).then(function () { return gpPoll(); }).then(function () { var n = $('#chIn'); if (n) { n.disabled = false; n.value = ''; n.focus(); } }).catch(function (e) { var n = $('#chIn'); if (n) n.disabled = false; hxErr(e); });
+}; })();
+(function (f) { chUnread = function () { return f.apply(this, arguments) + gpUnread(); }; })(chUnread);
+(function (f) { hxPoll = function () { var p = f.apply(this, arguments); return p.then(function (n) { return gpPoll().then(function (m) { return n + m; }); }); }; })(hxPoll);
+(function (f) { var czo = A.czOpen; A.czOpen = function (v) { GP.edit = null; return czo.apply(this, arguments); }; })();
+(function (f) { chPaint = function () { f.apply(this, arguments); gpHydrate(); }; })(chPaint);
+(function (f) { HX_PUSH.push('grp'); })();
+// جوائز التحديات داخل تبويب الاشتراك
+(function (f) { subTab = function (c) { var h = f.apply(this, arguments), rs = c.rewards || []; if (!rs.length) return h; return h + '<div class="ucard"><h3>🎁 جوائز التحديات</h3>' + rs.map(function (r) { var stt = r.st === 'pending' ? '<span class="sbchip w">بانتظار اعتمادك</span> <button class="sm" data-a="gpRw" data-v="' + esc(c.code + '|' + r.id + '|ok') + '">اعتماد</button> <button class="sec sm" data-a="gpRw" data-v="' + esc(c.code + '|' + r.id + '|no') + '">رفض</button>' : r.st === 'done' ? '<span class="sbchip ok">طُبّقت</span>' : r.st === 'ok' ? '<span class="sbchip ok">معتمدة — طبّقها عند التجديد</span>' : '<span class="sbchip n">مرفوضة</span>'; return '<p><b>' + esc(r.label) + '</b> — المركز ' + r.rank + ' في «' + esc(r.ch) + '» (' + r.pts + ' نقطة) ' + stt + '</p>'; }).join('') + '</div>'; }; })(subTab);
+window.GPX = { post: gpPost, list: gpList, poll: gpPoll, board: function (id) { var g = gpGet(id); return GRP.board(g.msgs, g.chal); }, get: gpGet };    // للاختبارات
 
 // ================= تجربة عميل أغنى (المرحلة 5) — يُدمج داخل app.js عند /*RICHUI*/
 // 1) الوصفات: لكل وجبة في محرر الحصص وصفة (خطوات، وقت التحضير، نصيحة، صورة) تُحفظ في S.settings.recipes وتصل مع الخطة إلى «زنها».

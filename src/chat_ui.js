@@ -11,7 +11,7 @@ function chClients() { return S.clients.filter(function (c) { return c.hx; }); }
 function chUnread() { return chClients().reduce(function (a, c) { return a + ((c.hx && c.hx.unread) || 0); }, 0); }
 function chList() {
   var q = String(CHT.q || '').trim().toLowerCase(), rows = chClients().filter(function (c) { return !q || String(c.name || c.code).toLowerCase().indexOf(q) >= 0; }).sort(function (a, b) { var x = chLast(a), y = chLast(b); return (y ? y.ts : 0) - (x ? x.ts : 0) || String(a.name).localeCompare(String(b.name), 'ar'); });
-  return rows.map(function (c) {
+  return (q ? '' : gpRows()) + rows.map(function (c) {
     var m = chLast(c), un = (c.hx && c.hx.unread) || 0;
     return '<button class="chrow' + (CHT.sel === c.code ? ' on' : '') + '" data-a="czOpen" data-v="' + esc(c.code) + '"><span class="cav">' + esc(initial(c.name)) + '</span><span class="cht2"><b>' + esc(c.name || c.code) + '</b><small>' + (m ? (m.from === 'd' ? (m.read ? '✓✓ ' : '✓ ') : '') + esc(String(m.t || '').slice(0, 60)) : 'ابدأ المحادثة') + '</small></span><span class="chmeta">' + (m ? '<small' + (un ? ' class="un"' : '') + '>' + esc(ctDay(m.ts) === 'اليوم' ? chTime(m.ts) : ctDay(m.ts)) + '</small>' : '') + (un ? '<em class="hxnb">' + un + '</em>' : '') + '</span></button>';
   }).join('') || '<p class="small" style="padding:12px">لا عملاء مرتبطون بـ«زنها» بعد. ادعُ عميلاً من تبويب «📲 زنها» في ملفه ليظهر هنا.</p>';
@@ -27,13 +27,13 @@ function chThread(c) {
   return out || '<div class="empty chempty"><p class="small">لا رسائل بعد. ما يكتبه العميل من «راسل الأخصائي» يظهر هنا مع إشعار، وتستطيع أن تبدأ أنت.</p></div>';
 }
 function chPage() {
-  var c = S.clients.filter(function (x) { return x.code === CHT.sel && x.hx; })[0];
+  var gsel = String(CHT.sel).indexOf('g:') === 0, c = gsel ? null : S.clients.filter(function (x) { return x.code === CHT.sel && x.hx; })[0];
   var side = '<div class="chl"><div class="chsearch"><input id="chQ" type="search" placeholder="ابحث عن عميل" value="' + esc(CHT.q) + '" aria-label="بحث في المحادثات"></div><div class="chrows">' + chList() + '</div></div>';
-  var main = c ? '<section class="chm"><header class="chh"><button class="sec sm chback" data-a="czBack" aria-label="رجوع إلى المحادثات">›</button><span class="cav">' + esc(initial(c.name)) + '</span><div><b>' + esc(c.name || c.code) + '</b><small>' + (c.hx.sentAt ? 'خطته v' + (c.hx.planV || 1) + ' • ' : '') + 'آخر تحقق ' + hxAgo(HX.last) + '</small></div><button class="sec sm" data-a="czFile" data-v="' + esc(c.code) + '" style="margin-inline-start:auto">فتح ملفه</button></header>'
+  var main = gsel ? gpMain() : c ? '<section class="chm"><header class="chh"><button class="sec sm chback" data-a="czBack" aria-label="رجوع إلى المحادثات">›</button><span class="cav">' + esc(initial(c.name)) + '</span><div><b>' + esc(c.name || c.code) + '</b><small>' + (c.hx.sentAt ? 'خطته v' + (c.hx.planV || 1) + ' • ' : '') + 'آخر تحقق ' + hxAgo(HX.last) + '</small></div><button class="sec sm" data-a="czFile" data-v="' + esc(c.code) + '" style="margin-inline-start:auto">فتح ملفه</button></header>'
     + '<div class="chbody" id="chBody">' + chThread(c) + '</div><div class="chquick">' + CH_QUICK.map(function (q, i) { return '<button class="chip" data-a="czQuick" data-v="' + i + '">' + esc(q) + '</button>'; }).join('') + '</div>'
     + '<div class="chcomp"><textarea id="chIn" rows="1" maxlength="2000" placeholder="اكتب رسالة…" aria-label="رسالة للعميل"></textarea><button data-a="czSend" aria-label="إرسال">➤</button></div></section>'
     : '<section class="chm chnone"><div class="empty"><p><b>شات زنها</b></p><p class="small">اختر عميلاً من القائمة لتبدأ المحادثة. كل الرسائل مشفّرة بين جوالك وجواله.</p></div></section>';
-  return '<div class="chwrap' + (c ? ' open' : '') + '"><div class="chlbar"><button class="chexit" data-a="home" aria-label="رجوع إلى زنها برو">›</button><b>شات زنها</b></div><div class="hxtop"><h2>💬 شات زنها</h2><small class="small">محادثات الأخصائي مع عملائه، مشفّرة طرفاً لطرف.</small></div><div class="chgrid">' + side + main + '</div></div>';
+  return '<div class="chwrap' + (c || gsel ? ' open' : '') + '"><div class="chlbar"><button class="chexit" data-a="home" aria-label="رجوع إلى زنها برو">›</button><b>شات زنها</b></div><div class="hxtop"><h2>💬 شات زنها</h2><small class="small">محادثات الأخصائي مع عملائه، مشفّرة طرفاً لطرف.</small></div><div class="chgrid">' + side + main + '</div></div>';
 }
 function chRe(keep) { if (S.view !== 'chat') return; CHT.keep = !!keep; main(); }
 function chPaint() {                                                   // رسم الصفحة مع الإبقاء على ما يكتبه الأخصائي وموضع التمرير
