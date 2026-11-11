@@ -200,5 +200,24 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); };
     await c7(C2, 'POST', '/v1/clients/remove', {}); assert.strictEqual(env7.DB._raw.prepare('SELECT COUNT(*) AS n FROM remind').get().n, 0);
     globalThis.fetch = rf; ok('التذكيرات: للعميل فقط، أوقات بربع ساعة، المشغّل المجدول يُشعر من حان وقته فقط، وعامل الخدمة يعرف أنه تذكير لا رسالة، والإيقاف أو حذف الحساب يمسحها');
   }
+  // ---- مجموعات التحدي: نصوص مشفّرة بمفتاح المجموعة، والتحقق بسر ga، والصور مشفّرة وتُخدم من /m
+  {
+    const gc = await HXC.genIdentity(), gtk = HXC.token(); await call(dr, 'POST', '/v1/invites', { h: await HXC.tokenHash(gtk), label: 'غ' }); assert.strictEqual((await call(gc, 'POST', '/v1/join', { token: gtk, sigPub: gc.sigPub, encPub: gc.encPub })).s, 200);
+    const gx = HXC.gNew(), ah = await HXC.gah(gx.ga), g = '/v1/g';
+    { const r = await call(gc, 'POST', g + '/new', { gid: gx.gid, ah }); assert.strictEqual(r.s, 403, 'للأخصائي فقط ' + JSON.stringify(r.j)); }
+    assert.strictEqual((await call(dr, 'POST', g + '/new', { gid: gx.gid, ah })).s, 200); assert.strictEqual((await call(dr, 'POST', g + '/new', { gid: gx.gid, ah })).s, 409);
+    const box = await HXC.gSeal(gx.key, { t: 'm', nm: 'سارة', x: 'صباح الخير 🌞' });
+    assert.strictEqual((await call(gc, 'POST', g + '/send', { gid: gx.gid, ga: 'wrong', box })).s, 403, 'سر خاطئ');
+    const sr = await call(gc, 'POST', g + '/send', { gid: gx.gid, ga: gx.ga, box }); assert.strictEqual(sr.s, 200);
+    const box2 = await HXC.gSeal(gx.key, { t: 'act', tool: 'meal', pts: 10 }); await call(dr, 'POST', g + '/send', { gid: gx.gid, ga: gx.ga, box: box2 });
+    const pl = await call(dr, 'POST', g + '/poll', { gid: gx.gid, ga: gx.ga, after: 0 }); assert.strictEqual(pl.j.msgs.length, 2); assert.strictEqual(pl.j.msgs[0].from, gc.id);
+    assert(!JSON.stringify(pl.j).includes('صباح'), 'المحطة لا ترى النص'); assert.deepStrictEqual(await HXC.gOpen(gx.key, pl.j.msgs[0].body), { t: 'm', nm: 'سارة', x: 'صباح الخير 🌞' });
+    await assert.rejects(HXC.gOpen(HXC.gNew().key, pl.j.msgs[0].body)); assert.strictEqual((await call(gc, 'POST', g + '/poll', { gid: gx.gid, ga: gx.ga, after: pl.j.msgs[1].id })).j.msgs.length, 0);
+    const img = new Uint8Array(3000).map((_, i) => i % 251), sealed = await HXC.gSealBytes(gx.key, img), up = await call(gc, 'POST', g + '/media', { gid: gx.gid, ga: gx.ga, c: sealed }); assert.strictEqual(up.s, 200);
+    const mr = await W.default.fetch(new Request(base + '/m/' + up.j.key), env), mb = new Uint8Array(await mr.arrayBuffer()); assert.strictEqual(mr.status, 200);
+    assert.deepStrictEqual(Array.from(await HXC.gOpenBytes(gx.key, HXC.b64u(mb))), Array.from(img), 'الصورة المشفّرة تُفتح بمفتاح المجموعة فقط');
+    assert.strictEqual((await call(gc, 'POST', g + '/media', { gid: gx.gid, ga: 'x', c: sealed })).s, 403);
+    ok('مجموعات التحدي: إنشاء للأخصائي فقط، وإرسال/استقبال مشفّر لا تراه المحطة، وسرّ خاطئ يُرفض، والصور مشفّرة وتُفتح بمفتاح المجموعة');
+  }
   console.log('\nنجح', n, 'اختبارات المحطة الوسيطة');
-})().catch((e) => { console.log('✘', e && e.stack ? e.stack.split('\n').slice(0, 4).join(' | ') : e); process.exit(1); });
+})().catch((e) => { console.log('✘', e && e.stack ? e.stack.split('\n').slice(0, 14).join(' | ') : e); process.exit(1); });

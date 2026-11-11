@@ -4,7 +4,7 @@
    - تقدّم تطبيق «زنها» نفسه على الصفحة الرئيسية (/)، فرابط الدعوة = عنوان هذه المحطة.
    - الجداول تُنشأ تلقائياً أول مرة؛ يكفي ربط قاعدة D1 باسم DB. متغير اختياري REG_KEY: مفتاح تسجيل الأخصائيين (بدونه يقبل أي «حصة»).
    - لا تسجّل أي محتوى (لا console.log). يُبنى منه worker/relay/dist/worker.js بـ py build_web.py (يُضمَّن تطبيق «زنها» وأيقونته). */
-const VER = '1.8';
+const VER = '1.9';
 // ---- 1.7: رخصة الأخصائي: كود تفعيل موقَّع بمفتاح المدير (ADMIN_PUB، مفتاح عام) يغني عن مفتاح التسجيل، فيُربط الأخصائي تلقائياً دون سر في الموقع
 const b64uBytes = (x) => { x = x.replace(/-/g, '+').replace(/_/g, '/'); while (x.length % 4) x += '='; const b = atob(x), u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; };
 async function licOk(tok, env) {
@@ -22,7 +22,7 @@ const SW_JS = /*HISSATI_SW*/''/*END*/;
 const QURAN_TXT = /*QURAN_TXT*/''/*END*/;                      // 0.58: نص المصحف (Tanzil، بلا تعديل) وخط Amiri Quran؛ يُطلبان عند فتح القارئ فقط ويُحفظان على الجوال
 const QURAN_FONT = /*QURAN_FONT*/''/*END*/;
 const ICONS = /*HISSATI_ICONS*/{}/*END*/;                          // أيقونات التثبيت من المتصفح: icon-192 / icon-512 / maskable-512 / apple-180
-const LIM = { remind: 24, chunk: 900000, chunks: 40, keep: 7, xfer: 1500000, xferTtl: 900, body: 1600000, box: 450000, cat: 300000, label: 80, invitesActive: 300, perHour: 400, inbox: 100, skew: 300 };
+const LIM = { remind: 24, chunk: 900000, chunks: 40, keep: 7, xfer: 1500000, xferTtl: 900, body: 1600000, box: 450000, cat: 300000, label: 80, invitesActive: 300, perHour: 400, inbox: 100, skew: 300, groups: 60, gbox: 12000, gperHour: 600, gpoll: 100, gimg: 330000, gTtl: 30 * 86400, gimgTtl: 7 * 86400 };
 const enc = new TextEncoder();
 const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-methods': 'GET, POST, OPTIONS', 'access-control-allow-headers': 'authorization, content-type', 'access-control-max-age': '86400' };
 const json = (o, status = 200) => new Response(JSON.stringify(o), { status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', ...CORS } });
@@ -71,6 +71,9 @@ const SCHEMA = [
   'CREATE TABLE IF NOT EXISTS remind (id TEXT PRIMARY KEY, mins TEXT NOT NULL, upd INTEGER)',
   'CREATE TABLE IF NOT EXISTS creds (uh TEXT PRIMARY KEY, did TEXT NOT NULL, h TEXT NOT NULL, salt TEXT NOT NULL, iter INTEGER NOT NULL, blob TEXT NOT NULL, exp INTEGER, created INTEGER)',
   'CREATE TABLE IF NOT EXISTS credtry (uh TEXT PRIMARY KEY, n INTEGER NOT NULL, t INTEGER NOT NULL)',
+  'CREATE TABLE IF NOT EXISTS grps (gid TEXT PRIMARY KEY, did TEXT NOT NULL, ah TEXT NOT NULL, created INTEGER)',
+  'CREATE TABLE IF NOT EXISTS gmsgs (id INTEGER PRIMARY KEY AUTOINCREMENT, gid TEXT NOT NULL, sender TEXT NOT NULL, body TEXT NOT NULL, ts INTEGER)',
+  'CREATE INDEX IF NOT EXISTS gm_idx ON gmsgs (gid, id)',
   'CREATE TABLE IF NOT EXISTS vault_chunks (vid TEXT NOT NULL, up TEXT NOT NULL, idx INTEGER NOT NULL, data TEXT NOT NULL, ts INTEGER, PRIMARY KEY (vid, up, idx))'
 ];
 let ready = null;
@@ -282,6 +285,30 @@ async function api(req, env, url, ctx) {
     await db.batch([db.prepare('DELETE FROM msgs WHERE rcpt = ? OR sender = ?').bind(cid, cid), db.prepare('DELETE FROM push_subs WHERE id = ?').bind(cid), db.prepare('DELETE FROM remind WHERE id = ?').bind(cid), db.prepare('DELETE FROM xfer WHERE cid = ?').bind(cid), db.prepare('UPDATE posts SET likes = MAX(0, likes - (SELECT COUNT(*) FROM post_likes WHERE pid = posts.id AND uid = ?)), comments = MAX(0, comments - (SELECT COUNT(*) FROM comments WHERE pid = posts.id AND uid = ?))').bind(cid, cid), db.prepare('DELETE FROM post_likes WHERE uid = ?').bind(cid), db.prepare('DELETE FROM comments WHERE uid = ?').bind(cid), db.prepare('DELETE FROM clients WHERE id = ?').bind(cid)]);
     return json({ ok: true });
   }
+  // ---- مجموعات التحدي (0.91): المحطة تحفظ نصوصاً مشفّرة بمفتاح المجموعة فقط؛ الأعضاء يتبادلون المفتاح عبر الرسائل المشفّرة الثنائية. التحقق: بصمة السر ga تُخزَّن عند الإنشاء
+  if (p === '/v1/g/new' && method === 'POST') {
+    if (me.role !== 'd') return err(403, 'role', 'للأخصائي فقط'); const gid = String(J.gid || ''), ah = String(J.ah || '');
+    if (!/^[A-Za-z0-9_-]{16,32}$/.test(gid) || !/^[A-Za-z0-9_-]{43}$/.test(ah)) return err(400, 'g', 'بيانات المجموعة غير صالحة');
+    if (await one(db, 'SELECT gid FROM grps WHERE gid = ?', gid)) return err(409, 'dup', 'المجموعة موجودة');
+    const n = await one(db, 'SELECT COUNT(*) AS n FROM grps WHERE did = ?', me.id); if (n && n.n >= LIM.groups) return err(429, 'many', 'عدد المجموعات كبير');
+    await run(db, 'INSERT INTO grps (gid, did, ah, created) VALUES (?, ?, ?, ?)', gid, me.id, ah, now()); return json({ ok: true });
+  }
+  if (p === '/v1/g/send' || p === '/v1/g/poll' || p === '/v1/g/media') {
+    if (method !== 'POST') return err(405, 'method', 'POST فقط'); const g = await one(db, 'SELECT gid, did, ah FROM grps WHERE gid = ?', String(J.gid || ''));
+    if (!g || b64u(await sha256('ga.' + String(J.ga || ''))) !== g.ah) return err(403, 'group', 'لا صلاحية لهذه المجموعة');
+    if (p === '/v1/g/poll') {
+      const after = Math.max(0, parseInt(J.after || '0', 10) || 0), rows = await all(db, 'SELECT id, sender, body, ts FROM gmsgs WHERE gid = ? AND id > ? ORDER BY id LIMIT ?', g.gid, after, LIM.gpoll);
+      return json({ ok: true, msgs: rows.map((r) => ({ id: r.id, from: r.sender, body: JSON.parse(r.body), ts: r.ts })), more: rows.length === LIM.gpoll });
+    }
+    if (p === '/v1/g/send') {
+      const box = J.box; if (!box || typeof box !== 'object') return err(400, 'box', 'رسالة فارغة'); const sb = JSON.stringify(box); if (sb.length > LIM.gbox) return err(413, 'big', 'الرسالة أكبر من المسموح');
+      const n = await one(db, 'SELECT COUNT(*) AS n FROM gmsgs WHERE sender = ? AND ts > ?', me.id, now() - 3600); if (n && n.n >= LIM.gperHour) return err(429, 'rate', 'رسائل كثيرة خلال ساعة');
+      const r = await run(db, 'INSERT INTO gmsgs (gid, sender, body, ts) VALUES (?, ?, ?, ?)', g.gid, me.id, sb, now()); return json({ ok: true, id: r.meta && r.meta.last_row_id });
+    }
+    const c = String(J.c || ''); if (!/^[A-Za-z0-9_-]+$/.test(c) || c.length > LIM.gimg) return err(413, 'big', 'الصورة أكبر من المسموح');
+    const key = b64u(crypto.getRandomValues(new Uint8Array(18)));
+    await run(db, 'INSERT INTO media (key, did, type, size, store, data, created) VALUES (?, ?, ?, ?, ?, ?, ?)', key, g.did, 'application/octet-stream', Math.floor(c.length * 0.75), 'd1', c, now()); return json({ ok: true, key });
+  }
   const fr = await feedApi(p, method, J, me, db, env, url, bg, origin); if (fr) return fr;
   return err(404, 'route', 'مسار غير معروف');
 }
@@ -409,7 +436,7 @@ export async function remindTick(env, at) {
   for (const r of rows) await pushTo(db, r.id, origin, 'rem'); return rows.length;
 }
 export default {
-  async scheduled(event, env, ctx) { const p = remindTick(env, event && event.scheduledTime).catch(() => 0); if (ctx && ctx.waitUntil) ctx.waitUntil(p); return p; },
+  async scheduled(event, env, ctx) { const p = Promise.all([remindTick(env, event && event.scheduledTime).catch(() => 0), gcGroups(env).catch(() => 0)]).then((r) => r[0]); if (ctx && ctx.waitUntil) ctx.waitUntil(p); return p; },
   async fetch(req, env, ctx) {
     const url = new URL(req.url);
     if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS });
@@ -420,4 +447,8 @@ export default {
     } catch (e) { return err(500, 'server', 'خطأ في المحطة'); }
   }
 };
+async function gcGroups(env) {                                    // مجموعات التحدي: الرسائل 30 يوماً والصور 7 أيام
+  const db = env.DB; if (!db) return 0; await init(db); const t = now();
+  await run(db, 'DELETE FROM gmsgs WHERE ts < ?', t - LIM.gTtl); await run(db, "DELETE FROM media WHERE type = 'application/octet-stream' AND created < ?", t - LIM.gimgTtl); return 1;
+}
 export const _test = { reset: () => { ready = null; vapidC = null; jwtC.clear(); } };

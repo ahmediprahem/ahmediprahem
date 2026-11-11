@@ -64,5 +64,13 @@
   function credOpen(pw, o) { var raw = unb64u(o.blob), iter = +o.iter; if (!(iter >= 100000 && iter <= 1000000) || raw.length < 29) return Promise.reject(new Error('bad')); return credKey(pw, unb64u(o.salt), iter).then(function (k) { return S.decrypt({ name: 'AES-GCM', iv: raw.slice(0, 12) }, k, raw.slice(12)); }).then(function (pt) { return dec.decode(pt); }); }
   function token() { return b64u(rand(18)); }                  // رمز الدعوة (144 بت)
   function tokenHash(t) { return sha256('inv.' + t).then(function (h) { return b64u(h).slice(0, 32); }); }
-  return { userHash: userHash, credSeal: credSeal, credOpen: credOpen, b64u: b64u, unb64u: unb64u, sha256: sha256, hex: hex, idOf: idOf, fpOf: fpOf, genIdentity: genIdentity, signReq: signReq, parseAuth: parseAuth, verifyReq: verifyReq, seal: seal, open: open, wrap: wrap, unwrap: unwrap, token: token, tokenHash: tokenHash, pubOnly: pubOnly };
+  // 0.91: مجموعات التحدي — مفتاح المجموعة (AES-256) وسر التحقق ga يتبادلهما الأعضاء عبر الرسائل المشفّرة الثنائية؛ المحطة ترى النص المشفّر وبصمة السر فقط
+  function gNew() { return { gid: b64u(rand(15)), key: b64u(rand(32)), ga: b64u(rand(24)) }; }
+  function gah(ga) { return sha256('ga.' + ga).then(function (h) { return b64u(h); }); }
+  function gKey(k) { return S.importKey('raw', unb64u(k), { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']); }
+  function gSeal(k, obj) { var iv = rand(12); return gKey(k).then(function (key) { return S.encrypt({ name: 'AES-GCM', iv: iv }, key, enc.encode(JSON.stringify(obj))); }).then(function (c) { return { v: 1, iv: b64u(iv), c: b64u(c) }; }); }
+  function gOpen(k, box) { return gKey(k).then(function (key) { return S.decrypt({ name: 'AES-GCM', iv: unb64u(box.iv) }, key, unb64u(box.c)); }).then(function (pt) { return JSON.parse(dec.decode(pt)); }); }
+  function gSealBytes(k, u8) { var iv = rand(12); return gKey(k).then(function (key) { return S.encrypt({ name: 'AES-GCM', iv: iv }, key, u8); }).then(function (c) { var all = new Uint8Array(12 + c.byteLength); all.set(iv, 0); all.set(new Uint8Array(c), 12); return b64u(all); }); }
+  function gOpenBytes(k, str) { var raw = unb64u(str); return gKey(k).then(function (key) { return S.decrypt({ name: 'AES-GCM', iv: raw.slice(0, 12) }, key, raw.slice(12)); }).then(function (pt) { return new Uint8Array(pt); }); }
+  return { gNew: gNew, gah: gah, gSeal: gSeal, gOpen: gOpen, gSealBytes: gSealBytes, gOpenBytes: gOpenBytes, userHash: userHash, credSeal: credSeal, credOpen: credOpen, b64u: b64u, unb64u: unb64u, sha256: sha256, hex: hex, idOf: idOf, fpOf: fpOf, genIdentity: genIdentity, signReq: signReq, parseAuth: parseAuth, verifyReq: verifyReq, seal: seal, open: open, wrap: wrap, unwrap: unwrap, token: token, tokenHash: tokenHash, pubOnly: pubOnly };
 });
