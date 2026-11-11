@@ -51,7 +51,7 @@ function chGrow(t) { if (!t) return; t.style.height = 'auto'; t.style.height = M
 function chRead(c) {
   if (!c || !c.hx || !c.hx.unread) return; c.hx.unread = 0; persist(c); var last = chMsgs(c).filter(function (m) { return m.from === 'c'; }).slice(-1)[0]; if (last) hxSend(c, { t: 'read', upTo: last.ts }).catch(function () { }); chRail(); if (typeof hxRail === 'function') hxRail();
 }
-function chRail() { var b = document.querySelector('[data-a="zchat"] em'), n = chUnread(); if (b) { b.textContent = n || ''; b.style.display = n ? '' : 'none'; } }
+function chRail() { var n = chUnread(); [].forEach.call(document.querySelectorAll('[data-a="zchat"] em'), function (b) { b.textContent = n || ''; b.style.display = n ? '' : 'none'; }); var tb = document.querySelector('#tabbar [data-v="zchat"]'); if (tb) { var e = tb.querySelector('em'); if (!e && n) { e = document.createElement('em'); e.className = 'hxnb'; tb.appendChild(e); } if (e) { e.textContent = n || ''; e.style.display = n ? '' : 'none'; } } }
 Object.assign(A, {
   zchat: function () { S.view = 'chat'; S.cur = null; render(); var c = S.clients.filter(function (x) { return x.code === CHT.sel; })[0]; if (c) chRead(c); var bd = $('#chBody'); if (bd) bd.scrollTop = bd.scrollHeight; },
   czOpen: function (v) { CHT.sel = v; var c = S.clients.filter(function (x) { return x.code === v; })[0]; chRead(c); chRe(true); var t = $('#chIn'); if (t && !matchMedia('(max-width:700px)').matches) t.focus(); },

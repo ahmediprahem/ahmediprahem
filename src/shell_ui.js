@@ -21,8 +21,8 @@ function glassSide() {
 function tabbar() {                                                // شريط سفلي للجوال (يظهر بالـ CSS على الشاشات الصغيرة في الثيم الزجاجي فقط)
   var t = $('#tabbar'); if (!t) { t = document.createElement('nav'); t.id = 'tabbar'; t.setAttribute('aria-label', 'التنقل السريع'); document.body.appendChild(t); }
   var menu = document.body.classList.contains('menu'), v = S.view, home = v === 'client' && !S.cur && !menu;
-  var it = function (a, icon, label, on) { return '<button data-a="nav" data-v="' + a + '" class="' + (on ? 'on' : '') + '"' + (on ? ' aria-current="page"' : '') + '>' + IC(icon) + '<span>' + label + '</span></button>'; };
-  t.innerHTML = it('home', 'home', 'الرئيسية', home) + it('menu', 'users', 'العملاء', menu || (v === 'client' && !!S.cur)) + it('bank', 'book', 'بنك الوجبات', v === 'bank' && !menu) + it('settings', 'settings', 'الإعدادات', v === 'settings' && !menu);
+  var it = function (a, icon, label, on) { var n = a === 'zchat' && typeof chUnread === 'function' ? chUnread() : 0; return '<button data-a="nav" data-v="' + a + '" class="' + (on ? 'on' : '') + '"' + (on ? ' aria-current="page"' : '') + '>' + IC(icon) + '<span>' + label + '</span>' + (n ? '<em class="hxnb">' + n + '</em>' : '') + '</button>'; };
+  t.innerHTML = it('home', 'home', 'الرئيسية', home) + it('menu', 'users', 'العملاء', menu || (v === 'client' && !!S.cur)) + it('zchat', 'message', 'شات زنها', v === 'chat' && !menu) + it('bank', 'book', 'بنك الوجبات', v === 'bank' && !menu) + it('settings', 'settings', 'الإعدادات', v === 'settings' && !menu);
 }
 function firstName() { return String(CFG.userLabel || '').replace(/^المدير:\s*/, '').trim(); }
 function inboxCard() {                               // 0.86: «الوارد» في أول الرئيسية: طلبات التسجيل الجديدة ورسائل العملاء، بلمسة تفتح تبويب «زنها»
@@ -37,7 +37,7 @@ function homeGlass() {
   return '<div class="home ghome">'
     + '<section class="hero"><div class="herot"><h2>أهلاً بك' + (firstName() ? '، ' + esc(firstName()) : '') + '</h2><p>اختر عميلاً أو ابدأ خطة جديدة. كل بياناتك محفوظة ومشفّرة على هذا الجهاز.</p></div>' + (window.HK ? HK.splashHtml(HK.gateCfg(), 'splash') : '') + '</section>'
     + inboxCard() + wkToday() + '<div class="stats"><div><b>' + cs.length + '</b><small>عميل</small></div><div><b>' + withPlan + '</b><small>له خطة</small></div><div><b>' + ath + '</b><small>بالجرامات</small></div></div>'
-    + '<div class="qgrid">' + tile('new', 'ex', 'userPlus', 'نظام الحصص', 'عميل جديد: خطة بالحصص والبدائل') + tile('new', 'ath', 'dumbbell', 'نظام الجرامات', 'عميل جديد: خطة بالجرام والماكروز') + tile('bank', '', 'book', 'بنك الوجبات', 'وجبات المولّد وابتكار وجبة') + tile('ready', '', 'package', 'الخطط الجاهزة', 'خطط أسبوعية من مكتبتك + مكتبة الأخصائي') + tile('appts', '', 'calendar', 'المواعيد', 'مواعيد اليوم والأسبوع والمتابعات') + tile('subs', '', 'package', 'الاشتراكات', 'المتبقي لكل عميل والمدفوعات والتمديد') + tile('hxv', '', 'phone', 'زنها', 'ادعُ عميلاً برابط واتساب واستقبل طلباته') + tile('feed', '', 'megaphone', 'التثقيف', 'انشر نصائح وفيديوهات لمراجعيك') + tile('settings', '', 'settings', 'إعدادات النظام', 'الألوان والبدائل والشعار والمظهر') + '</div>'
+    + '<div class="qgrid">' + tile('new', 'ex', 'userPlus', 'نظام الحصص', 'عميل جديد: خطة بالحصص والبدائل') + tile('new', 'ath', 'dumbbell', 'نظام الجرامات', 'عميل جديد: خطة بالجرام والماكروز') + tile('bank', '', 'book', 'بنك الوجبات', 'وجبات المولّد وابتكار وجبة') + tile('ready', '', 'package', 'الخطط الجاهزة', 'خطط أسبوعية من مكتبتك + مكتبة الأخصائي') + tile('appts', '', 'calendar', 'المواعيد', 'مواعيد اليوم والأسبوع والمتابعات') + tile('zchat', '', 'message', 'شات زنها', 'محادثات العملاء بتنسيق واتساب') + tile('subs', '', 'package', 'الاشتراكات', 'المتبقي لكل عميل والمدفوعات والتمديد') + tile('hxv', '', 'phone', 'زنها', 'ادعُ عميلاً برابط واتساب واستقبل طلباته') + tile('feed', '', 'megaphone', 'التثقيف', 'انشر نصائح وفيديوهات لمراجعيك') + tile('settings', '', 'settings', 'إعدادات النظام', 'الألوان والبدائل والشعار والمظهر') + '</div>'
     + (recent ? '<h3>آخر العملاء</h3><div class="recent">' + recent + '</div>' : '<p class="small">لا عملاء بعد — ابدأ بـ«عميل جديد».</p>')
     + '<p class="two mobonly"><button data-a="new" data-v="ex">+ عميل جديد — الحصص</button><button class="o" data-a="new" data-v="ath">+ عميل جديد — الجرامات</button></p>'
     + bakCard() + vtHomeCard() + proInstCard() + appCard() + '</div>';
@@ -51,6 +51,7 @@ Object.assign(A, {
     document.body.classList.remove('menu');
     if (v === 'home') return A.home();
     if (v === 'settings') { S.view = 'settings'; render(); }
+    else if (v === 'zchat') A.zchat();
     else if (v === 'bank') A.bank();
     else if (v === 'lib') A.lib();
     else if (v === 'ready') A.ready();
