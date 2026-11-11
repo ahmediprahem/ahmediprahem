@@ -280,9 +280,24 @@ html[data-theme="glass"] .bakrem{border-color:rgba(245,166,35,.55)}html[data-the
 
 /* 0.87: مراجعة الاستعمال على الجوال (أخصائي): تبويبات العميل في صفين مرتّبين، وأزرار «عميل جديد» تحت الترحيب مباشرة، وترويسة الرئيسية مضغوطة */
 @media (max-width:600px){
-  html[data-theme="glass"] .tabs.ctabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;padding:6px}
-  html[data-theme="glass"] .tabs.ctabs>button,html[data-theme="glass"] .tabs.ctabs>.cmore,html[data-theme="glass"] .tabs.ctabs>.cmore>summary{flex:none;min-width:0;min-height:44px;padding:6px 2px;font-size:13px;line-height:1.25;white-space:normal;text-align:center;justify-content:center}
+  html[data-theme="glass"] .tabs.ctabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;padding:6px}
+  html[data-theme="glass"] .tabs.ctabs>button,html[data-theme="glass"] .tabs.ctabs>.cmore,html[data-theme="glass"] .tabs.ctabs>.cmore>summary{flex:none;min-width:0;min-height:44px;padding:6px 1px;font-size:12.5px;line-height:1.25;white-space:normal;text-align:center;justify-content:center}
   html[data-theme="glass"] .ghome .hero .splash,html[data-theme="glass"] .ghome .hero video.splash{display:none}
   html[data-theme="glass"] .ghome .hero{padding:16px 18px}
   html[data-theme="glass"] .ghome{display:flex;flex-direction:column}html[data-theme="glass"] .ghome .hero{order:-3}html[data-theme="glass"] .ghome .inboxc{order:-2}html[data-theme="glass"] .ghome .qgrid{order:-1}
 }
+
+/* 0.89: الاشتراكات */
+.sbchip{display:inline-block;border-radius:99px;padding:2px 12px;font-size:13px;font-weight:700;background:rgba(111,227,169,.16);color:#6fe3a9;white-space:nowrap}
+.sbchip.w{background:rgba(255,196,87,.18);color:#ffc457}.sbchip.no{background:rgba(255,138,128,.18);color:#ff8a80}.sbchip.n{background:rgba(255,255,255,.1);color:inherit;opacity:.8}
+.sbf{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}.sbf .wide{grid-column:1/-1}.sbf label{display:grid;gap:4px;font-size:14px}
+.sbrow{display:flex;align-items:center;gap:12px;width:100%;min-height:56px;padding:8px 4px;border:0;border-bottom:1px solid rgba(255,255,255,.1);background:transparent;color:inherit;font:inherit;text-align:start;cursor:pointer}
+.sbrow:last-child{border-bottom:0}.sbn{flex:1;min-width:0}.sbn b,.sbn small{display:block}.sbn small{opacity:.75}
+.sbt{width:100%;border-collapse:collapse;font-size:14px;min-width:560px}.sbt th,.sbt td{padding:8px 6px;border-bottom:1px solid rgba(255,255,255,.1);text-align:start;white-space:nowrap}.sbt td:last-child{white-space:normal}
+.sbstats{margin:10px 0}
+html[data-theme="glass"] .sbrow{background:transparent;color:inherit;box-shadow:none;border-radius:0;border:0;border-bottom:1px solid rgba(255,255,255,.1);padding:8px 4px}
+html[data-theme="glass"] .sbrow:hover{background:rgba(255,255,255,.05)}
+.sbhero .stats{margin:8px 0}
+.subpage .stats,.sbhero .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0}
+.subpage .stats>div,.sbhero .stats>div{display:grid;gap:2px;justify-items:center;text-align:center;padding:10px 4px;border-radius:14px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12)}
+.subpage .stats b,.sbhero .stats b{font-size:18px;line-height:1.3}.subpage .stats small,.sbhero .stats small{font-size:12px;opacity:.8;line-height:1.35}

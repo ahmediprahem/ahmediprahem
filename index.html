@@ -917,12 +917,27 @@ html[data-theme="glass"] .bakrem{border-color:rgba(245,166,35,.55)}html[data-the
 
 /* 0.87: مراجعة الاستعمال على الجوال (أخصائي): تبويبات العميل في صفين مرتّبين، وأزرار «عميل جديد» تحت الترحيب مباشرة، وترويسة الرئيسية مضغوطة */
 @media (max-width:600px){
-  html[data-theme="glass"] .tabs.ctabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;padding:6px}
-  html[data-theme="glass"] .tabs.ctabs>button,html[data-theme="glass"] .tabs.ctabs>.cmore,html[data-theme="glass"] .tabs.ctabs>.cmore>summary{flex:none;min-width:0;min-height:44px;padding:6px 2px;font-size:13px;line-height:1.25;white-space:normal;text-align:center;justify-content:center}
+  html[data-theme="glass"] .tabs.ctabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;padding:6px}
+  html[data-theme="glass"] .tabs.ctabs>button,html[data-theme="glass"] .tabs.ctabs>.cmore,html[data-theme="glass"] .tabs.ctabs>.cmore>summary{flex:none;min-width:0;min-height:44px;padding:6px 1px;font-size:12.5px;line-height:1.25;white-space:normal;text-align:center;justify-content:center}
   html[data-theme="glass"] .ghome .hero .splash,html[data-theme="glass"] .ghome .hero video.splash{display:none}
   html[data-theme="glass"] .ghome .hero{padding:16px 18px}
   html[data-theme="glass"] .ghome{display:flex;flex-direction:column}html[data-theme="glass"] .ghome .hero{order:-3}html[data-theme="glass"] .ghome .inboxc{order:-2}html[data-theme="glass"] .ghome .qgrid{order:-1}
 }
+
+/* 0.89: الاشتراكات */
+.sbchip{display:inline-block;border-radius:99px;padding:2px 12px;font-size:13px;font-weight:700;background:rgba(111,227,169,.16);color:#6fe3a9;white-space:nowrap}
+.sbchip.w{background:rgba(255,196,87,.18);color:#ffc457}.sbchip.no{background:rgba(255,138,128,.18);color:#ff8a80}.sbchip.n{background:rgba(255,255,255,.1);color:inherit;opacity:.8}
+.sbf{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}.sbf .wide{grid-column:1/-1}.sbf label{display:grid;gap:4px;font-size:14px}
+.sbrow{display:flex;align-items:center;gap:12px;width:100%;min-height:56px;padding:8px 4px;border:0;border-bottom:1px solid rgba(255,255,255,.1);background:transparent;color:inherit;font:inherit;text-align:start;cursor:pointer}
+.sbrow:last-child{border-bottom:0}.sbn{flex:1;min-width:0}.sbn b,.sbn small{display:block}.sbn small{opacity:.75}
+.sbt{width:100%;border-collapse:collapse;font-size:14px;min-width:560px}.sbt th,.sbt td{padding:8px 6px;border-bottom:1px solid rgba(255,255,255,.1);text-align:start;white-space:nowrap}.sbt td:last-child{white-space:normal}
+.sbstats{margin:10px 0}
+html[data-theme="glass"] .sbrow{background:transparent;color:inherit;box-shadow:none;border-radius:0;border:0;border-bottom:1px solid rgba(255,255,255,.1);padding:8px 4px}
+html[data-theme="glass"] .sbrow:hover{background:rgba(255,255,255,.05)}
+.sbhero .stats{margin:8px 0}
+.subpage .stats,.sbhero .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0}
+.subpage .stats>div,.sbhero .stats>div{display:grid;gap:2px;justify-items:center;text-align:center;padding:10px 4px;border-radius:14px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12)}
+.subpage .stats b,.sbhero .stats b{font-size:18px;line-height:1.3}.subpage .stats small,.sbhero .stats small{font-size:12px;opacity:.8;line-height:1.35}
 </style></head>
 <body class="gating"><header id="hd"></header><div id="gate" style="display:flex"><div class="gcard" style="text-align:center"><div style="font-weight:700;color:#253464">حصة — جارٍ التحميل…</div></div></div><div id="app" style="display:none"><aside></aside><main></main></div>
 <noscript><div style="position:fixed;inset:0;background:#092061;color:#fff;padding:24px;text-align:center;font:16px Tahoma,Arial">هذا الملف يحتاج تفعيل JavaScript. افتحه مباشرة في Chrome أو Edge أو Safari (وليس من معاينة واتساب أو البريد).</div></noscript>
@@ -3780,7 +3795,7 @@ function homeHtml(){if(isGlass())return homeGlass();return'<div class="home">'+(
 function pgFlag(){var c=cur();document.body.classList.toggle('pgplan',!!c&&S.view==='client'&&S.tab==='plan')}
 function main(){FID={};try{main0();legacyBanner();pgFlag();hudRender()}catch(e){renderFatal(e)}}
 function main0(){var c=cur(),m=$('main');if(S.view==='users'&&window.HAdminUI){m.innerHTML=HAdminUI.html();return}if(S.view==='bank'){m.innerHTML=bankPage();bkAfter();return}if(S.view==='lib'&&window.DX){m.innerHTML=dxLibPage();return}if(S.view==='ready'&&window.RL){m.innerHTML=rdPage();return}if(S.view==='settings'){m.innerHTML=setPage();if(S.setTab==='gate')gatePrev();return}if(!c){m.innerHTML=homeHtml();if(window.HK)HK.bindVideo(m);return}
-m.innerHTML='<div class="tabs ctabs"><button class="'+(S.tab==='client'?'on':'')+'" data-a="tab" data-v="client">بيانات العميل</button><button class="'+(S.tab==='ci'?'on':'')+'" data-a="tab" data-v="ci">✅ الحضور</button><button class="'+(S.tab==='plan'?'on':'')+'" data-a="tab" data-v="plan">الخطة</button><button class="'+(S.tab==='ver'?'on':'')+'" data-a="tab" data-v="ver">الإصدارات ('+S.versions.length+')</button>'+'<button class="'+(S.tab==='med'?'on':'')+'" data-a="tab" data-v="med">🩺 الملف الطبي'+(function(n){return n?' <em class="hxnb">'+n+'</em>':''})(medAlerts(c).filter(function(a){return a.lvl>1}).length)+'</button>'+'<button class="'+(S.tab==='appt'?'on':'')+'" data-a="tab" data-v="appt">📅 المواعيد'+(function(n){return n?' <em class="hxnb">'+n+'</em>':''})((c.appts||[]).filter(function(a){return !a.st&&a.d===wkDay()}).length)+'</button>'+'<button class="'+(S.tab==='hx'?'on':'')+'" data-a="tab" data-v="hx">📲 زنها'+(c.hx&&(c.hx.unread||0)+(c.hx.health?1:0)+(c.hx.phNew||0)?' <em class="hxnb">'+((c.hx.unread||0)+(c.hx.health?1:0)+(c.hx.phNew||0))+'</em>':'')+'</button>'+'<details class="tbm cmore"><summary class="sec sm" aria-label="المزيد من إجراءات العميل">⋯</summary><div class="tbp"><button class="r" data-a="del">🗑 حذف العميل</button></div></details>'+'</div>'+(S.tab==='client'?clientTab(c):S.tab==='plan'?planTab(c):S.tab==='hx'?(c.hx?hxTab(c):hxEmptyTab(c)):S.tab==='med'?medTab(c):S.tab==='appt'?wkApptTab(c):S.tab==='ci'?ciTab(c):verTab(c))}
+m.innerHTML='<div class="tabs ctabs"><button class="'+(S.tab==='client'?'on':'')+'" data-a="tab" data-v="client">بيانات العميل</button><button class="'+(S.tab==='ci'?'on':'')+'" data-a="tab" data-v="ci">✅ الحضور</button><button class="'+(S.tab==='plan'?'on':'')+'" data-a="tab" data-v="plan">الخطة</button><button class="'+(S.tab==='ver'?'on':'')+'" data-a="tab" data-v="ver">الإصدارات ('+S.versions.length+')</button>'+'<button class="'+(S.tab==='med'?'on':'')+'" data-a="tab" data-v="med">🩺 الملف الطبي'+(function(n){return n?' <em class="hxnb">'+n+'</em>':''})(medAlerts(c).filter(function(a){return a.lvl>1}).length)+'</button>'+'<button class="'+(S.tab==='appt'?'on':'')+'" data-a="tab" data-v="appt">📅 المواعيد'+(function(n){return n?' <em class="hxnb">'+n+'</em>':''})((c.appts||[]).filter(function(a){return !a.st&&a.d===wkDay()}).length)+'</button>'+'<button class="'+(S.tab==='sub'?'on':'')+'" data-a="tab" data-v="sub">💳 الاشتراك'+(function(k){return k==='soon'||k==='last'||k==='expired'?' <em class="hxnb">!</em>':''})(sbState(c)[0])+'</button>'+'<button class="'+(S.tab==='hx'?'on':'')+'" data-a="tab" data-v="hx">📲 زنها'+(c.hx&&(c.hx.unread||0)+(c.hx.health?1:0)+(c.hx.phNew||0)?' <em class="hxnb">'+((c.hx.unread||0)+(c.hx.health?1:0)+(c.hx.phNew||0))+'</em>':'')+'</button>'+'<details class="tbm cmore"><summary class="sec sm" aria-label="المزيد من إجراءات العميل">⋯</summary><div class="tbp"><button class="r" data-a="del">🗑 حذف العميل</button></div></details>'+'</div>'+(S.tab==='client'?clientTab(c):S.tab==='plan'?planTab(c):S.tab==='hx'?(c.hx?hxTab(c):hxEmptyTab(c)):S.tab==='med'?medTab(c):S.tab==='appt'?wkApptTab(c):S.tab==='sub'?subTab(c):S.tab==='ci'?ciTab(c):verTab(c))}
 function render(){try{sidebar();main();dtEnsure();toastSweep()}catch(e){renderFatal(e)}}
 function loadVersions(){var c=cur();return dbAll('versions').then(function(v){S.versions=v.filter(function(x){return c&&x.code===c.code}).sort(function(a,b){return b.at-a.at})})}
 // ============ الأحداث
@@ -4560,7 +4575,7 @@ function glassSide() {
   var home = S.view === 'client' && !S.cur, admin = S.mode === 'admin';
   var clx = (!home && !S.clOpen) || !S.clients.length; document.body.classList.toggle('clx', clx);        // 0.46: لا عمود عملاء فارغ قبل أول عميل؛ عمود العملاء يُطوى تلقائياً خارج الرئيسية ليتسع المحتوى (الخطة والجداول)، ويُفتح من «العملاء»
   var rail = '<nav class="rail" aria-label="التنقل"><p class="two newc"><button data-a="new" data-v="ex" title="عميل جديد بنظام الحصص">+ عميل جديد — الحصص</button><button class="o" data-a="new" data-v="ath" title="عميل جديد بنظام الجرامات">+ عميل جديد — الجرامات</button></p>'
-    + railBtn('home', 'home', 'الرئيسية', home) + (home ? '' : '<button class="sec sidebtn cltog' + (clx ? '' : ' on') + '" data-a="clToggle" aria-expanded="' + (!clx) + '">' + IC('users') + '<span>العملاء</span><em>' + S.clients.length + '</em></button>') + railBtn('bank', 'book', 'بنك الوجبات', S.view === 'bank') + railBtn('ready', 'package', 'الخطط الجاهزة', S.view === 'ready' || S.view === 'lib') + railBtn('hxv', 'phone', 'طلبات زنها', S.view === 'hx').replace('</span></button>', '</span><em class="hxnb"></em></button>') + railBtn('appts', 'calendar', 'المواعيد', S.view === 'appts').replace('</span></button>', '</span><em class="hxnb"></em></button>') + railBtn('feed', 'megaphone', 'التثقيف', S.view === 'feed').replace('</span></button>', '</span><em class="hxnb"></em></button>') + railBtn('settings', 'settings', 'إعدادات النظام', S.view === 'settings')
+    + railBtn('home', 'home', 'الرئيسية', home) + (home ? '' : '<button class="sec sidebtn cltog' + (clx ? '' : ' on') + '" data-a="clToggle" aria-expanded="' + (!clx) + '">' + IC('users') + '<span>العملاء</span><em>' + S.clients.length + '</em></button>') + railBtn('bank', 'book', 'بنك الوجبات', S.view === 'bank') + railBtn('ready', 'package', 'الخطط الجاهزة', S.view === 'ready' || S.view === 'lib') + railBtn('hxv', 'phone', 'طلبات زنها', S.view === 'hx').replace('</span></button>', '</span><em class="hxnb"></em></button>') + railBtn('appts', 'calendar', 'المواعيد', S.view === 'appts').replace('</span></button>', '</span><em class="hxnb"></em></button>') + railBtn('subs', 'package', 'الاشتراكات', S.view === 'subs').replace('</span></button>', '</span><em class="hxnb"></em></button>') + railBtn('feed', 'megaphone', 'التثقيف', S.view === 'feed').replace('</span></button>', '</span><em class="hxnb"></em></button>') + railBtn('settings', 'settings', 'إعدادات النظام', S.view === 'settings')
     + (admin ? '<div class="sbg' + sbc('tools') + '" data-g="tools"><button class="sbh" data-a="sbg" data-v="tools" aria-expanded="' + (SBG.tools === 0 ? 'false' : 'true') + '">أدوات الإدارة <i>' + IC('chevron') + '</i></button><div class="sbb">'
       + railBtn('users', 'users', 'المستخدمون والأجهزة', S.view === 'users') + railBtn('exportUsers', 'package', 'تصدير نسخة المستخدمين') + railBtn('exportSite', 'globe', 'تصدير موقع للنشر (ZIP)') + '</div></div>' : '')
     + '<div class="sbg' + sbc('bak') + '" data-g="bak"><button class="sbh" data-a="sbg" data-v="bak" aria-expanded="' + (SBG.bak === 0 ? 'false' : 'true') + '">النسخ الاحتياطي <i>' + IC('chevron') + '</i></button><div class="sbb">'
@@ -4590,7 +4605,7 @@ function homeGlass() {
   return '<div class="home ghome">'
     + '<section class="hero"><div class="herot"><h2>أهلاً بك' + (firstName() ? '، ' + esc(firstName()) : '') + '</h2><p>اختر عميلاً أو ابدأ خطة جديدة. كل بياناتك محفوظة ومشفّرة على هذا الجهاز.</p></div>' + (window.HK ? HK.splashHtml(HK.gateCfg(), 'splash') : '') + '</section>'
     + inboxCard() + wkToday() + '<div class="stats"><div><b>' + cs.length + '</b><small>عميل</small></div><div><b>' + withPlan + '</b><small>له خطة</small></div><div><b>' + ath + '</b><small>بالجرامات</small></div></div>'
-    + '<div class="qgrid">' + tile('new', 'ex', 'userPlus', 'نظام الحصص', 'عميل جديد: خطة بالحصص والبدائل') + tile('new', 'ath', 'dumbbell', 'نظام الجرامات', 'عميل جديد: خطة بالجرام والماكروز') + tile('bank', '', 'book', 'بنك الوجبات', 'وجبات المولّد وابتكار وجبة') + tile('ready', '', 'package', 'الخطط الجاهزة', 'خطط أسبوعية من مكتبتك + مكتبة الأخصائي') + tile('appts', '', 'calendar', 'المواعيد', 'مواعيد اليوم والأسبوع والمتابعات') + tile('hxv', '', 'phone', 'زنها', 'ادعُ عميلاً برابط واتساب واستقبل طلباته') + tile('feed', '', 'megaphone', 'التثقيف', 'انشر نصائح وفيديوهات لمراجعيك') + tile('settings', '', 'settings', 'إعدادات النظام', 'الألوان والبدائل والشعار والمظهر') + '</div>'
+    + '<div class="qgrid">' + tile('new', 'ex', 'userPlus', 'نظام الحصص', 'عميل جديد: خطة بالحصص والبدائل') + tile('new', 'ath', 'dumbbell', 'نظام الجرامات', 'عميل جديد: خطة بالجرام والماكروز') + tile('bank', '', 'book', 'بنك الوجبات', 'وجبات المولّد وابتكار وجبة') + tile('ready', '', 'package', 'الخطط الجاهزة', 'خطط أسبوعية من مكتبتك + مكتبة الأخصائي') + tile('appts', '', 'calendar', 'المواعيد', 'مواعيد اليوم والأسبوع والمتابعات') + tile('subs', '', 'package', 'الاشتراكات', 'المتبقي لكل عميل والمدفوعات والتمديد') + tile('hxv', '', 'phone', 'زنها', 'ادعُ عميلاً برابط واتساب واستقبل طلباته') + tile('feed', '', 'megaphone', 'التثقيف', 'انشر نصائح وفيديوهات لمراجعيك') + tile('settings', '', 'settings', 'إعدادات النظام', 'الألوان والبدائل والشعار والمظهر') + '</div>'
     + (recent ? '<h3>آخر العملاء</h3><div class="recent">' + recent + '</div>' : '<p class="small">لا عملاء بعد — ابدأ بـ«عميل جديد».</p>')
     + '<p class="two mobonly"><button data-a="new" data-v="ex">+ عميل جديد — الحصص</button><button class="o" data-a="new" data-v="ath">+ عميل جديد — الجرامات</button></p>'
     + bakCard() + vtHomeCard() + proInstCard() + appCard() + '</div>';
@@ -5841,6 +5856,142 @@ document.addEventListener('click', function (e) { var a = e.target.closest && e.
 (function (f) { render = function () { var r = f.apply(this, arguments); wkRail(); return r; }; })(render);
 setInterval(function () { if (document.visibilityState !== 'hidden') wkTick(); }, 60000); setTimeout(wkTick, 2500);
 window.DPApp.wk = { tick: wkTick, items: wkItems };                // للاختبارات
+
+// ================= الاشتراكات في «زنها Pro» (0.89) — يُدمج داخل app.js عند /*SUBUI*/
+// لكل عميل c.sub = { end:'YYYY-MM-DD', status:'active'|'paused'|'stopped', pkg, price, left (الأيام المتبقية وقت الإيقاف المؤقت), history:[{id,ts,type,days,amount,method,note,end,pkg}] }
+// السجل يضم: start (بداية اشتراك)، renew (تجديد بدفع)، extend (تمديد بلا دفع)، pause/resume (إيقاف مؤقت واستئناف)، stop (إيقاف البرنامج).
+// ملاحظة: هذه المرحلة للأخصائي فقط (تسجيل ومتابعة)، ولا يُرسَل الاشتراك إلى «زنها» بعد.
+var SUBS = { form: null, open: null };
+var SUB_METHODS = ['فودافون كاش', 'نقداً', 'تحويل بنكي', 'إنستاباي', 'أخرى'];
+function sbDay(t) { var d = new Date(t || Date.now()); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function sbDiff(a, b) { return Math.round((new Date(a + 'T12:00') - new Date(b + 'T12:00')) / 86400000); }
+function sbAdd(day, n) { var d = new Date(day + 'T12:00'); d.setDate(d.getDate() + n); return sbDay(d); }
+function sbNum(v) { return Number(String(v == null ? '' : v).replace(/[٠-٩]/g, function (d) { return d.charCodeAt(0) - 0x660; }).replace(/[^\d.]/g, '')) || 0; }
+function sbFmt(n) { return Number(n || 0).toLocaleString('ar-EG'); }
+function sbDate(d) { return d ? new Date(d + 'T12:00').toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' }) : '—'; }
+function sbHas(c) { return !!(c && c.sub && c.sub.end); }
+function sbLeft(c) {                                                   // الأيام المتبقية (سالب = بعد الانتهاء)
+  if (!sbHas(c)) return null; var s = c.sub;
+  if (s.status === 'paused') return s.left || 0; if (s.status === 'stopped') return null;
+  return sbDiff(s.end, sbDay());
+}
+function sbState(c) {                                                  // [مفتاح، نص، صنف الشارة]
+  if (!sbHas(c)) return ['none', 'بلا اشتراك', 'n']; var s = c.sub, d = sbLeft(c);
+  if (s.status === 'stopped') return ['stopped', 'البرنامج متوقف', 'no'];
+  if (s.status === 'paused') return ['paused', 'موقوف مؤقتاً', 'w'];
+  if (d < 0) return ['expired', 'منتهٍ منذ ' + sbFmt(-d) + (d === -1 ? ' يوم' : ' أيام'), 'no'];
+  if (d === 0) return ['last', 'ينتهي اليوم', 'w']; if (d <= 5) return ['soon', 'متبقي ' + sbFmt(d) + (d === 1 ? ' يوم' : d === 2 ? ' يومان' : ' أيام'), 'w'];
+  return ['ok', 'متبقي ' + sbFmt(d) + ' يوماً', 'ok'];
+}
+function sbPaid(c) { return ((c.sub && c.sub.history) || []).reduce(function (a, h) { return a + (+h.amount || 0); }, 0); }
+function sbLog(c, h) {
+  c.sub = c.sub || { end: '', status: 'active', pkg: '', price: 0, history: [] }; c.sub.history = c.sub.history || [];
+  h.id = 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5); h.ts = Date.now(); c.sub.history.push(h); return h;
+}
+// تجديد/بدء بدفع: يُضاف إلى المتبقي إن كان فعّالاً، ويبدأ من اليوم إن انتهى أو كان موقوفاً/جديداً
+function sbRenew(c, days, amount, method, pkg, note) {
+  var s = c.sub || {}, t = sbDay(), from = (sbHas(c) && s.status === 'active' && s.end > t) ? s.end : t, type = sbHas(c) ? 'renew' : 'start';
+  sbLog(c, { type: type, days: days, amount: amount, method: method, pkg: pkg, note: note });
+  c.sub.end = sbAdd(from, days); c.sub.status = 'active'; c.sub.pkg = pkg || c.sub.pkg || ''; c.sub.price = amount || c.sub.price || 0; delete c.sub.left; c.sub.history[c.sub.history.length - 1].end = c.sub.end;
+}
+function sbExtend(c, days, note) {                                     // تمديد بلا دفع (منحة)
+  var s = c.sub, t = sbDay(), from = (s.status === 'active' && s.end > t) ? s.end : t;
+  sbLog(c, { type: 'extend', days: days, amount: 0, method: '', pkg: s.pkg || '', note: note });
+  s.end = sbAdd(from, days); if (s.status !== 'paused') s.status = 'active'; s.history[s.history.length - 1].end = s.end;
+  if (s.status === 'paused') s.left = (s.left || 0) + days;
+}
+function sbPause(c, note) { var s = c.sub; s.left = Math.max(0, sbDiff(s.end, sbDay())); s.status = 'paused'; sbLog(c, { type: 'pause', days: 0, amount: 0, note: note, end: s.end }); }
+function sbResume(c) { var s = c.sub; s.end = sbAdd(sbDay(), s.left || 0); s.status = 'active'; sbLog(c, { type: 'resume', days: s.left || 0, amount: 0, note: '', end: s.end }); delete s.left; }
+function sbStop(c, note) { var s = c.sub; s.status = 'stopped'; sbLog(c, { type: 'stop', days: 0, amount: 0, note: note, end: s.end }); }
+var SB_TYPES = { start: ['🟢', 'بدء اشتراك'], renew: ['💳', 'تجديد بدفع'], extend: ['🎁', 'تمديد بلا دفع'], pause: ['⏸', 'إيقاف مؤقت'], resume: ['▶', 'استئناف'], stop: ['⛔', 'إيقاف البرنامج'] };
+function sbHistoryHtml(c) {
+  var H = ((c.sub && c.sub.history) || []).slice().reverse();
+  if (!H.length) return '<p class="small">لا سجل بعد. سجّل أول اشتراك للعميل من الأعلى.</p>';
+  return '<div class="tw"><table class="sbt"><thead><tr><th>التاريخ</th><th>الحدث</th><th>المدة</th><th>المبلغ</th><th>الطريقة</th><th>ينتهي في</th><th>ملاحظة</th></tr></thead><tbody>' + H.map(function (h) {
+    var t = SB_TYPES[h.type] || ['•', h.type];
+    return '<tr><td>' + esc(sbDate(sbDay(h.ts))) + '</td><td>' + t[0] + ' ' + t[1] + '</td><td>' + (h.days ? sbFmt(h.days) + ' يوماً' : '—') + '</td><td>' + (h.amount ? '<b>' + sbFmt(h.amount) + '</b> جنيه' : h.type === 'extend' ? 'منحة' : '—') + '</td><td>' + esc(h.method || '—') + '</td><td>' + esc(h.end ? sbDate(h.end) : '—') + '</td><td>' + esc(h.note || '') + '</td></tr>';
+  }).join('') + '</tbody></table></div>';
+}
+function sbForm(c) {
+  var f = SUBS.form || (SUBS.form = { pkg: '', months: '1', days: '', amount: '', method: SUB_METHODS[0], note: '', ext: '7', extNote: '' });
+  var s = c.sub || {}, st = sbState(c), act = sbHas(c) && s.status === 'active', paused = s.status === 'paused', stopped = s.status === 'stopped';
+  var pk = (S.settings.sbPkgs || []);
+  return '<div class="ucard"><h3>💳 ' + (sbHas(c) ? 'تجديد الاشتراك بدفع' : 'تسجيل اشتراك جديد') + '</h3><div class="sbf">'
+    + (pk.length ? '<label>الباقة<select id="sb_pk" data-sbf="pk"><option value="">— مخصّصة —</option>' + pk.map(function (p, i) { return '<option value="' + i + '"' + (f.pk === String(i) ? ' selected' : '') + '>' + esc(p.n) + ' — ' + sbFmt(p.a) + ' جنيه (' + sbFmt(p.d) + ' يوماً)</option>'; }).join('') + '</select></label>' : '')
+    + '<label>اسم الباقة<input id="sb_nm" data-sbf="name" value="' + esc(f.name != null ? f.name : (s.pkg || '')) + '" placeholder="مثال: شهري"></label>'
+    + '<label>المدة<select id="sb_mo" data-sbf="months">' + [['1', 'شهر (30 يوماً)'], ['2', 'شهران (60)'], ['3', '3 أشهر (90)'], ['6', '6 أشهر (180)'], ['0', 'عدد أيام مخصّص']].map(function (o) { return '<option value="' + o[0] + '"' + (f.months === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></label>'
+    + (f.months === '0' ? '<label>عدد الأيام<input id="sb_dy" data-sbf="days" inputmode="numeric" value="' + esc(f.days) + '" placeholder="مثال: 45"></label>' : '')
+    + '<label>المبلغ المدفوع (جنيه)<input id="sb_am" data-sbf="amount" inputmode="decimal" value="' + esc(f.amount) + '" placeholder="مثال: 150"></label>'
+    + '<label>طريقة الدفع<select id="sb_me" data-sbf="method">' + SUB_METHODS.map(function (m) { return '<option' + (f.method === m ? ' selected' : '') + '>' + m + '</option>'; }).join('') + '</select></label>'
+    + '<label class="wide">ملاحظة (اختياري)<input id="sb_nt" data-sbf="note" value="' + esc(f.note) + '" placeholder="مثال: وصل الإيصال على واتساب"></label>'
+    + '</div><p><button data-a="sbPay">' + (sbHas(c) ? '✓ تسجيل الدفع وتجديد الاشتراك' : '✓ تسجيل الاشتراك') + '</button></p>'
+    + (act ? '<p class="small">يُضاف إلى المتبقي (' + esc(st[1]) + ') فينتهي بعد انقضاء المتبقي والمدة الجديدة.</p>' : sbHas(c) ? '<p class="small">يبدأ العدّ من اليوم.</p>' : '') + '</div>'
+    + (sbHas(c) ? '<div class="ucard"><h3>🎁 تمديد بلا دفع</h3><div class="sbf"><label>مدة التمديد<select id="sb_ex" data-sbf="ext">' + [['3', '3 أيام'], ['7', '7 أيام'], ['14', '14 يوماً'], ['30', '30 يوماً']].map(function (o) { return '<option value="' + o[0] + '"' + (f.ext === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></label>'
+      + '<label class="wide">السبب (اختياري)<input id="sb_en" data-sbf="extNote" value="' + esc(f.extNote) + '" placeholder="مثال: ظرف طارئ أو مكافأة التزام"></label></div><p><button class="sec" data-a="sbExt">تمديد المدة بلا شرط دفع</button> <small class="small">يُسجَّل كمنحة مبلغها صفر.</small></p></div>'
+      + '<div class="ucard"><h3>⏯ إيقاف الاشتراك</h3><p class="small">الإيقاف المؤقت يجمّد الأيام المتبقية ولا تُحتسب حتى تستأنف. إيقاف البرنامج يعني انتهاء المتابعة مع بقاء بيانات العميل.</p><p>'
+      + (paused ? '<button data-a="sbResume">▶ استئناف الاشتراك (' + sbFmt(s.left || 0) + ' يوماً متبقياً)</button> ' : act ? '<button class="sec" data-a="sbPause">⏸ إيقاف مؤقت</button> ' : '')
+      + (stopped ? '' : '<button class="sec" data-a="sbStop">⛔ إيقاف البرنامج</button>') + (stopped ? '<span class="small">البرنامج متوقف. سجّل دفعاً جديداً من الأعلى لإعادة التفعيل.</span>' : '') + '</p></div>' : '');
+}
+function subTab(c) {
+  var st = sbState(c), s = c.sub || {}, d = sbLeft(c), total = sbPaid(c), n = ((s.history || []).filter(function (h) { return h.amount > 0; })).length;
+  return '<div class="subtab"><div class="ucard sbhero ' + st[2] + '"><div class="hxtop"><h3>💳 اشتراك ' + esc(c.name || c.code) + '</h3><span class="sbchip ' + st[2] + '">' + esc(st[1]) + '</span></div>'
+    + (sbHas(c) ? '<div class="stats"><div><b>' + (d == null ? '—' : sbFmt(Math.max(d, 0))) + '</b><small>يوماً متبقياً</small></div><div><b>' + esc(s.status === 'active' ? sbDate(s.end) : s.status === 'paused' ? 'مجمّد' : '—') + '</b><small>ينتهي في</small></div><div><b>' + sbFmt(total) + '</b><small>جنيه مدفوعة (' + sbFmt(n) + ' دفعة)</small></div></div>' + (s.pkg ? '<p class="small">الباقة الحالية: <b>' + esc(s.pkg) + '</b>' + (s.price ? ' • ' + sbFmt(s.price) + ' جنيه' : '') + '</p>' : '')
+      : '<p class="small">لم يُسجَّل اشتراك لهذا العميل بعد. سجّل أول اشتراك ليظهر المتبقي ويتم تنبيهك قبل انتهائه.</p>') + '</div>'
+    + sbForm(c) + '<div class="ucard"><h3>سجل الاشتراكات والمدفوعات</h3>' + sbHistoryHtml(c) + '</div></div>';
+}
+function sbRows() {
+  var order = { expired: 0, last: 1, soon: 2, paused: 3, ok: 4, stopped: 5, none: 6 };
+  return S.clients.map(function (c) { return [c, sbState(c), sbLeft(c)]; }).sort(function (a, b) { return (order[a[1][0]] - order[b[1][0]]) || ((a[2] == null ? 9e9 : a[2]) - (b[2] == null ? 9e9 : b[2])); });
+}
+function sbOverview() {
+  var rows = sbRows(), cnt = function (k) { return rows.filter(function (r) { return k.indexOf(r[1][0]) >= 0; }).length; }, month = sbDay().slice(0, 7), mt = 0, all = 0;
+  S.clients.forEach(function (c) { ((c.sub && c.sub.history) || []).forEach(function (h) { all += +h.amount || 0; if (sbDay(h.ts).slice(0, 7) === month) mt += +h.amount || 0; }); });
+  return '<div class="subpage"><div class="hxtop"><h2>💳 الاشتراكات</h2><small class="small">المتبقي لكل عميل، وتاريخ الاشتراكات والمدفوعات. اضغط على عميل لتجديده أو تمديده أو إيقافه.</small></div>'
+    + '<div class="stats sbstats"><div><b>' + sbFmt(cnt(['ok', 'soon', 'last'])) + '</b><small>فعّال</small></div><div><b>' + sbFmt(cnt(['soon', 'last', 'expired'])) + '</b><small>يحتاج تجديداً</small></div><div><b>' + sbFmt(mt) + '</b><small>جنيه هذا الشهر (إجمالي ' + sbFmt(all) + ')</small></div></div>'
+    + '<div class="ucard">' + (rows.length ? rows.map(function (r) {
+      var c = r[0], st = r[1], s = c.sub || {};
+      return '<button class="sbrow" data-a="sbOpen" data-v="' + esc(c.code) + '"><span class="cav">' + esc(initial(c.name)) + '</span><span class="sbn"><b>' + esc(c.name || c.code) + '</b><small>' + (s.pkg ? esc(s.pkg) + ' • ' : '') + (sbHas(c) && s.status !== 'stopped' ? 'ينتهي ' + esc(sbDate(s.status === 'paused' ? '' : s.end)) : sbHas(c) ? 'آخر دفعة: ' + sbFmt(((s.history || []).filter(function (h) { return h.amount; }).pop() || {}).amount || 0) + ' جنيه' : 'لا اشتراك مسجّل') + '</small></span><span class="sbchip ' + st[2] + '">' + esc(st[1]) + '</span></button>';
+    }).join('') : '<p class="small">لا عملاء بعد.</p>') + '</div></div>';
+}
+function sbRe() { if (S.view === 'subs' || (cur() && S.tab === 'sub')) main(); }
+Object.assign(A, {
+  subs: function () { S.view = 'subs'; S.cur = null; render(); },
+  sbOpen: function (v) { var c = S.clients.filter(function (x) { return x.code === v; })[0]; if (!c) return; S.cur = c.code; S.view = 'client'; S.tab = 'sub'; render(); window.scrollTo(0, 0); },
+  sbPay: function () {
+    var c = cur(), f = SUBS.form || {}; if (!c) return; var pk = (S.settings.sbPkgs || [])[+f.pk], mo = +f.months, days = f.months === '0' ? sbNum(f.days) : mo * 30, amount = sbNum(f.amount), name = String(f.name != null ? f.name : (pk ? pk.n : '')).trim() || (mo ? ['', 'شهري', 'شهران', '3 أشهر', '', '', '6 أشهر'][mo] || mo + ' أشهر' : 'مخصّصة');
+    if (!(days > 0)) { toast('حدّد مدة الاشتراك بالأيام'); return; } if (!(amount > 0)) { toast('اكتب المبلغ المدفوع (للتمديد بلا دفع استعمل «تمديد بلا دفع»)'); return; }
+    sbRenew(c, days, amount, f.method || SUB_METHODS[0], name, String(f.note || '').trim().slice(0, 200)); persist(c); SUBS.form = null; toast('✓ سُجّل الدفع وتجدّد الاشتراك حتى ' + sbDate(c.sub.end)); sbRe(); sbRail();
+  },
+  sbExt: function () {
+    var c = cur(), f = SUBS.form || {}; if (!c || !sbHas(c)) return; var n = +(f.ext || 7);
+    sbExtend(c, n, String(f.extNote || '').trim().slice(0, 200)); persist(c); SUBS.form = null; toast('✓ مُدّد الاشتراك ' + sbFmt(n) + ' يوماً بلا دفع'); sbRe(); sbRail();
+  },
+  sbPause: function () { var c = cur(); if (!c || !sbHas(c) || !confirm('إيقاف اشتراك «' + (c.name || c.code) + '» مؤقتاً؟ تتجمّد الأيام المتبقية حتى تستأنف.')) return; sbPause(c, ''); persist(c); toast('⏸ أُوقف الاشتراك مؤقتاً'); sbRe(); sbRail(); },
+  sbResume: function () { var c = cur(); if (!c || !sbHas(c)) return; sbResume(c); persist(c); toast('▶ استؤنف الاشتراك حتى ' + sbDate(c.sub.end)); sbRe(); sbRail(); },
+  sbStop: function () { var c = cur(); if (!c || !sbHas(c)) return; var r = prompt('إيقاف برنامج «' + (c.name || c.code) + '». اكتب السبب (اختياري):', ''); if (r === null) return; sbStop(c, String(r).trim().slice(0, 200)); persist(c); toast('⛔ أُوقف البرنامج'); sbRe(); sbRail(); }
+});
+document.addEventListener('change', function (e) {
+  var t = e.target, k = t && t.dataset && t.dataset.sbf; if (!k) return; var f = SUBS.form || (SUBS.form = {}), c = cur(); if (!c) return;
+  if (k === 'pk') { f.pk = t.value; var p = (S.settings.sbPkgs || [])[+t.value]; if (p) { f.name = p.n; f.amount = String(p.a); f.months = ({ 30: '1', 60: '2', 90: '3', 180: '6' })[p.d] || '0'; f.days = f.months === '0' ? String(p.d) : ''; } }
+  else if (k === 'ext') f.ext = t.value; else f[k] = t.value;
+  if (k === 'months' || k === 'pk') sbRe();
+});
+document.addEventListener('input', function (e) { var t = e.target, k = t && t.dataset && t.dataset.sbf; if (!k || t.tagName === 'SELECT') return; (SUBS.form || (SUBS.form = {}))[k] = t.value; });
+// ---------- تكامل: تبويب العميل، الصفحة العامة، «من يحتاج اهتمامك»، شارة الشريط
+function sbRail() { var b = document.querySelector('[data-a="subs"] em'), n = S.clients.filter(function (c) { var k = sbState(c)[0]; return k === 'soon' || k === 'last' || k === 'expired'; }).length; if (b) { b.textContent = n || ''; b.style.display = n ? '' : 'none'; } }
+(function (f) { main0 = function () { if (S.view === 'subs') { $('main').innerHTML = sbOverview(); return; } return f.apply(this, arguments); }; })(main0);
+(function (f) {
+  wkItems = function () {
+    var out = f.apply(this, arguments);
+    S.clients.forEach(function (c) {
+      var st = sbState(c), d = sbLeft(c); if (st[0] === 'expired') out.push({ c: c, pri: 1, ic: '💳', txt: 'اشتراكه ' + st[1] + ' — جدّد أو مدّد أو أوقف', tab: 'sub', key: c.code + ':subx' });
+      else if (st[0] === 'last' || st[0] === 'soon') out.push({ c: c, pri: 2, ic: '💳', txt: 'اشتراكه ' + (d === 0 ? 'ينتهي اليوم' : 'ينتهي بعد ' + sbFmt(d) + (d === 1 ? ' يوم' : d === 2 ? ' يومين' : ' أيام')), tab: 'sub', key: c.code + ':subs' });
+    });
+    return out.sort(function (a, b) { return a.pri - b.pri; });
+  };
+})(wkItems);
+window.SBX = { left: sbLeft, paid: sbPaid, renew: sbRenew, extend: sbExtend, day: sbDay, state: sbState };       // للاختبارات
+(function (f) { wkRail = function () { f.apply(this, arguments); sbRail(); }; })(wkRail);
 
 // ================= تجربة عميل أغنى (المرحلة 5) — يُدمج داخل app.js عند /*RICHUI*/
 // 1) الوصفات: لكل وجبة في محرر الحصص وصفة (خطوات، وقت التحضير، نصيحة، صورة) تُحفظ في S.settings.recipes وتصل مع الخطة إلى «زنها».
