@@ -301,3 +301,26 @@ html[data-theme="glass"] .sbrow:hover{background:rgba(255,255,255,.05)}
 .subpage .stats,.sbhero .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0}
 .subpage .stats>div,.sbhero .stats>div{display:grid;gap:2px;justify-items:center;text-align:center;padding:10px 4px;border-radius:14px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12)}
 .subpage .stats b,.sbhero .stats b{font-size:18px;line-height:1.3}.subpage .stats small,.sbhero .stats small{font-size:12px;opacity:.8;line-height:1.35}
+
+/* 0.91: شات زنها (واتساب) */
+.chwrap .chgrid{display:grid;grid-template-columns:minmax(240px,320px) minmax(0,1fr);gap:0;border:1px solid rgba(255,255,255,.14);border-radius:16px;overflow:hidden;height:min(72vh,680px);min-height:420px;margin-top:10px;background:rgba(255,255,255,.04)}
+.chl{display:flex;flex-direction:column;min-height:0;border-inline-end:1px solid rgba(255,255,255,.12)}
+.chsearch{padding:10px}.chsearch input{width:100%;min-height:44px;border-radius:99px;padding:0 14px}
+.chrows{flex:1;overflow:auto}
+html[data-theme="glass"] .chrow{display:flex;flex-direction:row;justify-content:flex-start;align-items:center;gap:10px;width:100%;min-height:64px;padding:8px 12px;border:0;border-bottom:1px solid rgba(255,255,255,.08);background:transparent;color:inherit;font:inherit;text-align:start;cursor:pointer;border-radius:0;box-shadow:none}
+html[data-theme="glass"] .chrow:hover{background:rgba(255,255,255,.06)}html[data-theme="glass"] .chrow.on{background:rgba(111,227,169,.14)}
+.cht2{flex:1;min-width:0}.cht2 b,.cht2 small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cht2 small{opacity:.75}
+.chmeta{display:grid;justify-items:end;gap:4px;flex:none}.chmeta small{font-size:12px;opacity:.7}.chmeta small.un{color:#6fe3a9;opacity:1;font-weight:700}
+.chm{display:flex;flex-direction:column;min-width:0;min-height:0;background:radial-gradient(circle at 20% 10%,rgba(111,227,169,.06),transparent 40%),rgba(0,0,0,.12)}
+.chh{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05)}.chh small{display:block;opacity:.7}.chwrap .chh .chback{display:none}
+.chbody{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:6px}
+.chsep{align-self:center;margin:8px 0 4px}.chsep span{background:rgba(255,255,255,.12);border-radius:99px;padding:2px 14px;font-size:12px}
+.chb{max-width:min(78%,520px);align-self:flex-end;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.12);border-radius:14px;border-top-right-radius:4px;padding:7px 12px;line-height:1.6;word-wrap:break-word}
+.chb.me{align-self:flex-start;background:rgba(111,227,169,.2);border-color:rgba(111,227,169,.4);border-top-right-radius:14px;border-top-left-radius:4px}
+.chtm{display:block;text-align:end;font-size:11px;opacity:.7;margin-top:2px}.chtm i{font-style:normal}.chtm i.rd{color:#6fb4ff;opacity:1}.chcx{display:block;opacity:.8;margin-bottom:2px}
+.chquick{display:flex;gap:6px;overflow:auto;padding:6px 12px;border-top:1px solid rgba(255,255,255,.08)}.chquick .chip{flex:none;min-height:36px;font-size:13px;padding:0 12px;border-radius:99px}
+.chcomp{display:flex;gap:8px;align-items:flex-end;padding:8px 12px 12px;border-top:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04)}
+.chcomp textarea{flex:1;min-height:44px;max-height:120px;border-radius:22px;padding:11px 16px;resize:none;line-height:1.5}
+html[data-theme="glass"] .chcomp button{min-width:44px;width:44px;height:44px;border-radius:50%;padding:0;font-size:18px}
+.chnone{display:grid;place-items:center;text-align:center}
+@media(max-width:700px){.chwrap .chgrid{grid-template-columns:minmax(0,1fr);height:calc(100vh - 230px);min-height:420px}.chwrap.open .chl{display:none}.chwrap:not(.open) .chm{display:none}.chwrap .chh .chback{display:inline-flex}}
