@@ -324,3 +324,30 @@ html[data-theme="glass"] .chrow:hover{background:rgba(255,255,255,.06)}html[data
 html[data-theme="glass"] .chcomp button{min-width:44px;width:44px;height:44px;border-radius:50%;padding:0;font-size:18px}
 .chnone{display:grid;place-items:center;text-align:center}
 @media(max-width:700px){.chwrap .chgrid{grid-template-columns:minmax(0,1fr);height:calc(100vh - 230px);min-height:420px}.chwrap.open .chl{display:none}.chwrap:not(.open) .chm{display:none}.chwrap .chh .chback{display:inline-flex}}
+
+/* 0.92: أبعاد واتساب لشات زنها في زن برو */
+.chb{max-width:min(80%,560px);padding:6px 9px 6px;border-radius:8px;border-top-left-radius:0;font-size:16px;line-height:1.4}
+.chb.me{border-radius:8px;border-top-right-radius:0}.chb.cont{margin-top:-4px;border-radius:8px}
+.chtm{font-size:11px;margin-top:1px}.chbody{gap:8px;padding:10px 14px;overflow-anchor:none}
+.chh{min-height:56px;padding:4px 12px}.chh b{font-size:17px}.chh small{font-size:13px}
+.chb .cht3{font-size:16px}
+.chlbar{display:none}
+@media(max-width:700px){
+  .chwrap{position:fixed;inset:0;z-index:300;margin:0;padding:0;display:flex;flex-direction:column;background:linear-gradient(180deg,#0f1a4d,#0a1236)}
+  .chwrap>.hxtop{display:none}
+  .chwrap:not(.open) .chlbar{display:flex;align-items:center;gap:10px;min-height:56px;padding:4px 10px;background:rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.12)}
+  .chwrap.open .chlbar{display:none}
+  .chlbar b{font-size:20px}.chlbar .chexit{width:44px;height:44px;min-height:44px;border-radius:50%;padding:0;font-size:22px}
+  .chwrap .chgrid{flex:1;height:auto;min-height:0;margin:0;border:0;border-radius:0;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr)}
+  .chl,.chm{height:100%;min-height:0}
+  .chsearch{padding:8px 10px}.chsearch input{min-height:44px;font-size:16px}
+  html[data-theme="glass"] .chrow{min-height:72px;padding:8px 14px;gap:14px}
+  .chrow .cav{width:52px;height:52px;font-size:20px;flex:none}.cht2 b{font-size:17px}.cht2 small{font-size:14px}.chmeta small{font-size:12px}
+  .chwrap.open .chm{border-radius:0;background:radial-gradient(circle at 15% 8%,rgba(111,227,169,.06),transparent 45%),#0a1236}
+  .chwrap .chh{position:sticky;top:0}.chh .cav{width:40px;height:40px}
+  .chquick{display:none}
+  .chcomp{padding:6px 8px calc(8px + env(safe-area-inset-bottom,0px));border-top:0;background:transparent;gap:6px}
+  .chcomp textarea{min-height:48px;padding:12px 16px;border-radius:24px;font-size:16px;line-height:1.35}
+  html[data-theme="glass"] .chcomp button{width:48px;height:48px;min-width:48px}
+  .chb{max-width:85%}
+}

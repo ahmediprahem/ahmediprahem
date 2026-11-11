@@ -18,9 +18,11 @@ function chList() {
 }
 function chThread(c) {
   var msgs = chMsgs(c), out = '', last = '';
+  var prev = null;
   msgs.forEach(function (m) {
-    var d = ctDay(m.ts); if (d !== last) { out += '<div class="chsep"><span>' + esc(d) + '</span></div>'; last = d; }
-    out += '<div class="chb' + (m.from === 'd' ? ' me' : '') + '">' + (m.ctx ? '<small class="chcx">بخصوص: ' + esc(m.ctx) + '</small>' : '') + '<span class="cht3">' + esc(m.t).replace(/\n/g, '<br>') + '</span><small class="chtm">' + chTime(m.ts) + (m.from === 'd' ? ' <i class="' + (m.read ? 'rd' : '') + '">' + (m.read ? '✓✓' : '✓') + '</i>' : '') + '</small></div>';
+    var d = ctDay(m.ts); if (d !== last) { out += '<div class="chsep"><span>' + esc(d) + '</span></div>'; last = d; prev = null; }
+    var cont = prev && prev.from === m.from && m.ts - prev.ts < 120000; prev = m;
+    out += '<div class="chb' + (m.from === 'd' ? ' me' : '') + (cont ? ' cont' : '') + '">' + (m.ctx ? '<small class="chcx">بخصوص: ' + esc(m.ctx) + '</small>' : '') + '<span class="cht3">' + esc(m.t).replace(/\n/g, '<br>') + '</span><small class="chtm">' + chTime(m.ts) + (m.from === 'd' ? ' <i class="' + (m.read ? 'rd' : '') + '">' + (m.read ? '✓✓' : '✓') + '</i>' : '') + '</small></div>';
   });
   return out || '<div class="empty chempty"><p class="small">لا رسائل بعد. ما يكتبه العميل من «راسل الأخصائي» يظهر هنا مع إشعار، وتستطيع أن تبدأ أنت.</p></div>';
 }
@@ -31,13 +33,19 @@ function chPage() {
     + '<div class="chbody" id="chBody">' + chThread(c) + '</div><div class="chquick">' + CH_QUICK.map(function (q, i) { return '<button class="chip" data-a="czQuick" data-v="' + i + '">' + esc(q) + '</button>'; }).join('') + '</div>'
     + '<div class="chcomp"><textarea id="chIn" rows="1" maxlength="2000" placeholder="اكتب رسالة…" aria-label="رسالة للعميل"></textarea><button data-a="czSend" aria-label="إرسال">➤</button></div></section>'
     : '<section class="chm chnone"><div class="empty"><p><b>شات زنها</b></p><p class="small">اختر عميلاً من القائمة لتبدأ المحادثة. كل الرسائل مشفّرة بين جوالك وجواله.</p></div></section>';
-  return '<div class="chwrap' + (c ? ' open' : '') + '"><div class="hxtop"><h2>💬 شات زنها</h2><small class="small">محادثات الأخصائي مع عملائه، مشفّرة طرفاً لطرف.</small></div><div class="chgrid">' + side + main + '</div></div>';
+  return '<div class="chwrap' + (c ? ' open' : '') + '"><div class="chlbar"><button class="chexit" data-a="home" aria-label="رجوع إلى زنها برو">›</button><b>شات زنها</b></div><div class="hxtop"><h2>💬 شات زنها</h2><small class="small">محادثات الأخصائي مع عملائه، مشفّرة طرفاً لطرف.</small></div><div class="chgrid">' + side + main + '</div></div>';
 }
 function chRe(keep) { if (S.view !== 'chat') return; CHT.keep = !!keep; main(); }
 function chPaint() {                                                   // رسم الصفحة مع الإبقاء على ما يكتبه الأخصائي وموضع التمرير
   var ta = $('#chIn'), v = ta ? ta.value : '', foc = ta && document.activeElement === ta, q = $('#chQ'), qv = q ? q.value : '', qf = q && document.activeElement === q, bd = $('#chBody'), atEnd = !bd || bd.scrollHeight - bd.scrollTop - bd.clientHeight < 90, top = bd ? bd.scrollTop : 0;
   $('main').innerHTML = chPage(); ta = $('#chIn'); if (ta) { ta.value = v; if (foc) ta.focus(); chGrow(ta); } q = $('#chQ'); if (q && qf) { q.value = qv; q.focus(); try { q.setSelectionRange(qv.length, qv.length); } catch (e) { } }
-  bd = $('#chBody'); if (bd) bd.scrollTop = (atEnd || CHT.keep) ? bd.scrollHeight : top; CHT.keep = false;
+  bd = $('#chBody'); if (bd) { if (atEnd || CHT.keep) ctPin(bd); else bd.scrollTop = top; } CHT.keep = false;
+}
+function ctPin(el) {                                                   // تثبيت أسفل المحادثة (آخر رسالة) حتى بعد تأخّر الخطوط/الصور أو لوحة المفاتيح، ما لم يتمرّر المستخدم للأعلى
+  if (!el) return; el.dataset.pin = '1'; var go = function () { if (el.dataset.pin !== '0') el.scrollTop = el.scrollHeight; };
+  go(); requestAnimationFrame(function () { go(); requestAnimationFrame(go); }); setTimeout(go, 120); setTimeout(go, 400);
+  if (!el._pinBound) { el._pinBound = 1; el.addEventListener('scroll', function () { el.dataset.pin = (el.scrollHeight - el.scrollTop - el.clientHeight < 80) ? '1' : '0'; }, { passive: true }); }
+  if (window.ResizeObserver) { try { if (el._ro) el._ro.disconnect(); var ro = new ResizeObserver(go); ro.observe(el); [].forEach.call(el.children, function (c) { ro.observe(c); }); el._ro = ro; } catch (e) { } }
 }
 function chGrow(t) { if (!t) return; t.style.height = 'auto'; t.style.height = Math.min(t.scrollHeight, 120) + 'px'; }
 function chRead(c) {

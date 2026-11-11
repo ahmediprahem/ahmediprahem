@@ -2045,10 +2045,10 @@ const CLIENT_Q = ['عندي سؤال عن خطتي', 'لم أستطع الالت
 const hm = (ts) => { const d = new Date(ts); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); };
 function chatBtn() { return '<button class="chatbtn" data-act="chat">' + I('msg') + 'راسل الأخصائي' + (S.unreadC ? '<span class="nb" aria-label="' + S.unreadC + ' رسائل جديدة">' + S.unreadC + '</span>' : '') + '</button>'; }
 function bubbles() {
-  let last = '';
+  let last = '', prev = null;
   return S.msgs.map((m) => {
-    const mine = m.from === 'c', d = new Date(m.ts).toLocaleDateString('ar', { weekday: 'long', day: 'numeric', month: 'short' }), sep = d !== last ? '<span class="daysep">' + d + '</span>' : ''; last = d;
-    return sep + '<div class="bub' + (mine ? ' me' : '') + '">' + (m.ctx ? '<span class="cx">بخصوص: ' + esc(m.ctx) + '</span><br>' : '') + esc(m.t)
+    const mine = m.from === 'c', d = new Date(m.ts).toLocaleDateString('ar', { weekday: 'long', day: 'numeric', month: 'short' }), sep = d !== last ? '<span class="daysep">' + d + '</span>' : '', cont = !sep && prev && prev.from === m.from && m.ts - prev.ts < 120000; last = d; prev = m;
+    return sep + '<div class="bub' + (mine ? ' me' : '') + (cont ? ' cont' : '') + '">' + (m.ctx ? '<span class="cx">بخصوص: ' + esc(m.ctx) + '</span><br>' : '') + esc(m.t)
       + '<div class="mt"><span>' + hm(m.ts) + '</span>' + (mine ? '<span class="' + (m.read ? 'rd' : '') + '">' + (m.read ? '✓✓ قُرئت' : S.outbox.some((q) => q.t === 'msg' && q.ts === m.ts) ? '◷ بانتظار الإنترنت' : '✓ أُرسلت') + '</span>' : '') + '</div></div>';
   }).join('');
 }
@@ -2096,7 +2096,7 @@ function render() {
   document.querySelectorAll('video[data-keep]').forEach((n) => { const o = keep[n.dataset.keep]; if (o && o !== n) n.replaceWith(o); });   // فيديو يعمل لا يتوقف عند إعادة الرسم
   if (cmV) { const n = $('#cmIn'); if (n) { n.value = cmV[0]; if (cmV[1]) n.focus(); } }
   const s2 = $('.scroll'); if (s2 && key === lastKey) s2.scrollTop = top; lastKey = key;
-  const th = $('#thread'); if (th) th.scrollTop = th.scrollHeight;
+  const th = $('#thread'); if (th) { th.dataset.pin = th.dataset.pin || '1'; const go = () => { if (th.dataset.pin !== '0') th.scrollTop = th.scrollHeight; }; go(); requestAnimationFrame(() => { go(); requestAnimationFrame(go); }); setTimeout(go, 150); if (!th._pb) { th._pb = 1; th.addEventListener('scroll', () => { th.dataset.pin = (th.scrollHeight - th.scrollTop - th.clientHeight < 80) ? '1' : '0'; }, { passive: true }); } }
   onbSplashTimer(); fillCerts(); if (window.HxMotion) HxMotion.after(); if (S && S.chal && S.screen === 'app' && V.screen === '') chalCheck(); chalCheck(); whMaybe(); actMaybe(); badgeSync(); { const c = $('#chatIn'); if (c) c.focus(); focusChat = false; }
   if (S && K) save();
   if (!V.trSched && tourAuto()) { V.trSched = 1; setTimeout(() => { V.trSched = 0; if (tourAuto()) tourStart(); }, 900); }
