@@ -122,9 +122,9 @@ function wkItems() {
     ap.forEach(function (a) { if (a.st) return; if (a.d === today && wkAt(a) >= now - 3600000) add(c, 0, '📅', 'موعد اليوم ' + (a.t || '') + ' — ' + (a.type || 'متابعة'), 'appt', 'a' + a.id); else if (wkAt(a) < now - 3600000) add(c, 1, '⏰', 'موعد ' + wkDate(a.d) + ' لم يُسجَّل حضوره', 'appt', 'l' + a.id); });
     var x = c.hx;
     if (x) {
-      if (x.unread) add(c, 0, '💬', x.unread + (x.unread === 1 ? ' رسالة جديدة' : ' رسائل جديدة') + ' في «زنها»', 'hx', 'msg');
-      if (x.health) add(c, 0, '🩺', 'يطلب تعديل حالته الصحية من «زنها»', 'hx', 'health');
-      if (c.plan && !x.planV) add(c, 1, '📤', 'لديه خطة لم تُرسل إلى «زنها»', 'hx', 'send');
+      if (x.unread) add(c, 0, '💬', x.unread + (x.unread === 1 ? ' رسالة جديدة' : ' رسائل جديدة') + ' في «زنها»', 'chat', 'msg');
+      if (x.health) add(c, 0, '🩺', 'يطلب تعديل حالته الصحية من «زنها»', 'link', 'health');
+      if (c.plan && !x.planV) add(c, 1, '📤', 'لديه خطة لم تُرسل إلى «زنها»', 'link', 'send');
       var ks = Object.keys(x.logs || {}).sort(), last = ks.length ? new Date(ks[ks.length - 1] + 'T12:00').getTime() : 0, recent = ks.filter(function (k) { return k >= wkAddDays(-3) && k < today; }).map(function (k) { var l = x.logs[k]; return l.n ? l.done / l.n : 0; });
       var p1 = x.logs[wkAddDays(-1)], p2 = x.logs[wkAddDays(-2)], pc = function (l) { return l && l.n ? l.done / l.n : 0; };   // 0.50: يومان متتاليان تحت 60%
       if (p1 && p2 && pc(p1) < 0.6 && pc(p2) < 0.6) add(c, 1, '📉', 'التزام منخفض يومين متتاليين: ' + Math.round(pc(p2) * 100) + '% ثم ' + Math.round(pc(p1) * 100) + '%', 'ci', 'low');
@@ -169,7 +169,7 @@ Object.assign(A, {
   wkApply: function (v, el) { var c = cur(); if (!c) return; if (wkHas(c) && !confirm('استبدال الخطة الحالية؟ تُحفظ إصداراً يمكنك استرجاعه.')) return; wkApply(c, v, el.dataset.m).catch(function (e) { toast('⚠ ' + e.message); }); },
   appts: function () { S.view = 'appts'; S.cur = null; render(); },
   wkOpen: function (v) { A.pick(v).then(function () { S.tab = 'appt'; main(); }); },
-  wkGo: function (v, el) { var t = el.dataset.t; if (!v) { A[t](); return; } A.pick(v).then(function () { S.tab = t; main(); if (t === 'hx' && A.hxRead) A.hxRead(); }); },
+  wkGo: function (v, el) { var t = el.dataset.t; if (!v) { A[t](); return; } if (t === 'chat') { A.cfChat(v); return; } A.pick(v).then(function () { S.tab = t; main(); }); },   // 0.94: الرسائل تفتح محادثة العميل في «شات زنها»
   wkHide: function (v) { wkHide(v); main(); },
   wkAll: function () { WK.all = !WK.all; main(); },
   wkIn: function (v) { WK.form = WK.form || {}; WK.form.d = wkAddDays(+v); main(); },

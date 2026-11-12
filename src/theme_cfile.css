@@ -1,0 +1,83 @@
+/* ===== 0.94 ملف العميل: رأس ثابت + خمسة تبويبات + أقسام داخلية (cfile_ui.js). الشاشة فقط؛ يُحمَّل بعد theme_glass.css.
+   القواعد الأساسية للمظهر الكلاسيكي الفاتح، وتحتها ضبط المظهرين الداكنين (Linear والزجاجي)، ثم الجوال (شريط تبويبات أفقي ثابت أعلى الصفحة). ===== */
+@media screen{
+/* ---------- الرأس ---------- */
+.cfhead{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin:0 0 12px;padding:12px 14px;border:1px solid var(--line,#d9dbe3);border-radius:12px;background:#f7f8fb}
+.cfhead .cav{display:inline-grid;place-items:center;flex:none;width:44px;height:44px;border-radius:50%;font-weight:700;font-size:18px;background:#1D2C5F;color:#fff}
+.cfid{display:flex;flex-direction:column;min-width:0;flex:0 1 auto;max-width:100%}
+.cfname{font-size:18px;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cfid small{font-size:12.5px;opacity:.78;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cfbadges{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+html[data-theme] .cfb{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:3px 12px;border-radius:99px;border:1px solid transparent;font-size:13px;font-weight:700;line-height:1.3;white-space:nowrap;box-shadow:none;background:#e3f4ea;color:#17603a}
+html[data-theme] .cfb.w{background:#fdf0d2;color:#7a5200}
+html[data-theme] .cfb.no{background:#fde3e1;color:#a32219}
+html[data-theme] .cfb.n{background:#e8ecef;color:#3d4660}
+.cfb .ico{width:15px;height:15px}
+.cfb .hxnb{margin-inline-start:2px}
+.cfact{display:flex;align-items:center;gap:8px;margin-inline-start:auto}
+html[data-theme] .cfsend,html[data-theme] .cfchat{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:6px 16px;white-space:nowrap}
+.cfsend .ico,.cfchat .ico{width:17px;height:17px}
+html[data-theme] .cfhead details.cmore>summary{display:inline-grid;place-items:center;min-width:40px;min-height:40px;padding:0;border-radius:10px}
+.cfhead .cmore>summary .ico{width:20px;height:20px}
+.cfhead .cmore .tbp{inset-inline-start:auto;inset-inline-end:0;min-width:230px}
+.cfhead .tbp button{display:flex;align-items:center;gap:8px;min-height:40px}
+/* ---------- التبويبات الخمسة ---------- */
+html[data-theme] .tabs.cftabs{display:flex;flex-wrap:nowrap;gap:4px;width:fit-content;max-width:100%;margin:0 0 10px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none}
+.cftabs::-webkit-scrollbar,.cfseg::-webkit-scrollbar{display:none}
+html[data-theme] .tabs.cftabs>button{display:inline-flex;align-items:center;justify-content:center;gap:7px;flex:0 0 auto;min-height:40px;padding:6px 16px;white-space:nowrap}
+.cftabs>button .ico{width:17px;height:17px}
+/* ---------- الأقسام الداخلية (خط سفلي لتمييزها عن التبويبات) ---------- */
+.cfseg{display:flex;gap:2px;margin:0 0 14px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;border-bottom:1px solid var(--line,#d9dbe3)}
+html[data-theme] .cfseg>button{flex:0 0 auto;min-height:38px;padding:6px 14px;border:0;border-bottom:2px solid transparent;border-radius:8px 8px 0 0;margin-bottom:-1px;background:none;color:inherit;font-weight:600;opacity:.72;white-space:nowrap;box-shadow:none}
+html[data-theme] .cfseg>button:hover{opacity:1;background:rgba(127,127,127,.12)}
+html[data-theme] .cfseg>button.on{opacity:1;color:#1D2C5F;border-bottom-color:#1D2C5F}
+/* ---------- محتوى الأقسام ---------- */
+.cfday .hxgrid .hxdaily{grid-column:1/-1}
+.hxlast{display:flex;align-items:center;justify-content:flex-end;gap:10px;margin:0 0 10px}
+.cfneed{text-align:center;padding:22px 14px}
+.cfneed h3{margin:0 0 6px}
+
+/* ---------- المظهران الداكنان ---------- */
+html:is([data-theme="linear"],[data-theme="glass"]) .cfhead{background:var(--lpanel);border-color:var(--lline)}
+html:is([data-theme="linear"],[data-theme="glass"]) .cfhead .cav{background:#7fe7b4 linear-gradient(145deg,#a7f3cc,#5fd49b);color:#06281a}
+html:is([data-theme="linear"],[data-theme="glass"]) .cfname{color:#fff}
+html:is([data-theme="linear"],[data-theme="glass"]) .cfid small{color:var(--lmut);opacity:1}
+html:is([data-theme="linear"],[data-theme="glass"]) .cfb{background:rgba(111,227,169,.16);color:#6fe3a9;border-color:rgba(111,227,169,.28)}
+html:is([data-theme="linear"],[data-theme="glass"]) .cfb.w{background:rgba(255,196,87,.18);color:#ffc457;border-color:rgba(255,196,87,.3)}
+html:is([data-theme="linear"],[data-theme="glass"]) .cfb.no{background:rgba(255,138,128,.18);color:#ff8a80;border-color:rgba(255,138,128,.32)}
+html:is([data-theme="linear"],[data-theme="glass"]) .cfb.n{background:rgba(255,255,255,.1);color:#dbe3f7;border-color:var(--lline)}
+html:is([data-theme="linear"],[data-theme="glass"]) .cfb:hover{filter:brightness(1.15);box-shadow:none}
+html:is([data-theme="linear"],[data-theme="glass"]) .cfseg{border-bottom-color:var(--lline)}
+html:is([data-theme="linear"],[data-theme="glass"]) .cfseg>button{color:var(--lmut);opacity:1}
+html:is([data-theme="linear"],[data-theme="glass"]) .cfseg>button:hover{background:var(--lpanel2);color:#fff}
+html:is([data-theme="linear"],[data-theme="glass"]) .cfseg>button.on{color:#fff;border-bottom-color:var(--lacc,#22c55e)}
+html[data-theme="glass"] .cfhead{border-radius:var(--r2);box-shadow:var(--ghi)}
+html[data-theme="glass"] .tabs.cftabs{margin-bottom:12px}
+
+/* ---------- الجوال: رأس مضغوط، وشريط تبويبات واحد يُسحب أفقياً ويبقى أعلى الصفحة، وأهداف لمس 44 ---------- */
+@media (max-width:900px){
+  .cfhead{gap:8px 10px;padding:10px 12px;margin-bottom:8px}
+  .cfhead .cav{width:40px;height:40px;font-size:16px}
+  .cfid{flex:1 1 0}
+  .cfname{font-size:16.5px}
+  .cfact{display:contents}
+  html[data-theme] .cfchat{order:1;min-width:44px;min-height:44px;padding:0;position:relative}
+  .cfchat>span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+  .cfchat .ico{width:20px;height:20px}
+  .cfchat .hxnb{position:absolute;top:2px;inset-inline-end:2px}
+  .cfhead details.cmore{order:2}
+  html[data-theme] .cfhead details.cmore>summary{min-width:44px;min-height:44px}
+  .cfbadges{order:3;flex:1 1 100%;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+  .cfbadges::-webkit-scrollbar{display:none}
+  html[data-theme] .cfb{min-height:44px;flex:0 0 auto;border-radius:14px}
+  html[data-theme] .cfsend{order:4;flex:1 1 100%;min-height:46px}
+  .cfhead .tbp button{min-height:44px}
+  html[data-theme] .tabs.cftabs{position:sticky;top:0;z-index:20;width:auto;max-width:none;margin:0 -10px 8px;padding:6px 10px;border-radius:0;background:#fff;box-shadow:0 6px 10px -8px rgba(0,0,0,.35)}
+  html[data-theme] .tabs.cftabs>button{min-height:44px;padding:6px 14px}
+  html[data-theme="linear"] .tabs.cftabs{background:#0b1329;border-bottom:1px solid var(--lline)}
+  html[data-theme="glass"] .tabs.cftabs{top:calc(var(--hh) + env(safe-area-inset-top,0px));margin:0 -14px 10px;padding:6px 14px;border:0;border-bottom:1px solid var(--lline);background:rgba(14,22,54,.96);box-shadow:0 10px 18px -12px rgba(0,0,0,.6)}
+  .cfseg{margin-bottom:12px}
+  html[data-theme] .cfseg>button{min-height:44px}
+  .hxlast{justify-content:space-between}
+}
+}

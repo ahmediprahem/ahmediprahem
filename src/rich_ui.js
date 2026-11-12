@@ -30,8 +30,8 @@ function rcUpload(rs) {                                             // صور ا
 function rcOfPlan(c) { var seen = {}, out = []; if (!c.plan || !c.plan.days || c.kind === 'athlete') return out; c.plan.days.forEach(function (d) { d.slots.forEach(function (s) { var n = s.mealLabel || s.meal; if (n && !seen[n]) { seen[n] = 1; var m = rcByMeal(s.meal) || rcByMeal(n); if (m && m.r) out.push({ name: n, r: m.r }); } }); }); return out; }
 // ---------- صور الوجبات في ملف العميل
 function phCard(c) {
-  var ps = (c.hx.photos || []).slice().reverse(); if (!ps.length) return '<div class="ucard"><h3>📷 صور الوجبات</h3><p class="small">يصوّر العميل وجبته من «زنها» («صوّر وجبتك» في بطاقة الوجبة) فتظهر هنا مشفّرة، وتردّ بتعليق سريع.</p></div>';
-  return '<div class="ucard phcard"><h3>📷 صور الوجبات (' + ps.length + ')</h3><div class="phgrid">' + ps.slice(0, 24).map(function (p) {
+  var ps = (c.hx.photos || []).slice().reverse(); if (!ps.length) return '<div class="ucard"><h3>صور الوجبات</h3><p class="small">يصوّر العميل وجبته من «زنها» («صوّر وجبتك» في بطاقة الوجبة) فتظهر هنا مشفّرة، وتردّ بتعليق سريع.</p></div>';
+  return '<div class="ucard phcard"><h3>صور الوجبات (' + ps.length + ')</h3><div class="phgrid">' + ps.slice(0, 24).map(function (p) {
     return '<figure class="' + (p.cm ? '' : 'new') + '"><img src="' + p.img + '" alt="صورة ' + esc(p.slot) + '" loading="lazy"><figcaption><b>' + esc(p.slot || 'وجبة') + '</b><small>' + esc(new Date(p.ts).toLocaleString('ar', { weekday: 'short', hour: '2-digit', minute: '2-digit' })) + '</small>'
       + (p.cm ? '<p class="phcm">✓ ' + esc(p.cm) + '</p>' : '<p class="phq">' + PH_QUICK.map(function (q) { return '<button class="sec sm" data-a="phCm" data-v="' + p.id + '" data-t="' + esc(q) + '">' + q + '</button>'; }).join('') + '<button class="sec sm" data-a="phCm" data-v="' + p.id + '" data-t="">✎ تعليق</button></p>') + '</figcaption></figure>';
   }).join('') + '</div></div>';
@@ -65,6 +65,6 @@ document.addEventListener('change', function (e) { var t = e.target; if (t.id !=
     x.phNew = (x.phNew || 0) + 1; toast('📷 ' + (c.name || x.label || '') + ' أرسل صورة ' + (p.slot || 'وجبته')); return 1;
   }
   return f.apply(this, arguments); }; })(hxIn);
-(function (f) { hxTab = function (c) { var h = f.apply(this, arguments); return h.replace('<div class="hxgrid">', phCard(c) + '<div class="hxgrid">'); }; })(hxTab);
+// 0.94: صور الوجبات قسم في «المتابعة» (cfile_ui.js يستدعي phCard مباشرة)، وعدّاد الجديد يُصفَّر عند فتح القسم
 (function (f) { A.hxRead = function () { var c = cur(); if (c && c.hx && c.hx.phNew) { c.hx.phNew = 0; persist(c); } return f.apply(this, arguments); }; })(A.hxRead);
-(function (f) { wkItems = function () { var out = f.apply(this, arguments), hid = wkHidden(); S.clients.forEach(function (c) { var n = c.hx && c.hx.phNew; if (n && !hid[c.code + ':ph']) out.push({ c: c, pri: 1, ic: '📷', txt: n + (n === 1 ? ' صورة وجبة جديدة' : ' صور وجبات جديدة') + ' بانتظار تعليقك', tab: 'hx', key: c.code + ':ph' }); }); return out.sort(function (a, b) { return a.pri - b.pri; }); }; })(wkItems);
+(function (f) { wkItems = function () { var out = f.apply(this, arguments), hid = wkHidden(); S.clients.forEach(function (c) { var n = c.hx && c.hx.phNew; if (n && !hid[c.code + ':ph']) out.push({ c: c, pri: 1, ic: '📷', txt: n + (n === 1 ? ' صورة وجبة جديدة' : ' صور وجبات جديدة') + ' بانتظار تعليقك', tab: 'ph', key: c.code + ':ph' }); }); return out.sort(function (a, b) { return a.pri - b.pri; }); }; })(wkItems);
