@@ -1,0 +1,16 @@
+# خادم إدارة «زنها» — انظر index.mjs. لا أسرار هنا: ACCESS_TEAM و ACCESS_AUD تُضبط بعد تفعيل Cloudflare Access.
+name = "zenha-admin"
+main = "index.mjs"
+compatibility_date = "2026-10-01"
+workers_dev = true
+
+[vars]
+OWNER_EMAIL = "ah6171317@gmail.com"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "zenha_admin"
+database_id = "6711c840-e769-4f9c-92e5-177bbf6256e0"
+
+[triggers]
+crons = ["17 3 * * *"]
