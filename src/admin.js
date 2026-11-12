@@ -54,20 +54,20 @@
   }
   // ---- 0.96: الأخصائيون بالبريد — يضيف المدير البريد والاسم والمدة، ويوقّع متصفحه رخصة لهذا البريد بمفتاح المدير (لا أكواد ولا رموز أجهزة)
   var SP = { list: null, err: '', loading: 0 }, SP_DAYS = [[30, 'شهر'], [90, '3 أشهر'], [180, '6 أشهر'], [365, 'سنة'], [0, 'بلا انتهاء']];
-  async function spLicense(email, name, exp) { var t = Math.floor(Date.now() / 1000); return H.sign(HAD.priv, { v: 1, t: 'em', u: 'em:' + email, em: email, n: name, iat: t, exp: exp || 0 }); }
+  async function spLicense(email, name, exp, lu) { var t = Math.floor(Date.now() / 1000), pl = { v: 1, t: 'em', u: 'em:' + email, em: email, n: name, iat: t, exp: exp || 0 }; if (lu) pl.lu = lu; return H.sign(HAD.priv, pl); }   // lu: حسابه القديم (اسم المستخدم) لتبقى بياناته
   async function spLoad() { try { SP.list = (await cloudApi('GET', '/api/specialists')).specialists; SP.err = ''; } catch (e) { SP.err = e.message; } var el = document.getElementById('spBox'); if (el) el.outerHTML = spBoxHtml(); }
   function spState(x) { var t = Date.now() / 1000; return x.status === 'off' ? ['موقوف', 'warn'] : x.exp && x.exp < t ? ['منتهٍ', 'warn'] : ['فعّال', 'ok']; }
   function spBoxHtml() {
     var fmt = function (ts) { return ts ? new Date(ts * 1000).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'; };
     return '<div class="addbox cloudbox" id="spBox"><h3>🩺 الأخصائيون — الدخول بالبريد</h3><p class="small">أضف بريد الأخصائي واسمه ومدة اشتراكه فقط. يدخل «زنها Pro» برمز يصله على بريده، بلا اسم مستخدم ولا كود تفعيل ولا رمز جهاز. الرخصة تُوقَّع هنا في متصفحك بمفتاح المدير.</p>'
-      + '<div class="row"><div><label for="sp_email">بريد الأخصائي</label><input id="sp_email" type="email" dir="ltr" placeholder="doctor@gmail.com"></div><div><label for="sp_name">الاسم</label><input id="sp_name" placeholder="د. سارة"></div><div><label for="sp_days">المدة</label><select id="sp_days">' + SP_DAYS.map(function (d) { return '<option value="' + d[0] + '"' + (d[0] === 365 ? ' selected' : '') + '>' + d[1] + '</option>'; }).join('') + '</select></div></div><p><button data-ha="spAdd">+ إضافة الأخصائي</button></p>'
+      + '<div class="row"><div><label for="sp_email">بريد الأخصائي</label><input id="sp_email" type="email" dir="ltr" placeholder="doctor@gmail.com"></div><div><label for="sp_name">الاسم</label><input id="sp_name" placeholder="د. سارة"></div><div><label for="sp_days">المدة</label><select id="sp_days">' + SP_DAYS.map(function (d) { return '<option value="' + d[0] + '"' + (d[0] === 365 ? ' selected' : '') + '>' + d[1] + '</option>'; }).join('') + '</select></div><div><label for="sp_lu">ربط بحسابه القديم (اختياري)</label><select id="sp_lu"><option value="">— أخصائي جديد —</option>' + HAD.users.map(function (u) { return '<option value="' + esc(u.username) + '">' + esc(u.name + ' (' + u.username + ')') + '</option>'; }).join('') + '</select></div></div><p class="small">الربط بحساب قديم يُبقي بيانات الأخصائي وعملاءه كما هي: يكتب كلمة سره المعتادة مرة واحدة على جهازه ثم يدخل ببريده.</p><p><button data-ha="spAdd">+ إضافة الأخصائي</button></p>'
       + (SP.err ? '<div class="gerr">' + esc(SP.err) + '</div>' : '')
       + (!SP.list ? '<p class="small">جارٍ التحميل…</p>' : SP.list.length ? '<table class="dt spt"><tr><th>الأخصائي</th><th>البريد</th><th>الحالة</th><th>ينتهي</th><th>آخر دخول</th><th></th></tr>' + SP.list.map(function (x) { var st = spState(x);
         return '<tr><td>' + esc(x.name) + '</td><td dir="ltr">' + esc(x.email) + '</td><td><span class="' + st[1] + '">' + st[0] + '</span></td><td>' + (x.exp ? fmt(x.exp) : 'بلا انتهاء') + '</td><td>' + fmt(x.last_seen) + '</td><td><button class="sec sm" data-ha="spExt" data-e="' + esc(x.email) + '">تمديد شهر</button> <button class="sec sm" data-ha="spToggle" data-e="' + esc(x.email) + '">' + (x.status === 'off' ? 'تفعيل' : 'إيقاف') + '</button> <button class="sec sm r" data-ha="spDel" data-e="' + esc(x.email) + '">حذف</button></td></tr>'; }).join('') + '</table>' : '<p class="small">لم تُضف أخصائيين بالبريد بعد.</p>') + '</div>';
   }
   function spCard() { if (!CLOUD) return ''; if (!SP.list && !SP.loading) { SP.loading = 1; spLoad().then(function () { SP.loading = 0; }); } return spBoxHtml(); }
   async function spSave(x, resign) {
-    var body = { email: x.email, name: x.name, exp: x.exp || 0, status: x.status || 'active', note: x.note || '' }; if (resign) body.lic = await spLicense(x.email, x.name, x.exp);
+    var lu = /^lu:(.+)$/.exec(x.note || ''), body = { email: x.email, name: x.name, exp: x.exp || 0, status: x.status || 'active', note: x.note || '' }; if (resign) body.lic = await spLicense(x.email, x.name, x.exp, lu && lu[1]);
     await cloudApi('POST', '/api/specialists', body);
   }
   // ---- أعضاء نظام الإدارة (المالك فقط): من يدخل عبر Access ويصل لأي قسم
@@ -214,7 +214,7 @@
       var em = ($('#sp_email').value || '').trim().toLowerCase(), nm = ($('#sp_name').value || '').trim(), days = +$('#sp_days').value;
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) return toast('اكتب بريداً صحيحاً'); if (!nm) return toast('اكتب اسم الأخصائي');
       if ((SP.list || []).some(function (x) { return x.email === em; })) return toast('هذا البريد مضاف بالفعل — استعمل «تمديد»');
-      try { await spSave({ email: em, name: nm, exp: days ? Math.floor(Date.now() / 1000) + days * 86400 : 0 }, true); toast('أُضيف ' + nm + ' — يدخل «زنها Pro» ببريده'); spLoad(); } catch (e) { toast('⚠ ' + e.message); }
+      var lu0 = $('#sp_lu').value; try { await spSave({ email: em, name: nm, exp: days ? Math.floor(Date.now() / 1000) + days * 86400 : 0, note: lu0 ? 'lu:' + lu0 : '' }, true); toast('أُضيف ' + nm + ' — يدخل «زنها Pro» ببريده'); spLoad(); } catch (e) { toast('⚠ ' + e.message); }
     },
     spExt: async function (el) { var x = (SP.list || []).filter(function (y) { return y.email === el.dataset.e; })[0]; if (!x) return; var t = Math.floor(Date.now() / 1000), base = x.exp && x.exp > t ? x.exp : t; x.exp = base + 30 * 86400; try { await spSave(x, true); toast('مُدّد حتى ' + new Date(x.exp * 1000).toLocaleDateString('ar-EG')); spLoad(); } catch (e) { toast('⚠ ' + e.message); } },
     spToggle: async function (el) { var x = (SP.list || []).filter(function (y) { return y.email === el.dataset.e; })[0]; if (!x) return; x.status = x.status === 'off' ? 'active' : 'off'; try { await spSave(x, false); spLoad(); } catch (e) { toast('⚠ ' + e.message); } },
