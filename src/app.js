@@ -22,10 +22,10 @@ function newClient(kind){var n=S.clients.reduce(function(a,c){return Math.max(a,
 function cur(){var c=S.clients.filter(function(c){return c.code===S.cur})[0];if(c)return c;if(S.draft&&S.draft.code===S.cur)return S.draft;S.draft=null}
 // 0.60: العميل الجديد مسودة في الذاكرة حتى يُكتب اسمه، فلا يبقى عملاء فارغون في القائمة أو قاعدة البيانات
 function promote(c){if(c&&c===S.draft&&String(c.name||'').trim()){S.clients.push(c);S.draft=null;return true}return false}
-var saveT=0,saveQ=Promise.resolve();
-function persist(c){promote(c);if(c&&c===S.draft)return saveQ;saveQ=saveQ.then(function(){c.updated=Date.now();return dbPut('clients',c)}).catch(function(){});return saveQ}
-function save(){var c0=cur();if(c0&&promote(c0)){try{sidebar()}catch(e){}}clearTimeout(saveT);saveT=setTimeout(function(){saveT=0;var c=cur();if(c)persist(c)},250)}
-function flush(){if(saveT){clearTimeout(saveT);saveT=0;var c=cur();if(c)return persist(c)}return saveQ}
+var saveT=0,saveC=null,saveQ=Promise.resolve();   // 0.94: الحفظ المؤجّل يحفظ العميل الذي عُدِّل نفسه، لا «الحالي» وقت انتهاء المؤقت (كان الانتقال خلال 250ms يُضيع التعديل أو العميل الجديد)
+function persist(c){promote(c);if(c&&(c===S.draft||S.clients.indexOf(c)<0))return saveQ;saveQ=saveQ.then(function(){c.updated=Date.now();return dbPut('clients',c)}).catch(function(){});return saveQ}
+function save(){var c0=cur();if(c0&&promote(c0)){try{sidebar()}catch(e){}}if(saveT&&saveC&&saveC!==c0)persist(saveC);clearTimeout(saveT);saveC=c0;saveT=setTimeout(function(){saveT=0;var c=saveC;saveC=null;if(c)persist(c)},250)}
+function flush(){if(saveT){clearTimeout(saveT);saveT=0;var c=saveC||cur();saveC=null;if(c)return persist(c)}return saveQ}
 window.addEventListener('pagehide',flush);window.addEventListener('beforeunload',flush);document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden')flush()});
 function ec(c){var x=JSON.parse(JSON.stringify(c));x.keywords=String(c.keywords||'').split(/[,،\n]/).map(function(s){return s.trim()}).filter(Boolean);return x}
 // ============ العرض
