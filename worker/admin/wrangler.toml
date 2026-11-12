@@ -16,3 +16,8 @@ database_id = "6711c840-e769-4f9c-92e5-177bbf6256e0"
 
 [triggers]
 crons = ["17 3 * * *"]
+
+# واجهة الإدارة: public/index.html نسخة من admin.html تُكتب عند البناء (لا تُحفظ في git)
+[assets]
+directory = "./public"
+binding = "ASSETS"

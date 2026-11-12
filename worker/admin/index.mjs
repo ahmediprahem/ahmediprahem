@@ -135,7 +135,7 @@ export default {
     if (!env.DB) return err(500, 'db', 'قاعدة البيانات غير مربوطة (DB)');
     if (url.pathname === '/health') return json({ ok: true, ver: VER, access: !!(env.ACCESS_TEAM && env.ACCESS_AUD), owner: !!env.OWNER_EMAIL });
     if (url.pathname.startsWith('/api/')) { try { return await api(req, env, url); } catch (e) { return err(500, 'server', 'خطأ في الخادم'); } }
-    if (env.ASSETS && url.pathname !== '/') return env.ASSETS.fetch(req);
+    if (env.ASSETS) return env.ASSETS.fetch(req);     // واجهة الإدارة (admin.html) كأصل ثابت خلف Access
     return new Response(SETUP_HTML, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store', 'x-frame-options': 'DENY', 'referrer-policy': 'no-referrer', 'content-security-policy': "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; frame-ancestors 'none'" } });
   },
   async scheduled(event, env, ctx) { if (!env.DB) return 0; await init(env.DB, env); const id = await backup(env.DB); await audit(env.DB, 'system', 'backup', 'daily #' + id); return id; }

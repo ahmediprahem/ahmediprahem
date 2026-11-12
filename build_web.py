@@ -24,6 +24,11 @@ def build(mode, tpl):
     return t
 user = build('user', 'null'); admin = build('admin', json.dumps(user).replace('</', '<\\/'))
 open(os.path.join(H, 'index.html'), 'w', encoding='utf-8').write(user); open(os.path.join(H, 'admin.html'), 'w', encoding='utf-8').write(admin)
+
+# 0.95: واجهة الإدارة على الإنترنت (zenha-admin): نسخة admin.html أصلاً ثابتاً للخادم، مع ترويسات الأمان
+os.makedirs(os.path.join(H, 'worker', 'admin', 'public'), exist_ok=True)
+open(os.path.join(H, 'worker', 'admin', 'public', 'index.html'), 'w', encoding='utf-8').write(admin)
+open(os.path.join(H, 'worker', 'admin', 'public', '_headers'), 'w', encoding='utf-8').write("/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: no-referrer\n  X-Frame-Options: DENY\n  X-Robots-Tag: noindex, nofollow\n  Cache-Control: no-cache\n  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()\n  Content-Security-Policy: default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob: 'self'; media-src data: blob:; font-src data:; connect-src 'self' https:; worker-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'\n")
 # «حصتي»: تطبيق العميل ملف واحد (hissati.html)، ونسخة المحطة الوسيطة الجاهزة للصق في Cloudflare (worker/relay/dist/worker.js) وهي تقدّمه على «/»
 import re
 A = R('assets.js'); js = lambda k: json.loads('"' + re.search(k + r':"((?:[^"\\]|\\.)*)"', A).group(1) + '"')

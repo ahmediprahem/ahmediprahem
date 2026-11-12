@@ -8082,12 +8082,86 @@ refresh:function(){render()},reencrypt:function(newKey){var stores=['clients','v
 (function () {
   'use strict';
   var K = window.HK, H = window.HSec, MODE = window.APP_MODE, MAXDEV = 2, gate = K.gate, openGate = K.openGate, copy = K.copy, openKV = K.openKV, kvGet = K.kvGet, kvAll = K.kvAll, kvPut = K.kvPut, kvDel = K.kvDel, throttleLeft = K.throttleLeft, failed = K.failed, esc = K.esc, $ = K.$;
+  // ======================================================= 0.95: الإدارة على الإنترنت (zenha-admin خلف Cloudflare Access)
+  // حين تُفتح النسخة من خادم الإدارة (يرد /api/me): يُسترجع حساب المدير على جهاز جديد، وتُرفع بيانات الإدارة بعد كل تعديل.
+  // ما يُرفع: (1) سجل المدير = المفتاح العام + المفتاح الخاص مغلَّفاً بكلمة السر (مشفّر أصلاً، لا يُفتح بدونها) + إعداد بوابة الدخول؛
+  // (2) الأخصائيون والأجهزة مشفّرين AES-GCM بمفتاح مشتق من كلمة سر المدير. الخادم وCloudflare لا يريان كلمة السر ولا المفتاح ولا القائمة.
+  var CLOUD = null, CK = null, CV = { auth: 0, users: 0 }, cT = 0, cBusy = null, CS = { st: '', msg: '', at: 0 }, CM = { list: null, audit: null };
+  var kvPut0 = kvPut, kvDel0 = kvDel;
+  kvPut = function (db) { var r = kvPut0.apply(null, arguments); if (HAD && db === HAD.db) r.then(cloudDirty, function () { }); return r; };
+  kvDel = function (db) { var r = kvDel0.apply(null, arguments); if (HAD && db === HAD.db) r.then(cloudDirty, function () { }); return r; };
+  async function cloudApi(method, p, body) {
+    var r = await fetch(p, { method: method, headers: body ? { 'content-type': 'application/json' } : {}, body: body ? JSON.stringify(body) : undefined, credentials: 'same-origin', cache: 'no-store' });
+    var j = await r.json().catch(function () { return {}; }); if (!r.ok) { var e = new Error(j.error || ('خطأ من خادم الإدارة (' + r.status + ')')); e.status = r.status; throw e; } return j;
+  }
+  async function cloudDetect() { if (location.protocol === 'file:') return null; try { return (await cloudApi('GET', '/api/me')).me; } catch (e) { return null; } }
+  function authBox(auth, gc) { return { _e: 1, iv: 'wrapped', ct: btoa(unescape(encodeURIComponent(JSON.stringify({ auth: auth, gatecfg: gc || null })))) }; }
+  function authUnbox(v) { return JSON.parse(decodeURIComponent(escape(atob(v.ct)))); }
+  function cloudState(st, msg) { CS = { st: st, msg: msg || '', at: Date.now() }; var b = document.getElementById('cloudSt'); if (b) b.outerHTML = cloudStHtml(); }
+  function cloudStHtml() { return '<span id="cloudSt" class="' + (CS.st === 'err' ? 'warn' : 'ok') + ' vtline">' + (CS.st === 'err' ? '⚠ لم تُرفع آخر التعديلات: ' + esc(CS.msg) + ' — ستُعاد المحاولة تلقائياً' : CS.st === 'ok' ? '☁ بيانات الإدارة محفوظة في النظام' + (CS.at ? ' (' + new Date(CS.at).toLocaleTimeString('ar-EG') + ')' : '') : '☁ جارٍ المزامنة…') + '</span>'; }
+  async function cloudRestoreAuth(db) {                       // جهاز جديد بلا حساب محلي: يُجلب سجل المدير من النظام ثم يُطلب كلمة السر كالمعتاد
+    var ra = await cloudApi('GET', '/api/store/keys:auth'); if (!ra.v) return null;
+    var x = authUnbox(ra.v), auth = Object.assign({}, x.auth, { key: 'auth' }); await kvPut0(db, 'kv', auth); if (x.gatecfg) { await kvPut0(db, 'kv', { key: 'gatecfg', cfg: x.gatecfg }); window.HGateCfg = x.gatecfg; }
+    CV.auth = ra.ver; return auth;
+  }
+  function mergeUsers(theirs, mine) { var by = {}; (theirs || []).forEach(function (u) { by[u.username] = u; }); (mine || []).forEach(function (u) { by[u.username] = u; }); return Object.keys(by).sort().map(function (k) { return by[k]; }); }
+  async function replaceLocalUsers(list) { var loc = await kvAll(HAD.db, 'users'); for (var i = 0; i < loc.length; i++) await kvDel0(HAD.db, 'users', loc[i].username); for (var j = 0; j < list.length; j++) await kvPut0(HAD.db, 'users', list[j]); HAD.users = list; }
+  async function cloudAfterLogin(key) {
+    CK = key; cloudState('');
+    try {
+      var lv = (await kvGet(HAD.db, 'kv', 'cloudver')) || {}, ru = await cloudApi('GET', '/api/store/users:admin');
+      var chg = false; if (ru.v && ru.ver !== lv.users) { var theirs = await H.decJSON(CK, ru.v); await replaceLocalUsers(lv.dirty ? mergeUsers(theirs, HAD.users) : theirs); chg = true; }
+      CV.users = ru.ver || 0; var ra = await cloudApi('GET', '/api/store/keys:auth'); CV.auth = ra.ver || 0;
+      if (chg && window.HApp && window.HApp.refresh && window.HApp.state.view === 'users') window.HApp.refresh();
+    } catch (e) { cloudState('err', e.message); }
+    return cloudPush();
+  }
+  function cloudDirty() { if (!CLOUD || !CK) return; clearTimeout(cT); kvPut0(HAD.db, 'kv', { key: 'cloudver', users: CV.users, auth: CV.auth, dirty: 1 }); cT = setTimeout(cloudPush, 1200); }
+  function cloudPush() {
+    if (!CLOUD || !CK) return Promise.resolve(); if (cBusy) { clearTimeout(cT); cT = setTimeout(cloudPush, 1500); return cBusy; }
+    cBusy = (async function () {
+      try {
+        var gc = await kvGet(HAD.db, 'kv', 'gatecfg'), ab = authBox(HAD.auth, gc && gc.cfg), cur = await cloudApi('GET', '/api/store/keys:auth');
+        if (!cur.v || cur.v.ct !== ab.ct) CV.auth = (await cloudApi('PUT', '/api/store/keys:auth', { v: ab, ver: cur.ver || 0 })).ver; else CV.auth = cur.ver;
+        var put = async function (list, ver) { var b = await H.encJSON(CK, list); b._e = 1; return (await cloudApi('PUT', '/api/store/users:admin', { v: b, ver: ver })).ver; };
+        try { CV.users = await put(HAD.users, CV.users); }
+        catch (e) { if (e.status !== 409) throw e; var s2 = await cloudApi('GET', '/api/store/users:admin'), merged = mergeUsers(s2.v ? await H.decJSON(CK, s2.v) : [], HAD.users); await replaceLocalUsers(merged); CV.users = await put(merged, s2.ver); }
+        await kvPut0(HAD.db, 'kv', { key: 'cloudver', users: CV.users, auth: CV.auth, dirty: 0 }); cloudState('ok');
+      } catch (e) { cloudState('err', e.message); clearTimeout(cT); cT = setTimeout(cloudPush, 30000); }
+      finally { cBusy = null; }
+    })();
+    return cBusy;
+  }
+  // ---- أعضاء نظام الإدارة (المالك فقط): من يدخل عبر Access ويصل لأي قسم
+  var PERM_L = { users: 'الأخصائيون والأجهزة', lic: 'إصدار الرخص والأكواد', settings: 'الإعدادات الرئيسية', publish: 'النشر', clients: 'العملاء والخطط', audit: 'سجل التدقيق' }, ROLE_L = { owner: 'مالك', admin: 'مدير كامل', member: 'صلاحيات محددة' };
+  async function cmLoad() { try { CM.list = (await cloudApi('GET', '/api/members')).members; CM.audit = (await cloudApi('GET', '/api/audit')).rows.slice(0, 15); CM.err = ''; } catch (e) { CM.err = e.message; } var el = document.getElementById('cmBox'); if (el) el.outerHTML = cmBoxHtml(); }   // يحدّث صندوقه فقط، فلا يضيع ما يُكتب في الصفحة
+  function cloudCard() {
+    if (!CLOUD) return '';
+    var h = '<div class="addbox cloudbox"><h3>☁ النظام على الإنترنت</h3><p class="small">أنت داخل بـ <b dir="ltr">' + esc(CLOUD.email) + '</b> (' + esc(ROLE_L[CLOUD.role] || CLOUD.role) + '). بيانات الإدارة تُحفظ مشفّرة تلقائياً بعد كل تعديل، وتفتحها من أي جهاز بعد الدخول وكتابة كلمة سر المدير.</p>' + cloudStHtml() + '</div>';
+    if (CLOUD.role !== 'owner') return h;
+    if (!CM.list && !CM.loading) { CM.loading = 1; cmLoad().then(function () { CM.loading = 0; }); }
+    return h + cmBoxHtml();
+  }
+  function cmBoxHtml() {
+    var h = '<div class="addbox cloudbox" id="cmBox"><h3>👤 أعضاء نظام الإدارة</h3><p class="small">من تضيفه هنا يدخل بعنوان النظام بالرمز الذي يصله على بريده. «مدير كامل» يحتاج أيضاً كلمة سر المدير ليفتح البيانات المشفّرة. الصلاحيات المحددة تُفرض على الخادم الآن، وتعمل كاملة بعد المرحلة التالية (مفاتيح لكل قسم).</p>'
+      + (CM.err ? '<div class="gerr">' + esc(CM.err) + '</div>' : '')
+      + (CM.list ? '<table class="dt cmt"><tr><th>البريد</th><th>الدور</th><th>الصلاحيات</th><th>آخر دخول</th><th></th></tr>' + CM.list.map(function (m) {
+        return '<tr><td dir="ltr">' + esc(m.email) + '</td><td>' + esc(ROLE_L[m.role] || m.role) + (m.disabled ? ' <span class="small">(معطّل)</span>' : '') + '</td><td class="small">' + (m.role === 'member' ? esc(m.perms.map(function (x) { return PERM_L[x] || x; }).join('، ') || '—') : 'الكل') + '</td><td class="small">' + (m.last_seen ? new Date(m.last_seen * 1000).toLocaleString('ar-EG') : '—') + '</td><td>'
+          + (m.role === 'owner' ? '' : '<button class="sec sm" data-ha="cmToggle" data-e="' + esc(m.email) + '">' + (m.disabled ? 'تفعيل' : 'تعطيل') + '</button> <button class="sec sm r" data-ha="cmDel" data-e="' + esc(m.email) + '">حذف</button>') + '</td></tr>';
+      }).join('') + '</table>' : '<p class="small">جارٍ التحميل…</p>')
+      + '<div class="row"><div><label for="cm_email">بريد العضو</label><input id="cm_email" dir="ltr" type="email" placeholder="name@gmail.com"></div><div><label for="cm_role">الدور</label><select id="cm_role"><option value="admin">مدير كامل</option><option value="member">صلاحيات محددة</option></select></div></div>'
+      + '<p class="small">الصلاحيات (للدور «صلاحيات محددة»):</p><p>' + Object.keys(PERM_L).map(function (k) { return '<label class="chk"><input type="checkbox" data-cmp="' + k + '"> ' + PERM_L[k] + '</label>'; }).join(' ') + '</p>'
+      + '<p><button data-ha="cmAdd">+ إضافة العضو</button></p>'
+      + (CM.audit && CM.audit.length ? '<h3>آخر العمليات</h3><ul class="small cma">' + CM.audit.map(function (r) { return '<li>' + new Date(r.ts * 1000).toLocaleString('ar-EG') + ' — <span dir="ltr">' + esc(r.email) + '</span>: ' + esc(r.action) + ' ' + esc(r.detail || '') + '</li>'; }).join('') + '</ul>' : '') + '</div>';
+    return h;
+  }
   // ======================================================= بوابة المدير + لوحة الإدارة
   var HAD = null;
   var seededNote = '';
   async function adminGate() {
     if (!(window.crypto && window.crypto.subtle)) { K.showFatal('هذا المتصفح أو هذا السياق لا يوفّر التشفير (WebCrypto).'); return; }
     var db = await openKV('hissa_admin_auth', true), auth = await kvGet(db, 'kv', 'auth'), gc = await kvGet(db, 'kv', 'gatecfg'); if (gc && gc.cfg) window.HGateCfg = gc.cfg;
+    CLOUD = await cloudDetect(); if (CLOUD && !auth) { try { auth = await cloudRestoreAuth(db); if (auth) seededNote = 'استُرجع حساب المدير من النظام على الإنترنت. أدخل كلمة السر.'; } catch (e) { } }
     if (!auth && window.ADMIN_SEED) { auth = Object.assign({}, window.ADMIN_SEED, { key: 'auth', seeded: true }); await kvPut(db, 'kv', auth); seededNote = 'هذا حساب المدير الأولي (اسم المستخدم: ' + auth.user + '). كلمة السر الابتدائية في ملف «بيانات الدخول الأولية» المرافق. غيّرها فور الدخول من «👥 المستخدمون والأجهزة».'; }
     var REM = K.makeRem(db), st = auth && await REM.staying();
     if (st) { var pw0 = await REM.pw(st); if (pw0 && st.u.toLowerCase() === auth.user.toLowerCase() && await doLogin(db, auth, pw0, true)) { await REM.save(auth.user, pw0, { stay: true, fill: st.fill }); return; } await REM.clear(st.u); if (auth) return login(db, auth, 'انتهت جلسة «البقاء مسجلاً». أدخل كلمة السر.'); }
@@ -8095,7 +8169,7 @@ refresh:function(){render()},reencrypt:function(newKey){var stores=['clients','v
   }
   async function doLogin(db, auth, pw, stay) {                    // يفتح مفتاح التوقيع بكلمة السر ويشغّل التطبيق؛ يعيد false إن كانت الكلمة خاطئة
     var priv; try { priv = await H.unwrapPriv(auth.wrap, pw); } catch (e) { return false; }
-    K.resetFails(); var users = await kvAll(db, 'users'), key = await H.dataKey(pw, auth.saltD, auth.wrap.iter), REM = K.makeRem(db); HAD = { db: db, auth: auth, priv: priv, users: users, last: null, REM: REM }; try { window.HAD_PUB = HAD.auth.pub; } catch (e) { } window.HAD = HAD;
+    K.resetFails(); var users = await kvAll(db, 'users'), key = await H.dataKey(pw, auth.saltD, auth.wrap.iter), REM = K.makeRem(db); HAD = { db: db, auth: auth, priv: priv, users: users, last: null, REM: REM }; try { window.HAD_PUB = HAD.auth.pub; } catch (e) { } window.HAD = HAD; if (CLOUD) setTimeout(function () { cloudAfterLogin(key); }, 0);
     window.HGate = { save: function (cfg) { window.HGateCfg = cfg; return kvPut(db, 'kv', { key: 'gatecfg', cfg: cfg }); } }; openGate();
     window.HApp.start({ mode: 'admin', dbName: 'hissa_admin_data', key: key, base: null, userLabel: 'المدير: ' + auth.user, lockMin: 30, stay: !!stay, signOut: function () { return REM.signOut(auth.user); },
       aiToken: async function () { var now = Math.floor(Date.now() / 1000); return H.sign(HAD.priv, { v: 1, u: 'admin:' + auth.user, n: auth.user, role: 'admin', iat: now, exp: now + 300 }); } });
@@ -8140,7 +8214,7 @@ refresh:function(){render()},reencrypt:function(newKey){var stores=['clients','v
   window.HAdminUI = {
     html: function () {
       var us = HAD.users.slice().sort(function (a, b) { return a.username < b.username ? -1 : 1; });
-      return (HAD.auth.seeded ? '<div class="gerr">⚠ تستعمل كلمة سر ابتدائية. غيّرها الآن من قسم «تغيير كلمة سر المدير» أسفل الصفحة.</div>' : '') + '<h2>👥 المستخدمون والأجهزة</h2><p class="small">لكل مستخدم حد أقصى ' + MAXDEV + ' جهازين. الخطوات: أنشئ المستخدم ← أرسل له (اسم المستخدم + كلمة السر + ملف المستخدمين من «تصدير نسخة المستخدمين») ← يعطيك «رمز الجهاز» من شاشة التفعيل ← تصدر له الكود. تنبيه: تعطيل المستخدم أو تحرير جهاز يمنع التجديد فقط؛ الكود الحالي يبقى صالحاً حتى تاريخ انتهائه.</p>'
+      return (HAD.auth.seeded ? '<div class="gerr">⚠ تستعمل كلمة سر ابتدائية. غيّرها الآن من قسم «تغيير كلمة سر المدير» أسفل الصفحة.</div>' : '') + cloudCard() + '<h2>👥 المستخدمون والأجهزة</h2><p class="small">لكل مستخدم حد أقصى ' + MAXDEV + ' جهازين. الخطوات: أنشئ المستخدم ← أرسل له (اسم المستخدم + كلمة السر + ملف المستخدمين من «تصدير نسخة المستخدمين») ← يعطيك «رمز الجهاز» من شاشة التفعيل ← تصدر له الكود. تنبيه: تعطيل المستخدم أو تحرير جهاز يمنع التجديد فقط؛ الكود الحالي يبقى صالحاً حتى تاريخ انتهائه.</p>'
         + '<div class="addbox"><h3>إضافة مستخدم</h3><div class="row"><div><label>اسم المستخدم (حروف إنجليزية صغيرة وأرقام)</label><input id="ua_user" dir="ltr" placeholder="sara"></div><div><label>الاسم الظاهر</label><input id="ua_name" placeholder="سارة"></div><div><label>كلمة السر (8 أحرف على الأقل)</label><input id="ua_pw" dir="ltr"></div></div><p><button class="sec sm" data-ha="ugen">توليد كلمة سر</button> <button data-ha="uadd">+ إضافة المستخدم</button></p></div>'
         + (us.length ? us.map(card).join('') : '<p class="small">لا مستخدمين بعد.</p>')
         + '<h3>تغيير كلمة سر المدير</h3><div class="addbox"><div class="row"><div><label>كلمة السر الحالية</label><input id="cp_old" type="password" autocomplete="current-password"></div><div><label>كلمة السر الجديدة (8 أحرف على الأقل)</label><input id="cp_new" type="password" autocomplete="new-password"></div><div><label>تأكيد الجديدة</label><input id="cp_new2" type="password" autocomplete="new-password"></div></div><p><button data-ha="chpw">تغيير كلمة السر</button> <small class="small">تُعاد تشفير بيانات عملائك بالكلمة الجديدة، وتُلغى كلمة السر المحفوظة. خذ نسخة احتياطية قبل ذلك.</small></p></div><h3>نسخة احتياطية للإدارة</h3><p class="small">تحوي مفتاح التوقيع (مشفّراً بكلمة سرك) وقائمة المستخدمين. احفظها خارج المتصفح. بدونها لا يمكن إصدار أكواد لنفس المستخدمين إذا فُقدت بيانات المتصفح.</p><p><button class="sec" data-ha="backup">تنزيل نسخة احتياطية للإدارة</button></p>';
@@ -8196,8 +8270,15 @@ refresh:function(){render()},reencrypt:function(newKey){var stores=['clients','v
       var o = $('#cp_old').value, n1 = $('#cp_new').value, n2 = $('#cp_new2').value; if (n1.length < 8) return toast('كلمة السر الجديدة 8 أحرف على الأقل'); if (n1 !== n2) return toast('كلمتا السر الجديدتان غير متطابقتين'); if (n1 === o) return toast('الجديدة مثل الحالية');
       var priv; try { priv = await H.unwrapPriv(HAD.auth.wrap, o); } catch (e) { return toast('كلمة السر الحالية غير صحيحة'); }
       if (!confirm('سيُعاد تشفير بيانات عملائك بكلمة السر الجديدة. هل أخذتَ نسخة احتياطية؟ متابعة؟')) return;
-      try { var wrap = await H.wrapPriv(priv, n1), key = await H.dataKey(n1, HAD.auth.saltD, wrap.iter); await window.HApp.reencrypt(key); var auth = Object.assign({}, HAD.auth, { wrap: wrap, seeded: false, pwChanged: true }); await kvPut(HAD.db, 'kv', auth); HAD.auth = auth; await HAD.REM.clear(auth.user); await HAD.REM.setPrefs(false, false); toast('تم تغيير كلمة السر. استعمل الجديدة في الدخول القادم.'); refresh(); } catch (e) { toast('تعذّر التغيير: ' + (e && e.message || e)); }
+      try { var wrap = await H.wrapPriv(priv, n1), key = await H.dataKey(n1, HAD.auth.saltD, wrap.iter); await window.HApp.reencrypt(key); CK = CLOUD ? key : CK; var auth = Object.assign({}, HAD.auth, { wrap: wrap, seeded: false, pwChanged: true }); await kvPut(HAD.db, 'kv', auth); HAD.auth = auth; await HAD.REM.clear(auth.user); await HAD.REM.setPrefs(false, false); toast('تم تغيير كلمة السر. استعمل الجديدة في الدخول القادم.'); refresh(); } catch (e) { toast('تعذّر التغيير: ' + (e && e.message || e)); }
     },
+    cmAdd: async function () {
+      var em = ($('#cm_email').value || '').trim(), role = $('#cm_role').value, perms = [].map.call(document.querySelectorAll('[data-cmp]:checked'), function (x) { return x.dataset.cmp; });
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) return toast('اكتب بريداً صحيحاً');
+      try { await cloudApi('POST', '/api/members', { email: em, role: role, perms: perms }); toast('أُضيف ' + em + ' — يدخل من العنوان نفسه بالرمز الذي يصله'); CM.list = null; CM.err = ''; cmLoad(); } catch (e) { toast('⚠ ' + e.message); }
+    },
+    cmToggle: async function (el) { var m = (CM.list || []).filter(function (x) { return x.email === el.dataset.e; })[0]; if (!m) return; try { await cloudApi('POST', '/api/members', { email: m.email, role: m.role, perms: m.perms, disabled: !m.disabled }); cmLoad(); } catch (e) { toast('⚠ ' + e.message); } },
+    cmDel: async function (el) { if (!confirm('حذف العضو ' + el.dataset.e + ' من نظام الإدارة؟')) return; try { await cloudApi('DELETE', '/api/members/' + encodeURIComponent(el.dataset.e)); cmLoad(); } catch (e) { toast('⚠ ' + e.message); } },
     backup: function () { window.HApp.download(new Blob([JSON.stringify({ app: 'hissa-admin', v: 1, auth: HAD.auth, users: HAD.users })], { type: 'application/json' }), 'hissa_admin_backup_' + new Date().toISOString().slice(0, 10) + '.json'); toast('احفظ هذا الملف في مكان آمن'); }
   };
   document.addEventListener('click', function (e) { var el = e.target.closest('[data-ha]'); if (el && ACT[el.dataset.ha] && HAD) { e.preventDefault(); ACT[el.dataset.ha](el); } });
