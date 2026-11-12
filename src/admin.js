@@ -52,6 +52,24 @@
     })();
     return cBusy;
   }
+  // ---- 0.96: الأخصائيون بالبريد — يضيف المدير البريد والاسم والمدة، ويوقّع متصفحه رخصة لهذا البريد بمفتاح المدير (لا أكواد ولا رموز أجهزة)
+  var SP = { list: null, err: '', loading: 0 }, SP_DAYS = [[30, 'شهر'], [90, '3 أشهر'], [180, '6 أشهر'], [365, 'سنة'], [0, 'بلا انتهاء']];
+  async function spLicense(email, name, exp) { var t = Math.floor(Date.now() / 1000); return H.sign(HAD.priv, { v: 1, t: 'em', u: 'em:' + email, em: email, n: name, iat: t, exp: exp || 0 }); }
+  async function spLoad() { try { SP.list = (await cloudApi('GET', '/api/specialists')).specialists; SP.err = ''; } catch (e) { SP.err = e.message; } var el = document.getElementById('spBox'); if (el) el.outerHTML = spBoxHtml(); }
+  function spState(x) { var t = Date.now() / 1000; return x.status === 'off' ? ['موقوف', 'warn'] : x.exp && x.exp < t ? ['منتهٍ', 'warn'] : ['فعّال', 'ok']; }
+  function spBoxHtml() {
+    var fmt = function (ts) { return ts ? new Date(ts * 1000).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'; };
+    return '<div class="addbox cloudbox" id="spBox"><h3>🩺 الأخصائيون — الدخول بالبريد</h3><p class="small">أضف بريد الأخصائي واسمه ومدة اشتراكه فقط. يدخل «زنها Pro» برمز يصله على بريده، بلا اسم مستخدم ولا كود تفعيل ولا رمز جهاز. الرخصة تُوقَّع هنا في متصفحك بمفتاح المدير.</p>'
+      + '<div class="row"><div><label for="sp_email">بريد الأخصائي</label><input id="sp_email" type="email" dir="ltr" placeholder="doctor@gmail.com"></div><div><label for="sp_name">الاسم</label><input id="sp_name" placeholder="د. سارة"></div><div><label for="sp_days">المدة</label><select id="sp_days">' + SP_DAYS.map(function (d) { return '<option value="' + d[0] + '"' + (d[0] === 365 ? ' selected' : '') + '>' + d[1] + '</option>'; }).join('') + '</select></div></div><p><button data-ha="spAdd">+ إضافة الأخصائي</button></p>'
+      + (SP.err ? '<div class="gerr">' + esc(SP.err) + '</div>' : '')
+      + (!SP.list ? '<p class="small">جارٍ التحميل…</p>' : SP.list.length ? '<table class="dt spt"><tr><th>الأخصائي</th><th>البريد</th><th>الحالة</th><th>ينتهي</th><th>آخر دخول</th><th></th></tr>' + SP.list.map(function (x) { var st = spState(x);
+        return '<tr><td>' + esc(x.name) + '</td><td dir="ltr">' + esc(x.email) + '</td><td><span class="' + st[1] + '">' + st[0] + '</span></td><td>' + (x.exp ? fmt(x.exp) : 'بلا انتهاء') + '</td><td>' + fmt(x.last_seen) + '</td><td><button class="sec sm" data-ha="spExt" data-e="' + esc(x.email) + '">تمديد شهر</button> <button class="sec sm" data-ha="spToggle" data-e="' + esc(x.email) + '">' + (x.status === 'off' ? 'تفعيل' : 'إيقاف') + '</button> <button class="sec sm r" data-ha="spDel" data-e="' + esc(x.email) + '">حذف</button></td></tr>'; }).join('') + '</table>' : '<p class="small">لم تُضف أخصائيين بالبريد بعد.</p>') + '</div>';
+  }
+  function spCard() { if (!CLOUD) return ''; if (!SP.list && !SP.loading) { SP.loading = 1; spLoad().then(function () { SP.loading = 0; }); } return spBoxHtml(); }
+  async function spSave(x, resign) {
+    var body = { email: x.email, name: x.name, exp: x.exp || 0, status: x.status || 'active', note: x.note || '' }; if (resign) body.lic = await spLicense(x.email, x.name, x.exp);
+    await cloudApi('POST', '/api/specialists', body);
+  }
   // ---- أعضاء نظام الإدارة (المالك فقط): من يدخل عبر Access ويصل لأي قسم
   var PERM_L = { users: 'الأخصائيون والأجهزة', lic: 'إصدار الرخص والأكواد', settings: 'الإعدادات الرئيسية', publish: 'النشر', clients: 'العملاء والخطط', audit: 'سجل التدقيق' }, ROLE_L = { owner: 'مالك', admin: 'مدير كامل', member: 'صلاحيات محددة' };
   async function cmLoad() { try { CM.list = (await cloudApi('GET', '/api/members')).members; CM.audit = (await cloudApi('GET', '/api/audit')).rows.slice(0, 15); CM.err = ''; } catch (e) { CM.err = e.message; } var el = document.getElementById('cmBox'); if (el) el.outerHTML = cmBoxHtml(); }   // يحدّث صندوقه فقط، فلا يضيع ما يُكتب في الصفحة
@@ -134,7 +152,7 @@
   window.HAdminUI = {
     html: function () {
       var us = HAD.users.slice().sort(function (a, b) { return a.username < b.username ? -1 : 1; });
-      return (HAD.auth.seeded ? '<div class="gerr">⚠ تستعمل كلمة سر ابتدائية. غيّرها الآن من قسم «تغيير كلمة سر المدير» أسفل الصفحة.</div>' : '') + cloudCard() + '<h2>👥 المستخدمون والأجهزة</h2><p class="small">لكل مستخدم حد أقصى ' + MAXDEV + ' جهازين. الخطوات: أنشئ المستخدم ← أرسل له (اسم المستخدم + كلمة السر + ملف المستخدمين من «تصدير نسخة المستخدمين») ← يعطيك «رمز الجهاز» من شاشة التفعيل ← تصدر له الكود. تنبيه: تعطيل المستخدم أو تحرير جهاز يمنع التجديد فقط؛ الكود الحالي يبقى صالحاً حتى تاريخ انتهائه.</p>'
+      return (HAD.auth.seeded ? '<div class="gerr">⚠ تستعمل كلمة سر ابتدائية. غيّرها الآن من قسم «تغيير كلمة سر المدير» أسفل الصفحة.</div>' : '') + spCard() + cloudCard() + '<h2>👥 المستخدمون والأجهزة</h2><p class="small">لكل مستخدم حد أقصى ' + MAXDEV + ' جهازين. الخطوات: أنشئ المستخدم ← أرسل له (اسم المستخدم + كلمة السر + ملف المستخدمين من «تصدير نسخة المستخدمين») ← يعطيك «رمز الجهاز» من شاشة التفعيل ← تصدر له الكود. تنبيه: تعطيل المستخدم أو تحرير جهاز يمنع التجديد فقط؛ الكود الحالي يبقى صالحاً حتى تاريخ انتهائه.</p>'
         + '<div class="addbox"><h3>إضافة مستخدم</h3><div class="row"><div><label>اسم المستخدم (حروف إنجليزية صغيرة وأرقام)</label><input id="ua_user" dir="ltr" placeholder="sara"></div><div><label>الاسم الظاهر</label><input id="ua_name" placeholder="سارة"></div><div><label>كلمة السر (8 أحرف على الأقل)</label><input id="ua_pw" dir="ltr"></div></div><p><button class="sec sm" data-ha="ugen">توليد كلمة سر</button> <button data-ha="uadd">+ إضافة المستخدم</button></p></div>'
         + (us.length ? us.map(card).join('') : '<p class="small">لا مستخدمين بعد.</p>')
         + '<h3>تغيير كلمة سر المدير</h3><div class="addbox"><div class="row"><div><label>كلمة السر الحالية</label><input id="cp_old" type="password" autocomplete="current-password"></div><div><label>كلمة السر الجديدة (8 أحرف على الأقل)</label><input id="cp_new" type="password" autocomplete="new-password"></div><div><label>تأكيد الجديدة</label><input id="cp_new2" type="password" autocomplete="new-password"></div></div><p><button data-ha="chpw">تغيير كلمة السر</button> <small class="small">تُعاد تشفير بيانات عملائك بالكلمة الجديدة، وتُلغى كلمة السر المحفوظة. خذ نسخة احتياطية قبل ذلك.</small></p></div><h3>نسخة احتياطية للإدارة</h3><p class="small">تحوي مفتاح التوقيع (مشفّراً بكلمة سرك) وقائمة المستخدمين. احفظها خارج المتصفح. بدونها لا يمكن إصدار أكواد لنفس المستخدمين إذا فُقدت بيانات المتصفح.</p><p><button class="sec" data-ha="backup">تنزيل نسخة احتياطية للإدارة</button></p>';
@@ -192,6 +210,15 @@
       if (!confirm('سيُعاد تشفير بيانات عملائك بكلمة السر الجديدة. هل أخذتَ نسخة احتياطية؟ متابعة؟')) return;
       try { var wrap = await H.wrapPriv(priv, n1), key = await H.dataKey(n1, HAD.auth.saltD, wrap.iter); await window.HApp.reencrypt(key); CK = CLOUD ? key : CK; var auth = Object.assign({}, HAD.auth, { wrap: wrap, seeded: false, pwChanged: true }); await kvPut(HAD.db, 'kv', auth); HAD.auth = auth; await HAD.REM.clear(auth.user); await HAD.REM.setPrefs(false, false); toast('تم تغيير كلمة السر. استعمل الجديدة في الدخول القادم.'); refresh(); } catch (e) { toast('تعذّر التغيير: ' + (e && e.message || e)); }
     },
+    spAdd: async function () {
+      var em = ($('#sp_email').value || '').trim().toLowerCase(), nm = ($('#sp_name').value || '').trim(), days = +$('#sp_days').value;
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) return toast('اكتب بريداً صحيحاً'); if (!nm) return toast('اكتب اسم الأخصائي');
+      if ((SP.list || []).some(function (x) { return x.email === em; })) return toast('هذا البريد مضاف بالفعل — استعمل «تمديد»');
+      try { await spSave({ email: em, name: nm, exp: days ? Math.floor(Date.now() / 1000) + days * 86400 : 0 }, true); toast('أُضيف ' + nm + ' — يدخل «زنها Pro» ببريده'); spLoad(); } catch (e) { toast('⚠ ' + e.message); }
+    },
+    spExt: async function (el) { var x = (SP.list || []).filter(function (y) { return y.email === el.dataset.e; })[0]; if (!x) return; var t = Math.floor(Date.now() / 1000), base = x.exp && x.exp > t ? x.exp : t; x.exp = base + 30 * 86400; try { await spSave(x, true); toast('مُدّد حتى ' + new Date(x.exp * 1000).toLocaleDateString('ar-EG')); spLoad(); } catch (e) { toast('⚠ ' + e.message); } },
+    spToggle: async function (el) { var x = (SP.list || []).filter(function (y) { return y.email === el.dataset.e; })[0]; if (!x) return; x.status = x.status === 'off' ? 'active' : 'off'; try { await spSave(x, false); spLoad(); } catch (e) { toast('⚠ ' + e.message); } },
+    spDel: async function (el) { if (!confirm('حذف الأخصائي ' + el.dataset.e + '؟ لن يستطيع الدخول بعدها.')) return; try { await cloudApi('DELETE', '/api/specialists/' + encodeURIComponent(el.dataset.e)); spLoad(); } catch (e) { toast('⚠ ' + e.message); } },
     cmAdd: async function () {
       var em = ($('#cm_email').value || '').trim(), role = $('#cm_role').value, perms = [].map.call(document.querySelectorAll('[data-cmp]:checked'), function (x) { return x.dataset.cmp; });
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) return toast('اكتب بريداً صحيحاً');

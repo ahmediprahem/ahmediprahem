@@ -60,5 +60,14 @@ const b64u = (b) => Buffer.from(b).toString('base64url');
   ok('كل تعديل في سجل التدقيق (من ومتى وماذا)، والنسخة الاحتياطية اليومية تلتقط التخزين المشفّر والأعضاء');
   const h = await W.default.fetch(new Request('https://zenha-admin.example/health'), env); assert.deepStrictEqual(await h.json(), { ok: true, ver: '0.1', access: true, owner: true });
   assert.strictEqual((await W.default.fetch(new Request('https://zenha-admin.example/health'), { DB: d1() })).status, 200); ok('/health يبيّن هل Access والمالك مضبوطان');
+  // 6) الأخصائيون بالبريد: صلاحية users للقائمة، وlic لإرفاق رخصة
+  await call(owner, 'POST', '/api/members', { email: 'u2@gmail.com', role: 'member', perms: ['users'] }); const u2 = await jwt({ email: 'u2@gmail.com' });
+  assert.strictEqual((await call(u2, 'POST', '/api/specialists', { email: 'd@x.com', name: 'د', exp: 0 })).s, 200, 'إضافة بلا رخصة');
+  assert.strictEqual((await call(u2, 'POST', '/api/specialists', { email: 'd@x.com', name: 'د', lic: 'aa.bb' })).s, 403, 'الرخصة تحتاج صلاحية lic');
+  assert.strictEqual((await call(owner, 'POST', '/api/specialists', { email: 'd@x.com', name: 'د', lic: 'bad lic' })).s, 400);
+  assert.strictEqual((await call(owner, 'POST', '/api/specialists', { email: 'D@X.com', name: 'د. د', lic: 'aa.bb', exp: 99 })).s, 200);
+  const sl = (await call(u2, 'GET', '/api/specialists')).j.specialists; assert.strictEqual(sl.length, 1); assert.strictEqual(sl[0].email, 'd@x.com'); assert.strictEqual(sl[0].lic, undefined, 'الرخصة لا تُعرض في القائمة');
+  assert.strictEqual((await call(helper, 'GET', '/api/specialists')).s, 403); assert.strictEqual((await call(u2, 'DELETE', '/api/specialists/d%40x.com')).s, 200);
+  ok('الأخصائيون بالبريد: القائمة بصلاحية «الأخصائيين»، وإرفاق رخصة بصلاحية «الرخص»، والرخصة لا تُعرض في القائمة');
   globalThis.fetch = realFetch; console.log('\nنجح ' + n + ' اختباراً');
 })().catch((e) => { console.error('✘', e && e.stack ? e.stack.split('\n').slice(0, 6).join(' | ') : e); process.exit(1); });

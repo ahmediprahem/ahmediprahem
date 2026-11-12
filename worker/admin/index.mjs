@@ -16,7 +16,9 @@ const SCHEMA = [
   'CREATE TABLE IF NOT EXISTS store (k TEXT PRIMARY KEY, v TEXT NOT NULL, ver INTEGER NOT NULL, updated INTEGER, updated_by TEXT)',
   'CREATE TABLE IF NOT EXISTS audit (id INTEGER PRIMARY KEY AUTOINCREMENT, ts INTEGER, email TEXT, action TEXT, detail TEXT)',
   'CREATE TABLE IF NOT EXISTS backups (id INTEGER PRIMARY KEY AUTOINCREMENT, ts INTEGER, data TEXT)',
-  'CREATE INDEX IF NOT EXISTS audit_ts ON audit (ts)'
+  'CREATE INDEX IF NOT EXISTS audit_ts ON audit (ts)',
+  // 0.96: الأخصائيون بالبريد. lic = رخصة موقّعة بمفتاح المدير في متصفحه (الخادم لا يوقّع ولا يملك المفتاح)، يتحقق منها «زنها Pro» والمحطة بالمفتاح العام
+  'CREATE TABLE IF NOT EXISTS specialists (email TEXT PRIMARY KEY, name TEXT, exp INTEGER, status TEXT, lic TEXT, created INTEGER, updated INTEGER, updated_by TEXT, last_seen INTEGER, note TEXT)'
 ];
 const now = () => Math.floor(Date.now() / 1000);
 const json = (o, s = 200) => new Response(JSON.stringify(o), { status: s, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' } });
@@ -112,6 +114,21 @@ async function api(req, env, url) {
     const ex = await one(db, 'SELECT role FROM members WHERE email = ?', email); if (!ex) return err(404, 'none', 'عضو غير موجود'); if (ex.role === 'owner') return err(400, 'owner', 'لا يُحذف مالك');
     await run(db, 'DELETE FROM members WHERE email = ?', email); await audit(db, me.email, 'member.del', email); return json({ ok: true });
   }
+  // ---- الأخصائيون بالبريد (صلاحية «users»): القائمة والإضافة/التعديل والحذف. الرخصة تأتي موقّعة من متصفح المدير
+  if (p === '/api/specialists' && method === 'GET') { if (!can(me, 'users')) return err(403, 'perm', 'لا تملك صلاحية الأخصائيين'); return json({ ok: true, specialists: await all(db, 'SELECT email, name, exp, status, created, updated, updated_by, last_seen, note FROM specialists ORDER BY created DESC') }); }
+  if (p === '/api/specialists' && method === 'POST') {
+    if (!can(me, 'users')) return err(403, 'perm', 'لا تملك صلاحية الأخصائيين'); if (J.lic && !can(me, 'lic')) return err(403, 'perm', 'إصدار الرخص يحتاج صلاحية «lic»');
+    const email = normEmail(J.email); if (!emailOk(email)) return err(400, 'email', 'بريد غير صالح'); const name = String(J.name || '').trim().slice(0, 60); if (!name) return err(400, 'name', 'اكتب اسم الأخصائي');
+    const status = J.status === 'off' ? 'off' : 'active', exp = Math.max(0, parseInt(J.exp || '0', 10) || 0), lic = J.lic == null ? null : String(J.lic);
+    if (lic !== null && (!/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(lic) || lic.length > 4000)) return err(400, 'lic', 'رخصة غير صالحة');
+    const ex = await one(db, 'SELECT email FROM specialists WHERE email = ?', email); const n = await one(db, 'SELECT COUNT(*) AS n FROM specialists'); if (!ex && n && n.n >= 2000) return err(429, 'many', 'عدد كبير');
+    if (ex) await run(db, 'UPDATE specialists SET name = ?, exp = ?, status = ?, lic = COALESCE(?, lic), updated = ?, updated_by = ?, note = ? WHERE email = ?', name, exp, status, lic, now(), me.email, String(J.note || '').slice(0, 200), email);
+    else await run(db, 'INSERT INTO specialists (email, name, exp, status, lic, created, updated, updated_by, note) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', email, name, exp, status, lic, now(), now(), me.email, String(J.note || '').slice(0, 200));
+    await audit(db, me.email, ex ? 'spec.update' : 'spec.add', email + ' ' + status + (exp ? ' حتى ' + new Date(exp * 1000).toISOString().slice(0, 10) : '') + (lic ? ' +رخصة' : ''));
+    return json({ ok: true });
+  }
+  const spm = /^\/api\/specialists\/(.+)$/.exec(p);
+  if (spm && method === 'DELETE') { if (!can(me, 'users')) return err(403, 'perm', 'لا تملك صلاحية الأخصائيين'); const email = normEmail(decodeURIComponent(spm[1])); await run(db, 'DELETE FROM specialists WHERE email = ?', email); await audit(db, me.email, 'spec.del', email); return json({ ok: true }); }
   // ---- سجل التدقيق والنسخ الاحتياطية
   if (p === '/api/audit' && method === 'GET') {
     if (!can(me, 'audit')) return err(403, 'perm', 'لا تملك صلاحية سجل التدقيق'); const before = parseInt(url.searchParams.get('before') || '0', 10) || 2e9;
@@ -123,8 +140,8 @@ async function api(req, env, url) {
 }
 // نسخة احتياطية: لقطة كاملة لجدول التخزين (صناديق مشفّرة أصلاً) والأعضاء، ويُحتفظ بآخر 30
 async function backup(db) {
-  const store = await all(db, 'SELECT k, v, ver, updated, updated_by FROM store'), members = await all(db, 'SELECT * FROM members');
-  const r = await run(db, 'INSERT INTO backups (ts, data) VALUES (?, ?)', now(), JSON.stringify({ v: 1, store, members }));
+  const store = await all(db, 'SELECT k, v, ver, updated, updated_by FROM store'), members = await all(db, 'SELECT * FROM members'), specialists = await all(db, 'SELECT * FROM specialists');
+  const r = await run(db, 'INSERT INTO backups (ts, data) VALUES (?, ?)', now(), JSON.stringify({ v: 2, store, members, specialists }));
   await run(db, 'DELETE FROM backups WHERE id NOT IN (SELECT id FROM backups ORDER BY id DESC LIMIT ?)', LIM.backups);
   return r.meta && r.meta.last_row_id;
 }

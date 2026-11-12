@@ -41,5 +41,17 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   const mem = (await env.DB.prepare('SELECT email, role FROM members ORDER BY created').all()).results; assert.deepStrictEqual(mem.map((m) => m.email + ':' + m.role), ['ah6171317@gmail.com:owner', 'boss@gmail.com:admin']);
   const C = await device('stranger@gmail.com'); await C.waitForTimeout(1500); assert.strictEqual(await C.evaluate(() => (window.HAD ? 1 : 0)), 0); assert.strictEqual((await store()).length, 2);
   ok('المالك يرى أعضاء النظام ويضيف «مديراً كاملاً» ببريده؛ وبريد غريب لا يصل لبيانات النظام');
+  // 5) الأخصائيون بالبريد: إضافة برخصة موقّعة في المتصفح، تمديد، إيقاف، حذف
+  await users(A); await A.waitForSelector('#spBox'); await A.fill('#sp_email', 'Dr.Mona@Gmail.com'); await A.fill('#sp_name', 'د. منى'); await A.selectOption('#sp_days', '30'); await A.click('[data-ha="spAdd"]');
+  await A.waitForFunction(() => /dr.mona@gmail.com/.test((document.querySelector('.spt') || {}).textContent || ''), null, { timeout: 10000 });
+  let sp = await env.DB.prepare('SELECT * FROM specialists').first(); assert.strictEqual(sp.email, 'dr.mona@gmail.com'); assert.strictEqual(sp.status, 'active'); assert(Math.abs(sp.exp - (Date.now() / 1000 + 30 * 86400)) < 120);
+  const lic = await A.evaluate((t) => HSec.verify(HAD_PUB, t), sp.lic); assert.strictEqual(lic.u, 'em:dr.mona@gmail.com'); assert.strictEqual(lic.v, 1); assert.strictEqual(lic.exp, sp.exp);
+  ok('إضافة أخصائي بالبريد والاسم والمدة فقط: رخصة موقّعة بمفتاح المدير لهذا البريد (يتحقق منها المفتاح العام)، والبريد بلا حساسية للأحرف');
+  const exp0 = sp.exp; await A.click('.spt [data-ha="spExt"]'); await A.waitForFunction(async (e0) => true, exp0); await A.waitForTimeout(1500);
+  sp = await env.DB.prepare('SELECT * FROM specialists').first(); assert(sp.exp >= exp0 + 30 * 86400 - 5, 'التمديد'); assert.strictEqual((await A.evaluate((t) => HSec.verify(HAD_PUB, t), sp.lic)).exp, sp.exp, 'الرخصة أُعيد توقيعها بالمدة الجديدة');
+  await A.click('.spt [data-ha="spToggle"]'); await A.waitForTimeout(1200); assert.strictEqual((await env.DB.prepare('SELECT status FROM specialists').first()).status, 'off'); await A.waitForFunction(() => /موقوف/.test(document.querySelector('.spt').textContent));
+  await A.click('.spt [data-ha="spDel"]'); await A.waitForTimeout(1200); assert.strictEqual((await env.DB.prepare('SELECT COUNT(*) AS n FROM specialists').first()).n, 0);
+  const au = (await env.DB.prepare("SELECT action FROM audit WHERE action LIKE 'spec.%'").all()).results.map((r) => r.action); assert.deepStrictEqual(au, ['spec.add', 'spec.update', 'spec.update', 'spec.del']);
+  ok('تمديد شهر يعيد توقيع الرخصة بالمدة الجديدة، والإيقاف والحذف فوريان، وكل ذلك في سجل التدقيق');
   assert.deepStrictEqual(errs, []); await b.close(); srv.close(); console.log('\nنجح ' + n + ' اختباراً');
 })().catch((e) => { console.error('✘', String(e && e.stack || e).slice(0, 1200)); console.error(errs.join('\n')); process.exit(1); });
