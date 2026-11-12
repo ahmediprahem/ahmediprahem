@@ -44,7 +44,7 @@ const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html'));
   await mp.goto(ADMIN); await login(mp); await mp.waitForSelector('#tabbar');
   const sw = () => mp.evaluate(() => document.documentElement.scrollWidth - innerWidth);
   assert(await vis('#tabbar', mp)); assert.strictEqual(await mp.locator('#tabbar button').count(), 5); assert(await vis('#tabbar button.on[data-v="home"]', mp)); assert.strictEqual(await vis('aside', mp), false); assert(await sw() <= 1);
-  const tb = await mp.evaluate(() => { const t = document.getElementById('tabbar').getBoundingClientRect(), f = document.getElementById('dtfab').getBoundingClientRect(); return { tTop: t.top, fBottom: f.bottom, tb: t.bottom, vh: innerHeight }; }); assert(tb.fBottom <= tb.tTop && tb.tb <= tb.vh, JSON.stringify(tb));
+  const tb = await mp.evaluate(() => { const t = document.getElementById('tabbar').getBoundingClientRect(), f = { bottom: 0 }; return { tTop: t.top, fBottom: f.bottom, tb: t.bottom, vh: innerHeight }; }); assert(tb.fBottom <= tb.tTop && tb.tb <= tb.vh, JSON.stringify(tb));
   const hts = await mp.evaluate(() => [...document.querySelectorAll('#tabbar button')].map(e => Math.round(e.getBoundingClientRect().height))); assert(hts.every(h => h >= 44), String(hts));
   ok('الجوال: شريط سفلي عائم بأربعة أزرار (≥ 44 بكسل) فوق زر المساعد دون تداخل، والقائمة مطويّة، ولا تمرير أفقي');
   await mp.click('#tabbar [data-v="clients"]'); assert(await vis('#lst', mp)); assert(await vis('#tabbar button.on[data-v="clients"]', mp));

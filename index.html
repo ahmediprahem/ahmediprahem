@@ -1007,6 +1007,46 @@ html[data-theme="glass"] .chcomp button{min-width:44px;width:44px;height:44px;bo
 }
 
 html[data-theme="glass"] .hxdc.ok{color:#6fe3a9}html[data-theme="glass"] .hxdc.no{color:#ff8a80}html[data-theme="glass"] .hxdc.pt{color:#ffc457}
+
+/* 0.94 التنقل واليوم: مجموعات الشريط الجانبي، صفحة «اليوم»، صفحة «العملاء»، «المزيد»، تبويبات القسم، وزر «عميل جديد» الواحد */
+html[data-theme="glass"] .rail{display:flex;flex-direction:column;gap:2px}
+html[data-theme="glass"] .rail .rgrp{display:flex;flex-direction:column;gap:2px;margin-top:10px;padding-top:8px;border-top:1px solid var(--lline)}
+html[data-theme="glass"] .rail .rgl{padding:2px 14px 4px;font-size:11px;letter-spacing:.06em;color:var(--lmut);opacity:.85}
+html[data-theme="glass"] .rail .sidebtn .rcnt{margin-inline-start:auto;font-style:normal;font-size:12px;color:var(--lmut)}
+html[data-theme="glass"] .rail .sidebtn em.hxnb{margin-inline-start:auto}
+html[data-theme="glass"] .rail .sidebtn.on{background:rgba(255,255,255,.12);border-color:var(--lline2);color:#fff}
+html[data-theme="glass"] .today .tdh{margin:2px 0 14px}
+html[data-theme="glass"] .today .tdh h2{margin:0;font-size:28px;font-weight:700}
+html[data-theme="glass"] .today .tdhi{margin:4px 0 0;color:var(--lmut);font-size:14px}
+html[data-theme="glass"] .tdks{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:0 0 16px}
+html[data-theme="glass"] .tdk{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:10px;align-items:center;padding:12px 14px;border-radius:var(--r2);background:var(--lpanel);border:1px solid var(--lline);box-shadow:var(--ghi);color:var(--ltext);text-align:start;min-height:64px}
+html[data-theme="glass"] .tdk .ico{grid-row:1/3;width:22px;height:22px;color:var(--lmut)}
+html[data-theme="glass"] .tdk b{font-size:22px;font-weight:700;line-height:1.1}
+html[data-theme="glass"] .tdk small{font-size:12px;color:var(--lmut);white-space:normal}
+html[data-theme="glass"] .tdk.has{border-color:rgba(111,227,169,.55);background:rgba(111,227,169,.12)}
+html[data-theme="glass"] .tdk.has .ico,html[data-theme="glass"] .tdk.has b{color:var(--lacc)}
+html[data-theme="glass"] .tdrh{margin:6px 0 10px}
+html[data-theme="glass"] .tdsum{margin-top:10px;color:var(--lmut)}
+html[data-theme="glass"] .tdempty{text-align:start}
+html[data-theme="glass"] .clpage .hxtop{margin-bottom:12px;align-items:center}
+html[data-theme="glass"] .clpage .srch.clq{margin-bottom:12px}
+html[data-theme="glass"] details.newm{position:relative}
+html[data-theme="glass"] .newb{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border-radius:14px;background:linear-gradient(180deg,rgba(111,227,169,.95),rgba(76,196,140,.95));color:var(--lacc-d);font-weight:700;cursor:pointer;list-style:none;border:1px solid rgba(255,255,255,.3)}
+html[data-theme="glass"] .newb::-webkit-details-marker{display:none}
+html[data-theme="glass"] .newb .ico{width:18px;height:18px}
+html[data-theme="glass"] details.newm .tbp{position:absolute;inset-inline-end:0;top:calc(100% + 8px);z-index:60;min-width:260px;padding:12px;border-radius:var(--r2);background:rgba(18,28,69,.96);border:1px solid var(--lline2);box-shadow:var(--gsh);-webkit-backdrop-filter:var(--gblur);backdrop-filter:var(--gblur)}
+html[data-theme="glass"] details.newm .tbp button{display:block;width:100%;text-align:start;padding:10px 12px;margin-top:6px;border-radius:12px;background:var(--lpanel);border:1px solid var(--lline);color:var(--ltext)}
+html[data-theme="glass"] details.newm .tbp button small{display:block;color:var(--lmut);font-weight:400;margin-top:2px}
+html[data-theme="glass"] .morepage h2{margin:0 0 4px}
+html[data-theme="glass"] .mrows{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+html[data-theme="glass"] .mrow{display:flex;align-items:center;gap:12px;width:100%;min-height:60px;padding:10px 14px;border-radius:var(--r2);background:var(--lpanel);border:1px solid var(--lline);color:var(--ltext);text-align:start}
+html[data-theme="glass"] .mrow .mri{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:rgba(111,227,169,.14);color:var(--lacc);flex:none}
+html[data-theme="glass"] .mrow .mrt{flex:1;min-width:0;display:flex;flex-direction:column}
+html[data-theme="glass"] .mrow .mrt small{color:var(--lmut);font-weight:400;white-space:normal}
+html[data-theme="glass"] .tabs.secnav{margin:0 0 12px}
+html[data-theme="glass"] nav.secnav.secback{margin:0 0 10px}
+@media (max-width:900px){html[data-theme="glass"] .tdks{grid-template-columns:repeat(2,1fr)}html[data-theme="glass"] .today .tdh h2{font-size:24px}}
+@media (max-width:700px){html[data-theme="glass"] #dtfab{display:none}}     /* الجوال: «المساعد» صار صفاً في «المزيد» فلا يغطي المحتوى */
 /* ===== 0.94 ملف العميل: رأس ثابت + خمسة تبويبات + أقسام داخلية (cfile_ui.js). الشاشة فقط؛ يُحمَّل بعد theme_glass.css.
    القواعد الأساسية للمظهر الكلاسيكي الفاتح، وتحتها ضبط المظهرين الداكنين (Linear والزجاجي)، ثم الجوال (شريط تبويبات أفقي ثابت أعلى الصفحة). ===== */
 @media screen{
@@ -1154,6 +1194,8 @@ window.ASSETS={light:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABLAAAAFUCAYA
     upload: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>',
     sliders: '<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>',
     card: '<rect x="2" y="5" width="20" height="14" rx="2.5"/><path d="M2 10h20M6 15h4"/>',
+    layers: '<path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 13 9 5 9-5"/>',
+    inbox: '<path d="M3 13h5l1.5 3h5L16 13h5"/><path d="M5 13 7 5h10l2 8v6H5v-6Z"/>',
     send: '<path d="M21 3 10.5 13.5M21 3l-6.5 18-4-8.5-8.5-4L21 3Z"/>',
     activity: '<path d="M3 12h4l3-8 4 16 3-8h4"/>',
     more: '<circle cx="5" cy="12" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/><circle cx="19" cy="12" r="1.3" fill="currentColor"/>',

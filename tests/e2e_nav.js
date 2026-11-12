@@ -15,7 +15,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   assert(/اختر خطة جاهزة/.test(await p.textContent('main [data-a="genBank"]'))); assert(/من بنك الوجبات/.test(await p.textContent('main')));
   await p.click('.rail [data-a="home"]'); await p.waitForSelector('.today'); assert(/ريم/.test(await p.textContent('.today')), 'العميل الجديد يظهر في «اليوم» بعد إضافته');
   ok('بيانات العميل: «📗 اختر خطة جاهزة» و«من بنك الوجبات»، وعمود العملاء يظهر بعد أول عميل');
-  await p.click('.rail [data-a="settings"]'); await p.waitForSelector('.stgs'); assert.strictEqual(await p.locator('.stg').count(), 4); assert.strictEqual(await p.locator('.stg [data-a="setTab"]').count(), 11);
+  await p.click('.rail [data-a="settings"]'); await p.waitForSelector('.stgs'); assert.strictEqual(await p.locator('.stg').count(), 4); assert.strictEqual(await p.locator('.stg [data-a="setTab"]').count(), 12);
   assert(/المساعد/.test(await p.textContent('[data-a="setTab"][data-v="dt"]'))); assert(!/dt\/hamed/.test(await p.textContent('.stgs')));
   await p.click('[data-a="setTab"][data-v="vault"]'); assert.strictEqual(await p.getAttribute('[data-a="setTab"][data-v="vault"]', 'class'), 'on');
   ok('الإعدادات: تبويباتها (11 منذ 0.56) في أربعة أقسام (البيانات الغذائية، زنها والعملاء، المظهر والمساعد، النسخ)، و«🤖 المساعد» بدل dt/hamed');
