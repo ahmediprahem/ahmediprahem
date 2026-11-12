@@ -95,7 +95,7 @@ function homeHtml(){if(isGlass())return homeGlass();return'<div class="home">'+(
 function pgFlag(){var c=cur();document.body.classList.toggle('pgplan',!!c&&S.view==='client'&&S.tab==='plan')}
 function main(){FID={};try{main0();legacyBanner();pgFlag();hudRender()}catch(e){renderFatal(e)}}
 function main0(){var c=cur(),m=$('main');if(S.view==='users'&&window.HAdminUI){m.innerHTML=HAdminUI.html();return}if(S.view==='bank'){m.innerHTML=bankPage();bkAfter();return}if(S.view==='lib'&&window.DX){m.innerHTML=dxLibPage();return}if(S.view==='ready'&&window.RL){m.innerHTML=rdPage();return}if(S.view==='settings'){m.innerHTML=setPage();if(S.setTab==='gate')gatePrev();return}if(!c){m.innerHTML=homeHtml();if(window.HK)HK.bindVideo(m);return}
-m.innerHTML='<div class="tabs ctabs"><button class="'+(S.tab==='client'?'on':'')+'" data-a="tab" data-v="client">بيانات العميل</button><button class="'+(S.tab==='ci'?'on':'')+'" data-a="tab" data-v="ci">✅ الحضور</button><button class="'+(S.tab==='plan'?'on':'')+'" data-a="tab" data-v="plan">الخطة</button><button class="'+(S.tab==='ver'?'on':'')+'" data-a="tab" data-v="ver">الإصدارات ('+S.versions.length+')</button>'+'<button class="'+(S.tab==='med'?'on':'')+'" data-a="tab" data-v="med">🩺 الملف الطبي'+(function(n){return n?' <em class="hxnb">'+n+'</em>':''})(medAlerts(c).filter(function(a){return a.lvl>1}).length)+'</button>'+'<button class="'+(S.tab==='appt'?'on':'')+'" data-a="tab" data-v="appt">📅 المواعيد'+(function(n){return n?' <em class="hxnb">'+n+'</em>':''})((c.appts||[]).filter(function(a){return !a.st&&a.d===wkDay()}).length)+'</button>'+'<button class="'+(S.tab==='sub'?'on':'')+'" data-a="tab" data-v="sub">💳 الاشتراك'+(function(k){return k==='soon'||k==='last'||k==='expired'?' <em class="hxnb">!</em>':''})(sbState(c)[0])+'</button>'+'<button class="'+(S.tab==='hx'?'on':'')+'" data-a="tab" data-v="hx">📲 زنها'+(c.hx&&(c.hx.unread||0)+(c.hx.health?1:0)+(c.hx.phNew||0)?' <em class="hxnb">'+((c.hx.unread||0)+(c.hx.health?1:0)+(c.hx.phNew||0))+'</em>':'')+'</button>'+'<details class="tbm cmore"><summary class="sec sm" aria-label="المزيد من إجراءات العميل">⋯</summary><div class="tbp"><button class="r" data-a="del">🗑 حذف العميل</button></div></details>'+'</div>'+(S.tab==='client'?clientTab(c):S.tab==='plan'?planTab(c):S.tab==='hx'?(c.hx?hxTab(c):hxEmptyTab(c)):S.tab==='med'?medTab(c):S.tab==='appt'?wkApptTab(c):S.tab==='sub'?subTab(c):S.tab==='ci'?ciTab(c):verTab(c))}
+m.innerHTML=cfPage(c)}   // 0.94: ملف العميل (رأس ثابت + خمسة تبويبات) في cfile_ui.js
 function render(){try{sidebar();main();dtEnsure();toastSweep()}catch(e){renderFatal(e)}}
 function loadVersions(){var c=cur();return dbAll('versions').then(function(v){S.versions=v.filter(function(x){return c&&x.code===c.code}).sort(function(a,b){return b.at-a.at})})}
 // ============ الأحداث
@@ -200,6 +200,7 @@ window.DPApp={relist:function(){$('#lst').innerHTML=list()},S:S,A:A};
 /*READYUI*/
 /*CHECKUI*/
 /*GYMUI*/
+/*CFILEUI*/
 
 // ================= بطاقة «تطبيق الجوال»: روابط التنزيل والتحديث (يحرّرها المدير وتصل المستخدمين مع نسخة المستخدمين) =================
 // ---- 0.86: تثبيت «زن برو» على جوال الأخصائي كتطبيق (أندرويد: زر مباشر، آيفون: خطوات) من موقعه المنشور، بلا متجر
