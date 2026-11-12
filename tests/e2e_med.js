@@ -23,7 +23,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   for (const [k, v] of [['hba1c', '6.1'], ['fbg', '108'], ['ldl', '165'], ['hdl', '45'], ['vitd', '١٥'], ['tsh', '5.2'], ['hb', '12.5']]) await p.fill('#ml_' + k, v); await p.click('[data-a="medLabSave"]');
   t = await p.textContent('.medtab'); for (const s of ['ما قبل السكري', 'مقاومة الإنسولين / ما قبل السكري', 'خمول الغدة', 'الكوليسترول الضار LDL: 165', 'الكوليسترول النافع HDL: 45', 'نقص']) assert(t.includes(s), 'بلا: ' + s);
   assert(!t.includes('الهيموغلوبين: 12.5'), 'Hb 12.5 طبيعي للأنثى ولا تنبيه له');
-  assert.strictEqual(await p.locator('[data-a="medAddCond"]').count(), 2); const badge = Number(await p.textContent('main .tabs [data-v="med"] em')); assert(badge >= 3, String(badge));
+  assert.strictEqual(await p.locator('[data-a="medAddCond"]').count(), 2); const badge = Number(await p.textContent('main .cfseg [data-v="med"] em')); assert(badge >= 3, String(badge));
   await p.click('[data-a="medAddCond"][data-v="مقاومة الإنسولين / ما قبل السكري"]'); c = await C(); assert.deepStrictEqual(c.conditions, ['مقاومة الإنسولين / ما قبل السكري']); assert.strictEqual(await p.locator('[data-a="medAddCond"]').count(), 1);
   ok('التحاليل: نطاقات حسب الجنس (HDL 45 منخفض للأنثى، Hb 12.5 طبيعي)، تنبيهات بنصيحة غذائية، واقتراح إضافة «ما قبل السكري» و«خمول الغدة» بضغطة، وشارة التنبيهات على التبويب');
   await p.click('[data-a="medLabForm"]'); await p.fill('#ml_d', '2026-10-02'); await p.fill('#ml_hba1c', '5.6'); await p.fill('#ml_vitd', '32'); await p.click('[data-a="medLabSave"]');

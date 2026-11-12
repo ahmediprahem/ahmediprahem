@@ -18,7 +18,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   // ---- 2) عميل غير مرتبط: التبويب ظاهر بمعايناته وزر الدعوة
   await d.evaluate(() => DPApp.A.new('ex')); await d.fill('[data-f="name"]', 'سلمى حسن'); await d.selectOption('[data-f="sex"]', 'ذكر').catch(() => { }); await d.fill('[data-f="phone"]', '0509876543'); await d.fill('[data-f="age"]', '31'); await d.fill('[data-f="weight"]', '72'); await d.fill('[data-f="height"]', '165');
   await d.selectOption('[data-f="goal"]', { index: 2 }); await d.selectOption('[data-f="activity"]', { index: 3 }); await d.press('[data-f="height"]', 'Tab'); await d.waitForTimeout(200);
-  assert((await tabs()).includes('hx'), 'لا تبويب «زنها» لغير المرتبط'); await d.evaluate(() => DPApp.A.tab('hx')); await d.waitForSelector('.hxempty');
+  assert(/غير مرتبط/.test(await d.textContent('.cfhead .cfzen')), 'شارة «زنها» تبيّن أنه غير مرتبط'); await d.evaluate(() => DPApp.A.tab('hx')); await d.waitForSelector('.hxempty');
   const em = await d.textContent('.hxempty'); for (const w of ['عميلك لم يتصل بـ«زنها» بعد', 'يرى خطته على جواله ويبدّل الأصناف', 'يسجّل يومه في 30 ثانية ويصلك الالتزام', 'تراسله وتتابع وزنه', 'ادعُ سلمى حسن إلى زنها']) assert(em.includes(w), w + '\n' + em);
   assert.strictEqual(await d.locator('.hxempty li').count(), 3); assert.strictEqual(await d.locator('.hxempty button:not(.sec)').count(), 1, 'زر أساسي واحد');
   ok('عميل غير مرتبط: تبويب «📲 زنها» ظاهر، وفيه «عميلك لم يتصل بـ«زنها» بعد» و3 معاينات وزر واحد «ادعُ سلمى حسن إلى زنها»');
