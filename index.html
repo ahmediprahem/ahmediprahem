@@ -8075,7 +8075,8 @@ refresh:function(){render()},reencrypt:function(newKey){var stores=['clients','v
     // يكتب كلمة سره القديمة مرة واحدة فيُستعمل نفس مفتاح البيانات، فتظهر عملاؤه كما هي.
     async function emLic() {
       if (location.protocol === 'file:' || !window.fetch) return null;
-      try { var r = await fetch('/api/lic', { cache: 'no-store', credentials: 'same-origin' }), j = await r.json().catch(function () { return {}; }); if (r.ok && j.lic) return j; if (r.status === 403 && j.code) return j; return null; }
+      var ua = navigator.userAgent || '', lab = (/Android/.test(ua) ? 'Android' : /iPhone|iPad/.test(ua) ? 'iPhone/iPad' : /Windows/.test(ua) ? 'Windows' : /Mac/.test(ua) ? 'Mac' : 'جهاز') + ' • ' + (/Edg\//.test(ua) ? 'Edge' : /Chrome\//.test(ua) ? 'Chrome' : /Safari\//.test(ua) ? 'Safari' : /Firefox\//.test(ua) ? 'Firefox' : 'متصفح');
+      try { var r = await fetch('/api/lic?d=' + encodeURIComponent(dev.id) + '&l=' + encodeURIComponent(lab), { cache: 'no-store', credentials: 'same-origin' }), j = await r.json().catch(function () { return {}; }); if (r.ok && j.lic) return j; if (r.status === 403 && j.code) return j; return null; }
       catch (e) { var acc = (await kvAll(db, 'kv')).filter(function (x) { return x.key.indexOf('emacct:') === 0; }).sort(function (a, b) { return (b.at || 0) - (a.at || 0); })[0]; if (!acc) return null; var t = await kvGet(db, 'kv', 'token:' + acc.u.toLowerCase()); return t ? { lic: t.token, email: acc.em, offline: true } : null; }
     }
     function emNo(j) { gate('<h2>لم يُفعَّل حسابك بعد</h2><div class="gerr">' + esc(j.error || 'هذا البريد غير مسجّل') + '</div><p class="small">دخلت بالبريد <b dir="ltr">' + esc(j.email || '') + '</b>. اطلب من إدارة «زنها» إضافة بريدك أو تفعيله، ثم أعد تحميل الصفحة.</p><p><button class="sec" id="emOld">الدخول بالطريقة القديمة (اسم المستخدم وكلمة السر)</button></p>'); $('#emOld').onclick = function () { oldFlow(); }; }
