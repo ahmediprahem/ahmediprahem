@@ -929,7 +929,7 @@ html[data-theme="glass"] *{scrollbar-width:thin;scrollbar-color:rgba(255,255,255
 }
 }
 html[data-theme="glass"] .stg .tabs{margin-bottom:0}
-@media (max-width:760px){html[data-theme="glass"] .stg .tabs{display:flex;max-width:100%;overflow-x:auto;flex-wrap:nowrap}}
+@media (max-width:760px){html[data-theme="glass"] .stg .tabs{display:flex;max-width:100%;flex-wrap:wrap;gap:4px}html[data-theme="glass"] .stg .tabs>button{flex:1 1 auto;min-height:44px}}     /* 0.94: تبويبات الإعدادات تلتف على الجوال بدل قصّها */
 @media (max-width:900px){
   html[data-theme="glass"] .dtfab{padding:3px 10px 3px 3px;border-radius:20px;gap:6px;font-size:12px;opacity:.92}html[data-theme="glass"] .dtfab span{display:inline}html[data-theme="glass"] .dtfab .dtav{width:28px;height:28px}}
 html[data-theme="glass"] .bakrem{border-color:rgba(245,166,35,.55)}html[data-theme="glass"] .bakrem b{color:#fbbf6a}
@@ -4408,10 +4408,10 @@ function athFoodsPage() {
 }
 function setPage() {
   var tab = S.setTab || 'portions', b = function (v, t) { return '<button class="' + (tab === v ? 'on' : '') + '" data-a="setTab" data-v="' + v + '">' + t + '</button>'; }, grp = function (t, x) { return '<div class="stg"><small>' + t + '</small><div class="tabs">' + x + '</div></div>'; };
-  var tabs = '<div class="stgs">' + grp('البيانات الغذائية', b('portions', 'الحصص والبدائل') + b('ath', 'أغذية نظام الجرامات') + b('supp', '💊 المكملات والأعشاب'))     // 0.46: عشرة تبويبات في أربعة أقسام
-    + grp('زنها والعملاء', b('hx', '📲 زنها') + b('app', '📲 تطبيق الجوال') + b('forms', '📝 الاستبيانات') + b('chal', '🏆 التحديات'))
+  var tabs = '<div class="stgs">' + grp('البيانات الغذائية', b('portions', 'الحصص والبدائل') + b('ath', 'أغذية نظام الجرامات') + b('supp', IC('apple') + ' المكملات والأعشاب'))     // 0.46: عشرة تبويبات في أربعة أقسام
+    + grp('زنها والعملاء', b('hx', '📲 زنها') + b('app', '📲 تطبيق الجوال') + b('forms', IC('file') + ' الاستبيانات') + b('chal', IC('sparkles') + ' التحديات'))
     + grp('المظهر والمساعد', b('theme', '🌙 المظهر') + (S.mode === 'admin' ? b('gate', '🎨 واجهة الدخول') : '') + b('dt', '🤖 المساعد'))
-    + grp('النسخ والأدوات', b('vault', '☁ النسخ والمزامنة') + b('tools', '🧰 النسخ الاحتياطي والأدوات')) + '</div>';
+    + grp('النسخ والأدوات', b('vault', IC('upload') + ' النسخ والمزامنة') + b('tools', IC('tool') + ' النسخ الاحتياطي والأدوات')) + '</div>';
   return '<h2>⚙ إعدادات النظام</h2>' + tabs + (tab === 'ath' ? athFoodsPage() : tab === 'app' ? appPage() : tab === 'dt' ? dtSettingsPage() : tab === 'theme' ? themePage() : tab === 'hx' ? hxSetPage() : tab === 'forms' ? formsPage() : tab === 'vault' ? vaultPage() : tab === 'tools' ? toolsPage() : tab === 'chal' ? chTplPage() : (tab === 'gate' && S.mode === 'admin') ? gatePage() : tab === 'supp' ? suppSetPage() : portionsPage());
 }
 Object.assign(A, {
