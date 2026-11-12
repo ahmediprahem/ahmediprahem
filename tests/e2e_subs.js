@@ -6,7 +6,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   const b = await chromium.launch(), p = await (await b.newContext({ viewport: { width: 1400, height: 1000 } })).newPage(); p.on('pageerror', (e) => errs.push(String(e))); p.on('dialog', (d) => d.accept(d.type() === 'prompt' ? 'سفر طويل' : undefined));
   await p.goto(fileUrl(path.resolve(__dirname, '../admin.html'))); await login(p);
   const C = () => p.evaluate(() => JSON.parse(JSON.stringify(DPApp.S.clients.find((x) => x.code === DPApp.S.cur))));
-  const mk = async (name) => { await p.click('.rail [data-a="new"][data-v="ex"]'); await p.fill('[data-f="name"]', name); await p.selectOption('[data-f="sex"]', 'أنثى').catch(() => { }); await p.fill('[data-f="age"]', '30'); await p.fill('[data-f="weight"]', '80'); await p.fill('[data-f="height"]', '165'); };
+  const mk = async (name) => { await p.evaluate(() => DPApp.A.new('ex')); await p.fill('[data-f="name"]', name); await p.selectOption('[data-f="sex"]', 'أنثى').catch(() => { }); await p.fill('[data-f="age"]', '30'); await p.fill('[data-f="weight"]', '80'); await p.fill('[data-f="height"]', '165'); };
   await mk('منى أحمد'); await p.click('[data-a="tab"][data-v="sub"]'); await p.waitForSelector('.subtab');
   assert(/لم يُسجَّل اشتراك/.test(await p.textContent('.subtab')) && /بلا اشتراك/.test(await p.textContent('.sbchip')));
   ok('تبويب «💳 الاشتراك» في ملف العميل: بلا اشتراك قبل التسجيل');

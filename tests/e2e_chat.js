@@ -4,7 +4,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
 (async () => {
   const { d, m, hxCheck, cPoll, C, close } = await linked('chat', errs);
   await m.click('[data-act="tab"][data-v="today"]'); await m.click('.chatbtn'); await m.fill('#chatIn', 'السلام عليكم دكتور، عندي سؤال عن الفطور'); await m.press('#chatIn', 'Enter'); await m.waitForTimeout(2800); await cPoll();
-  await d.click('.rail [data-a="hxv"]'); await hxCheck();
+  await d.evaluate(() => DPApp.A.hxv()); await hxCheck();
   assert(await d.locator('.rail [data-a="zchat"]').count() === 1); await d.evaluate(() => DPApp.A.zchat()); await d.waitForSelector('.chrow');
   assert(/السلام عليكم/.test(await d.textContent('.chrow')) && await d.locator('.chrow em.hxnb').count() === 1);
   ok('شات زنها: العميل في القائمة الجانبية بآخر رسالته وشارة غير مقروء');

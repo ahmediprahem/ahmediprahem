@@ -24,7 +24,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   const cov = await p.evaluate(() => { const t = document.querySelector('table.dt').getBoundingClientRect(), b = document.getElementById('tabbar').getBoundingClientRect(); return { tb: t.bottom, bar: b.top }; }); assert(cov.tb <= cov.bar + 1, 'الشريط السفلي يغطي آخر الجدول: ' + JSON.stringify(cov));
   await p.click('header .hdast'); await p.waitForSelector('#dtp.open'); await p.click('.dtx');
   ok('صفحة يوم الخطة على 390: حبة المساعد مخفية و«المساعد» في الرأس يفتح اللوحة، والمؤشر شريط ثابت تحت الرأس، ولا تقاطع بين شريط التبويب والمساعد والمؤشر، وآخر الجدول فوق الشريط السفلي');
-  await p.click('main .tabs [data-v="client"]'); await p.waitForTimeout(150);
+  await p.evaluate(() => DPApp.A.tab('client')); await p.waitForTimeout(150);
   const fab = await p.evaluate(() => { const f = document.getElementById('dtfab').getBoundingClientRect(), t = document.getElementById('tabbar').getBoundingClientRect(); return { label: document.querySelector('#dtfab span').textContent, w: f.width, h: f.height, above: f.bottom <= t.top + 1 }; });
   assert(fab.label === 'المساعد' && fab.w <= 120 && fab.h <= 44 && fab.above, JSON.stringify(fab));
   ok('خارج صفحة الخطة: زر «المساعد» صغير (≤120×44) بعنوان واضح فوق الشريط السفلي');
@@ -35,7 +35,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   ok('تذكير النسخة الاحتياطية في الرئيسية بعد أول عميل: «نسخة احتياطية الآن» تنزّلها ويختفي التذكير 7 أيام، و«ذكّرني بعد 3 أيام»');
   // 0.60: على 1440 الزر العائم لا يغطي «اختر هذه الخطة» (المحتوى يأخذ مسافة سفلية بقدره)
   const w = await (await b.newContext({ viewport: { width: 1440, height: 900 } })).newPage(); w.on('pageerror', (e) => errs.push(String(e))); await w.goto(fileUrl(path.resolve(__dirname, '../admin.html'))); await login(w);
-  await w.click('.rail [data-a="new"][data-v="ex"]'); await w.fill('[data-f="name"]', 'سارة'); await w.selectOption('[data-f="sex"]', 'ذكر').catch(() => { }); await w.fill('[data-f="age"]', '30'); await w.fill('[data-f="weight"]', '80'); await w.fill('[data-f="height"]', '165'); await w.selectOption('[data-f="goal"]', { index: 2 }); await w.selectOption('[data-f="activity"]', { index: 3 }); await w.press('[data-f="height"]', 'Tab');
+  await w.evaluate(() => DPApp.A.new('ex')); await w.fill('[data-f="name"]', 'سارة'); await w.selectOption('[data-f="sex"]', 'ذكر').catch(() => { }); await w.fill('[data-f="age"]', '30'); await w.fill('[data-f="weight"]', '80'); await w.fill('[data-f="height"]', '165'); await w.selectOption('[data-f="goal"]', { index: 2 }); await w.selectOption('[data-f="activity"]', { index: 3 }); await w.press('[data-f="height"]', 'Tab');
   await w.click('main [data-a="genBank"]'); await w.waitForSelector('.rdbank [data-a="rdApprove"]', { timeout: 20000 }); await w.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight)); await w.waitForTimeout(200);
   const hid = await w.evaluate(() => { const f = document.getElementById('dtfab').getBoundingClientRect(); return [...document.querySelectorAll('[data-a="rdApprove"]')].filter((e) => { const r = e.getBoundingClientRect(); return r.width && r.left < f.right && f.left < r.right && r.top < f.bottom && f.top < r.bottom; }).length; });
   assert.strictEqual(hid, 0, 'الزر العائم يغطي «اختر هذه الخطة»'); ok('على 1440 بعد التمرير لآخر «اختر خطة جاهزة»: الزر العائم لا يغطي أي «اختر هذه الخطة»');

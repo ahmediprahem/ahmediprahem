@@ -339,7 +339,7 @@ details.im>summary{padding:0 7px;border-radius:6px;background:#e8ecef;font-weigh
 details.tbm:not([open])>.tbp,details.im:not([open])>.imx{display:none}
 @media (min-width:761px){table.dt td.f{min-width:180px}table.dt td.v input.n{width:32px}}
 /* 0.48: الجوال — تبويبات العميل في سطرين بدل تمرير خفي، وزر «المساعد» صغير فوق الشريط السفلي، وتذكير النسخ */
-@media screen and (max-width:820px){.tabs.ctabs{flex-wrap:wrap!important;overflow:visible}.tabs.ctabs button{flex:1 1 30%}}
+/* 0.94: تبويبات ملف العميل صارت شريطاً أفقياً واحداً (theme_cfile.css) */
 .bakrem{border-color:#e8a33c}.bakrem b{color:#b06a00}
 .hudhl{font-size:11.5px;line-height:1.5;padding:4px 8px;margin:4px 0;border-radius:8px;background:#fdecea;color:#7a1710}
 /* 0.50: الحضور */
@@ -373,7 +373,7 @@ header .hdast{display:none!important}
   body.pgplan #hud.hud.hf-min{padding-top:4px;padding-bottom:4px}
 }
 /* 0.60: «⋯» في رأس ملف العميل (حذف العميل بعيداً عن أفعال الخطة) */
-.ctabs .cmore{display:inline-block;margin-inline-start:auto}.ctabs .cmore>summary{min-width:44px;text-align:center}.ctabs .cmore .tbp{inset-inline-start:auto;inset-inline-end:0}
+
 /* 0.60: تبويب «زنها» لغير المرتبط */
 .hxempty .hxprev{list-style:none;padding:0;margin:10px 0 14px;display:grid;gap:8px}.hxempty .hxprev li{display:flex;gap:10px;align-items:center;font-size:15px}
 /* 0.60: «أيام التمرين» واقتراح العميل */
@@ -930,14 +930,12 @@ html[data-theme="glass"] *{scrollbar-width:thin;scrollbar-color:rgba(255,255,255
 }
 html[data-theme="glass"] .stg .tabs{margin-bottom:0}
 @media (max-width:760px){html[data-theme="glass"] .stg .tabs{display:flex;max-width:100%;overflow-x:auto;flex-wrap:nowrap}}
-@media (max-width:900px){html[data-theme="glass"] .tabs.ctabs{display:flex;flex-wrap:wrap;overflow:visible}html[data-theme="glass"] .tabs.ctabs button{flex:1 1 30%}
+@media (max-width:900px){
   html[data-theme="glass"] .dtfab{padding:3px 10px 3px 3px;border-radius:20px;gap:6px;font-size:12px;opacity:.92}html[data-theme="glass"] .dtfab span{display:inline}html[data-theme="glass"] .dtfab .dtav{width:28px;height:28px}}
 html[data-theme="glass"] .bakrem{border-color:rgba(245,166,35,.55)}html[data-theme="glass"] .bakrem b{color:#fbbf6a}
 
 /* 0.87: مراجعة الاستعمال على الجوال (أخصائي): تبويبات العميل في صفين مرتّبين، وأزرار «عميل جديد» تحت الترحيب مباشرة، وترويسة الرئيسية مضغوطة */
 @media (max-width:600px){
-  html[data-theme="glass"] .tabs.ctabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;padding:6px}
-  html[data-theme="glass"] .tabs.ctabs>button,html[data-theme="glass"] .tabs.ctabs>.cmore,html[data-theme="glass"] .tabs.ctabs>.cmore>summary{flex:none;min-width:0;min-height:44px;padding:6px 1px;font-size:12.5px;line-height:1.25;white-space:normal;text-align:center;justify-content:center}
   html[data-theme="glass"] .ghome .hero .splash,html[data-theme="glass"] .ghome .hero video.splash{display:none}
   html[data-theme="glass"] .ghome .hero{padding:16px 18px}
   html[data-theme="glass"] .ghome{display:flex;flex-direction:column}html[data-theme="glass"] .ghome .hero{order:-3}html[data-theme="glass"] .ghome .inboxc{order:-2}html[data-theme="glass"] .ghome .qgrid{order:-1}
@@ -1009,6 +1007,89 @@ html[data-theme="glass"] .chcomp button{min-width:44px;width:44px;height:44px;bo
 }
 
 html[data-theme="glass"] .hxdc.ok{color:#6fe3a9}html[data-theme="glass"] .hxdc.no{color:#ff8a80}html[data-theme="glass"] .hxdc.pt{color:#ffc457}
+/* ===== 0.94 ملف العميل: رأس ثابت + خمسة تبويبات + أقسام داخلية (cfile_ui.js). الشاشة فقط؛ يُحمَّل بعد theme_glass.css.
+   القواعد الأساسية للمظهر الكلاسيكي الفاتح، وتحتها ضبط المظهرين الداكنين (Linear والزجاجي)، ثم الجوال (شريط تبويبات أفقي ثابت أعلى الصفحة). ===== */
+@media screen{
+/* ---------- الرأس ---------- */
+.cfhead{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin:0 0 12px;padding:12px 14px;border:1px solid var(--line,#d9dbe3);border-radius:12px;background:#f7f8fb}
+.cfhead .cav{display:inline-grid;place-items:center;flex:none;width:44px;height:44px;border-radius:50%;font-weight:700;font-size:18px;background:#1D2C5F;color:#fff}
+.cfid{display:flex;flex-direction:column;min-width:0;flex:0 1 auto;max-width:100%}
+.cfname{font-size:18px;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cfid small{font-size:12.5px;opacity:.78;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cfbadges{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+html[data-theme] .cfb{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:3px 12px;border-radius:99px;border:1px solid transparent;font-size:13px;font-weight:700;line-height:1.3;white-space:nowrap;box-shadow:none;background:#e3f4ea;color:#17603a}
+html[data-theme] .cfb.w{background:#fdf0d2;color:#7a5200}
+html[data-theme] .cfb.no{background:#fde3e1;color:#a32219}
+html[data-theme] .cfb.n{background:#e8ecef;color:#3d4660}
+.cfb .ico{width:15px;height:15px}
+.cfb .hxnb{margin-inline-start:2px}
+.cfact{display:flex;align-items:center;gap:8px;margin-inline-start:auto}
+html[data-theme] .cfsend,html[data-theme] .cfchat{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:6px 16px;white-space:nowrap}
+.cfsend .ico,.cfchat .ico{width:17px;height:17px}
+html[data-theme] .cfhead details.cmore>summary{display:inline-grid;place-items:center;min-width:40px;min-height:40px;padding:0;border-radius:10px}
+.cfhead .cmore>summary .ico{width:20px;height:20px}
+.cfhead .cmore .tbp{inset-inline-start:auto;inset-inline-end:0;min-width:230px}
+.cfhead .tbp button{display:flex;align-items:center;gap:8px;min-height:40px}
+/* ---------- التبويبات الخمسة ---------- */
+html[data-theme] .tabs.cftabs{display:flex;flex-wrap:nowrap;gap:4px;width:fit-content;max-width:100%;margin:0 0 10px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none}
+.cftabs::-webkit-scrollbar,.cfseg::-webkit-scrollbar{display:none}
+html[data-theme] .tabs.cftabs>button{display:inline-flex;align-items:center;justify-content:center;gap:7px;flex:0 0 auto;min-height:40px;padding:6px 16px;white-space:nowrap}
+.cftabs>button .ico{width:17px;height:17px}
+/* ---------- الأقسام الداخلية (خط سفلي لتمييزها عن التبويبات) ---------- */
+.cfseg{display:flex;gap:2px;margin:0 0 14px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;border-bottom:1px solid var(--line,#d9dbe3)}
+html[data-theme] .cfseg>button{flex:0 0 auto;min-height:38px;padding:6px 14px;border:0;border-bottom:2px solid transparent;border-radius:8px 8px 0 0;margin-bottom:-1px;background:none;color:inherit;font-weight:600;opacity:.72;white-space:nowrap;box-shadow:none}
+html[data-theme] .cfseg>button:hover{opacity:1;background:rgba(127,127,127,.12)}
+html[data-theme] .cfseg>button.on{opacity:1;color:#1D2C5F;border-bottom-color:#1D2C5F}
+/* ---------- محتوى الأقسام ---------- */
+.cfday .hxgrid .hxdaily{grid-column:1/-1}
+.hxlast{display:flex;align-items:center;justify-content:flex-end;gap:10px;margin:0 0 10px}
+.cfneed{text-align:center;padding:22px 14px}
+.cfneed h3{margin:0 0 6px}
+
+/* ---------- المظهران الداكنان ---------- */
+html:is([data-theme="linear"],[data-theme="glass"]) .cfhead{background:var(--lpanel);border-color:var(--lline)}
+html:is([data-theme="linear"],[data-theme="glass"]) .cfhead .cav{background:#7fe7b4 linear-gradient(145deg,#a7f3cc,#5fd49b);color:#06281a}
+html:is([data-theme="linear"],[data-theme="glass"]) .cfname{color:#fff}
+html:is([data-theme="linear"],[data-theme="glass"]) .cfid small{color:var(--lmut);opacity:1}
+html:is([data-theme="linear"],[data-theme="glass"]) .cfb{background:rgba(111,227,169,.16);color:#6fe3a9;border-color:rgba(111,227,169,.28)}
+html:is([data-theme="linear"],[data-theme="glass"]) .cfb.w{background:rgba(255,196,87,.18);color:#ffc457;border-color:rgba(255,196,87,.3)}
+html:is([data-theme="linear"],[data-theme="glass"]) .cfb.no{background:rgba(255,138,128,.18);color:#ff8a80;border-color:rgba(255,138,128,.32)}
+html:is([data-theme="linear"],[data-theme="glass"]) .cfb.n{background:rgba(255,255,255,.1);color:#dbe3f7;border-color:var(--lline)}
+html:is([data-theme="linear"],[data-theme="glass"]) .cfb:hover{filter:brightness(1.15);box-shadow:none}
+html:is([data-theme="linear"],[data-theme="glass"]) .cfseg{border-bottom-color:var(--lline)}
+html:is([data-theme="linear"],[data-theme="glass"]) .cfseg>button{color:var(--lmut);opacity:1}
+html:is([data-theme="linear"],[data-theme="glass"]) .cfseg>button:hover{background:var(--lpanel2);color:#fff}
+html:is([data-theme="linear"],[data-theme="glass"]) .cfseg>button.on{color:#fff;border-bottom-color:var(--lacc,#22c55e)}
+html[data-theme="glass"] .cfhead{border-radius:var(--r2);box-shadow:var(--ghi)}
+html[data-theme="glass"] .tabs.cftabs{margin-bottom:12px}
+
+/* ---------- الجوال: رأس مضغوط، وشريط تبويبات واحد يُسحب أفقياً ويبقى أعلى الصفحة، وأهداف لمس 44 ---------- */
+@media (max-width:900px){
+  .cfhead{gap:8px 10px;padding:10px 12px;margin-bottom:8px}
+  .cfhead .cav{width:40px;height:40px;font-size:16px}
+  .cfid{flex:1 1 0}
+  .cfname{font-size:16.5px}
+  .cfact{display:contents}
+  html[data-theme] .cfchat{order:1;min-width:44px;min-height:44px;padding:0;position:relative}
+  .cfchat>span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+  .cfchat .ico{width:20px;height:20px}
+  .cfchat .hxnb{position:absolute;top:2px;inset-inline-end:2px}
+  .cfhead details.cmore{order:2}
+  html[data-theme] .cfhead details.cmore>summary{min-width:44px;min-height:44px}
+  .cfbadges{order:3;flex:1 1 100%;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+  .cfbadges::-webkit-scrollbar{display:none}
+  html[data-theme] .cfb{min-height:44px;flex:0 0 auto;border-radius:14px}
+  html[data-theme] .cfsend{order:4;flex:1 1 100%;min-height:46px}
+  .cfhead .tbp button{min-height:44px}
+  html[data-theme] .tabs.cftabs{position:sticky;top:0;z-index:20;width:auto;max-width:none;margin:0 -10px 8px;padding:6px 10px;border-radius:0;background:#fff;box-shadow:0 6px 10px -8px rgba(0,0,0,.35)}
+  html[data-theme] .tabs.cftabs>button{min-height:44px;padding:6px 14px}
+  html[data-theme="linear"] .tabs.cftabs{background:#0b1329;border-bottom:1px solid var(--lline)}
+  html[data-theme="glass"] .tabs.cftabs{top:calc(var(--hh) + env(safe-area-inset-top,0px));margin:0 -14px 10px;padding:6px 14px;border:0;border-bottom:1px solid var(--lline);background:rgba(14,22,54,.96);box-shadow:0 10px 18px -12px rgba(0,0,0,.6)}
+  .cfseg{margin-bottom:12px}
+  html[data-theme] .cfseg>button{min-height:44px}
+  .hxlast{justify-content:space-between}
+}
+}
 </style></head>
 <body class="gating"><header id="hd"></header><div id="gate" style="display:flex"><div class="gcard" style="text-align:center"><div style="font-weight:700;color:#253464">حصة — جارٍ التحميل…</div></div></div><div id="app" style="display:none"><aside></aside><main></main></div>
 <noscript><div style="position:fixed;inset:0;background:#092061;color:#fff;padding:24px;text-align:center;font:16px Tahoma,Arial">هذا الملف يحتاج تفعيل JavaScript. افتحه مباشرة في Chrome أو Edge أو Safari (وليس من معاينة واتساب أو البريد).</div></noscript>
@@ -1069,6 +1150,9 @@ window.ASSETS={light:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABLAAAAFUCAYA
     download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>',
     upload: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>',
     sliders: '<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>',
+    card: '<rect x="2" y="5" width="20" height="14" rx="2.5"/><path d="M2 10h20M6 15h4"/>',
+    send: '<path d="M21 3 10.5 13.5M21 3l-6.5 18-4-8.5-8.5-4L21 3Z"/>',
+    activity: '<path d="M3 12h4l3-8 4 16 3-8h4"/>',
     more: '<circle cx="5" cy="12" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/><circle cx="19" cy="12" r="1.3" fill="currentColor"/>',
     printer: '<path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/>',
     logout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>',
@@ -4020,7 +4104,7 @@ function homeHtml(){if(isGlass())return homeGlass();return'<div class="home">'+(
 function pgFlag(){var c=cur();document.body.classList.toggle('pgplan',!!c&&S.view==='client'&&S.tab==='plan')}
 function main(){FID={};try{main0();legacyBanner();pgFlag();hudRender()}catch(e){renderFatal(e)}}
 function main0(){var c=cur(),m=$('main');if(S.view==='users'&&window.HAdminUI){m.innerHTML=HAdminUI.html();return}if(S.view==='bank'){m.innerHTML=bankPage();bkAfter();return}if(S.view==='lib'&&window.DX){m.innerHTML=dxLibPage();return}if(S.view==='ready'&&window.RL){m.innerHTML=rdPage();return}if(S.view==='settings'){m.innerHTML=setPage();if(S.setTab==='gate')gatePrev();return}if(!c){m.innerHTML=homeHtml();if(window.HK)HK.bindVideo(m);return}
-m.innerHTML='<div class="tabs ctabs"><button class="'+(S.tab==='client'?'on':'')+'" data-a="tab" data-v="client">بيانات العميل</button><button class="'+(S.tab==='ci'?'on':'')+'" data-a="tab" data-v="ci">✅ الحضور</button><button class="'+(S.tab==='plan'?'on':'')+'" data-a="tab" data-v="plan">الخطة</button><button class="'+(S.tab==='ver'?'on':'')+'" data-a="tab" data-v="ver">الإصدارات ('+S.versions.length+')</button>'+'<button class="'+(S.tab==='med'?'on':'')+'" data-a="tab" data-v="med">🩺 الملف الطبي'+(function(n){return n?' <em class="hxnb">'+n+'</em>':''})(medAlerts(c).filter(function(a){return a.lvl>1}).length)+'</button>'+'<button class="'+(S.tab==='appt'?'on':'')+'" data-a="tab" data-v="appt">📅 المواعيد'+(function(n){return n?' <em class="hxnb">'+n+'</em>':''})((c.appts||[]).filter(function(a){return !a.st&&a.d===wkDay()}).length)+'</button>'+'<button class="'+(S.tab==='sub'?'on':'')+'" data-a="tab" data-v="sub">💳 الاشتراك'+(function(k){return k==='soon'||k==='last'||k==='expired'?' <em class="hxnb">!</em>':''})(sbState(c)[0])+'</button>'+'<button class="'+(S.tab==='hx'?'on':'')+'" data-a="tab" data-v="hx">📲 زنها'+(c.hx&&(c.hx.unread||0)+(c.hx.health?1:0)+(c.hx.phNew||0)?' <em class="hxnb">'+((c.hx.unread||0)+(c.hx.health?1:0)+(c.hx.phNew||0))+'</em>':'')+'</button>'+'<details class="tbm cmore"><summary class="sec sm" aria-label="المزيد من إجراءات العميل">⋯</summary><div class="tbp"><button class="r" data-a="del">🗑 حذف العميل</button></div></details>'+'</div>'+(S.tab==='client'?clientTab(c):S.tab==='plan'?planTab(c):S.tab==='hx'?(c.hx?hxTab(c):hxEmptyTab(c)):S.tab==='med'?medTab(c):S.tab==='appt'?wkApptTab(c):S.tab==='sub'?subTab(c):S.tab==='ci'?ciTab(c):verTab(c))}
+m.innerHTML=cfPage(c)}   // 0.94: ملف العميل (رأس ثابت + خمسة تبويبات) في cfile_ui.js
 function render(){try{sidebar();main();dtEnsure();toastSweep()}catch(e){renderFatal(e)}}
 function loadVersions(){var c=cur();return dbAll('versions').then(function(v){S.versions=v.filter(function(x){return c&&x.code===c.code}).sort(function(a,b){return b.at-a.at})})}
 // ============ الأحداث
@@ -4282,8 +4366,8 @@ function setPage() {
   var tabs = '<div class="stgs">' + grp('البيانات الغذائية', b('portions', 'الحصص والبدائل') + b('ath', 'أغذية نظام الجرامات') + b('supp', '💊 المكملات والأعشاب'))     // 0.46: عشرة تبويبات في أربعة أقسام
     + grp('زنها والعملاء', b('hx', '📲 زنها') + b('app', '📲 تطبيق الجوال') + b('forms', '📝 الاستبيانات') + b('chal', '🏆 التحديات'))
     + grp('المظهر والمساعد', b('theme', '🌙 المظهر') + (S.mode === 'admin' ? b('gate', '🎨 واجهة الدخول') : '') + b('dt', '🤖 المساعد'))
-    + grp('النسخ', b('vault', '☁ النسخ والمزامنة')) + '</div>';
-  return '<h2>⚙ إعدادات النظام</h2>' + tabs + (tab === 'ath' ? athFoodsPage() : tab === 'app' ? appPage() : tab === 'dt' ? dtSettingsPage() : tab === 'theme' ? themePage() : tab === 'hx' ? hxSetPage() : tab === 'forms' ? formsPage() : tab === 'vault' ? vaultPage() : tab === 'chal' ? chTplPage() : (tab === 'gate' && S.mode === 'admin') ? gatePage() : tab === 'supp' ? suppSetPage() : portionsPage());
+    + grp('النسخ والأدوات', b('vault', '☁ النسخ والمزامنة') + b('tools', '🧰 النسخ الاحتياطي والأدوات')) + '</div>';
+  return '<h2>⚙ إعدادات النظام</h2>' + tabs + (tab === 'ath' ? athFoodsPage() : tab === 'app' ? appPage() : tab === 'dt' ? dtSettingsPage() : tab === 'theme' ? themePage() : tab === 'hx' ? hxSetPage() : tab === 'forms' ? formsPage() : tab === 'vault' ? vaultPage() : tab === 'tools' ? toolsPage() : tab === 'chal' ? chTplPage() : (tab === 'gate' && S.mode === 'admin') ? gatePage() : tab === 'supp' ? suppSetPage() : portionsPage());
 }
 Object.assign(A, {
   setTab: function (v) { S.setTab = v; main(); if (v === 'ath') { renderMng(); renderImp(); } if (v === 'gate') gatePrev(); },
@@ -4792,72 +4876,145 @@ document.addEventListener('change', function (e) {
 });
 
 // ================= هيكل الواجهة في الثيم الزجاجي (يُدمج داخل app.js عند /*SHELLUI*/)
-// شريط تنقل بأيقونات (يمين) + عمود العملاء + المحتوى، وصفحة رئيسية ترحيبية، وشريط سفلي على الجوال.
-// نفس أزرار data-a ونفس المعرّفات (#q #lst #imp) كالقالبين الآخرين، فلا يتغير أي سلوك؛ يتغير الترتيب والشكل فقط.
+// 0.94: التنقل خمسة أقسام: اليوم | العملاء | شات زنها (ومعها طلبات زنها) | المكتبة (بنك الوجبات، الخطط الجاهزة، التثقيف) | الإدارة (المواعيد، الاشتراكات، الإعدادات).
+// شريط جانبي على الويب، وشريط سفلي على الجوال (اليوم، العملاء، شات زنها، المكتبة، المزيد). «العملاء» صفحة (قائمة + بحث + زر واحد «عميل جديد»)، وأدوات الإدارة والنسخ داخل الإعدادات.
+// لا يتغير أي منطق: نفس الإجراءات (data-a) ونفس المعرّفات (#q #lst #imp #impc)؛ تتغير الأماكن والتسميات والترتيب فقط.
 var IC = function (n) { return window.HIcon ? HIcon.svg(n) : ''; };
-function railBtn(a, icon, label, on, v) { return '<button class="sec sidebtn' + (on ? ' on' : '') + '" data-a="' + a + '"' + (v ? ' data-v="' + v + '"' : '') + (on ? ' aria-current="page"' : '') + '>' + IC(icon) + '<span>' + label + '</span></button>'; }
+function railBtn(a, icon, label, on, badge) { return '<button class="sec sidebtn' + (on ? ' on' : '') + '" data-a="' + a + '" title="' + label + '"' + (on ? ' aria-current="page"' : '') + '>' + IC(icon) + '<span>' + label + '</span>' + (badge ? '<em class="hxnb"></em>' : '') + '</button>'; }
+function navIs() {                                               // أي قسم من الخمسة نشط الآن
+  var v = S.view, c = v === 'client';
+  return { today: c && !S.cur, clients: v === 'clients' || (c && !!S.cur), chat: v === 'chat' || v === 'hx', lib: v === 'bank' || v === 'ready' || v === 'lib' || v === 'feed', admin: v === 'appts' || v === 'subs' || v === 'settings' || v === 'users' || v === 'more' };
+}
+function navCounts() {                                           // أعداد ما ينتظر الأخصائي (للشارات ولملخص «اليوم»)
+  var st = (typeof HX !== 'undefined' && HX && HX.st) || null, rq = st && st.reqs ? Object.keys(st.reqs).map(function (k) { return st.reqs[k]; }) : [];
+  var req = rq.filter(function (q) { return q.st === 'new'; }).length, rmsg = rq.reduce(function (a, q) { return a + (q.unread || 0); }, 0);
+  return { appt: typeof wkTodayCount === 'function' ? wkTodayCount() : 0, req: req, reqAll: req + rmsg, chat: typeof chUnread === 'function' ? chUnread() : 0,
+    subs: typeof sbState === 'function' ? S.clients.filter(function (c) { var k = sbState(c)[0]; return k === 'soon' || k === 'last' || k === 'expired'; }).length : 0 };
+}
+function navBadge() {                                            // شارة «شات زنها» = الرسائل غير المقروءة + طلبات التسجيل الجديدة (الطلبات صارت داخل القسم)
+  var n = navCounts(), set = function (sel, v) { [].forEach.call(document.querySelectorAll(sel), function (b) { b.textContent = v || ''; b.style.display = v ? '' : 'none'; }); };
+  set('.rail [data-a="zchat"] em, #tabbar [data-v="zchat"] em', n.chat + n.reqAll); set('.secnav [data-v="zchat"] em', n.chat); set('.secnav [data-v="hxv"] em', n.reqAll);
+}
 function glassSide() {
-  var home = S.view === 'client' && !S.cur, admin = S.mode === 'admin';
-  var clx = (!home && !S.clOpen) || !S.clients.length; document.body.classList.toggle('clx', clx);        // 0.46: لا عمود عملاء فارغ قبل أول عميل؛ عمود العملاء يُطوى تلقائياً خارج الرئيسية ليتسع المحتوى (الخطة والجداول)، ويُفتح من «العملاء»
-  var rail = '<nav class="rail" aria-label="التنقل"><p class="two newc"><button data-a="new" data-v="ex" title="عميل جديد بنظام الحصص">+ عميل جديد — الحصص</button><button class="o" data-a="new" data-v="ath" title="عميل جديد بنظام الجرامات">+ عميل جديد — الجرامات</button></p>'
-    + railBtn('home', 'home', 'الرئيسية', home) + (home ? '' : '<button class="sec sidebtn cltog' + (clx ? '' : ' on') + '" data-a="clToggle" aria-expanded="' + (!clx) + '">' + IC('users') + '<span>العملاء</span><em>' + S.clients.length + '</em></button>') + railBtn('bank', 'book', 'بنك الوجبات', S.view === 'bank') + railBtn('ready', 'package', 'الخطط الجاهزة', S.view === 'ready' || S.view === 'lib') + railBtn('hxv', 'phone', 'طلبات زنها', S.view === 'hx').replace('</span></button>', '</span><em class="hxnb"></em></button>') + railBtn('appts', 'calendar', 'المواعيد', S.view === 'appts').replace('</span></button>', '</span><em class="hxnb"></em></button>') + railBtn('subs', 'package', 'الاشتراكات', S.view === 'subs').replace('</span></button>', '</span><em class="hxnb"></em></button>') + railBtn('zchat', 'message', 'شات زنها', S.view === 'chat').replace('</span></button>', '</span><em class="hxnb"></em></button>') + railBtn('feed', 'megaphone', 'التثقيف', S.view === 'feed').replace('</span></button>', '</span><em class="hxnb"></em></button>') + railBtn('settings', 'settings', 'إعدادات النظام', S.view === 'settings')
-    + (admin ? '<div class="sbg' + sbc('tools') + '" data-g="tools"><button class="sbh" data-a="sbg" data-v="tools" aria-expanded="' + (SBG.tools === 0 ? 'false' : 'true') + '">أدوات الإدارة <i>' + IC('chevron') + '</i></button><div class="sbb">'
-      + railBtn('users', 'users', 'المستخدمون والأجهزة', S.view === 'users') + railBtn('exportUsers', 'package', 'تصدير نسخة المستخدمين') + railBtn('exportSite', 'globe', 'تصدير موقع للنشر (ZIP)') + '</div></div>' : '')
-    + '<div class="sbg' + sbc('bak') + '" data-g="bak"><button class="sbh" data-a="sbg" data-v="bak" aria-expanded="' + (SBG.bak === 0 ? 'false' : 'true') + '">النسخ الاحتياطي <i>' + IC('chevron') + '</i></button><div class="sbb">'
-    + railBtn('export', 'download', 'نسخة احتياطية') + railBtn('import', 'upload', 'استرجاع') + railBtn('importClient', 'user', 'استيراد عميل جاهز') + '<input type="file" id="impc" accept=".json" class="hide"><input type="file" id="imp" accept=".json" class="hide"><p class="small">البيانات محفوظة داخل هذا المتصفح فقط. خذ نسخة احتياطية دورياً.</p></div></div>'
-    + '</nav>';
-  var cls = '<section class="clients" aria-label="العملاء"><div class="clh"><b>العملاء</b><span class="cnt">' + S.clients.length + '</span></div>'
-    + '<label class="srch">' + IC('search') + '<input id="q" placeholder="بحث بالاسم أو الكود أو الجوال" oninput="DPApp.relist()" aria-label="بحث في العملاء"></label>'
-    + '<div id="lst">' + list() + '</div></section>';
-  $('aside').innerHTML = rail + cls; tabbar();
+  var n = navIs(); document.body.classList.remove('clx', 'menu'); if (n.lib) S.libTab = S.view === 'lib' ? 'ready' : S.view;
+  $('aside').innerHTML = '<nav class="rail" aria-label="التنقل">'
+    + railBtn('home', 'sunrise', 'اليوم', n.today)
+    + railBtn('clients', 'users', 'العملاء', n.clients).replace('</span></button>', '</span><i class="rcnt">' + S.clients.length + '</i></button>')
+    + railBtn('zchat', 'message', 'شات زنها', n.chat, 1)
+    + '<div class="rgrp" role="group" aria-label="المكتبة"><small class="rgl">المكتبة</small>' + railBtn('bank', 'utensils', 'بنك الوجبات', S.view === 'bank') + railBtn('ready', 'layers', 'الخطط الجاهزة', S.view === 'ready' || S.view === 'lib') + railBtn('feed', 'megaphone', 'التثقيف', S.view === 'feed', 1) + '</div>'
+    + '<div class="rgrp" role="group" aria-label="الإدارة"><small class="rgl">الإدارة</small>' + railBtn('appts', 'calendar', 'المواعيد', S.view === 'appts', 1) + railBtn('subs', 'card', 'الاشتراكات', S.view === 'subs', 1) + railBtn('settings', 'settings', 'الإعدادات', S.view === 'settings' || S.view === 'users') + '</div>'
+    + '<input type="file" id="impc" accept=".json" class="hide"><input type="file" id="imp" accept=".json" class="hide"></nav>';
+  tabbar(); navBadge();
 }
 function tabbar() {                                                // شريط سفلي للجوال (يظهر بالـ CSS على الشاشات الصغيرة في الثيم الزجاجي فقط)
   var t = $('#tabbar'); if (!t) { t = document.createElement('nav'); t.id = 'tabbar'; t.setAttribute('aria-label', 'التنقل السريع'); document.body.appendChild(t); }
-  var menu = document.body.classList.contains('menu'), v = S.view, home = v === 'client' && !S.cur && !menu;
-  var it = function (a, icon, label, on) { var n = a === 'zchat' && typeof chUnread === 'function' ? chUnread() : 0; return '<button data-a="nav" data-v="' + a + '" class="' + (on ? 'on' : '') + '"' + (on ? ' aria-current="page"' : '') + '>' + IC(icon) + '<span>' + label + '</span>' + (n ? '<em class="hxnb">' + n + '</em>' : '') + '</button>'; };
-  t.innerHTML = it('home', 'home', 'الرئيسية', home) + it('menu', 'users', 'العملاء', menu || (v === 'client' && !!S.cur)) + it('zchat', 'message', 'شات زنها', v === 'chat' && !menu) + it('bank', 'book', 'بنك الوجبات', v === 'bank' && !menu) + it('settings', 'settings', 'الإعدادات', v === 'settings' && !menu);
+  var n = navIs(), it = function (a, icon, label, on, badge) { return '<button data-a="nav" data-v="' + a + '" class="' + (on ? 'on' : '') + '"' + (on ? ' aria-current="page"' : '') + '>' + IC(icon) + '<span>' + label + '</span>' + (badge ? '<em class="hxnb"></em>' : '') + '</button>'; };
+  t.innerHTML = it('home', 'sunrise', 'اليوم', n.today) + it('clients', 'users', 'العملاء', n.clients) + it('zchat', 'message', 'شات زنها', n.chat, 1) + it('library', 'book', 'المكتبة', n.lib) + it('more', 'more', 'المزيد', n.admin);
 }
 function firstName() { return String(CFG.userLabel || '').replace(/^المدير:\s*/, '').trim(); }
-function inboxCard() {                               // 0.86: «الوارد» في أول الرئيسية: طلبات التسجيل الجديدة ورسائل العملاء، بلمسة تفتح تبويب «زنها»
-  if (typeof hxOn !== 'function' || !hxOn() || typeof hxCounts !== 'function') return '';
-  var n = hxCounts(); if (!n.req && !n.msg) return '';
-  return '<button class="qa inboxc" data-a="hxv"><span class="qai">' + IC('bell') + '</span><b>الوارد من «زنها»</b><small>' + (n.req ? n.req + ' طلب تسجيل جديد' : '') + (n.req && n.msg ? ' • ' : '') + (n.msg ? n.msg + ' رسالة أو تنبيه' : '') + '</small></button>';
+function bakAge() { var t = 0; try { t = +localStorage.getItem('hissa_lastbak') || 0; } catch (e) { } return t ? Math.floor((Date.now() - t) / 864e5) : -1; }
+function bakCard() {
+  var d = bakAge(), snz = 0; try { snz = +localStorage.getItem('hissa_baksnooze') || 0; } catch (e) { }
+  if (!S.clients.length || (typeof VT !== 'undefined' && VT.st && VT.st.on) || (d >= 0 && d < 7) || snz > Date.now()) return '';
+  return '<div class="ucard bakrem"><b>💾 ' + (d < 0 ? 'لم تأخذ نسخة احتياطية بعد' : 'آخر نسخة احتياطية منذ ' + d + ' يوماً') + '</b><p class="small">بيانات ' + S.clients.length + ' عميل محفوظة في هذا المتصفح فقط؛ مسح بيانات المتصفح يضيّعها.</p><p><button class="sm" data-a="export">نسخة احتياطية الآن</button> <button class="sec sm" data-a="bakLater">ذكّرني بعد 3 أيام</button></p></div>';
 }
+A.bakLater = function () { try { localStorage.setItem('hissa_baksnooze', String(Date.now() + 3 * 864e5)); } catch (e) { } main(); };
+(function (f) { A.export = function () { var r = f.apply(this, arguments); setTimeout(function () { if (S.view === 'client' && !S.cur) main(); }, 300); return r; }; })(A.export);
+function initial(n) { n = String(n || '').trim(); return n ? n.charAt(0) : '؟'; }
+// ---- زر «عميل جديد» الواحد: يسأل بعد الضغط عن النظام (الإجراءان نفسهما: new/ex و new/ath)
+function newMenu() {
+  return '<details class="tbm newm"><summary class="newb">' + IC('plus') + '<span>عميل جديد</span></summary><div class="tbp"><p class="small">اختر نظام الخطة لهذا العميل</p>'
+    + '<button data-a="new" data-v="ex"><b>نظام الحصص</b><small>خطة بالحصص والبدائل</small></button><button class="o" data-a="new" data-v="ath"><b>نظام الجرامات</b><small>خطة بالجرام والماكروز</small></button></div></details>';
+}
+// ---- «اليوم»: ما يحتاج الأخصائي فعله الآن أولاً؛ الترحيب سطر واحد، ولا بلاطات تكرر التنقل
+function tdStat(a, icon, n, label) { return '<button class="tdk' + (n ? ' has' : '') + '" data-a="' + a + '">' + IC(icon) + '<b>' + n + '</b><small>' + label + '</small></button>'; }
 function homeGlass() {
   var cs = S.clients.slice().sort(function (a, b) { return (b.updated || b.created) - (a.updated || a.created); }), withPlan = cs.filter(function (c) { return c.plan || c.planSrc === 'ready'; }).length, ath = cs.filter(function (c) { return c.kind === 'athlete'; }).length;
-  var tile = function (a, v, icon, t, d) { return '<button class="qa" data-a="' + a + '"' + (v ? ' data-v="' + v + '"' : '') + '><span class="qai">' + IC(icon) + '</span><b>' + t + '</b><small>' + d + '</small></button>'; };
+  var n = navCounts(), fol = wkItems().filter(function (i) { return /:follow$/.test(i.key); }).length;
   var recent = cs.slice(0, 6).map(function (c) { return '<div class="cl" data-a="pick" data-v="' + c.code + '"><span class="cav">' + esc(initial(c.name)) + '</span><b>' + esc(c.name || '(بلا اسم)') + '</b><small>' + c.code + (c.phone ? ' • ' + esc(c.phone) : '') + (c.plan ? ' • له خطة' : '') + '</small></div>'; }).join('');
-  return '<div class="home ghome">'
-    + '<section class="hero"><div class="herot"><h2>أهلاً بك' + (firstName() ? '، ' + esc(firstName()) : '') + '</h2><p>اختر عميلاً أو ابدأ خطة جديدة. كل بياناتك محفوظة ومشفّرة على هذا الجهاز.</p></div>' + (window.HK ? HK.splashHtml(HK.gateCfg(), 'splash') : '') + '</section>'
-    + inboxCard() + wkToday() + '<div class="stats"><div><b>' + cs.length + '</b><small>عميل</small></div><div><b>' + withPlan + '</b><small>له خطة</small></div><div><b>' + ath + '</b><small>بالجرامات</small></div></div>'
-    + '<div class="qgrid">' + tile('new', 'ex', 'userPlus', 'نظام الحصص', 'عميل جديد: خطة بالحصص والبدائل') + tile('new', 'ath', 'dumbbell', 'نظام الجرامات', 'عميل جديد: خطة بالجرام والماكروز') + tile('bank', '', 'book', 'بنك الوجبات', 'وجبات المولّد وابتكار وجبة') + tile('ready', '', 'package', 'الخطط الجاهزة', 'خطط أسبوعية من مكتبتك + مكتبة الأخصائي') + tile('appts', '', 'calendar', 'المواعيد', 'مواعيد اليوم والأسبوع والمتابعات') + tile('zchat', '', 'message', 'شات زنها', 'محادثات العملاء بتنسيق واتساب') + tile('subs', '', 'package', 'الاشتراكات', 'المتبقي لكل عميل والمدفوعات والتمديد') + tile('hxv', '', 'phone', 'زنها', 'ادعُ عميلاً برابط واتساب واستقبل طلباته') + tile('feed', '', 'megaphone', 'التثقيف', 'انشر نصائح وفيديوهات لمراجعيك') + tile('settings', '', 'settings', 'إعدادات النظام', 'الألوان والبدائل والشعار والمظهر') + '</div>'
-    + (recent ? '<h3>آخر العملاء</h3><div class="recent">' + recent + '</div>' : '<p class="small">لا عملاء بعد — ابدأ بـ«عميل جديد».</p>')
-    + '<p class="two mobonly"><button data-a="new" data-v="ex">+ عميل جديد — الحصص</button><button class="o" data-a="new" data-v="ath">+ عميل جديد — الجرامات</button></p>'
-    + bakCard() + vtHomeCard() + proInstCard() + appCard() + '</div>';
+  return '<div class="home ghome today">'
+    + '<div class="tdh"><h2>اليوم</h2><p class="tdhi">أهلاً' + (firstName() ? '، ' + esc(firstName()) : '') + ' • ' + esc(wkDate(wkDay())) + '</p></div>'
+    + bakCard()
+    + (cs.length || n.req ? '<div class="tdks" role="group" aria-label="ملخص اليوم">' + tdStat('appts', 'calendar', n.appt, 'مواعيد اليوم') + tdStat('hxv', 'inbox', n.req, 'طلبات تسجيل جديدة') + tdStat('zchat', 'message', n.chat, 'رسائل غير مقروءة') + tdStat('subs', 'card', n.subs, 'اشتراكات للتجديد') + tdStat('tdFollow', 'repeat', fol, 'متابعات مستحقة') + '</div>' : '')
+    + wkToday()
+    + (recent ? '<div class="hxtop tdrh"><h3>آخر العملاء</h3><button class="sec sm" data-a="clients">كل العملاء (' + cs.length + ')</button></div><div class="recent">' + recent + '</div><p class="small tdsum">' + cs.length + ' عميل • ' + withPlan + ' له خطة • ' + ath + ' بنظام الجرامات</p>'
+      : '<div class="ucard tdempty"><h3>ابدأ بأول عميل</h3><p class="small">أضف عميلاً لتبني خطته، وستظهر هنا مواعيده ورسائله ومتابعاته.</p>' + newMenu() + '</div>')
+    + vtHomeCard() + proInstCard() + appCard() + '</div>';
 }
-function initial(n) { n = String(n || '').trim(); return n ? n.charAt(0) : '؟'; }
+// ---- «العملاء»: القائمة والبحث وزر واحد «عميل جديد» (على الويب البحث في الترويسة، وعلى الجوال حقل الصفحة نفسه)
+function clPage() {
+  var q = ($('#hq') || {}).value || '';
+  return '<div class="clpage"><div class="hxtop"><h2>العملاء <span class="cnt">' + S.clients.length + '</span></h2>' + newMenu() + '</div>'
+    + '<label class="srch clq">' + IC('search') + '<input id="q" type="search" placeholder="بحث بالاسم أو الكود أو الجوال" value="' + esc(q) + '" aria-label="بحث في العملاء"></label>'
+    + '<div id="lst">' + list() + '</div></div>';
+}
+// ---- «المزيد» (الجوال): ما لا مكان له في الشريط السفلي
+function navRow(a, v, icon, t, d, badge) { return '<button class="mrow" data-a="' + a + '"' + (v ? ' data-v="' + v + '"' : '') + '><span class="mri">' + IC(icon) + '</span><span class="mrt"><b>' + t + '</b><small>' + d + '</small></span>' + (badge ? '<b class="hxnb">' + badge + '</b>' : '') + '</button>'; }
+function morePage() {
+  var n = navCounts(), left = CFG.exp ? Math.ceil((CFG.exp * 1000 - Date.now()) / 86400000) : null;
+  return '<div class="morepage"><h2>المزيد</h2><p class="small">' + esc(CFG.userLabel || '') + (left !== null ? ' • ينتهي التفعيل بعد ' + left + ' يوم' : '') + '</p>'
+    + '<div class="mrows">' + navRow('appts', '', 'calendar', 'المواعيد', 'مواعيد اليوم والأسبوع والمتابعات', n.appt) + navRow('subs', '', 'card', 'الاشتراكات', 'المتبقي لكل عميل والمدفوعات والتمديد', n.subs) + navRow('nav', 'settings', 'settings', 'الإعدادات', 'البيانات الغذائية وزنها والمظهر والاستبيانات')
+    + navRow('setTools', '', 'tool', 'النسخ الاحتياطي والأدوات', 'نسخة احتياطية واسترجاع واستيراد عميل' + (S.mode === 'admin' ? ' وأدوات الإدارة' : '')) + navRow('dtToggle', '', 'bot', 'المساعد', 'اطلب تعديل الخطة بالعربية واعتمد قبل التنفيذ') + '</div></div>';
+}
+// ---- «النسخ الاحتياطي والأدوات» داخل الإعدادات: ما كان أسفل القائمة الجانبية، بنفس الإجراءات ونفس شروط الظهور (أدوات الإدارة للمدير فقط)
+function toolsPage() {
+  var on = typeof VT !== 'undefined' && VT.st && VT.st.on;
+  return '<h3>النسخ الاحتياطي والأدوات</h3><div class="ucard tools"><h3>النسخ الاحتياطي</h3><p class="small">البيانات محفوظة داخل هذا المتصفح فقط. خذ نسخة احتياطية دورياً.</p>'
+    + '<div class="' + (on ? 'ok' : 'warn') + ' vtline">' + (on ? 'النسخ التلقائي مفعّل. آخر نسخة: ' + vtAgo(VT.st.last) : 'النسخ الاحتياطي التلقائي غير مفعّل.') + ' <button class="sec sm" data-a="vtOpen">' + (on ? 'إدارة النسخ التلقائي' : 'فعّل النسخ التلقائي') + '</button></div>'
+    + '<div class="mrows">' + navRow('export', '', 'download', 'نسخة احتياطية', 'تنزيل ملف فيه كل العملاء وإصدارات خططهم') + navRow('import', '', 'upload', 'استرجاع', 'استرجاع من ملف نسخة احتياطية') + navRow('importClient', '', 'user', 'استيراد عميل جاهز', 'إضافة عميل من ملف عميل جاهز (JSON)') + '</div></div>'
+    + (S.mode === 'admin' ? '<div class="ucard tools"><h3>أدوات الإدارة</h3><div class="mrows">' + navRow('users', '', 'users', 'المستخدمون والأجهزة', 'حسابات الأخصائيين وأجهزتهم') + navRow('exportUsers', '', 'package', 'تصدير نسخة المستخدمين', 'ملف نسخة الأخصائيين بإعداداتك الحالية') + navRow('exportSite', '', 'globe', 'تصدير موقع للنشر (ZIP)', 'موقع الأخصائيين جاهزاً للرفع') + '</div></div>' : '');
+}
+// ---- تبويبات داخل القسم: «شات زنها» (المحادثات | طلبات زنها) دائماً، و«المكتبة» على الجوال (لا شريط جانبي هناك)
+function secNav() {
+  var n = navIs(), v = S.view, t = function (to, label, on, badge) { return '<button class="' + (on ? 'on' : '') + '" data-a="nav" data-v="' + to + '"' + (on ? ' aria-current="page"' : '') + '>' + label + (badge ? ' <em class="hxnb"></em>' : '') + '</button>'; };
+  if (n.chat) return '<nav class="tabs secnav" aria-label="شات زنها">' + t('zchat', 'المحادثات', v === 'chat', 1) + t('hxv', 'طلبات زنها', v === 'hx', 1) + '</nav>';
+  if (n.lib) return '<nav class="tabs secnav seclib" aria-label="المكتبة">' + t('bank', 'بنك الوجبات', v === 'bank') + t('ready', 'الخطط الجاهزة', v === 'ready' || v === 'lib') + t('feed', 'التثقيف', v === 'feed') + '</nav>';
+  if (v === 'users') return '<nav class="secnav secback" aria-label="رجوع"><button class="sec sm" data-a="setTools">› رجوع إلى الإعدادات</button></nav>';
+  return '';
+}
+function secInject() {
+  if (!isGlass()) return; var m = $('main'), h = secNav(); if (!m || !h || m.querySelector('.secnav')) return;
+  var w = m.querySelector('.chwrap'), bar = w && w.querySelector('.chlbar'); if (bar) bar.insertAdjacentHTML('afterend', h); else m.insertAdjacentHTML('afterbegin', h);
+  navBadge();
+}
+(function (f) {
+  main0 = function () {
+    if ((S.view === 'clients' || S.view === 'more') && !isGlass()) S.view = 'client';
+    if (S.view === 'clients') { $('main').innerHTML = clPage(); return; }
+    if (S.view === 'more') { $('main').innerHTML = morePage(); return; }
+    return f.apply(this, arguments);
+  };
+})(main0);
+(function (f) { main = function () { var r = f.apply(this, arguments); try { secInject(); } catch (e) { } return r; }; })(main);
 Object.assign(A, {
-  clToggle: function () { S.clOpen = !S.clOpen; sidebar(); var q = S.clOpen && $('#q'); if (q && !matchMedia('(max-width:900px)').matches) q.focus(); },
   home: function () { S.view = 'client'; S.cur = null; document.body.classList.remove('menu'); render(); window.scrollTo(0, 0); },
+  clients: function (v) {
+    if (!isGlass()) return A.home(); S.view = 'clients'; S.cur = null; render(); window.scrollTo(0, 0);
+    if (v === 'q') { var q = matchMedia('(max-width:900px)').matches ? $('#q') : $('#hq'); if (q) q.focus(); }
+  },
+  more: function () { if (!isGlass()) return A.home(); S.view = 'more'; S.cur = null; render(); window.scrollTo(0, 0); },
+  setTools: function () { S.view = 'settings'; S.setTab = 'tools'; render(); window.scrollTo(0, 0); },
+  tdFollow: function () { WK.all = true; main(); var w = $('.wktodo'); if (w && w.scrollIntoView) w.scrollIntoView({ block: 'start' }); },
   nav: function (v) {
-    if (v === 'menu') { A.menu(); return; }
     document.body.classList.remove('menu');
     if (v === 'home') return A.home();
-    if (v === 'settings') { S.view = 'settings'; render(); }
-    else if (v === 'zchat') A.zchat();
-    else if (v === 'bank') A.bank();
-    else if (v === 'lib') A.lib();
-    else if (v === 'ready') A.ready();
+    if (v === 'library') v = S.libTab || 'bank';
+    if (v === 'settings' || v === 'bank' || v === 'ready' || v === 'lib') { S.view = v; render(); }
+    else if (/^(clients|more|zchat|hxv|feed|appts|subs)$/.test(v) && A[v]) A[v]();
     window.scrollTo(0, 0);
   }
 });
-document.addEventListener('input', function (e) {                // بحث الترويسة = بحث العملاء نفسه
-  if (e.target && e.target.id === 'hq') { var q = $('#q'); if (q) { q.value = e.target.value; DPApp.relist(); } if (matchMedia('(max-width:900px)').matches && !document.body.classList.contains('menu')) A.menu(); }
+document.addEventListener('input', function (e) {                // بحث واحد: حقل الترويسة (الويب) وحقل صفحة «العملاء» (الجوال) قيمة واحدة، والكتابة من أي شاشة تفتح «العملاء»
+  var t = e.target; if (!t || (t.id !== 'hq' && t.id !== 'q') || !isGlass()) return;
+  var o = $(t.id === 'hq' ? '#q' : '#hq'); if (o) o.value = t.value;
+  if (S.view !== 'clients') { S.view = 'clients'; S.cur = null; render(); } else DPApp.relist();
 });
-(function (f) { A.menu = function () { var r = f.apply(this, arguments); if (isGlass()) tabbar(); return r; }; })(A.menu);
-['pick', 'new', 'users'].forEach(function (k) {                // على الجوال: اختيار عميل أو صفحة يغلق درج القائمة فيظهر المحتوى مباشرة
+(function (f) { A.menu = function () { if (isGlass()) return A.more(); return f.apply(this, arguments); }; })(A.menu);
+['pick', 'new', 'users'].forEach(function (k) {                // اختيار عميل أو صفحة يبدأ من أعلى الصفحة
   var f = A[k]; if (f) A[k] = function () { if (isGlass()) { document.body.classList.remove('menu'); window.scrollTo(0, 0); } return f.apply(this, arguments); };
 });
+(function (f) { hxRail = function () { var r = f.apply(this, arguments); navBadge(); return r; }; })(hxRail);   // بعد كل تحديث لشارات «زنها» و«الشات» تُحسب شارة القسم الموحّدة
+(function (f) { chRail = function () { var r = f.apply(this, arguments); navBadge(); return r; }; })(chRail);
 // ---- 0.47: قوائم شريط الخطة وقائمة «⋯» للصنف: تُغلق بعد الاختيار أو بالنقر خارجها
 document.addEventListener('click', function (e) {
   var t = e.target, own = t.closest ? t.closest('details.tbm, details.im') : null;
@@ -4879,15 +5036,7 @@ document.addEventListener('change', function (e) {
   var i = e.target, n = i.getAttribute && i.getAttribute('data-fpk') && i.nextSibling && i.nextSibling.querySelector && i.nextSibling.querySelector('.fpkn');
   if (n) n.textContent = i.files && i.files.length ? (i.files.length > 1 ? i.files.length + ' ملفات' : i.files[0].name) : 'لم يُختر ملف';
 }, true);
-// ---- 0.48: تذكير النسخة الاحتياطية في الرئيسية (للبيانات المحفوظة في المتصفح فقط، ويختفي مع النسخ التلقائي المفعّل)
-function bakAge() { var t = 0; try { t = +localStorage.getItem('hissa_lastbak') || 0; } catch (e) { } return t ? Math.floor((Date.now() - t) / 864e5) : -1; }
-function bakCard() {
-  var d = bakAge(), snz = 0; try { snz = +localStorage.getItem('hissa_baksnooze') || 0; } catch (e) { }
-  if (!S.clients.length || (typeof VT !== 'undefined' && VT.st && VT.st.on) || (d >= 0 && d < 7) || snz > Date.now()) return '';
-  return '<div class="ucard bakrem"><b>💾 ' + (d < 0 ? 'لم تأخذ نسخة احتياطية بعد' : 'آخر نسخة احتياطية منذ ' + d + ' يوماً') + '</b><p class="small">بيانات ' + S.clients.length + ' عميل محفوظة في هذا المتصفح فقط؛ مسح بيانات المتصفح يضيّعها.</p><p><button class="sm" data-a="export">نسخة احتياطية الآن</button> <button class="sec sm" data-a="bakLater">ذكّرني بعد 3 أيام</button></p></div>';
-}
-A.bakLater = function () { try { localStorage.setItem('hissa_baksnooze', String(Date.now() + 3 * 864e5)); } catch (e) { } main(); };
-(function (f) { A.export = function () { var r = f.apply(this, arguments); setTimeout(function () { if (S.view === 'client' && !S.cur) main(); }, 300); return r; }; })(A.export);
+(function (f) { A.settings = function () { if (S.view !== 'settings' && S.setTab === 'tools') S.setTab = 'portions'; return f.apply(this, arguments); }; })(A.settings);     // «الأدوات» وجهة عابرة: فتح الإعدادات من القائمة يبدأ بأول تبويب
 
 // ================= «زنها»: ربط «زنها Pro» بتطبيق العميل عبر المحطة الوسيطة (يُدمج داخل app.js عند /*HXUI*/)
 // الأخصائي يدعو العميل برابط (واتساب) ← العميل يسجّل بياناته في «زنها» ← تصل هنا «طلب عميل» فيعتمده الأخصائي كعميل جديد
@@ -5012,7 +5161,7 @@ function hxPoll() {
     Object.keys(touched).forEach(function (k) { var c = S.clients.filter(function (x) { return x.code === k; })[0]; if (c) persist(c); });
     return hxSave().then(function () { return n ? hxFetch('POST', '/v1/ack', { upTo: maxId }, true).catch(function () { }) : 0; });
   }).catch(function (e) { HX.err = e.message; HX.last = Date.now(); }).then(function () {
-    HX.busy = false; if (got) { var c = cur(); if (S.view === 'hx' || (c && S.tab === 'hx')) hxRe(); hxRail(); }
+    HX.busy = false; if (got) { var c = cur(); if (S.view === 'hx' || (c && S.view === 'client' && typeof cfLive === 'function' && cfLive())) hxRe(); hxRail(); }
     return got;
   });
 }
@@ -5285,8 +5434,20 @@ function hxDayDetail(c, k, l) {
   var foot = (l.sub ? 'أرسل تسجيل اليوم ✓' : 'لم يرسل تسجيل اليوم بعد') + (l.ts ? ' • آخر تحديث ' + hxAgo(l.ts) : '') + (l.pv && x.planV && l.pv !== x.planV ? ' • سُجّل على إصدار خطة سابق (v' + l.pv + ')، والأصناف المعروضة من الخطة الحالية' : '');
   return '<details class="hxdd"><summary>تفاصيل اليوم' + (sp && sp.days.length ? ': عمل ' + done + ' ولم يعمل ' + miss : '') + '</summary>' + h + '<p class="small">' + esc(foot) + '</p></details>';
 }
-function hxTab(c) {                                                // تبويب «زنها» داخل ملف العميل
-  var x = c.hx, ath = c.kind === 'athlete', logs = x.logs || {}, days = Object.keys(logs).sort().reverse().slice(0, 7), w = (x.weights || []).slice(-8);
+// 0.94: أجزاء «زنها» في ملف العميل موزّعة على أماكنها الجديدة (cfile_ui.js): الربط ووضع «يوم واحد في كل مرة» في «الملف ← ربط زنها»،
+// والمتابعة اليومية والوزن والتفضيلات في «المتابعة»، وإرسال الخطة زر في رأس الملف، والمحادثة في «شات زنها». المحتوى والمنطق كما هما.
+function hxHasPlan(c) { return !!(c && (c.plan || (c.planSrc === 'ready' && c.ready && c.readyDoc && window.RL) || c.rawSnap)); }
+function hxLastLine() { return '<p class="small hxlast">آخر تحقق ' + hxAgo(HX.last) + ' <button class="sec sm" data-a="hxCheck">↻ تحقق الآن</button></p>'; }
+function hxLinkCard(c) {
+  var x = c.hx, ath = c.kind === 'athlete';
+  return '<div class="ucard hxlinkc"><div class="hxtop"><h3>ربط «زنها» <small>مرتبط منذ ' + new Date(x.since || Date.now()).toLocaleDateString('ar') + ' • آخر تحقق ' + hxAgo(HX.last) + '</small></h3><button class="sec sm" data-a="hxCheck">↻ تحقق الآن</button></div>'
+    + (!hxHasPlan(c) ? '<p class="small">ولّد الخطة (من البنك أو جديدة) من تبويب «الخطة»، ثم أرسلها بزر «أرسل الخطة إلى زنها» أعلى الملف.</p>' : '<p>' + (x.planV ? 'آخر خطة أُرسلت: v' + x.planV + ' ' + hxAgo(x.sentAt) + '.' : 'لم تُرسل خطة بعد.') + ' <span class="small">الإرسال من زر «أرسل الخطة إلى زنها» أعلى الملف.</span></p><p class="small">' + (ath ? 'تصل الخطة بالجرامات لكل يوم (حسب نوع التدريب) مع ماكروز كل وجبة وبدائل كل صنف بجرامات تعادل الماكرو الرئيسي.' : 'تصل الخطة بكل أيامها ووجباتها مع بدائل كل صنف من نفس المجموعة.') + ' ما لا يحبه العميل يُستبدل تلقائياً في جواله.</p>')
+    + '</div>';
+}
+function hxGateCard(c) { var x = c.hx; return '<div class="ucard hxgate"><label class="chk"><input type="checkbox" data-hxgate ' + (x.gate ? 'checked' : '') + '> يوم واحد في كل مرة</label><p class="small">يرى العميل جدول يومه فقط. جدول الغد يُفتح بعد أن يرسل «تسجيل اليوم»، أو تلقائياً الساعة <select data-hxgateh>' + [9, 10, 12, 14, 16].map(function (h) { return '<option value="' + h + '"' + ((x.gateH || 12) === h ? ' selected' : '') + '>' + h + ':00</option>'; }).join('') + '</select> إن نسي (فلا يبقى بلا جدول). عدّل الخطة وأعد إرسالها متى شئت: يرى الجديد في يومه التالي.</p></div>'; }
+function hxHealthWarn(c) { var x = c && c.hx; if (!x) return ''; return x.health ? '<div class="warn">🩺 يطلب العميل تعديل حالته الصحية إلى: <b>' + (esc(x.health.cond.concat(x.health.allg).join('، ')) || 'لا حالات') + '</b>' + (x.health.note ? ' — ' + esc(x.health.note) : '') + '<p class="two"><button class="sm" data-a="hxHealthOk">اعتماد وتحديث ملفه</button><button class="sec sm" data-a="hxHealthNo">رفض</button></p></div>' : ''; }
+function hxDayCards(c) {                                           // المتابعة اليومية + الوزن + التفضيلات (كانت في تبويب «زنها»)
+  var x = c.hx, logs = x.logs || {}, days = Object.keys(logs).sort().reverse().slice(0, 7), w = (x.weights || []).slice(-8);
   var adh = days.map(function (k) {
     var l = logs[k], pct = l.n ? Math.round(l.done / l.n * 100) : 0, extra = [];
     Object.keys(l.sw || {}).forEach(function (q) { extra.push('⇄ ' + l.sw[q]); }); Object.keys(l.note || {}).forEach(function (q) { extra.push('✎ ' + l.note[q]); }); Object.keys(l.skip || {}).forEach(function (q) { extra.push('⤼ تخطّى وجبة ' + (+q + 1)); });
@@ -5294,15 +5455,9 @@ function hxTab(c) {                                                // تبويب
     var wk = hxWalk(l.h); if (wk) extra.unshift(wk); var of = Object.keys(l.off || {}).map(function (q) { return HX_OFF[q] || q; }); if (of.length || l.offT) extra.push('⚠ خارج النظام: ' + of.join('، ') + (l.offT ? ' — ' + l.offT : ''));
     return '<div class="hxday"><b>' + esc((D.days[l.dow] || '') + ' ' + k.slice(5)) + '</b><span class="hxbar"><i style="width:' + pct + '%"></i></span><span>' + pct + '%' + (l.sub ? ' <em title="أرسل تسجيل اليوم">✓</em>' : '') + '</span><small>💧 ' + (l.water * 0.25).toFixed(2).replace(/\.?0+$/, '') + ' ل</small>' + (extra.length ? '<small class="hxex">' + esc(extra.join(' • ')) + '</small>' : '') + '</div>' + hxDayDetail(c, k, l);
   }).join('');
-  return '<div class="hxtab"><div class="ucard"><div class="hxtop"><h3>📲 «زنها» <small>مرتبط منذ ' + new Date(x.since || Date.now()).toLocaleDateString('ar') + ' • آخر تحقق ' + hxAgo(HX.last) + '</small></h3><button class="sec sm" data-a="hxCheck">↻ تحقق الآن</button></div>'
-    + (!c.plan && c.planSrc !== 'ready' && !c.rawSnap ? '<p class="small">ولّد الخطة (من البنك أو جديدة) من «بيانات العميل» ثم أرسلها من هنا.</p>' : '<p>' + (x.planV ? 'آخر خطة أُرسلت: v' + x.planV + ' ' + hxAgo(x.sentAt) + '. ' : '') + '<button data-a="hxSendPlan">' + (x.planV ? '↻ أرسل الخطة المحدَّثة إلى «زنها»' : '➤ أرسل الخطة إلى «زنها»') + '</button></p><p class="small">' + (ath ? 'تصل الخطة بالجرامات لكل يوم (حسب نوع التدريب) مع ماكروز كل وجبة وبدائل كل صنف بجرامات تعادل الماكرو الرئيسي.' : 'تصل الخطة بكل أيامها ووجباتها مع بدائل كل صنف من نفس المجموعة.') + ' ما لا يحبه العميل يُستبدل تلقائياً في جواله.</p>')
-    + '</div>'
-    + '<div class="ucard hxgate"><label class="chk"><input type="checkbox" data-hxgate ' + (x.gate ? 'checked' : '') + '> 📅 يوم واحد في كل مرة</label><p class="small">يرى العميل جدول يومه فقط. جدول الغد يُفتح بعد أن يرسل «تسجيل اليوم»، أو تلقائياً الساعة <select data-hxgateh>' + [9, 10, 12, 14, 16].map(function (h) { return '<option value="' + h + '"' + ((x.gateH || 12) === h ? ' selected' : '') + '>' + h + ':00</option>'; }).join('') + '</select> إن نسي (فلا يبقى بلا جدول). عدّل الخطة وأعد إرسالها متى شئت: يرى الجديد في يومه التالي.</p></div>'
-    + (x.health ? '<div class="warn">🩺 يطلب العميل تعديل حالته الصحية إلى: <b>' + (esc(x.health.cond.concat(x.health.allg).join('، ')) || 'لا حالات') + '</b>' + (x.health.note ? ' — ' + esc(x.health.note) : '') + '<p class="two"><button class="sm" data-a="hxHealthOk">اعتماد وتحديث ملفه</button><button class="sec sm" data-a="hxHealthNo">رفض</button></p></div>' : '')
-    + '<div class="hxgrid"><div class="ucard"><h3>💬 المحادثة</h3>' + (hxThread(x.msgs).replace('<div class="hxthread"></div>', '<p class="small">لا رسائل بعد. ما يكتبه العميل من «راسل الأخصائي» يظهر هنا مع إشعار.</p>')) + '<div class="hxcomp"><textarea id="hxMsg" rows="2" placeholder="اكتب رسالة للعميل…"></textarea><button data-a="hxSendMsg">إرسال</button></div></div>'
-    + '<div class="ucard"><h3>✅ المتابعة اليومية</h3>' + (adh || '<p class="small">لم يسجّل العميل متابعة بعد. يعلّم في «زنها» ما أكله بلمسة، ويكتب ما أضاف أو حذف.</p>') + '</div>'
-    + '<div class="ucard"><h3>⚖ الوزن</h3>' + (w.length ? '<div class="hxw">' + w.map(function (q) { return '<span><b>' + q[1] + '</b><small>' + new Date(q[0]).toLocaleDateString('ar', { day: 'numeric', month: 'short' }) + '</small></span>'; }).join('') + '</div>' : '<p class="small">—</p>') + '</div>'
-    + '<div class="ucard"><h3>❤ التفضيلات</h3>' + ((x.prefLog || []).length ? '<ul class="hxpl">' + x.prefLog.slice(-10).reverse().map(function (q) { return '<li>' + (q.t === 'no' ? '🚫 لا يحب' : '❤ يحب') + ' «' + esc(q.f) + '»' + (q.n ? ' — استُبدل في ' + q.n + ' موضعاً' : '') + ' <small>' + hxAgo(q.ts) + '</small></li>'; }).join('') + '</ul>' : '<p class="small">ما يغيّره العميل يُضاف تلقائياً إلى «أصناف يتجنبها / مفضّلة» في بياناته.</p>') + '</div></div></div>';
+  return '<div class="hxgrid"><div class="ucard hxdaily"><h3>المتابعة اليومية</h3>' + (adh || '<p class="small">لم يسجّل العميل متابعة بعد. يعلّم في «زنها» ما أكله بلمسة، ويكتب ما أضاف أو حذف.</p>') + '</div>'
+    + '<div class="ucard"><h3>الوزن</h3>' + (w.length ? '<div class="hxw">' + w.map(function (q) { return '<span><b>' + q[1] + '</b><small>' + new Date(q[0]).toLocaleDateString('ar', { day: 'numeric', month: 'short' }) + '</small></span>'; }).join('') + '</div>' : '<p class="small">—</p>') + '</div>'
+    + '<div class="ucard"><h3>التفضيلات</h3>' + ((x.prefLog || []).length ? '<ul class="hxpl">' + x.prefLog.slice(-10).reverse().map(function (q) { return '<li>' + (q.t === 'no' ? '🚫 لا يحب' : '❤ يحب') + ' «' + esc(q.f) + '»' + (q.n ? ' — استُبدل في ' + q.n + ' موضعاً' : '') + ' <small>' + hxAgo(q.ts) + '</small></li>'; }).join('') + '</ul>' : '<p class="small">ما يغيّره العميل يُضاف تلقائياً إلى «أصناف يتجنبها / مفضّلة» في بياناته.</p>') + '</div></div>';
 }
 // إعادة الرسم مع الإبقاء على ما يكتبه الأخصائي في صناديق الرد (الاستقبال الدوري لا يمسح رسالة قيد الكتابة)
 function hxRe() { var keep = [].map.call(document.querySelectorAll('#hxMsg,[data-hxr]'), function (t) { return [t.id ? '#' + t.id : '[data-hxr="' + t.dataset.hxr + '"]', t.value, document.activeElement === t]; }); main(); keep.forEach(function (k) { var n = $(k[0]); if (n) { n.value = k[1]; if (k[2]) n.focus(); } }); }
@@ -5310,7 +5465,7 @@ function hxRe() { var keep = [].map.call(document.querySelectorAll('#hxMsg,[data
 function hxErr(e) { HX.err = e.message; toast('⚠ ' + e.message); main(); }
 Object.assign(A, {
   hxv: function () { S.view = 'hx'; S.cur = null; render(); if (hxOn()) hxPoll(); },
-  hxOpen: function (v) { return A.pick(v).then(function () { S.tab = 'hx'; main(); }).then(function () { A.hxRead(); }); },
+  hxOpen: function (v) { return A.pick(v).then(function () { S.tab = 'hx'; main(); }); },   // 0.94: يفتح «المتابعة اليومية» للمرتبط و«ربط زنها» لغيره (cfNorm)؛ الرسائل تُقرأ في «شات زنها»
   hxReg: function () {
     var relay = ($('#hx_relay').value || '').trim().replace(/\/+$/, ''), key = ($('#hx_key').value || '').trim(), name = ($('#hx_name').value || '').trim();
     if (!hxUrlOk(relay)) { toast('اكتب عنوان المحطة كاملاً ويبدأ بـ https://'); return; } if (!name) { toast('اكتب اسمك كما يراه العميل'); return; }
@@ -5324,12 +5479,12 @@ Object.assign(A, {
   hxUnlink: function () { if (!confirm('فصل هذا الجهاز عن «زنها»؟ لن تصل رسائل العملاء المرتبطين إلى هذا الجهاز بعد الآن.')) return; if (HX.st.pushEp) hxFetch('POST', '/v1/push/unsub', { ep: HX.st.pushEp }, true).catch(function () { }); HX.st = { key: 'hx', relay: HX.st.relay, name: HX.st.name, cc: HX.st.cc, after: 0, inv: {}, reqs: {} }; clearInterval(HX.timer); hxSave(); main(); },
   hxCheck: function () { toast('جارٍ التحقق…'); hxPoll().then(function (n) { toast(HX.err ? '⚠ ' + HX.err : n ? 'وصل ' + n + ' جديد' : 'لا جديد'); main(); }); },
   hxInvForm: function () { HX.form = !HX.form; if (!HX.form) HX.pre = null; HX.made = null; main(); var i = $('#hxi_l'); if (i) i.focus(); },
-  hxInvC: function () { var c = cur(); if (!c) return; HX.cform = HX.cform === c.code && !HX.made ? null : c.code; HX.made = null; HX.madeFor = null; S.tab = 'hx'; main(); var i = $('#hxi_p'); if (i && !i.value) i.focus(); },
-  hxSendOrInvite: function () { var c = cur(); if (!c) return; if (c.hx) { A.hxSendPlan(); return; } HX.cform = c.code; HX.made = null; HX.madeFor = null; S.tab = 'hx'; main(); window.scrollTo(0, 0); toast('«' + (c.name || 'العميل') + '» لم يتصل بـ«زنها» بعد — أرسل له الدعوة أولاً'); },
+  hxInvC: function () { var c = cur(); if (!c) return; HX.cform = HX.cform === c.code && !HX.made ? null : c.code; HX.made = null; HX.madeFor = null; S.tab = 'link'; main(); var i = $('#hxi_p'); if (i && !i.value) i.focus(); },
+  hxSendOrInvite: function () { var c = cur(); if (!c) return; if (c.hx) { A.hxSendPlan(); return; } HX.cform = c.code; HX.made = null; HX.madeFor = null; S.tab = 'link'; main(); window.scrollTo(0, 0); toast('«' + (c.name || 'العميل') + '» لم يتصل بـ«زنها» بعد — أرسل له الدعوة أولاً'); },
   hxInvMake: function () {
     var l = ($('#hxi_l').value || '').trim(), ph = ($('#hxi_p').value || '').trim(), d = +$('#hxi_d').value || 7, sy = ($('#hxi_s') || {}).value === 'g' ? 'g' : 'ex';
     if (!l) { toast('اكتب اسم العميل'); return; }
-    var fc = S.view === 'client' && cur() && S.tab === 'hx' && !cur().hx ? cur().code : null;
+    var fc = S.view === 'client' && cur() && S.tab === 'link' && !cur().hx ? cur().code : null;
     var link = ($('#hxi_c') || {}).value || '', lc = link && S.clients.filter(function (q) { return q.code === link; })[0]; if (lc && lc.kind === 'athlete') sy = 'g';
     var cred = ($('#hxi_m') || {}).value === 'cred', un = (($('#hxi_u') || {}).value || '').trim().toLowerCase(), pw = (($('#hxi_pw') || {}).value || '').trim();
     if (cred) { if (un && !/^[a-z0-9._-]{3,30}$/.test(un)) { toast('اسم المستخدم: 3 إلى 30 حرفاً إنجليزياً صغيراً أو أرقاماً أو . _ -'); return; } if (pw && (pw.length < 10 || !/[A-Za-z]/.test(pw) || !/\d/.test(pw))) { toast('كلمة السر: 10 أحرف على الأقل وفيها حروف وأرقام'); return; } }
@@ -5375,7 +5530,6 @@ Object.assign(A, {
   },
   hxHealthNo: function () { var c = cur(); hxSend(c, { t: 'health', ok: 0 }).catch(function () { }).then(function () { delete c.hx.health; persist(c); main(); }); }
 });
-(function (f) { A.tab = function (v) { var r = f.apply(this, arguments); if (v === 'hx') A.hxRead(); return r; }; })(A.tab);
 document.addEventListener('change', function (e) {
   var t = e.target; if (!t.dataset || !t.dataset.hx || !HX.st) return;
   if (t.dataset.hx === 'cc') HX.st.cc = t.value.replace(/\D/g, '') || '966'; else if (t.dataset.hx === 'name' && t.value.trim()) HX.st.name = t.value.trim().slice(0, 80);
@@ -6035,9 +6189,9 @@ function wkItems() {
     ap.forEach(function (a) { if (a.st) return; if (a.d === today && wkAt(a) >= now - 3600000) add(c, 0, '📅', 'موعد اليوم ' + (a.t || '') + ' — ' + (a.type || 'متابعة'), 'appt', 'a' + a.id); else if (wkAt(a) < now - 3600000) add(c, 1, '⏰', 'موعد ' + wkDate(a.d) + ' لم يُسجَّل حضوره', 'appt', 'l' + a.id); });
     var x = c.hx;
     if (x) {
-      if (x.unread) add(c, 0, '💬', x.unread + (x.unread === 1 ? ' رسالة جديدة' : ' رسائل جديدة') + ' في «زنها»', 'hx', 'msg');
-      if (x.health) add(c, 0, '🩺', 'يطلب تعديل حالته الصحية من «زنها»', 'hx', 'health');
-      if (c.plan && !x.planV) add(c, 1, '📤', 'لديه خطة لم تُرسل إلى «زنها»', 'hx', 'send');
+      if (x.unread) add(c, 0, '💬', x.unread + (x.unread === 1 ? ' رسالة جديدة' : ' رسائل جديدة') + ' في «زنها»', 'chat', 'msg');
+      if (x.health) add(c, 0, '🩺', 'يطلب تعديل حالته الصحية من «زنها»', 'link', 'health');
+      if (c.plan && !x.planV) add(c, 1, '📤', 'لديه خطة لم تُرسل إلى «زنها»', 'link', 'send');
       var ks = Object.keys(x.logs || {}).sort(), last = ks.length ? new Date(ks[ks.length - 1] + 'T12:00').getTime() : 0, recent = ks.filter(function (k) { return k >= wkAddDays(-3) && k < today; }).map(function (k) { var l = x.logs[k]; return l.n ? l.done / l.n : 0; });
       var p1 = x.logs[wkAddDays(-1)], p2 = x.logs[wkAddDays(-2)], pc = function (l) { return l && l.n ? l.done / l.n : 0; };   // 0.50: يومان متتاليان تحت 60%
       if (p1 && p2 && pc(p1) < 0.6 && pc(p2) < 0.6) add(c, 1, '📉', 'التزام منخفض يومين متتاليين: ' + Math.round(pc(p2) * 100) + '% ثم ' + Math.round(pc(p1) * 100) + '%', 'ci', 'low');
@@ -6082,7 +6236,7 @@ Object.assign(A, {
   wkApply: function (v, el) { var c = cur(); if (!c) return; if (wkHas(c) && !confirm('استبدال الخطة الحالية؟ تُحفظ إصداراً يمكنك استرجاعه.')) return; wkApply(c, v, el.dataset.m).catch(function (e) { toast('⚠ ' + e.message); }); },
   appts: function () { S.view = 'appts'; S.cur = null; render(); },
   wkOpen: function (v) { A.pick(v).then(function () { S.tab = 'appt'; main(); }); },
-  wkGo: function (v, el) { var t = el.dataset.t; if (!v) { A[t](); return; } A.pick(v).then(function () { S.tab = t; main(); if (t === 'hx' && A.hxRead) A.hxRead(); }); },
+  wkGo: function (v, el) { var t = el.dataset.t; if (!v) { A[t](); return; } if (t === 'chat') { A.cfChat(v); return; } A.pick(v).then(function () { S.tab = t; main(); }); },   // 0.94: الرسائل تفتح محادثة العميل في «شات زنها»
   wkHide: function (v) { wkHide(v); main(); },
   wkAll: function () { WK.all = !WK.all; main(); },
   wkIn: function (v) { WK.form = WK.form || {}; WK.form.d = wkAddDays(+v); main(); },
@@ -6573,8 +6727,8 @@ function rcUpload(rs) {                                             // صور ا
 function rcOfPlan(c) { var seen = {}, out = []; if (!c.plan || !c.plan.days || c.kind === 'athlete') return out; c.plan.days.forEach(function (d) { d.slots.forEach(function (s) { var n = s.mealLabel || s.meal; if (n && !seen[n]) { seen[n] = 1; var m = rcByMeal(s.meal) || rcByMeal(n); if (m && m.r) out.push({ name: n, r: m.r }); } }); }); return out; }
 // ---------- صور الوجبات في ملف العميل
 function phCard(c) {
-  var ps = (c.hx.photos || []).slice().reverse(); if (!ps.length) return '<div class="ucard"><h3>📷 صور الوجبات</h3><p class="small">يصوّر العميل وجبته من «زنها» («صوّر وجبتك» في بطاقة الوجبة) فتظهر هنا مشفّرة، وتردّ بتعليق سريع.</p></div>';
-  return '<div class="ucard phcard"><h3>📷 صور الوجبات (' + ps.length + ')</h3><div class="phgrid">' + ps.slice(0, 24).map(function (p) {
+  var ps = (c.hx.photos || []).slice().reverse(); if (!ps.length) return '<div class="ucard"><h3>صور الوجبات</h3><p class="small">يصوّر العميل وجبته من «زنها» («صوّر وجبتك» في بطاقة الوجبة) فتظهر هنا مشفّرة، وتردّ بتعليق سريع.</p></div>';
+  return '<div class="ucard phcard"><h3>صور الوجبات (' + ps.length + ')</h3><div class="phgrid">' + ps.slice(0, 24).map(function (p) {
     return '<figure class="' + (p.cm ? '' : 'new') + '"><img src="' + p.img + '" alt="صورة ' + esc(p.slot) + '" loading="lazy"><figcaption><b>' + esc(p.slot || 'وجبة') + '</b><small>' + esc(new Date(p.ts).toLocaleString('ar', { weekday: 'short', hour: '2-digit', minute: '2-digit' })) + '</small>'
       + (p.cm ? '<p class="phcm">✓ ' + esc(p.cm) + '</p>' : '<p class="phq">' + PH_QUICK.map(function (q) { return '<button class="sec sm" data-a="phCm" data-v="' + p.id + '" data-t="' + esc(q) + '">' + q + '</button>'; }).join('') + '<button class="sec sm" data-a="phCm" data-v="' + p.id + '" data-t="">✎ تعليق</button></p>') + '</figcaption></figure>';
   }).join('') + '</div></div>';
@@ -6608,9 +6762,9 @@ document.addEventListener('change', function (e) { var t = e.target; if (t.id !=
     x.phNew = (x.phNew || 0) + 1; toast('📷 ' + (c.name || x.label || '') + ' أرسل صورة ' + (p.slot || 'وجبته')); return 1;
   }
   return f.apply(this, arguments); }; })(hxIn);
-(function (f) { hxTab = function (c) { var h = f.apply(this, arguments); return h.replace('<div class="hxgrid">', phCard(c) + '<div class="hxgrid">'); }; })(hxTab);
+// 0.94: صور الوجبات قسم في «المتابعة» (cfile_ui.js يستدعي phCard مباشرة)، وعدّاد الجديد يُصفَّر عند فتح القسم
 (function (f) { A.hxRead = function () { var c = cur(); if (c && c.hx && c.hx.phNew) { c.hx.phNew = 0; persist(c); } return f.apply(this, arguments); }; })(A.hxRead);
-(function (f) { wkItems = function () { var out = f.apply(this, arguments), hid = wkHidden(); S.clients.forEach(function (c) { var n = c.hx && c.hx.phNew; if (n && !hid[c.code + ':ph']) out.push({ c: c, pri: 1, ic: '📷', txt: n + (n === 1 ? ' صورة وجبة جديدة' : ' صور وجبات جديدة') + ' بانتظار تعليقك', tab: 'hx', key: c.code + ':ph' }); }); return out.sort(function (a, b) { return a.pri - b.pri; }); }; })(wkItems);
+(function (f) { wkItems = function () { var out = f.apply(this, arguments), hid = wkHidden(); S.clients.forEach(function (c) { var n = c.hx && c.hx.phNew; if (n && !hid[c.code + ':ph']) out.push({ c: c, pri: 1, ic: '📷', txt: n + (n === 1 ? ' صورة وجبة جديدة' : ' صور وجبات جديدة') + ' بانتظار تعليقك', tab: 'ph', key: c.code + ':ph' }); }); return out.sort(function (a, b) { return a.pri - b.pri; }); }; })(wkItems);
 
 // ================= التحديات الأسبوعية وشهادات التقدير (يُدمج داخل app.js عند /*CHALUI*/)
 // قوالب جاهزة لأول 4 أسابيع (الإعدادات ← «🏆 التحديات») يعدّلها الأخصائي، ثم من ملف العميل ← «زنها»: برنامج 4 أسابيع أو تحدٍّ مخصّص
@@ -6687,7 +6841,7 @@ function chCard(c) {
   if (CH.ed && CH.ed.code === c.code) return '<div class="ucard chcard"><h3>🏆 ' + (CH.ed.weeks.length > 1 ? 'برنامج تحديات 4 أسابيع' : 'تحدٍّ مخصّص') + ' لـ' + esc(c.name) + '</h3><p class="small">عدّل ما تريد قبل الإرسال. تُضاف العادات المطلوبة إلى صفحة العميل تلقائياً، وتولَّد له شهادة تقدير باسمه وشعارك عند إتمام كل أسبوع.</p>'
     + '<label class="small">يبدأ في <input type="date" data-chf="start" value="' + esc(CH.ed.start) + '"></label>' + CH.ed.weeks.map(function (w, i) { return chWeekEd(w, 'ed.' + i, i); }).join('')
     + '<p class="two"><button data-a="chSend">➤ أرسل إلى «زنها»</button><button class="sec" data-a="chCancelEd">إلغاء</button></p></div>';
-  var head = '<div class="ucard chcard"><div class="hxtop"><h3>🏆 التحديات' + (ach.length ? ' <small>🏅 ' + ach.length + ' شهادة</small>' : '') + '</h3><p class="two"><button class="sm" data-a="chNew" data-v="prog">ابدأ برنامج 4 أسابيع</button><button class="sec sm" data-a="chNew" data-v="one">تحدٍّ مخصّص</button><button class="sec sm" data-a="chLib">📚 مكتبة التحديات (10)</button></p></div>' + (CH.lib ? chLibList() : '');
+  var head = '<div class="ucard chcard"><div class="hxtop"><h3>التحديات' + (ach.length ? ' <small>🏅 ' + ach.length + ' شهادة</small>' : '') + '</h3><p class="two"><button class="sm" data-a="chNew" data-v="prog">ابدأ برنامج 4 أسابيع</button><button class="sec sm" data-a="chNew" data-v="one">تحدٍّ مخصّص</button><button class="sec sm" data-a="chLib">📚 مكتبة التحديات (10)</button></p></div>' + (CH.lib ? chLibList() : '');
   if (!ch) return head + '<p class="small">قوالب جاهزة متدرّجة (الماء ← الحركة ← النوم ← أسلوب الحياة) تعدّلها قبل الإرسال. يتابعها العميل في «اليوم» ويحصل على شهادة تقدير عند إتمام كل أسبوع.</p></div>';
   var today = chDay(), cur = Math.floor((new Date(today + 'T12:00') - new Date(ch.start + 'T12:00')) / 864e5 / 7);
   return head + '<p class="small">بدأ ' + esc(ch.start) + (cur >= 0 && cur < ch.weeks.length ? ' • الأسبوع الحالي: ' + (cur + 1) : cur < 0 ? ' • لم يبدأ بعد' : ' • انتهى البرنامج') + ' <button class="sec sm" data-a="chStop">إيقاف</button></p>' + ch.weeks.map(function (w, i) {
@@ -6723,7 +6877,7 @@ document.addEventListener('input', function (e) {
 });
 document.addEventListener('change', function (e) { var t = e.target, f = t.dataset && t.dataset.chf; if (f && /\|h\|/.test(f)) { var a = f.split('|'), g = chRef(a[0]).goals[+a[2]]; g.h = t.value; g.v = CH_G[t.value][2]; main(); } });
 (function (f) { hxIn = function (c, p) { if (p.t === 'ach' && +p.w > 0) { var x = c.hx; x.ach = (x.ach || []).filter(function (a) { return !(a.id === p.id && a.w === +p.w); }).concat([{ id: String(p.id || ''), w: +p.w, title: String(p.title || '').slice(0, 80), at: p.ts || Date.now() }]); toast('🏅 ' + (c.name || '') + ' أتمّ ' + (+p.w === 99 ? 'برنامج التحديات كاملاً' : 'تحدي الأسبوع ' + p.w) + ' وحصل على شهادة تقدير'); return 1; } return f.apply(this, arguments); }; })(hxIn);
-(function (f) { hxTab = function (c) { var h = f.apply(this, arguments); return h.replace('<div class="hxgrid">', chCard(c) + '<div class="hxgrid">'); }; })(hxTab);
+// 0.94: التحديات قسم في «المتابعة» (cfile_ui.js يستدعي chCard مباشرة)
 
 // ================= مكتبة الأخصائي (0.41): تبويب «الأنظمة» (10 أنظمة لنزول الوزن) وتبويب «مشاكل الأخصائي» (10 مشاكل) + تطبيق تلقائي على العميل (يُدمج داخل app.js عند /*DIETSUI*/)
 // المنطق كله في src/diets.js (DX)؛ هنا العرض والإجراءات فقط. كل الأرقام قيم افتراضية قابلة للتعديل، والأخصائي هو من يعتمد.
@@ -7600,6 +7754,107 @@ document.addEventListener('change', function (e) {
   }
   if (t.hasAttribute && t.hasAttribute('data-gshop') && (c = cur())) { var sh = gyShopParse(t.value, c.shop); c.shop = sh.groups.length ? sh : null; persist(c).then(function () { toast(c.shop ? '✓ حُفظت قائمة التسوق' : 'ستُولَّد القائمة من الخطة'); }); }
 });
+
+// ================= ملف العميل (0.94) — يُدمج داخل app.js عند /*CFILEUI*/
+// رأس ثابت (الاسم والكود وشارتا الاشتراك و«زنها» وزر «أرسل الخطة إلى زنها» و«افتح المحادثة» وقائمة «…») فوق خمسة تبويبات:
+// الملف (البيانات | الملف الطبي | ربط زنها) • الخطة (الخطة | الإصدارات) • المتابعة (الحضور | المتابعة اليومية | صور الوجبات | التحديات) • المواعيد • الاشتراك.
+// لا محتوى جديد ولا منطق جديد: كل قسم يستدعي دالة وحدته كما هي (clientTab, medTab, planTab, verTab, ciTab, wkApptTab, subTab, phCard, chCard…).
+// S.tab يحمل اسم القسم الداخلي. الأسماء القديمة تبقى صالحة: «hx» يقود إلى «المتابعة اليومية» للمرتبط وإلى «ربط زنها» لغيره (cfNorm).
+var CF_G = [
+  ['file', 'الملف', 'user', ['client', 'med', 'link']],
+  ['plan', 'الخطة', 'utensils', ['plan', 'ver']],
+  ['follow', 'المتابعة', 'activity', ['ci', 'day', 'ph', 'chal']],
+  ['appt', 'المواعيد', 'calendar', ['appt']],
+  ['sub', 'الاشتراك', 'card', ['sub']]
+];
+var CF_L = { client: 'البيانات', med: 'الملف الطبي', link: 'ربط زنها', plan: 'الخطة', ver: 'الإصدارات', ci: 'الحضور', day: 'المتابعة اليومية', ph: 'صور الوجبات', chal: 'التحديات' };
+function cfGroup(t) { for (var i = 0; i < CF_G.length; i++) if (CF_G[i][3].indexOf(t) >= 0) return CF_G[i]; return CF_G[0]; }
+function cfNorm(v, c) {                                            // توافق خلفي: أسماء التبويبات القديمة وأسماء المجموعات تقود إلى القسم الصحيح
+  if (v === 'hx' || v === 'zenha') return c && c.hx ? 'day' : 'link';
+  if (v === 'file') return 'client'; if (v === 'follow') return 'ci';
+  return CF_L[v] || v === 'appt' || v === 'sub' ? v : 'client';
+}
+function cfNb(n) { return n ? ' <em class="hxnb">' + n + '</em>' : ''; }
+function cfBadge(c, k) {                                            // عدّاد كل قسم (نفس مصادر الشارات القديمة)
+  var x = c.hx || {};
+  if (k === 'med') return medAlerts(c).filter(function (a) { return a.lvl > 1; }).length;
+  if (k === 'link') return x.health ? 1 : 0;
+  if (k === 'ph') return x.phNew || 0;
+  if (k === 'appt') return (c.appts || []).filter(function (a) { return !a.st && a.d === wkDay(); }).length;
+  if (k === 'sub') { var s = sbState(c)[0]; return s === 'soon' || s === 'last' || s === 'expired' ? '!' : 0; }
+  return 0;
+}
+function cfGBadge(c, g) { var n = 0, mark = ''; g[3].forEach(function (k) { var b = cfBadge(c, k); if (b === '!') mark = '!'; else n += b; }); return n || mark; }
+function cfHead(c) {
+  var st = sbState(c), x = c.hx, un = x ? x.unread || 0 : 0;
+  var zen = x ? 'مرتبط' + (x.planV ? ' • أُرسل v' + x.planV : ' • لم تُرسل خطة') : 'غير مرتبط';
+  return '<div class="cfhead"><span class="cav">' + esc(initial(c.name)) + '</span>'
+    + '<div class="cfid"><b class="cfname">' + esc(c.name || 'عميل بلا اسم') + '</b><small>' + esc(c.code) + ' • ' + (c.kind === 'athlete' ? 'نظام الجرامات' : 'نظام الحصص') + '</small></div>'
+    + '<div class="cfbadges"><button class="cfb cfsub ' + st[2] + '" data-a="tab" data-v="sub" title="الاشتراك">' + IC('card') + '<span>' + esc(st[1]) + '</span></button>'
+    + '<button class="cfb cfzen ' + (x ? 'ok' : 'n') + '" data-a="tab" data-v="link" title="إدارة ربط «زنها»">' + IC('phone') + '<span>زنها: ' + zen + '</span>' + (x && x.health ? '<em class="hxnb">!</em>' : '') + '</button></div>'
+    + '<div class="cfact">' + (x && hxHasPlan(c) ? '<button class="cfsend" data-a="hxSendPlan">' + IC('send') + '<span>أرسل الخطة إلى زنها</span></button>' : '')
+    + (x ? '<button class="sec cfchat" data-a="cfChat" title="افتح محادثة العميل في «شات زنها»">' + IC('message') + '<span>افتح المحادثة</span>' + (un ? '<em class="hxnb">' + un + '</em>' : '') + '</button>' : '')
+    + '<details class="tbm cmore"><summary class="sec sm" aria-label="المزيد من إجراءات العميل" title="المزيد">' + IC('more') + '</summary><div class="tbp">'
+    + (x ? '<button data-a="hxCheck">' + IC('repeat') + ' تحقق من «زنها» الآن</button>' : '') + '<button data-a="tab" data-v="link">' + IC('phone') + ' إدارة ربط «زنها»</button><button class="r" data-a="del">' + IC('trash') + ' حذف العميل</button></div></details></div></div>';
+}
+function cfTabs(c) {
+  var g0 = cfGroup(S.tab);
+  return '<div class="tabs ctabs cftabs" role="tablist" aria-label="أقسام ملف العميل">' + CF_G.map(function (g) {
+    var on = g === g0; return '<button role="tab" aria-selected="' + on + '" class="' + (on ? 'on' : '') + '" data-a="tab" data-v="' + g[3][0] + '" data-g="' + g[0] + '">' + IC(g[2]) + '<span>' + g[1] + '</span>' + cfNb(cfGBadge(c, g)) + '</button>';
+  }).join('') + '</div>';
+}
+function cfSeg(c) {
+  var g = cfGroup(S.tab); if (g[3].length < 2) return '';
+  return '<div class="cfseg" role="tablist" aria-label="أقسام ' + g[1] + '">' + g[3].map(function (k) {
+    var on = S.tab === k; return '<button role="tab" aria-selected="' + on + '" class="' + (on ? 'on' : '') + '" data-a="tab" data-v="' + k + '">' + CF_L[k] + (k === 'ver' ? ' (' + S.versions.length + ')' : '') + cfNb(cfBadge(c, k)) + '</button>';
+  }).join('') + '</div>';
+}
+function cfNeed(t, d) { return '<div class="ucard cfneed"><h3>' + t + '</h3><p class="small">' + d + ' تظهر هنا بعد ربط العميل بـ«زنها».</p><p><button class="sec" data-a="tab" data-v="link">ربط العميل بـ«زنها»</button></p></div>'; }
+function cfBody(c) {
+  var t = S.tab, x = c.hx;
+  if (t === 'client') return clientTab(c);
+  if (t === 'med') return medTab(c);
+  if (t === 'link') return x ? '<div class="hxtab cflink">' + hxLinkCard(c) + hxGateCard(c) + '</div>' : hxEmptyTab(c);
+  if (t === 'plan') return planTab(c);
+  if (t === 'ver') return verTab(c);
+  if (t === 'ci') return ciTab(c);
+  if (t === 'day') return x ? '<div class="hxtab cfday">' + hxLastLine() + hxDayCards(c) + '</div>' : cfNeed('المتابعة اليومية', 'ما يسجّله العميل كل يوم (الوجبات والماء والعادات والوزن).');
+  if (t === 'ph') return x ? '<div class="hxtab cfph">' + hxLastLine() + phCard(c) + '</div>' : cfNeed('صور الوجبات', 'صور الوجبات التي يرسلها العميل لتعلّق عليها.');
+  if (t === 'chal') return x ? '<div class="hxtab cfchal">' + chCard(c) + '</div>' : cfNeed('التحديات', 'برامج التحديات الأسبوعية وشهادات التقدير.');
+  if (t === 'appt') return wkApptTab(c);
+  return subTab(c);
+}
+function cfPage(c) {
+  S.tab = cfNorm(S.tab, c);
+  if (S.tab === 'ph' && c.hx && c.hx.phNew) { c.hx.phNew = 0; persist(c); setTimeout(function () { if (typeof hxRail === 'function') hxRail(); }, 0); }   // فُتح قسم الصور: لا جديد بعد الآن
+  return cfHead(c) + cfTabs(c) + cfSeg(c) + hxHealthWarn(c) + '<div class="cfbody" data-tab="' + S.tab + '">' + cfBody(c) + '</div>';
+}
+function cfCenter() {                                               // التبويب المفعّل في منتصف الشريط الأفقي (الجوال)
+  [].forEach.call(document.querySelectorAll('main .cftabs, main .cfseg'), function (s) {
+    var on = s.querySelector('.on'); if (!on || s.scrollWidth <= s.clientWidth + 1) return; var a = on.getBoundingClientRect(), b = s.getBoundingClientRect(); s.scrollLeft += (a.left + a.width / 2) - (b.left + b.width / 2);
+  });
+}
+// الاستقبال الدوري من «زنها»: أقسام «زنها» تُعاد كاملة، وباقي الأقسام يُحدَّث رأسها وشاراتها فقط حتى لا يضيع ما يُكتب في النماذج
+function cfLive() {
+  var c = cur(); if (!c || S.view !== 'client') return false; if (S.tab === 'link' || S.tab === 'day' || S.tab === 'ph' || S.tab === 'chal') return true;
+  var h = $('main .cfhead'), t = $('main .cftabs'), g = $('main .cfseg'), d = document.createElement('div');
+  if (h && !h.querySelector('details[open]')) { d.innerHTML = cfHead(c); h.parentNode.replaceChild(d.firstChild, h); }
+  if (t) { var sl = t.scrollLeft; d.innerHTML = cfTabs(c); t.parentNode.replaceChild(d.firstChild, t); $('main .cftabs').scrollLeft = sl; }
+  if (g) { d.innerHTML = cfSeg(c); if (d.firstChild) g.parentNode.replaceChild(d.firstChild, g); }
+  return false;
+}
+Object.assign(A, {
+  cfChat: function (v) { var c = v ? S.clients.filter(function (x) { return x.code === v; })[0] : cur(); if (!c || !c.hx) return; var code = c.code; A.zchat(); A.czOpen(code); window.scrollTo(0, 0); }
+});
+(function (f) {
+  A.tab = function (v) {
+    var c = cur(), g0 = cfGroup(S.tab), r = f.call(this, cfNorm(v, c)), t = $('main .cftabs');
+    if (c && t && cfGroup(S.tab) !== g0 && getComputedStyle(t).position === 'sticky') { var top = parseFloat(getComputedStyle(t).top) || 0, y = t.getBoundingClientRect().top; if (y <= top + 1) { var hd = $('main .cfhead'); window.scrollTo(0, Math.max(0, window.scrollY + (hd ? hd.getBoundingClientRect().bottom : 0) - top)); } }
+    return r;
+  };
+})(A.tab);
+(function (f) { main0 = function () { var r = f.apply(this, arguments); if (S.view === 'client' && cur()) cfCenter(); return r; }; })(main0);
+document.addEventListener('input', function (e) { var t = e.target; if (t && t.dataset && t.dataset.f === 'name') { var n = $('main .cfname'), a = $('main .cfhead .cav'); if (n) n.textContent = t.value.trim() || 'عميل بلا اسم'; if (a) a.textContent = initial(t.value); } });
 
 
 // ================= بطاقة «تطبيق الجوال»: روابط التنزيل والتحديث (يحرّرها المدير وتصل المستخدمين مع نسخة المستخدمين) =================

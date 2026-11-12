@@ -22,7 +22,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   // ---- الربط والدعوة والتسجيل
   await d.goto(SITE + '/'); await login(d); await d.click('.rail [data-a="settings"]'); await d.click('[data-a="setTab"][data-v="hx"]');
   await d.fill('#hx_relay', RELAY); await d.fill('#hx_key', 'clinic-key'); await d.fill('#hx_name', 'د. أحمد حامد'); await d.click('[data-a="hxReg"]'); await d.waitForSelector('main .ok');
-  await d.click('.rail [data-a="hxv"]'); await d.click('main [data-a="hxInvForm"]'); await d.fill('#hxi_l', 'منى علي'); await d.fill('#hxi_p', '01001234567'); await d.click('[data-a="hxInvMake"]');
+  await d.evaluate(() => DPApp.A.hxv()); await d.click('main [data-a="hxInvForm"]'); await d.fill('#hxi_l', 'منى علي'); await d.fill('#hxi_p', '01001234567'); await d.click('[data-a="hxInvMake"]');
   await d.waitForSelector('.hxinv.made .hxlink'); const link = (await d.textContent('.hxinv.made .hxlink')).trim();
   await m.goto(link); await m.waitForSelector('.invite .dr'); await m.click('[data-act="go"][data-v="pin"]'); for (const k of '12341234') await m.click(`.pad [data-v="${k}"]`); await m.waitForSelector('.prog');
   await m.fill('#f_phone', '01001234567'); await m.fill('#f_age', '34'); await m.fill('#f_weight', '88'); await m.fill('#f_height', '162');

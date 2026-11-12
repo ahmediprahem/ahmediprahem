@@ -18,7 +18,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   ok('الماء من سطر الماء (يظهر في «تسجيل اليوم»)، المشي باختيار سريع (30 دقيقة، 5 آلاف خطوة) أو رقم (٣٢٠٠ متر بأرقام عربية)، و«خارج النظام» باختيارات + نص');
   if (process.env.SHOTS) { await m.locator('#daylog').screenshot({ path: process.env.SHOTS + '/daylog.png' }); }
   await m.click('#daylog [data-act="subDay"]'); await m.waitForSelector('#daylog:has-text("أُرسل تسجيل اليوم ✓")'); await cPoll();
-  await d.click('main .tabs [data-v="hx"]'); await hxCheck();
+  await d.evaluate(() => DPApp.A.tab('hx')); await hxCheck();
   const c = await C(), k = Object.keys(c.hx.logs).sort().pop(), lg = c.hx.logs[k];
   assert.strictEqual(lg.done, lg.n); assert(lg.sub > 0); assert.deepStrictEqual(Object.keys(lg.off).sort(), ['sweets', 'sym']); assert(/كيك/.test(lg.offT)); assert.strictEqual(lg.h.walkM, 3200);
   const day = await d.textContent('.hxday'); assert(/100%/.test(day) && /✓/.test(day) && /30 دقيقة/.test(day) && /3200 متر/.test(day) && /خارج النظام: حلويات، تعب أو أعراض/.test(day) && /كيك/.test(day), day);

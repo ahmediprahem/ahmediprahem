@@ -14,11 +14,11 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
     const ids = [...document.querySelectorAll('main [id]')].map((e) => e.id), dup = ids.filter((x, i) => ids.indexOf(x) !== i);
     return { total: fs.length, bad: fs.filter((e) => !name(e)).map((e) => e.outerHTML.slice(0, 140)), dup, forOk: [...document.querySelectorAll('main label[for]')].every((l) => !!l.control), bound: fs.filter((e) => e.dataset.f && e.labels && e.labels.length).length, need: [...document.querySelectorAll('main .need label .needb')].length };
   });
-  await p.click('.rail [data-a="new"][data-v="ex"]'); await p.fill('[data-f="name"]', 'ليلى'); await p.selectOption('[data-f="sex"]', 'ذكر').catch(() => { }); await p.press('[data-f="name"]', 'Tab'); await p.waitForTimeout(200);
+  await p.evaluate(() => DPApp.A.new('ex')); await p.fill('[data-f="name"]', 'ليلى'); await p.selectOption('[data-f="sex"]', 'ذكر').catch(() => { }); await p.press('[data-f="name"]', 'Tab'); await p.waitForTimeout(200);
   let r = await scan(); assert(r.total >= 20, JSON.stringify(r)); assert.deepStrictEqual(r.bad, [], r.bad.join('\n')); assert.deepStrictEqual(r.dup, [], 'معرّفات مكررة: ' + r.dup); assert(r.forOk, 'عنوان for بلا حقل'); assert(r.bound >= 10, JSON.stringify(r));
   assert.strictEqual(await p.getAttribute('label[for="f-age"]', 'for'), 'f-age'); assert.strictEqual(await p.getAttribute('#f-age', 'data-f'), 'age', 'data-f لا يتغير');
   ok('نظام الحصص: ' + r.total + ' حقلاً ظاهراً كلها بأسماء مقروءة (0 بلا اسم)، و«الاسم» مربوط بـ for="f-name"، والمعرّفات غير مكررة، وdata-f كما هو');
-  await p.click('.rail [data-a="new"][data-v="ath"]'); await p.fill('[data-f="name"]', 'كابتن'); await p.selectOption('[data-f="sex"]', 'ذكر').catch(() => { }); await p.press('[data-f="name"]', 'Tab'); await p.waitForTimeout(200);
+  await p.evaluate(() => DPApp.A.new('ath')); await p.fill('[data-f="name"]', 'كابتن'); await p.selectOption('[data-f="sex"]', 'ذكر').catch(() => { }); await p.press('[data-f="name"]', 'Tab'); await p.waitForTimeout(200);
   r = await scan(); assert(r.total >= 20, JSON.stringify(r)); assert.deepStrictEqual(r.bad, [], r.bad.join('\n')); assert.deepStrictEqual(r.dup, [], 'معرّفات مكررة: ' + r.dup); assert(r.forOk);
   ok('نظام الجرامات: ' + r.total + ' حقلاً ظاهراً (منها جدول التدريب والوجبات) كلها بأسماء مقروءة');
   // تكرار المفتاح في الصفحة نفسها يأخذ لاحقة

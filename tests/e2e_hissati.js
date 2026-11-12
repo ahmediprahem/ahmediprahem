@@ -37,7 +37,7 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
   assert.deepStrictEqual(await d.evaluate(() => DPApp.S.settings.hx), { relay: RELAY, regKey: 'clinic-key' });
   ok('«حصة» تُربط بالمحطة بمفتاح التسجيل (الخطأ يُرفض برسالة واضحة)، ويُحفظ العنوان للمستخدمين');
   // ---- 2) الدعوة
-  await d.click('.rail [data-a="hxv"]'); await d.click('main [data-a="hxInvForm"]'); await shot(d, 'd0_invite_form'); await d.fill('#hxi_l', 'سارة أحمد'); await d.fill('#hxi_p', '0554079404'); await d.click('[data-a="hxInvMake"]');
+  await d.evaluate(() => DPApp.A.hxv()); await d.click('main [data-a="hxInvForm"]'); await shot(d, 'd0_invite_form'); await d.fill('#hxi_l', 'سارة أحمد'); await d.fill('#hxi_p', '0554079404'); await d.click('[data-a="hxInvMake"]');
   await d.waitForSelector('.hxinv.made .hxlink'); const link = (await d.textContent('.hxinv.made .hxlink')).trim(), wa = await d.getAttribute('.hxinv.made a[data-hxwa]', 'href');
   assert(link.startsWith(RELAY + '/#t=') && /#t=[\w-]{24}\.[\w-]{11}$/.test(link), link); assert(wa.startsWith('https://wa.me/966554079404?text=') && decodeURIComponent(wa).includes(link), wa);
   const relayInv = env.DB._raw.prepare('SELECT h, label, cat FROM invites').get(); assert.strictEqual(relayInv.label, 'سارة أحمد'); assert(!relayInv.cat.includes('0554079404') && JSON.parse(relayInv.cat).bank.length > 50);
@@ -60,17 +60,17 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
   // ---- 5) الطلب في «حصة» والاعتماد
   await hxCheck(); await d.waitForSelector('.hxreq:not(.wait)'); const card = await d.textContent('.hxreq'); await shot(d, 'd1_requests'); await shot(m, 'c4_sent');
   for (const s of ['سارة أحمد', '0554079404', '72.5', '162', cond, likeB, love, hate]) assert(card.includes(s), 'بطاقة الطلب بلا: ' + s);
-  assert.strictEqual(await d.textContent('.rail [data-a="hxv"] em'), '1');
+  assert.strictEqual(await d.textContent('.rail [data-a="zchat"] em'), '1');
   await d.click('[data-a="hxOk"]'); await d.waitForSelector('[data-f="name"]');
   const c = await d.evaluate(() => { const c = DPApp.S.clients.filter((x) => x.code === DPApp.S.cur)[0]; return { name: c.name, phone: c.phone, w: c.weight, h: c.height, age: c.age, sex: c.sex, cond: c.conditions, avoid: c.avoid, love: c.love, fav: c.favMeals, ex: c.excludedMeals.length, hx: !!c.hx, code: c.code }; });
   assert.deepStrictEqual([c.name, c.phone, c.w, c.h, c.age, c.sex], ['سارة أحمد', '0554079404', 72.5, 162, 29, 'أنثى']); assert.deepStrictEqual(c.cond, [cond]); assert.deepStrictEqual(c.avoid, [hate]); assert.deepStrictEqual(c.love, [love]); assert.deepStrictEqual(c.fav, [likeB.trim()]); assert.strictEqual(c.ex, 1); assert(c.hx);
-  assert(await d.isVisible('main .tabs [data-v="hx"]')); assert.strictEqual(await d.textContent('.rail [data-a="hxv"] em'), '');
+  assert(await d.isVisible('main .tabs [data-v="hx"]')); assert.strictEqual(await d.textContent('.rail [data-a="zchat"] em'), '');
   await cPoll(); await m.waitForSelector('text=اعتمدك أخصائيك'); assert((await m.textContent('.tl')).includes(c.code));
   ok('«حصة»: طلب العميل يظهر بكل بياناته مع شارة، والاعتماد ينشئ عميلاً جديداً مملوءاً (الأكلات المكروهة في «يتجنبها»)، ويصل الاعتماد ورقم الملف إلى «زنها»');
   // ---- 6) الخطة ← «زنها»
-  await d.click('main .tabs [data-v="plan"]'); await d.evaluate(() => { const c = DPApp.S.clients.find((x) => x.code === DPApp.S.cur); if (c && c.kind !== 'athlete') { c.goal = c.goal || DATA.settings.goals[2][0]; c.activity = c.activity || DATA.settings.activity[2][0]; } if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); }).then(() => d.click('button:has-text("ولّد خطة جديدة")')); await d.waitForSelector('.pnav button');
+  await d.evaluate(() => DPApp.A.tab('plan')); await d.evaluate(() => { const c = DPApp.S.clients.find((x) => x.code === DPApp.S.cur); if (c && c.kind !== 'athlete') { c.goal = c.goal || DATA.settings.goals[2][0]; c.activity = c.activity || DATA.settings.activity[2][0]; } if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); }).then(() => d.click('button:has-text("ولّد خطة جديدة")')); await d.waitForSelector('.pnav button');
   const planHas = await d.evaluate((f) => { const c = DPApp.S.clients.filter((x) => x.code === DPApp.S.cur)[0]; return c.plan.days.some((d) => d.slots.some((s) => s.lines.some((l) => l.name === f))); }, hate); assert.strictEqual(planHas, false, 'المحرك تجاهل «يتجنبها»');
-  await d.click('main .tabs [data-v="hx"]'); await d.click('[data-a="hxSendPlan"]'); await d.waitForSelector('text=آخر خطة أُرسلت: v1');
+  await d.evaluate(() => DPApp.A.tab('hx')); await d.click('[data-a="hxSendPlan"]'); await d.waitForSelector('text=آخر خطة أُرسلت: v1');
   await cPoll(); await m.waitForSelector('.tabbar'); await m.evaluate(() => { const A = window.HissatiApp; A.state().ui = { today2: false }; A.render(); }); await m.click('[data-act="tab"][data-v="plan"]'); const meals = await m.locator('.card.meal').count(); assert(meals >= 3, String(meals)); await m.click('[data-act="tab"][data-v="today"]');
   const inst = await m.textContent('.inst'); assert(inst.includes('إضافة إلى الشاشة الرئيسية') && inst.includes('إنشاء رمز النقل'), inst); await shot(m, 'c5_today'); const today = await m.evaluate(() => { const S = window.HissatiApp.state(); return { kcal: S.pm.kcal, days: S.plan.length, alts: S.plan[0].slots[0].lines[0][3].length }; }); assert(today.kcal > 1000 && today.days === 7 && today.alts > 0, JSON.stringify(today));
   ok('الخطة تُرسل من تبويب «زنها» في ملف العميل وتصل كاملة (7 أيام ووجبات وبدائل لكل صنف) فتفتح «زنها» على شاشة «اليوم»');
@@ -81,7 +81,7 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
   await m.click('[data-act="tab"][data-v="today"]'); await m.click('.chatbtn'); await m.fill('#chatIn', 'هل أقدر أبدّل الأرز بالبطاطس؟'); await m.press('#chatIn', 'Enter'); await m.click('[data-act="chatClose"]');
   await m.click('[data-act="tab"][data-v="today"]'); await m.click('[data-act="sub"][data-v="progress"]'); await m.click('#wIn'); await m.keyboard.type('٧١٫٨'); await m.click('[data-act="weigh"]');
   await m.waitForTimeout(2800); await cPoll();
-  await d.click('main .tabs [data-v="client"]'); await hxCheck().catch(() => { }); await d.click('.rail [data-a="hxv"]'); await hxCheck(); await d.waitForSelector('.hxlinked .hxnb');
+  await d.evaluate(() => DPApp.A.tab('client')); await hxCheck().catch(() => { }); await d.evaluate(() => DPApp.A.hxv()); await hxCheck(); await d.waitForSelector('.hxlinked .hxnb');
   await d.click('.hxlinked .cl'); await d.waitForSelector('.hxtab .hxday');
   const tab = await d.textContent('.hxtab'); await shot(d, 'd2_client_tab'); for (const s of ['هل أقدر أبدّل الأرز بالبطاطس؟', 'أضفت شيئاً', '71.8', swTo]) assert(tab.includes(s), 'تبويب زنها بلا: ' + s);
   assert(/\d+%/.test(await d.textContent('.hxday')) && (await d.textContent('.hxday')).includes('0.75'));
@@ -134,14 +134,14 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
   // ---- 12) إشعارات الأخصائي على موقع «حصة»
   const dsub = env.DB._raw.prepare("SELECT id FROM push_subs WHERE ep LIKE '%e2e-dietitian%'").get(); assert(dsub, 'الأخصائي لم يشترك في الإشعارات');
   await d.click('.rail [data-a="settings"]'); await d.click('[data-a="setTab"][data-v="hx"]'); assert((await d.textContent('main')).includes('إشعارات المتصفح مفعّلة'));
-  await d.click('.rail [data-a="hxv"]'); assert.strictEqual(await d.locator('.hxnotif').count(), 0);
+  await d.evaluate(() => DPApp.A.hxv()); assert.strictEqual(await d.locator('.hxnotif').count(), 0);
   ok('«حصة» على الموقع: بعد ربط المحطة تشترك في إشعارات المتصفح تلقائياً (مع السماح)، وتعرض «إشعارات المتصفح مفعّلة»');
   const before = pushes.length; await m2.click('.chatbtn'); await m2.fill('#chatIn', 'وزني اليوم 71.5 الحمد لله'); await m2.press('#chatIn', 'Enter'); await m2.waitForTimeout(800);
   const toD = pushes.slice(before).filter((x) => /e2e-dietitian/.test(x.u)); assert.strictEqual(toD.length, 1, 'رسالة العميل يجب أن ترسل إشعاراً للأخصائي'); assert(!toD[0].o.body);
   const dcdp = await dctx.newCDPSession(d), dregs = []; dcdp.on('ServiceWorker.workerRegistrationUpdated', (e) => dregs.push(...e.registrations)); await dcdp.send('ServiceWorker.enable'); await d.waitForTimeout(300);
-  const dreg = dregs.find((r) => r.scopeURL === SITE + '/'); assert(dreg, JSON.stringify(dregs)); const pre = await d.textContent('.rail [data-a="hxv"] em'); assert(pre === '' || pre === '1', pre);   // '1' إن سبق التحقق الدوري (كل نصف دقيقة) الإشعار
+  const dreg = dregs.find((r) => r.scopeURL === SITE + '/'); assert(dreg, JSON.stringify(dregs)); const pre = await d.textContent('.rail [data-a="zchat"] em'); assert(pre === '' || pre === '1', pre);   // '1' إن سبق التحقق الدوري (كل نصف دقيقة) الإشعار
   await dcdp.send('ServiceWorker.deliverPushMessage', { origin: SITE, registrationId: dreg.registrationId, data: '' });
-  await d.waitForFunction(() => document.querySelector('.rail [data-a="hxv"] em').textContent === '1', null, { timeout: 8000 }); assert((await d.textContent('main')).includes('سارة أحمد'));
+  await d.waitForFunction(() => document.querySelector('.rail [data-a="zchat"] em').textContent === '1', null, { timeout: 8000 }); assert((await d.textContent('main')).includes('سارة أحمد'));
   ok('رسالة العميل ← إشعار للأخصائي بلا محتوى، ووصوله يوقظ «حصة» المفتوحة فتجلب الرسالة فوراً وتظهر الشارة');
   // ---- 13) التثبيت من المتصفح: الأيقونات والبيان، ونقل الحساب إلى «التطبيق المثبّت» (تخزين منفصل كآيفون)، ورمز الدعوة داخل التطبيق
   const man = await (await realFetch(RELAY + '/manifest.webmanifest')).json(); assert.strictEqual(man.display, 'standalone'); assert.strictEqual(man.start_url, '/');
@@ -160,7 +160,7 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
   await d.fill('#hxMsg', 'وصلتني رسالتك على الجهاز الجديد؟').catch(async () => { await d.click('.hxlinked .cl'); await d.fill('#hxMsg', 'وصلتني رسالتك على الجهاز الجديد؟'); }); await d.press('#hxMsg', 'Enter'); await d.waitForTimeout(500);
   await ip.click('[data-act="tab"][data-v="today"]'); await ip.evaluate(() => window.HissatiApp.poll()); await ip.waitForSelector('.chatbtn .nb');
   ok('نقل الحساب برمز (كمن سجّل في Safari ثم ثبّت التطبيق): الرمز الخطأ يُرفض، والصحيح ينقل الخطة والمحادثة برمز دخول جديد، ويُمسح الحساب من المتصفح القديم، وتصل الرسائل للجهاز الجديد');
-  await d.click('.rail [data-a="hxv"]'); await d.click('main [data-a="hxInvForm"]'); await d.fill('#hxi_l', 'خالد'); await d.click('[data-a="hxInvMake"]'); await d.waitForSelector('.hxinv.made .hxlink');
+  await d.evaluate(() => DPApp.A.hxv()); await d.click('main [data-a="hxInvForm"]'); await d.fill('#hxi_l', 'خالد'); await d.click('[data-a="hxInvMake"]'); await d.waitForSelector('.hxinv.made .hxlink');
   const link2 = (await d.textContent('.hxinv.made .hxlink')).trim(), jctx = await b.newContext({ ...devices['iPhone 13'] }), jp = await jctx.newPage(); jp.on('pageerror', (e) => errs.push('دعوة: ' + e));
   await jp.goto(RELAY + '/'); await jp.fill('#invIn', 'مرحباً خالد، رابطك: ' + link2); await jp.click('[data-act="useInv"]');
   {     // شاشات المستخدم الجديد: بداية حيّة ← 3 قصص تفاعلية ← اختيار الشكل ← الدعوة؛ مرة واحدة على الجهاز
@@ -227,7 +227,7 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
     await d.evaluate((n) => { const el = [...document.querySelectorAll('.bkr')].find((r) => r.querySelector('.bkn b').textContent === n); el.querySelector('[data-a="rcEdit"]').click(); }, tgt.meal); await d.waitForSelector('.rced');
     await d.fill('#rc_steps', 'سخّن المقلاة\nأضف المكونات وقلّب 5 دقائق'); await d.fill('#rc_mins', '١٥'); await d.setInputFiles('#rc_file', path.resolve(__dirname, '../assets/hissati/icon-512.png')); await d.waitForSelector('.rcimg img');
     await d.click('[data-a="rcSave"]'); await d.waitForSelector('.toast:has-text("حُفظت الوصفة")'); assert(await d.isVisible('.bkr:has-text("' + tgt.meal + '") .rcon'));
-    await d.evaluate((code) => DPApp.A.pick(code), tgt.code); await d.click('main .tabs [data-v="hx"]'); const m0 = env.DB._raw.prepare('SELECT COUNT(*) AS n FROM media').get().n;
+    await d.evaluate((code) => DPApp.A.pick(code), tgt.code); await d.evaluate(() => DPApp.A.tab('hx')); const m0 = env.DB._raw.prepare('SELECT COUNT(*) AS n FROM media').get().n;
     await d.click('[data-a="hxSendPlan"]'); await d.waitForSelector('text=آخر خطة أُرسلت: v2'); assert.strictEqual(env.DB._raw.prepare('SELECT COUNT(*) AS n FROM media').get().n, m0 + 1, 'صورة الوصفة رُفعت مرة');
     assert(await d.evaluate(() => Object.values(DPApp.S.settings.recipes)[0].key.length === 24));
     await ip.evaluate(() => window.HissatiApp.poll()); await ip.click('[data-act="tab"][data-v="plan"]'); await ip.waitForSelector('[data-act="rcp"]');
@@ -291,7 +291,7 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
     if (process.env.SHOTS) for (const id of ['adhkar', 'water', 'steps', 'sleep', 'veg', 'sugar', 'move', 'breath', 'mindful', 'kitchen', 'coffee']) await ip.locator('[data-hb="' + id + '"]').screenshot({ path: path.join(process.env.SHOTS, 'h_' + id + '.png') }); await ip.evaluate(() => { const S = window.HissatiApp.state(), d = new Date(Date.now() - 86400000), k = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); S.log[k] = Object.assign(S.log[k] || { ck: {}, sw: {}, note: {}, skip: {}, water: 0 }, { h: { sugar: 1 } }); });
     await ip.click('[data-hb="sleep"] [data-k="8"]'); await ip.click('[data-hb="sleep"] [data-k="8"]'); assert((await ip.textContent('[data-hb="sugar"] .hbs')).includes('2'), 'سلسلة يومين');
     await ip.click('[data-act="tab"][data-v="today"]'); await ip.click('[data-act="sub"][data-v="progress"]'); assert((await ip.textContent('.hgrid')).includes('المشي اليومي'));
-    await ip.waitForTimeout(2800); await ip.evaluate(() => window.HissatiApp.flush()); await hxCheck(); await d.click('main .tabs [data-v="hx"]').catch(() => { });
+    await ip.waitForTimeout(2800); await ip.evaluate(() => window.HissatiApp.flush()); await hxCheck(); await d.evaluate(() => DPApp.A.tab('hx')).catch(() => { });
     const tx = await d.textContent('.hxday'); assert(tx.includes('✓🚶 9000 خطوة') && tx.includes('✓😴 8 س نوم') && tx.includes('✗☕ 4 كوب قهوة') && tx.includes('✓📿 أذكار الصباح'), tx.slice(0, 400));
     ok('العادات: مكتبة من 10 عادات صحية تُضاف لـ«اليوم» بتصميم لكل عادة (قارورة الماء، عدّاد الخطوات، سماء النوم، صحن الخضار، شعلة السلسلة، بطارية النشاط، جلسة تنفّس، أكواب القهوة)، والإنجاز والسلسلة والأسبوع، وتصل الأخصائي في المتابعة اليومية');
     {     // مكتبة العصر: 10 عادات جديدة لكل منها تصميم وإنجاز واحتفال ويصل التقدّم للأخصائي
@@ -321,7 +321,7 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
   {
     await d.click('.rail [data-a="settings"]'); await d.click('[data-a="setTab"][data-v="chal"]'); await d.waitForSelector('.chwk >> nth=3'); assert.strictEqual(await d.locator('.chwk').count(), 4);
     await d.fill('[data-chf="tpl.0|title"]', 'انطلاقة قوية'); await d.click('[data-a="chTplSave"]'); assert.strictEqual(await d.evaluate(() => DPApp.S.settings.chal.weeks[0].title), 'انطلاقة قوية');
-    await d.evaluate(() => DPApp.A.pick(DPApp.S.clients.find((x) => x.name === 'سارة أحمد').code)); await d.click('main .tabs [data-v="hx"]'); await d.click('[data-a="chNew"][data-v="prog"]');
+    await d.evaluate(() => DPApp.A.pick(DPApp.S.clients.find((x) => x.name === 'سارة أحمد').code)); await d.evaluate(() => DPApp.A.tab('hx')); await d.click('[data-a="chNew"][data-v="prog"]');
     assert.strictEqual(await d.inputValue('[data-chf="ed.0|title"]'), 'انطلاقة قوية'); assert.strictEqual(await d.locator('.chcard .chwk').count(), 4);
     while (await d.locator('[data-a="chGoalDel"][data-v^="ed.0|"]').count() > 1) await d.click('[data-a="chGoalDel"][data-v="ed.0|1"]');
     await d.selectOption('[data-chf="ed.0|h|0"]', 'steps'); await d.fill('[data-chf="ed.0|v|0"]', '٨٠٠٠'); await d.fill('[data-chf="ed.0|d|0"]', '1');

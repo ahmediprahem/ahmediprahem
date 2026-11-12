@@ -8,8 +8,8 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   let answer = 'قالب إنقاص الوزن'; p.on('dialog', (d) => d.accept(d.type() === 'prompt' ? answer : undefined));
   await p.goto(fileUrl(path.resolve(__dirname, '../admin.html'))); await login(p);
   const C = () => p.evaluate(() => JSON.parse(JSON.stringify(DPApp.S.clients.find((x) => x.code === DPApp.S.cur))));
-  const mk = async (kind, name, w) => { await p.click('.rail [data-a="new"][data-v="' + kind + '"]'); await p.fill('[data-f="name"]', name); await p.selectOption('[data-f="sex"]', 'ذكر').catch(() => { }); await p.fill('[data-f="age"]', kind === 'ath' ? '28' : '30'); await p.fill('[data-f="weight"]', String(w || 80)); await p.fill('[data-f="height"]', kind === 'ath' ? '178' : '175'); await p.press('[data-f="name"]', 'Tab'); await p.waitForTimeout(250); };
-  const planTab = async () => { await p.click('main .tabs [data-v="plan"]'); };
+  const mk = async (kind, name, w) => { await p.evaluate((k) => DPApp.A.new(k), kind); await p.fill('[data-f="name"]', name); await p.selectOption('[data-f="sex"]', 'ذكر').catch(() => { }); await p.fill('[data-f="age"]', kind === 'ath' ? '28' : '30'); await p.fill('[data-f="weight"]', String(w || 80)); await p.fill('[data-f="height"]', kind === 'ath' ? '178' : '175'); await p.press('[data-f="name"]', 'Tab'); await p.waitForTimeout(250); };
+  const planTab = async () => { await p.evaluate(() => DPApp.A.tab('plan')); };
   const kcal = (c) => Math.round(c.plan.targets ? c.plan.targets.kcal : c.plan.T.days.reduce((a, d) => a + d.kcal, 0) / 7);
   // ---- 1) القالب
   await mk('ex', 'سارة', 95); await planTab(); assert(await p.isVisible('[data-a="wkPick"]')); await p.evaluate(() => { const c = DPApp.S.clients.find((x) => x.code === DPApp.S.cur); if (c && c.kind !== 'athlete') { c.goal = c.goal || DATA.settings.goals[2][0]; c.activity = c.activity || DATA.settings.activity[2][0]; } if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); }).then(() => p.click('[data-a="gen"]')); await p.waitForSelector('.pbar .tbmore'); await p.click('.pbar .tbmore summary');
@@ -26,7 +26,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   await mk('ex', 'هند', 58); await planTab(); await p.click('[data-a="wkPick"]'); await p.click('.wkpick [data-a="wkApply"][data-v="t:' + tpl.id + '"][data-m="fit"]'); await p.waitForSelector('.toast:has-text("على بيانات العميل")');
   const hind = await C(); assert(kcal(hind) < tpl.kcal - 100, kcal(hind) + ' vs ' + tpl.kcal); assert.strictEqual(hind.meals, sara.meals); assert.strictEqual(hind.kcalManual, '');
   await p.click('[data-a="wkPick"]'); await p.click('.wkpick [data-a="wkApply"][data-v="c:' + sara.code + '"][data-m="asis"]'); await p.waitForSelector('.toast:has-text("نُسخت")');
-  await p.click('main .tabs [data-v="ver"]'); assert((await p.textContent('main')).includes('قبل تطبيق خطة سارة'));
+  await p.waitForTimeout(1500); await p.evaluate(() => DPApp.A.tab('ver')); await p.waitForTimeout(400); const vt = await p.textContent('main'); assert(vt.includes('قبل تطبيق خطة سارة'), vt.replace(/\s+/g, ' ').slice(0, 300));
   ok('التطبيق: «كما هو» ينسخ نفس السعرات والأصناف ويثبّت السعرات للعميل وينبّه لما يتجنبه، و«بسعرات العميل» يولّد على بياناته (58 كجم ← سعرات أقل) بنفس عدد الوجبات، والنسخ من عميل آخر، والخطة السابقة تُحفظ إصداراً');
   // ---- 3) نظام الجرامات
   answer = 'جرامات تضخيم'; await mk('ath', 'كابتن', 85); await planTab(); await p.evaluate(() => { const c = DPApp.S.clients.find((x) => x.code === DPApp.S.cur); if (c && c.kind !== 'athlete') { c.goal = c.goal || DATA.settings.goals[2][0]; c.activity = c.activity || DATA.settings.activity[2][0]; } if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); }).then(() => p.click('[data-a="gen"]')); await p.waitForSelector('.pbar .tbmore'); await p.click('.pbar .tbmore summary'); await p.click('[data-a="wkSaveTpl"]'); await p.waitForSelector('.toast:has-text("حُفظ القالب")');
@@ -35,9 +35,9 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   assert.strictEqual(lab.plan.kind, 'athlete'); assert.strictEqual(lab.phase, cap.phase); assert(kcal(lab) < kcal(cap), 'وزن أقل ← سعرات أقل');
   ok('نظام الجرامات: قوالب منفصلة لكل نظام، ونسخ المرحلة وجدول التدريب والوجبات ثم توليد على وزن اللاعب');
   // ---- 4) المواعيد
-  await p.click('aside .cl:has-text("منى"), .rail [data-a="clToggle"]').catch(() => { }); await p.evaluate(() => DPApp.A.pick(DPApp.S.clients.find((c) => c.name === 'منى').code)); await p.waitForSelector('main .tabs');
+  await p.evaluate(() => DPApp.A.clients()).catch(() => { }); await p.evaluate(() => DPApp.A.pick(DPApp.S.clients.find((c) => c.name === 'منى').code)); await p.waitForSelector('main .tabs');
   await p.evaluate(() => { const c = DPApp.S.clients.find((x) => x.name === 'منى'); c.phone = '0554079404'; });
-  await p.click('main .tabs [data-v="appt"]'); await p.waitForSelector('.wktab'); await p.click('[data-a="wkIn"][data-v="14"]'); await p.fill('#wk_t', '10:30'); await p.fill('#wk_note', 'إحضار التحاليل'); await p.click('[data-a="wkAdd"]'); await p.waitForSelector('.toast:has-text("أُضيف الموعد")');
+  await p.evaluate(() => DPApp.A.tab('appt')); await p.waitForSelector('.wktab'); await p.click('[data-a="wkIn"][data-v="14"]'); await p.fill('#wk_t', '10:30'); await p.fill('#wk_note', 'إحضار التحاليل'); await p.click('[data-a="wkAdd"]'); await p.waitForSelector('.toast:has-text("أُضيف الموعد")');
   const soon = new Date(Date.now() + 20 * 60000), pad = (x) => String(x).padStart(2, '0'), dS = soon.getFullYear() + '-' + pad(soon.getMonth() + 1) + '-' + pad(soon.getDate()), tS = pad(soon.getHours()) + ':' + pad(soon.getMinutes());
   await p.fill('#wk_d', dS); await p.fill('#wk_t', tS); await p.selectOption('#wk_type', 'قياس وتحاليل'); await p.click('[data-a="wkAdd"]'); await p.waitForSelector('.wktab .wkappt >> nth=1');
   mona = await C(); assert.strictEqual(mona.appts.length, 2); assert.strictEqual(mona.appts[0].note, 'إحضار التحاليل');

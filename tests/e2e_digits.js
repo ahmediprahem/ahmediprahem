@@ -6,7 +6,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   const b = await chromium.launch(), p = await (await b.newContext({ viewport: { width: 1400, height: 950 } })).newPage(); p.on('pageerror', e => errs.push(String(e))); p.on('dialog', d => d.accept());
   await p.goto(fileUrl(path.resolve(__dirname, '../admin.html'))); await login(p);
   const cl = () => p.evaluate(() => { const S = HApp.state; return JSON.parse(JSON.stringify(S.clients.find(c => c.code === S.cur))); });
-  await p.click('.rail [data-a="new"][data-v="ex"]'); await p.waitForSelector('[data-f="weight"]'); await p.fill('[data-f="name"]', 'عميل'); await p.selectOption('[data-f="sex"]', 'ذكر').catch(() => { });
+  await p.evaluate(() => DPApp.A.new('ex')); await p.waitForSelector('[data-f="weight"]'); await p.fill('[data-f="name"]', 'عميل'); await p.selectOption('[data-f="sex"]', 'ذكر').catch(() => { });
   const kinds = await p.evaluate(() => [...document.querySelectorAll('main input')].filter(i => i.dataset.num).map(i => [i.dataset.f, i.type, i.getAttribute('inputmode')]));
   assert.strictEqual(await p.locator('main input[type="number"]').count(), 0); assert(kinds.some(k => k[0] === 'weight' && k[1] === 'text' && k[2] === 'decimal'), JSON.stringify(kinds)); assert(kinds.some(k => k[0] === 'age' && k[2] === 'numeric'));
   ok('حقول الأرقام صارت حقول نص بلوحة أرقام (decimal للكسور، numeric للأعداد الصحيحة)');

@@ -10,7 +10,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   ok('«الإعدادات ← 💊 المكملات والأعشاب»: 10 مكملات و8 أعشاب «مسودة» لكل منها متى يُنظر فيه والجرعة المرجعية والتنبيهات والمرجع');
   await d.click('[data-a="suppOk"][data-v="vitd"]'); await d.fill('#sp_n', 'خل التفاح'); await d.selectOption('#sp_k', 'h'); await d.fill('#sp_w', 'يُخفف بالماء'); await d.click('[data-a="suppAdd"]');
   assert.strictEqual(await d.locator('.supt .dxb.draft').count(), 17);
-  await d.evaluate(() => DPApp.A.pick(DPApp.S.clients[0].code)); await d.waitForSelector('main .tabs [data-v="ci"]'); await d.click('main .tabs [data-v="ci"]'); await d.waitForSelector('#cs_s');
+  await d.evaluate(() => DPApp.A.pick(DPApp.S.clients[0].code)); await d.waitForSelector('main .tabs [data-v="ci"]'); await d.evaluate(() => DPApp.A.tab('ci')); await d.waitForSelector('#cs_s');
   const opts = await d.$$eval('#cs_s option', (o) => o.map((x) => x.textContent)); assert.deepStrictEqual(opts, ['💊 فيتامين د', '🌿 خل التفاح'], JSON.stringify(opts));
   ok('الترشيح يقتصر على المعتمد (فيتامين د) وما أضافه الأخصائي (خل التفاح)؛ المسودات لا تظهر');
   await d.fill('#cs_d', '1000 وحدة يومياً لمدة 3 أشهر'); await d.fill('#cs_n', 'بعد تحليل 25-OH'); await d.click('[data-a="suppPick"]'); await d.click('[data-a="suppSend"]'); await d.waitForSelector('.toast:has-text("وصلت المكملات")');

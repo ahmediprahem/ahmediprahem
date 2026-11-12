@@ -9,7 +9,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   await m.locator('.cups button').nth(2).click();
   await m.locator('.it .sw').nth(2).click(); const swTo = (await m.textContent('.sheet button.opt >> nth=0')).trim(); await m.click('.sheet button.opt >> nth=0');
   await m.locator('[data-act="note"]').first().click(); await m.fill('#noteIn', 'أضفت ملعقة عسل'); await m.click('[data-act="savenote"]');
-  await m.waitForTimeout(2800); await cPoll(); await d.click('.rail [data-a="hxv"]'); await hxCheck(); await d.waitForSelector('.hxlinked .cl'); await d.click('.hxlinked .cl'); await d.waitForSelector('.hxtab .hxday');
+  await m.waitForTimeout(2800); await cPoll(); await d.evaluate(() => DPApp.A.hxv()); await hxCheck(); await d.waitForSelector('.hxlinked .cl'); await d.click('.hxlinked .cl'); await d.waitForSelector('.hxtab .hxday');
   assert(await d.locator('.hxdd').count() >= 1); await d.click('.hxdd >> nth=0 >> summary'); await d.waitForSelector('.hxdd[open] .hxdm');
   const tx = await d.textContent('.hxdd[open]');
   assert(/عمل [23] ولم يعمل \d+/.test(await d.textContent('.hxdd >> nth=0 >> summary')), await d.textContent('.hxdd >> nth=0 >> summary'));

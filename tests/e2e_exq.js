@@ -7,7 +7,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   const b = await chromium.launch(), p = await (await b.newContext({ viewport: { width: 1400, height: 1000 } })).newPage(); p.on('pageerror', (e) => errs.push(String(e)));
   await p.goto(fileUrl(path.resolve(__dirname, '../admin.html'))); await login(p);
   const C = () => p.evaluate(() => JSON.parse(JSON.stringify(DPApp.S.clients.find((x) => x.code === DPApp.S.cur))));
-  await p.click('.rail [data-a="new"][data-v="ex"]'); await p.fill('[data-f="name"]', 'هالة'); await p.selectOption('[data-f="sex"]', 'ذكر').catch(() => { }); await p.fill('[data-f="age"]', '30'); await p.selectOption('[data-f="sex"]', 'أنثى'); await p.fill('[data-f="weight"]', '112'); await p.fill('[data-f="height"]', '160'); await p.press('[data-f="height"]', 'Tab'); await p.waitForTimeout(200);
+  await p.evaluate(() => DPApp.A.new('ex')); await p.fill('[data-f="name"]', 'هالة'); await p.selectOption('[data-f="sex"]', 'ذكر').catch(() => { }); await p.fill('[data-f="age"]', '30'); await p.selectOption('[data-f="sex"]', 'أنثى'); await p.fill('[data-f="weight"]', '112'); await p.fill('[data-f="height"]', '160'); await p.press('[data-f="height"]', 'Tab'); await p.waitForTimeout(200);
   await p.waitForSelector('#tg .obn'); const note = await p.textContent('#tg .obn'); assert(/الوزن المعدّل/.test(note) && /BMI ≥ 30/.test(note), note);
   let c = await C(); const T = await p.evaluate((x) => DPEngine.targets(x, DATA), c); assert(T.obese && Math.abs(T.pro / T.adjbw - 1.3) < 0.21 && T.pro < 112 * 1.2, JSON.stringify([T.pro, T.adjbw]));
   ok('السمنة: البروتين على الوزن المعدّل (~1.3 جم/كجم) وملاحظة تشرح ذلك ونسب الماكروز');

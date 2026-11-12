@@ -7,7 +7,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   const b = await chromium.launch(), p = await (await b.newContext({ viewport: { width: 1400, height: 1000 }, acceptDownloads: true })).newPage(); p.on('pageerror', (e) => errs.push(String(e))); p.on('dialog', (d) => d.accept(d.type() === 'prompt' ? (globalThis.PR || '') : undefined));
   await p.goto(fileUrl(path.resolve(__dirname, '../admin.html'))); await login(p);
   const C = () => p.evaluate(() => JSON.parse(JSON.stringify(DPApp.S.clients.find((x) => x.code === DPApp.S.cur))));
-  await p.click('.rail [data-a="new"][data-v="ex"]'); await p.fill('[data-f="name"]', 'منى'); await p.selectOption('[data-f="sex"]', 'ذكر').catch(() => { }); await p.selectOption('[data-f="sex"]', 'أنثى'); await p.fill('[data-f="weight"]', '88'); await p.fill('[data-f="height"]', '162'); await p.fill('[data-f="age"]', '34'); await p.press('[data-f="age"]', 'Tab'); await p.waitForTimeout(200);
+  await p.evaluate(() => DPApp.A.new('ex')); await p.fill('[data-f="name"]', 'منى'); await p.selectOption('[data-f="sex"]', 'ذكر').catch(() => { }); await p.selectOption('[data-f="sex"]', 'أنثى'); await p.fill('[data-f="weight"]', '88'); await p.fill('[data-f="height"]', '162'); await p.fill('[data-f="age"]', '34'); await p.press('[data-f="age"]', 'Tab'); await p.waitForTimeout(200);
   // ---- صفحة بيانات العميل المضغوطة
   assert.strictEqual(await p.locator('main .need').count(), 3, 'الجنس والهدف والنشاط بلا قيمة افتراضية'); assert(/لم يُحدَّد الهدف ومستوى النشاط/.test(await p.textContent('#tg')));
   await p.click('main [data-a="genBank"]'); await p.waitForTimeout(200); assert.strictEqual(await p.locator('.rdbank').count(), 0, 'لا بنك قبل الهدف'); assert(/حدّد الهدف ومستوى النشاط أولاً/.test(await p.textContent('.toast')));
@@ -86,7 +86,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   await p.click('[data-a="tab"][data-v="client"]'); await p.selectOption('[data-f="cuisine"]', 'sa'); await p.waitForTimeout(150); await p.click('main [data-a="genBank"]'); await p.waitForSelector('.rdbank');
   const san = await p.locator('.rdopt .rdot small').allTextContents(); assert(san.every((t) => /سعودية/.test(t)), san.join('|'));
   ok('«المطبخ» في بيانات العميل يرجّح خطط البنك تلقائياً: مصري ← الملفات المصرية أولاً، سعودي ← السعودية (ومختلط يجمعهما)');
-  await p.click('.rail [data-a="new"][data-v="ath"]'); await p.fill('[data-f="name"]', 'سامر'); await p.selectOption('[data-f="sex"]', 'ذكر').catch(() => { }); await p.fill('[data-f="weight"]', '85'); await p.fill('[data-f="height"]', '180'); await p.fill('[data-f="age"]', '28'); await p.press('[data-f="age"]', 'Tab'); await p.waitForTimeout(200);
+  await p.evaluate(() => DPApp.A.new('ath')); await p.fill('[data-f="name"]', 'سامر'); await p.selectOption('[data-f="sex"]', 'ذكر').catch(() => { }); await p.fill('[data-f="weight"]', '85'); await p.fill('[data-f="height"]', '180'); await p.fill('[data-f="age"]', '28'); await p.press('[data-f="age"]', 'Tab'); await p.waitForTimeout(200);
   const ha = await p.evaluate(() => document.querySelector('main').scrollHeight); assert(ha < 1300, 'ارتفاع صفحة الجرامات ' + ha);
   await p.click('main [data-a="genBank"]'); await p.waitForSelector('.rdbank'); const sys = await p.locator('.rdopt .rdot small').allTextContents(); assert(sys.length >= 5 && sys.every((s) => /بالجرامات/.test(s)), sys.join('|'));
   ok('عميل الجرامات: صفحته أقصر بالثلث، والبنك يعرض خطط الجرامات فقط (تنشيف/كارب سايكل للرياضيين)');

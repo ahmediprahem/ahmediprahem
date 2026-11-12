@@ -17,8 +17,8 @@ const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html')), PW = 'نسخ-آ
   const dev = async (tag) => { const c = await b.newContext({ viewport: { width: 1400, height: 900 } }), p = await c.newPage(); p.on('pageerror', (e) => errs.push(tag + ': ' + e)); p.on('dialog', (x) => x.accept()); await p.goto(ADMIN); await login(p); return p; };
   const openSet = async (p) => { if (!(await p.isVisible('[data-a="setTab"][data-v="vault"]'))) await p.click('.rail [data-a="settings"]'); };
   const connect = async (p) => { await openSet(p); await p.click('[data-a="setTab"][data-v="hx"]'); await p.fill('#hx_relay', RELAY); await p.fill('#hx_key', 'k'); await p.fill('#hx_name', 'د. أحمد'); await p.click('[data-a="hxReg"]'); await p.waitForSelector('main .ok'); };
-  const newClient = async (p, name) => { await p.click('.rail [data-a="new"][data-v="ex"]'); await p.fill('[data-f="name"]', name); await p.press('[data-f="name"]', 'Tab'); await p.waitForTimeout(400); };
-  const pick = async (p, name) => { if (!(await p.isVisible('aside .clients'))) await p.click('.rail [data-a="clToggle"], .rail [data-a="home"]'); await p.click(`aside .cl:has-text("${name}")`); await p.waitForSelector('[data-f="name"]'); };
+  const newClient = async (p, name) => { await p.evaluate(() => DPApp.A.new('ex')); await p.fill('[data-f="name"]', name); await p.press('[data-f="name"]', 'Tab'); await p.waitForTimeout(400); };
+  const pick = async (p, name) => { if (!(await p.isVisible('#lst'))) await p.click('.rail [data-a="clients"]'); await p.click(`#lst .cl:has-text("${name}")`); await p.waitForSelector('[data-f="name"]'); };
   const vault = async (p) => { await openSet(p); await p.click('[data-a="setTab"][data-v="vault"]'); };
   const enable = async (p, devName) => { await vault(p); await p.fill('#vt_i', 'clinic-hamed'); await p.fill('#vt_d', devName); await p.fill('#vt_p', PW); await p.fill('#vt_p2', PW); await p.click('[data-a="vtOn"]'); await p.waitForSelector('main .ok:has-text("النسخ التلقائي مفعّل")', { timeout: 20000 }); };
   const names = (p) => p.evaluate(() => DPApp.S.clients.map((c) => c.name).sort());
@@ -50,10 +50,10 @@ const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html')), PW = 'نسخ-آ
   await pick(B, 'سارة أحمد'); await B.fill('[data-f="age"]', '41'); await B.press('[data-f="age"]', 'Tab'); await B.waitForTimeout(500); await vault(B); await B.click('[data-a="vtNow"]'); await toastWait(B, /أُخذت نسخة/);
   await vault(A); await A.click('[data-a="vtSyncNow"]'); await toastWait(A, /تعارض حُفظ كإصدار/);
   const sa = await A.evaluate(() => DPApp.S.clients.find((c) => c.name === 'سارة أحمد')); assert.strictEqual(sa.age, 41);
-  await pick(A, 'سارة أحمد'); await A.click('main .tabs [data-v="ver"]'); assert((await A.textContent('main')).includes('قبل المزامنة'));
+  await pick(A, 'سارة أحمد'); await A.evaluate(() => DPApp.A.tab('ver')); assert((await A.textContent('main')).includes('قبل المزامنة'));
   ok('التعارض: عُدّل نفس العميل على الجهازين ← الأحدث يغلب، ونسخة الجهاز الأخرى تُحفظ «إصداراً» فلا يضيع شيء');
   // ---- 5) استقرار: لا رفع متكرر بلا تعديل
-  await A.click('main .tabs [data-v="client"]'); await vault(A); await A.click('[data-a="vtNow"]'); await toastWait(A, /أُخذت نسخة/); const h1 = env.DB._raw.prepare('SELECT head FROM vaults').get().head;
+  await A.evaluate(() => DPApp.A.tab('client')); await vault(A); await A.click('[data-a="vtNow"]'); await toastWait(A, /أُخذت نسخة/); const h1 = env.DB._raw.prepare('SELECT head FROM vaults').get().head;
   await B.click('[data-a="vtSyncNow"]'); await B.waitForTimeout(1500); await vault(B); assert(!(await B.textContent('main .ok')).includes('بانتظار الرفع'), 'B لا يجب أن يعيد الرفع بعد دمج نسخة لا جديد فيها منه');
   await A.click('[data-a="vtSyncNow"]'); await toastWait(A, /لا جديد/); assert.strictEqual(env.DB._raw.prepare('SELECT head FROM vaults').get().head, h1);
   ok('الاستقرار: الجهاز الذي دمج نسخة لا تنقصها تعديلاته لا يعيد الرفع، فلا تتبادل الأجهزة النسخ بلا نهاية');

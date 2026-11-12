@@ -3,7 +3,7 @@ const assert = require('assert'), linked = require('./hx_link_helper');
 let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
 (async () => {
   const { d, m, env, hxCheck, cPoll, close } = await linked('grp', errs);
-  await d.click('.rail [data-a="hxv"]'); await hxCheck(); await d.evaluate(() => DPApp.A.zchat()); await d.waitForSelector('.gpnewb');
+  await d.evaluate(() => DPApp.A.hxv()); await hxCheck(); await d.evaluate(() => DPApp.A.zchat()); await d.waitForSelector('.gpnewb');
   await d.click('.gpnewb'); await d.fill('#gnName', 'تحدي رمضان'); await d.check('[data-gnm]'); await d.click('[data-a="gpCreate"]');
   await d.waitForFunction(() => window.GPX.list().length === 1, null, { timeout: 15000 }); assert(await d.locator('.chrow', { hasText: 'تحدي رمضان' }).count() === 1); ok('الأخصائي ينشئ مجموعة تحدٍّ ويضيف عميلاً، وتظهر في القائمة الجانبية');
   await d.waitForSelector('text=الإعدادات'); assert(await d.locator('[data-gt]:checked').count() >= 3); await d.click('[data-a="gpSaveChal"]'); await d.waitForSelector('.gpbody .ucard'); ok('إعداد التحدي (قالب الوجبات) وحفظه وإرساله');

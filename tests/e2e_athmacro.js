@@ -6,7 +6,7 @@ const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html')); let n = 0; cons
   const b = await chromium.launch(), p = await (await b.newContext({ viewport: { width: 1400, height: 1000 } })).newPage(); p.on('pageerror', (e) => errs.push(String(e))); p.on('dialog', (d) => d.accept());
   await p.goto(ADMIN); await login(p);
   const C = () => p.evaluate(() => { const c = DPApp.S.clients.filter((x) => x.code === DPApp.S.cur)[0]; return JSON.parse(JSON.stringify(c)); });
-  await p.click('button:has-text("عميل جديد — الجرامات")'); await p.waitForSelector('#atg'); await p.fill('[data-f="name"]', 'كابتن يدوي'); await p.selectOption('[data-f="sex"]', 'ذكر').catch(() => { }); await p.fill('[data-f="age"]', '28'); await p.fill('[data-f="height"]', '178'); await p.press('[data-f="height"]', 'Tab'); await p.fill('[data-f="weight"]', '80'); await p.press('[data-f="weight"]', 'Tab');
+  await p.evaluate(() => DPApp.A.new('ath')); await p.waitForSelector('#atg'); await p.fill('[data-f="name"]', 'كابتن يدوي'); await p.selectOption('[data-f="sex"]', 'ذكر').catch(() => { }); await p.fill('[data-f="age"]', '28'); await p.fill('[data-f="height"]', '178'); await p.press('[data-f="height"]', 'Tab'); await p.fill('[data-f="weight"]', '80'); await p.press('[data-f="weight"]', 'Tab');
   await p.selectOption('[data-f="phase"]', 'تنشيف'); assert.strictEqual(await p.locator('[data-f="pVal"]').count(), 0); assert((await p.textContent('#atg')).includes('حسب المرحلة'));
   ok('الافتراضي «حسب المرحلة»: لا حقول يدوية، ويظهر وصف الطريقة في صندوق الأهداف');
   await p.selectOption('[data-f="macroMode"]', 'manual'); await p.waitForSelector('[data-f="pVal"]');
@@ -29,7 +29,7 @@ const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html')); let n = 0; cons
   await p.evaluate(() => { const c = DPApp.S.clients.find((x) => x.code === DPApp.S.cur); if (c && c.kind !== 'athlete') { c.goal = c.goal || DATA.settings.goals[2][0]; c.activity = c.activity || DATA.settings.activity[2][0]; } if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); }).then(() => p.click('button:has-text("ولّد خطة جديدة")')); await p.waitForSelector('.pnav button'); const sum = await p.textContent('main');
   assert(sum.includes('الماكروز') && sum.includes('2.5 جم/كجم كتلة خالية') && sum.includes('سعرات -12%'), sum.slice(0, 600));
   ok('ملخص الخطة يذكر الطريقة اليدوية والبروتين لكل كجم وزن ولكل كجم كتلة خالية');
-  await p.click('main .tabs [data-v="client"]'); await p.selectOption('[data-f="macroMode"]', 'phase'); assert.strictEqual(await p.locator('[data-f="pVal"]').count(), 0); assert((await p.textContent('#atg')).includes('حسب المرحلة'));
+  await p.evaluate(() => DPApp.A.tab('client')); await p.selectOption('[data-f="macroMode"]', 'phase'); assert.strictEqual(await p.locator('[data-f="pVal"]').count(), 0); assert((await p.textContent('#atg')).includes('حسب المرحلة'));
   ok('الرجوع إلى «حسب المرحلة» يعيد الحساب التلقائي (وتبقى القيم اليدوية محفوظة إن عدت إليها)');
   assert.deepStrictEqual(errs, [], errs.join(' | ')); ok('لا أخطاء في وحدة التحكم'); console.log('\nنجح', n, 'اختبارات واجهة الماكروز اليدوية'); await b.close();
 })().catch((e) => { console.log('✘', String(e && e.stack || e).slice(0, 1200)); console.log('أخطاء:', JSON.stringify(errs).slice(0, 400)); process.exit(1); });

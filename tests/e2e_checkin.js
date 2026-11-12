@@ -7,7 +7,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
 (async () => {
   const b = await chromium.launch(), p = await (await b.newContext({ viewport: { width: 1400, height: 1000 } })).newPage(); p.on('pageerror', (e) => errs.push(String(e)));
   await p.goto(fileUrl(path.resolve(__dirname, '../admin.html'))); await login(p);
-  await p.click('.rail [data-a="new"][data-v="ex"]'); await p.fill('[data-f="name"]', 'سارة'); await p.selectOption('[data-f="sex"]', 'ذكر').catch(() => { }); await p.fill('[data-f="weight"]', '90'); await p.fill('[data-f="height"]', '165'); await p.fill('[data-f="age"]', '40');
+  await p.evaluate(() => DPApp.A.new('ex')); await p.fill('[data-f="name"]', 'سارة'); await p.selectOption('[data-f="sex"]', 'ذكر').catch(() => { }); await p.fill('[data-f="weight"]', '90'); await p.fill('[data-f="height"]', '165'); await p.fill('[data-f="age"]', '40');
   await p.selectOption('[data-f="goal"]', { index: 2 }); await p.selectOption('[data-f="activity"]', { index: 3 }); await p.waitForTimeout(150);
   await p.evaluate(() => {
     const c = DPApp.S.clients.find((x) => x.code === DPApp.S.cur), day = (d) => { const x = new Date(); x.setDate(x.getDate() + d); return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0'); }, now = Date.now();

@@ -6,7 +6,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   const b = await chromium.launch(), p = await (await b.newContext({ viewport: { width: 1400, height: 1000 }, acceptDownloads: true })).newPage(); p.on('pageerror', (e) => errs.push(String(e))); p.on('dialog', (d) => d.accept());
   await p.goto(fileUrl(path.resolve(__dirname, '../admin.html'))); await login(p);
   const C = () => p.evaluate(() => JSON.parse(JSON.stringify(DPApp.S.clients.find((x) => x.code === DPApp.S.cur))));
-  await p.click('.rail [data-a="new"][data-v="ex"]'); await p.fill('[data-f="name"]', 'هدى'); await p.selectOption('[data-f="sex"]', 'أنثى'); await p.fill('[data-f="weight"]', '88'); await p.fill('[data-f="height"]', '162'); await p.fill('[data-f="age"]', '34');
+  await p.evaluate(() => DPApp.A.new('ex')); await p.fill('[data-f="name"]', 'هدى'); await p.selectOption('[data-f="sex"]', 'أنثى'); await p.fill('[data-f="weight"]', '88'); await p.fill('[data-f="height"]', '162'); await p.fill('[data-f="age"]', '34');
   await p.selectOption('[data-f="goal"]', { index: 2 }); await p.selectOption('[data-f="activity"]', { index: 3 }); await p.waitForTimeout(150);
   await p.click('.rail [data-a="ready"]'); await p.click('[data-a="rdTab"][data-v="browse"]'); await p.selectOption('[data-rdf="fam"]', 'lowgi'); await p.selectOption('[data-rdf="rg"]', 'eg'); await p.waitForTimeout(150);
   assert(/42 نظاماً مطابقاً/.test(await p.textContent('.rdl')), await p.textContent('.rdl').then((t) => t.slice(0, 120)));

@@ -7,8 +7,8 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   await p.goto(fileUrl(path.resolve(__dirname, '../admin.html'))); await login(p);
   const C = () => p.evaluate(() => JSON.parse(JSON.stringify(DPApp.S.clients.find((x) => x.code === DPApp.S.cur))));
   const visit = async (d, vals, note) => { await p.fill('#mv_d', d); for (const k of ['w', 'waist', 'hip', 'bf', 'mm', 'bps', 'bpd']) await p.fill('#mv_' + k, vals[k] == null ? '' : String(vals[k])); await p.fill('#mv_note', note || ''); await p.click('[data-a="medVisit"]'); await p.waitForTimeout(200); };
-  await p.click('.rail [data-a="new"][data-v="ex"]'); await p.fill('[data-f="name"]', 'سارة'); await p.selectOption('[data-f="sex"]', 'ذكر').catch(() => { }); await p.fill('[data-f="age"]', '30'); await p.fill('[data-f="height"]', '175'); await p.press('[data-f="height"]', 'Tab'); await p.selectOption('[data-f="sex"]', 'أنثى'); await p.fill('[data-f="weight"]', '80'); await p.press('[data-f="weight"]', 'Tab');
-  await p.click('main .tabs [data-v="med"]'); await p.waitForSelector('.medtab'); assert.strictEqual(await p.inputValue('#mv_w'), '80');
+  await p.evaluate(() => DPApp.A.new('ex')); await p.fill('[data-f="name"]', 'سارة'); await p.selectOption('[data-f="sex"]', 'ذكر').catch(() => { }); await p.fill('[data-f="age"]', '30'); await p.fill('[data-f="height"]', '175'); await p.press('[data-f="height"]', 'Tab'); await p.selectOption('[data-f="sex"]', 'أنثى'); await p.fill('[data-f="weight"]', '80'); await p.press('[data-f="weight"]', 'Tab');
+  await p.evaluate(() => DPApp.A.tab('med')); await p.waitForSelector('.medtab'); assert.strictEqual(await p.inputValue('#mv_w'), '80');
   await p.fill('#mv_w', ''); await p.click('[data-a="medVisit"]'); await p.waitForSelector('.toast:has-text("قياساً واحداً")');
   // ---- 1) الزيارات
   await visit('2026-08-01', { w: 80, waist: 95, hip: 110, bf: 38, bps: 135, bpd: 85 }, 'بداية البرنامج');
@@ -36,7 +36,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   ok('تقرير التقدّم للعميل: القياسات من البداية إلى الآن بالتغيّر، المنحنيات، التحاليل وتقييمها، وكلمة الأخصائي — صفحة جاهزة للطباعة');
   // ---- 4) الحذف ونظام الجرامات
   await p.locator('[data-a="medVisitDel"]').last().click(); c = await C(); assert.strictEqual(c.med.visits.length, 1);
-  await p.click('.rail [data-a="new"][data-v="ath"]'); await p.fill('[data-f="name"]', 'كابتن'); await p.selectOption('[data-f="sex"]', 'ذكر').catch(() => { }); await p.press('[data-f="name"]', 'Tab'); await p.click('main .tabs [data-v="med"]'); await p.fill('#mv_w', '90'); await p.fill('#mv_bf', '18'); await p.click('[data-a="medVisit"]');
+  await p.evaluate(() => DPApp.A.new('ath')); await p.fill('[data-f="name"]', 'كابتن'); await p.selectOption('[data-f="sex"]', 'ذكر').catch(() => { }); await p.press('[data-f="name"]', 'Tab'); await p.evaluate(() => DPApp.A.tab('med')); await p.fill('#mv_w', '90'); await p.fill('#mv_bf', '18'); await p.click('[data-a="medVisit"]');
   c = await C(); assert.deepStrictEqual([c.kind, c.weight, c.bf], ['athlete', 90, 18]);
   ok('حذف زيارة، والملف الطبي في نظام الجرامات أيضاً (ونسبة الدهون من الزيارة تُحدّث بيانات العميل لمعادلة كانينغهام)');
   assert.deepStrictEqual(errs, [], errs.join(' | ')); ok('لا أخطاء في وحدة التحكم'); console.log('\nنجح', n, 'اختبارات الملف الطبي'); await b.close();
