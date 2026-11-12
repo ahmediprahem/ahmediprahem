@@ -19,7 +19,7 @@ function navBadge() {                                            // شارة «�
   set('.rail [data-a="zchat"] em, #tabbar [data-v="zchat"] em', n.chat + n.reqAll); set('.secnav [data-v="zchat"] em', n.chat); set('.secnav [data-v="hxv"] em', n.reqAll);
 }
 function glassSide() {
-  var n = navIs(); document.body.classList.remove('clx', 'menu'); if (n.lib) S.libTab = S.view === 'lib' ? 'ready' : S.view;
+  var n = navIs(); document.body.classList.add('clx'); document.body.classList.remove('menu'); if (n.lib) S.libTab = S.view === 'lib' ? 'ready' : S.view;
   $('aside').innerHTML = '<nav class="rail" aria-label="التنقل">'
     + railBtn('home', 'sunrise', 'اليوم', n.today)
     + railBtn('clients', 'users', 'العملاء', n.clients).replace('</span></button>', '</span><i class="rcnt">' + S.clients.length + '</i></button>')
@@ -159,4 +159,4 @@ document.addEventListener('change', function (e) {
   var i = e.target, n = i.getAttribute && i.getAttribute('data-fpk') && i.nextSibling && i.nextSibling.querySelector && i.nextSibling.querySelector('.fpkn');
   if (n) n.textContent = i.files && i.files.length ? (i.files.length > 1 ? i.files.length + ' ملفات' : i.files[0].name) : 'لم يُختر ملف';
 }, true);
-(function (f) { A.settings = function () { if (S.view !== 'settings' && S.setTab === 'tools') S.setTab = 'portions'; return f.apply(this, arguments); }; })(A.settings);     // «الأدوات» وجهة عابرة: فتح الإعدادات من القائمة يبدأ بأول تبويب
+A.settings = function () { if (S.setTab === 'tools' && S.view !== 'settings') S.setTab = 'portions'; S.view = 'settings'; render(); window.scrollTo(0, 0); };     // 0.94: دائماً يفتح الإعدادات (لا تبديل)، و«الأدوات» وجهة عابرة

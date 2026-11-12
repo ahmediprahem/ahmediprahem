@@ -35,10 +35,10 @@ function cfHead(c) {
     + '<div class="cfid"><b class="cfname">' + esc(c.name || 'عميل بلا اسم') + '</b><small>' + esc(c.code) + ' • ' + (c.kind === 'athlete' ? 'نظام الجرامات' : 'نظام الحصص') + '</small></div>'
     + '<div class="cfbadges"><button class="cfb cfsub ' + st[2] + '" data-a="tab" data-v="sub" title="الاشتراك">' + IC('card') + '<span>' + esc(st[1]) + '</span></button>'
     + '<button class="cfb cfzen ' + (x ? 'ok' : 'n') + '" data-a="tab" data-v="link" title="إدارة ربط «زنها»">' + IC('phone') + '<span>زنها: ' + zen + '</span>' + (x && x.health ? '<em class="hxnb">!</em>' : '') + '</button></div>'
-    + '<div class="cfact">' + (x && hxHasPlan(c) ? '<button class="cfsend" data-a="hxSendPlan">' + IC('send') + '<span>أرسل الخطة إلى زنها</span></button>' : '')
+    + '<div class="cfact">' + (x ? '<button class="sec cfchk" data-a="hxCheck" title="تحقق من «زنها» الآن" aria-label="تحقق من زنها الآن">' + IC('repeat') + '</button>' : '') + (x && hxHasPlan(c) ? '<button class="cfsend" data-a="hxSendPlan">' + IC('send') + '<span>أرسل الخطة إلى زنها</span></button>' : '')
     + (x ? '<button class="sec cfchat" data-a="cfChat" title="افتح محادثة العميل في «شات زنها»">' + IC('message') + '<span>افتح المحادثة</span>' + (un ? '<em class="hxnb">' + un + '</em>' : '') + '</button>' : '')
     + '<details class="tbm cmore"><summary class="sec sm" aria-label="المزيد من إجراءات العميل" title="المزيد">' + IC('more') + '</summary><div class="tbp">'
-    + (x ? '<button data-a="hxCheck">' + IC('repeat') + ' تحقق من «زنها» الآن</button>' : '') + '<button data-a="tab" data-v="link">' + IC('phone') + ' إدارة ربط «زنها»</button><button class="r" data-a="del">' + IC('trash') + ' حذف العميل</button></div></details></div></div>';
+    + '<button data-a="tab" data-v="link">' + IC('phone') + ' إدارة ربط «زنها»</button><button class="r" data-a="del">' + IC('trash') + ' حذف العميل</button></div></details></div></div>';
 }
 function cfTabs(c) {
   var g0 = cfGroup(S.tab);

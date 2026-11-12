@@ -81,3 +81,6 @@ html[data-theme="glass"] .tabs.cftabs{margin-bottom:12px}
   .hxlast{justify-content:space-between}
 }
 }
+html[data-theme] .cfchk{display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;padding:0}.cfchk .ico{width:18px;height:18px}
+html[data-theme] .cfbody :is(button,input,select,textarea,a,summary,label){scroll-margin-top:150px}
+@media (max-width:700px){html[data-theme] .tabs.cftabs>button{flex:1 1 0;min-width:0;flex-direction:column;gap:2px;padding:4px 2px;min-height:52px;font-size:12px;line-height:1.2}html[data-theme] .tabs.cftabs>button span{white-space:normal;text-align:center}}

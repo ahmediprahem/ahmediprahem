@@ -1,2 +1,2 @@
-// في الثيم الزجاجي يُطوى عمود العملاء خارج الرئيسية: يفتحه كما يفعل المستخدم (زر «العملاء» في شريط التنقل) قبل اختيار عميل من القائمة
-module.exports.showClients = (p) => p.evaluate(() => { if (document.body.classList.contains('clx')) { const b = document.querySelector('aside [data-a="clToggle"]'); if (b) b.click(); } });
+// 0.94: «العملاء» صفحة مستقلة (قائمة + بحث)، فالمساعد يفتحها بدل طيّ/فرد عمود العملاء القديم
+module.exports.showClients = (p) => p.evaluate(() => { if (window.DPApp && DPApp.A.clients) DPApp.A.clients(); });

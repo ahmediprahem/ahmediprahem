@@ -1090,6 +1090,9 @@ html[data-theme="glass"] .tabs.cftabs{margin-bottom:12px}
   .hxlast{justify-content:space-between}
 }
 }
+html[data-theme] .cfchk{display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;padding:0}.cfchk .ico{width:18px;height:18px}
+html[data-theme] .cfbody :is(button,input,select,textarea,a,summary,label){scroll-margin-top:150px}
+@media (max-width:700px){html[data-theme] .tabs.cftabs>button{flex:1 1 0;min-width:0;flex-direction:column;gap:2px;padding:4px 2px;min-height:52px;font-size:12px;line-height:1.2}html[data-theme] .tabs.cftabs>button span{white-space:normal;text-align:center}}
 </style></head>
 <body class="gating"><header id="hd"></header><div id="gate" style="display:flex"><div class="gcard" style="text-align:center"><div style="font-weight:700;color:#253464">حصة — جارٍ التحميل…</div></div></div><div id="app" style="display:none"><aside></aside><main></main></div>
 <noscript><div style="position:fixed;inset:0;background:#092061;color:#fff;padding:24px;text-align:center;font:16px Tahoma,Arial">هذا الملف يحتاج تفعيل JavaScript. افتحه مباشرة في Chrome أو Edge أو Safari (وليس من معاينة واتساب أو البريد).</div></noscript>
@@ -4896,7 +4899,7 @@ function navBadge() {                                            // شارة «�
   set('.rail [data-a="zchat"] em, #tabbar [data-v="zchat"] em', n.chat + n.reqAll); set('.secnav [data-v="zchat"] em', n.chat); set('.secnav [data-v="hxv"] em', n.reqAll);
 }
 function glassSide() {
-  var n = navIs(); document.body.classList.remove('clx', 'menu'); if (n.lib) S.libTab = S.view === 'lib' ? 'ready' : S.view;
+  var n = navIs(); document.body.classList.add('clx'); document.body.classList.remove('menu'); if (n.lib) S.libTab = S.view === 'lib' ? 'ready' : S.view;
   $('aside').innerHTML = '<nav class="rail" aria-label="التنقل">'
     + railBtn('home', 'sunrise', 'اليوم', n.today)
     + railBtn('clients', 'users', 'العملاء', n.clients).replace('</span></button>', '</span><i class="rcnt">' + S.clients.length + '</i></button>')
@@ -5036,7 +5039,7 @@ document.addEventListener('change', function (e) {
   var i = e.target, n = i.getAttribute && i.getAttribute('data-fpk') && i.nextSibling && i.nextSibling.querySelector && i.nextSibling.querySelector('.fpkn');
   if (n) n.textContent = i.files && i.files.length ? (i.files.length > 1 ? i.files.length + ' ملفات' : i.files[0].name) : 'لم يُختر ملف';
 }, true);
-(function (f) { A.settings = function () { if (S.view !== 'settings' && S.setTab === 'tools') S.setTab = 'portions'; return f.apply(this, arguments); }; })(A.settings);     // «الأدوات» وجهة عابرة: فتح الإعدادات من القائمة يبدأ بأول تبويب
+A.settings = function () { if (S.setTab === 'tools' && S.view !== 'settings') S.setTab = 'portions'; S.view = 'settings'; render(); window.scrollTo(0, 0); };     // 0.94: دائماً يفتح الإعدادات (لا تبديل)، و«الأدوات» وجهة عابرة
 
 // ================= «زنها»: ربط «زنها Pro» بتطبيق العميل عبر المحطة الوسيطة (يُدمج داخل app.js عند /*HXUI*/)
 // الأخصائي يدعو العميل برابط (واتساب) ← العميل يسجّل بياناته في «زنها» ← تصل هنا «طلب عميل» فيعتمده الأخصائي كعميل جديد
@@ -7792,10 +7795,10 @@ function cfHead(c) {
     + '<div class="cfid"><b class="cfname">' + esc(c.name || 'عميل بلا اسم') + '</b><small>' + esc(c.code) + ' • ' + (c.kind === 'athlete' ? 'نظام الجرامات' : 'نظام الحصص') + '</small></div>'
     + '<div class="cfbadges"><button class="cfb cfsub ' + st[2] + '" data-a="tab" data-v="sub" title="الاشتراك">' + IC('card') + '<span>' + esc(st[1]) + '</span></button>'
     + '<button class="cfb cfzen ' + (x ? 'ok' : 'n') + '" data-a="tab" data-v="link" title="إدارة ربط «زنها»">' + IC('phone') + '<span>زنها: ' + zen + '</span>' + (x && x.health ? '<em class="hxnb">!</em>' : '') + '</button></div>'
-    + '<div class="cfact">' + (x && hxHasPlan(c) ? '<button class="cfsend" data-a="hxSendPlan">' + IC('send') + '<span>أرسل الخطة إلى زنها</span></button>' : '')
+    + '<div class="cfact">' + (x ? '<button class="sec cfchk" data-a="hxCheck" title="تحقق من «زنها» الآن" aria-label="تحقق من زنها الآن">' + IC('repeat') + '</button>' : '') + (x && hxHasPlan(c) ? '<button class="cfsend" data-a="hxSendPlan">' + IC('send') + '<span>أرسل الخطة إلى زنها</span></button>' : '')
     + (x ? '<button class="sec cfchat" data-a="cfChat" title="افتح محادثة العميل في «شات زنها»">' + IC('message') + '<span>افتح المحادثة</span>' + (un ? '<em class="hxnb">' + un + '</em>' : '') + '</button>' : '')
     + '<details class="tbm cmore"><summary class="sec sm" aria-label="المزيد من إجراءات العميل" title="المزيد">' + IC('more') + '</summary><div class="tbp">'
-    + (x ? '<button data-a="hxCheck">' + IC('repeat') + ' تحقق من «زنها» الآن</button>' : '') + '<button data-a="tab" data-v="link">' + IC('phone') + ' إدارة ربط «زنها»</button><button class="r" data-a="del">' + IC('trash') + ' حذف العميل</button></div></details></div></div>';
+    + '<button data-a="tab" data-v="link">' + IC('phone') + ' إدارة ربط «زنها»</button><button class="r" data-a="del">' + IC('trash') + ' حذف العميل</button></div></details></div></div>';
 }
 function cfTabs(c) {
   var g0 = cfGroup(S.tab);

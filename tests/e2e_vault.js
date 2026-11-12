@@ -28,7 +28,7 @@ const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html')), PW = 'نسخ-آ
   await vault(A); assert(await A.isVisible('#vt_p')); await A.fill('#vt_i', 'clinic-hamed'); await A.fill('#vt_d', 'حاسوب العيادة'); await A.fill('#vt_p', 'short'); await A.fill('#vt_p2', 'short'); await A.click('[data-a="vtOn"]'); await toastWait(A, /8 أحرف/);
   await enable(A, 'حاسوب العيادة'); const head = env.DB._raw.prepare('SELECT head FROM vaults').get().head; assert.strictEqual(head, 1);
   const raw = env.DB._raw.prepare('SELECT data FROM vault_chunks').all().map((r) => r.data).join(''); assert(raw.length > 100 && !raw.includes('سارة') && !/"clients"/.test(raw), 'الخزنة يجب أن تكون مشفّرة');
-  assert((await A.textContent('.sbg[data-g="bak"]')).includes('النسخ التلقائي'));
+  await A.evaluate(() => DPApp.A.setTools()); assert((await A.textContent('.tools')).includes('النسخ التلقائي'));
   ok('التفعيل: كلمة سر قصيرة تُرفض، ثم أول نسخة مشفّرة (المحطة لا ترى الأسماء ولا البنية)، وحالة النسخ في القائمة الجانبية');
   // ---- 2) الجهاز B: جهاز جديد يسترجع
   const B = await dev('B'); await B.waitForSelector('.vthome'); await B.click('.vthome [data-a="vtOpen"]');
@@ -39,7 +39,7 @@ const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html')), PW = 'نسخ-آ
   // ---- 3) B يفعّل النسخ بنفس المعرّف ثم تعديلات على الجهازين
   await connect(B); await enable(B, 'جوال المساء');
   await pick(B, 'سارة'); await B.fill('[data-f="name"]', 'سارة أحمد'); await B.selectOption('[data-f="sex"]', 'ذكر').catch(() => { }); await B.press('[data-f="name"]', 'Tab'); await B.waitForTimeout(400); await newClient(B, 'منى'); await vault(B); await B.click('[data-a="vtNow"]'); await toastWait(B, /أُخذت نسخة/);
-  await newClient(A, 'هند'); await pick(A, 'خالد'); await A.click('.ctabs .cmore summary'); await A.click('[data-a="del"]'); await A.waitForTimeout(300);
+  await newClient(A, 'هند'); await pick(A, 'خالد'); await A.click('.cfhead .cmore summary'); await A.click('[data-a="del"]'); await A.waitForTimeout(300);
   await vault(A); await A.click('[data-a="vtSyncNow"]'); await toastWait(A, /مزامنة من «جوال المساء»/); assert.deepStrictEqual(await names(A), ['سارة أحمد', 'منى', 'هند']);
   const codesA = await A.evaluate(() => DPApp.S.clients.map((c) => c.code)); assert.strictEqual(new Set(codesA).size, 3, 'أكواد مكررة: ' + codesA);
   await A.click('[data-a="vtNow"]'); await toastWait(A, /أُخذت نسخة/);

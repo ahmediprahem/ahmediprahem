@@ -6,7 +6,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   const { d, m, hxCheck, cPoll, C, close } = await linked('dayonly', errs);
   assert(await m.locator('.wmk span').count() > 3); assert(/منى علي • C\d+/.test(await m.textContent('.wmk span')));
   ok('«زنها»: علامة مائية خفيفة باسم العميل وكوده على شاشة الجدول (الخطة لا تصلح لغيره)');
-  await d.evaluate(() => DPApp.A.tab('hx')); await d.check('[data-hxgate]'); await d.waitForSelector('.toast:has-text("يوم واحد في كل مرة")'); await d.selectOption('[data-hxgateh]', '14'); await d.waitForTimeout(400);
+  await d.evaluate(() => DPApp.A.tab('link')); await d.check('[data-hxgate]'); await d.waitForSelector('.toast:has-text("يوم واحد في كل مرة")'); await d.selectOption('[data-hxgateh]', '14'); await d.waitForTimeout(400);
   assert.strictEqual((await C()).hx.gate, true); await cPoll();
   let g = await m.evaluate(() => window.HissatiApp.state().gate); assert(g && g.on && g.h === 14, JSON.stringify(g));
   await m.click('[data-act="tab"][data-v="plan"]'); assert(await m.isVisible('#daylog'), 'أول يوم بعد التفعيل مفتوح');

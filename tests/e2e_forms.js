@@ -21,8 +21,8 @@ const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html'));
   const spec = (sys) => d.evaluate((s) => HForms.normalize((DPApp.S.settings.forms || {})[s], s), sys);
   await d.goto(ADMIN); await login(d);
   // ---- 1) التسمية الجديدة: نظامان أساسيان
-  const rail = await d.textContent('.rail .newc'); assert(rail.includes('عميل جديد — الحصص') && rail.includes('عميل جديد — الجرامات') && !rail.includes('رياضي'));
-  const tiles = await d.textContent('.ghome .qgrid'); assert(tiles.includes('نظام الحصص') && tiles.includes('نظام الجرامات'));
+  await d.evaluate(() => DPApp.A.clients()); await d.click('.newm summary'); const rail = await d.textContent('.newm'); assert(rail.includes('نظام الحصص') && rail.includes('نظام الجرامات') && !rail.includes('رياضي'));
+  await d.evaluate(() => DPApp.A.clients()); await d.click('.newm summary'); const tiles = await d.textContent('.newm'); assert(tiles.includes('نظام الحصص') && tiles.includes('نظام الجرامات'));
   ok('النظامان الأساسيان بالاسم الجديد: «نظام الحصص» و«نظام الجرامات» (بدل «رياضي»)');
   // ---- 2) محرر الاستبيان: الحصص
   await d.click('.rail [data-a="settings"]'); await d.click('[data-a="setTab"][data-v="forms"]'); await d.waitForSelector('.fmstep');
