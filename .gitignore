@@ -3,3 +3,5 @@ package-lock.json
 
 worker/admin/public/index.html
 worker/admin/.wrangler/
+worker/site/public/
+worker/site/.wrangler/

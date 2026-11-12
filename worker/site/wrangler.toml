@@ -1,0 +1,19 @@
+# موقع الأخصائيين hessanu: الأصول من public/ (يكتبها build_web.py، لا تُحفظ في git) + /api/lic (index.mjs)
+# SITE_AUD يُضبط بعد إنشاء تطبيق Cloudflare Access ثانٍ لهذا العنوان؛ قبله يعمل الدخول القديم وحده.
+name = "hessanu"
+main = "index.mjs"
+compatibility_date = "2026-10-01"
+workers_dev = true
+
+[vars]
+ACCESS_TEAM = "misty-scene-bff7"
+SITE_AUD = ""
+
+[[d1_databases]]
+binding = "ADB"
+database_name = "zenha_admin"
+database_id = "6711c840-e769-4f9c-92e5-177bbf6256e0"
+
+[assets]
+directory = "./public"
+binding = "ASSETS"

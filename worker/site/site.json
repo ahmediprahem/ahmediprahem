@@ -1,0 +1,13 @@
+{
+ "admin_pub": {
+  "crv": "P-256",
+  "ext": true,
+  "key_ops": [
+   "verify"
+  ],
+  "kty": "EC",
+  "x": "1vU4J0dmEEOG5ii1sKxF2K_eeasDJfinH6eg2GazaBY",
+  "y": "Mata216-qocZnUoe2CRJR26NDyn_BGcZILOMCYQ4jXM"
+ },
+ "relay": "https://hissati.ah6171317.workers.dev"
+}

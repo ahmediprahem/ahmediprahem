@@ -25,6 +25,13 @@ def build(mode, tpl):
 user = build('user', 'null'); admin = build('admin', json.dumps(user).replace('</', '<\\/'))
 open(os.path.join(H, 'index.html'), 'w', encoding='utf-8').write(user); open(os.path.join(H, 'admin.html'), 'w', encoding='utf-8').write(admin)
 
+# 0.96: موقع الأخصائيين hessanu (worker/site): index.html بمفتاح المدير العام وعنوان المحطة من site.json، مع الأصول الثابتة
+_sc = json.load(open(os.path.join(H, 'worker', 'site', 'site.json'), encoding='utf-8')); _sd = os.path.join(H, 'worker', 'site', 'public'); os.makedirs(_sd, exist_ok=True)
+_si = user.replace('ADMIN_PUB=null', 'ADMIN_PUB=' + json.dumps(_sc['admin_pub'], separators=(',', ':')), 1).replace('BASE_SETTINGS=null', 'BASE_SETTINGS=' + json.dumps({"colors": {}, "over": {}, "deleted": [], "custom": [], "hx": {"relay": _sc['relay']}}, separators=(',', ':'), ensure_ascii=False), 1)
+assert 'ADMIN_PUB=null' not in _si and 'BASE_SETTINGS=null' not in _si, 'لم يُحقن مفتاح المدير في موقع الأخصائيين'
+open(os.path.join(_sd, 'index.html'), 'w', encoding='utf-8').write(_si)
+import shutil
+for _f in os.listdir(os.path.join(H, 'worker', 'site', 'static')): shutil.copy(os.path.join(H, 'worker', 'site', 'static', _f), os.path.join(_sd, _f))
 # 0.95: واجهة الإدارة على الإنترنت (zenha-admin): نسخة admin.html أصلاً ثابتاً للخادم، مع ترويسات الأمان
 os.makedirs(os.path.join(H, 'worker', 'admin', 'public'), exist_ok=True)
 open(os.path.join(H, 'worker', 'admin', 'public', 'index.html'), 'w', encoding='utf-8').write(admin)

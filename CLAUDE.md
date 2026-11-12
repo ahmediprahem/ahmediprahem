@@ -20,7 +20,7 @@
 
 ## النشر (لا تغيّر العناوين أبداً)
 - المحطة: Worker اسمه `hissati` (D1 باسم `DB` = قاعدة `hissati`، سر `REG_KEY`، Cron `*/15 * * * *`، R2 اختياري `MEDIA`).
-- موقع الأخصائيين: Worker اسمه `hessanu` (أصول ثابتة من «تصدير موقع للنشر» في admin.html).
+- موقع الأخصائيين: Worker اسمه `hessanu` = `worker/site` (أصول `public/` يكتبها البناء من index.html + `site.json` + `static/`، ومسار `/api/lic` لرخصة الدخول بالبريد من D1 `zenha_admin`). النشر: `cd worker/site && npx wrangler@4 deploy`. اختباره: `node tests/test_site.js`.
 - العناوين: `https://hissati.ah6171317.workers.dev` و`https://hessanu.ah6171317.workers.dev`.
 - **لا تنشر `admin.html` أبداً** (الملف نفسه). الإدارة على الإنترنت نظام منفصل: Worker `zenha-admin` (D1 `zenha_admin`، المالك ah6171317@gmail.com) خلف Cloudflare Access، والبيانات مشفّرة في المتصفح قبل الحفظ — انظر `worker/admin/index.mjs`. اختباره: `node tests/test_admin.js`. لا تشغّل wrangler من جذر قرص؛ من مجلد الموقع المفكوك فقط (فيه `.assetsignore`).
 - بعد النشر: افحص `/v1/health` (يجب `reg:true` والإصدار الحالي).
