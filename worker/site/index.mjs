@@ -28,10 +28,19 @@ async function verifyAccess(req, env) {
 async function lic(req, env) {
   const who = await verifyAccess(req, env); if (!who) return json({ ok: false, code: 'access', error: 'الدخول عبر Cloudflare Access غير مفعّل' }, 401);
   if (!env.ADB) return json({ ok: false, code: 'db', error: 'قاعدة الأخصائيين غير مربوطة' }, 500);
-  const s = await env.ADB.prepare('SELECT name, exp, status, lic FROM specialists WHERE email = ?').bind(who.email).first().catch(() => null);
+  const s = await env.ADB.prepare('SELECT name, exp, status, lic, devmax FROM specialists WHERE email = ?').bind(who.email).first().catch(() => null);
   if (!s || !s.lic) return json({ ok: false, code: 'none', email: who.email, error: 'بريدك غير مضاف إلى «زنها Pro» بعد' }, 403);
   if (s.status === 'off') return json({ ok: false, code: 'off', email: who.email, error: 'حسابك موقوف حالياً' }, 403);
   if (s.exp && s.exp < now()) return json({ ok: false, code: 'expired', email: who.email, error: 'انتهى اشتراكك في «زنها Pro». تواصل مع الإدارة للتجديد.' }, 403);
+  // حد الأجهزة (يحدده المدير؛ 0 = بلا حد): جهاز جديد بعد بلوغ الحد يُرفض حتى يحرّر المدير جهازاً
+  const u = new URL(req.url), dev = String(u.searchParams.get('d') || ''), label = String(u.searchParams.get('l') || '').slice(0, 60);
+  if (!/^[A-Za-z0-9_-]{6,64}$/.test(dev)) return json({ ok: false, code: 'dev', error: 'رمز الجهاز غير صالح' }, 400);
+  const known = await env.ADB.prepare('SELECT dev FROM spdevices WHERE email = ? AND dev = ?').bind(who.email, dev).first().catch(() => null), max = s.devmax == null ? 2 : +s.devmax;
+  if (!known) {
+    const c = await env.ADB.prepare('SELECT COUNT(*) AS n FROM spdevices WHERE email = ?').bind(who.email).first().catch(() => ({ n: 0 }));
+    if (max > 0 && c && c.n >= max) return json({ ok: false, code: 'devices', email: who.email, max, error: 'بلغت حد الأجهزة المسموح لك (' + max + '). اطلب من الإدارة تحرير جهاز قديم ثم أعد المحاولة.' }, 403);
+    await env.ADB.prepare('INSERT INTO spdevices (email, dev, label, first, last) VALUES (?, ?, ?, ?, ?)').bind(who.email, dev, label, now(), now()).run();
+  } else await env.ADB.prepare('UPDATE spdevices SET last = ?, label = COALESCE(NULLIF(?, \'\'), label) WHERE email = ? AND dev = ?').bind(now(), label, who.email, dev).run().catch(() => { });
   await env.ADB.prepare('UPDATE specialists SET last_seen = ? WHERE email = ?').bind(now(), who.email).run().catch(() => { });
   return json({ ok: true, email: who.email, name: s.name, lic: s.lic });
 }

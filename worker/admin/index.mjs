@@ -18,8 +18,11 @@ const SCHEMA = [
   'CREATE TABLE IF NOT EXISTS backups (id INTEGER PRIMARY KEY AUTOINCREMENT, ts INTEGER, data TEXT)',
   'CREATE INDEX IF NOT EXISTS audit_ts ON audit (ts)',
   // 0.96: الأخصائيون بالبريد. lic = رخصة موقّعة بمفتاح المدير في متصفحه (الخادم لا يوقّع ولا يملك المفتاح)، يتحقق منها «زنها Pro» والمحطة بالمفتاح العام
-  'CREATE TABLE IF NOT EXISTS specialists (email TEXT PRIMARY KEY, name TEXT, exp INTEGER, status TEXT, lic TEXT, created INTEGER, updated INTEGER, updated_by TEXT, last_seen INTEGER, note TEXT)'
+  'CREATE TABLE IF NOT EXISTS specialists (email TEXT PRIMARY KEY, name TEXT, exp INTEGER, status TEXT, lic TEXT, created INTEGER, updated INTEGER, updated_by TEXT, last_seen INTEGER, note TEXT, devmax INTEGER DEFAULT 2)',
+  // أجهزة كل أخصائي (يسجّلها موقع الأخصائيين عند الدخول؛ الحد devmax يحدده المدير، 0 = بلا حد)
+  'CREATE TABLE IF NOT EXISTS spdevices (email TEXT NOT NULL, dev TEXT NOT NULL, label TEXT, first INTEGER, last INTEGER, PRIMARY KEY (email, dev))'
 ];
+const MIGRATE = ['ALTER TABLE specialists ADD COLUMN devmax INTEGER DEFAULT 2'];   // لقواعد أُنشئت قبل العمود؛ الخطأ «موجود» يُتجاهل
 const now = () => Math.floor(Date.now() / 1000);
 const json = (o, s = 200) => new Response(JSON.stringify(o), { status: s, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' } });
 const err = (s, code, msg) => json({ ok: false, code, error: msg }, s);
@@ -30,7 +33,7 @@ const normEmail = (e) => String(e || '').trim().toLowerCase();
 const emailOk = (e) => /^[^\s@]{1,64}@[^\s@]{1,190}\.[a-z]{2,24}$/.test(e);
 let ready = null;
 async function init(db, env) {
-  if (!ready) ready = (async () => { for (const q of SCHEMA) await run(db, q); })().catch((e) => { ready = null; throw e; });
+  if (!ready) ready = (async () => { for (const q of SCHEMA) await run(db, q); for (const q of MIGRATE) await run(db, q).catch(() => { }); })().catch((e) => { ready = null; throw e; });
   await ready;
   const owner = normEmail(env.OWNER_EMAIL);
   if (owner && emailOk(owner)) { const m = await one(db, 'SELECT email, role, disabled FROM members WHERE email = ?', owner); if (!m) await run(db, 'INSERT INTO members (email, role, perms, added_by, created) VALUES (?, ?, ?, ?, ?)', owner, 'owner', JSON.stringify(PERMS), 'system', now()); else if (m.role !== 'owner' || m.disabled) await run(db, "UPDATE members SET role = 'owner', disabled = 0 WHERE email = ?", owner); }
@@ -115,20 +118,22 @@ async function api(req, env, url) {
     await run(db, 'DELETE FROM members WHERE email = ?', email); await audit(db, me.email, 'member.del', email); return json({ ok: true });
   }
   // ---- الأخصائيون بالبريد (صلاحية «users»): القائمة والإضافة/التعديل والحذف. الرخصة تأتي موقّعة من متصفح المدير
-  if (p === '/api/specialists' && method === 'GET') { if (!can(me, 'users')) return err(403, 'perm', 'لا تملك صلاحية الأخصائيين'); return json({ ok: true, specialists: await all(db, 'SELECT email, name, exp, status, created, updated, updated_by, last_seen, note FROM specialists ORDER BY created DESC') }); }
+  if (p === '/api/specialists' && method === 'GET') { if (!can(me, 'users')) return err(403, 'perm', 'لا تملك صلاحية الأخصائيين'); const rows = await all(db, 'SELECT email, name, exp, status, created, updated, updated_by, last_seen, note, devmax FROM specialists ORDER BY created DESC'), devs = await all(db, 'SELECT email, dev, label, first, last FROM spdevices ORDER BY last DESC'); rows.forEach((r) => { r.devices = devs.filter((d) => d.email === r.email).map((d) => ({ dev: d.dev, label: d.label, first: d.first, last: d.last })); }); return json({ ok: true, specialists: rows }); }
   if (p === '/api/specialists' && method === 'POST') {
     if (!can(me, 'users')) return err(403, 'perm', 'لا تملك صلاحية الأخصائيين'); if (J.lic && !can(me, 'lic')) return err(403, 'perm', 'إصدار الرخص يحتاج صلاحية «lic»');
     const email = normEmail(J.email); if (!emailOk(email)) return err(400, 'email', 'بريد غير صالح'); const name = String(J.name || '').trim().slice(0, 60); if (!name) return err(400, 'name', 'اكتب اسم الأخصائي');
-    const status = J.status === 'off' ? 'off' : 'active', exp = Math.max(0, parseInt(J.exp || '0', 10) || 0), lic = J.lic == null ? null : String(J.lic);
+    const status = J.status === 'off' ? 'off' : 'active', exp = Math.max(0, parseInt(J.exp || '0', 10) || 0), lic = J.lic == null ? null : String(J.lic), devmax = J.devmax == null ? 2 : Math.max(0, Math.min(50, parseInt(J.devmax, 10) || 0));
     if (lic !== null && (!/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(lic) || lic.length > 4000)) return err(400, 'lic', 'رخصة غير صالحة');
     const ex = await one(db, 'SELECT email FROM specialists WHERE email = ?', email); const n = await one(db, 'SELECT COUNT(*) AS n FROM specialists'); if (!ex && n && n.n >= 2000) return err(429, 'many', 'عدد كبير');
-    if (ex) await run(db, 'UPDATE specialists SET name = ?, exp = ?, status = ?, lic = COALESCE(?, lic), updated = ?, updated_by = ?, note = ? WHERE email = ?', name, exp, status, lic, now(), me.email, String(J.note || '').slice(0, 200), email);
-    else await run(db, 'INSERT INTO specialists (email, name, exp, status, lic, created, updated, updated_by, note) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', email, name, exp, status, lic, now(), now(), me.email, String(J.note || '').slice(0, 200));
-    await audit(db, me.email, ex ? 'spec.update' : 'spec.add', email + ' ' + status + (exp ? ' حتى ' + new Date(exp * 1000).toISOString().slice(0, 10) : '') + (lic ? ' +رخصة' : ''));
+    if (ex) await run(db, 'UPDATE specialists SET name = ?, exp = ?, status = ?, lic = COALESCE(?, lic), updated = ?, updated_by = ?, note = ?, devmax = ? WHERE email = ?', name, exp, status, lic, now(), me.email, String(J.note || '').slice(0, 200), devmax, email);
+    else await run(db, 'INSERT INTO specialists (email, name, exp, status, lic, created, updated, updated_by, note, devmax) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', email, name, exp, status, lic, now(), now(), me.email, String(J.note || '').slice(0, 200), devmax);
+    await audit(db, me.email, ex ? 'spec.update' : 'spec.add', email + ' ' + status + (exp ? ' حتى ' + new Date(exp * 1000).toISOString().slice(0, 10) : '') + (lic ? ' +رخصة' : '') + ' أجهزة:' + (devmax || '∞'));
     return json({ ok: true });
   }
+  const sdm = /^\/api\/specialists\/([^/]+)\/devices\/([A-Za-z0-9_-]{1,64})$/.exec(p);
+  if (sdm && method === 'DELETE') { if (!can(me, 'users')) return err(403, 'perm', 'لا تملك صلاحية الأخصائيين'); const email = normEmail(decodeURIComponent(sdm[1])); await run(db, 'DELETE FROM spdevices WHERE email = ? AND dev = ?', email, sdm[2]); await audit(db, me.email, 'spec.devfree', email + ' ' + sdm[2]); return json({ ok: true }); }
   const spm = /^\/api\/specialists\/(.+)$/.exec(p);
-  if (spm && method === 'DELETE') { if (!can(me, 'users')) return err(403, 'perm', 'لا تملك صلاحية الأخصائيين'); const email = normEmail(decodeURIComponent(spm[1])); await run(db, 'DELETE FROM specialists WHERE email = ?', email); await audit(db, me.email, 'spec.del', email); return json({ ok: true }); }
+  if (spm && method === 'DELETE') { if (!can(me, 'users')) return err(403, 'perm', 'لا تملك صلاحية الأخصائيين'); const email = normEmail(decodeURIComponent(spm[1])); await run(db, 'DELETE FROM specialists WHERE email = ?', email); await run(db, 'DELETE FROM spdevices WHERE email = ?', email); await audit(db, me.email, 'spec.del', email); return json({ ok: true }); }
   // ---- سجل التدقيق والنسخ الاحتياطية
   if (p === '/api/audit' && method === 'GET') {
     if (!can(me, 'audit')) return err(403, 'perm', 'لا تملك صلاحية سجل التدقيق'); const before = parseInt(url.searchParams.get('before') || '0', 10) || 2e9;

@@ -23,6 +23,10 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); };
   ok('أخصائي جديد بالبريد: يختار كلمة سر للجهاز (8 أحرف وتأكيد)، يدخل ويضيف عميلاً، وبعد إعادة التحميل يدخل بكلمة السر فقط وعميله موجود');
   // 4) اشتراك منتهٍ
   LIC = await lic('new@x.com', 'د. جديد', -1); await N.reload(); await N.waitForSelector('#emOld'); assert(/انتهى اشتراكك/.test(await N.textContent('body'))); ok('الاشتراك المنتهي: رسالة «انتهى اشتراكك» ولا دخول');
+  // 4ب) بلغ حد الأجهزة: رسالة واضحة، والطلب يحمل رمز الجهاز واسمه
+  let lastQ = ''; srv.removeAllListeners('request'); srv.on('request', (q, r) => { if (q.url.startsWith('/api/lic')) { lastQ = q.url; r.writeHead(LIC.s, { 'content-type': 'application/json' }); return r.end(JSON.stringify(LIC.j)); } r.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }); r.end(html); });
+  LIC = { s: 403, j: { ok: false, code: 'devices', email: 'new@x.com', max: 2, error: 'بلغت حد الأجهزة المسموح لك (2). اطلب من الإدارة تحرير جهاز قديم ثم أعد المحاولة.' } }; await N.reload(); await N.waitForSelector('#emOld');
+  assert(/بلغت حد الأجهزة/.test(await N.innerText('body'))); assert(/[?&]d=[A-Za-z0-9_-]{6,}/.test(lastQ) && /[?&]l=/.test(lastQ), lastQ); ok('بلوغ حد الأجهزة: رسالة «بلغت حد الأجهزة»، والتطبيق يرسل رمز جهازه واسمه');
   // 5) أخصائي قديم رُبط بريده بحسابه: بياناته تبقى
   LIC = { s: 401, j: {} }; const O = await S.mk('o'); await O.goto(URL0); await O.waitForSelector('#devId'); const dev = (await O.textContent('#devId')).trim(), tok = await S.issue(dev);
   await O.fill('#actCode', tok); await O.click('#actBtn'); await O.waitForSelector('#lu'); await O.fill('#lu', 'sara'); await O.fill('#lp', S.pw); await O.click('#lbtn'); await O.waitForSelector('aside .sidebtn', { state: 'attached' });
