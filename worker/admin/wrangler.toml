@@ -6,6 +6,8 @@ workers_dev = true
 
 [vars]
 OWNER_EMAIL = "ah6171317@gmail.com"
+ACCESS_TEAM = "misty-scene-bff7"
+ACCESS_AUD = "9f2fb6b5ef091d47a4a194cf45d35750982cbef87fb9b6c52b868e0c8ce3d822"
 
 [[d1_databases]]
 binding = "DB"
