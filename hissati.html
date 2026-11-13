@@ -4710,7 +4710,7 @@ function adhCard() {
   const weak = tier === 'full' ? null : ['w', 'f', 'm'].reduce((x, y) => T[y] < T[x] ? y : x), C = 2 * Math.PI * 40;
   const bar = (key, ic, nm, v, sub) => '<div class="cmr"><span class="cmi">' + ic + '</span><span class="cmn"><b>' + nm + '</b><span class="dim">' + sub + '</span></span><span class="cmb"><i style="width:' + pc(v) + '%;background:' + ({ w: 'var(--sky)', f: 'var(--mint)', m: 'var(--amber)' }[key]) + '"></i></span><b class="cmp">' + pc(v) + '%</b></div>';
   const [done, n] = itemsOfDay(TODAY), L = dl(TODAY), g = hWaterGoal(), H = L.h || {};
-  const mvSub = H.steps ? (+H.steps).toLocaleString('ar-EG') + ' خطوة' : (+H.move || +H.walkMin) ? (Math.max(+H.move || 0, +H.walkMin || 0)) + ' دقيقة' : 'سجّل مشيك أو تمرينك';
+  const mvSub = H.steps ? (+H.steps).toLocaleString('en-US') + ' خطوة' : (+H.move || +H.walkMin) ? (Math.max(+H.move || 0, +H.walkMin || 0)) + ' دقيقة' : 'سجّل مشيك أو تمرينك';
   return '<section class="card cmt"><div class="cmh"><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="10"/><circle cx="50" cy="50" r="40" fill="none" stroke="var(--mint)" stroke-width="10" stroke-linecap="round" stroke-dasharray="' + C + '" stroke-dashoffset="' + (C * (1 - a)) + '"/></svg>'
     + '<div class="cmtt"><small class="dim">التزامك اليوم</small><div class="num">' + pc(a) + '%</div>' + (avg != null ? '<div class="dim">متوسط أسبوعك ' + pc(avg) + '%' + (a > avg + .05 ? ' • اليوم أفضل ' + I('trend') : '') + '</div>' : '') + '</div></div>'
     + '<p class="cmmsg">' + esc(msg) + '</p>'
