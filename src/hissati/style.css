@@ -1000,3 +1000,22 @@ button.plsub:not([disabled]){text-decoration:underline dotted;text-underline-off
 .ia-walk{animation:iawalk 3.4s ease-in-out infinite alternate}@keyframes iawalk{from{transform:translate(-34px,34px)}to{transform:translate(52px,-8px)}}
 .ia-path{animation:iadash 1.2s linear infinite}@keyframes iadash{to{stroke-dashoffset:-22}}
 @media (prefers-reduced-motion:reduce){.in-caret,.ia-needle,.ia-pg,.ia-walk,.ia-path,.in-body,.in-card{animation:none}.in-card{opacity:1}.ia-pg{opacity:.85}}
+/* 0.99: المقدمة بألوان حيوية على خلفية فاتحة (كالمرجع): تدرّج باستيل في الأعلى، عناوين كحلية، برتقالي للجمل والأزرار، ورسومات ملوّنة */
+.intro{--text:#101736;--mut:#5b6385;--dim:#8a91ad;--line:rgba(16,23,54,.1);--line2:rgba(16,23,54,.18);--glass:#fff;--glass2:#f3f5fc;--mint:#12b886;--amber:#ff7a1a;background:#fff;color-scheme:light}
+.intro .onb-mesh{background:#fff}.intro .onb-mesh i{filter:blur(52px);opacity:.75;width:62%}
+.intro .onb-mesh i:nth-child(1){top:-16%;right:-12%;background:#ffd9c2}.intro .onb-mesh i:nth-child(2){top:-18%;left:-14%;bottom:auto;background:#d9ccff}.intro .onb-mesh i:nth-child(3){top:-22%;right:24%;bottom:auto;background:#c4f1df;opacity:.8}
+.intro .onb-skip{background:rgba(255,255,255,.7);color:#101736;border-color:rgba(16,23,54,.14)}
+.intro .btn{background:#ff7a1a linear-gradient(180deg,#ff9440,#ff6a0a);color:#fff;border-color:transparent;box-shadow:0 10px 24px rgba(255,122,26,.32)}
+.intro .in-dots i.on,.intro .in-dots i.was{background:#ff7a1a}.intro .in-caret{background:#ff7a1a}
+.intro .in-c{box-shadow:0 2px 10px rgba(16,23,54,.05)}.intro .in-c:active{background:#fff3e8;border-color:#ffb37a}
+.intro .in-art{width:min(86%,330px);color:#101736}
+.in-card{box-shadow:0 6px 18px rgba(16,23,54,.06)}.in-ic{width:44px;height:44px;flex:none;display:grid;place-items:center;border-radius:14px;background:#e3f8ef}.in-card .in-ic svg{color:#12a37a}
+.in-card.k1 .in-ic{background:#ffeede}.in-card.k1 .in-ic svg{color:#ff7a1a}.in-card.k2 .in-ic{background:#e6efff}.in-card.k2 .in-ic svg{color:#3f78e0}
+.in-s1 .in-body,.in-s2 .in-body{padding-top:6vh}
+.ia-bob{animation:iabob 3.2s ease-in-out infinite alternate}.ia-bob.b2{animation-delay:-1.4s}@keyframes iabob{from{transform:translateY(3px)}to{transform:translateY(-5px)}}
+.ia-ring{transform-box:fill-box;transform-origin:center;animation:iaring 9s linear infinite}@keyframes iaring{to{transform:rotate(360deg)}}
+.ia-needle{transform-origin:100px 118px}
+@keyframes iafly{0%{transform:translate(0,6px) rotate(0)}50%{transform:translate(6px,-8px) rotate(7deg)}100%{transform:translate(0,6px) rotate(0)}}
+.ia-pg{transform-box:fill-box;transform-origin:center;animation:iafly 3.4s ease-in-out infinite}
+@keyframes iawalk{from{transform:translate(-46px,30px)}to{transform:translate(54px,-22px)}}
+@media (prefers-reduced-motion:reduce){.ia-bob,.ia-ring{animation:none}}
