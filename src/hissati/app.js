@@ -598,7 +598,7 @@ function scrOnb() {
     return '<div class="scr onb onb-story s' + i + '" data-i="' + i + '"><div class="onb-mesh"><i></i><i></i><i></i></div>' + onbPhoto(i) + onbBars(i) + '<button class="onb-skip" data-act="onbSkip">تخطّي</button><button class="onb-edge l" data-act="onbNext" aria-label="التالي"></button><button class="onb-edge r" data-act="onbPrev" aria-label="السابق"></button>'
       + '<div class="onb-art">' + art + '</div><div class="onb-txt"><h1>' + T[0] + '</h1><p>' + T[1] + '</p>' + (i === 3 ? '<p class="onb-lock">' + I('lock') + ' بياناتك مشفّرة: لا يقرؤها إلا أخصائيك</p>' : '') + '</div><div class="onb-foot"><button class="btn full" data-act="onbNext">' + (i === 3 ? 'لنبدأ' : 'التالي') + '</button><span class="dim" aria-live="polite">الشاشة ' + i + ' من 3</span></div></div>';
   }
-  const cur = window.HxTheme ? HxTheme.get() : 'classic', T = [['classic', 'الحالي'], ['rose', 'وردة'], ['pulse', 'نبض']];
+  const cur = window.HxTheme ? HxTheme.get() : 'classic', T = [['classic', 'الحالي'], ['sun', 'إشراق'], ['rose', 'وردة'], ['pulse', 'نبض']];
   return '<div class="scr onb onb-theme"><div class="onb-mesh"><i></i><i></i><i></i></div><button class="onb-skip" data-act="onbFinish">تخطّي</button><div class="onb-txt" style="margin-top:56px"><h1>اختر الشكل الذي يريحك</h1><p>تقدر تغيّره لاحقاً من «الإعدادات». خطتك وبياناتك لا تتغير.</p></div><div class="hx-themes" role="radiogroup" aria-label="مظهر التطبيق">'
     + T.map((t) => '<button class="hx-th" role="radio" aria-checked="' + (cur === t[0]) + '" data-act="theme" data-v="' + t[0] + '"><span class="hx-pv" data-theme="' + t[0] + '" aria-hidden="true"><i class="h"></i><i class="k"><b></b></i><i class="k s"></i><i class="c"></i></span><span class="hx-tl">' + t[1] + (cur === t[0] ? ' ✓' : '') + '</span></button>').join('') + '</div><div class="onb-foot"><button class="btn full" data-act="onbFinish">ابدأ</button></div></div>';
 }
@@ -897,7 +897,7 @@ function sceneSvg(tod, egy) {
 }
 // ---- 0.81: خلفية صوتية بشرية بلا آلات (اختيارية، مغلقة افتراضياً). مولِّد همهمات صوتية (mmm) بلا كلمات بالتركيب الصوتي (Formant) كصوت تجريبي إلى أن تُعتمد تسجيلات بشرية مرخّصة
 const snd = () => (S.snd = S.snd || { on: 0, vol: 0.5, ask: 0 });
-const SND = { ctx: null, m: null, playing: false, quiet: false, chords: { classic: [146.83, 220, 293.66, 369.99], rose: [130.81, 196, 261.63, 329.63], pulse: [123.47, 185, 246.94, 311.13], firoz: [138.59, 207.65, 277.18, 349.23] } };
+const SND = { ctx: null, m: null, playing: false, quiet: false, chords: { classic: [146.83, 220, 293.66, 369.99], rose: [130.81, 196, 261.63, 329.63], sun: [146.83, 220, 293.66, 369.99], pulse: [123.47, 185, 246.94, 311.13], firoz: [138.59, 207.65, 277.18, 349.23] } };
 const SND_SRC = {};                       // روابط التسجيلات البشرية المعتمدة شرعياً (all أو لكل ثيم)؛ فارغة الآن فلا يظهر الخيار للعملاء
 const sndDev = () => { try { return !!navigator.webdriver || localStorage.getItem('hx_snd_dev') === '1'; } catch (e) { return false; } };   // المولِّد البرمجي للتجارب فقط ولا يصل العملاء
 const sndSrc = () => SND_SRC[(window.HxTheme && HxTheme.get()) || 'classic'] || SND_SRC.all || '';
@@ -1279,7 +1279,7 @@ function adhCard() {
   const bar = (key, ic, nm, v, sub) => '<div class="cmr"><span class="cmi">' + ic + '</span><span class="cmn"><b>' + nm + '</b><span class="dim">' + sub + '</span></span><span class="cmb"><i style="width:' + pc(v) + '%;background:' + ({ w: 'var(--sky)', f: 'var(--mint)', m: 'var(--amber)' }[key]) + '"></i></span><b class="cmp">' + pc(v) + '%</b></div>';
   const [done, n] = itemsOfDay(TODAY), L = dl(TODAY), g = hWaterGoal(), H = L.h || {};
   const mvSub = H.steps ? (+H.steps).toLocaleString('en-US') + ' خطوة' : (+H.move || +H.walkMin) ? (Math.max(+H.move || 0, +H.walkMin || 0)) + ' دقيقة' : 'سجّل مشيك أو تمرينك';
-  return '<section class="card cmt"><div class="cmh"><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="10"/><circle cx="50" cy="50" r="40" fill="none" stroke="var(--mint)" stroke-width="10" stroke-linecap="round" stroke-dasharray="' + C + '" stroke-dashoffset="' + (C * (1 - a)) + '"/></svg>'
+  return '<section class="card cmt"><div class="cmh"><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" stroke-opacity=".13" stroke-width="10"/><circle cx="50" cy="50" r="40" fill="none" stroke="var(--mint)" stroke-width="10" stroke-linecap="round" stroke-dasharray="' + C + '" stroke-dashoffset="' + (C * (1 - a)) + '"/></svg>'
     + '<div class="cmtt"><small class="dim">التزامك اليوم</small><div class="num">' + pc(a) + '%</div>' + (avg != null ? '<div class="dim">متوسط أسبوعك ' + pc(avg) + '%' + (a > avg + .05 ? ' • اليوم أفضل ' + I('trend') : '') + '</div>' : '') + '</div></div>'
     + '<p class="cmmsg">' + esc(msg) + '</p>'
     + bar('w', I('glass'), 'الماء', T.w, (L.water || 0) + ' من ' + g + ' أكواب') + bar('f', I('utensils'), 'الأكل', T.f, done + ' من ' + n + ' أصناف') + bar('m', I('walk'), 'الحركة', T.m, mvSub)
@@ -1632,7 +1632,7 @@ function applyThemeIcons(t) {                         // أيقونة التطب
   set('link[rel=manifest]', '/manifest.webmanifest' + (sf ? '?t=' + t : '')); set('link[rel=apple-touch-icon]', '/apple-180' + sf + '.png'); set('link[rel=icon]', '/icon-192' + sf + '.png');
 }
 function themeCard() {
-  const cur = window.HxTheme ? HxTheme.get() : 'classic', T = [['classic', 'الحالي'], ['rose', 'وردة'], ['pulse', 'نبض']];
+  const cur = window.HxTheme ? HxTheme.get() : 'classic', T = [['classic', 'الحالي'], ['sun', 'إشراق'], ['rose', 'وردة'], ['pulse', 'نبض']];
   return '<section class="card stack"><h3>' + I('sparkle') + ' مظهر التطبيق</h3><div class="hx-themes" role="radiogroup" aria-label="مظهر التطبيق">'
     + T.map((t) => '<button class="hx-th" role="radio" aria-checked="' + (cur === t[0]) + '" data-act="theme" data-v="' + t[0] + '"><span class="hx-pv" data-theme="' + t[0] + '" aria-hidden="true"><i class="h"></i><i class="k"><b></b></i><i class="k s"></i><i class="c"></i></span><span class="hx-tl">' + t[1] + (cur === t[0] ? ' ✓' : '') + '</span></button>').join('')
     + '</div><p class="dim">خطتك وبياناتك لا تتغير، يتغير الشكل فقط. يُحفظ على هذا الجوال. أيقونة التطبيق تتبع الثيم أيضاً: عند التثبيت تُؤخذ أيقونة ثيمك الحالي (أندرويد يحدّثها لاحقاً من تلقاء نفسه، وآيفون يحتاج حذف الأيقونة وإعادة إضافتها).</p></section>';

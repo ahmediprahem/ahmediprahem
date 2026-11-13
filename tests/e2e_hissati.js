@@ -172,7 +172,7 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
     for (let i = 0; i < 4; i++) await jp.click('[data-onb="cup"]'); assert((await jp.textContent('.onb-cup .oc')).trim() === '4 / 4'); assert(await jp.locator('.onb-cup.full').count() === 1); for (let i = 0; i < 4; i++) await jp.click('[data-onb="heart"]'); assert((await jp.textContent('.onb-heart .oh')).trim() === '100%'); await shot(jp, 'o3_story2');
     const b2 = await jp.locator('.onb-art').boundingBox(); await jp.mouse.move(b2.x + 20, b2.y + 20); await jp.mouse.down(); await jp.mouse.move(b2.x + 160, b2.y + 24, { steps: 6 }); await jp.mouse.up(); await jp.waitForSelector('.onb-story.s3');
     assert(await jp.locator('.cb.a').count() === 1 && await jp.locator('.cert').count() === 1); assert((await jp.textContent('.onb-lock')).includes('مشفّرة')); await jp.waitForTimeout(1500); await shot(jp, 'o4_story3');
-    await jp.click('.onb-foot [data-act="onbNext"]'); await jp.waitForSelector('.onb-theme'); assert.strictEqual(await jp.locator('.hx-th').count(), 3);
+    await jp.click('.onb-foot [data-act="onbNext"]'); await jp.waitForSelector('.onb-theme'); assert.strictEqual(await jp.locator('.hx-th').count(), 4);
     await jp.click('.hx-th[data-v="rose"]'); await jp.waitForFunction(() => document.documentElement.getAttribute('data-theme') === 'rose'); assert.strictEqual(await jp.getAttribute('link[rel=manifest]', 'href'), '/manifest.webmanifest?t=rose'); await jp.waitForTimeout(700); await shot(jp, 'o5_theme');
     await jp.click('.onb-foot [data-act="onbFinish"]'); await jp.waitForSelector('.invite .dr'); assert.strictEqual(await jp.evaluate(() => localStorage.getItem('hissati_onb')), '1');
     await jp.click('.hx-th, [data-act="theme"]', { timeout: 500 }).catch(() => { }); await jp.evaluate(() => HxTheme.set('classic'));
@@ -347,7 +347,7 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
     }
   }
   {     // الثيمات: «الحالي» الافتراضي + «وردة» + «نبض» — مختار الثيم في «تقدّمي»، يُحفظ على الجهاز، ويُطبَّق قبل أول رسم (حتى على شاشة القفل)
-    await goMe(ip); await ip.waitForSelector('.hx-themes'); assert.strictEqual(await ip.locator('.hx-th').count(), 3);
+    await goMe(ip); await ip.waitForSelector('.hx-themes'); assert.strictEqual(await ip.locator('.hx-th').count(), 4);
     assert.strictEqual(await ip.getAttribute('.hx-th[data-v="classic"]', 'aria-checked'), 'true'); assert.strictEqual(await ip.evaluate(() => document.documentElement.getAttribute('data-theme')), null);
     const bgOf = () => ip.evaluate(() => getComputedStyle(document.body).backgroundColor), classicBg = await bgOf();
     for (const [t, meta, light] of [['rose', '#FAF6F2', true], ['pulse', '#0A0C0F', false]]) {

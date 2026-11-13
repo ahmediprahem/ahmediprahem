@@ -1,0 +1,24 @@
+/* ثيم «إشراق» (data-theme="sun") — 0.99: ألوان المقدمة القصصية: أبيض بتدرّج باستيل، نص كحلي، وبرتقالي للفعل.
+   قواعده هي قواعد «وردة» (البناء يضيف sun بجانب rose في كل محدِّد)، وهنا تُستبدل المتغيرات فقط */
+[data-theme="sun"][data-theme="sun"]{
+  color-scheme:light;
+  --hx-bg:#FFFFFF;--hx-bg2:#FFF6EE;--hx-surface-1:#FFFFFF;--hx-surface-2:#FFFCF9;--hx-sunken:#F6F4FB;
+  --hx-text:#101736;--hx-text-2:#4D5578;--hx-text-3:#5E668A;--hx-line:rgba(16,23,54,.10);--hx-line-strong:#8A91AD;
+  --hx-accent:#E8590C;--hx-accent-hover:#D14B05;--hx-accent-ink:#FFFFFF;--hx-accent-soft:#FFEBDD;--hx-accent-text:#B84300;--hx-accent-ring:rgba(232,89,12,.26);
+  --hx-track:#FBE6D8;--hx-focus:#9C3A00;
+  --hx-ok:#1E8A68;--hx-ok-soft:#DFF5EC;--hx-ok-text:#146B50;--hx-on-ok:#FFFFFF;
+  --hx-info:#3565C9;--hx-info-soft:#E6EEFF;--hx-info-text:#27509F;
+  --hx-gold:#8A5800;--hx-gold-soft:#FFF0D2;--hx-second:#1E8A68;--hx-second-soft:#DFF5EC;
+  --hx-water-1:#C4D8FF;--hx-water-2:#5B8DEF;--hx-water-line:#5B8DEF;--hx-heart-1:#FFC9B0;--hx-heart-2:#FF7A59;--hx-heart-line:#E8590C;
+  --hx-logo:#101736;--hx-logo-mark:#E8590C;--hx-scrim:rgba(16,23,54,.34);--hx-toast-bg:#101736;--hx-toast-text:#FFF7F0;
+  --hx-e1:0 1px 2px rgba(16,23,54,.05),0 3px 10px rgba(16,23,54,.05);--hx-e2:0 2px 4px rgba(16,23,54,.05),0 10px 26px rgba(16,23,54,.09);--hx-e3:0 4px 10px rgba(16,23,54,.07),0 22px 52px rgba(16,23,54,.15);
+  --bg:#FFFFFF;--bg2:#FFF6EE;--glass:#FFFFFF;--glass2:#FFF3E8;--glass3:#FFFFFF;--line:rgba(16,23,54,.10);--line2:rgba(16,23,54,.22);
+  --text:#101736;--mut:#4D5578;--dim:#5E668A;--mint:#E8590C;--mint2:#D14B05;--mintInk:#FFFFFF;--coral:#B42318;--coralBg:#FCE6E3;--amber:#8A5800;--sky:#3565C9;
+  --hx-g-glow1:#FFD9C2;--hx-g-glow2:#DDD0FF;--hx-g-glow3:#C8F2E2;
+  --hx-backdrop:radial-gradient(52% 30% at 92% 0%,#FFD9C2,transparent 72%),radial-gradient(52% 30% at 6% 2%,#DDD0FF,transparent 72%),radial-gradient(44% 24% at 50% -4%,#C8F2E2,transparent 72%),linear-gradient(180deg,#FFFFFF,#FFFAF5);
+  --tb1:#fff1e2;--tb2:#ff8a3c;--tb3:#9c3a00;--tbs:rgba(255,255,255,.5);
+}
+html[data-theme="sun"] .onb-splash{background:linear-gradient(160deg,#FF8A3C,#E8590C)}
+html[data-theme="sun"] .onb-mesh i:nth-child(1){background:#FFD9C2}html[data-theme="sun"] .onb-mesh i:nth-child(2){background:#DDD0FF}html[data-theme="sun"] .onb-mesh i:nth-child(3){background:#C8F2E2}
+html[data-theme="sun"] .alm{background:radial-gradient(70% 50% at 50% 28%,rgba(255,170,110,.45),transparent 70%),rgba(255,252,248,.9)}
+html[data-theme="sun"] .btn:not(.sec){background:#F26A0A linear-gradient(180deg,#FF8A3C,#EE5F06);color:#fff;border-color:transparent}

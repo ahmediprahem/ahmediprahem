@@ -33,10 +33,13 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   await m.click('[data-act="plOff"][data-v="-1"]'); await m.waitForSelector('.plr.done:has-text("أتصل بأمي")'); assert.strictEqual(await m.locator('#plIn').count(), 0, 'الأمس للقراءة');
   await m.click('[data-act="plOff"][data-v="1"]'); await m.evaluate(() => { Date.now = window.__dn0; }); ok('في اليوم التالي: غير المنجز من أهدافي ينتقل موسوماً «من أمس» والمنجز لا ينتقل، وصفحة الأمس للقراءة بسهم «اليوم السابق»');
   // الثيمات
-  const cols = {}; for (const th of ['classic', 'rose', 'pulse', 'firoz']) { await m.evaluate((t) => HxTheme.set(t), th); await m.waitForTimeout(500); await m.click('[data-act="pt"][data-v="meals"]'); await m.click('[data-act="pt"][data-v="day"]'); await m.waitForSelector('.nbk');
+  const cols = {}; for (const th of ['classic', 'sun', 'rose', 'pulse', 'firoz']) { await m.evaluate((t) => HxTheme.set(t), th); await m.waitForTimeout(500); await m.click('[data-act="pt"][data-v="meals"]'); await m.click('[data-act="pt"][data-v="day"]'); await m.waitForSelector('.nbk');
     cols[th] = await m.evaluate(() => { const x = document.querySelector('.plx'), k = document.querySelector('.plk path'); return [getComputedStyle(x).color, k ? getComputedStyle(k).stroke : '']; }); if (shot) await m.locator('.nbk').screenshot({ path: shot + 'th_' + th + '.png' }); }
   assert(new Set(Object.values(cols).map((x) => x[0])).size >= 2, JSON.stringify(cols)); Object.values(cols).forEach((x) => assert.strictEqual(x[0], x[1], 'لون القلم من نص الثيم'));
-  await m.evaluate(() => HxTheme.set('classic')); ok('المفكرة تأخذ ألوان كل ثيم (الحالي، وردة، نبض، فيروز): الورقة والسطور والقلم من ألوان الثيم');
+  await m.evaluate(() => HxTheme.set('sun')); await m.waitForTimeout(500); const sun = await m.evaluate(() => { const c = getComputedStyle(document.documentElement); return [c.getPropertyValue('--bg').trim(), c.getPropertyValue('--mint').trim(), c.colorScheme, document.querySelector('meta[name=theme-color]').content]; }); assert.deepStrictEqual(sun, ['#FFFFFF', '#E8590C', 'light', '#FFFFFF'], JSON.stringify(sun));
+  await m.click('[data-act="tab"][data-v="me"]'); await m.waitForSelector('.hx-th[data-v="sun"]'); assert(/إشراق/.test(await m.innerText('.hx-th[data-v="sun"]'))); assert.strictEqual(await m.locator('.hx-th').count(), 4); await m.click('[data-act="tab"][data-v="plan"]');
+  ok('ثيم «إشراق» الجديد: خلفية بيضاء ولون فعل برتقالي ومخطط فاتح، ويظهر في اختيار المظهر مع الثلاثة');
+  await m.evaluate(() => HxTheme.set('classic')); ok('المفكرة تأخذ ألوان كل ثيم (الحالي، إشراق، وردة، نبض، فيروز): الورقة والسطور والقلم من ألوان الثيم');
   await m.click('[data-act="tab"][data-v="today"]'); await m.waitForSelector('.plhm'); assert(/تخطيط اليوم/.test(await m.innerText('.plhm'))); await m.click('.plhm'); await m.waitForSelector('.nbk'); ok('بطاقة «تخطيط اليوم» في الرئيسية بعدد الأهداف المنجزة، ولمسها يفتح المفكرة');
   assert.deepStrictEqual(errs, []); await close(); console.log('\nنجح ' + n + ' اختباراً');
 })().catch((e) => { console.error('✘', String(e && e.stack || e).slice(0, 1400)); process.exit(1); });
