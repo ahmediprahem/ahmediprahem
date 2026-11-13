@@ -927,14 +927,14 @@ input[type=range]{width:100%;accent-color:var(--mint)}
 .plleg i{width:10px;height:10px;border-radius:3px;flex:none}.plleg b{font-variant-numeric:tabular-nums;font-weight:600}.plleg b svg{width:14px;height:14px;vertical-align:-2px;color:var(--mint)}
 /* 0.97: ماء ما قبل الوجبة، والوجبات المطوية، و«التزامك اليوم» */
 .wpre{display:flex;align-items:center;gap:10px;padding:10px 12px;margin:0 0 10px;border-radius:16px;background:rgba(157,187,255,.12);border:1px solid rgba(157,187,255,.32)}
-.wpre .wpi{width:34px;height:34px;flex:none;display:grid;place-items:center;border-radius:11px;background:rgba(157,187,255,.18);color:var(--sky)}
+.wpre .wpi svg{width:17px;height:17px;margin:0 -1px}.wpre .wpi{width:46px;height:34px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:11px;background:rgba(157,187,255,.18);color:var(--sky)}
 .wpre .wpt{flex:1;min-width:0;display:flex;flex-direction:column}.wpre.on{background:rgba(111,227,169,.1);border-color:rgba(111,227,169,.3)}.wpre.on .wpi{color:var(--mint);background:rgba(111,227,169,.16)}
 .pmlist .t2row .t2st{margin-inline-start:auto}.pmopen{margin-bottom:8px}.pmfold{margin:-4px 0 10px}
 .cmt .cmgo{margin-top:10px}
 .cmh{display:flex;align-items:center;gap:14px}.cmh svg{width:78px;height:78px;flex:none;transform:rotate(-90deg)}
 .cmtt .num{font-size:calc(30px*var(--fs));font-weight:700;line-height:1.1}
 .cmmsg{margin:10px 0 6px;font-weight:600}
-.cmr{display:flex;align-items:center;gap:10px;padding:7px 0}.cmr .cmi{width:28px;text-align:center;flex:none}
+.cmr{display:flex;align-items:center;gap:10px;padding:7px 0}.cmr .cmi svg{width:20px;height:20px}.cmr .cmi{color:var(--mut);width:28px;text-align:center;flex:none}
 .cmr .cmn{display:flex;flex-direction:column;width:9.5em;flex:none}.cmr .cmn .dim{font-size:calc(12px*var(--fs))}
 .cmr .cmb{flex:1;height:8px;border-radius:8px;background:rgba(255,255,255,.1);overflow:hidden}.cmr .cmb i{display:block;height:100%;border-radius:8px;transition:width .5s}
 .cmr .cmp{min-width:40px;text-align:end;font-variant-numeric:tabular-nums}

@@ -934,14 +934,14 @@ input[type=range]{width:100%;accent-color:var(--mint)}
 .plleg i{width:10px;height:10px;border-radius:3px;flex:none}.plleg b{font-variant-numeric:tabular-nums;font-weight:600}.plleg b svg{width:14px;height:14px;vertical-align:-2px;color:var(--mint)}
 /* 0.97: ماء ما قبل الوجبة، والوجبات المطوية، و«التزامك اليوم» */
 .wpre{display:flex;align-items:center;gap:10px;padding:10px 12px;margin:0 0 10px;border-radius:16px;background:rgba(157,187,255,.12);border:1px solid rgba(157,187,255,.32)}
-.wpre .wpi{width:34px;height:34px;flex:none;display:grid;place-items:center;border-radius:11px;background:rgba(157,187,255,.18);color:var(--sky)}
+.wpre .wpi svg{width:17px;height:17px;margin:0 -1px}.wpre .wpi{width:46px;height:34px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:11px;background:rgba(157,187,255,.18);color:var(--sky)}
 .wpre .wpt{flex:1;min-width:0;display:flex;flex-direction:column}.wpre.on{background:rgba(111,227,169,.1);border-color:rgba(111,227,169,.3)}.wpre.on .wpi{color:var(--mint);background:rgba(111,227,169,.16)}
 .pmlist .t2row .t2st{margin-inline-start:auto}.pmopen{margin-bottom:8px}.pmfold{margin:-4px 0 10px}
 .cmt .cmgo{margin-top:10px}
 .cmh{display:flex;align-items:center;gap:14px}.cmh svg{width:78px;height:78px;flex:none;transform:rotate(-90deg)}
 .cmtt .num{font-size:calc(30px*var(--fs));font-weight:700;line-height:1.1}
 .cmmsg{margin:10px 0 6px;font-weight:600}
-.cmr{display:flex;align-items:center;gap:10px;padding:7px 0}.cmr .cmi{width:28px;text-align:center;flex:none}
+.cmr{display:flex;align-items:center;gap:10px;padding:7px 0}.cmr .cmi svg{width:20px;height:20px}.cmr .cmi{color:var(--mut);width:28px;text-align:center;flex:none}
 .cmr .cmn{display:flex;flex-direction:column;width:9.5em;flex:none}.cmr .cmn .dim{font-size:calc(12px*var(--fs))}
 .cmr .cmb{flex:1;height:8px;border-radius:8px;background:rgba(255,255,255,.1);overflow:hidden}.cmr .cmb i{display:block;height:100%;border-radius:8px;transition:width .5s}
 .cmr .cmp{min-width:40px;text-align:end;font-variant-numeric:tabular-nums}
@@ -3083,7 +3083,9 @@ const P = {
   sparkle:'<path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/>',
   alert:'<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4M12 17h.01"/>',
   scale:'<path d="M16 16.5 19 9l3 7.5a3.5 3.5 0 0 1-6 0zM2 16.5 5 9l3 7.5a3.5 3.5 0 0 1-6 0z"/><path d="M7 21h10M12 3v18M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/>',
+  walk:'<circle cx="13" cy="4" r="2"/><path d="m9 21 2-6 3 3v3M7 12l3-4 4 1 2 3 3 1M10 8l-1 5"/>',
   drop:'<path d="M12 2.7s6 6.4 6 11.3a6 6 0 0 1-12 0c0-4.9 6-11.3 6-11.3z"/>',
+  glass:'<path d="M5 3h14l-1.6 16.2A2 2 0 0 1 15.4 21H8.6a2 2 0 0 1-2-1.8z"/><path d="M5.8 10.5c2-.9 4.2-.9 6.2 0s4.2.9 6.2 0"/>',
   sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
   moon:'<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>',
   dumbbell:'<path d="M6.5 6.5 17.5 17.5"/><path d="m21 21-1-1M3 3l1 1"/><path d="m18 22 4-4M2 6l4-4M3 10l7-7M14 21l7-7"/>',
@@ -4052,7 +4054,7 @@ document.addEventListener('pointerup', onbUp, { passive: true }); document.addEv
 let onbT = 0; function onbSplashTimer() { if (V.screen === 'onb' && V.onb && V.onb.i === 0) { if (!onbT) onbT = setTimeout(() => { onbT = 0; if (V.screen === 'onb' && V.onb && V.onb.i === 0) onbNextStage(1); }, RM ? 1400 : 2600); } else { clearTimeout(onbT); onbT = 0; } }
 // أول إنجاز بعد التسجيل: كوب ماء واحد ← احتفال وسلسلة اليوم الأول ← بعدها فقط يُعرض التثبيت والإشعارات
 function firstWinCard() {
-  return '<section class="card firstwin"><div class="fw-cup" aria-hidden="true">' + I('drop') + '</div><div><h2>ابدأ يومك: اشرب أول كوب ماء</h2><p class="dim">خطوة صغيرة تبدأ بها سلسلتك. المس الزر بعد أن تشرب.</p></div><button class="btn full" data-act="firstWin">' + I('drop') + ' شربت أول كوب</button></section>';
+  return '<section class="card firstwin"><div class="fw-cup" aria-hidden="true">' + I('glass') + '</div><div><h2>ابدأ يومك: اشرب أول كوب ماء</h2><p class="dim">خطوة صغيرة تبدأ بها سلسلتك. المس الزر بعد أن تشرب.</p></div><button class="btn full" data-act="firstWin">' + I('drop') + ' شربت أول كوب</button></section>';
 }
 function scrStart() {                               // بلا حساب ولا رابط (مثل فتح التطبيق المثبّت أول مرة): رمز الدعوة أو رمز النقل
   return '<div class="scr"><div class="scroll"><div class="stack" style="padding-top:22px"><div class="logo" style="width:180px;margin:0 auto;color:#fff">' + LOGO + '</div>'
@@ -4408,7 +4410,7 @@ function missionCard(d) {                                  // أول وجبة ل
   if (si >= 0) { const s = slots[si], first = s.lines[0] ? lineT(s.lines[0]) : '';
     return '<section class="card msn"><div class="mis"><span class="mic">' + I('check') + '</span><div style="flex:1;min-width:0"><small>مهمتك الآن</small><h3>سجّل ' + esc(s.name) + '</h3>' + (s.time ? '<span class="mcd" data-t="' + esc(s.time) + '">' + mcLeft(s.time) + '</span>' : '') + '<p class="dim">' + esc(s.time || '') + (s.kcal ? ' • ' + s.kcal + ' سعرة' : '') + (first ? ' • ' + esc(first) : '') + '</p></div></div><button class="btn full" data-act="whole" data-v="' + si + '">' + I('check') + ' أكلتها كاملة</button></section>'; }
   const g = hWaterGoal(), w = L.water || 0;
-  if (w < g) return '<section class="card msn"><div class="mis"><span class="mic">' + I('drop') + '</span><div style="flex:1;min-width:0"><small>مهمتك الآن</small><h3>اشرب كوباً من الماء</h3><p class="dim">' + w + ' من ' + g + ' أكواب</p></div></div><button class="btn full" data-act="water" data-v="' + (w + 1) + '">' + I('drop') + ' شربت كوباً</button></section>';
+  if (w < g) return '<section class="card msn"><div class="mis"><span class="mic">' + I('glass') + '</span><div style="flex:1;min-width:0"><small>مهمتك الآن</small><h3>اشرب كوباً من الماء</h3><p class="dim">' + w + ' من ' + g + ' أكواب</p></div></div><button class="btn full" data-act="water" data-v="' + (w + 1) + '">' + I('drop') + ' شربت كوباً</button></section>';
   return '<section class="card msn done"><div class="mis"><span class="mic">' + I('check') + '</span><div style="flex:1;min-width:0"><small>مهمتك الآن</small><h3>أحسنت، أنجزت مهام اليوم</h3><p class="dim">وجباتك وماؤك كاملة. استرح، وغداً نكمل.</p></div></div></section>';
 }
 
@@ -4683,7 +4685,7 @@ function waterPlan(d) {                             // [{m, n, si?}] مرتّب�
 }
 function preWater(d, si) {                          // شريط «كوبان قبل الوجبة» فوق الوجبة الرئيسية (اليوم فقط)
   if (d !== TODAY) return ''; const x = waterPlan(d).find((y) => y.si === si); if (!x) return ''; const L = dl(d), on = !!(L.wp || {})[si];
-  return '<div class="wpre' + (on ? ' on' : '') + '"><span class="wpi">' + I('drop') + '</span><span class="wpt"><b>' + (on ? 'شربت كوبَي ما قبل الوجبة' : 'كوبان ماء قبلها بربع ساعة') + '</b><span class="dim">' + (on ? 'سُجّلا في ماء اليوم' : 'الساعة ' + hm12(m2hm(x.m)) + ' • لتنظيم شهيتك') + '</span></span><button class="btn sm ' + (on ? 'sec' : '') + '" data-act="wpre" data-v="' + si + '" aria-pressed="' + on + '">' + (on ? 'تراجع' : I('check') + ' شربتهما') + '</button></div>';
+  return '<div class="wpre' + (on ? ' on' : '') + '"><span class="wpi">' + I('glass') + I('glass') + '</span><span class="wpt"><b>' + (on ? 'شربت كوبَي ما قبل الوجبة' : 'كوبان ماء قبلها بربع ساعة') + '</b><span class="dim">' + (on ? 'سُجّلا في ماء اليوم' : 'الساعة ' + hm12(m2hm(x.m)) + ' • لتنظيم شهيتك') + '</span></span><button class="btn sm ' + (on ? 'sec' : '') + '" data-act="wpre" data-v="' + si + '" aria-pressed="' + on + '">' + (on ? 'تراجع' : I('check') + ' شربتهما') + '</button></div>';
 }
 // ---- 0.97: «التزامك اليوم» في الرئيسية: الماء والأكل والحركة، مع تحليل بسيط وجملة تحفيزية (مسودة نصوص بانتظار موافقة المالك)
 function moveFrac(k) {
@@ -4714,7 +4716,7 @@ function adhCard() {
   return '<section class="card cmt"><div class="cmh"><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="10"/><circle cx="50" cy="50" r="40" fill="none" stroke="var(--mint)" stroke-width="10" stroke-linecap="round" stroke-dasharray="' + C + '" stroke-dashoffset="' + (C * (1 - a)) + '"/></svg>'
     + '<div class="cmtt"><small class="dim">التزامك اليوم</small><div class="num">' + pc(a) + '%</div>' + (avg != null ? '<div class="dim">متوسط أسبوعك ' + pc(avg) + '%' + (a > avg + .05 ? ' • اليوم أفضل ' + I('trend') : '') + '</div>' : '') + '</div></div>'
     + '<p class="cmmsg">' + esc(msg) + '</p>'
-    + bar('w', '💧', 'الماء', T.w, (L.water || 0) + ' من ' + g + ' أكواب') + bar('f', '🍽', 'الأكل', T.f, done + ' من ' + n + ' أصناف') + bar('m', '🚶', 'الحركة', T.m, mvSub)
+    + bar('w', I('glass'), 'الماء', T.w, (L.water || 0) + ' من ' + g + ' أكواب') + bar('f', I('utensils'), 'الأكل', T.f, done + ' من ' + n + ' أصناف') + bar('m', I('walk'), 'الحركة', T.m, mvSub)
     + (weak && tier !== 'start' ? '<p class="cmtip">' + I('sparkle') + ' ' + ADH_TIP[weak] + '</p>' : '') + '<button class="btn sm sec cmgo" data-act="adhOpen">' + I('cal') + ' افتح وجبتك الآن</button></section>';
 }
 
@@ -5377,10 +5379,10 @@ function adhOpen(hid) {                                 // 0.61: أذكار «ع
 // ---------- المنبّه (0.40): التذكير يظهر على الشاشة كمنبّه بتصميم الثيم، لا إشعاراً فقط — رنّة هادئة واهتزاز و«تم» و«غفوة 10 دقائق».
 // يظهر: عند حلول الوقت والتطبيق مفتوح، أو عند لمس إشعار التذكير. (التطبيق المغلق والجوال مقفل: إشعار ثابت يهتز فقط — الرنين فوق القفل يحتاج تطبيقاً أصلياً.)
 const ALM_T = {
-  water: ['drop', 'وقت كوب ماء', 'اشرب كوباً الآن ثم سجّله بلمسة.', 'تم، شربت'], meal: ['utensils', 'حان وقت وجبتك', 'افتح خطتك وعلّم ما تأكله.', 'افتح خطتي'],
+  water: ['glass', 'وقت كوب ماء', 'اشرب كوباً الآن ثم سجّله بلمسة.', 'تم، شربت'], meal: ['utensils', 'حان وقت وجبتك', 'افتح خطتك وعلّم ما تأكله.', 'افتح خطتي'],
   adhAm: ['sun', 'أذكار الصباح', 'ابدأ يومك بذكر الله.', 'ابدأ الأذكار'], adhPm: ['moon', 'أذكار المساء', 'حصّن مساءك بذكر الله.', 'ابدأ الأذكار'], med: ['pill', 'موعد دوائك', 'خذ دواءك أو مكمّلك في موعده.', 'أخذته'], wh: ['sparkle', 'عجلة رسالة اليوم', 'عجلتك جاهزة: لفّها لتلقي رسالتك.', 'افتح العجلة']
 };
-ALM_T.wpre = ['drop', 'كوبان ماء قبل وجبتك', 'وجبتك بعد ربع ساعة: اشرب كوبين الآن لتنظيم شهيتك.', 'تم، شربتهما'];
+ALM_T.wpre = ['glass', 'كوبان ماء قبل وجبتك', 'وجبتك بعد ربع ساعة: اشرب كوبين الآن لتنظيم شهيتك.', 'تم، شربتهما'];
 ALM_T.mq = ['trend', 'موعد قياسك الأسبوعي', 'الوزن على الريق (والخصر اختياري): دقيقة واحدة.', 'قِس الآن']; ALM_T.bd = ['camera', 'صورة التقدم الشهرية', 'صورة واحدة كل شهر تريك الفرق الذي لا يظهر في الميزان.', 'التقط الصورة'];
 const ALM = { fired: {}, snz: 0, snd: 0, ctx: null };
 const almIcon = (t) => t === 'pill' ? '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><g transform="rotate(-35 12 12)"><rect x="2" y="7.5" width="20" height="9" rx="4.5"/><path d="M12 7.5v9"/></g></svg>' : I(t);
