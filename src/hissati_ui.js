@@ -162,7 +162,7 @@ function hxQuiz(p) {
 function hxIn(c, p) {                                              // بعد الاعتماد: المتابعة اليومية، الوزن، التفضيلات، الصحة، المحادثة
   var x = c.hx, nm = c.name || x.label || '';
   if (p.t === 'log' && /^\d{4}-\d{2}-\d{2}$/.test(p.d)) {
-    x.logs = x.logs || {}; x.logs[p.d] = { dow: p.dow, pv: p.pv, ck: p.ck || {}, sw: p.sw || {}, note: p.note || {}, skip: p.skip || {}, water: +p.water || 0, done: +p.done || 0, n: +p.n || 0, ts: p.ts, h: p.h && typeof p.h === 'object' && JSON.stringify(p.h).length < 2000 ? p.h : {}, hs: Array.isArray(p.hs) ? p.hs.slice(0, 12).map(String) : [], off: hxOff(p.off), offT: String(p.offT || '').slice(0, 500), sub: +p.sub || 0 };
+    x.logs = x.logs || {}; x.logs[p.d] = { dow: p.dow, pv: p.pv, ck: p.ck || {}, sw: p.sw || {}, note: p.note || {}, skip: p.skip || {}, water: +p.water || 0, done: +p.done || 0, n: +p.n || 0, ts: p.ts, h: p.h && typeof p.h === 'object' && JSON.stringify(p.h).length < 2000 ? p.h : {}, hs: Array.isArray(p.hs) ? p.hs.slice(0, 12).map(String) : [], off: hxOff(p.off), offT: String(p.offT || '').slice(0, 500), sub: +p.sub || 0, pl: p.pl && +p.pl.n > 0 ? { d: Math.max(0, Math.min(+p.pl.d || 0, +p.pl.n)), n: Math.min(40, +p.pl.n) } : null };
     if (p.off && (p.off.sym || p.off.change) && !(x.flags || {})[p.d]) { x.flags = x.flags || {}; x.flags[p.d] = 1; x.unread = (x.unread || 0) + 1; toast('🩺 ' + nm + (p.off.sym ? ' سجّل أعراضاً اليوم' : ' يطلب تعديل النظام')); return 1; }
     var ks = Object.keys(x.logs).sort(); if (ks.length > 90) ks.slice(0, ks.length - 90).forEach(function (k) { delete x.logs[k]; });
     return 0;                                                       // المتابعة تُحدَّث بصمت (بلا إشعار لكل لمسة)
@@ -412,6 +412,7 @@ function hxDayCards(c) {                                           // المتا
     var l = logs[k], pct = l.n ? Math.round(l.done / l.n * 100) : 0, extra = [];
     Object.keys(l.sw || {}).forEach(function (q) { extra.push('⇄ ' + l.sw[q]); }); Object.keys(l.note || {}).forEach(function (q) { extra.push('✎ ' + l.note[q]); }); Object.keys(l.skip || {}).forEach(function (q) { extra.push('⤼ تخطّى وجبة ' + (+q + 1)); });
     var hb = hxHabits(l); if (hb) extra.unshift(hb);
+    if (l.pl && l.pl.n) extra.push('📝 تخطيط اليوم: ' + l.pl.d + ' من ' + l.pl.n + ' أهداف');
     var wk = hxWalk(l.h); if (wk) extra.unshift(wk); var of = Object.keys(l.off || {}).map(function (q) { return HX_OFF[q] || q; }); if (of.length || l.offT) extra.push('⚠ خارج النظام: ' + of.join('، ') + (l.offT ? ' — ' + l.offT : ''));
     return '<div class="hxday"><b>' + esc((D.days[l.dow] || '') + ' ' + k.slice(5)) + '</b><span class="hxbar"><i style="width:' + pct + '%"></i></span><span>' + pct + '%' + (l.sub ? ' <em title="أرسل تسجيل اليوم">✓</em>' : '') + '</span><small>💧 ' + (l.water * 0.25).toFixed(2).replace(/\.?0+$/, '') + ' ل</small>' + (extra.length ? '<small class="hxex">' + esc(extra.join(' • ')) + '</small>' : '') + '</div>' + hxDayDetail(c, k, l);
   }).join('');

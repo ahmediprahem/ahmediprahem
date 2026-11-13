@@ -942,3 +942,35 @@ input[type=range]{width:100%;accent-color:var(--mint)}
 .mtbtn{margin:4px 0 2px}.mtlist{display:flex;flex-direction:column;gap:2px;margin:8px 0 14px}
 .mtrow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.08)}.mtrow .mtn{flex:1;min-width:0;display:flex;flex-direction:column}
 .mtrow .mtp{display:flex;align-items:center;gap:4px;flex:none}.mtsel{width:auto;min-width:0;padding:0 6px;height:42px;font-variant-numeric:tabular-nums}
+/* 0.98: «تخطيط اليوم» مفكرة بسطور وهامش، تأخذ ألوانها من الثيم (الورقة من --glass والسطور من --line والقلم من --text) */
+.nbk{padding:0;overflow:hidden}
+.nbh{display:flex;align-items:center;gap:10px;padding:14px 14px 10px;border-bottom:1px solid var(--line)}
+.nbh .nbt{flex:1;text-align:center;display:flex;flex-direction:column}.nbh .nbt small{color:var(--mut)}
+.nbh .nbt b{font-family:'Hissa Amiri','Amiri',serif;font-size:calc(21px*var(--fs));font-weight:700}
+.nbh .nbn svg{transform:scaleX(-1)}.nbh .btn[disabled]{opacity:.35}
+.nbp{--ln:calc(46px*var(--fs));position:relative;padding:12px 16px 16px;padding-inline-start:44px;background-image:linear-gradient(to left,transparent 30px,color-mix(in srgb,var(--coral) 55%,transparent) 30px 31.5px,transparent 31.5px)}
+.nbm{display:flex;align-items:center;gap:10px;margin-bottom:6px;font-size:calc(13px*var(--fs));color:var(--mut)}.nbm > span:first-child{min-width:56px;font-variant-numeric:tabular-nums}
+.nbtr{display:block;flex:1;height:6px;border-radius:6px;background:var(--glass2);overflow:hidden}.nbtr i{display:block;height:100%;border-radius:6px;background:var(--mint);transition:width .5s}
+.nbs{font-size:calc(13px*var(--fs));color:var(--mut);font-weight:600;letter-spacing:.02em;margin:14px 0 2px}
+.pll{list-style:none;margin:0;padding:0}
+.plr{display:flex;align-items:center;gap:10px;min-height:var(--ln);border-bottom:1px solid var(--line)}
+.plc0{width:26px;height:26px;flex:none;border-radius:8px;border:1.6px solid var(--line2);background:transparent;display:grid;place-items:center;color:var(--mintInk);padding:0}
+.plr.done .plc0{background:var(--mint);border-color:transparent}.plc0 svg{width:16px;height:16px}.plr.auto .plc0{border-style:dashed}.plr.auto.done .plc0{border-style:solid}
+.plc0[disabled]{cursor:default;opacity:1}
+.plt0{flex:1;min-width:0;display:flex;flex-direction:column;padding:6px 0}
+.plx{position:relative;align-self:flex-start;font-size:calc(16px*var(--fs));line-height:1.45;transition:color .4s}
+.plr.done .plx{color:var(--mut)}
+.plk{position:absolute;inset-inline:-3px;top:50%;width:calc(100% + 6px);height:.9em;transform:translateY(-50%) scaleX(-1);overflow:visible;pointer-events:none}
+.plk path{fill:none;stroke:var(--text);stroke-width:1.7;stroke-linecap:round;opacity:.62;vector-effect:non-scaling-stroke}.plk path.b{stroke-width:1.1;opacity:.32}
+.plk.anim path{stroke-dasharray:1;stroke-dashoffset:1;animation:plpen .45s cubic-bezier(.55,.1,.4,1) forwards}.plk.anim path.b{animation-delay:.08s}
+@keyframes plpen{to{stroke-dashoffset:0}}
+.plsub{align-self:flex-start;display:inline-flex;align-items:center;gap:5px;font-size:calc(12.5px*var(--fs));color:var(--mut);background:none;border:0;padding:2px 0}.plsub svg{width:14px;height:14px}.plsub.from{color:var(--amber)}
+button.plsub:not([disabled]){text-decoration:underline dotted;text-underline-offset:3px}
+.pldel{width:30px;height:30px;flex:none;border:0;background:none;color:var(--dim);display:grid;place-items:center;border-radius:9px;opacity:.7}.pldel svg{width:15px;height:15px}
+.nbre{display:block;margin:4px 0 0;font-size:calc(13px*var(--fs))}
+.nbin{display:flex;gap:8px;margin-top:12px}.nbin .inp{flex:1;min-width:0;background:transparent;border-style:dashed}
+.nbid{margin-top:10px;display:flex;flex-direction:column;gap:6px}.nbid .chips{display:flex;flex-wrap:wrap;gap:6px}.nbid .chip{font-size:calc(13px*var(--fs))}.nbid .chip svg{width:13px;height:13px}
+.nbok{margin:6px 0 0;color:var(--mint);font-weight:600;display:flex;gap:6px;align-items:center}
+.nbe{margin:6px 0}.nbpv{display:flex;gap:6px;align-items:center;justify-content:center;font-size:calc(12.5px*var(--fs));margin:8px 0 0}.nbpv svg{width:14px;height:14px}
+.plhm{display:flex;align-items:center;gap:12px;width:100%;text-align:start;color:inherit}.plhm .plhi{width:40px;height:40px;flex:none;display:grid;place-items:center;border-radius:13px;background:var(--glass2);color:var(--amber)}
+.plhm .plht{flex:1;display:flex;flex-direction:column;min-width:0}.plhm > svg:last-child{opacity:.6}

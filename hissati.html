@@ -949,6 +949,38 @@ input[type=range]{width:100%;accent-color:var(--mint)}
 .mtbtn{margin:4px 0 2px}.mtlist{display:flex;flex-direction:column;gap:2px;margin:8px 0 14px}
 .mtrow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.08)}.mtrow .mtn{flex:1;min-width:0;display:flex;flex-direction:column}
 .mtrow .mtp{display:flex;align-items:center;gap:4px;flex:none}.mtsel{width:auto;min-width:0;padding:0 6px;height:42px;font-variant-numeric:tabular-nums}
+/* 0.98: «تخطيط اليوم» مفكرة بسطور وهامش، تأخذ ألوانها من الثيم (الورقة من --glass والسطور من --line والقلم من --text) */
+.nbk{padding:0;overflow:hidden}
+.nbh{display:flex;align-items:center;gap:10px;padding:14px 14px 10px;border-bottom:1px solid var(--line)}
+.nbh .nbt{flex:1;text-align:center;display:flex;flex-direction:column}.nbh .nbt small{color:var(--mut)}
+.nbh .nbt b{font-family:'Hissa Amiri','Amiri',serif;font-size:calc(21px*var(--fs));font-weight:700}
+.nbh .nbn svg{transform:scaleX(-1)}.nbh .btn[disabled]{opacity:.35}
+.nbp{--ln:calc(46px*var(--fs));position:relative;padding:12px 16px 16px;padding-inline-start:44px;background-image:linear-gradient(to left,transparent 30px,color-mix(in srgb,var(--coral) 55%,transparent) 30px 31.5px,transparent 31.5px)}
+.nbm{display:flex;align-items:center;gap:10px;margin-bottom:6px;font-size:calc(13px*var(--fs));color:var(--mut)}.nbm > span:first-child{min-width:56px;font-variant-numeric:tabular-nums}
+.nbtr{display:block;flex:1;height:6px;border-radius:6px;background:var(--glass2);overflow:hidden}.nbtr i{display:block;height:100%;border-radius:6px;background:var(--mint);transition:width .5s}
+.nbs{font-size:calc(13px*var(--fs));color:var(--mut);font-weight:600;letter-spacing:.02em;margin:14px 0 2px}
+.pll{list-style:none;margin:0;padding:0}
+.plr{display:flex;align-items:center;gap:10px;min-height:var(--ln);border-bottom:1px solid var(--line)}
+.plc0{width:26px;height:26px;flex:none;border-radius:8px;border:1.6px solid var(--line2);background:transparent;display:grid;place-items:center;color:var(--mintInk);padding:0}
+.plr.done .plc0{background:var(--mint);border-color:transparent}.plc0 svg{width:16px;height:16px}.plr.auto .plc0{border-style:dashed}.plr.auto.done .plc0{border-style:solid}
+.plc0[disabled]{cursor:default;opacity:1}
+.plt0{flex:1;min-width:0;display:flex;flex-direction:column;padding:6px 0}
+.plx{position:relative;align-self:flex-start;font-size:calc(16px*var(--fs));line-height:1.45;transition:color .4s}
+.plr.done .plx{color:var(--mut)}
+.plk{position:absolute;inset-inline:-3px;top:50%;width:calc(100% + 6px);height:.9em;transform:translateY(-50%) scaleX(-1);overflow:visible;pointer-events:none}
+.plk path{fill:none;stroke:var(--text);stroke-width:1.7;stroke-linecap:round;opacity:.62;vector-effect:non-scaling-stroke}.plk path.b{stroke-width:1.1;opacity:.32}
+.plk.anim path{stroke-dasharray:1;stroke-dashoffset:1;animation:plpen .45s cubic-bezier(.55,.1,.4,1) forwards}.plk.anim path.b{animation-delay:.08s}
+@keyframes plpen{to{stroke-dashoffset:0}}
+.plsub{align-self:flex-start;display:inline-flex;align-items:center;gap:5px;font-size:calc(12.5px*var(--fs));color:var(--mut);background:none;border:0;padding:2px 0}.plsub svg{width:14px;height:14px}.plsub.from{color:var(--amber)}
+button.plsub:not([disabled]){text-decoration:underline dotted;text-underline-offset:3px}
+.pldel{width:30px;height:30px;flex:none;border:0;background:none;color:var(--dim);display:grid;place-items:center;border-radius:9px;opacity:.7}.pldel svg{width:15px;height:15px}
+.nbre{display:block;margin:4px 0 0;font-size:calc(13px*var(--fs))}
+.nbin{display:flex;gap:8px;margin-top:12px}.nbin .inp{flex:1;min-width:0;background:transparent;border-style:dashed}
+.nbid{margin-top:10px;display:flex;flex-direction:column;gap:6px}.nbid .chips{display:flex;flex-wrap:wrap;gap:6px}.nbid .chip{font-size:calc(13px*var(--fs))}.nbid .chip svg{width:13px;height:13px}
+.nbok{margin:6px 0 0;color:var(--mint);font-weight:600;display:flex;gap:6px;align-items:center}
+.nbe{margin:6px 0}.nbpv{display:flex;gap:6px;align-items:center;justify-content:center;font-size:calc(12.5px*var(--fs));margin:8px 0 0}.nbpv svg{width:14px;height:14px}
+.plhm{display:flex;align-items:center;gap:12px;width:100%;text-align:start;color:inherit}.plhm .plhi{width:40px;height:40px;flex:none;display:grid;place-items:center;border-radius:13px;background:var(--glass2);color:var(--amber)}
+.plhm .plht{flex:1;display:flex;flex-direction:column;min-width:0}.plhm > svg:last-child{opacity:.6}
 
 /* ==========================================================================
    «حصتي» — themes.css  •  ثيم «وردة» (data-theme="rose") وثيم «نبض» (data-theme="pulse")
@@ -3328,7 +3360,7 @@ let logT = {}; function queueLog(k) { clearTimeout(logT[k]); logT[k] = setTimeou
 function sendLog(k) {
   const L = S.log[k]; if (!L || !S.plan) return; const dow = new Date(k + 'T12:00:00').getDay(), day = S.plan[dow % S.plan.length]; let n = 0, done = 0;
   day.slots.forEach((s, si) => s.lines.forEach((l, li) => { n++; if (L.ck[si + '_' + li]) done++; }));
-  send({ t: 'log', d: k, dow, pv: S.pv, ck: L.ck, sw: L.sw, note: L.note, skip: L.skip, water: L.water, wp: L.wp || {}, done, n, h: L.h || {}, hs: hList(), off: L.off || {}, offT: L.offT || '', sub: L.sub || 0 });
+  send({ t: 'log', d: k, dow, pv: S.pv, ck: L.ck, sw: L.sw, note: L.note, skip: L.skip, water: L.water, wp: L.wp || {}, pl: plStat(k), done, n, h: L.h || {}, hs: hList(), off: L.off || {}, offT: L.offT || '', sub: L.sub || 0 });
 }
 
 // ---- 0.49: «تسجيل اليوم» في 30 ثانية: زر الالتزام الكامل، الماء، المشي، وما خرج عن النظام، ثم «أرسل تسجيل اليوم»
@@ -4737,7 +4769,7 @@ function tabToday() {
   const d = TODAY, L = dl(d), [done, n] = itemsOfDay(d), pct = n ? Math.round(done / n * 100) : 0, C = 2 * Math.PI * 40;
   const first = (S.p.name || '').trim().split(/\s+/)[0] || '';
   let out = renameCard() + sceneHeader(first, d) + missionCard(d) + sndInvite() + radioCard() + whChip() + chalCar() + (S.fw === 'pending' ? firstWinCard() : installState() === 'done' || installState() === 'desktop' ? notifCard(true) : installCard('today')) + chalCard() + prCard() + apCard() + wkCard() + bdCard() + panCard() + pfCard();
-  out += adhCard();
+  out += adhCard() + plCard();
   const dp = dayPlan(d), kc = dp.kcal || DATA.kcal, pr = dp.p || DATA.pro, wt = +(dp.water || DATA.water), cups = Math.max(4, Math.min(16, Math.round(wt / CUP)));
   if (dp.type) out += '<div class="banner info">' + I('dumbbell') + '<span><b>' + esc(dp.type) + '</b> • كارب ' + dp.c + ' جم • دهون ' + dp.f + ' جم</span></div>';
   out += '<div class="stats3"><div class="st"><b>' + kc + '</b><small>سعرة هدفك' + (dp.type ? ' اليوم' : '') + '</small></div><div class="st"><b>' + pr + ' جم</b><small>بروتين</small></div><div class="st"><b>' + (L.water * CUP).toFixed(2).replace(/\.?0+$/, '') + ' / ' + wt.toFixed(1) + '</b><small>لتر ماء</small></div></div>';
@@ -4897,7 +4929,7 @@ function shopAuto() {                                        // من الخطة:
   return { title: 'قائمة تسوّق الأسبوع', prep: [], groups: Object.keys(by).map((g) => ({ g, items: Object.keys(by[g]).map((n) => ({ n, q: by[g][n].g ? Math.round(by[g][n].g).toLocaleString('en') + ' جم في الأسبوع' : '× ' + by[g][n].n })) })) };
 }
 function planSeg() {
-  const t = [['meals', 'وجباتي']]; if (S.work) t.push(['work', 'تمريني']); t.push(['shop', 'قائمة التسوق']);
+  const t = [['meals', 'وجباتي'], ['day', 'تخطيط اليوم']]; if (S.work) t.push(['work', 'تمريني']); t.push(['shop', 'قائمة التسوق']);
   return '<div class="segc ptseg" role="tablist" aria-label="أقسام خطتي">' + t.map((x) => '<button role="tab" class="' + ((S.pt || 'meals') === x[0] ? 'on' : '') + '" aria-selected="' + ((S.pt || 'meals') === x[0]) + '" data-act="pt" data-v="' + x[0] + '">' + x[1] + '</button>').join('') + '</div>';
 }
 document.addEventListener('load', (e) => { const t = e.target; if (t && t.tagName === 'IFRAME' && /youtube-nocookie\.com/.test(t.src || '') && t.contentWindow) try { t.contentWindow.postMessage(JSON.stringify({ event: 'listening', id: 1, channel: 'widget' }), 'https://www.youtube-nocookie.com'); } catch (x) { } }, true);
@@ -5013,8 +5045,53 @@ function planMeals(d) {                            // 0.97: اليوم: الوج
     return '<button class="t2row pmrow' + (all ? ' done' : '') + '" data-act="mealOpen" data-v="' + si + '" aria-expanded="false"><span class="tm">' + esc(hm12(s.time)) + '</span><b>' + mealIc(s.name) + esc(s.name) + '</b><span class="t2st">' + (all ? I('check') + ' تمّت' : sk ? 'لم آكلها' : dn ? dn + ' من ' + s.lines.length : '') + '</span>' + I('back') + '</button>'; }).join('');
   return '<h2 class="mealsh">وجبتك الآن</h2>' + preWater(d, nx) + mealPlate(d, nx) + mealCard(d, nx, sl[nx], true) + (rest ? '<h2 class="mealsh">باقي وجبات اليوم</h2><div class="t2list pmlist">' + rest + '</div>' : '');
 }
+// ---- 0.98: «تخطيط اليوم»: مفكرة يومية في «خطتي». أهداف تلقائية من الخطة تُشطب وحدها، وأهداف يكتبها العميل يشطبها بقلم رصاص.
+// غير المنجز من أهدافه ينتقل لليوم التالي تلقائياً موسوماً «من أمس» (مرتين على الأكثر ثم يسقط)، ويرى الأخصائي نسبة الإنجاز فقط (لا النصوص)
+const PL_IDEAS = ['أنام 7 ساعات على الأقل', 'أجهّز وجبة الغد', 'أمشي 10 دقائق بعد العشاء', 'بلا سكر مضاف اليوم', 'أبتعد عن الشاشة قبل النوم بنصف ساعة', 'أطبخ في البيت بدل الطلب من الخارج'];   // مسودة نصوص بانتظار موافقة المالك
+function plDay(k) {
+  S.pl = S.pl || {}; if (S.pl[k]) return S.pl[k];
+  const prev = Object.keys(S.pl).filter((x) => x < k).sort().pop(), carry = prev && k === dkey(new Date(now())) ? (S.pl[prev].items || []).filter((x) => !x.done && (x.c || 0) < 2).map((x) => ({ id: x.id, t: x.t, c: (x.c || 0) + 1, done: 0 })) : [];
+  S.pl[k] = { items: carry, hide: {} }; const ks = Object.keys(S.pl).sort(); if (ks.length > 21) ks.slice(0, ks.length - 21).forEach((x) => delete S.pl[x]);
+  return S.pl[k];
+}
+function plAuto(k) {                                 // [{id, t, done, prog, go}] من خطة اليوم: الوجبات، الماء، الحركة، العادات
+  if (!S.plan) return []; const dow = new Date(k + 'T12:00:00').getDay(), sl = dayPlan(dow).slots, L = S.log[k] || { ck: {}, skip: {}, water: 0 }, g = hWaterGoal(), out = [];
+  const fin = sl.filter((s, si) => (L.skip || {})[si] || s.lines.every((l, li) => (L.ck || {})[si + '_' + li])).length;
+  out.push({ id: 'meals', ic: 'utensils', t: 'آكل وجباتي في مواعيدها', done: sl.length && fin === sl.length, prog: fin + ' من ' + sl.length + ' وجبات', go: 'meals' });
+  out.push({ id: 'water', ic: 'glass', t: 'أشرب ماء اليوم كاملاً', done: (L.water || 0) >= g, prog: (L.water || 0) + ' من ' + g + ' أكواب', go: 'water' });
+  const H = L.h || {}, mv = moveFrac(k); out.push({ id: 'move', ic: 'walk', t: 'أتحرك 30 دقيقة', done: mv >= 1, prog: H.steps ? (+H.steps).toLocaleString('en-US') + ' خطوة' : (+H.move || +H.walkMin) ? Math.max(+H.move || 0, +H.walkMin || 0) + ' دقيقة' : 'سجّل مشيك أو تمرينك', go: 'move' });
+  const hb = hList().filter((id) => id !== 'water'); if (hb.length) { const ok = hb.filter((id) => hOkDay(id, k)).length; out.push({ id: 'habits', ic: 'sparkle', t: 'أكمل عاداتي', done: ok === hb.length, prog: ok + ' من ' + hb.length + ' عادات', go: 'habits' }); }
+  return out;
+}
+function plStat(k) { if (!S.pl || !S.pl[k]) return null; const P = S.pl[k], a = plAuto(k).filter((x) => !P.hide[x.id]), c = P.items || []; return { d: a.filter((x) => x.done).length + c.filter((x) => x.done).length, n: a.length + c.length }; }
+function plStrike(key) {                             // خط رصاص متعرّج يُرسم فوق النص؛ يتحرك مرة واحدة عند الشطب
+  const r = (i) => { let h = 0; for (const ch of key + i) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return (h % 1000) / 1000; }, y = (i) => (9 + (r(i) - .5) * 4).toFixed(1);
+  let d = 'M1 ' + y(0); for (let i = 1; i <= 6; i++) d += ' Q' + (i * 33 - 16) + ' ' + y(i + 10) + ' ' + (i * 33) + ' ' + y(i);
+  const an = V.plNew === key && !RM ? ' anim' : '';
+  return '<svg class="plk' + an + '" viewBox="0 0 200 18" preserveAspectRatio="none" aria-hidden="true"><path d="' + d + '" pathLength="1"/><path class="b" d="' + d + '" pathLength="1" transform="translate(0 1.2)"/></svg>';
+}
+function tabDayPlan() {
+  const off = Math.max(-6, Math.min(0, V.plOff || 0)), k = dkey(new Date(now() + off * 864e5)), today = !off, P = plDay(k), A = plAuto(k), st = plStat(k) || { d: 0, n: 0 };
+  const dt = new Date(k + 'T12:00:00'), dn = DATA.dayNames[dt.getDay()] + ' ' + dt.toLocaleDateString('ar-EG-u-nu-latn', { day: 'numeric', month: 'long' });
+  const row = (x, auto) => { const key = k + '_' + x.id, dis = !today || auto ? ' disabled' : '';
+    return '<li class="plr' + (x.done ? ' done' : '') + (auto ? ' auto' : '') + '"><button class="plc0" data-act="plTog" data-v="' + esc(x.id) + '" aria-pressed="' + !!x.done + '"' + dis + ' aria-label="' + (x.done ? 'تم: ' : '') + esc(x.t) + '">' + (x.done ? I('check') : '') + '</button>'
+      + '<span class="plt0"><span class="plx">' + esc(x.t) + (x.done ? plStrike(key) : '') + '</span>' + (auto ? '<button class="plsub" data-act="plGo" data-v="' + x.go + '"' + (today ? '' : ' disabled') + '>' + I(x.ic) + ' ' + esc(x.prog) + '</button>' : x.c ? '<span class="plsub from">من ' + (x.c > 1 ? 'قبل يومين' : 'أمس') + '</span>' : '') + '</span>'
+      + (today ? '<button class="pldel" data-act="' + (auto ? 'plHide' : 'plDel') + '" data-v="' + esc(x.id) + '" aria-label="' + (auto ? 'إخفاء' : 'حذف') + ' ' + esc(x.t) + '">' + I('x') + '</button>' : '') + '</li>'; };
+  const autos = A.filter((x) => !P.hide[x.id]), hid = A.length - autos.length, mine = P.items || [], all = st.n && st.d === st.n;
+  const ideas = PL_IDEAS.filter((t) => !mine.some((x) => x.t === t)).slice(0, 4);
+  return '<div class="row" style="justify-content:space-between"><h2>خطتي</h2></div>' + planSeg()
+    + '<section class="card nbk"><div class="nbh"><button class="btn sm sec nbpr" data-act="plOff" data-v="-1"' + (off <= -6 ? ' disabled' : '') + ' aria-label="اليوم السابق">' + I('back') + '</button><div class="nbt"><small>' + (today ? 'تخطيط اليوم' : off === -1 ? 'أمس' : 'قبل ' + (-off) + ' أيام') + '</small><b>' + esc(dn) + '</b></div><button class="btn sm sec nbn" data-act="plOff" data-v="1"' + (today ? ' disabled' : '') + ' aria-label="اليوم التالي">' + I('back') + '</button></div>'
+    + '<div class="nbp"><div class="nbm"><span>' + st.d + ' من ' + st.n + '</span><span class="nbtr"><i style="width:' + (st.n ? Math.round(st.d / st.n * 100) : 0) + '%"></i></span></div>'
+    + (all ? '<p class="nbok">' + I('sparkle') + ' أنجزت كل ما خططت له ' + (today ? 'اليوم' : 'في هذا اليوم') + '.</p>' : '')
+    + '<h3 class="nbs">من خطتك</h3><ul class="pll">' + autos.map((x) => row(x, 1)).join('') + '</ul>' + (hid && today ? '<button class="link nbre" data-act="plUnhide">أظهر الأهداف المخفية (' + hid + ')</button>' : '')
+    + '<h3 class="nbs">أهدافي</h3><ul class="pll">' + mine.map((x) => row(x, 0)).join('') + '</ul>'
+    + (today ? '<div class="nbin"><input id="plIn" class="inp" maxlength="80" placeholder="اكتب هدفاً لليوم…" aria-label="هدف جديد" autocomplete="off"><button class="btn sm" data-act="plAdd" aria-label="أضف">' + I('plus') + '</button></div>'
+      + (ideas.length ? '<div class="nbid"><small class="dim">أفكار سريعة</small><div class="chips">' + ideas.map((t) => '<button class="chip" data-act="plIdea" data-v="' + esc(t) + '">' + I('plus') + ' ' + esc(t) + '</button>').join('') + '</div></div>' : '') : (!mine.length ? '<p class="dim nbe">لم تكتب أهدافاً في هذا اليوم.</p>' : ''))
+    + '</div></section><p class="dim nbpv">' + I('lock') + ' ما تكتبه يبقى على جوالك. أخصائيك يرى نسبة إنجازك فقط.</p>';
+}
+function plCard() { if (!S.plan) return ''; const k = dkey(new Date(now())), st = plStat(k) || (plDay(k), plStat(k)); return '<button class="card plhm" data-act="plOpen"><span class="plhi">' + I('edit') + '</span><span class="plht"><b>تخطيط اليوم</b><span class="dim">' + (st.n ? st.d + ' من ' + st.n + ' أهداف' : 'اكتب أهداف يومك') + '</span></span>' + I('back') + '</button>'; }
 function tabPlan() {
-  if (S.pt === 'work' && S.work) return workView(); if (S.pt === 'shop') return shopView();
+  if (S.pt === 'work' && S.work) return workView(); if (S.pt === 'shop') return shopView(); if (S.pt === 'day') return tabDayPlan();
   const hid = S.gate && (S.day !== TODAY || !gateOpen());
   const chips = DATA.dayNames.map((n, i) => { const [a, b] = itemsOfDay(i); return '<button class="' + (S.day === i ? 'on' : '') + (i === TODAY ? ' today' : '') + '" data-act="day" data-v="' + i + '"><b>' + esc(String(n).replace('ال', '')) + '</b><span>' + (S.gate && i !== TODAY ? '🔒' : b && i <= TODAY ? Math.round(a / b * 100) + '%' : '—') + '</span></button>'; }).join('');
   return '<div class="row" style="justify-content:space-between"><h2>خطتي</h2></div>' + planSeg()
@@ -5653,6 +5730,7 @@ function sendMsg(text) {
   const m = { from: 'c', t: text, ts: now(), ctx: S.ctx }; S.msgs.push(m); S.ctx = ''; send({ t: 'msg', text: m.t, ctx: m.ctx, ts: m.ts }).then(render); return true;
 }
 document.addEventListener('keydown', (e) => {     // Enter يرسل، وShift+Enter سطر جديد
+  if (e.key === 'Enter' && !e.isComposing && e.target && e.target.id === 'plIn') { e.preventDefault(); const b = document.querySelector('[data-act="plAdd"]'); if (b) b.click(); return; }
   const t = e.target; if (e.key !== 'Enter' || e.shiftKey || e.isComposing || !t || t.id !== 'chatIn') return;
   e.preventDefault(); const b = t.parentNode.querySelector('.snd'); if (b) b.click();
 });
@@ -6062,6 +6140,14 @@ document.addEventListener('click', (e) => {
     case 'mtOpen': V.mtE = {}; sheet = { t: 'mt' }; break;
     case 'mtSave': { const r = mtRead(), base = {}; mtNames().forEach(([n, t0]) => { base[n] = t0; }); S.mt = {}; Object.keys(r).forEach((n) => { if (r[n] !== base[n]) S.mt[n] = r[n]; }); S.rem = Object.assign({ water: false, meals: false }, S.rem, { meals: true }); sheet = null; save(); remSync(true); toast('✓ حُفظت مواعيد وجباتك، وسيصلك التذكير في موعد كل وجبة'); break; }
     case 'mtReset': S.mt = {}; sheet = null; save(); remSync(true); toast('رجعت لمواعيد أخصائيك'); break;
+    case 'plOpen': S.tab = 'plan'; S.pt = 'day'; V.plOff = 0; break;
+    case 'plOff': V.plOff = Math.max(-6, Math.min(0, (V.plOff || 0) + +v)); break;
+    case 'plTog': { const k = dkey(new Date(now())), P = plDay(k), x = P.items.find((y) => y.id === v); if (x) { x.done = x.done ? 0 : 1; V.plNew = x.done ? k + '_' + x.id : ''; setTimeout(() => { V.plNew = ''; }, 900); queueLog(k); } break; }
+    case 'plAdd': case 'plIdea': { const t = (a === 'plIdea' ? v : (($('#plIn') || {}).value || '')).trim().slice(0, 80); if (!t) break; const k = dkey(new Date(now())), P = plDay(k); if (P.items.length >= 20) { toast('20 هدفاً تكفي ليوم واحد'); break; } P.items.push({ id: 'u' + now().toString(36) + Math.random().toString(36).slice(2, 5), t, done: 0 }); queueLog(k); if (a === 'plAdd') setTimeout(() => { const i = $('#plIn'); if (i) i.focus(); }, 40); break; }
+    case 'plDel': { const k = dkey(new Date(now())), P = plDay(k); P.items = P.items.filter((y) => y.id !== v); queueLog(k); break; }
+    case 'plHide': { const k = dkey(new Date(now())), P = plDay(k); P.hide[v] = 1; queueLog(k); break; }
+    case 'plUnhide': { const k = dkey(new Date(now())), P = plDay(k); P.hide = {}; queueLog(k); break; }
+    case 'plGo': if (v === 'habits') sheet = { t: 'hb' }; else if (v === 'move') sheet = { t: 'daylog' }; else { S.pt = 'meals'; S.day = TODAY; if (v === 'water') setTimeout(() => { const w = document.getElementById('wrow'); if (w) w.scrollIntoView({ block: 'center' }); }, 60); } break;
     case 'wpre': { const L = dl(TODAY), si = +v; L.wp = L.wp || {}; if (L.wp[si]) { delete L.wp[si]; L.water = Math.max(0, (L.water || 0) - 2); } else { L.wp[si] = 1; L.water = Math.min(24, (L.water || 0) + 2); } queueLog(dkey(new Date())); break; }
     case 'adhOpen': S.tab = 'plan'; S.day = TODAY; break;
     case 'whole': { const L = dl(TODAY), s = dayPlan(TODAY).slots[+v], all = s.lines.every((l, li) => L.ck[v + '_' + li]); s.lines.forEach((l, li) => { if (all) delete L.ck[v + '_' + li]; else L.ck[v + '_' + li] = 1; }); delete L.skip[v]; queueLog(dkey(new Date())); break; }
