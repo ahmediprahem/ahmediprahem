@@ -974,3 +974,29 @@ button.plsub:not([disabled]){text-decoration:underline dotted;text-underline-off
 .nbe{margin:6px 0}.nbpv{display:flex;gap:6px;align-items:center;justify-content:center;font-size:calc(12.5px*var(--fs));margin:8px 0 0}.nbpv svg{width:14px;height:14px}
 .plhm{display:flex;align-items:center;gap:12px;width:100%;text-align:start;color:inherit}.plhm .plhi{width:40px;height:40px;flex:none;display:grid;place-items:center;border-radius:13px;background:var(--glass2);color:var(--amber)}
 .plhm .plht{flex:1;display:flex;flex-direction:column;min-width:0}.plhm > svg:last-child{opacity:.6}
+/* 0.99: المقدمة القصصية (اختيار الدولة ثم أربع شاشات تُكتب حرفاً حرفاً). الألوان من الثيم */
+.intro{padding:0 22px;color:var(--text)}.intro h1{font-size:calc(34px*var(--fs));font-weight:700;line-height:1.3;margin:0;text-wrap:balance}
+.in-top{margin-top:calc(72px + env(safe-area-inset-top,0px));text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px}.in-top p{color:var(--mut);margin:0}
+.in-logo{width:74px;height:74px;margin-bottom:6px}.in-logo svg,.in-logo img{width:100%;height:100%}
+.in-ccs{flex:1;overflow:auto;display:grid;grid-template-columns:1fr 1fr;gap:10px;align-content:start;margin-top:22px;padding-bottom:calc(22px + env(safe-area-inset-bottom,0px))}
+.in-c{display:flex;align-items:center;gap:10px;min-height:54px;padding:0 14px;border-radius:16px;border:1px solid var(--line2);background:var(--glass);color:var(--text);font:inherit;font-weight:600;font-size:calc(16px*var(--fs));text-align:start;cursor:pointer}
+.in-c span{font-size:22px}.in-c:active{transform:scale(.97);background:var(--glass2)}
+.in-dots{display:flex;gap:6px;justify-content:center;margin-top:calc(26px + env(safe-area-inset-top,0px))}.in-dots i{width:22px;height:4px;border-radius:4px;background:var(--line2)}.in-dots i.on{background:var(--mint);width:34px}.in-dots i.was{background:var(--mint);opacity:.45}
+.in-body{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;text-align:center;padding-top:9vh;animation:inrise .5s both}
+@keyframes inrise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.in-sub{color:var(--amber);font-weight:700;font-size:calc(18px*var(--fs));margin:10px 0 0}
+.in-ls{list-style:none;margin:26px 0 0;padding:0;display:flex;flex-direction:column;gap:12px;width:100%;align-items:center}
+.in-l{min-height:1.7em;font-size:calc(19px*var(--fs));color:var(--mut)}.in-l.p{font-size:calc(20px*var(--fs));color:var(--text);max-width:22ch;line-height:1.8}
+.in-caret{display:inline-block;width:2px;height:1.1em;margin-inline-start:2px;vertical-align:-3px;background:var(--mint);animation:inblink .7s steps(1) infinite,injit .12s linear infinite}
+@keyframes inblink{50%{opacity:0}}@keyframes injit{0%{transform:translate(0,0)}25%{transform:translate(.6px,-.6px)}50%{transform:translate(-.5px,.5px)}75%{transform:translate(.4px,.6px)}}
+.in-punch{margin:24px 0 0;color:var(--amber);font-weight:700;font-size:calc(17px*var(--fs));max-width:24ch;line-height:1.7;opacity:0;transform:translateY(8px);transition:opacity .5s,transform .5s}
+.in-art{margin-top:auto;width:min(64%,250px);color:var(--text);opacity:0;transform:translateY(12px) scale(.96);transition:opacity .6s .25s,transform .6s .25s;padding-bottom:8px}.in-art svg{width:100%;height:auto;display:block}
+.in-foot{opacity:0;transform:translateY(10px);transition:opacity .45s .35s,transform .45s .35s;pointer-events:none;padding-inline:0}
+.intro.fin .in-punch,.intro.fin .in-art,.intro.fin .in-foot{opacity:1;transform:none}.intro.fin .in-foot{pointer-events:auto}
+.in-ls.cards{gap:12px;margin-top:30px}.in-card{display:flex;align-items:center;gap:12px;width:100%;text-align:start;padding:14px 16px;border-radius:18px;background:var(--glass);border:1px solid var(--line);font-size:calc(16px*var(--fs));font-weight:600;opacity:0;animation:inrise .55s forwards}
+.in-card svg{width:24px;height:24px;flex:none;color:var(--mint)}
+.ia-needle{transform-box:view-box;transform-origin:74px 92px;animation:ianeedle 1.6s ease-in-out infinite alternate}@keyframes ianeedle{from{transform:rotate(-48deg)}to{transform:rotate(42deg)}}
+.ia-pg{animation:iafly 3s ease-in-out infinite}.ia-pg.p2{animation-delay:-1s}.ia-pg.p3{animation-delay:-2s}@keyframes iafly{0%{transform:translate(0,8px) rotate(0);opacity:0}30%{opacity:.9}100%{transform:translate(14px,-22px) rotate(24deg);opacity:0}}
+.ia-walk{animation:iawalk 3.4s ease-in-out infinite alternate}@keyframes iawalk{from{transform:translate(-34px,34px)}to{transform:translate(52px,-8px)}}
+.ia-path{animation:iadash 1.2s linear infinite}@keyframes iadash{to{stroke-dashoffset:-22}}
+@media (prefers-reduced-motion:reduce){.in-caret,.ia-needle,.ia-pg,.ia-walk,.ia-path,.in-body,.in-card{animation:none}.in-card{opacity:1}.ia-pg{opacity:.85}}

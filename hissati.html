@@ -981,6 +981,32 @@ button.plsub:not([disabled]){text-decoration:underline dotted;text-underline-off
 .nbe{margin:6px 0}.nbpv{display:flex;gap:6px;align-items:center;justify-content:center;font-size:calc(12.5px*var(--fs));margin:8px 0 0}.nbpv svg{width:14px;height:14px}
 .plhm{display:flex;align-items:center;gap:12px;width:100%;text-align:start;color:inherit}.plhm .plhi{width:40px;height:40px;flex:none;display:grid;place-items:center;border-radius:13px;background:var(--glass2);color:var(--amber)}
 .plhm .plht{flex:1;display:flex;flex-direction:column;min-width:0}.plhm > svg:last-child{opacity:.6}
+/* 0.99: المقدمة القصصية (اختيار الدولة ثم أربع شاشات تُكتب حرفاً حرفاً). الألوان من الثيم */
+.intro{padding:0 22px;color:var(--text)}.intro h1{font-size:calc(34px*var(--fs));font-weight:700;line-height:1.3;margin:0;text-wrap:balance}
+.in-top{margin-top:calc(72px + env(safe-area-inset-top,0px));text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px}.in-top p{color:var(--mut);margin:0}
+.in-logo{width:74px;height:74px;margin-bottom:6px}.in-logo svg,.in-logo img{width:100%;height:100%}
+.in-ccs{flex:1;overflow:auto;display:grid;grid-template-columns:1fr 1fr;gap:10px;align-content:start;margin-top:22px;padding-bottom:calc(22px + env(safe-area-inset-bottom,0px))}
+.in-c{display:flex;align-items:center;gap:10px;min-height:54px;padding:0 14px;border-radius:16px;border:1px solid var(--line2);background:var(--glass);color:var(--text);font:inherit;font-weight:600;font-size:calc(16px*var(--fs));text-align:start;cursor:pointer}
+.in-c span{font-size:22px}.in-c:active{transform:scale(.97);background:var(--glass2)}
+.in-dots{display:flex;gap:6px;justify-content:center;margin-top:calc(26px + env(safe-area-inset-top,0px))}.in-dots i{width:22px;height:4px;border-radius:4px;background:var(--line2)}.in-dots i.on{background:var(--mint);width:34px}.in-dots i.was{background:var(--mint);opacity:.45}
+.in-body{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;text-align:center;padding-top:9vh;animation:inrise .5s both}
+@keyframes inrise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.in-sub{color:var(--amber);font-weight:700;font-size:calc(18px*var(--fs));margin:10px 0 0}
+.in-ls{list-style:none;margin:26px 0 0;padding:0;display:flex;flex-direction:column;gap:12px;width:100%;align-items:center}
+.in-l{min-height:1.7em;font-size:calc(19px*var(--fs));color:var(--mut)}.in-l.p{font-size:calc(20px*var(--fs));color:var(--text);max-width:22ch;line-height:1.8}
+.in-caret{display:inline-block;width:2px;height:1.1em;margin-inline-start:2px;vertical-align:-3px;background:var(--mint);animation:inblink .7s steps(1) infinite,injit .12s linear infinite}
+@keyframes inblink{50%{opacity:0}}@keyframes injit{0%{transform:translate(0,0)}25%{transform:translate(.6px,-.6px)}50%{transform:translate(-.5px,.5px)}75%{transform:translate(.4px,.6px)}}
+.in-punch{margin:24px 0 0;color:var(--amber);font-weight:700;font-size:calc(17px*var(--fs));max-width:24ch;line-height:1.7;opacity:0;transform:translateY(8px);transition:opacity .5s,transform .5s}
+.in-art{margin-top:auto;width:min(64%,250px);color:var(--text);opacity:0;transform:translateY(12px) scale(.96);transition:opacity .6s .25s,transform .6s .25s;padding-bottom:8px}.in-art svg{width:100%;height:auto;display:block}
+.in-foot{opacity:0;transform:translateY(10px);transition:opacity .45s .35s,transform .45s .35s;pointer-events:none;padding-inline:0}
+.intro.fin .in-punch,.intro.fin .in-art,.intro.fin .in-foot{opacity:1;transform:none}.intro.fin .in-foot{pointer-events:auto}
+.in-ls.cards{gap:12px;margin-top:30px}.in-card{display:flex;align-items:center;gap:12px;width:100%;text-align:start;padding:14px 16px;border-radius:18px;background:var(--glass);border:1px solid var(--line);font-size:calc(16px*var(--fs));font-weight:600;opacity:0;animation:inrise .55s forwards}
+.in-card svg{width:24px;height:24px;flex:none;color:var(--mint)}
+.ia-needle{transform-box:view-box;transform-origin:74px 92px;animation:ianeedle 1.6s ease-in-out infinite alternate}@keyframes ianeedle{from{transform:rotate(-48deg)}to{transform:rotate(42deg)}}
+.ia-pg{animation:iafly 3s ease-in-out infinite}.ia-pg.p2{animation-delay:-1s}.ia-pg.p3{animation-delay:-2s}@keyframes iafly{0%{transform:translate(0,8px) rotate(0);opacity:0}30%{opacity:.9}100%{transform:translate(14px,-22px) rotate(24deg);opacity:0}}
+.ia-walk{animation:iawalk 3.4s ease-in-out infinite alternate}@keyframes iawalk{from{transform:translate(-34px,34px)}to{transform:translate(52px,-8px)}}
+.ia-path{animation:iadash 1.2s linear infinite}@keyframes iadash{to{stroke-dashoffset:-22}}
+@media (prefers-reduced-motion:reduce){.in-caret,.ia-needle,.ia-pg,.ia-walk,.ia-path,.in-body,.in-card{animation:none}.in-card{opacity:1}.ia-pg{opacity:.85}}
 
 /* ==========================================================================
    «حصتي» — themes.css  •  ثيم «وردة» (data-theme="rose") وثيم «نبض» (data-theme="pulse")
@@ -4065,8 +4091,46 @@ const onbPhoto = (i) => ONB_IMG[i] ? '<i class="onb-photo" style="background-ima
 const ONB_PLATE = '<svg viewBox="0 0 200 140" aria-hidden="true"><ellipse cx="100" cy="82" rx="86" ry="46" fill="rgba(255,255,255,.1)" stroke="currentColor" stroke-opacity=".5" stroke-width="2"/><ellipse cx="100" cy="82" rx="62" ry="32" fill="none" stroke="currentColor" stroke-opacity=".25"/><circle cx="78" cy="76" r="17" fill="#ffe9a8"/><circle cx="78" cy="76" r="8" fill="#ffb931"/><circle cx="116" cy="70" r="15" fill="#ffe9a8"/><circle cx="116" cy="70" r="7" fill="#ffb931"/><path d="M62 98c14 8 44 10 76 0" fill="none" stroke="#6fe3a9" stroke-width="7" stroke-linecap="round"/><circle cx="140" cy="94" r="10" fill="#e85d75"/><path d="M140 84c2-6 6-8 9-8" stroke="#6fe3a9" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M58 52c8-14 22-18 30-10" stroke="currentColor" stroke-opacity=".5" fill="none" stroke-width="3" stroke-linecap="round"><animate attributeName="d" dur="3s" repeatCount="indefinite" values="M58 52c8-14 22-18 30-10;M58 50c8-16 24-14 30-12;M58 52c8-14 22-18 30-10"/></path></svg>';
 const ONB_ALT = ['½ كوب جبن قريش', '30 جم جبنة بيضاء', '3 بيضات مسلوقة'], ONB_ALT2 = ['1 كوب حليب قليل الدسم', '170 جم زبادي سادة', '⅔ كوب لبن رائب'];
 function onbBars(i) { return '<div class="onb-bars" aria-hidden="true">' + [1, 2, 3].map((n) => '<i class="' + (n < i ? 'done' : n === i ? 'cur' : '') + '"><b' + (n === i && !RM ? ' class="fill"' : '') + '></b></i>').join('') + '</div>'; }
+// ---- 0.99: المقدمة القصصية قبل التعريف: يختار العميل دولته فنخاطبه بلهجته، ثم أربع شاشات تُكتب سطورها حرفاً حرفاً مع اهتزاز خفيف لكل حرف
+// (الاهتزاز لأندرويد؛ آيفون لا يدعمه في المتصفح). نصوص اللهجات مسودة بانتظار مراجعة المالك
+const INTRO_KEY = 'hissati_intro', INTRO_CC = 'hissati_cc';
+const INTRO_C = [['eg', '🇪🇬', 'مصر', 'eg'], ['sa', '🇸🇦', 'السعودية', 'sa'], ['ae', '🇦🇪', 'الإمارات', 'gulf'], ['kw', '🇰🇼', 'الكويت', 'gulf'], ['qa', '🇶🇦', 'قطر', 'gulf'], ['bh', '🇧🇭', 'البحرين', 'gulf'], ['om', '🇴🇲', 'عُمان', 'gulf'], ['jo', '🇯🇴', 'الأردن', 'lev'], ['ps', '🇵🇸', 'فلسطين', 'lev'], ['sy', '🇸🇾', 'سوريا', 'lev'], ['lb', '🇱🇧', 'لبنان', 'lev'], ['iq', '🇮🇶', 'العراق', 'fus'], ['ye', '🇾🇪', 'اليمن', 'fus'], ['sd', '🇸🇩', 'السودان', 'fus'], ['ly', '🇱🇾', 'ليبيا', 'fus'], ['tn', '🇹🇳', 'تونس', 'fus'], ['dz', '🇩🇿', 'الجزائر', 'fus'], ['ma', '🇲🇦', 'المغرب', 'fus'], ['xx', '🌍', 'دولة أخرى', 'fus']];
+const INTRO_T = {
+  eg: [['من السبت', 'بنقولها كل أسبوع', ['هبدأ الدايت من السبت', 'بعد العزومة دي بس', 'الأسبوع الجاي إن شاء الله'], '', 'أيوه، ده أنا!'], ['والسبت بييجي…', '', ['نبدأ بحماس', 'نجوع يومين', 'ونرجع زي ما كنا'], 'عشان الدايت كان عقاب، مش خطة على مقاسنا', 'كمّل'], ['زِنها مختلفة', 'مش دايت وخلاص', ['خطة من أخصائيك، بأكل بتحبه', 'طبقك بيتملي وأنت بتعلّم وجباتك', 'كوبايتين مية قبل كل وجبة، وتذكير في ميعادك'], '', 'كمّل'], ['خطوة واحدة النهارده', '', ['مش هنغيّر حياتك في يوم. هنمشي معاك خطوة بخطوة.'], '', 'يلا نبدأ']],
+  sa: [['من الأحد', 'نقولها كل أسبوع', ['ببدأ الدايت من الأحد', 'بس بعد هالعزيمة', 'الأسبوع الجاي إن شاء الله'], '', 'إيه، هذا أنا!'], ['ويجي الأحد…', '', ['نبدأ متحمسين', 'نجوع يومين', 'ونرجع مثل ما كنا'], 'لأن الدايت كان عقاب، مو خطة على مقاسنا', 'كمّل'], ['زِنها غير', 'مو دايت وبس', ['خطة من أخصائيك، بأكل تحبه', 'صحنك يمتلي وأنت تعلّم وجباتك', 'كوبين موية قبل كل وجبة، وتذكير بوقتك'], '', 'كمّل'], ['خطوة وحدة اليوم', '', ['ما راح نغيّر حياتك بيوم. نمشي معك خطوة خطوة.'], '', 'يلا نبدأ']],
+  gulf: [['من الأحد', 'نقولها كل أسبوع', ['ببدأ الدايت من الأحد', 'بس بعد هالعزيمة', 'الأسبوع الياي إن شاء الله'], '', 'إي، هذا أنا!'], ['وييي الأحد…', '', ['نبدأ متحمسين', 'نجوع يومين', 'ونرجع مثل ما كنا'], 'لأن الدايت كان عقاب، مو خطة على مقاسنا', 'كمّل'], ['زِنها غير', 'مو دايت وبس', ['خطة من أخصائيك، بأكل تحبه', 'صحنك يمتلي وأنت تعلّم وجباتك', 'كوبين ماي قبل كل وجبة، وتذكير بوقتك'], '', 'كمّل'], ['خطوة وحدة اليوم', '', ['ما راح نغيّر حياتك بيوم. نمشي وياك خطوة خطوة.'], '', 'يلا نبدأ']],
+  lev: [['من الاثنين', 'منقولها كل أسبوع', ['رح بلّش الدايت من الاثنين', 'بس بعد هالعزيمة', 'الأسبوع الجاي إن شاء الله'], '', 'إي، هاد أنا!'], ['وبيجي الاثنين…', '', ['منبلّش بحماس', 'منجوع يومين', 'ومنرجع متل ما كنّا'], 'لأنو الدايت كان عقاب، مش خطة على قياسنا', 'كمّل'], ['زِنها غير', 'مش دايت وبس', ['خطة من أخصائيك، بأكل بتحبّه', 'صحنك بيتعبّى وأنت عم تعلّم وجباتك', 'كاستين مي قبل كل وجبة، وتذكير بوقتك'], '', 'كمّل'], ['خطوة وحدة اليوم', '', ['ما رح نغيّر حياتك بيوم. منمشي معك خطوة خطوة.'], '', 'يلا نبلّش']],
+  fus: [['غداً', 'نقولها دائماً', ['سأبدأ الحمية غداً', 'بعد هذه المناسبة فقط', 'الأسبوع المقبل إن شاء الله'], '', 'نعم، هذا أنا!'], ['ويأتي الغد…', '', ['نبدأ بحماس', 'نجوع يومين', 'ثم نعود كما كنّا'], 'لأن الحمية كانت عقاباً، لا خطة تناسبنا', 'متابعة'], ['زِنها مختلفة', 'ليست حمية عابرة', ['خطة من أخصائيك، بطعام تحبه', 'طبقك يمتلئ وأنت تعلّم وجباتك', 'كوبان من الماء قبل كل وجبة، وتذكير في موعدك'], '', 'متابعة'], ['خطوة واحدة اليوم', '', ['لن نغيّر حياتك في يوم. سنمشي معك خطوة بخطوة.'], '', 'هيا نبدأ']]
+};
+const INTRO_ART = ['', '<svg viewBox="0 0 220 150" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="26" y="52" width="96" height="78" rx="18"/><path d="M48 92a26 26 0 0 1 52 0z"/><path d="M56 80l3 3M74 70v4M92 80l-3 3" stroke-width="2"/><path class="ia-needle" d="M74 92V74"/><rect x="132" y="70" width="46" height="56" rx="7"/><path d="M132 86h46M144 64v12M166 64v12"/></g><g fill="var(--mint)" opacity=".85"><rect class="ia-pg p1" x="150" y="40" width="20" height="24" rx="3"/><rect class="ia-pg p2" x="176" y="24" width="18" height="22" rx="3"/><rect class="ia-pg p3" x="196" y="52" width="14" height="18" rx="3"/></g></svg>',
+  '', '<svg viewBox="0 0 240 160" aria-hidden="true"><path d="M10 150c40-8 60-34 96-40s62-30 78-62" fill="none" stroke="var(--mint)" stroke-width="16" stroke-linecap="round" opacity=".28"/><path class="ia-path" d="M10 150c40-8 60-34 96-40s62-30 78-62" fill="none" stroke="var(--mint)" stroke-width="3" stroke-linecap="round" stroke-dasharray="2 9"/><g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M192 50V14"/><path d="M192 16l26 8-26 9" fill="var(--amber)" stroke="var(--amber)"/><g class="ia-walk"><circle cx="76" cy="74" r="9"/><path d="M76 84v26M76 92l-13 9M76 92l12 7M76 110l-10 20M76 110l12 18"/></g></g></svg>'];
+const introSeen = () => { if (DEMO) return true; try { return localStorage.getItem(INTRO_KEY) === '1'; } catch (e) { return true; } };
+const introOn = () => V.screen === 'onb' && V.onb && V.onb.in !== -1 && !introSeen();
+function introDia(o) { const c = INTRO_C.find((x) => x[0] === o.cc); return INTRO_T[c ? c[3] : 'fus']; }
+function scrIntro(o) {
+  const st = o.in || 0, skip = '<button class="onb-skip" data-act="introSkip">تخطّي</button>';
+  if (!st) return '<div class="scr onb intro in-cc"><div class="onb-mesh"><i></i><i></i><i></i></div>' + skip + '<div class="in-top"><div class="in-logo" role="img" aria-label="زنها">' + LOGO + '</div><h1>أهلاً بك في زِنها</h1><p>من أي بلد أنت؟ لنكلّمك بلهجتك.</p></div><div class="in-ccs" role="list">' + INTRO_C.map((c) => '<button class="in-c" role="listitem" data-act="introCC" data-v="' + c[0] + '"><span aria-hidden="true">' + c[1] + '</span>' + c[2] + '</button>').join('') + '</div></div>';
+  const T = introDia(o)[st - 1], ty = o.ty || (o.ty = { l: 0, c: 0, done: RM || st === 3 }), cards = st === 3;
+  const lines = T[2].map((t, i) => cards ? '<li class="in-card" style="animation-delay:' + (.25 + i * .55) + 's">' + I(['book', 'utensils', 'glass'][i]) + '<span>' + esc(t) + '</span></li>' : '<li class="in-l' + (st === 4 ? ' p' : '') + '" id="inl' + i + '">' + esc(ty.done || i < ty.l ? t : i === ty.l ? t.slice(0, ty.c) : '') + (!ty.done && i === ty.l ? '<i class="in-caret"></i>' : '') + '</li>').join('');
+  return '<div class="scr onb intro in-s' + st + (ty.done ? ' fin' : '') + '" data-act="introTap"><div class="onb-mesh"><i></i><i></i><i></i></div>' + skip + '<div class="in-dots" aria-hidden="true">' + [1, 2, 3, 4].map((n) => '<i class="' + (n === st ? 'on' : n < st ? 'was' : '') + '"></i>').join('') + '</div>'
+    + '<div class="in-body"><h1>' + esc(T[0]) + '</h1>' + (T[1] ? '<p class="in-sub">' + esc(T[1]) + '</p>' : '') + '<ul class="in-ls' + (cards ? ' cards' : '') + '" aria-live="polite">' + lines + '</ul>' + (T[3] ? '<p class="in-punch">' + esc(T[3]) + '</p>' : '') + (INTRO_ART[st - 1] ? '<div class="in-art">' + INTRO_ART[st - 1] + '</div>' : '') + '</div>'
+    + '<div class="onb-foot in-foot"><button class="btn full" data-act="introNext">' + esc(T[4]) + '</button></div></div>';
+}
+let introT = 0;
+function introRun() {                                 // يكتب السطر الحالي حرفاً حرفاً في العنصر مباشرة (بلا إعادة رسم)، ويهتز الجوال اهتزازاً خفيفاً مع كل حرف
+  clearTimeout(introT); introT = 0; if (!introOn()) return; const o = V.onb, st = o.in || 0, ty = o.ty; if (!st || !ty || ty.done) return;
+  const L = introDia(o)[st - 1][2], step = () => {
+    if (!introOn() || V.onb !== o || (o.in || 0) !== st || ty.done) return; const t = L[ty.l], el = document.getElementById('inl' + ty.l);
+    if (ty.c < t.length) { ty.c++; if (el) el.innerHTML = esc(t.slice(0, ty.c)) + '<i class="in-caret"></i>'; if (t[ty.c - 1] !== ' ' && navigator.vibrate) try { navigator.vibrate(7); } catch (e) { } introT = setTimeout(step, t[ty.c - 1] === ' ' ? 95 : 58); return; }
+    if (el) el.textContent = t; if (ty.l < L.length - 1) { ty.l++; ty.c = 0; const nx = document.getElementById('inl' + ty.l); if (nx) nx.innerHTML = '<i class="in-caret"></i>'; introT = setTimeout(step, 420); return; }
+    ty.done = true; render();
+  };
+  introT = setTimeout(step, ty.l || ty.c ? 60 : 520);
+}
+function introEnd(all) { clearTimeout(introT); try { localStorage.setItem(INTRO_KEY, '1'); } catch (e) { } if (V.onb) { V.onb.in = -1; V.onb.i = 1; } if (all) onbDone(); else render(); }
 function scrOnb() {
   const o = V.onb || (V.onb = { i: 0 }), i = o.i;
+  if (introOn()) return scrIntro(o);
   if (i === 0) return '<div class="scr onb onb-splash" data-act="onbNext" role="button" aria-label="متابعة"><div class="onb-mesh"><i></i><i></i><i></i></div>' + onbPhoto(0) + '<div class="onb-logo" role="img" aria-label="زنها">' + LOGO + '</div><p class="onb-tag">مع أخصائيك… خطوة بخطوة</p><button class="onb-skip" data-act="onbSkip">تخطّي</button></div>';
   if (i <= 3) {
     const T = [['خطتك من أخصائيك', 'وجباتك بكمياتها، بدّل ما لا يناسبك بلمسة، وتبقى خطتك متوازنة.'], ['يومك بلمسة', 'الماء والعادات والأذكار… المس وشاهد تقدّمك يمتلئ أمامك.'], ['لست وحدك', 'أخصائيك يتابعك ويراسلك، وتحديات أسبوعية وشهادات تقدير تشجّعك.']][i - 1];
@@ -4096,7 +4160,7 @@ let onbP = null;
 document.addEventListener('pointerdown', (e) => { const st = e.target.closest && e.target.closest('.onb-story'); if (!st || e.target.closest('button,[data-onb]')) return; onbP = { x: e.clientX, t: setTimeout(() => { st.classList.add('hold'); onbP && (onbP.held = 1); }, 220) }; }, { passive: true });
 const onbUp = (e) => { if (!onbP) return; clearTimeout(onbP.t); const st = document.querySelector('.onb-story'); if (st) st.classList.remove('hold'); const dx = e.clientX - onbP.x; onbP = null; if (Math.abs(dx) > 48 && V.screen === 'onb') onbNextStage(dx > 0 ? 1 : -1); };
 document.addEventListener('pointerup', onbUp, { passive: true }); document.addEventListener('pointercancel', () => { if (onbP) { clearTimeout(onbP.t); onbP = null; const st = document.querySelector('.onb-story'); if (st) st.classList.remove('hold'); } }, { passive: true });
-let onbT = 0; function onbSplashTimer() { if (V.screen === 'onb' && V.onb && V.onb.i === 0) { if (!onbT) onbT = setTimeout(() => { onbT = 0; if (V.screen === 'onb' && V.onb && V.onb.i === 0) onbNextStage(1); }, RM ? 1400 : 2600); } else { clearTimeout(onbT); onbT = 0; } }
+let onbT = 0; function onbSplashTimer() { if (V.screen === 'onb' && V.onb && V.onb.i === 0 && !introOn()) { if (!onbT) onbT = setTimeout(() => { onbT = 0; if (V.screen === 'onb' && V.onb && V.onb.i === 0) onbNextStage(1); }, RM ? 1400 : 2600); } else { clearTimeout(onbT); onbT = 0; } }
 // أول إنجاز بعد التسجيل: كوب ماء واحد ← احتفال وسلسلة اليوم الأول ← بعدها فقط يُعرض التثبيت والإشعارات
 function firstWinCard() {
   return '<section class="card firstwin"><div class="fw-cup" aria-hidden="true">' + I('glass') + '</div><div><h2>ابدأ يومك: اشرب أول كوب ماء</h2><p class="dim">خطوة صغيرة تبدأ بها سلسلتك. المس الزر بعد أن تشرب.</p></div><button class="btn full" data-act="firstWin">' + I('drop') + ' شربت أول كوب</button></section>';
@@ -5763,7 +5827,7 @@ function render() {
   if (cmV) { const n = $('#cmIn'); if (n) { n.value = cmV[0]; if (cmV[1]) n.focus(); } }
   const s2 = $('.scroll'); if (s2 && key === lastKey) s2.scrollTop = top; lastKey = key;
   const th = $('#thread'); if (th) { th.dataset.pin = th.dataset.pin || '1'; const go = () => { if (th.dataset.pin !== '0') th.scrollTop = th.scrollHeight; }; go(); requestAnimationFrame(() => { go(); requestAnimationFrame(go); }); setTimeout(go, 150); if (!th._pb) { th._pb = 1; th.addEventListener('scroll', () => { th.dataset.pin = (th.scrollHeight - th.scrollTop - th.clientHeight < 80) ? '1' : '0'; }, { passive: true }); } }
-  onbSplashTimer(); fillCerts(); if (window.HxMotion) HxMotion.after(); if (S && S.chal && S.screen === 'app' && V.screen === '') chalCheck(); chalCheck(); whMaybe(); actMaybe(); badgeSync(); { const c = $('#chatIn'); if (c) c.focus(); focusChat = false; }
+  onbSplashTimer(); introRun(); fillCerts(); if (window.HxMotion) HxMotion.after(); if (S && S.chal && S.screen === 'app' && V.screen === '') chalCheck(); chalCheck(); whMaybe(); actMaybe(); badgeSync(); { const c = $('#chatIn'); if (c) c.focus(); focusChat = false; }
   if (S && K) save();
   if (!V.trSched && tourAuto()) { V.trSched = 1; setTimeout(() => { V.trSched = 0; if (tourAuto()) tourStart(); }, 900); }
 }
@@ -5920,6 +5984,9 @@ document.addEventListener('click', (e) => {
   if (a.slice(0, 2) === 'qk' && S) { if (qkAct(a, v, el)) render(); return; }
   if (a.slice(0, 2) === 'kh' && (V.khg || S)) { if (V.khg ? khGuideAct(a, v, el) : khAct(a, v)) render(); return; }
   switch (a) {
+    case 'introCC': { const o = V.onb || (V.onb = { i: 0 }); o.cc = v; try { localStorage.setItem(INTRO_CC, v); } catch (e) { } o.in = 1; o.ty = null; if (navigator.vibrate) try { navigator.vibrate(12); } catch (e) { } render(); return; }
+    case 'introTap': case 'introNext': { const o = V.onb; if (!o || !introOn()) return; if (o.ty && !o.ty.done) { o.ty.done = true; render(); return; } if (a === 'introTap') return; if ((o.in || 0) >= 4) { introEnd(false); return; } o.in = (o.in || 0) + 1; o.ty = null; render(); return; }
+    case 'introSkip': introEnd(true); return;
     case 'onbNext': onbNextStage(1); return;
     case 'onbPrev': onbNextStage(-1); return;
     case 'onbSkip': case 'onbFinish': onbDone(); return;
