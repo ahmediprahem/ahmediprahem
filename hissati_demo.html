@@ -915,6 +915,23 @@ input[type=range]{width:100%;accent-color:var(--mint)}
 .zcbody{flex:1;overflow:auto;padding:12px}.zcbox{background:var(--glass);border:1px solid var(--line);border-radius:16px;padding:12px;margin-bottom:12px}.zcbox h3{margin:0 0 8px}.zcrows{list-style:none;margin:0;padding:0}.zcrows li{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}.zcrows li.me{font-weight:700;background:rgba(37,211,102,.12);border-radius:10px;padding-inline:8px}.zcrows .zcav{width:34px;height:34px;font-size:15px}.zcr{width:30px;text-align:center;font-size:20px}.zcp{margin-inline-start:auto;font-weight:700}.zcrw{margin:0;padding-inline-start:18px}
 .zcprof{display:flex;gap:12px;align-items:center}.zcavbig{width:72px;height:72px;border-radius:50%;border:2px dashed var(--line);background:var(--glass);color:inherit;font-size:28px;font-weight:700;overflow:hidden;padding:0}.zcavbig img{width:100%;height:100%;object-fit:cover}.zccode{font:700 26px/1 monospace;letter-spacing:2px;direction:ltr;text-align:center;margin:6px 0}.zcadd{display:flex;gap:8px;margin-top:8px}.zcadd input{flex:1}.zccomp{list-style:none;padding:0;margin:0}.zccomp li{padding:6px 0}
 
+/* 0.97: طبق اليوم */
+.plc{display:block;width:100%;text-align:start;color:inherit}
+.plrow{display:flex;align-items:center;gap:16px}
+.plsvg{width:124px;height:124px;flex:none;filter:drop-shadow(0 6px 14px rgba(0,0,0,.28))}
+.plrim{fill:currentColor;fill-opacity:.1;stroke:currentColor;stroke-opacity:.28;stroke-width:1.2}
+.plwell{fill:currentColor;fill-opacity:.07;stroke:currentColor;stroke-opacity:.14;stroke-width:.8}
+.plb{fill:currentColor;fill-opacity:.07}.plb.skip{fill:none;stroke:currentColor;stroke-opacity:.4;stroke-width:1;stroke-dasharray:3 3}
+.plf{transform-box:view-box;transform-origin:60px 60px;transform:scale(var(--s,0))}
+.plf.full{filter:saturate(1.15) brightness(1.06)}
+.plhub{fill:var(--bg,#0e1440);fill-opacity:.55;stroke:currentColor;stroke-opacity:.25;stroke-width:.8}
+.plsvg.all .plrim{stroke:var(--mint);stroke-opacity:.9;stroke-width:2}
+@keyframes plgrow{from{transform:scale(var(--s0,0))}to{transform:scale(var(--s,0))}}
+.plt{flex:1;min-width:0}.plt .num{font-size:calc(30px*var(--fs));font-weight:700;line-height:1.1}
+.plleg{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:12px;font-size:calc(13px*var(--fs))}
+.plleg span{display:inline-flex;align-items:center;gap:6px;opacity:.85}.plleg span.full{opacity:1}.plleg span.skip{opacity:.55}
+.plleg i{width:10px;height:10px;border-radius:3px;flex:none}.plleg b{font-variant-numeric:tabular-nums;font-weight:600}.plleg b svg{width:14px;height:14px;vertical-align:-2px;color:var(--mint)}
+
 /* ==========================================================================
    «حصتي» — themes.css  •  ثيم «وردة» (data-theme="rose") وثيم «نبض» (data-theme="pulse")
    يُحمَّل بعد code/style.css. الثيم الحالي يبقى الافتراضي: بلا data-theme لا يتغيّر شيء.
@@ -4615,12 +4632,33 @@ setInterval(() => {
 let chX = null;
 document.addEventListener('touchstart', (e) => { const el = e.target.closest && e.target.closest('.chcar[data-n]'); chX = el ? e.touches[0].clientX : null; if (el) V.chp = 1; }, { passive: true });
 document.addEventListener('touchend', (e) => { if (chX == null) return; const el = document.querySelector('.chcar[data-n]'), dx = e.changedTouches[0].clientX - chX; chX = null; setTimeout(() => { V.chp = 0; }, 4000); if (!el || Math.abs(dx) < 45) return; const n = +el.dataset.n; V.chi = ((V.chi || 0) + (dx > 0 ? 1 : n - 1)) % n; el.querySelector('.chtr').style.transform = 'translateX(' + V.chi * 100 + '%)'; el.querySelectorAll('.chdt button').forEach((b, k) => b.classList.toggle('on', k === V.chi)); }, { passive: true });
+// ---- 0.97: «طبق اليوم»: قطاع لكل وجبة يمتلئ من المركز بمساحة تساوي نسبة ما عُلِّم منها. لا أرقام جديدة: نفس أصناف الخطة فقط
+const PL_C = ['var(--mint)', 'var(--amber)', 'var(--sky)', 'var(--coral)', '#c9a7ff', '#7fd8e8', '#f3a6d0', '#b8e07a'];
+function plateData(d) { const L = S.log[dateFor(d)] || { ck: {}, skip: {} }; return dayPlan(d).slots.map((s, si) => { const n = s.lines.length, done = s.lines.filter((l, li) => L.ck[si + '_' + li]).length; return { name: s.name, n, done, f: n ? done / n : 0, skip: !!(L.skip || {})[si] }; }); }
+function plateSvg(d) {
+  const P = plateData(d), N = P.length || 1, R = 45, gap = N > 1 ? 2.2 : 0, pt = (a, r) => { const t = (a - 90) * Math.PI / 180; return (60 + r * Math.cos(t)).toFixed(2) + ' ' + (60 + r * Math.sin(t)).toFixed(2); };
+  const wedge = (i) => { if (N === 1) return 'M60 15a45 45 0 1 0 .01 0Z'; const a = i * 360 / N + gap, b = (i + 1) * 360 / N - gap; return 'M60 60L' + pt(a, R) + 'A' + R + ' ' + R + ' 0 ' + (b - a > 180 ? 1 : 0) + ' 1 ' + pt(b, R) + 'Z'; };
+  V.pl = V.pl || {}; const t = now(), all = P.length && P.every((x) => x.f === 1);
+  const ws = P.map((x, i) => {
+    const k = dateFor(d) + '_' + i, sc = +Math.sqrt(x.f).toFixed(3), e = V.pl[k]; let an = '';
+    if (!e || e.v !== sc) { V.pl[k] = { v: sc, from: e ? e.v : 0, t }; if (!RM && sc !== (e ? e.v : 0)) an = ';--s0:' + (e ? e.v : 0) + ';animation:plgrow .6s cubic-bezier(.3,1.35,.5,1) both'; }
+    else if (!RM && e.from !== sc && t - e.t < 600) an = ';--s0:' + e.from + ';animation:plgrow .6s cubic-bezier(.3,1.35,.5,1) -' + (t - e.t) + 'ms both';
+    const w = wedge(i);
+    return '<path class="plb' + (x.skip ? ' skip' : '') + '" d="' + w + '"/><path class="plf' + (x.f === 1 ? ' full' : '') + '" data-i="' + i + '" d="' + w + '" style="fill:' + PL_C[i % PL_C.length] + ';--s:' + sc + an + '"/>';
+  }).join('');
+  return '<svg class="plsvg' + (all ? ' all' : '') + '" viewBox="0 0 120 120" role="img" aria-label="طبق اليوم: ' + P.map((x) => esc(x.name) + ' ' + (x.skip ? 'لم تؤكل' : x.done + ' من ' + x.n)).join('، ') + '"><circle class="plrim" cx="60" cy="60" r="57"/><circle class="plwell" cx="60" cy="60" r="49"/>' + ws + '<circle class="plhub" cx="60" cy="60" r="5"/></svg>';
+}
+function plateLegend(d) { return '<div class="plleg">' + plateData(d).map((x, i) => '<span class="' + (x.f === 1 ? 'full' : x.skip ? 'skip' : '') + '"><i style="background:' + PL_C[i % PL_C.length] + '"></i>' + esc(x.name) + ' <b>' + (x.skip ? 'لم آكلها' : x.f === 1 ? I('check') : x.done + '/' + x.n) + '</b></span>').join('') + '</div>'; }
+function plateCard(d, home) {
+  const [done, n] = itemsOfDay(d), pct = n ? Math.round(done / n * 100) : 0, tag = home ? 'button' : 'section';
+  return '<' + tag + ' class="card plc' + (pct === 100 ? ' all' : '') + '"' + (home ? ' data-act="tab" data-v="plan"' : '') + '><div class="plrow">' + plateSvg(d) + '<div class="plt"><small class="dim">طبق اليوم</small><div class="num">' + pct + '%</div><div class="mut">' + done + ' من ' + n + ' أصناف اليوم</div>'
+    + (pct === 100 ? '<div class="dim" style="color:var(--mint)">طبق كامل، أحسنت!</div>' : '<div class="dim">' + (home ? 'افتح «خطتي» وعلّم ما أكلته.' : 'علّم ما أكلته فيمتلئ طبقك.') + '</div>') + '</div></div>' + plateLegend(d) + '</' + tag + '>';
+}
 function tabToday() {
   const d = TODAY, L = dl(d), [done, n] = itemsOfDay(d), pct = n ? Math.round(done / n * 100) : 0, C = 2 * Math.PI * 40;
   const first = (S.p.name || '').trim().split(/\s+/)[0] || '';
   let out = renameCard() + sceneHeader(first, d) + missionCard(d) + sndInvite() + radioCard() + whChip() + chalCar() + (S.fw === 'pending' ? firstWinCard() : installState() === 'done' || installState() === 'desktop' ? notifCard(true) : installCard('today')) + chalCard() + prCard() + apCard() + wkCard() + bdCard() + panCard() + pfCard();
-  out += '<section class="card ring"><svg viewBox="0 0 100 100" role="img" aria-label="التزام اليوم ' + pct + '%"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="10"/><circle cx="50" cy="50" r="40" fill="none" stroke="#6fe3a9" stroke-width="10" stroke-linecap="round" stroke-dasharray="' + C + '" stroke-dashoffset="' + (C * (1 - pct / 100)) + '"/></svg><div style="flex:1"><div class="num">' + pct + '%</div><div class="mut">' + done + ' من ' + n + ' أصناف اليوم</div>'
-    + (pct === 100 ? '<div class="dim" style="color:var(--mint)">يوم كامل، أحسنت!</div>' : '<div class="dim">علّم ما أكلته باللمس.</div>') + '</div></section>';
+  out += plateCard(d, true);
   const dp = dayPlan(d), kc = dp.kcal || DATA.kcal, pr = dp.p || DATA.pro, wt = +(dp.water || DATA.water), cups = Math.max(4, Math.min(16, Math.round(wt / CUP)));
   if (dp.type) out += '<div class="banner info">' + I('dumbbell') + '<span><b>' + esc(dp.type) + '</b> • كارب ' + dp.c + ' جم • دهون ' + dp.f + ' جم</span></div>';
   out += '<div class="stats3"><div class="st"><b>' + kc + '</b><small>سعرة هدفك' + (dp.type ? ' اليوم' : '') + '</small></div><div class="st"><b>' + pr + ' جم</b><small>بروتين</small></div><div class="st"><b>' + (L.water * CUP).toFixed(2).replace(/\.?0+$/, '') + ' / ' + wt.toFixed(1) + '</b><small>لتر ماء</small></div></div>';
@@ -4894,7 +4932,7 @@ function tabPlan() {
   const chips = DATA.dayNames.map((n, i) => { const [a, b] = itemsOfDay(i); return '<button class="' + (S.day === i ? 'on' : '') + (i === TODAY ? ' today' : '') + '" data-act="day" data-v="' + i + '"><b>' + esc(String(n).replace('ال', '')) + '</b><span>' + (S.gate && i !== TODAY ? '🔒' : b && i <= TODAY ? Math.round(a / b * 100) + '%' : '—') + '</span></button>'; }).join('');
   return '<div class="row" style="justify-content:space-between"><h2>خطتي</h2></div>' + planSeg()
     + '<div class="dim">من ' + esc(S.dname) + ' • ' + (S.pm && S.pm.sys === 'g' ? 'نظام الجرامات: السعرات حسب نوع كل يوم' : S.pm && S.pm.ready ? esc(S.pm.ready.name) + ' • متوسط ' + DATA.kcal + ' سعرة' : DATA.kcal + ' سعرة يومياً') + ' • الإصدار ' + S.pv + '</div>'
-    + '<div class="daychips">' + chips + '</div>' + (hid ? '<section class="card stack gatec"><div class="gl">🔒</div><p class="mut">' + (S.day !== TODAY ? 'خطتك تظهر يوماً بيوم: يُفتح كل يوم في وقته بعد إرسال تسجيل اليوم السابق.' : 'أرسل تسجيل أمس من «اليوم» ليُفتح جدول اليوم.') + '</p></section>' : '') + (hid || S.day !== TODAY ? '' : waterRow()) + (hid ? '' : (dayPlan(S.day).type ? '<div class="banner info">' + I('dumbbell') + '<span><b>' + esc(dayPlan(S.day).type) + '</b> • ' + dayPlan(S.day).kcal + ' سعرة' + (dayPlan(S.day).p != null ? ' • بروتين ' + dayPlan(S.day).p + ' • كارب ' + dayPlan(S.day).c + ' • دهون ' + dayPlan(S.day).f + ' جم' : '') + '</span></div>' : '') + dayPlan(S.day).slots.map((s, si) => mealCard(S.day, si, s, S.day === TODAY)).join('') + (S.day === TODAY && !(sheet && sheet.t === 'daylog') ? dayLogCard(TODAY) : '') + ((dayPlan(S.day).tips || []).length ? '<div class="banner info">' + I('sparkle') + '<span>' + dayPlan(S.day).tips.map(esc).join(' • ') + '</span></div>' : '')) + rqCard(false);
+    + '<div class="daychips">' + chips + '</div>' + (hid ? '<section class="card stack gatec"><div class="gl">🔒</div><p class="mut">' + (S.day !== TODAY ? 'خطتك تظهر يوماً بيوم: يُفتح كل يوم في وقته بعد إرسال تسجيل اليوم السابق.' : 'أرسل تسجيل أمس من «اليوم» ليُفتح جدول اليوم.') + '</p></section>' : '') + (hid || S.day !== TODAY ? '' : waterRow()) + (hid || S.day !== TODAY ? '' : plateCard(TODAY)) + (hid ? '' : (dayPlan(S.day).type ? '<div class="banner info">' + I('dumbbell') + '<span><b>' + esc(dayPlan(S.day).type) + '</b> • ' + dayPlan(S.day).kcal + ' سعرة' + (dayPlan(S.day).p != null ? ' • بروتين ' + dayPlan(S.day).p + ' • كارب ' + dayPlan(S.day).c + ' • دهون ' + dayPlan(S.day).f + ' جم' : '') + '</span></div>' : '') + dayPlan(S.day).slots.map((s, si) => mealCard(S.day, si, s, S.day === TODAY)).join('') + (S.day === TODAY && !(sheet && sheet.t === 'daylog') ? dayLogCard(TODAY) : '') + ((dayPlan(S.day).tips || []).length ? '<div class="banner info">' + I('sparkle') + '<span>' + dayPlan(S.day).tips.map(esc).join(' • ') + '</span></div>' : '')) + rqCard(false);
 }
 function tabPrefs() {
   const lv = foodsOf('love').length, no = foodsOf('no').length;
