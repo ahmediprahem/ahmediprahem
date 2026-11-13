@@ -946,6 +946,9 @@ input[type=range]{width:100%;accent-color:var(--mint)}
 .cmr .cmb{flex:1;height:8px;border-radius:8px;background:rgba(255,255,255,.1);overflow:hidden}.cmr .cmb i{display:block;height:100%;border-radius:8px;transition:width .5s}
 .cmr .cmp{min-width:40px;text-align:end;font-variant-numeric:tabular-nums}
 .cmtip{margin-top:8px;font-size:calc(13px*var(--fs));opacity:.85;display:flex;gap:6px;align-items:center}
+.mtbtn{margin:4px 0 2px}.mtlist{display:flex;flex-direction:column;gap:2px;margin:8px 0 14px}
+.mtrow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.08)}.mtrow .mtn{flex:1;min-width:0;display:flex;flex-direction:column}
+.mtrow .mtp{display:flex;align-items:center;gap:4px;flex:none}.mtsel{width:auto;min-width:0;padding:0 6px;height:42px;font-variant-numeric:tabular-nums}
 
 /* ==========================================================================
    «حصتي» — themes.css  •  ثيم «وردة» (data-theme="rose") وثيم «نبض» (data-theme="pulse")
@@ -3998,7 +4001,17 @@ function toast(m) { toastMsg = m; clearTimeout(toastT); toastT = setTimeout(() =
 function bmi() { const w = +S.p.weight, h = +S.p.height / 100; return w && h ? (w / (h * h)).toFixed(1) : '—'; }
 function foodsOf(state) { return Object.keys(S.p.food).filter((k) => S.p.food[k] === state); }
 function mealsBy(t) { const i = MEALS.findIndex((m) => m[0] === t); return DATA.bank.filter((b) => b[1][i]); }
-const dayPlan = (dow) => S.plan[dow % S.plan.length];
+const dayPlan = (dow) => { const d = S.plan[dow % S.plan.length], sig = JSON.stringify(S.mt || {}); if (d && d.__mt !== sig) { (d.slots || []).forEach((x) => { if (x.t0 === undefined) x.t0 = x.time; x.time = (S.mt && S.mt[x.name]) || x.t0; }); d.__mt = sig; } return d; };
+// 0.97: مواعيد وجباتي: العميل يحدد وقت كل وجبة (بنظام 12 ساعة)، فتتبعه التذكيرات وماء ما قبل الوجبة. الوقت الأصلي من الأخصائي يبقى في t0
+function mtNames() { const seen = {}, out = []; (S.plan || []).forEach((d) => (d.slots || []).forEach((x) => { if (!seen[x.name]) { seen[x.name] = 1; out.push([x.name, x.t0 !== undefined ? x.t0 : x.time]); } })); return out; }
+function mtSheet() {
+  const E = V.mtE || {}, rows = mtNames().map(([n, t0], i) => { const t = E[n] || (S.mt && S.mt[n]) || t0 || '08:00', m = /^(\d{1,2}):(\d{2})/.exec(t) || [0, 8, 0], h = +m[1], mi = Math.round(+m[2] / 15) * 15 % 60, h12 = h % 12 || 12, pm = h >= 12;
+    const sel = (k, opts, v) => '<select class="inp mtsel" id="mt' + k + i + '" data-mt="' + i + '" data-mk="' + k + '" aria-label="' + esc(n) + '">' + opts.map((o) => '<option value="' + o[0] + '"' + (String(o[0]) === String(v) ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select>';
+    return '<div class="mtrow"><span class="mtn"><b>' + mealIc(n) + esc(n) + '</b><span class="dim">' + (S.mt && S.mt[n] ? 'من أخصائيك: ' + esc(hm12(t0)) : 'موعد أخصائيك') + '</span></span><span class="mtp" dir="ltr">' + sel('h', Array.from({ length: 12 }, (_, k) => [k + 1, k + 1]), h12) + '<b>:</b>' + sel('m', [[0, '00'], [15, '15'], [30, '30'], [45, '45']], mi) + sel('a', [[0, 'ص'], [1, 'م']], pm ? 1 : 0) + '</span></div>'; }).join('');
+  return '<p class="mut">اختر الوقت الذي تأكل فيه كل وجبة عادةً. يصلك تذكير الوجبة في موعدها، وتذكير كوبَي الماء قبلها بربع ساعة.</p><div class="mtlist">' + rows + '</div>'
+    + '<button class="btn full" data-act="mtSave">' + I('check') + ' احفظ مواعيدي</button>' + (S.mt && Object.keys(S.mt).length ? '<button class="btn sec full" data-act="mtReset">ارجع لمواعيد أخصائيي</button>' : '');
+}
+function mtRead() { const out = {}; mtNames().forEach(([n], i) => { const g = (k) => +(($('#mt' + k + i) || {}).value || 0), h = g('h') % 12 + (g('a') ? 12 : 0); out[n] = String(h).padStart(2, '0') + ':' + String(g('m')).padStart(2, '0'); }); return out; }
 const dl = (dow) => { const k = dateFor(dow); return (S.log[k] = S.log[k] || { ck: {}, sw: {}, note: {}, skip: {}, water: 0 }); };
 const lineT = (l) => l[2];
 function itemsOfDay(d) { let n = 0, done = 0; const L = S.log[dateFor(d)] || { ck: {} }; dayPlan(d).slots.forEach((s, si) => s.lines.forEach((l, li) => { n++; if (L.ck[si + '_' + li]) done++; })); return [done, n]; }
@@ -4408,7 +4421,7 @@ function missionCard(d) {                                  // أول وجبة ل
   const L = dl(d), dp = dayPlan(d), slots = dp.slots; let si = -1;
   for (let i = 0; i < slots.length; i++) { if (!L.skip[i] && slots[i].lines.length && !slots[i].lines.every((l, li) => L.ck[i + '_' + li])) { si = i; break; } }
   if (si >= 0) { const s = slots[si], first = s.lines[0] ? lineT(s.lines[0]) : '';
-    return '<section class="card msn"><div class="mis"><span class="mic">' + I('check') + '</span><div style="flex:1;min-width:0"><small>مهمتك الآن</small><h3>سجّل ' + esc(s.name) + '</h3>' + (s.time ? '<span class="mcd" data-t="' + esc(s.time) + '">' + mcLeft(s.time) + '</span>' : '') + '<p class="dim">' + esc(s.time || '') + (s.kcal ? ' • ' + s.kcal + ' سعرة' : '') + (first ? ' • ' + esc(first) : '') + '</p></div></div><button class="btn full" data-act="whole" data-v="' + si + '">' + I('check') + ' أكلتها كاملة</button></section>'; }
+    return '<section class="card msn"><div class="mis"><span class="mic">' + I('check') + '</span><div style="flex:1;min-width:0"><small>مهمتك الآن</small><h3>سجّل ' + esc(s.name) + '</h3>' + (s.time ? '<span class="mcd" data-t="' + esc(hm12(s.time)) + '">' + mcLeft(s.time) + '</span>' : '') + '<p class="dim">' + esc(s.time || '') + (s.kcal ? ' • ' + s.kcal + ' سعرة' : '') + (first ? ' • ' + esc(first) : '') + '</p></div></div><button class="btn full" data-act="whole" data-v="' + si + '">' + I('check') + ' أكلتها كاملة</button></section>'; }
   const g = hWaterGoal(), w = L.water || 0;
   if (w < g) return '<section class="card msn"><div class="mis"><span class="mic">' + I('glass') + '</span><div style="flex:1;min-width:0"><small>مهمتك الآن</small><h3>اشرب كوباً من الماء</h3><p class="dim">' + w + ' من ' + g + ' أكواب</p></div></div><button class="btn full" data-act="water" data-v="' + (w + 1) + '">' + I('drop') + ' شربت كوباً</button></section>';
   return '<section class="card msn done"><div class="mis"><span class="mic">' + I('check') + '</span><div style="flex:1;min-width:0"><small>مهمتك الآن</small><h3>أحسنت، أنجزت مهام اليوم</h3><p class="dim">وجباتك وماؤك كاملة. استرح، وغداً نكمل.</p></div></div></section>';
@@ -4783,7 +4796,7 @@ function tabToday2() {
     out += '<h2 class="mealsh">وجبتك التالية</h2>' + mealCard(d, nx, sl[nx], 't2');
     const rows = sl.map((s, si) => { if (si === nx) return ''; if (V.openMeal === si) return mealCard(d, si, s, 't2');
       const all = s.lines.every((l, li) => L.ck[si + '_' + li]), sk = L.skip[si];
-      return '<button class="t2row' + (all ? ' done' : '') + '" data-act="mealOpen" data-v="' + si + '"><span class="tm">' + esc(s.time) + '</span><b>' + esc(s.name) + '</b><span class="t2st">' + (all ? I('check') + ' تمّت' : sk ? 'لم آكلها' : '') + '</span>' + I('back') + '</button>'; }).join('');
+      return '<button class="t2row' + (all ? ' done' : '') + '" data-act="mealOpen" data-v="' + si + '"><span class="tm">' + esc(hm12(s.time)) + '</span><b>' + esc(s.name) + '</b><span class="t2st">' + (all ? I('check') + ' تمّت' : sk ? 'لم آكلها' : '') + '</span>' + I('back') + '</button>'; }).join('');
     if (rows) out += '<h2 class="mealsh">وجباتك اليوم</h2><div class="t2list">' + rows + '</div>';
   } else out += gateCard();
   out += waitStrip();
@@ -4853,13 +4866,13 @@ function mealCard(d, si, s, live) {
   const rbtn = rec ? '<button class="btn sm sec" data-act="rcp" data-v="' + d + '_' + si + '">' + I('book') + ' الوصفة</button>' : '';
   if (live === 't2') {
     const more = V.mealMore === si, fold = V.openMeal === si ? '<button class="btn sm sec" data-act="mealOpen" data-v="' + si + '">طيّ</button>' : '';
-    return '<section class="card meal t2meal' + (all ? ' done' : '') + (skip ? ' skip' : '') + '" id="meal' + si + '"><div class="mt"><span class="tm">' + esc(s.time) + '</span><div style="flex:1;min-width:0"><h3>' + esc(s.name) + '</h3>' + meal + '</div>' + (s.kcal ? '<span class="pc">' + s.kcal + ' سعرة</span>' : '') + fold + '</div><div class="items">' + items + '</div>'
+    return '<section class="card meal t2meal' + (all ? ' done' : '') + (skip ? ' skip' : '') + '" id="meal' + si + '"><div class="mt"><span class="tm">' + esc(hm12(s.time)) + '</span><div style="flex:1;min-width:0"><h3>' + esc(s.name) + '</h3>' + meal + '</div>' + (s.kcal ? '<span class="pc">' + s.kcal + ' سعرة</span>' : '') + fold + '</div><div class="items">' + items + '</div>'
       + (L.note[si] ? '<div class="note">' + I('edit') + ' ' + esc(L.note[si]) + '</div>' : '') + phStrip(si)
       + '<div class="macts t2acts"><button class="btn sm sec" data-act="whole" data-v="' + si + '">' + I('check') + (all ? ' تمّت' : ' أكلتها كاملة') + '</button><button class="btn sm sec" data-act="skip" data-v="' + si + '">' + (skip ? 'تراجع' : 'لم آكلها') + '</button><button class="btn sm sec" data-act="mealMore" data-v="' + si + '" aria-expanded="' + more + '">⋯ المزيد</button></div>'
       + (more ? '<div class="macts t2more"><button class="btn sm sec" data-act="note" data-v="' + si + '">' + I('edit') + ' أضفت / ملاحظة</button><button class="btn sm sec" data-act="ask" data-v="' + si + '">' + I('msg') + ' اسأل عنها</button><button class="btn sm sec" data-act="photo" data-v="' + si + '">' + I('camera') + ' صوّر وجبتك</button>' + rbtn + '</div>' : '') + '</section>';
   }
-  if (!live) return '<section class="card"><div class="row" style="justify-content:space-between"><h3>' + esc(s.name) + '</h3><span class="dim">' + esc(s.time) + (s.kcal ? ' • ' + s.kcal + ' سعرة' : '') + '</span></div>' + meal + '<ul class="plist" style="margin-top:8px">' + items + '</ul>' + (rbtn ? '<div class="macts">' + rbtn + '</div>' : '') + '</section>';
-  return '<section class="card meal' + (all ? ' done' : '') + (skip ? ' skip' : '') + '"><div class="mt"><span class="tm">' + esc(s.time) + '</span><div style="flex:1;min-width:0"><h3>' + mealIc(s.name) + esc(s.name) + '</h3>' + meal + '</div>' + (s.kcal ? '<span class="pc">' + s.kcal + ' سعرة</span>' : '') + '</div><div class="items">' + items + '</div>'
+  if (!live) return '<section class="card"><div class="row" style="justify-content:space-between"><h3>' + esc(s.name) + '</h3><span class="dim">' + esc(hm12(s.time)) + (s.kcal ? ' • ' + s.kcal + ' سعرة' : '') + '</span></div>' + meal + '<ul class="plist" style="margin-top:8px">' + items + '</ul>' + (rbtn ? '<div class="macts">' + rbtn + '</div>' : '') + '</section>';
+  return '<section class="card meal' + (all ? ' done' : '') + (skip ? ' skip' : '') + '"><div class="mt"><span class="tm">' + esc(hm12(s.time)) + '</span><div style="flex:1;min-width:0"><h3>' + mealIc(s.name) + esc(s.name) + '</h3>' + meal + '</div>' + (s.kcal ? '<span class="pc">' + s.kcal + ' سعرة</span>' : '') + '</div><div class="items">' + items + '</div>'
     + (L.note[si] ? '<div class="note">' + I('edit') + ' ' + esc(L.note[si]) + '</div>' : '') + phStrip(si)
     + '<div class="macts"><button class="btn sm sec" data-act="whole" data-v="' + si + '">' + I('check') + (all ? ' تمّت' : ' أكلتها كاملة') + '</button><button class="btn sm sec" data-act="note" data-v="' + si + '">' + I('edit') + ' أضفت / ملاحظة</button><button class="btn sm sec" data-act="skip" data-v="' + si + '">' + (skip ? 'تراجع' : 'لم آكلها') + '</button><button class="btn sm sec" data-act="ask" data-v="' + si + '">' + I('msg') + ' اسأل عنها</button><button class="btn sm sec" data-act="photo" data-v="' + si + '">' + I('camera') + ' صوّر وجبتك</button>' + rbtn + '</div></section>';
 }
@@ -4997,7 +5010,7 @@ function planMeals(d) {                            // 0.97: اليوم: الوج
   const nx = nextMeal(d), L = dl(d), rest = sl.map((s, si) => {
     if (si === nx) return ''; if (V.openMeal === si) return '<div class="pmopen">' + preWater(d, si) + mealCard(d, si, s, true) + '<button class="btn sm sec pmfold" data-act="mealOpen" data-v="' + si + '">طيّ ' + esc(s.name) + '</button></div>';
     const all = s.lines.every((l, li) => L.ck[si + '_' + li]), sk = L.skip[si], dn = s.lines.filter((l, li) => L.ck[si + '_' + li]).length;
-    return '<button class="t2row pmrow' + (all ? ' done' : '') + '" data-act="mealOpen" data-v="' + si + '" aria-expanded="false"><span class="tm">' + esc(s.time) + '</span><b>' + mealIc(s.name) + esc(s.name) + '</b><span class="t2st">' + (all ? I('check') + ' تمّت' : sk ? 'لم آكلها' : dn ? dn + ' من ' + s.lines.length : '') + '</span>' + I('back') + '</button>'; }).join('');
+    return '<button class="t2row pmrow' + (all ? ' done' : '') + '" data-act="mealOpen" data-v="' + si + '" aria-expanded="false"><span class="tm">' + esc(hm12(s.time)) + '</span><b>' + mealIc(s.name) + esc(s.name) + '</b><span class="t2st">' + (all ? I('check') + ' تمّت' : sk ? 'لم آكلها' : dn ? dn + ' من ' + s.lines.length : '') + '</span>' + I('back') + '</button>'; }).join('');
   return '<h2 class="mealsh">وجبتك الآن</h2>' + preWater(d, nx) + mealPlate(d, nx) + mealCard(d, nx, sl[nx], true) + (rest ? '<h2 class="mealsh">باقي وجبات اليوم</h2><div class="t2list pmlist">' + rest + '</div>' : '');
 }
 function tabPlan() {
@@ -5006,7 +5019,7 @@ function tabPlan() {
   const chips = DATA.dayNames.map((n, i) => { const [a, b] = itemsOfDay(i); return '<button class="' + (S.day === i ? 'on' : '') + (i === TODAY ? ' today' : '') + '" data-act="day" data-v="' + i + '"><b>' + esc(String(n).replace('ال', '')) + '</b><span>' + (S.gate && i !== TODAY ? '🔒' : b && i <= TODAY ? Math.round(a / b * 100) + '%' : '—') + '</span></button>'; }).join('');
   return '<div class="row" style="justify-content:space-between"><h2>خطتي</h2></div>' + planSeg()
     + '<div class="dim">من ' + esc(S.dname) + ' • ' + (S.pm && S.pm.sys === 'g' ? 'نظام الجرامات: السعرات حسب نوع كل يوم' : S.pm && S.pm.ready ? esc(S.pm.ready.name) + ' • متوسط ' + DATA.kcal + ' سعرة' : DATA.kcal + ' سعرة يومياً') + ' • الإصدار ' + S.pv + '</div>'
-    + '<div class="daychips">' + chips + '</div>' + (hid ? '<section class="card stack gatec"><div class="gl">🔒</div><p class="mut">' + (S.day !== TODAY ? 'خطتك تظهر يوماً بيوم: يُفتح كل يوم في وقته بعد إرسال تسجيل اليوم السابق.' : 'أرسل تسجيل أمس من «اليوم» ليُفتح جدول اليوم.') + '</p></section>' : '') + (hid || S.day !== TODAY ? '' : waterRow()) + (hid ? '' : (dayPlan(S.day).type ? '<div class="banner info">' + I('dumbbell') + '<span><b>' + esc(dayPlan(S.day).type) + '</b> • ' + dayPlan(S.day).kcal + ' سعرة' + (dayPlan(S.day).p != null ? ' • بروتين ' + dayPlan(S.day).p + ' • كارب ' + dayPlan(S.day).c + ' • دهون ' + dayPlan(S.day).f + ' جم' : '') + '</span></div>' : '') + planMeals(S.day) + (S.day === TODAY && !(sheet && sheet.t === 'daylog') ? dayLogCard(TODAY) : '') + ((dayPlan(S.day).tips || []).length ? '<div class="banner info">' + I('sparkle') + '<span>' + dayPlan(S.day).tips.map(esc).join(' • ') + '</span></div>' : '')) + rqCard(false);
+    + '<div class="daychips">' + chips + '</div>' + (hid ? '<section class="card stack gatec"><div class="gl">🔒</div><p class="mut">' + (S.day !== TODAY ? 'خطتك تظهر يوماً بيوم: يُفتح كل يوم في وقته بعد إرسال تسجيل اليوم السابق.' : 'أرسل تسجيل أمس من «اليوم» ليُفتح جدول اليوم.') + '</p></section>' : '') + (hid || S.day !== TODAY ? '' : waterRow()) + (hid ? '' : (dayPlan(S.day).type ? '<div class="banner info">' + I('dumbbell') + '<span><b>' + esc(dayPlan(S.day).type) + '</b> • ' + dayPlan(S.day).kcal + ' سعرة' + (dayPlan(S.day).p != null ? ' • بروتين ' + dayPlan(S.day).p + ' • كارب ' + dayPlan(S.day).c + ' • دهون ' + dayPlan(S.day).f + ' جم' : '') + '</span></div>' : '') + (S.day === TODAY ? '<button class="btn sm sec mtbtn" data-act="mtOpen">' + I('clock') + ' مواعيد وجباتي</button>' : '') + planMeals(S.day) + (S.day === TODAY && !(sheet && sheet.t === 'daylog') ? dayLogCard(TODAY) : '') + ((dayPlan(S.day).tips || []).length ? '<div class="banner info">' + I('sparkle') + '<span>' + dayPlan(S.day).tips.map(esc).join(' • ') + '</span></div>' : '')) + rqCard(false);
 }
 function tabPrefs() {
   const lv = foodsOf('love').length, no = foodsOf('no').length;
@@ -5588,6 +5601,8 @@ function sheetHtml() {
       + '<p class="dim">الرمز صالح 15 دقيقة ولمرة واحدة، ويحمل مفتاح فك التشفير فلا ترسله لأحد. بعد النقل يُمسح الحساب من هنا تلقائياً.</p>';
   } else if (sheet.t === 'rcp') {
     const [d0, s0] = sheet.k.split('_').map(Number); h = esc(dayPlan(d0).slots[s0].meal); b = rcpSheet();
+  } else if (sheet.t === 'mt') {
+    h = I('clock') + ' مواعيد وجباتي'; b = mtSheet();
   } else if (sheet.t === 'post') {
     h = V.post && V.post.k === 'b' ? 'تأجيل الصورة الشهرية' : 'تأجيل قياس الأسبوع'; b = postSheet();
   } else if (sheet.t === 'achs') {
@@ -6044,6 +6059,9 @@ document.addEventListener('click', (e) => {
 
     case 'day': S.day = +v; break;
     case 'ck': { const L = dl(TODAY); L.ck[v] = !L.ck[v]; if (!L.ck[v]) delete L.ck[v]; queueLog(dkey(new Date())); break; }
+    case 'mtOpen': V.mtE = {}; sheet = { t: 'mt' }; break;
+    case 'mtSave': { const r = mtRead(), base = {}; mtNames().forEach(([n, t0]) => { base[n] = t0; }); S.mt = {}; Object.keys(r).forEach((n) => { if (r[n] !== base[n]) S.mt[n] = r[n]; }); S.rem = Object.assign({ water: false, meals: false }, S.rem, { meals: true }); sheet = null; save(); remSync(true); toast('✓ حُفظت مواعيد وجباتك، وسيصلك التذكير في موعد كل وجبة'); break; }
+    case 'mtReset': S.mt = {}; sheet = null; save(); remSync(true); toast('رجعت لمواعيد أخصائيك'); break;
     case 'wpre': { const L = dl(TODAY), si = +v; L.wp = L.wp || {}; if (L.wp[si]) { delete L.wp[si]; L.water = Math.max(0, (L.water || 0) - 2); } else { L.wp[si] = 1; L.water = Math.min(24, (L.water || 0) + 2); } queueLog(dkey(new Date())); break; }
     case 'adhOpen': S.tab = 'plan'; S.day = TODAY; break;
     case 'whole': { const L = dl(TODAY), s = dayPlan(TODAY).slots[+v], all = s.lines.every((l, li) => L.ck[v + '_' + li]); s.lines.forEach((l, li) => { if (all) delete L.ck[v + '_' + li]; else L.ck[v + '_' + li] = 1; }); delete L.skip[v]; queueLog(dkey(new Date())); break; }

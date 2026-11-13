@@ -38,5 +38,18 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   assert(/التزامك اليوم/.test(txt) && /الماء/.test(txt) && /الأكل/.test(txt) && /الحركة/.test(txt)); assert.strictEqual(await m.locator('.cmt .cmr').count(), 3); assert(await m.locator('.cmt .cmmsg').innerText());
   await m.locator('.cmt').screenshot({ path: (shot || '/tmp/x') + '3.png' }).catch(() => { });
   await m.click('.cmt .cmgo'); await m.waitForSelector('.plc'); ok('الرئيسية: «التزامك اليوم» بنسبة عامة وثلاثة أشرطة (ماء، أكل، حركة) وجملة تحفيزية، ولمسها يفتح «خطتي»');
+  // مواعيد وجباتي بنظام 12 ساعة: العميل يغيّر موعد الغداء فتتبعه التذكيرات وماء ما قبل الوجبة
+  await m.click('[data-act="tab"][data-v="plan"]'); await m.click('[data-act="mtOpen"]'); await m.waitForSelector('.sheet .mtrow');
+  const li = P.names.findIndex((x) => /غداء|غذاء/.test(x)); assert(li >= 0);
+  const ri = await m.evaluate((nm) => [...document.querySelectorAll('.sheet .mtrow .mtn b')].findIndex((b) => b.textContent.includes(nm)), P.names[li]);
+  assert.deepStrictEqual(await m.evaluate(() => [...document.querySelector('.sheet [data-mk="a"]').options].map((o) => o.text)), ['ص', 'م'], 'ص/م');
+  assert.strictEqual(await m.locator('.sheet [data-mk="h"] >> nth=0').locator('option').count(), 12, 'ساعات 1–12');
+  await m.selectOption('#mth' + ri, '2'); await m.selectOption('#mtm' + ri, '30'); await m.selectOption('#mta' + ri, '1'); if (shot) await m.screenshot({ path: shot + 'mt.png' });
+  await m.click('[data-act="mtSave"]'); await m.waitForFunction(() => !document.querySelector('.sheet .mtrow'));
+  const r2 = await m.evaluate(() => window.HissatiApp.remItems()), lm = r2.find((x) => x.t === 'meal' && /غداء|غذاء/.test(x.label)), lp = r2.find((x) => x.t === 'wpre' && /غداء|غذاء/.test(x.label));
+  assert.strictEqual(lm.m, 14 * 60 + 30, 'تذكير الغداء 2:30 م'); assert.strictEqual(lp.m, 14 * 60 + 15, 'كوبا الماء 2:15 م');
+  assert(/2:30 م/.test(await m.innerText('body')), 'الوقت يظهر بنظام 12 ساعة'); assert(await m.evaluate(() => window.HissatiApp.state().rem.meals === true), 'تفعيل تذكير الوجبات');
+  await m.click('[data-act="mtOpen"]'); await m.waitForSelector('[data-act="mtReset"]'); await m.click('[data-act="mtReset"]'); await m.waitForFunction(() => !Object.keys(window.HissatiApp.state().mt || {}).length);
+  ok('مواعيد وجباتي: يختار العميل الساعة والدقيقة وص/م لكل وجبة، فيصله تذكير الوجبة في موعدها وكوبا الماء قبلها بربع ساعة، ويظهر الوقت بنظام 12 ساعة، ويرجع لمواعيد أخصائيه متى شاء');
   assert.deepStrictEqual(errs, []); await close(); console.log('\nنجح ' + n + ' اختباراً');
 })().catch((e) => { console.error('✘', String(e && e.stack || e).slice(0, 1200)); process.exit(1); });
