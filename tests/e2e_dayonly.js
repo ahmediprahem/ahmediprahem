@@ -17,7 +17,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   await m.click('[data-act="tab"][data-v="plan"]'); const chips = await m.textContent('.daychips'); assert((chips.match(/🔒/g) || []).length === 6, chips); assert(await m.isVisible('.gatec'));
   const other = await m.getAttribute('.daychips button:not(.today)', 'data-v'); await m.click('.daychips button[data-v="' + other + '"]'); assert(/يوماً بيوم/.test(await m.textContent('.gatec'))); assert.strictEqual(await m.locator('.plist').count(), 0);
   ok('قبل تسجيل أمس: «اليوم» يعرض «🔒 جدول اليوم ينتظر تسجيل أمس» بلا وجبات، و«خطتي» تُظهر اليوم وحده وباقي الأيام 🔒');
-  await m.click('[data-act="tab"][data-v="today"]'); await m.click('.gatec [data-act="yAll"]'); await m.click('[data-act="tab"][data-v="plan"]'); await m.click('.daychips button.today'); await m.waitForSelector('#daylog'); assert(await m.locator('.card.meal').count() >= 3);
+  await m.click('[data-act="tab"][data-v="today"]'); await m.click('.gatec [data-act="yAll"]'); await m.click('[data-act="tab"][data-v="plan"]'); await m.click('.daychips button.today'); await m.waitForSelector('#daylog'); assert(await m.locator('.card.meal, .pmrow').count() >= 3);
   await m.evaluate(() => { Date.now = window.__dn; }); await cPoll(); await hxCheck(); const c = await C(), ys = Object.keys(c.hx.logs).sort(), yl = c.hx.logs[ys[0]]; assert(yl.sub > 0 && yl.done === yl.n, JSON.stringify(yl));
   ok('«التزمت بأمس كله» يرسل تسجيل أمس (100% ✓) إلى «حصة» ويفتح جدول اليوم فوراً');
   await m.evaluate(() => { const S = window.HissatiApp.state(); Object.keys(S.log).forEach((k) => { delete S.log[k].sub; }); const t = new Date(); t.setHours(15, 0, 0, 0); const T = t.getTime(); window.__dn = window.__dn || Date.now; Date.now = () => T; });

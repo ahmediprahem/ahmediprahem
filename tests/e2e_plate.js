@@ -1,24 +1,42 @@
-// «طبق اليوم» (0.97): قطاع لكل وجبة يمتلئ بنسبة ما عُلِّم منها؛ يظهر في «خطتي» فوق الوجبات وفي الرئيسية، ويكتمل مع اكتمال اليوم
+// 0.97: «طبق الوجبة» فوق الوجبة التي عليها الدور فقط (قطاع لكل صنف) والباقي مطوي؛ كوبان ماء قبل كل وجبة رئيسية بربع ساعة (من هدف اليوم نفسه)
+// وتذكيرهما؛ و«التزامك اليوم» في الرئيسية: الماء والأكل والحركة بنسب وجملة تحفيزية وأضعف جانب
 const assert = require('assert'), linked = require('./hx_link_helper');
 let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
 (async () => {
-  const { m, close } = await linked('plate', errs), shot = process.env.PLATE_SHOT;
+  const { m, close } = await linked('plate', errs), shot = process.env.PLATE_SHOT, snap = (f) => shot ? m.screenshot({ path: shot + f + '.png' }) : null;
   await m.click('[data-act="tab"][data-v="plan"]'); await m.waitForSelector('.plc .plsvg');
-  const slots = await m.evaluate(() => { const s = window.HissatiApp.state(); return s.plan[new Date().getDay() % s.plan.length].slots.map((x) => x.lines.length); });
+  const P = await m.evaluate(() => { const A = window.HissatiApp, S = A.state(), sl = S.plan[new Date().getDay() % S.plan.length].slots; return { names: sl.map((s) => s.name), lines: sl.map((s) => s.lines.length) }; });
+  assert.strictEqual(await m.locator('.plc').count(), 1, 'طبق واحد فقط'); assert.strictEqual(await m.locator('.card.meal').count(), 1, 'وجبة واحدة مفتوحة');
+  assert.strictEqual(await m.locator('.pmlist .pmrow').count(), P.names.length - 1, 'الباقي قائمة مطوية');
+  const si = +(await m.getAttribute('.plc', 'data-si')), nl = P.lines[si]; assert.strictEqual(await m.locator('.plc .plf').count(), nl, 'قطاع لكل صنف');
+  ok('«خطتي» اليوم: طبق واحد فوق الوجبة التي عليها الدور (قطاع لكل صنف)، وباقي الوجبات قائمة مطوية');
   const sc = () => m.evaluate(() => [...document.querySelectorAll('.plc .plf')].map((p) => +p.style.getPropertyValue('--s')));
-  assert.strictEqual(await m.locator('.plc .plf').count(), slots.length); assert.deepStrictEqual(await sc(), slots.map(() => 0)); assert(/0%/.test(await m.textContent('.plc .num')));
-  assert.strictEqual(await m.locator('.plleg span').count(), slots.length); ok('طبق اليوم في «خطتي»: قطاع لكل وجبة، فارغ في البداية، ومفتاح بأسماء الوجبات');
-  await m.click('.meal >> nth=0 >> [data-act="ck"] >> nth=0'); await m.waitForFunction(() => +document.querySelector('.plc .plf').style.getPropertyValue('--s') > 0);
-  let s = await sc(); assert(Math.abs(s[0] - Math.sqrt(1 / slots[0])) < 0.01, 'المساحة = نسبة الأصناف: ' + s[0]); assert(s.slice(1).every((x) => x === 0));
-  assert(/plgrow/.test(await m.evaluate(() => document.querySelector('.plc .plf').style.animation)), 'يمتلئ بحركة'); if (shot) { await m.waitForTimeout(700); await m.locator('.plc').screenshot({ path: shot + '1.png' }); }
-  ok('تعليم صنف واحد: يمتلئ قطاع وجبته فقط بمساحة تساوي نسبته، بحركة نموّ');
-  await m.click('.meal >> nth=1 >> [data-act="whole"]'); await m.waitForSelector('.plc .plf.full'); s = await sc(); assert.strictEqual(s[1], 1); assert(/check|svg/.test(await m.innerHTML('.plleg span.full b')));
-  if (slots.length > 2) { await m.click('.meal >> nth=2 >> [data-act="skip"]'); await m.waitForSelector('.plc .plb.skip'); assert(/لم آكلها/.test(await m.textContent('.plleg span.skip'))); await m.click('.meal >> nth=2 >> [data-act="skip"]'); await m.waitForFunction(() => !document.querySelector('.plc .plb.skip')); }
-  if (shot) { await m.waitForTimeout(700); await m.locator('.plc').screenshot({ path: shot + '4.png' }); }
-  ok('«أكلتها كاملة» تملأ القطاع كله وتعلّمه في المفتاح، و«لم آكلها» ترسمه منقّطاً');
-  for (let i = 0; i < slots.length; i++) { const done = await m.evaluate((i) => document.querySelectorAll('.plc .plf')[i].classList.contains('full'), i); if (!done) { await m.click('.meal >> nth=' + i + ' >> [data-act="whole"]'); await m.waitForFunction((i) => document.querySelectorAll('.plc .plf')[i].classList.contains('full'), i); if ((await sc())[i] !== 1) { await m.click('.meal >> nth=' + i + ' >> [data-act="whole"]'); } } }
-  await m.waitForSelector('.plc.all .plsvg.all'); assert(/100%/.test(await m.textContent('.plc .num')) && /طبق كامل/.test(await m.textContent('.plc'))); if (shot) { await m.waitForTimeout(700); await m.locator('.plc').screenshot({ path: shot + '2.png' }); }
-  await m.click('[data-act="tab"][data-v="today"]'); await m.waitForSelector('button.plc.all'); assert.strictEqual(await m.locator('.card.ring').count(), 0); if (shot) await m.locator('.plc').screenshot({ path: shot + '3.png' });
-  await m.click('button.plc'); await m.waitForSelector('section.plc'); ok('اكتمال كل الوجبات: «طبق كامل» ١٠٠٪ بحافة مضيئة؛ والطبق في الرئيسية بدل الحلقة ولمسه يفتح «خطتي»');
+  await m.locator('.card.meal [data-act="ck"]').first().click(); await m.waitForFunction(() => +document.querySelector('.plc .plf').style.getPropertyValue('--s') === 1);
+  let s = await sc(); assert(s[0] === 1 && s.slice(1).every((x) => x === 0)); assert(/plgrow/.test(await m.evaluate(() => document.querySelector('.plc .plf').style.animation)));
+  await m.waitForTimeout(700); await snap('1'); ok('تعليم صنف يملأ قطاعه بحركة نموّ');
+  // ماء ما قبل الوجبة
+  const wp = await m.evaluate(() => window.HissatiApp.__wp ? 0 : 1); void wp;
+  const main = P.names.map((x, i) => /فطور|إفطار|افطار|غداء|غذاء|عشاء/.test(x) ? i : -1).filter((i) => i >= 0);
+  if (!main.includes(si) && main.length) { await m.click('.pmrow[data-v="' + main[0] + '"]'); await m.waitForSelector('.pmopen .wpre'); }
+  if (main.length) {
+    assert(await m.locator('.wpre').count() >= 1); const w0 = await m.evaluate(() => window.HissatiApp.state().log[Object.keys(window.HissatiApp.state().log).sort().pop()].water || 0);
+    await m.click('.wpre [data-act="wpre"]'); await m.waitForSelector('.wpre.on'); await snap('w'); const w1 = await m.evaluate(() => { const L = window.HissatiApp.state().log; return L[Object.keys(L).sort().pop()].water; }); assert.strictEqual(w1, w0 + 2, 'كوبان');
+    await m.click('.wpre [data-act="wpre"]'); await m.waitForSelector('.wpre:not(.on)'); if (!main.includes(si)) { await m.click('.pmopen .pmfold'); await m.waitForFunction(() => !document.querySelector('.pmopen')); }
+  }
+  const rem = await m.evaluate(() => { const S = window.HissatiApp.state(); S.rem = Object.assign({}, S.rem, { water: true, meals: true }); return window.HissatiApp.remItems(); });
+  if (rem) { const pre = rem.filter((x) => x.t === 'wpre'), meals = rem.filter((x) => x.t === 'meal'); assert.strictEqual(pre.length, main.length, JSON.stringify(rem)); pre.forEach((x) => { const ml = meals.find((y) => y.label.startsWith(x.label)); assert(ml && ml.m - x.m === 15, 'قبل الوجبة بربع ساعة'); });
+    const g = await m.evaluate(() => { const S = window.HissatiApp.state(); return Math.max(4, Math.min(16, Math.round(+(S.plan[new Date().getDay() % S.plan.length].water || S.pm.water || 2.5) / 0.25))); });
+    assert.strictEqual(rem.filter((x) => x.t === 'water' || x.t === 'wpre').reduce((a, x) => a + x.n, 0), g, 'مجموع أكواب التذكيرات = هدف اليوم'); }
+  ok('ماء ما قبل الوجبة: «كوبان قبلها بربع ساعة» فوق كل وجبة رئيسية يضيف كوبين لماء اليوم، والتذكير قبل الوجبة بـ15 دقيقة، وباقي الهدف موزّع على اليوم');
+  // فتح وجبة أخرى من القائمة
+  await m.click('.pmlist .pmrow >> nth=0'); await m.waitForSelector('.pmopen .card.meal'); assert.strictEqual(await m.locator('.plc').count(), 1, 'الطبق يبقى للحالية فقط');
+  await m.click('.pmopen .pmfold'); await m.waitForFunction(() => !document.querySelector('.pmopen')); ok('لمس وجبة في القائمة يفتحها تحت الحالية (بلا طبق إضافي) ويطويها');
+  // اكتمال الوجبة
+  await m.click('.card.meal [data-act="whole"]'); await m.waitForTimeout(400); await snap('2');
+  // الرئيسية
+  await m.click('[data-act="tab"][data-v="today"]'); await m.waitForSelector('.cmt'); const txt = await m.innerText('.cmt');
+  assert(/التزامك اليوم/.test(txt) && /الماء/.test(txt) && /الأكل/.test(txt) && /الحركة/.test(txt)); assert.strictEqual(await m.locator('.cmt .cmr').count(), 3); assert(await m.locator('.cmt .cmmsg').innerText());
+  await m.locator('.cmt').screenshot({ path: (shot || '/tmp/x') + '3.png' }).catch(() => { });
+  await m.click('.cmt .cmgo'); await m.waitForSelector('.plc'); ok('الرئيسية: «التزامك اليوم» بنسبة عامة وثلاثة أشرطة (ماء، أكل، حركة) وجملة تحفيزية، ولمسها يفتح «خطتي»');
   assert.deepStrictEqual(errs, []); await close(); console.log('\nنجح ' + n + ' اختباراً');
 })().catch((e) => { console.error('✘', String(e && e.stack || e).slice(0, 1200)); process.exit(1); });
