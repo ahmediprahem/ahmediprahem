@@ -81,7 +81,7 @@
     var extra = new Array(n).fill(0); for (i = 0; i < k && i < idx.length; i++) extra[idx[i]] = step;
     return base.map(function (b, j) { return b + fl[j] + extra[j]; });
   };
-  E.allocateDay = function (counts, day, meals, D, scale) {
+  E.allocateDay = function (counts, day, meals, D, scale, v2) {
     scale = scale || 1; var sl = E.slots(meals, D), comp = D.comp[day], out = sl.map(function () { return new Array(13).fill(0); }), short = [];
     var domG = -1; [2, 3, 4, 5].forEach(function (gq) { if (domG < 0 && counts[gq] > 0) domG = gq; });          // نوع لحم الغداء: الأقل دهناً المتاح
     for (var g = 0; g < 13; g++) {
@@ -102,6 +102,15 @@
         }
       }
     }
+    if (v2 && L >= 0) {                                 // ج2 (v2): بروتين الغداء لا يقل عن min(2، ثلث بروتين اليوم) حصة. تُنقل حصة من الفطور أو العشاء بنفس المجموعة (مجموع كل مجموعة ثابت) ويبقى لكل منهما حصة بروتين على الأقل
+      var tpr = function (i) { return out[i][2] + out[i][3] + out[i][4] + out[i][5]; }, Pd = 0; sl.forEach(function (s0, i0) { Pd += tpr(i0); });
+      var wantL = Math.min(2, Math.floor(Pd / 3)), domL = -1; [2, 3, 4, 5].forEach(function (gq) { if (domL < 0 && counts[gq] > 0) domL = gq; });
+      for (var g4 = 0; g4 < 8 && domL > 0 && tpr(L) < wantL; g4++) {
+        var Xs = -1; sl.forEach(function (s1, i1) { if (i1 !== L && s1.active && (s1.type === 'B' || s1.type === 'D') && tpr(i1) > 1 && out[i1][domL] >= 1 && (Xs < 0 || tpr(i1) > tpr(Xs))) Xs = i1; });
+        if (Xs < 0 || out[L][domL] + 1 > Math.ceil(comp[domL][sl[L].i][1] * scale - 1e-9) + 4) break;
+        out[Xs][domL] -= 1; out[L][domL] += 1;
+      }
+    }
     return { slots: sl, perSlot: out, short: short };
   };
   // ================================================ قيود العميل: الحساسية/الكلمات والقواعد السريرية
@@ -117,6 +126,7 @@ E.panS = function (cx, f, t) { var p = cx && cx.pan && cx.pan[t]; if (!p) return
 E.ctx = function (client, D) {
     var kws = [], diab = (client.conditions || []).some(function (c) { return c === 'سكري النوع الثاني' || c === 'مقاومة الإنسولين / ما قبل السكري'; });
     (client.allergens || []).forEach(function (lab) { var a = D.allergens.filter(function (x) { return x.label === lab; })[0]; if (a) kws = kws.concat(a.kw); });
+    if (client.v2 && (client.allergens || []).indexOf('حساسية السمك') >= 0) { var sh = D.allergens.filter(function (x) { return x.label === 'حساسية القشريات والمحار'; })[0]; if (sh) kws = kws.concat(sh.kw); }     // v2: القشريات تُستبعد احتياطاً مع حساسية السمك
     (client.keywords || []).forEach(function (k) { if (k) kws.push(k); });
     var excl = {}; (client.excludedFoods || []).forEach(function (n) { excl[n] = 1; });
     var love = {}, avoid = {}; (client.love || []).forEach(function (n) { love[n] = 1; }); (client.avoid || []).forEach(function (n) { avoid[n] = 1; });
@@ -469,7 +479,7 @@ E.ctx = function (client, D) {
       if (dco) { sol = mk(dco); sol.day = true; } else if (manual) sol = mk(client.baseCounts.map(Number));
       else sol = E.solveDay(T, { cap: cap, sweets: st.sweets, share: E.PREF.share, base: client.diet && E.dietBase ? E.dietBase(client.diet) : undefined }, D);
       if (!dco && !manual && client.diet && E.dietShape) sol = E.dietShape(client.diet, d, sol, D) || sol;
-      st.keepGroups = !!(dco || manual); var al = E.allocateDay(sol.counts, d, meals, D, sc), slots = E.buildDay(st, d, al), dy = { day: d, name: D.days[d], solver: sol, counts: sol.counts, short: al.short, slots: slots };
+      st.keepGroups = !!(dco || manual); var al = E.allocateDay(sol.counts, d, meals, D, sc, client.v2), slots = E.buildDay(st, d, al), dy = { day: d, name: D.days[d], solver: sol, counts: sol.counts, short: al.short, slots: slots };
       if (!st.keepGroups) E.syncCounts(dy); st.keepGroups = false;
       days.push(E.dayStats(dy, T, D));
     }
