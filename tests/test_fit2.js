@@ -54,4 +54,19 @@ t('مجموع حصص كل مجموعة في كل وجبة لا يتغير بتم
   let ch = 0, cmp = 0; for (let i = 0; i < 40; i++) { const p = base[i], before = tot(p); const pl = { client: Object.assign({}, p.client, { v2: true }), days: JSON.parse(JSON.stringify(p.days)) }; E.fitPass(pl, D); const after = tot(pl); Object.keys(before).forEach(k => { cmp++; if (Math.abs((after[k] || 0) - before[k]) > 1e-9) ch++; }); } console.log('   مقارنات', cmp, 'تغيّر', ch); assert.strictEqual(ch, 0); });
 t('سمك مع ألبان (تفضيل ثقافي): ينخفض عن المحرك الحالي', () => { const cnt = ps => { let c = 0; ps.forEach(p => slots(p).forEach(s => { if (E.mealConflicts(s.lines, D, { fishDairy: true }).some(x => x.id === 'S1')) c++; })); return c; }; const a = cnt(base), b = cnt(plans); console.log('   وجبات سمك مع ألبان: v1', a, '→ v2', b); assert(b <= a); });
 t('البدائل: لا بديل يتجاوز سقف السطر ولا يخلق تعارضاً صلباً', () => { let chk = 0; plans.slice(0, 30).forEach(p => p.days.slice(0, 2).forEach(d => d.slots.forEach(s => s.lines.forEach(l => { if (l.bank) return; E.alternatives(l, s.type, p, D, 8, s.lines).forEach(a => { chk++; const f = byName[a.name]; assert(l.e <= E.lim(f, s.type, D).max + 1e-9, a.name); const rest = s.lines.filter(x => x !== l).concat([{ name: a.name }]); assert(!E.mealConflicts(rest, D).some(x => x.sev === 'hard'), a.name + ' يخلق تعارضاً'); }); })))); console.log('   بدائل مفحوصة', chk); assert(chk > 100); });
+t('تكرار الغداء المطلوب (freqCheck): المجموع 7، لحم أحمر ≤ 3 مع تحذير مصدره، سمك صفر مع تحذير، وحساسية السمك تحوّل المرات للدجاج', () => {
+  const b = { sex: 'أنثى', age: 30, weight: 70, height: 165, activity: D.settings.activity[1][0], goal: D.settings.goals[0][0], meals: 5, conditions: [], allergens: [], keywords: [], love: [], avoid: [] }, chk = (x, extra) => E.freqCheck(Object.assign({}, b, extra || {}, { freq: x }), D), sum = r => r.freq.poultry + r.freq.red + r.freq.fish;
+  let r = chk({ poultry: 3, red: 2, fish: 2 }); assert.strictEqual(sum(r), 7); assert.strictEqual(r.warns.length, 0);
+  r = chk({ poultry: 1, red: 5, fish: 1 }); assert.strictEqual(r.freq.red, 3); assert.strictEqual(sum(r), 7); assert(r.warns.some(w => w.src === 'WCRF'));
+  r = chk({ poultry: 7, red: 0, fish: 0 }); assert(r.warns.some(w => /DGA/.test(w.src || '')));
+  r = chk({ poultry: 2, red: 2, fish: 1 }); assert.strictEqual(sum(r), 7); assert(r.warns.some(w => /المجموع 5/.test(w.msg)));
+  r = chk({ poultry: 3, red: 2, fish: 2 }, { allergens: ['حساسية السمك'] }); assert.strictEqual(r.freq.fish, 0); assert.strictEqual(sum(r), 7); assert(r.warns.some(w => /غير متاح/.test(w.msg)));
+  const sch = E.weekSchedule(Object.assign({}, b, { v2: true, freq: { poultry: 3, red: 2, fish: 2 } }), D); assert.deepStrictEqual(r.sched.length, 7); assert.strictEqual(sch.length, 7);
+});
+t('مع السماح بوجبات البنك: v2 يحترم جدول الغداء والتعارض الصلب أيضاً (وجبات البنك تُصفّى)', () => {
+  let m = 0, bad = 0, bankMeals = 0, off = 0, days = 0;
+  for (let i = 0; i < 80; i++) { const c = mk(true, { noBank: {}, freq: { poultry: 3, red: 2, fish: 2 }, allergens: [] }), p = E.planWeek(c, D), sch = E.weekSchedule(c, D);
+    p.days.forEach((d, di) => { d.slots.forEach(s => { m++; if (s.meal) bankMeals++; if (E.mealConflicts(s.lines, D).some(x => x.sev === 'hard')) bad++; }); const L = d.slots.find(x => x.type === 'L'), l = L && L.lines.filter(q => q.g >= 2 && q.g <= 5).map(q => E.protClass(byName[q.name])).map(k => k === 'shell' ? 'fish' : k)[0]; if (l && sch) { days++; if (l !== sch[di]) off++; } }); }
+  console.log('   وجبات', m, 'منها من البنك', bankMeals, '| تعارض صلب', bad, '| غداء يخالف الجدول', off + '/' + days); assert(bankMeals > 50, 'يجب أن تظهر وجبات بنك لهذا الاختبار'); assert.strictEqual(bad, 0); assert(off / days <= 0.03, off / days);
+});
 console.log('\nنجح', n, 'اختبارات');

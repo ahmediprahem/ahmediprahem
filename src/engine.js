@@ -430,6 +430,10 @@ E.ctx = function (client, D) {
           if (blk || (!st.sweets && x.prof[12] > 0)) return;                                                     // السكري/مقاومة الإنسولين: لا وجبة بنك فيها سكريات                                                                                          // المطبخ/الميزانية/نمط الحياة/الأصناف غير الشائعة تنطبق على وجبات البنك أيضاً
           if (czc) sc += x.b.cz === czc ? 2 : (x.b.cz || 'both') === 'both' ? 0 : -4;
           if (sl.type === 'L' && (nMeat > 1 || proc)) return;                                                   // الغداء: صنف لحم واحد وغير مصنّع
+          if (client.v2) {                                                                                       // v2: وجبة البنك تحترم التعارض الصلب وجدول بروتين الغداء الأسبوعي
+            if (hardN(x.ings.map(function (ig) { return { name: ig.f.n }; }), D) > 0) return;
+            if (sl.type === 'L' && st.sched && st.sched[d]) { var cls = null; x.ings.forEach(function (ig) { var k0 = E.protClass(ig.f); if (FLESH[k0]) cls = k0 === 'shell' ? 'fish' : k0; }); if (cls && cls !== st.sched[d]) return; }
+          }
           if (sl.type === 'B' || sl.type === 'D') { var bds = protN ? bdN / protN : 1; sc += E.PREF.bdBank * bds - E.PREF.bdBank * 0.6 * (1 - bds); if (proc) sc -= 6; }                // فطور/عشاء: وجبات بيض وأجبان وألبان أولاً
           if (sl.type === 'S') { if (allS) sc += 2.5; if (anyMain) sc -= 2; }
           x.ings.forEach(function (ig) { if (cx.love[ig.f.n]) sc += 0.4; if (used[ig.f.n]) sc -= 2; sc += E.panS(cx, ig.f, sl.type); });
@@ -671,6 +675,21 @@ E.ctx = function (client, D) {
     if (st.cult && st.cult.fishDairy && (k === 'fish' || k === 'shell') && rem[6] + rem[7] + rem[8] > 0) s -= 3.5;
     if (k === 'proc' && W.procMax === 0) s -= 40;
     return s;
+  };
+
+  E.freqCheck = function (client, D) {                      // يفسّر «كم مرة تريد الدجاج/اللحم/السمك في الغداء»: {freq الفعلي، sched لكل يوم، warns[{lvl, msg, src}]}
+    var W = (D.limits && D.limits.week) || {}, redMax = W.redMax == null ? 3 : W.redMax, c2 = {}, k, warns = [], asked = client.freq || W.lunch || { poultry: 3, red: 2, fish: 2 };
+    for (k in client) c2[k] = client[k]; c2.v2 = true; var cx = E.ctx(c2, D);
+    var ask = {}, tot = 0; ['poultry', 'red', 'fish'].forEach(function (x) { ask[x] = Math.max(0, Math.min(7, Math.round(+asked[x] || 0))); tot += ask[x]; });
+    var sched = E.weekSchedule(c2, D, cx) || [], eff = { poultry: 0, red: 0, fish: 0 }; sched.forEach(function (x) { eff[x] = (eff[x] || 0) + 1; });
+    var fishOk = false, redOk = false; D.foods.forEach(function (f) { var cl = E.protClass(f); if (f.on && f.m[1] && cx.ok(f) && !cx.avoid[f.n]) { if (cl === 'fish' || cl === 'shell') fishOk = true; if (cl === 'red') redOk = true; } });
+    if (tot !== 7) warns.push({ lvl: 'info', msg: 'المجموع ' + tot + ' والمطلوب 7 أيام: ضُبط تلقائياً.' });
+    if (ask.red > redMax) warns.push({ lvl: 'warn', msg: 'لحم أحمر ' + ask.red + ' مرات: التوصية ألا يزيد على نحو 3 حصص (350–500 جم مطبوخ) أسبوعياً، فقُيّد بـ' + redMax + '.', src: 'WCRF' });
+    if (ask.fish > 0 && !fishOk) warns.push({ lvl: 'info', msg: 'السمك غير متاح لهذا العميل (حساسية أو استبعاد): حُوِّلت مراته إلى دجاج.' });
+    if (ask.red > 0 && !redOk) warns.push({ lvl: 'info', msg: 'اللحم الأحمر غير متاح لهذا العميل: حُوِّلت مراته إلى دجاج.' });
+    if (fishOk && ask.fish === 0) warns.push({ lvl: 'warn', msg: 'لا سمك في الأسبوع: إرشادات الغذاء الأمريكية 2020–2025 تقترح 8 أونصات (نحو 225 جم) أو أكثر أسبوعياً للبالغين.', src: 'DGA 2020–2025' });
+    else if (fishOk && eff.fish === 1) warns.push({ lvl: 'info', msg: 'مرة سمك واحدة: الإرشاد نحو 8 أونصات أسبوعياً (حصتان في الغالب).', src: 'DGA 2020–2025' });
+    return { freq: eff, sched: sched, warns: warns };
   };
   var fixSlot = function (plan, s, D, res) {                // يضبط الأسطر فوق الحد الأقصى (ينقل الزيادة بالحصص نفسها) ثم الأسطر تحت الحد الأدنى (يدمجها)
     var M = byN(D), c2 = {}, k, nv; for (k in plan.client) c2[k] = plan.client[k]; c2.v2 = false; nv = { client: c2 };
