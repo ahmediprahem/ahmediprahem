@@ -18,5 +18,7 @@ const milk = seg('v2 + حساسية حليب'); assert(milk.dupDay <= 5, 'milk d
 assert(v2.garnishOnly <= 1, show('garnishOnly')); ok('م2: خضار الوجبة ليست «تزييناً» فقط (بصل/بقدونس/فجل) ≤ 1٪ (' + show('garnishOnly') + ')');
 assert(v2.bigCount <= 0.5, show('bigCount')); ok('م2: العدّ فوق 12 حبة له مقياس يدوي (قبضة/نحو كوب) ≤ 0.5٪ بلا مقياس (' + show('bigCount') + ')');
 assert(v2.rawVegBig <= 1, show('rawVegBig')); ok('م2: الخضار النيئة حتى كوب ونصف (الورقية كوبان) (' + show('rawVegBig') + ')');
+assert(v2.kcalOff <= 5, show('kcalOff')); ok('م4: أيام سعراتها تبعد أكثر من 7٪ عن الهدف ≤ 5٪ (' + show('kcalOff') + ')');
+const lo = seg('v2 + سعرات منخفضة (امرأة قصيرة خاملة)').kcalOff, hi = seg('v2 + سعرات عالية (رجل نشيط زيادة)').kcalOff; assert(lo <= 10 && hi <= 10, lo + ' / ' + hi); ok('م4: وفي أطراف السعرات ≤ 10٪ (منخفضة ' + lo + '٪، عالية ' + hi + '٪)');
 A.res.forEach((r) => assert.strictEqual(r.err, 0, r.seg)); assert(A.res.every((r) => r.pct.missing === 0)); ok('لا أخطاء ولا أسطر بلا صنف في ' + A.res.length + ' فئة');
 console.log('\nنجح ' + n + ' اختبارات');

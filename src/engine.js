@@ -749,6 +749,19 @@ E.ctx = function (client, D) {
       if (tgt) { tgt.e += la.e; tgt.text = E.lineText(M[tgt.name], tgt.e, plan.client.alias); s.lines.splice(a, 1); a--; res.merged++; } else res.minLeft++;
     }
   };
+  E.dayKcal = function (d, D) { var M = byN(D), k = 0; d.slots.forEach(function (s) { s.lines.forEach(function (l) { var f = M[l.name]; if (f && !l.missing) k += E.lineMacros(f, l.e)[3]; }); }); return k; };
+  E.rebalance = function (plan, d, D) {                     // م4 (v2): سعرات اليوم الفعلية (من الأصناف بكمياتها المعروضة) ضمن ±4٪ من الهدف بتعديل نصف حصة من النشويات/الدهون/الفاكهة
+    var M = byN(D), T = plan.targets.kcal, n = 0, rr = 0, sc0 = Math.max(1, T / 2300);      // السعرات العالية: سقف السطر يتمدد مع السعرات
+    for (var it = 0; it < 24; it++) {
+      var diff = T - E.dayKcal(d, D); if (Math.abs(diff) <= 0.04 * T) break; var up = diff > 0, best = null;
+      d.slots.forEach(function (s, si) { s.lines.forEach(function (l) { if (l.bank || l.missing || (l.g !== 0 && l.g !== 11 && l.g !== 10)) return; var f = M[l.name]; if (!f) return; var lm = E.lim(f, s.type, D);
+        [0.5, 1].forEach(function (st) { var ne = l.e + (up ? st : -st);      // خطوة الحصة قد لا تغيّر الكمية المعروضة (ربع رغيف…)، فتُجرَّب حصة كاملة
+          if (up ? ne > Math.floor(lm.max * sc0 * 2 + 1e-9) / 2 + 1e-9 : ne < Math.max(0.5, lm.min) - 1e-9) return; var dk = E.lineMacros(f, ne)[3] - E.lineMacros(f, l.e)[3]; if (!(up ? dk > 0 : dk < 0)) return;
+          var sc = -Math.abs(diff - dk) - (l.g === 10 ? 25 : 0) - 8 * ((l._rb || 0)) + ((si + it + rr) % d.slots.length === 0 ? 3 : 0); if (!best || sc > best.sc) best = { sc: sc, l: l, f: f, ne: ne, dk: dk }; }); }); });
+      if (!best || Math.abs(diff - best.dk) >= Math.abs(diff)) break; best.l.e = best.ne; best.l._rb = (best.l._rb || 0) + 1; best.l.text = E.lineText(best.f, best.ne, plan.client.alias); n++; rr++;
+    }
+    d.slots.forEach(function (s) { s.lines.forEach(function (l) { delete l._rb; }); }); return n;
+  };
   E.hint = function (f, e) {                                // م2: مقياس يدوي للعدّ الكبير (أكثر من 12 حبة)
     var m = E.fmeta(f), q = E.qtyNum(f.upe * e, f.us, m.st); if (!/^حبة/.test(f.us) || q <= 12) return '';
     return m.r === 'nuts' || m.r === 'olive' ? '(قبضة يد صغيرة)' : m.r === 'fruit' ? (q >= 20 ? '(نحو كوب)' : '(نحو نصف كوب)') : '';
@@ -765,6 +778,7 @@ E.ctx = function (client, D) {
         if (!done) break; } });
     }); };
     enforce(); plan.days.forEach(function (d) { d.slots.forEach(function (s) { fixSlot(plan, s, D, res, d); }); }); enforce();      // مرة ثانية: الضبط قد يضيف صنفاً محدوداً
+    if (plan.targets && plan.targets.kcal) plan.days.forEach(function (d) { res.rebal = (res.rebal || 0) + E.rebalance(plan, d, D); });
     plan.days.forEach(function (d) { d.slots.forEach(function (s) { E.mealConflicts(s.lines, D, cult).forEach(function (x) { res[x.sev === 'hard' ? 'hard' : 'soft']++; }); s.lines.forEach(function (l) { var f = M0[l.name]; if (f) { var h = E.hint(f, l.e); if (h && l.text.indexOf(h) < 0) l.text += ' ' + h; } }); }); });
     if (dl.length) plan.days.forEach(function (d) {            // حدّ يومي (البيض…): يُبلَّغ به الأخصائي (التنفيذ التلقائي لاحقاً)
       dl.forEach(function (r) { var n = 0; d.slots.forEach(function (sl) { sl.lines.forEach(function (l) { if (r.exact ? l.name === r.kw : l.name.indexOf(r.kw) >= 0) { var f = D.foods.filter(function (x) { return x.n === l.name; })[0]; n += l.e * (f && f.upe || 1); } }); }); if (n > r.max_per_day + 1e-9) res.dayLimit.push({ day: d.name, food: r.kw, qty: n, max: r.max_per_day, cond: r.cond }); });
