@@ -1599,6 +1599,7 @@ E.ctx = function (client, D) {
       var nProt = lines.filter(function (l) { return l.g >= 2 && l.g <= 5 && !l.missing; }).length;
       var lean = function (l) { return l.g >= 2 && l.g <= 5 && (t === 'L' || X[l.g][2] <= Fp / P + 1.5); };      // التمديد لا يرفع الدهون كثيراً (الغداء: صنف لحم واحد دائماً)
       if (nProt) { var xe = ext(lean, P); got += xe[0]; gotFat += xe[1]; }
+      if (v2 && nProt >= 1 && P - got >= 0.5 && P - got <= 1) { var xe4 = ext(function (l) { return l.g >= 2 && l.g <= 5; }, P - got, 1.5); got += xe4[0]; gotFat += xe4[1]; }      // باقٍ صغير مع بروتين قائم: يُمدَّد بدل صنف ثانٍ بكمية ضئيلة (20 جم دجاج)
       var R = P - got, room = function () { return 5 * rem[11] + (st.fatDebt || 0) + (Fp - gotFat); };
       if (R >= 0.5 && nProt < 2) {
         var pc = pool([2, 3, 4, 5], E.PROT).filter(function (f) { return !has[E.fmeta(f).r] && (!v2 || E.canAdd(lines, f, D)); });
@@ -2040,6 +2041,7 @@ E.ctx = function (client, D) {
             s2.lines.push({ g: l.g, name: f5.n, e: tk, text: E.lineText(f5, tk, plan.client.alias), tier: al2.tier, bank: false, split: true }); dUsed[f5.n] = 1; l.e -= tk; surplus -= tk; s2.lines.sort(function (p, q) { return FOOD_CAT[p.g] - FOOD_CAT[q.g] || p.g - q.g; }); });
           if (surplus < 0.5) done = true; else if (l.e <= lm.max * 1.5 + 1e-9) { l.text = E.lineText(f, l.e, plan.client.alias); res.left++; continue; }      // تجاوز حتى 1.5× أهون من صنف إضافي في وجبة ممتلئة؛ وما فوقه يُقسَّم
         }
+        if (!done && l.g >= 2 && l.g <= 5 && l.e <= lm.max * 1.5 + 1e-9 && surplus <= 1 + 1e-9) { l.text = E.lineText(f, l.e, plan.client.alias); res.left++; continue; }      // فائض بروتين صغير: تجاوز حتى 1.5× أهون من سطر لحم ضئيل (20 جم)
         if (!done) {
           var used = {}; (day ? day.slots : [s]).forEach(function (s2) { s2.lines.forEach(function (q) { used[q.name] = 1; }); });      // لا صنف مكرر في اليوم نفسه
           var cult = E.cultOf(plan.client, D), softN = function (ls) { return E.mealConflicts(ls, D, cult).filter(function (x) { return x.sev === 'soft'; }).length; }, role0 = E.fmeta(f).r;
@@ -2056,7 +2058,7 @@ E.ctx = function (client, D) {
     }
     for (var a = 0; a < s.lines.length; a++) {              // الحد الأدنى: سطر أصغر من الحد يُدمج في سطر آخر من مجموعته إن وُجد متّسع
       var la = s.lines[a], fa = M[la.name]; if (!fa || la.bank || la.missing) continue; var lma = E.lim(fa, s.type, D); if (la.e >= lma.min - 1e-9) continue;
-      var tgt = null; for (var b = 0; b < s.lines.length && !tgt; b++) { if (b === a || s.lines[b].g !== la.g || s.lines[b].bank) continue; var fb = M[s.lines[b].name]; if (fb && E.lim(fb, s.type, D).max - s.lines[b].e >= la.e - 1e-9) tgt = s.lines[b]; }
+      var pg = function (g) { return g >= 2 && g <= 5 ? 'p' : g; }, tgt = null; for (var b = 0; b < s.lines.length && !tgt; b++) { if (b === a || pg(s.lines[b].g) !== pg(la.g) || s.lines[b].bank) continue; var fb = M[s.lines[b].name]; if (fb && E.lim(fb, s.type, D).max - s.lines[b].e >= la.e - 1e-9) tgt = s.lines[b]; }
       if (tgt) { tgt.e += la.e; tgt.text = E.lineText(M[tgt.name], tgt.e, plan.client.alias); s.lines.splice(a, 1); a--; res.merged++; } else res.minLeft++;
     }
   };
