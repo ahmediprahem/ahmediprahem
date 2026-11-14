@@ -175,6 +175,7 @@ E.ctx = function (client, D) {
     return (sh[0] + ' ' + sh[1] + ' ' + ((al && al[f.n]) || f.n)).replace(/\s+/g, ' ').trim();
   };
   E.lineMacros = function (f, e) { var qn = E.qtyNum(f.upe * e, f.us, f.st), k = f.units ? qn / f.units : 0; return f.mac.map(function (x) { return x * k; }); };
+  var fam = function (n) { return n.replace(/\s*\(?معلبة?\)?|\s*مطبوخة?$/g, '').trim(); };      // عائلة الصنف (فول مدمس = فول مدمس معلب) لحساب التكرار
   var hash = function (s) { var h = 2166136261; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
   // ================================================ مخطِّط الأسبوع (حالة مشتركة + تخطيط وجبة واحدة قابل لإعادة الاستخدام عند التعديل اليدوي)
   E.POOLED = [['starch', 'نشويات', [0]], ['legumes', 'بقوليات', [1]], ['meat', 'لحوم', [2, 3, 4, 5]], ['milk', 'ألبان', [6, 7, 8]], ['veg', 'خضار', [9]], ['fruit', 'فاكهة', [10]], ['other', 'أخرى', [12]], ['fat', 'دهون', [11]]];
@@ -267,10 +268,11 @@ E.ctx = function (client, D) {
     var put = function (f, e, g) {                       // يضيف سطراً؛ الحصص بمضاعفات ½ (العرض يقرّب الكمية لخطوة الصنف)
       var e2 = Math.round(e * 2) / 2; if (!(e2 > 0)) return 0;
       lines.push({ g: g == null ? f.g : g, name: f.n, e: e2, text: E.lineText(f, e2, client.alias), tier: cx.tierOf(f.n), bank: false });
-      used[f.n] = (used[f.n] || 0) + 1; st.useCount[f.n] = (st.useCount[f.n] || 0) + 1; var r = E.fmeta(f).r; has[r] = (has[r] || 0) + 1; dayRole[r] = (dayRole[r] || 0) + 1; return e2;
+      used[f.n] = (used[f.n] || 0) + 1; st.useCount[f.n] = (st.useCount[f.n] || 0) + 1; var r = E.fmeta(f).r; has[r] = (has[r] || 0) + 1; dayRole[r] = (dayRole[r] || 0) + 1; var tu = st.typeUse || (st.typeUse = {}), fk = t + fam(f.n); tu[fk] = (tu[fk] || 0) + 1; return e2;
     };
     var pick = function (cands, sc) { var b = null, bs = -1e9; cands.forEach(function (f) { var v = sc(f); if (v > bs) { bs = v; b = f; } }); return b; };
     var pool = function (gs, roles) { var c = D.foods.filter(function (f) { return gs.indexOf(f.g) >= 0 && (!roles || roles[E.fmeta(f).r]) && okF(f, true); }); return c.length ? c : D.foods.filter(function (f) { return gs.indexOf(f.g) >= 0 && (!roles || roles[E.fmeta(f).r]) && okF(f, false); }); };
+    var tuP = function (f) { var k = (st.typeUse || {})[t + fam(f.n)] || 0; return k >= 3 ? 12 : k * 2.5; };      // م3 (v2): مصدر البروتين نفسه في الوجبة نفسها 3 أيام على الأكثر
     var fatAdj = 0;                                       // تعويض الدهون (جم) حين يكون الصنف المختار أدسم أو أخف من حصص المجموعة الأصلية
     // ---------- وجبة منظمة: ما يُرحَّل من الوجبة السابقة يُضاف، وإن زادت الأصناف المتوقعة عن الحد (6 للرئيسية، 3 للسناك) تُرحَّل الفاكهة ثم الألبان ثم السكريات للوجبة التالية
     var carry = st.carry || (st.carry = new Array(13).fill(0)); for (var cg = 0; cg < 13; cg++) if (carry[cg]) { rem[cg] += carry[cg]; carry[cg] = 0; }
@@ -300,12 +302,12 @@ E.ctx = function (client, D) {
       var R = P - got, room = function () { return 5 * rem[11] + (st.fatDebt || 0) + (Fp - gotFat); };
       if (R >= 0.5 && nProt < 2) {
         var pc = pool([2, 3, 4, 5], E.PROT).filter(function (f) { return !has[E.fmeta(f).r] && (!v2 || E.canAdd(lines, f, D)); });
-        var ps = function (f) { var m = E.fmeta(f), e = Math.min(R, cap(f, R)), fat = e * X[f.g][2], want = Fp * R / P, s = base(f, 2) + (PR[m.r] || 0) + (v2 ? E.v2Score(st, d, t, f, rem) : 0) + (client.diet && E.dietBoost ? E.dietBoost(client.diet, d, t, m.r) : 0) + (m.r === 'fish' && t !== 'L' ? (m.prep === 0 ? (t === 'B' ? -2 : -0.5) : (t === 'B' ? -6 : -3)) : 0) - 0.6 * Math.abs(want - fat) - 4 * Math.max(0, R - e) - (used[f.n] ? 8 : 0) - 1.5 * (dayRole[m.r] || 0) - 2.5 * Math.max(0, (st.useCount[f.n] || 0) - 2); var rm = room(); if (fat - want > rm) s -= 1.2 * (fat - want - rm); return s; };
+        var ps = function (f) { var m = E.fmeta(f), e = Math.min(R, cap(f, R)), fat = e * X[f.g][2], want = Fp * R / P, s = base(f, 2) + (PR[m.r] || 0) + (v2 ? E.v2Score(st, d, t, f, rem) : 0) + (client.diet && E.dietBoost ? E.dietBoost(client.diet, d, t, m.r) : 0) + (m.r === 'fish' && t !== 'L' ? (m.prep === 0 ? (t === 'B' ? -2 : -0.5) : (t === 'B' ? -6 : -3)) : 0) - 0.6 * Math.abs(want - fat) - 4 * Math.max(0, R - e) - (used[f.n] ? 8 : 0) - 1.5 * (dayRole[m.r] || 0) - 2.5 * Math.max(0, (st.useCount[f.n] || 0) - 2) - (v2 ? tuP(f) : 0); var rm = room(); if (fat - want > rm) s -= 1.2 * (fat - want - rm); return s; };
         var best = pick(pc, ps), bestS = best ? ps(best) : -1e9, pair = null;
         if ((t === 'B' || t === 'D') && !nProt && R >= 1.5 && !(st.compact && R < 3) && !(v2 && (rem[1] > 0 || has.leg))) {      // v2: مع البقول مصدر حيواني واحد فقط                 // بيض + جبن: أفضل زوج بمراعاة دهون الحصص المطلوبة
           var eggs = pc.filter(function (f) { return E.fmeta(f).r === 'egg'; }), chs = pc.filter(function (f) { return E.fmeta(f).r === 'cheese'; });
           eggs.forEach(function (fe) { var n = Math.max(1, Math.min(E.fmeta(fe).mx, Math.round(R * 0.5 * fe.upe))), ee = Math.max(0.5, Math.round(n / fe.upe * 2) / 2); if (R - ee < 0.5) return;
-            chs.forEach(function (fc) { var ce = Math.min(R - ee, cap(fc, R - ee)); if (ce < 0.5) return; var fat2 = ee * X[fe.g][2] + ce * X[fc.g][2], rm = room(), s2 = base(fe, 3) / 2 + base(fc, 4) / 2 + 6.5 + (R >= 2.5 ? 1.5 : 0) - 0.6 * Math.abs(Fp * R / P - fat2) - 4 * Math.max(0, R - ee - ce) - 1.5 * ((dayRole.egg || 0) + (dayRole.cheese || 0)) - (used[fe.n] || used[fc.n] ? 6 : 0); if (fat2 - Fp * R / P > rm) s2 -= 1.2 * (fat2 - Fp * R / P - rm); if (!pair || s2 > pair.s) pair = { s: s2, a: [[fe, ee], [fc, ce]] }; }); });
+            chs.forEach(function (fc) { var ce = Math.min(R - ee, cap(fc, R - ee)); if (ce < 0.5) return; var fat2 = ee * X[fe.g][2] + ce * X[fc.g][2], rm = room(), s2 = base(fe, 3) / 2 + base(fc, 4) / 2 + 6.5 + (R >= 2.5 ? 1.5 : 0) - 0.6 * Math.abs(Fp * R / P - fat2) - 4 * Math.max(0, R - ee - ce) - 1.5 * ((dayRole.egg || 0) + (dayRole.cheese || 0)) - (used[fe.n] || used[fc.n] ? 6 : 0) - (v2 ? (tuP(fe) + tuP(fc)) / 2 : 0); if (fat2 - Fp * R / P > rm) s2 -= 1.2 * (fat2 - Fp * R / P - rm); if (!pair || s2 > pair.s) pair = { s: s2, a: [[fe, ee], [fc, ce]] }; }); });
         }
         if (pair && pair.s > bestS) pair.a.forEach(function (x) { add(x[0], x[1]); }); else if (best) add(best, Math.min(R, cap(best, R)));
       }
@@ -327,7 +329,7 @@ E.ctx = function (client, D) {
       var R = rem[g]; if (!(R > 0)) return; var c = pool([g]), n = 0; if (v2) c = c.filter(function (f) { return E.canAdd(lines, f, D); }); if (v2 && !(g === 9 && t === 'L' && !st.compact)) maxN = 1;      // م1 (v2): صنف واحد للمجموعة، والباقي يُمدَّد أو يُرحَّل
       R -= ext(function (l) { return l.g === g; }, R)[0]; if (R < 0.5) return;          // صنف المجموعة الموجود في الوجبة يُمدَّد أولاً
       while (R >= 0.5 && n < (maxN || 2)) {
-        var f = pick(c, function (f) { var m = E.fmeta(f); return base(f, k + n) + (rs[m.r] || 0) - 2 * Math.max(0, R - cap(f, R)) - (n && has[m.r] ? 4 : 0) - 1.2 * (dayRole[m.r] || 0) * (g === 9 ? 0.3 : 1); });
+        var f = pick(c, function (f) { var m = E.fmeta(f); return base(f, k + n) - (v2 && g === 1 && t !== 'L' ? tuP(f) : 0) + (rs[m.r] || 0) - 2 * Math.max(0, R - cap(f, R)) - (n && has[m.r] ? 4 : 0) - 1.2 * (dayRole[m.r] || 0) * (g === 9 ? 0.3 : 1); });
         if (!f) break; var e = put(f, Math.min(R, cap(f, R))); if (!e) break; R -= e; n++;
         if (R >= 0.5 && (t === 'S' || st.compact || g === 0 || g === 10 || g === 11)) R -= ext(function (l) { return l.g === g; }, R, g === 0 ? 1.5 : 1.4)[0];      // سناك/وجبة مزدحمة: الباقي على الصنف نفسه بدل صنف ثانٍ
         c = c.filter(function (x) { return x !== f; });
@@ -336,6 +338,7 @@ E.ctx = function (client, D) {
       if (v2 && R >= 0.5 && !isLast && g !== 9) { carry[g] += Math.round(R * 2) / 2; R = 0; }
       if (R >= 0.5) left[g] += Math.round(R * 2) / 2;
     };
+    if (v2 && rem[1] > 0 && !isLast && !lines.some(function (l) { return l.g === 1; }) && pool([1]).every(function (f) { return ((st.typeUse || {})[t + fam(f.n)] || 0) >= 3; })) { carry[1] += rem[1]; rem[1] = 0; }      // م3: البقول نفسها في الوجبة نفسها 3 أيام كفاية؛ تنتقل للوجبة التالية
     if (rem[1] > 0) single(1, 6, {}, 1);
     var SR = t === 'L' ? { grain: 3, tuber: 1.5, bread: 0.5, cereal: -6, snk: -6 } : t === 'S' ? { snk: 1, cereal: 1.5, bread: 0, grain: -6, tuber: -2 } : { bread: 3, cereal: t === 'B' ? 1 : -1, tuber: 0, grain: -3, snk: -3 };
     if (has.leg && t !== 'L') SR.bread += 2;
@@ -400,7 +403,7 @@ E.ctx = function (client, D) {
     (dy.short || []).forEach(function (x) { g[x[0]] += x[1]; }); dy.req = g.map(function (v) { return Math.round(v * 2) / 2; }); return dy;
   };
   E.buildDay = function (st, d, al) {                   // يبني يوماً؛ إن خالفت وجبةٌ قاعدةً صارمة يُعاد بناء اليوم بتنويع مختلف (ثم بلا بنك لتلك الوجبة) ويُختار الأفضل
-    var snap = function () { return { u: Object.assign({}, st.useCount), m: Object.assign({}, st.mealCount) }; }, rest = function (x) { st.useCount = Object.assign({}, x.u); st.mealCount = Object.assign({}, x.m); };
+    var snap = function () { return { u: Object.assign({}, st.useCount), m: Object.assign({}, st.mealCount), t: Object.assign({}, st.typeUse || {}) }; }, rest = function (x) { st.useCount = Object.assign({}, x.u); st.mealCount = Object.assign({}, x.m); st.typeUse = Object.assign({}, x.t); };
     var s0 = snap(), best = null, nb = {};
     for (var att = 0; att < 4; att++) {
       rest(s0); st.salt = att; st.noBankSi = att >= 2 ? nb : null; st._dayKey = -1; st.lastSi = -1; al.slots.forEach(function (sl, si) { if (sl.active && sum(al.perSlot[si])) st.lastSi = si; });
@@ -468,9 +471,9 @@ E.ctx = function (client, D) {
           });
           cands.sort(function (p, q) { return q._s - p._s; });
           if (!cands.length) {
-            var usedSub = false, okf = function (f, gg) { return f.g === gg && f.m[tIdx] && cx.ok(f) && !cx.avoid[f.n]; };
-            (E.SUB[g] || []).forEach(function (gg) { if (usedSub) return; var cs = D.foods.filter(function (f) { return okf(f, gg); }); if (cs.length) { cs.sort(function (p, q) { return (cx.love[q.n] ? 4 : 0) - (cx.love[p.n] ? 4 : 0) || p.o - q.o; }); var f0 = cs[0]; lines.push({ g: gg, name: f0.n, e: rem, text: E.lineText(f0, rem, client.alias), tier: cx.tierOf(f0.n), bank: false, sub: true }); used[f0.n] = (used[f0.n] || 0) + 1; usedSub = true; } });
-            if (!usedSub && E.SPLIT[g]) { var okAll = true, ls = []; E.SPLIT[g].forEach(function (gg) { var cs = D.foods.filter(function (f) { return okf(f, gg); }).sort(function (p, q) { return p.o - q.o; }); if (cs.length) ls.push({ g: gg, name: cs[0].n, e: rem, text: E.lineText(cs[0], rem, client.alias), tier: cx.tierOf(cs[0].n), bank: false, sub: true }); else okAll = false; }); if (okAll) { ls.forEach(function (l) { lines.push(l); }); usedSub = true; } }
+            var usedSub = false, okf0 = function (f, gg) { return f.g === gg && f.m[tIdx] && cx.ok(f) && !cx.avoid[f.n]; }, okf = function (f, gg) { return okf0(f, gg) && (!client.v2 || E.canAdd(lines, f, D) || !D.foods.some(function (h) { return okf0(h, gg) && E.canAdd(lines, h, D); })); }, fresh = function (p, q) { return client.v2 ? (used[p.n] ? 1 : 0) - (used[q.n] ? 1 : 0) + 0.15 * ((st.useCount[p.n] || 0) - (st.useCount[q.n] || 0)) : 0; };      // v2: البديل غير المستعمل اليوم أولاً، والأقل تكراراً في الأسبوع
+            (E.SUB[g] || []).forEach(function (gg) { if (usedSub) return; var cs = D.foods.filter(function (f) { return okf(f, gg); }); if (cs.length) { cs.sort(function (p, q) { return fresh(p, q) || (cx.love[q.n] ? 4 : 0) - (cx.love[p.n] ? 4 : 0) || p.o - q.o; }); var f0 = cs[0]; lines.push({ g: gg, name: f0.n, e: rem, text: E.lineText(f0, rem, client.alias), tier: cx.tierOf(f0.n), bank: false, sub: true }); used[f0.n] = (used[f0.n] || 0) + 1; st.useCount[f0.n] = (st.useCount[f0.n] || 0) + 1; usedSub = true; } });
+            if (!usedSub && E.SPLIT[g]) { var okAll = true, ls = []; E.SPLIT[g].forEach(function (gg) { var cs = D.foods.filter(function (f) { return okf(f, gg); }).sort(function (p, q) { return fresh(p, q) || p.o - q.o; }); if (cs.length) ls.push({ g: gg, name: cs[0].n, e: rem, text: E.lineText(cs[0], rem, client.alias), tier: cx.tierOf(cs[0].n), bank: false, sub: true }); else okAll = false; }); if (okAll) { ls.forEach(function (l) { lines.push(l); used[l.name] = (used[l.name] || 0) + 1; st.useCount[l.name] = (st.useCount[l.name] || 0) + 1; }); usedSub = true; } }
             if (!usedSub) lines.push({ g: g, name: '—', e: rem, text: 'لا يوجد صنف مناسب (راجع الاستبعادات)', tier: 0, missing: true });
             return;
           }

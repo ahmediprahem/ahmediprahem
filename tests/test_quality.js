@@ -13,5 +13,7 @@ assert(v2.lunchShare <= 10, show('lunchShare')); ok('الغداء أقل من 30
 assert(v2.lunchSmall <= 25, show('lunchSmall')); ok('بروتين الغداء الرئيسي < 90 جم ≤ 25٪، والباقي أيام بروتين لحوم منخفض (' + show('lunchSmall') + ')');
 assert(v2.dinnerNoStarch <= 3, show('dinnerNoStarch')); ok('فطور/عشاء بلا نشويات ≤ 3٪ (' + show('dinnerNoStarch') + ')');
 assert(v2.dupDay <= 3, show('dupDay')); ok('الصنف نفسه مرتين في اليوم ≤ 3٪ (إصلاح تراجع v2) (' + show('dupDay') + ')');
+assert(v2.rep4 <= 20, show('rep4')); ok('م3: مصدر بروتين يتكرر 4 أيام أو أكثر في الوجبة نفسها ≤ 20٪ من العملاء (' + show('rep4') + ')');
+const milk = seg('v2 + حساسية حليب'); assert(milk.dupDay <= 5, 'milk dupDay ' + milk.dupDay); ok('م3: بدائل الحليب لا تكرر الصنف في اليوم (حساسية الحليب ' + milk.dupDay + '٪)');
 A.res.forEach((r) => assert.strictEqual(r.err, 0, r.seg)); assert(A.res.every((r) => r.pct.missing === 0)); ok('لا أخطاء ولا أسطر بلا صنف في ' + A.res.length + ' فئة');
 console.log('\nنجح ' + n + ' اختبارات');
