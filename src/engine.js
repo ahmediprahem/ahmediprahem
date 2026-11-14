@@ -432,6 +432,7 @@ E.ctx = function (client, D) {
           if (sl.type === 'L' && (nMeat > 1 || proc)) return;                                                   // الغداء: صنف لحم واحد وغير مصنّع
           if (client.v2) {                                                                                       // v2: وجبة البنك تحترم التعارض الصلب وجدول بروتين الغداء الأسبوعي
             if (hardN(x.ings.map(function (ig) { return { name: ig.f.n }; }), D) > 0) return;
+            if (cx.rules.some(function (r) { return r.max_per_day && x.ings.reduce(function (a, ig) { return a + ((r.exact ? ig.f.n === r.kw : ig.f.n.indexOf(r.kw) >= 0) ? ig.e * (ig.f.upe || 1) : 0); }, 0) > r.max_per_day + 1e-9; })) return;      // وجبة جاهزة تتجاوز الحدّ اليومي (بيض…) لا تدخل
             if (sl.type === 'L' && st.sched && st.sched[d]) { var cls = null; x.ings.forEach(function (ig) { var k0 = E.protClass(ig.f); if (FLESH[k0]) cls = k0 === 'shell' ? 'fish' : k0; }); if (cls && cls !== st.sched[d]) return; }
           }
           if (sl.type === 'B' || sl.type === 'D') { var bds = protN ? bdN / protN : 1; sc += E.PREF.bdBank * bds - E.PREF.bdBank * 0.6 * (1 - bds); if (proc) sc -= 6; }                // فطور/عشاء: وجبات بيض وأجبان وألبان أولاً
@@ -723,6 +724,15 @@ E.ctx = function (client, D) {
   };
   E.fitPass = function (plan, D) {                          // نتيجة {capped, merged, left, minLeft, hard, soft}
     var res = { capped: 0, merged: 0, left: 0, minLeft: 0, hard: 0, soft: 0, dayLimit: [] }, cult = E.cultOf(plan.client, D), cxf = E.ctx(plan.client, D), dl = cxf.rules.filter(function (r) { return r.max_per_day; });
+    var M0 = byN(D), c0 = {}, k0; for (k0 in plan.client) c0[k0] = plan.client[k0]; c0.v2 = false;
+    var dayN = function (d, r) { var n = 0; d.slots.forEach(function (sl) { sl.lines.forEach(function (l) { if (r.exact ? l.name === r.kw : l.name.indexOf(r.kw) >= 0) { var f = M0[l.name]; n += l.e * (f && f.upe || 1); } }); }); return n; };
+    if (dl.length) plan.days.forEach(function (d) {              // حدّ يومي (البيض…): يُستبدل الفائض بصنف بديل من المجموعة نفسها
+      dl.forEach(function (r) { for (var g2 = 0; g2 < 6 && dayN(d, r) > r.max_per_day + 1e-9; g2++) { var done = false;
+        for (var si = d.slots.length - 1; si >= 0 && !done; si--) { var sl = d.slots[si]; for (var li = 0; li < sl.lines.length && !done; li++) { var ln = sl.lines[li]; if (!(r.exact ? ln.name === r.kw : ln.name.indexOf(r.kw) >= 0)) continue;
+          var alts = E.alternatives(ln, sl.type, { client: c0 }, D, 16, sl.lines).filter(function (x) { return !(r.exact ? x.name === r.kw : x.name.indexOf(r.kw) >= 0) && !sl.lines.some(function (q) { return q.name === x.name; }) && M0[x.name] && E.canAdd(sl.lines, M0[x.name], D); });
+          if (alts.length) { E.swap(ln, alts[0], D, plan.client.alias); ln.manual = false; ln.swapped = true; ln.bank = false; res.dayCapped = (res.dayCapped || 0) + 1; done = true; } } }
+        if (!done) break; } });
+    });
     plan.days.forEach(function (d) { d.slots.forEach(function (s) { fixSlot(plan, s, D, res); E.mealConflicts(s.lines, D, cult).forEach(function (x) { res[x.sev === 'hard' ? 'hard' : 'soft']++; }); }); });
     if (dl.length) plan.days.forEach(function (d) {            // حدّ يومي (البيض…): يُبلَّغ به الأخصائي (التنفيذ التلقائي لاحقاً)
       dl.forEach(function (r) { var n = 0; d.slots.forEach(function (sl) { sl.lines.forEach(function (l) { if (r.exact ? l.name === r.kw : l.name.indexOf(r.kw) >= 0) { var f = D.foods.filter(function (x) { return x.n === l.name; })[0]; n += l.e * (f && f.upe || 1); } }); }); if (n > r.max_per_day + 1e-9) res.dayLimit.push({ day: d.name, food: r.kw, qty: n, max: r.max_per_day, cond: r.cond }); });

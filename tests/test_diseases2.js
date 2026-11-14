@@ -23,3 +23,8 @@ for (let i = 0; i < 30; i++) { const c = base({ v2: true, conditions: CS[i % CS.
 assert.strictEqual(bad, 0); ok('30 عميلاً بأمراض متعددة: لا أسطر «تجنّب» ولا تعارض صلب (' + (Date.now() - t0) + 'ms)');
 const p2 = E.planWeek(base({ v2: true, conditions: [CH], meals: 4 }), D); assert(Array.isArray(p2.fit.dayLimit)); ok('نتيجة الحدّ اليومي موجودة في plan.fit.dayLimit (' + p2.fit.dayLimit.length + ')');
 console.log('\nنجح ' + n + ' اختباراً');
+// حدّ البيض اليومي يُطبَّق (v2 + كوليسترول): لا يوم فوق بيضة
+{ const EGGS = ['بيضة كاملة', 'بيض مسلوق']; let viol = 0, swapped = 0, tot = 0;
+  for (let i = 0; i < 12; i++) { const c = base({ v2: true, conditions: [[CH], ['سكري النوع الثاني'], [HD]][i % 3], meals: 4 + (i % 2), age: 30 + i, weight: 65 + i * 2 }), p = E.planWeek(c, D); swapped += p.fit.dayCapped || 0; tot++;
+    p.days.forEach((d) => { let q = 0; d.slots.forEach((s) => s.lines.forEach((l) => { if (EGGS.includes(l.name)) q += l.e * (D.foods.find((f) => f.n === l.name).upe || 1); })); if (q > 1 + 1e-9) viol++; }); }
+  assert.strictEqual(viol, 0, 'أيام فوق الحد: ' + viol); console.log('✔ بيضة كاملة يومياً كحدّ أعلى مطبّق (' + swapped + ' استبدالات في ' + tot + ' عملاء)'); }
