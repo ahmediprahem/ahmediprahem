@@ -172,7 +172,7 @@ E.ctx = function (client, D) {
   E.fmtQty = function (q, unit, step) { return E.qtyShow(E.qtyNum(q, unit, step), unit)[0]; };
   E.lineText = function (f, e, al) {                      // al: أسماء مستعارة للأصناف (اسم العرض للعميل)
     var qn = E.qtyNum(f.upe * e, f.us, f.st), sh = E.qtyShow(qn, f.us, f.us, f.up);
-    return (sh[0] + ' ' + sh[1] + ' ' + ((al && al[f.n]) || f.n)).replace(/\s+/g, ' ').trim();
+    return (sh[0] + ' ' + sh[1] + ' ' + ((al && al[f.n]) || f.dn || f.n)).replace(/\s+/g, ' ').trim();      // dn: اسم عرض مختصر (قرار المالك)
   };
   E.lineMacros = function (f, e) { var qn = E.qtyNum(f.upe * e, f.us, f.st), k = f.units ? qn / f.units : 0; return f.mac.map(function (x) { return x * k; }); };
   var LEAFY = /^(جرجير|خس|سبانخ نيئة|بقدونس)$/, GARNISH = /^(بصل|بصل أخضر|بقدونس|فجل|كرفس|نعناع|كزبرة|ثوم)$/;
@@ -801,7 +801,7 @@ E.ctx = function (client, D) {
   E.grainCups = function (f, e, al) {                      // م2: الحبوب المطبوخة بالأكواب لا بالملاعق (5 ملاعق فريك = ⅓ كوب)
     var r = E.fmeta(f).r; if (f.us !== 'ملعقة كبيرة' || (r !== 'grain' && r !== 'cereal') || !/مطبوخ|أرز|شوفان/.test(f.n)) return '';
     var q = E.qtyNum(f.upe * e, f.us, E.fmeta(f).st); if (q < 4 || q >= 8) return ''; var c = q / 16, a = Math.round(c * 4) / 4, b = Math.round(c * 3) / 3, cc = Math.abs(b - c) < Math.abs(a - c) ? b : a, t = { 0.25: '¼', 0.5: '½', 0.75: '¾' }[cc] || (Math.abs(cc - 1 / 3) < 0.01 ? '⅓' : Math.abs(cc - 2 / 3) < 0.01 ? '⅔' : ''); if (!t) return '';
-    return t + ' كوب ' + ((al && al[f.n]) || f.n);
+    return t + ' كوب ' + ((al && al[f.n]) || f.dn || f.n);
   };
   E.hint = function (f, e) {                                // م2: مقياس يدوي للعدّ الكبير (أكثر من 12 حبة)
     var m = E.fmeta(f), q = E.qtyNum(f.upe * e, f.us, m.st); if (!/^حبة/.test(f.us) || q <= 12) return '';
