@@ -1,0 +1,433 @@
+<title>استبيان زنها التفاعلي</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Readex+Pro:wght@500;600;700&display=swap">
+<style>
+/* المفهوم: جوال واحد في المنتصف. الطبق هو شريط التقدم: كل إجابة تملأ قطاعاً منه. بعد الاستبيان يولّد المحرك الحقيقي لزنها برو خطة أسبوع من اختيارات العميل. خلفية فاتحة بتدرّج باستيل وبرتقالي للفعل */
+:root{
+  --bg:#ffffff;--fg:#101736;--mut:#58618a;--card:#ffffff;--line:rgba(16,23,54,.12);--plate:rgba(16,23,54,.07);
+  --accent:#e0540a;--accent-soft:#ffeadb;--on-accent:#ffffff;--ok:#0f8f6b;--ok-soft:#dff5ec;--warn:#a85200;--warn-soft:#fff1d6;--no:#8b92b0;
+  --g-pro:#ff7a59;--g-carb:#ffc94d;--g-dairy:#7fb0ff;--g-fruit:#ff8fb1;--g-veg:#3fbf93;--g-fat:#c9a0ff;
+  --glow1:#ffd9c2;--glow2:#ddd0ff;--glow3:#c8f2e2;--shadow:0 10px 30px rgba(16,23,54,.10);
+  --fd:'Readex Pro','IBM Plex Sans Arabic',system-ui,sans-serif;--fb:'IBM Plex Sans Arabic',system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0d1330;--fg:#f2f4ff;--mut:#a9b2d8;--card:#151d4b;--line:rgba(255,255,255,.15);--plate:rgba(255,255,255,.09);
+  --accent:#ff8a3c;--accent-soft:#3a2418;--on-accent:#1b0f05;--ok:#5fe0b0;--ok-soft:#12342c;--warn:#ffc46b;--warn-soft:#3a2d12;--no:#7c85ad;
+  --glow1:#5a3326;--glow2:#2f2a66;--glow3:#16463c;--shadow:0 10px 30px rgba(0,0,0,.35);color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0d1330;--fg:#f2f4ff;--mut:#a9b2d8;--card:#151d4b;--line:rgba(255,255,255,.15);--plate:rgba(255,255,255,.09);
+  --accent:#ff8a3c;--accent-soft:#3a2418;--on-accent:#1b0f05;--ok:#5fe0b0;--ok-soft:#12342c;--warn:#ffc46b;--warn-soft:#3a2d12;--no:#7c85ad;
+  --glow1:#5a3326;--glow2:#2f2a66;--glow3:#16463c;--shadow:0 10px 30px rgba(0,0,0,.35);color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--fb);font-size:16px;line-height:1.65;direction:rtl}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.stage{padding-block:12px;padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px))}
+.app{position:relative;width:100%;max-width:430px;margin:0 auto;min-height:calc(100svh - 24px);display:flex;flex-direction:column;border-radius:30px;border:1px solid var(--line);background:var(--bg);overflow:hidden;box-shadow:var(--shadow)}
+.app::before{content:"";position:absolute;inset:0 0 auto 0;height:260px;z-index:0;pointer-events:none;background:radial-gradient(60% 90% at 92% 0,var(--glow1),transparent 72%),radial-gradient(60% 90% at 6% 0,var(--glow2),transparent 72%),radial-gradient(46% 70% at 50% -8%,var(--glow3),transparent 72%)}
+.top{position:relative;z-index:1;display:flex;align-items:center;gap:12px;padding:16px 16px 8px}
+.back{width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:color-mix(in srgb,var(--card) 80%,transparent);display:grid;place-items:center;flex:none}
+.back[disabled]{opacity:.3;cursor:default}.back svg{width:20px;height:20px;stroke:var(--fg);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.prog{flex:1;height:8px;border-radius:8px;background:var(--plate);overflow:hidden}.prog i{display:block;height:100%;width:0;border-radius:8px;background:linear-gradient(90deg,#ff9a4a,var(--accent));transition:width .5s cubic-bezier(.3,1,.4,1)}
+.tag{font-size:12px;font-weight:600;color:var(--accent);background:var(--accent-soft);border-radius:99px;padding:2px 10px;white-space:nowrap}
+.body{position:relative;z-index:1;flex:1;padding:8px 20px 20px;display:flex;flex-direction:column;gap:18px;animation:rise .38s both}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+h1,h2{font-family:var(--fd);margin:0;line-height:1.35;text-wrap:balance}h1{font-size:28px;font-weight:700}h2{font-size:22px;font-weight:700}
+.lead{color:var(--mut);margin:0;max-width:36ch}
+.cta{position:sticky;bottom:0;z-index:2;padding:14px 20px calc(16px + env(safe-area-inset-bottom,0px));background:linear-gradient(to bottom,transparent,var(--bg) 34%)}
+.btn{width:100%;min-height:54px;border:0;border-radius:18px;background:var(--accent);color:var(--on-accent);font-weight:700;font-size:17px;box-shadow:0 10px 22px color-mix(in srgb,var(--accent) 30%,transparent);transition:transform .15s,opacity .2s}
+.btn:active{transform:scale(.98)}.btn[disabled]{opacity:.4;box-shadow:none;cursor:default}
+.btn.ghost{background:transparent;color:var(--fg);border:1px solid var(--line);box-shadow:none}
+.plate{display:block;margin:0 auto;filter:drop-shadow(0 8px 14px rgba(16,23,54,.12))}
+.plate .rim{fill:var(--card);stroke:var(--line);stroke-width:1.2}.plate .well{fill:var(--plate)}.plate .wb{fill:var(--plate)}
+.plate .wf{transform-box:view-box;transform-origin:60px 60px;transform:scale(var(--s,0));transition:transform .65s cubic-bezier(.3,1.35,.5,1)}
+.plate .hub{fill:var(--bg);stroke:var(--line)}
+.plate.anim .wf{animation:fill 1s cubic-bezier(.3,1.35,.5,1) both}@keyframes fill{from{transform:scale(0)}to{transform:scale(var(--s,1))}}
+.hero{display:flex;flex-direction:column;gap:18px;align-items:center;text-align:center;padding-top:14px}.hero .lead{margin-inline:auto}
+.facts{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}.facts span{font-size:13px;color:var(--mut);border:1px solid var(--line);border-radius:99px;padding:3px 12px;background:var(--card)}
+.q{display:flex;flex-direction:column;gap:6px}.q .lead{font-size:15px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.opt{border:1.5px solid var(--line);background:var(--card);border-radius:20px;padding:16px;text-align:start;display:flex;flex-direction:column;gap:6px;transition:border-color .2s,background .2s,transform .15s}
+.opt:active{transform:scale(.98)}.opt b{font-family:var(--fd);font-size:17px}.opt span.d{color:var(--mut);font-size:14px;line-height:1.55}
+.opt.on{border-color:var(--accent);background:var(--accent-soft)}
+.opt .sym{width:44px;height:44px;border-radius:14px;background:var(--plate);display:grid;place-items:center;font-size:24px;font-weight:700}
+.opt.on .sym{background:var(--accent);color:var(--on-accent)}
+.big{display:flex;align-items:baseline;gap:8px}.big b{font-family:var(--fd);font-size:54px;line-height:1;font-variant-numeric:tabular-nums}.big span{color:var(--mut)}
+.rng{width:100%;direction:ltr;appearance:none;-webkit-appearance:none;height:8px;border-radius:8px;background:var(--plate);outline-offset:6px}
+.rng::-webkit-slider-thumb{-webkit-appearance:none;width:30px;height:30px;border-radius:50%;background:var(--accent);border:4px solid var(--card);box-shadow:0 2px 8px rgba(16,23,54,.3)}
+.rng::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:var(--accent);border:4px solid var(--card)}
+.card{border:1px solid var(--line);background:var(--card);border-radius:22px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.note{font-size:14.5px;color:var(--mut);margin:0}.note b{color:var(--fg)}
+.note.warn{color:var(--warn);background:var(--warn-soft);border-radius:12px;padding:8px 12px}
+.note.ok{color:var(--ok);background:var(--ok-soft);border-radius:12px;padding:8px 12px}
+.scale{position:relative;height:56px;margin-top:6px;direction:ltr}
+.scale .bar{position:absolute;inset:26px 0 auto;height:12px;border-radius:12px;background:var(--plate)}
+.scale .band{position:absolute;top:26px;height:12px;border-radius:12px;background:var(--g-veg);opacity:.85}
+.scale .mk{position:absolute;top:0;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;font-size:12px;font-weight:700;white-space:nowrap}
+.scale .mk::after{content:"";width:3px;height:12px;border-radius:3px;background:currentColor;margin-top:2px}
+.scale .mk.cur{color:var(--fg)}.scale .mk.tg{color:var(--accent)}
+.scale .lbl{position:absolute;top:42px;transform:translateX(-50%);font-size:12px;color:var(--mut);font-variant-numeric:tabular-nums}
+.meter{display:flex;gap:3px;align-items:flex-end;height:22px}.meter i{width:6px;border-radius:3px;background:var(--plate)}.meter i:nth-child(1){height:30%}.meter i:nth-child(2){height:52%}.meter i:nth-child(3){height:76%}.meter i:nth-child(4){height:100%}.meter i.on{background:var(--accent)}
+.row{display:flex;align-items:center;gap:14px}.row>div{min-width:0}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1.5px solid var(--line);background:var(--card);border-radius:99px;padding:8px 16px;min-height:44px;font-weight:500;transition:.2s}
+.chip.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent);font-weight:700}
+.mnames{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}.mnames span{font-size:13px;border-radius:99px;padding:2px 12px;background:var(--plate)}
+.wk{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;width:150px;flex:none;direction:ltr}.wk i{height:12px;border-radius:4px}
+.badge{font-size:12px;font-weight:700;color:var(--ok);background:var(--ok-soft);border-radius:99px;padding:1px 10px;align-self:flex-start}
+.tip{display:flex;flex-direction:column;gap:6px;padding:14px 16px;border-radius:20px;background:var(--card);border:1px dashed var(--line)}
+.tip p{margin:0}.draft{font-size:11px;color:var(--warn);font-weight:600}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--mut)}.legend span{display:flex;align-items:center;gap:6px}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex:none}
+.cnt{font-size:14px;font-weight:600;color:var(--ok)}.cnt.low{color:var(--warn)}
+.sec{display:flex;flex-direction:column;gap:10px}.sec h3{margin:0;font-size:16px;display:flex;align-items:center;gap:8px}.sec h3 small{font-weight:400;color:var(--mut)}
+.srch{width:100%;min-height:44px;border:1.5px solid var(--line);border-radius:14px;padding:0 14px;background:var(--card);color:var(--fg);font:inherit}
+.fl{display:flex;flex-wrap:wrap;gap:8px}
+.food{position:relative;border:1.5px solid var(--line);background:var(--card);border-radius:99px;min-height:44px;padding:6px 14px;display:flex;align-items:center;gap:8px;font-size:14.5px;font-weight:500;transition:.2s;text-align:start}
+.food .e{font-size:20px;line-height:1}.food:active{transform:scale(.96)}
+.food .st{font-size:11px;font-weight:700;border-radius:99px;padding:0 7px;display:none}
+.food.love{border-color:var(--ok);background:var(--ok-soft)}.food.love .st{display:inline;background:var(--ok);color:var(--bg)}
+.food.no{opacity:.55;border-style:dashed}.food.no .n{text-decoration:line-through}.food.no .st{display:inline;background:var(--no);color:var(--bg)}
+.food.more{display:none}.fl.all .food.more{display:flex}.food.hid{display:none!important}
+.morebtn{align-self:flex-start;border:0;background:none;color:var(--accent);font-weight:700;padding:6px 0}
+.ex{display:flex;flex-direction:column}.ex .r{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line)}.ex .r:first-child{border-top:0}.ex .r b{font-variant-numeric:tabular-nums;text-align:end}
+.steps{display:flex;flex-direction:column;gap:12px;margin:6px 0 0;list-style:none;padding:0}.steps li{display:flex;align-items:center;gap:12px;opacity:.3;transition:opacity .4s}.steps li.on{opacity:1}
+.steps .ck{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;flex:none}.steps li.on .ck{background:var(--ok);border-color:var(--ok)}.steps .ck svg{width:14px;height:14px;stroke:var(--bg);fill:none;stroke-width:3;opacity:0}.steps li.on .ck svg{opacity:1}
+.sum{display:flex;flex-direction:column;padding:0;margin:0}.sum li{display:flex;gap:12px;padding:10px 0;border-top:1px solid var(--line);list-style:none}.sum li:first-child{border-top:0}.sum b{font-family:var(--fd);flex:none;min-width:84px;color:var(--accent)}
+.sent{display:flex;flex-direction:column;gap:14px;align-items:center;text-align:center;padding-top:30px}
+/* الخطة المولَّدة */
+.phead{display:flex;flex-direction:column;gap:10px}
+.pill{display:inline-flex;font-size:12.5px;font-weight:600;border-radius:99px;padding:2px 12px;background:var(--plate);color:var(--fg)}
+.pills{display:flex;flex-wrap:wrap;gap:6px}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:2px 0 6px;scrollbar-width:none;margin-inline:-4px;padding-inline:4px}.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;min-width:64px;border:1.5px solid var(--line);background:var(--card);border-radius:16px;padding:8px 6px;text-align:center;font-weight:600;font-size:14px}
+.tab.on{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.mealc{border:1px solid var(--line);background:var(--card);border-radius:22px;overflow:hidden}
+.mh{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--plate) 60%,transparent)}
+.mh .tm{font-variant-numeric:tabular-nums;color:var(--mut);font-size:13.5px;min-width:58px}.mh b{font-family:var(--fd);flex:1}.mh .kc{font-size:13px;color:var(--mut)}
+.mh .fx{font-size:11px;font-weight:700;color:var(--ok);background:var(--ok-soft);border-radius:99px;padding:0 8px}
+.ul{list-style:none;margin:0;padding:0}.ul>li{padding:10px 16px;border-top:1px solid var(--line)}.ul>li:first-child{border-top:0}
+.ln{display:flex;align-items:center;gap:10px}.ln .lt{flex:1;min-width:0;line-height:1.5}
+.ln .lv{font-size:11.5px;font-weight:700;color:var(--ok);background:var(--ok-soft);border-radius:99px;padding:0 8px;white-space:nowrap}
+.ln .bkt{font-size:11.5px;font-weight:700;color:var(--warn);background:var(--warn-soft);border-radius:99px;padding:0 8px;white-space:nowrap}
+.swp{border:1px solid var(--line);background:var(--card);border-radius:12px;min-height:36px;padding:0 10px;font-size:13px;font-weight:600;flex:none}
+.swp.on{border-color:var(--accent);color:var(--accent)}
+.alts{display:flex;flex-direction:column;gap:6px;margin-top:8px}.alts button{border:1px solid var(--line);background:var(--bg);border-radius:12px;padding:8px 12px;text-align:start;font-size:14px;display:flex;justify-content:space-between;gap:10px;align-items:center}
+.alts button:active{background:var(--accent-soft)}.alts .lv{font-size:11px;font-weight:700;color:var(--ok)}
+.mealnote{padding:8px 16px;font-size:13px;color:var(--warn);background:var(--warn-soft)}
+.toggle{display:flex;align-items:center;gap:12px;justify-content:space-between}
+.sw2{width:52px;height:30px;border-radius:30px;background:var(--plate);border:1px solid var(--line);position:relative;flex:none;padding:0}.sw2::after{content:"";position:absolute;top:3px;inset-inline-start:3px;width:22px;height:22px;border-radius:50%;background:var(--card);box-shadow:0 1px 4px rgba(16,23,54,.3);transition:.2s}
+.sw2.on{background:var(--accent)}.sw2.on::after{inset-inline-start:25px}
+
+/* الدولة، الحد الأدنى، الانتظار، شاشة الأخصائي */
+.ccs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cc{display:flex;align-items:center;gap:10px;min-height:54px;padding:0 14px;border-radius:16px;border:1.5px solid var(--line);background:var(--card);font-weight:600;text-align:start}
+.cc span{font-size:22px}.cc.on{border-color:var(--accent);background:var(--accent-soft)}
+.req{font-size:13px;font-weight:700;color:var(--warn);background:var(--warn-soft);border-radius:99px;padding:1px 10px;margin-inline-start:auto;white-space:nowrap}.req.ok{color:var(--ok);background:var(--ok-soft)}
+.sec h3{flex-wrap:wrap}.sugg{border:0;background:none;color:var(--accent);font-weight:700;padding:0;font-size:13.5px}.sugg[hidden]{display:none}
+.hint{font-size:14px;color:var(--warn);background:var(--warn-soft);border-radius:12px;padding:8px 12px;margin:0}.hint.ok{color:var(--ok);background:var(--ok-soft)}
+.scene{position:relative;width:260px;height:230px;margin:0 auto}
+.scene .pl{position:absolute;inset:25px 40px auto 40px;animation:spin 24s linear infinite}
+.scene .pl .wf{animation:wfill 9s ease-in-out infinite;transform:scale(0)}
+@keyframes wfill{0%,8%{transform:scale(0)}20%,78%{transform:scale(1)}92%,100%{transform:scale(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.scene .orb{position:absolute;inset:0;animation:spin 14s linear infinite reverse}.scene .orb i{position:absolute;width:14px;height:14px;border-radius:50%}
+.scene .fl2{position:absolute;border-radius:10px;animation:bob 3.6s ease-in-out infinite alternate}
+@keyframes bob{from{transform:translateY(8px) rotate(-4deg)}to{transform:translateY(-10px) rotate(5deg)}}
+.cupw{position:absolute;inset-inline-start:6px;top:96px;width:34px;height:44px;border:3px solid var(--fg);border-top:0;border-radius:0 0 10px 10px;overflow:hidden;opacity:.85}.cupw i{position:absolute;inset:auto 0 0 0;background:var(--g-dairy);animation:cupfill 5s ease-in-out infinite}
+@keyframes cupfill{0%{height:8%}60%,80%{height:86%}100%{height:8%}}
+.pencil{position:absolute;inset-inline-end:2px;top:90px;width:12px;height:70px;border-radius:6px;background:linear-gradient(#ffc94d 75%,#ff7a59 75%);transform-origin:50% 100%;animation:wr 3s ease-in-out infinite alternate}
+@keyframes wr{from{transform:rotate(-18deg)}to{transform:rotate(22deg)}}
+.stg{display:flex;flex-direction:column;gap:12px;list-style:none;margin:0;padding:0}.stg li{display:flex;align-items:center;gap:12px;opacity:.4;transition:opacity .4s}.stg li.on{opacity:1;font-weight:700}.stg li.pass{opacity:.75}
+.stg .ck{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);flex:none;display:grid;place-items:center;font-size:13px}.stg li.pass .ck{background:var(--ok);border-color:var(--ok);color:var(--bg)}.stg li.on .ck{border-color:var(--accent);animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 6px color-mix(in srgb,var(--accent) 25%,transparent)}}
+.specbar{background:#101736;color:#fff}.tag.spec{background:#101736;color:#fff}
+.stepper{display:flex;align-items:center;gap:14px;justify-content:center}.stepper button{width:44px;height:44px;border-radius:14px;border:1px solid var(--line);background:var(--card);font-size:22px;font-weight:700}
+.stepper b{font-family:var(--fd);font-size:34px;min-width:120px;text-align:center;font-variant-numeric:tabular-nums}
+.ta{width:100%;min-height:80px;border:1.5px solid var(--line);border-radius:14px;padding:10px 12px;background:var(--card);color:var(--fg);font:inherit;resize:vertical}
+.msg{background:var(--accent-soft);border-radius:16px;padding:12px 16px}.msg b{color:var(--accent)}
+@media (prefers-reduced-motion:reduce){.scene .pl,.scene .orb,.scene .pl .wf,.scene .fl2,.cupw i,.pencil{animation:none}.scene .pl .wf{transform:scale(1)}}
+.frow{flex-direction:row;align-items:center;gap:12px}.frow b:first-of-type{flex:1;font-family:var(--fd)}.fic{font-size:28px}
+.stepper2{display:flex;align-items:center;gap:10px}.stepper2 button{width:42px;height:42px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-size:22px;font-weight:700}.stepper2 b{min-width:28px;text-align:center;font-size:24px;font-variant-numeric:tabular-nums}
+@media (min-width:500px){.stage{padding-block:28px}.app{min-height:min(860px,calc(100svh - 56px))}}
+@media (prefers-reduced-motion:reduce){.body{animation:none}.plate .wf,.prog i{transition:none}.plate.anim .wf{animation:none}}
+</style>
+<div class="stage"><div class="app" id="app"></div></div>
+<script type="application/json" id="dj">/*DATA_JSON*/</script>
+<script>/*ENGINE_JS*/</script>
+<script>/*FIXCAPS_JS*/</script>
+<script>
+(function(){
+'use strict';
+var D=JSON.parse(document.getElementById('dj').textContent),E=window.DPEngine,byName={};D.foods.forEach(function(f){byName[f.n]=f});
+/* ---------- الفئات ---------- */
+
+var CO=[['eg','🇪🇬','مصر','eg'],['sa','🇸🇦','السعودية','gulf'],['ae','🇦🇪','الإمارات','gulf'],['kw','🇰🇼','الكويت','gulf'],['qa','🇶🇦','قطر','gulf'],['bh','🇧🇭','البحرين','gulf'],['om','🇴🇲','عُمان','gulf'],['ye','🇾🇪','اليمن','gulf'],['jo','🇯🇴','الأردن','lev'],['ps','🇵🇸','فلسطين','lev'],['sy','🇸🇾','سوريا','lev'],['lb','🇱🇧','لبنان','lev'],['iq','🇮🇶','العراق','iq'],['sd','🇸🇩','السودان','fus'],['ly','🇱🇾','ليبيا','mag'],['tn','🇹🇳','تونس','mag'],['dz','🇩🇿','الجزائر','mag'],['ma','🇲🇦','المغرب','mag'],['xx','🌍','دولة أخرى','fus']];
+/* قاموس أسماء الأكلات حسب البلد (مسودة بانتظار مراجعة المالك) و«cz» مطبخ البلد في بيانات الأصناف: eg مصر • sa السعودية والخليج */
+var DIA={eg:{cz:'eg',ex:['خبز بلدي','عيش بلدي'],w:[['لبن رائب','لبن رايب'],['حليب','لبن'],['خبز','عيش'],['أرز','رز'],['كوسا','كوسة'],['ذرة','درة']]},
+ gulf:{cz:'sa',ex:['لبن رائب','لبن'],w:[['لبن رائب','لبن'],['أرز','رز'],['كوسا','كوسة']]},
+ lev:{cz:'',ex:['طماطم','بندورة'],w:[['طماطم','بندورة'],['بطاطس','بطاطا'],['لبن رائب','لبن'],['أرز','رز']]},
+ iq:{cz:'',ex:['أرز','تمن'],w:[['طماطم','طماطة'],['لبن رائب','روب'],['أرز','تمن']]},
+ mag:{cz:'',ex:['بطاطس','بطاطا'],w:[['بطاطس','بطاطا'],['لبن رائب','لبن']]},
+ fus:{cz:'',ex:null,w:[]}};
+function diaKey(){var c=CO.filter(function(x){return x[0]===S.cc})[0];return c?c[3]:'fus'}
+function dia(n){var d=DIA[diaKey()],o=n;d.w.forEach(function(p){o=o.split(p[0]).join(p[1])});return o.replace(/\s*\((عيش|خبز) بلدي مصري\)/,'')}
+function dn(n){return dia(n.split(' (')[0])}
+function czOK(f){var d=DIA[diaKey()],a=['both','intl'];if(d.cz)a.push(d.cz);return a.indexOf(f.cz||'both')>=0}
+var MIN={b:{pro:3,carb:2,dairy:2,fruit:2,veg:2,fat:2},l:{pro:3,carb:2,veg:3,fat:2,df:2},d:{pro:3,carb:2,veg:3,fat:2,df:2},s:{fruit:3,sdairy:1,sfat:1,scarb:1}};
+var SEC={pro:{n:'البروتين',c:'--g-pro',ug:[1,2,3,4,5]},carb:{n:'النشويات',c:'--g-carb',ug:[0]},dairy:{n:'الألبان',c:'--g-dairy',ug:[6,7,8]},fruit:{n:'الفواكه',c:'--g-fruit',ug:[10]},veg:{n:'الخضار',c:'--g-veg',ug:[9]},fat:{n:'الدهون الصحية',c:'--g-fat',ug:[11]},
+ df:{n:'الألبان والفواكه',c:'--g-dairy',ug:[6,7,8,10]},sdairy:{n:'الألبان',c:'--g-dairy',ug:[6,7,8]},sfat:{n:'مكسرات وبذور',c:'--g-fat',ug:[11]},scarb:{n:'نشويات خفيفة وحلويات',c:'--g-carb',ug:[0,12]}};
+var WG={b:['pro','carb','dairy','fruit','veg','fat'],l:['pro','carb','veg','fat','df'],d:['pro','carb','veg','fat','df'],s:['fruit','sdairy','sfat','scarb']};
+var TI={b:0,l:1,d:2,s:3},TU={b:'B',l:'L',d:'D',s:'S'};
+var KIND={b:'الفطور',l:'الغداء',d:'العشاء'};
+var TIPS={pro:'البروتين يطيل الشبع، فنحرص على وجوده في كل وجبة.',carb:'لا نلغي النشويات، بل نختار كميتها لتناسب هدفك.',dairy:'الألبان تضيف الكالسيوم والبروتين.',fruit:'الفواكه تضيف الألياف وطعماً حلواً صحياً.',vegfat:'الخضار تملأ الطبق بسعرات قليلة، والدهون الصحية بكمية صغيرة تكفي.'};
+var WEEKS={fixed:{n:'قائمة ثابتة وبدائل',d:'قائمة واحدة تتكرر كل يوم، ولكل صنف بدائل تبدّل بها. الأسهل في التحضير والتسوق.'},varied:{n:'أيام مختلفة',d:'قائمة جديدة كل يوم على مدار الأسبوع، بلا تكرار متتالٍ. الأكثر تنوعاً.'},mix:{n:'فطور وعشاء ثابتان وغداء متنوع',d:'الأقرب لعادات أغلب الناس: تحضّر الفطور والعشاء بسهولة، وتتنوع في الغداء.'}};
+var ACTS=[['أجلس أكثر يومي','عمل مكتبي وحركة قليلة'],['أمشي وأتحرك كل يوم','مشي أو أعمال منزلية يومية'],['أتمرن 3 مرات في الأسبوع','نادٍ أو رياضة منتظمة'],['أتمرن كل يوم تقريباً','تمرين شبه يومي']];
+var CAP=['#ff7a59','#ffc94d','#7fb0ff','#3fbf93','#c9a0ff','#ff8fb1'];
+var EMO=[['بيض','🥚'],['جبن','🧀'],['لبنة','🥣'],['زبادي','🥣'],['حليب','🥛'],['لبن','🥛'],['خبز','🍞'],['توست','🍞'],['عيش','🫓'],['فينو','🥖'],['شوفان','🥣'],['أرز','🍚'],['مكرونة','🍝'],['معكرونة','🍝'],['بطاطس','🥔'],['بطاطا','🍠'],['ذرة','🌽'],['فشار','🍿'],['عدس','🫘'],['فول','🫘'],['حمص','🫘'],['لوبيا','🫘'],['فاصوليا','🫘'],['بازلاء','🫛'],['دجاج','🍗'],['ديك رومي','🦃'],['كبدة','🥩'],['لحم','🥩'],['بقر','🥩'],['ضأن','🥩'],['كفتة','🍖'],['سمك','🐟'],['بلطي','🐟'],['تونة','🐟'],['سلمون','🐟'],['سردين','🐟'],['جمبري','🦐'],['روبيان','🦐'],['زيتون','🫒'],['زيت','🫒'],['طحينة','🥜'],['سمسم','🥜'],['فول سوداني','🥜'],['لوز','🌰'],['جوز','🌰'],['بندق','🌰'],['كاجو','🌰'],['فستق','🌰'],['مكسرات','🌰'],['أفوكادو','🥑'],['زبدة','🧈'],['سمن','🧈'],['تفاح','🍎'],['موز','🍌'],['برتقال','🍊'],['يوسفي','🍊'],['عنب','🍇'],['فراولة','🍓'],['مانجو','🥭'],['بطيخ','🍉'],['شمام','🍈'],['خوخ','🍑'],['دراق','🍑'],['كمثرى','🍐'],['تمر','🌴'],['تين','🍈'],['رمان','🍎'],['أناناس','🍍'],['كيوي','🥝'],['طماطم','🍅'],['خيار','🥒'],['جزر','🥕'],['فلفل','🫑'],['خس','🥬'],['جرجير','🥬'],['سبانخ','🥬'],['ملوخية','🥬'],['سلطة','🥗'],['بروكلي','🥦'],['قرنبيط','🥦'],['باذنجان','🍆'],['كوسة','🥒'],['بصل','🧅'],['فجل','🥬'],['شوربة','🍲'],['آيس','🍨'],['بوظة','🍨'],['شوكولاتة','🍫'],['عسل','🍯'],['مربى','🍯']];
+var GEMO={pro:'🍳',carb:'🌾',dairy:'🥛',fruit:'🍎',veg:'🥬',fat:'🫒',df:'🥛',sdairy:'🥛',sfat:'🌰',scarb:'🌾'};
+function emo(n,sec){for(var i=0;i<EMO.length;i++)if(n.indexOf(EMO[i][0])>=0)return EMO[i][1];return GEMO[sec]||'🍽'}
+function shortN(n){return dn(n)}
+function foodsOf(kind,sec){var ti=TI[kind],ug=SEC[sec].ug;return D.foods.filter(function(f){return f.on&&f.m[ti]&&ug.indexOf(f.g)>=0&&czOK(f)}).sort(function(a,b){return a.o-b.o})}
+function init(){return{sex:'f',age:34,h:162,w:88,target:null,tTouched:false,act:1,tt:'ev',meals:5,week:'mix',love:{},no:{},cook:'me',out:'rare',fast:'no',scale:'yes',cc:'',idx:0,finished:false,bank:false,plan:null,day:0,alt:'',role:'client',approved:false,kcalBase:null,kcalAdj:0,note:'',capFix:null,freq:{poultry:3,red:2,fish:2},cond:{},alg:{}}}
+var S=init();
+var app=document.getElementById('app'),token=0;
+function reset(){S=init()}
+/* ---------- حسابات ---------- */
+function bmiRange(){var m=S.h/100;return[Math.round(18.5*m*m),Math.round(24.9*m*m)]}
+function ibw(){return Math.round((S.h-100)*(S.sex==='f'?0.9:1))}
+function mealList(){var k={3:['b','l','d'],4:['b','l','s','d'],5:['b','s','l','s','d'],6:['b','s','l','s','d','s']}[S.meals],sn={4:['سناك العصر'],5:['سناك الصباح','سناك العصر'],6:['سناك الصباح','سناك العصر','سناك المساء']}[S.meals]||[],si=0;
+  return k.map(function(x){return{kind:x,name:x==='s'?sn[si++]:KIND[x]}})}
+function hm12(t){var m=/^(\d{1,2}):(\d{2})/.exec(t||'');if(!m)return t||'';var h=+m[1];return(h%12||12)+':'+m[2]+(h<12?' ص':' م')}
+function isLoved(n){return Object.keys(S.love).some(function(k){return k.split('|')[1]===n})}
+function loved(mi,sec){var m=mealList()[mi],c=0;foodsOf(m.kind,sec).forEach(function(f){if(S.love[TU[m.kind]+'|'+f.n])c++});return c}
+function banned(mi,sec){var m=mealList()[mi],c=0;foodsOf(m.kind,sec).forEach(function(f){if(S.no[f.n])c++});return c}
+function fillOf(c){return c.charAt(0)==='#'?c:'var('+c+')'}
+function plateSvg(ws,o){o=o||{};var N=ws.length||1,R=50,gap=N>1?2.4:0,size=o.size||150;
+  function pt(a,r){var t=(a-90)*Math.PI/180;return(60+r*Math.cos(t)).toFixed(2)+' '+(60+r*Math.sin(t)).toFixed(2)}
+  function wedge(i){if(N===1)return'M60 10a50 50 0 1 0 .01 0Z';var a=i*360/N+gap,b=(i+1)*360/N-gap;return'M60 60L'+pt(a,R)+'A'+R+' '+R+' 0 '+(b-a>180?1:0)+' 1 '+pt(b,R)+'Z'}
+  return'<svg class="plate'+(o.anim?' anim':'')+'" id="plate" viewBox="0 0 120 120" width="'+size+'" height="'+size+'" role="img" aria-label="'+(o.label||'طبقك')+'"><circle class="rim" cx="60" cy="60" r="57"/><circle class="well" cx="60" cy="60" r="52.5"/>'+
+   ws.map(function(w,i){return'<path class="wb" d="'+wedge(i)+'"/><path class="wf" data-i="'+i+'" d="'+wedge(i)+'" style="fill:'+fillOf(w.c)+';--s:'+Math.sqrt(Math.max(0,Math.min(1,w.f))).toFixed(3)+(o.anim?';animation-delay:'+(.2+i*.28)+'s':'')+'"/>'}).join('')+'<circle class="hub" cx="60" cy="60" r="5"/></svg>'}
+function setPlate(ws){var els=document.querySelectorAll('#plate .wf');ws.forEach(function(w,i){if(els[i])els[i].style.setProperty('--s',Math.sqrt(Math.max(0,Math.min(1,w.f))).toFixed(3))})}
+/* ---------- التسلسل ---------- */
+function groupsOf(g){return g==='vegfat'?['veg','fat']:[g]}
+function seq(){var s=['welcome','country','who','body','health','target','act','meals','week','bintro'];
+  mealList().forEach(function(m,i){if(m.kind==='b'){['pro','carb','dairy','fruit','vegfat'].forEach(function(g){s.push('g:'+i+':'+g)})}else s.push('m:'+i)});
+  return s.concat(['real','freq','scale','build',S.approved?'plan':'wait'])}
+function wedgesFor(id){var p=id.split(':'),sq=seq(),cur=sq.indexOf(id),mi,m;
+  if(id==='meals')return mealList().map(function(x,i){return{c:CAP[i%6],f:.55}});
+  if(id==='bintro')return WG.b.map(function(g){return{c:SEC[g].c,f:0}});
+  if(p[0]==='g'){mi=+p[1];m=mealList()[mi];var cg=groupsOf(p[2]);return WG.b.map(function(g){var done=sq.some(function(s,j){var q=s.split(':');return q[0]==='g'&&+q[1]===mi&&groupsOf(q[2]).indexOf(g)>=0&&j<cur});return{c:SEC[g].c,f:done?1:cg.indexOf(g)>=0?Math.min(1,loved(mi,g)/minOf(mi,g))*.9:0}})}
+  if(p[0]==='m'){mi=+p[1];m=mealList()[mi];return WG[m.kind].map(function(g){return{c:SEC[g].c,f:Math.min(1,loved(mi,g)/minOf(mi,g))}})}
+  return[]}
+/* ---------- شاشات الاستبيان ---------- */
+function countryHtml(){var d=DIA[diaKey()],ex=S.cc&&d.ex?'<p class="note ok">مثال: «'+d.ex[0]+'» يظهر لك «'+d.ex[1]+'»، وتُعرض لك أصناف مطبخ بلدك.</p>':S.cc?'<p class="note">سنعرض لك الأسماء الشائعة ولا نضع أصنافاً خاصة ببلد آخر.</p>':'';
+  return'<div class="q"><h2>من أي بلد أنت؟</h2><p class="lead">نكتب لك أسماء الأكلات كما تعرفها، ونعرض لك أصناف مطبخ بلدك.</p></div><div class="ccs">'+CO.map(function(c){return'<button class="cc'+(S.cc===c[0]?' on':'')+'" data-a="cc" data-v="'+c[0]+'"><span aria-hidden="true">'+c[1]+'</span>'+c[2]+'</button>'}).join('')+'</div>'+ex+'<span class="draft">قاموس الأسماء مسودة بانتظار المراجعة</span>'}
+var HC=[['سكري النوع الثاني','سكري النوع الثاني'],['مقاومة الإنسولين / ما قبل السكري','مقاومة الإنسولين أو ما قبل السكري'],['ضغط الدم المرتفع','ضغط الدم المرتفع'],['ارتفاع الكوليسترول والدهون','ارتفاع الكوليسترول أو الدهون'],['أمراض القلب','أمراض القلب'],['أمراض الكلى','أمراض الكلى'],['النقرس','النقرس'],['دهون الكبد (MASLD)','دهون الكبد'],['خمول الغدة','خمول الغدة الدرقية']];
+var HA=[['حساسية السمك','السمك'],['حساسية القشريات والمحار','الجمبري والقشريات'],['حساسية الحليب (بروتين الحليب)','الحليب'],['عدم تحمل اللاكتوز','اللاكتوز'],['حساسية البيض','البيض'],['حساسية المكسرات','المكسرات'],['حساسية الفول السوداني','الفول السوداني'],['حساسية السمسم','السمسم'],['حساسية القمح / الجلوتين (سيلياك)','القمح والجلوتين'],['لا آكل اللحوم (نباتي)','لا آكل اللحوم']];
+function multiRow(a,opts,map){return'<div class="chips">'+opts.filter(function(o){return a!=='hc'||D.conditions.indexOf(o[0])>=0}).map(function(o){return'<button class="chip'+(map[o[0]]?' on':'')+'" data-a="'+a+'" data-v="'+o[0]+'" aria-pressed="'+(map[o[0]]?'true':'false')+'">'+o[1]+'</button>'}).join('')+'</div>'}
+function healthHtml(){var n=Object.keys(S.cond).length+Object.keys(S.alg).length;return'<div class="q"><h2>صحتك</h2><p class="lead">اختر ما ينطبق عليك، أو تجاوز إن لم يوجد شيء. نُفصّل خطتك على أساسه، ويراجعه أخصائيك.</p></div>'+
+  '<div class="q"><span style="font-weight:700">حالة صحية</span>'+multiRow('hc',HC,S.cond)+'</div>'+
+  '<div class="q"><span style="font-weight:700">حساسية أو أطعمة لا تأكلها</span>'+multiRow('ha',HA,S.alg)+'</div>'+
+  '<p class="hint'+(n?' ok':'')+'">'+(n?'اخترت '+n+'. نستبعد ما يضرك ونقلّل ما يحتاج تقليلاً.':'لا شيء؟ ممتاز، انتقل للخطوة التالية.')+'</p><span class="draft">القواعد الصحية مسودة من إرشادات ACC/AHA وADA وACR وAASLD، يعتمدها أخصائيك</span>'}
+function healthTxt(c,p){var cs=c.conditions,out=[];if(cs.length)out.push('راعينا '+cs.join('، ')+': ما يضر مستبعد، وما يحتاج تقليلاً مرة في اليوم و3 أيام في الأسبوع على الأكثر.');
+  var cx=E.ctx(c,D);out.push(cx.diab?'لا حلويات، وحصة فاكهة واحدة في كل جلسة.':cs.indexOf('دهون الكبد (MASLD)')>=0?'لا حلويات.':'حلويات 3 أيام في الأسبوع فقط.');
+  out.push(cs.some(function(x){return /كوليسترول|القلب|سكري|الإنسولين/.test(x)})?'بيضة كاملة واحدة يومياً على الأكثر.':'بيضتان كاملتان يومياً على الأكثر.');
+  if((E.weekSchedule(c,D)||[]).indexOf('leg')>=0)out.push('يوم بقول في الأسبوع (عدس أو فاصوليا) بدل تكرار الصنف نفسه.');
+  if(c.allergens.length)out.push('بلا '+c.allergens.map(function(a){return(HA.filter(function(h){return h[0]===a})[0]||[0,a])[1]}).join('، ')+'.');return out.join(' ')}
+function whoHtml(){return'<div class="q"><h2>تعارف سريع</h2><p class="lead">لا نحتاج إلا ما يفصّل لك الخطة على مقاسك.</p></div>'+
+  '<div class="two"><button class="opt'+(S.sex==='m'?' on':'')+'" data-a="sex" data-v="m"><span class="sym">♂</span><b>رجل</b></button><button class="opt'+(S.sex==='f'?' on':'')+'" data-a="sex" data-v="f"><span class="sym">♀</span><b>امرأة</b></button></div>'+
+  '<div class="q"><span class="lead">كم عمرك؟</span><div class="big"><b id="vAge">'+S.age+'</b><span>سنة</span></div><input class="rng" type="range" min="14" max="80" step="1" value="'+S.age+'" data-s="age" aria-label="العمر"></div>'}
+function bodyHtml(){return'<div class="q"><h2>طولك ووزنك الآن</h2><p class="lead">بياناتك مشفّرة على جوالك، ولا يقرؤها إلا أخصائيك.</p></div>'+
+  '<div class="q"><span class="lead">الطول</span><div class="big"><b id="vH">'+S.h+'</b><span>سم</span></div><input class="rng" type="range" min="140" max="210" step="1" value="'+S.h+'" data-s="h" aria-label="الطول"></div>'+
+  '<div class="q"><span class="lead">الوزن</span><div class="big"><b id="vW">'+S.w+'</b><span>كجم</span></div><input class="rng" type="range" min="40" max="180" step="1" value="'+S.w+'" data-s="w" aria-label="الوزن"></div>'}
+function targetInfo(){var r=bmiRange(),lo=r[0],hi=r[1],smin=35,smax=Math.max(S.w,hi)+8,pc=function(v){return((v-smin)/(smax-smin)*100).toFixed(1)+'%'},d=S.w-S.target,msg;
+  if(S.target<lo)msg='<p class="note warn">هدفك أقل من النطاق الصحي لطولك. سيناقشه معك أخصائيك قبل اعتماده.</p>';
+  else if(d>0&&d>=S.w*.1)msg='<p class="note">فرق '+d+' كجم عن وزنك الآن. لن نطلب منك الوصول إليه دفعة واحدة، بل نقسمه على <b>مراحل صغيرة</b> ونحتفل بكل مرحلة.</p>';
+  else if(d>0)msg='<p class="note ok">فرق '+d+' كجم فقط. هدف قريب وقابل للتحقيق.</p>';
+  else msg='<p class="note ok">وزنك الآن ضمن هدفك. سنركز على الحفاظ عليه.</p>';
+  return'<div class="scale" aria-hidden="true"><div class="bar"></div><div class="band" style="left:'+pc(lo)+';width:calc('+pc(hi)+' - '+pc(lo)+')"></div><div class="mk cur" style="left:'+pc(S.w)+'">الآن</div><div class="mk tg" style="left:'+pc(S.target)+'">هدفك</div><span class="lbl" style="left:'+pc(lo)+'">'+lo+'</span><span class="lbl" style="left:'+pc(hi)+'">'+hi+'</span></div><div class="big"><b>'+S.target+'</b><span>كجم</span></div>'+msg}
+function targetHtml(){var r=bmiRange(),sg=ibw();
+  return'<div class="q"><h2>وزنك المثالي</h2><p class="lead">بناءً على طولك <b>'+S.h+' سم</b> وجنسك، وزنك الصحي بين <b>'+r[0]+' و'+r[1]+' كجم</b>، ونقترح لك <b>'+sg+' كجم</b>.</p></div>'+
+  '<div class="card"><div class="q"><span style="font-weight:700;font-size:18px">ما الوزن الذي تطمح إليه؟</span><span class="lead">حرّك المؤشر. يمكنك اختيار غير المقترح، وسيراجعه أخصائيك معك.</span></div><input class="rng" type="range" min="35" max="'+S.w+'" step="1" value="'+S.target+'" data-s="target" aria-label="الوزن المستهدف"><div id="tgt">'+targetInfo()+'</div></div>'}
+function actHtml(){var a='<div class="q"><h2>كيف يبدو يومك؟</h2><p class="lead">اختر الأقرب لحالك، ولا تبالغ ولا تقلل.</p></div><div class="sec">';
+  ACTS.forEach(function(x,i){a+='<button class="opt'+(S.act===i?' on':'')+'" data-a="act" data-v="'+i+'"><span class="row"><span class="meter">'+[0,1,2,3].map(function(k){return'<i'+(k<=i?' class="on"':'')+'></i>'}).join('')+'</span><span><b>'+x[0]+'</b><br><span class="d">'+x[1]+'</span></span></span></button>'});
+  a+='</div>';
+  if(S.act>=2)a+='<div class="q"><span style="font-weight:700">متى تتمرن غالباً؟</span><div class="chips">'+[['am','صباحاً'],['nn','ظهراً'],['ev','مساءً']].map(function(x){return'<button class="chip'+(S.tt===x[0]?' on':'')+'" data-a="tt" data-v="'+x[0]+'">'+x[1]+'</button>'}).join('')+'</div><p class="note">نضع النشويات قبل التمرين وبعده لتتمرن بطاقة ثم تتعافى.</p></div>';
+  return a}
+var MCAP={3:'3 وجبات رئيسية',4:'3 وجبات رئيسية وسناك',5:'3 وجبات رئيسية وسناكان',6:'3 وجبات رئيسية و3 سناكات'};
+function mealsHtml(){return'<div class="q"><h2>كم وجبة تفضّل في اليوم؟</h2><p class="lead">الطبق يتقسم حسب اختيارك.</p></div><div id="plateBox">'+plateSvg(wedgesFor('meals'),{size:190,label:'طبق مقسوم إلى '+S.meals+' وجبات'})+'</div>'+
+  '<div class="chips" style="justify-content:center">'+[3,4,5,6].map(function(n){return'<button class="chip'+(S.meals===n?' on':'')+'" data-a="mc" data-v="'+n+'" style="min-width:64px;font-size:18px">'+n+'</button>'}).join('')+'</div>'+
+  '<div style="text-align:center"><b id="mcap">'+MCAP[S.meals]+'</b></div><div class="mnames" id="mnames">'+mealList().map(function(m){return'<span>'+m.name+'</span>'}).join('')+'</div>'}
+function miniWeek(mode){var pal=['--g-pro','--g-carb','--g-dairy','--g-veg','--g-fat','--g-pro','--g-carb'],pal2=['--g-dairy','--g-veg','--g-fat','--g-pro','--g-carb','--g-dairy','--g-veg'],pal3=['--g-fat','--g-pro','--g-carb','--g-dairy','--g-veg','--g-fat','--g-pro'];
+  function row(a){return a.map(function(v){return'<i style="background:var('+v+')"></i>'}).join('')}function same(v){return[v,v,v,v,v,v,v]}
+  var h=mode==='fixed'?row(same('--g-carb'))+row(same('--g-veg'))+row(same('--g-dairy')):mode==='varied'?row(pal)+row(pal2)+row(pal3):row(same('--g-carb'))+row(pal2)+row(same('--g-dairy'));
+  return'<span class="wk" aria-hidden="true">'+h+'</span>'}
+function weekHtml(){return'<div class="q"><h2>كيف تحب أسبوعك؟</h2><p class="lead">الصفوف في الرسم: فطور، غداء، عشاء. كل لون صنف مختلف.</p></div><div class="sec">'+
+  ['mix','fixed','varied'].map(function(k){return'<button class="opt'+(S.week===k?' on':'')+'" data-a="wk" data-v="'+k+'">'+(k==='mix'?'<span class="badge">الأنسب لأغلب الناس</span>':'')+'<span class="row">'+miniWeek(k)+'<span><b>'+WEEKS[k].n+'</b></span></span><span class="d">'+WEEKS[k].d+'</span></button>'}).join('')+'</div>'}
+function bintroHtml(){return'<div class="q"><h2>لنبنِ وجباتك، نبدأ بالفطور</h2></div><div id="plateBox">'+plateSvg(wedgesFor('bintro'),{size:190,label:'طبق الفطور'})+'</div>'+
+  '<div class="legend" style="justify-content:center">'+WG.b.map(function(g){return'<span><i class="dot" style="background:var('+SEC[g].c+')"></i>'+SEC[g].n+'</span>'}).join('')+'</div>'+
+  '<div class="tip"><p>الفطور الصحي يكون <b>متنوعاً بين مصادر مختلفة</b>. والأفضل أن نبدأ بمصادر <b>البروتين</b> مثل البيض أو الفول أو الجبن.</p><span class="draft">نص تعريفي مسودة بانتظار موافقة الأخصائي</span></div>'}
+function foodCard(mi,f,sec,idx){var m=mealList()[mi],lk=TU[m.kind]+'|'+f.n,st=S.no[f.n]?'no':S.love[lk]?'love':'';
+  return'<button class="food'+(st?' '+st:'')+(idx>=16?' more':'')+'" data-a="pf" data-k="'+lk+'" data-n="'+f.n.replace(/"/g,'&quot;')+'" title="'+dn(f.n).replace(/"/g,'&quot;')+'"><span class="e">'+emo(f.n,sec)+'</span><span class="n">'+shortN(f.n)+'</span><span class="st">'+(st==='love'?'أحب':st==='no'?'لا':'')+'</span></button>'}
+function minOf(mi,sec){var m=mealList()[mi];return Math.min(MIN[m.kind][sec]||1,foodsOf(m.kind,sec).length)}
+function reqOf(mi,secs){var ok=true;secs.forEach(function(g){if(loved(mi,g)<minOf(mi,g))ok=false});return ok}
+function reqBadge(mi,g){var need=minOf(mi,g),have=loved(mi,g);return have>=need?'<span class="req ok" data-g="'+g+'">✓ اكتمل</span>':'<span class="req" data-g="'+g+'">اخترت '+have+' من '+need+' على الأقل</span>'}
+function secBlock(mi,g,showTitle){var m=mealList()[mi],fs=foodsOf(m.kind,g);
+  return'<div class="sec" data-sec="'+g+'" data-mi="'+mi+'"><h3><i class="dot" style="background:var('+SEC[g].c+')"></i>'+SEC[g].n+' <small>('+fs.length+')</small>'+reqBadge(mi,g)+'</h3><button class="sugg" data-a="suggest" data-g="'+g+'" data-mi="'+mi+'"'+(loved(mi,g)>=minOf(mi,g)?' hidden':'')+'>اقترح لي الأشهر</button>'+(fs.length>12?'<input class="srch" type="search" placeholder="ابحث في '+SEC[g].n+'…" data-a="srch" aria-label="بحث">':'')+
+   '<div class="fl">'+fs.map(function(f,i){return foodCard(mi,f,g,i)}).join('')+'</div>'+(fs.length>16?'<button class="morebtn" data-a="more">عرض المزيد ('+(fs.length-16)+')</button>':'')+'</div>'}
+function reqRefresh(){var id=seq()[S.idx],p=id.split(':');if(p[0]!=='g'&&p[0]!=='m')return;var mi=+p[1],gs=p[0]==='g'?groupsOf(p[2]):WG[mealList()[mi].kind];
+  gs.forEach(function(g){var sec=document.querySelector('.sec[data-sec="'+g+'"]');if(!sec)return;var b=sec.querySelector('.req'),tmp=document.createElement('div');tmp.innerHTML=reqBadge(mi,g);b.replaceWith(tmp.firstChild);sec.querySelector('.sugg').hidden=loved(mi,g)>=minOf(mi,g)});
+  var ok=reqOf(mi,gs),h=document.getElementById('hint'),c=document.getElementById('cta');if(c)c.disabled=!ok;if(h){h.className='hint'+(ok?' ok':'');h.textContent=ok?'ممتاز، يكفي هذا لنفصّل لك الخطة.':'نحتاج حداً أدنى من المفضلة في كل قسم لنفصّل لك خطة مناسبة.'}}
+
+function groupHtml(mi,g){var m=mealList()[mi],gs=groupsOf(g),title=g==='vegfat'?'الخضار والدهون التي تحبها في '+m.name:'أضف مصادر '+SEC[g].n+' التي تحبها في '+m.name,ok=reqOf(mi,gs);
+  return'<div id="plateBox">'+plateSvg(wedgesFor('g:'+mi+':'+g),{size:120,label:'طبق '+m.name})+'</div><div class="q"><h2>'+title+'</h2><p class="lead">المس الصنف مرة: <b>أحبه</b>. مرتين: <b>لا آكله</b>. ثلاث: عادي.</p></div>'+
+  gs.map(function(x){return secBlock(mi,x,true)}).join('')+'<p class="hint'+(ok?' ok':'')+'" id="hint">'+(ok?'ممتاز، يكفي هذا لنفصّل لك الخطة.':'نحتاج حداً أدنى من المفضلة في كل قسم لنفصّل لك خطة مناسبة.')+'</p><div class="tip"><p>'+TIPS[g]+'</p><span class="draft">نص تعريفي مسودة</span></div>'}
+
+function mealHtml(mi){var m=mealList()[mi],gs=WG[m.kind],ok=reqOf(mi,gs);
+  return'<div id="plateBox">'+plateSvg(wedgesFor('m:'+mi),{size:120,label:'طبق '+m.name})+'</div><div class="q"><h2>ماذا تحب في '+m.name+'؟</h2><p class="lead">المس مرة: أحبه. مرتين: لا آكله.</p></div>'+gs.map(function(g){return secBlock(mi,g,true)}).join('')+'<p class="hint'+(ok?' ok':'')+'" id="hint">'+(ok?'ممتاز، يكفي هذا لنفصّل لك الخطة.':'نحتاج حداً أدنى من المفضلة في كل قسم لنفصّل لك خطة مناسبة.')+'</p>'}
+
+function chipsRow(a,opts,cur){return'<div class="chips">'+opts.map(function(o){return'<button class="chip'+(cur===o[0]?' on':'')+'" data-a="'+a+'" data-v="'+o[0]+'">'+o[1]+'</button>'}).join('')+'</div>'}
+function realHtml(){return'<div class="q"><h2>وبعد، عن واقعك</h2><p class="lead">حتى لا نضع في خطتك ما يصعب تنفيذه.</p></div>'+
+  '<div class="q"><span style="font-weight:700">من يطبخ في بيتك؟</span>'+chipsRow('cook',[['me','أنا'],['fam','أهلي'],['out','أطلب غالباً']],S.cook)+'</div>'+
+  '<div class="q"><span style="font-weight:700">كم مرة تأكل خارج البيت؟</span>'+chipsRow('out',[['rare','نادراً'],['some','مرة أو مرتين أسبوعياً'],['often','كثيراً']],S.out)+'</div>'+
+  '<div class="q"><span style="font-weight:700">هل تصوم؟</span>'+chipsRow('fast',[['no','لا'],['mt','الاثنين والخميس'],['rm','رمضان']],S.fast)+'</div>'}
+/* ---------- الكميات ---------- */
+function gramsOK(g){return S.scale==='yes'?[0,1,2,3,4,5,9,10,12].indexOf(g)>=0:S.scale==='some'?[0,2,3,4,5].indexOf(g)>=0:false}
+function qty(l){var f=byName[l.name];if(!f)return l.text;
+  if(gramsOK(f.g)&&/^(كوب|ملعقة)/.test(f.us||'')){var g=Math.max(5,Math.round(f.gpe*l.e/5)*5);return g+' جم '+shortN(f.n)+(f.cooked&&f.cooked!=='جاهز'?' '+f.cooked:'')}
+  return l.text}
+function scaleRows(){var r=[['أرز مطبوخ','55 جم','3 ملاعق كبيرة'],['دجاج مشوي','65 جم','قطعة بحجم كف اليد'],['خيار','100 جم','حبة متوسطة']];
+  return r.map(function(x,i){var v=S.scale==='yes'?x[1]:S.scale==='no'?x[2]:(i<2?x[1]:x[2]);return'<div class="r"><span>'+x[0]+'</span><b>'+v+'</b></div>'}).join('')}
+function freqMsg(){var r=E.freqCheck(genClient(),D),f=S.freq,tot=f.poultry+f.red+f.fish;return'<p class="hint'+(tot===7?' ok':'')+'">المجموع '+tot+' من 7 أيام</p>'+r.warns.map(function(w){return'<p class="note'+(w.lvl==='warn'?' warn':'')+'">'+w.msg+(w.src?' ('+w.src+')':'')+'</p>'}).join('')}
+function freqHtml(){var f=S.freq,row=function(k,l,ic){return'<div class="card frow"><span class="fic" aria-hidden="true">'+ic+'</span><b>'+l+'</b><span class="stepper2"><button data-a="fq" data-k="'+k+'" data-v="-1" aria-label="أنقص '+l+'">−</button><b id="fq-'+k+'">'+f[k]+'</b><button data-a="fq" data-k="'+k+'" data-v="1" aria-label="زد '+l+'">+</button></span></div>'};
+  return'<div class="q"><h2>كم مرة تريد في الغداء كل أسبوع؟</h2><p class="lead">من 7 أيام. نوزّعها عليك بلا تكرار متتالٍ.</p></div>'+row('poultry','الدجاج','🍗')+row('red','اللحم','🥩')+row('fish','السمك','🐟')+'<div id="fqm">'+freqMsg()+'</div><span class="draft">التوصيات من إرشادات الغذاء الأمريكية وWCRF، وتعتمدها قبل التفعيل</span>'}
+function scaleHtml(){return'<div class="q"><h2>هل عندك ميزان أكل؟</h2><p class="lead">على إجابتك نختار كيف نكتب لك الكميات.</p></div><div class="sec">'+
+  [['yes','نعم، أزن طعامي','الكميات بالجرام، بدقة أعلى.'],['no','لا، أستعمل الملعقة والكوب','مقاييس منزلية سهلة مع صور لكل مقياس.'],['some','أحياناً','بالجرام للنشويات واللحوم، ومنزلية لباقي الأصناف.']].map(function(o){return'<button class="opt'+(S.scale===o[0]?' on':'')+'" data-a="sc" data-v="'+o[0]+'"><b>'+o[1]+'</b><span class="d">'+o[2]+'</span></button>'}).join('')+'</div>'+
+  '<div class="card"><span class="lead">هكذا ستظهر لك الكميات:</span><div class="ex">'+scaleRows()+'</div>'+(S.scale==='no'?'<p class="note">دقة الملعقة والكوب أقل قليلاً، فنراجع معك الكميات بعد أسبوعين.</p>':'')+'</div>'}
+var STEPS=['نحسب احتياجك من بياناتك','نوزّع السعرات على وجباتك','نختار من أصنافك المفضلة','نضع البدائل ونمنع التكرار','نراجع توازن الخطة'];
+function buildHtml(){return'<div class="hero"><div id="plateBox">'+plateSvg(mealList().map(function(m,i){return{c:CAP[i%6],f:0}}),{size:170,label:'طبقك يمتلئ'})+'</div><h1>نفصّل خطتك الآن</h1></div><ul class="steps" id="steps">'+STEPS.map(function(s){return'<li><span class="ck"><svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3.2L13 5"/></svg></span><span>'+s+'</span></li>'}).join('')+'</ul>'}
+function welcomeHtml(){return'<div class="hero"><div id="plateBox">'+plateSvg(['--g-pro','--g-carb','--g-dairy','--g-veg','--g-fat'].map(function(c){return{c:c,f:1}}),{size:210,anim:true,label:'طبق زنها'})+'</div><h1>نفصّل لك خطتك على مقاسك</h1><p class="lead">مثلما يفصّل الخياط ثوبك: نسألك عن جسمك ويومك وما تحب أن تأكله، وكل إجابة تغيّر شيئاً في خطتك.</p><div class="facts"><span>نحو 5 دقائق</span><span>بلا كتابة</span><span>تخطّى ما تشاء</span></div></div>'}
+/* ---------- توليد الخطة بمحرك زنها برو الحقيقي ---------- */
+function genClient(){var act=D.settings.activity[Math.min(S.act,3)][0],goal=D.settings.goals[0][0],pan={B:{},L:{},D:{},S:{}},love=[],al={},ex=Object.keys(S.no),d=DIA[diaKey()];
+  Object.keys(S.love).forEach(function(k){var t=k.split('|');pan[t[0]][t[1]]='h';if(love.indexOf(t[1])<0)love.push(t[1])});
+  D.foods.forEach(function(f){if(!czOK(f)&&ex.indexOf(f.n)<0)ex.push(f.n);var a=dia(f.n);if(a!==f.n)al[f.n]=a});
+  var c={name:'عميل تجريبي',sex:S.sex==='m'?'ذكر':'أنثى',age:S.age,weight:S.w,height:S.h,activity:act,goal:goal,meals:S.meals,macroMode:'auto_pf',conditions:Object.keys(S.cond),allergens:Object.keys(S.alg),keywords:[],love:love,avoid:[],excludedFoods:ex,alias:al,cuisine:d.cz||'',life:S.cook==='out'?'quick':S.out==='often'?'travel':'home',pantry:pan,v2:true,freq:S.freq,noBank:S.bank?{}:{B:true,L:true,D:true,S:true}};
+  if(S.kcalBase!=null&&S.kcalAdj)c.kcalManual=S.kcalBase+S.kcalAdj;return c}
+
+function slotFixed(s){return S.week==='fixed'||(S.week==='mix'&&(s.type==='B'||s.type==='D'))}
+function genPlan(){var p=E.planWeek(genClient(),D);if(S.kcalBase==null)S.kcalBase=Math.round(p.targets.kcal);
+  S.capFix={fixed:p.fit.capped+p.fit.merged,left:p.fit.left};var src=p.days[0];
+  if(S.week!=='varied')p.days.forEach(function(d,i){if(!i)return;d.slots.forEach(function(s,k){if(slotFixed(s)&&src.slots[k])d.slots[k]=JSON.parse(JSON.stringify(src.slots[k]))})});
+  S.plan=p;S.alt=''}
+
+function planStats(){var p=S.plan,tot=0,lv=0,bank=0;p.days.forEach(function(d){d.slots.forEach(function(s){if(s.meal)bank++;s.lines.forEach(function(l){tot++;if(isLoved(l.name))lv++})})});return{tot:tot,lv:lv,bank:bank}}
+function repTxt(){var p=S.plan,prev=null,rep=0,n=0;p.days.forEach(function(d){var s=d.slots.filter(function(x){return x.type==='L'})[0],l=s&&s.lines.filter(function(x){return x.g>=1&&x.g<=5})[0];if(!l)return;if(prev!==null){n++;if(prev===l.name)rep++}prev=l.name});
+  return n?(rep===0?'بروتين الغداء لا يتكرر في يومين متتاليين.':'بروتين الغداء تكرر '+rep+' من '+n+' انتقالات بين الأيام.'):''}
+function dayHtml(spec){var p=S.plan,d=p.days[S.day],h='';
+  h+='<div class="tabs" role="tablist">'+p.days.map(function(x,i){return'<button class="tab'+(i===S.day?' on':'')+'" role="tab" aria-selected="'+(i===S.day)+'" data-a="day" data-v="'+i+'">'+x.name+'</button>'}).join('')+'</div>';
+  d.slots.forEach(function(s,si){var fx=slotFixed(s);
+    h+='<section class="mealc"><div class="mh"><span class="tm">'+hm12(s.time)+'</span><b>'+s.name+'</b>'+(fx&&S.week!=='varied'?'<span class="fx">ثابتة</span>':'')+'<span class="kc">'+Math.round(s.kcal)+' سعرة</span></div>'+(s.meal?'<div class="mealnote">وجبة من بنك الوجبات: '+s.meal+'</div>':'')+'<ul class="ul">';
+    s.lines.forEach(function(l,li){var key=S.day+'|'+si+'|'+li,open=S.alt===key;
+      h+='<li><div class="ln"><span class="lt">'+qty(l)+'</span>'+(l.bank?'<span class="bkt">بنك</span>':isLoved(l.name)?'<span class="lv">♥ تحبه</span>':'')+'<button class="swp'+(open?' on':'')+'" data-a="alt" data-v="'+key+'" aria-expanded="'+open+'">بدّل</button></div>';
+      if(open){var alts=altsOf(l,s);h+='<div class="alts">'+(alts.length?alts.map(function(a,ai){return'<button data-a="pickalt" data-v="'+key+'|'+ai+'"><span>'+qty({name:a.name,e:l.e,text:a.text})+'</span>'+(isLoved(a.name)?'<span class="lv">♥</span>':'')+'</button>'}).join(''):'<p class="note">لا بدائل أخرى مناسبة لهذه الكمية.</p>')+'</div>'}
+      h+='</li>'});
+    h+='</ul></section>'});
+  return h}
+function altsOf(l,s){var cap=FixCaps.capE;return E.alternatives(l,s.type,S.plan,D,8,s.lines)}
+function planHtml(){if(!S.plan)genPlan();var p=S.plan,st=planStats(),T=p.targets,ml=mealList(),spec=S.role==='spec',h='';
+  if(!spec){h+='<div class="phead"><h1>خطتك جاهزة</h1><div class="msg"><b>اعتمد أخصائيك خطتك.</b>'+(S.note?'<br>'+S.note.replace(/</g,'&lt;'):'')+'</div></div><div class="pills"><span class="pill">'+ml.length+' وجبات</span><span class="pill">'+WEEKS[S.week].n+'</span><span class="pill">'+Math.round(T.kcal)+' سعرة يومياً</span><span class="pill">بروتين '+Math.round(T.pro)+' جم</span></div>'}
+  h+=dayHtml(spec);
+  h+='<div class="card"><b style="font-family:var(--fd);font-size:18px">كيف بُنيت خطتك</b><ul class="sum">'+
+   '<li><b>من اختيارك</b><span>'+st.lv+' من '+st.tot+' سطراً في أسبوعك من أصناف اخترتها «أحبها». لم يدخل الخطة أي صنف استبعدته.</span></li>'+
+   '<li><b>بلدك</b><span>'+(CO.filter(function(c){return c[0]===S.cc})[0]||[0,0,'—'])[2]+': أسماء الأكلات بلهجتك وأصناف مطبخ بلدك.</span></li>'+
+   '<li><b>صحتك</b><span>'+healthTxt(genClient(),S.plan)+'</span></li>'+'<li><b>أسبوعك</b><span>'+WEEKS[S.week].n+'. '+repTxt()+'</span></li>'+'<li><b>غداؤك</b><span>'+(function(){var r=E.freqCheck(genClient(),D).freq;return'دجاج '+r.poultry+' • لحم '+r.red+' • سمك '+r.fish+' في الأسبوع، وبلا تعارض بين اللحم والسمك في الوجبة الواحدة.'})()+'</span></li>'+
+   '<li><b>الكميات</b><span>'+(S.capFix&&S.capFix.fixed?'ضبطنا '+S.capFix.fixed+' كمية لتبقى منطقية (مثل ألا تزيد موزتان على موزتين في الوجبة)، دون تغيير حصصك.':'كل الكميات ضمن الحد المعقول لكل صنف.')+' '+(S.scale==='yes'?'بالجرام لمن يزن طعامه.':S.scale==='no'?'بمقاييس منزلية.':'جرامات للنشويات واللحوم ومقاييس منزلية لغيرها.')+'</span></li>'+
+   (S.act>=2?'<li><b>تمرينك</b><span>وجبة قبل التمرين أغنى بالنشويات، ووجبة بعده بالبروتين.</span></li>':'')+
+   '<li><b>الوجبات الجاهزة</b><span>'+(S.bank?'مفعّلة من الأخصائي: '+st.bank+' وجبة من البنك في هذا الأسبوع.':'لم تُستعمل وجبات من البنك أو الخطط الجاهزة. الخطة مبنية من أصنافك مباشرة.')+'</span></li></ul></div>';
+  return h}
+function waitHtml(){var ws=['--g-pro','--g-carb','--g-dairy','--g-veg','--g-fat'].map(function(c,i){return{c:c,f:1}});
+  return'<div class="hero"><h1>الأخصائي يجهّز خطتك الآن</h1><p class="lead">يراجع اختياراتك ويضبط الكميات، ثم يعتمد الخطة. ستصلك رسالة وإشعار فور جاهزيتها، ولا تحتاج للبقاء هنا.</p></div>'+
+  '<div class="scene" aria-hidden="true"><div class="orb"><i style="background:var(--g-pro);top:6px;left:122px"></i><i style="background:var(--g-carb);top:108px;right:2px"></i><i style="background:var(--g-veg);bottom:8px;left:60px"></i></div>'+
+  '<div class="pl">'+plateSvg(ws,{size:180}).replace('id="plate"','').replace(/class="wf" data-i="(\d+)" d="([^"]*)" style="/g,function(m,i,d){return'class="wf" data-i="'+i+'" d="'+d+'" style="animation-delay:'+(i*.45)+'s;'})+'</div><div class="cupw"><i></i></div><div class="pencil"></div>'+
+  '<span class="fl2" style="width:22px;height:22px;background:var(--g-fruit);top:14px;inset-inline-start:30px"></span><span class="fl2" style="width:16px;height:16px;background:var(--g-fat);top:30px;inset-inline-end:34px;animation-delay:-1.4s"></span><span class="fl2" style="width:18px;height:18px;background:var(--g-carb);bottom:6px;inset-inline-end:60px;animation-delay:-2.2s"></span></div>'+
+  '<ul class="stg" id="stg">'+['يراجع بياناتك وهدفك','يضبط سعراتك وبروتينك','يختار من أصنافك المفضلة','يوزّع الكميات على وجباتك','يراجع الخطة ويعتمدها'].map(function(x){return'<li><span class="ck"></span><span>'+x+'</span></li>'}).join('')+'</ul>'+
+  '<div class="card"><span class="note">للتجربة فقط: انتقل إلى شاشة الأخصائي لترى كيف يراجع الخطة ويعتمدها.</span><button class="btn ghost" data-a="spec">افتح شاشة الأخصائي</button></div>'}
+function specHtml(){if(!S.plan)genPlan();var p=S.plan,T=p.targets,floor=D.settings.min_kcal||1200,cur=Math.round(T.kcal),ml=mealList(),cc=(CO.filter(function(c){return c[0]===S.cc})[0]||[0,0,'—'])[2],lv=Object.keys(S.love).length,no=Object.keys(S.no).length;
+  var h='<div class="phead"><h1>مراجعة خطة العميل</h1><p class="lead">راجع ما اختاره العميل، عدّل السعرات والأصناف، ثم اعتمد. لا تصله الخطة قبل اعتمادك.</p></div>';
+  h+='<div class="card"><b style="font-family:var(--fd);font-size:18px">ما أجاب به العميل</b><ul class="sum">'+
+   '<li><b>أساسيات</b><span>'+(S.sex==='m'?'رجل':'امرأة')+'، '+S.age+' سنة، '+S.h+' سم، '+S.w+' كجم. الهدف '+S.target+' كجم (النطاق الصحي '+bmiRange().join('–')+').</span></li>'+'<li><b>صحته</b><span>'+(Object.keys(S.cond).concat(Object.keys(S.alg)).join('، ')||'لا حالات ولا حساسية')+'</span></li>'+(function(){var c=genClient(),f=p.fit||{},w=[];c.conditions.forEach(function(k){if(D.condNote&&D.condNote[k])w.push(k+': '+D.condNote[k])});(f.dayLimit||[]).forEach(function(x){w.push(x.day+': '+x.food+' '+x.qty+' (الحد '+x.max+')')});if(c.conditions.length)w.push('حالة صحية: راجع القواعد المطبّقة قبل الاعتماد.');return w.length?'<li><b>تنبيهات</b><span>'+w.join('<br>')+'</span></li>':''})()+
+   '<li><b>يومه</b><span>'+ACTS[S.act][0]+(S.act>=2?'، يتمرن '+({am:'صباحاً',nn:'ظهراً',ev:'مساءً'})[S.tt]:'')+'. من يطبخ: '+({me:'هو',fam:'أهله',out:'يطلب غالباً'})[S.cook]+'. الأكل خارجاً: '+({rare:'نادراً',some:'أحياناً',often:'كثيراً'})[S.out]+'.</span></li>'+
+   '<li><b>خطته</b><span>'+ml.length+' وجبات، '+WEEKS[S.week].n+'، من '+cc+'.</span></li>'+
+   '<li><b>تفضيلاته</b><span>'+lv+' اختيار «أحب» و'+no+' صنفاً مستبعداً، والحد الأدنى مكتمل في كل قسم.</span></li>'+
+   '<li><b>كمياته</b><span>'+({yes:'يملك ميزاناً',no:'بلا ميزان (مقاييس منزلية)',some:'يزن أحياناً'})[S.scale]+'.</span></li></ul></div>';
+  h+='<div class="card"><b style="font-family:var(--fd);font-size:18px">السعرات اليومية</b><div class="stepper"><button data-a="kcal" data-v="-50" aria-label="أنقص 50" '+(cur-50<floor?'disabled':'')+'>−</button><b>'+cur+'</b><button data-a="kcal" data-v="50" aria-label="زد 50">+</button></div><p class="note">المحسوب من المعادلة '+S.kcalBase+' سعرة. الحد الأدنى الآمن '+floor+'. بروتين '+Math.round(T.pro)+' جم، كربوهيدرات '+Math.round(T.cho)+' جم، دهون '+Math.round(T.fat)+' جم.</p>'+((T.warnings||[]).length?'<p class="note warn">'+T.warnings.join('، ')+'</p>':'')+'</div>';
+  h+=dayHtml(true);
+  h+='<div class="card"><b style="font-family:var(--fd);font-size:18px">رسالة للعميل (اختياري)</b><textarea class="ta" data-s="note" placeholder="مثال: ابدأ بالفطور وتابع معي بعد أسبوع" aria-label="رسالة للعميل">'+S.note.replace(/</g,'&lt;')+'</textarea></div>';
+  h+='<div class="card"><div class="toggle"><span><b>وجبات البنك والخطط الجاهزة</b><br><span class="note">لا تعمل إلا بتفعيلك. مطفأة افتراضياً.</span></span><button class="sw2'+(S.bank?' on':'')+'" data-a="bank" role="switch" aria-checked="'+S.bank+'" aria-label="تفعيل وجبات البنك"></button></div></div>';
+  h+='<div class="card"><b style="font-family:var(--fd);font-size:18px">منطقية الكميات</b><p class="note">ضُبطت '+(S.capFix?S.capFix.fixed:0)+' كمية تجاوزت السقف المعقول للصنف بنقل الزيادة إلى صنف آخر من اختيارات العميل، دون تغيير حصص أي مجموعة.'+(S.capFix&&S.capFix.left?' بقي '+S.capFix.left+' سطر يحتاج نظرتك.':'')+'</p></div>';
+  return h}
+function finishHtml(){return'<div class="sent"><div id="plateBox">'+plateSvg(mealList().map(function(m,i){return{c:CAP[i%6],f:1}}),{size:150})+'</div><h1>خطتك معك الآن</h1><p class="lead">ابدأ من «اليوم» في تطبيق زنها، وعلّم ما تأكله فيمتلئ طبقك.</p><button class="btn ghost" data-a="restart">جرّب النموذج من البداية</button></div>'}
+
+
+/* ---------- العرض ---------- */
+function screen(id){var p=id.split(':');
+  if(id==='welcome')return{h:welcomeHtml(),cta:'ابدأ'};
+  if(id==='who')return{h:whoHtml()};if(id==='health')return{h:healthHtml()};if(id==='body')return{h:bodyHtml()};
+  if(id==='target'){if(!S.tTouched)S.target=Math.min(S.w,Math.max(ibw(),35));S.target=Math.min(S.target,S.w);return{h:targetHtml()}}
+  if(id==='act')return{h:actHtml()};if(id==='meals')return{h:mealsHtml()};if(id==='week')return{h:weekHtml()};
+  if(id==='bintro')return{h:bintroHtml(),cta:'هيا نختار'};
+  if(p[0]==='g')return{h:groupHtml(+p[1],p[2])};if(p[0]==='m')return{h:mealHtml(+p[1])};
+  if(id==='real')return{h:realHtml()};if(id==='freq')return{h:freqHtml()};if(id==='scale')return{h:scaleHtml(),cta:'جهّز خطتي'};
+  if(id==='country')return{h:countryHtml()};
+  if(id==='build')return{h:buildHtml(),cta:null};
+  if(id==='wait'){if(S.role==='spec')return{h:specHtml(),cta:'اعتمد وأرسل للعميل'};return{h:waitHtml(),cta:null}}
+  if(S.finished)return{h:finishHtml(),cta:null};
+  return{h:planHtml(),cta:'ابدأ خطتي'}}
+function pickOk(id){var p=id.split(':');if(p[0]!=='g'&&p[0]!=='m')return true;var mi=+p[1];return reqOf(mi,p[0]==='g'?groupsOf(p[2]):WG[mealList()[mi].kind])}
+function render(keepScroll){token++;var sq=seq(),id=sq[S.idx],sc=screen(id),last=sq.length-1,y=window.scrollY,spec=S.role==='spec'&&id==='wait',okc=id==='country'?!!S.cc:pickOk(id);
+  app.innerHTML='<div class="top"><button class="back" data-a="back" aria-label="رجوع"'+(S.idx===0?' disabled':'')+'><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button><div class="prog" role="progressbar" aria-valuenow="'+Math.round(S.idx/last*100)+'"><i style="width:'+Math.round(S.idx/last*100)+'%"></i></div><span class="tag'+(spec?' spec':'')+'">'+(spec?'عرض الأخصائي':'نموذج أولي')+'</span></div>'+
+   '<div class="body" id="body">'+sc.h+'</div>'+(sc.cta===null?'':'<div class="cta"><button class="btn" data-a="next" id="cta"'+(okc?'':' disabled')+'>'+(sc.cta||'التالي')+'</button></div>');
+  window.scrollTo(0,keepScroll?y:0);if(id==='build')runBuild(token);if(id==='wait'&&!spec)runWait(token)}
+function runWait(t){var li=document.querySelectorAll('#stg li'),i=0;function paint(){if(t!==token)return;li.forEach(function(x,k){x.className=k<i?'pass':k===i?'on':'';x.firstChild.textContent=k<i?'✓':''});i=(i+1)%(li.length+1);setTimeout(paint,2300)}paint()}
+function runBuild(t){var li=document.querySelectorAll('#steps li'),i=0,ml=mealList();
+  (function step(){if(t!==token)return;if(i<li.length){li[i].classList.add('on');var f=(i+1)/li.length;setPlate(ml.map(function(m,k){return{c:CAP[k%6],f:k<f*ml.length+.99?1:0}}));if(i===1){try{S.kcalBase=null;S.kcalAdj=0;S.approved=false;S.role='client';S.day=0;genPlan()}catch(e){window.__err=String(e)}}i++;setTimeout(step,760)}
+    else setTimeout(function(){if(t!==token)return;S.idx++;render()},650)})()}
+/* ---------- الأحداث ---------- */
+app.addEventListener('click',function(e){var b=e.target.closest('[data-a]');if(!b||b.disabled)return;var a=b.dataset.a,v=b.dataset.v;
+  if(a==='next'){var cur=seq()[S.idx];if(cur==='wait'&&S.role==='spec'){S.approved=true;S.role='client';render();return}if(cur==='plan'&&!S.finished){S.finished=true;render();return}S.idx=Math.min(S.idx+1,seq().length-1);render();return}
+  if(a==='back'){if(S.role==='spec'){S.role='client';render();return}S.finished=false;S.idx=Math.max(0,S.idx-1);if(seq()[S.idx]==='build')S.idx--;render();return}
+  if(a==='fq'){var k0=b.dataset.k;S.freq[k0]=Math.max(0,Math.min(7,S.freq[k0]+ +v));document.getElementById('fq-'+k0).textContent=S.freq[k0];document.getElementById('fqm').innerHTML=freqMsg();return}
+  if(a==='cc'){S.cc=v;S.love={};S.no={};render(true);return}
+  if(a==='spec'){S.role='spec';render();return}
+  if(a==='kcal'){S.kcalAdj+=+v;genPlan();render(true);return}
+  if(a==='suggest'){var mi0=+b.dataset.mi,g0=b.dataset.g,m0=mealList()[mi0],need=minOf(mi0,g0)-loved(mi0,g0);foodsOf(m0.kind,g0).filter(function(f){return !S.no[f.n]&&!S.love[TU[m0.kind]+'|'+f.n]}).slice(0,Math.max(0,need)).forEach(function(f){S.love[TU[m0.kind]+'|'+f.n]=1});render(true);return}
+  if(a==='sex'){S.sex=v;S.tTouched=false;render();return}
+  if(a==='act'){S.act=+v;render();return}
+  if(a==='hc'||a==='ha'){var mp=a==='hc'?S.cond:S.alg;if(mp[v])delete mp[v];else mp[v]=1;S.plan=null;render();return}
+  if(a==='tt'||a==='cook'||a==='out'||a==='fast'||a==='wk'||a==='sc'){if(a==='wk')S.week=v;else if(a==='sc')S.scale=v;else S[a]=v;render();return}
+  if(a==='mc'){S.meals=+v;S.love={};document.getElementById('plateBox').innerHTML=plateSvg(wedgesFor('meals'),{size:190});document.querySelectorAll('[data-a="mc"]').forEach(function(x){x.classList.toggle('on',+x.dataset.v===S.meals)});document.getElementById('mcap').textContent=MCAP[S.meals];document.getElementById('mnames').innerHTML=mealList().map(function(m){return'<span>'+m.name+'</span>'}).join('');return}
+  if(a==='pf'){var k=b.dataset.k,n=b.dataset.n;if(S.no[n]){delete S.no[n]}else if(S.love[k]){delete S.love[k];S.no[n]=1}else{S.love[k]=1}
+    var id2=seq()[S.idx],p=id2.split(':'),mi=+p[1],gs=p[0]==='g'?groupsOf(p[2]):WG[mealList()[mi].kind];var st=S.no[n]?'no':S.love[k]?'love':'';
+    document.querySelectorAll('.food[data-n="'+n.replace(/"/g,'\\"')+'"]').forEach(function(x){var lk=x.dataset.k,s2=S.no[n]?'no':S.love[lk]?'love':'',more=x.classList.contains('more'),hid=x.classList.contains('hid');x.className='food'+(s2?' '+s2:'')+(more?' more':'')+(hid?' hid':'');x.querySelector('.st').textContent=s2==='love'?'أحب':s2==='no'?'لا':''});
+    setPlate(wedgesFor(id2));reqRefresh();return}
+  if(a==='more'){var fl=b.previousElementSibling;fl.classList.add('all');b.remove();return}
+  if(a==='day'){S.day=+v;S.alt='';render(false);return}
+  if(a==='alt'){S.alt=S.alt===v?'':v;render(true);return}
+  if(a==='pickalt'){var q=v.split('|'),di=+q[0],si=+q[1],li=+q[2],ai=+q[3],s=S.plan.days[di].slots[si],l=s.lines[li],alts=altsOf(l,s),alt=alts[ai];if(alt){E.swap(l,alt,D,S.plan.client.alias);
+      if(slotFixed(s))S.plan.days.forEach(function(d2,i2){if(i2===di)return;var l2=d2.slots[si]&&d2.slots[si].lines[li];if(l2&&slotFixed(d2.slots[si]))E.swap(l2,alt,D,S.plan.client.alias)})}
+    S.alt='';render(true);return}
+  if(a==='bank'){S.bank=!S.bank;genPlan();render(true);return}
+  if(a==='redo'){S.idx=seq().indexOf('bintro');S.plan=null;render();return}
+  if(a==='restart'){reset();render();return}});
+app.addEventListener('input',function(e){var t=e.target;
+  if(t.dataset&&t.dataset.a==='srch'){var q=t.value.trim(),fl=t.parentNode.querySelector('.fl');fl.classList.toggle('all',!!q);fl.querySelectorAll('.food').forEach(function(x){x.classList.toggle('hid',!!q&&x.title.indexOf(q)<0)});var mb=t.parentNode.querySelector('.morebtn');if(mb)mb.hidden=!!q;return}
+  if(t.dataset&&t.dataset.s==='note'){S.note=t.value;return}
+  if(!t.dataset||!t.dataset.s)return;var k=t.dataset.s,v=+t.value;
+  if(k==='age'){S.age=v;document.getElementById('vAge').textContent=v}
+  else if(k==='h'){S.h=v;S.tTouched=false;document.getElementById('vH').textContent=v}
+  else if(k==='w'){S.w=v;S.tTouched=false;document.getElementById('vW').textContent=v}
+  else if(k==='target'){S.target=Math.min(v,S.w);S.tTouched=true;document.getElementById('tgt').innerHTML=targetInfo()}});
+render();window.__S=function(){return S};window.__D=function(){return D};window.DPEngine=E;window.__lunch=function(){return S.plan.days.map(function(d){var s=d.slots.filter(function(x){return x.type==='L'})[0],l=s.lines.filter(function(q){return q.g>=2&&q.g<=5})[0];if(!l)return s.lines.some(function(q){return q.g===1})?'leg':'-';var k=E.protClass(byName[l.name]);return k==='shell'?'fish':k})};
+})();
+</script>
