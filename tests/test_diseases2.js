@@ -22,6 +22,14 @@ for (let i = 0; i < 30; i++) { const c = base({ v2: true, conditions: CS[i % CS.
   assert.strictEqual(p.fit.hard, 0); }
 assert.strictEqual(bad, 0); ok('30 عميلاً بأمراض متعددة: لا أسطر «تجنّب» ولا تعارض صلب (' + (Date.now() - t0) + 'ms)');
 const p2 = E.planWeek(base({ v2: true, conditions: [CH], meals: 4 }), D); assert(Array.isArray(p2.fit.dayLimit)); ok('نتيجة الحدّ اليومي موجودة في plan.fit.dayLimit (' + p2.fit.dayLimit.length + ')');
+
+// الدفعة الثانية: النقرس ودهون الكبد، والكبد والقلوب تجنّب
+{ const GT = 'النقرس', LV = 'دهون الكبد (MASLD)';
+  assert.strictEqual(tier(base({ conditions: [GT] }), 'سمك الرنجة (الهرينج)'), 0); ok('نقرس بلا v2: لا شيء');
+  assert.strictEqual(tier(base({ conditions: [GT], v2: true }), 'سمك الرنجة (الهرينج)'), 3); ok('نقرس: الرنجة تجنّب');
+  assert.strictEqual(tier(base({ conditions: [LV], v2: true }), 'سمك السردين معلب'), 1); assert.strictEqual(tier(base({ conditions: [LV, GT], v2: true }), 'سمك السردين معلب'), 3); ok('السردين داعم لدهون الكبد، والتقييد يغلب عند اجتماع النقرس');
+  assert.strictEqual(tier(base({ conditions: [CH], v2: true }), 'لحم كبد أو قلوب (مصدر عالٍ بالكوليسترول)'), 3); ok('الكبد والقلوب تجنّب عند الكوليسترول');
+  assert(D.condNote[LV] && D.condNote[GT]); ok('تنبيهات الأخصائي للنقرس ودهون الكبد موجودة'); }
 console.log('\nنجح ' + n + ' اختباراً');
 // حدّ البيض اليومي يُطبَّق (v2 + كوليسترول): لا يوم فوق بيضة
 { const EGGS = ['بيضة كاملة', 'بيض مسلوق']; let viol = 0, swapped = 0, tot = 0;
