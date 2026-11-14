@@ -132,12 +132,12 @@ E.ctx = function (client, D) {
     var love = {}, avoid = {}; (client.love || []).forEach(function (n) { love[n] = 1; }); (client.avoid || []).forEach(function (n) { avoid[n] = 1; });
     if (client.diet && E.dietRule) D.foods.forEach(function (f) { var r = E.dietRule(client.diet.id, f); if (r === 'avoid' && !love[f.n]) avoid[f.n] = 1; else if (r === 'love' && !avoid[f.n]) love[f.n] = 1; });      // النظام الغذائي (0.41): تجنّب/تفضيل أصناف
     var cs = {}; (client.conditions || []).forEach(function (c) { cs[c] = 1; });
-    var rules = D.rules.filter(function (r) { return cs[r.cond] || (r.cond === 'سكر (مشترك)' && diab); });
+    var rules = D.rules.filter(function (r) { if (r.v2 && !client.v2) return false; if (r.blocked_by && r.blocked_by.some(function (b) { return cs[b]; })) return false; return cs[r.cond] || (r.cond === 'سكر (مشترك)' && diab); });      // قواعد v2 (مسودة الأمراض) لا تعمل إلا خلف المفتاح؛ والمانع (كلى) يعطّل الدعم
     var byName = {}; D.foods.forEach(function (f) { byName[f.n] = f; });
     var cx = {
       D: D, client: client, diab: diab, byName: byName, love: love, avoid: avoid, pan: E.panOf(client, D),
       isExcluded: function (n) { return !!excl[n] || kws.some(function (k) { return n.indexOf(k) >= 0; }); },
-      tierOf: function (n) { var t = 0, p = ' ' + n + ' '; rules.forEach(function (r) { if (p.indexOf(r.kw) >= 0) { var v = TIER[r.tier] || 0; if (v > t) t = v; } }); return t; },
+      rules: rules, tierOf: function (n) { var t = 0, p = ' ' + n + ' '; rules.forEach(function (r) { if (r.exact ? n === r.kw : p.indexOf(r.kw) >= 0) { var v = TIER[r.tier] || 0; if (v > t) t = v; } }); return t; },
       keywordsMatch: function (n) { return kws.some(function (k) { return n.indexOf(k) >= 0; }); }
     };
     cx.cache = {}; cx.ok = function (f) { if (cx.cache[f.n] === undefined) cx.cache[f.n] = !f.on || cx.isExcluded(f.n) || cx.tierOf(f.n) === 3 ? 0 : 1; return cx.cache[f.n]; };
@@ -722,8 +722,11 @@ E.ctx = function (client, D) {
     }
   };
   E.fitPass = function (plan, D) {                          // نتيجة {capped, merged, left, minLeft, hard, soft}
-    var res = { capped: 0, merged: 0, left: 0, minLeft: 0, hard: 0, soft: 0 }, cult = E.cultOf(plan.client, D);
+    var res = { capped: 0, merged: 0, left: 0, minLeft: 0, hard: 0, soft: 0, dayLimit: [] }, cult = E.cultOf(plan.client, D), cxf = E.ctx(plan.client, D), dl = cxf.rules.filter(function (r) { return r.max_per_day; });
     plan.days.forEach(function (d) { d.slots.forEach(function (s) { fixSlot(plan, s, D, res); E.mealConflicts(s.lines, D, cult).forEach(function (x) { res[x.sev === 'hard' ? 'hard' : 'soft']++; }); }); });
+    if (dl.length) plan.days.forEach(function (d) {            // حدّ يومي (البيض…): يُبلَّغ به الأخصائي (التنفيذ التلقائي لاحقاً)
+      dl.forEach(function (r) { var n = 0; d.slots.forEach(function (sl) { sl.lines.forEach(function (l) { if (r.exact ? l.name === r.kw : l.name.indexOf(r.kw) >= 0) { var f = D.foods.filter(function (x) { return x.n === l.name; })[0]; n += l.e * (f && f.upe || 1); } }); }); if (n > r.max_per_day + 1e-9) res.dayLimit.push({ day: d.name, food: r.kw, qty: n, max: r.max_per_day, cond: r.cond }); });
+    });
     return res;
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = E; else root.DPEngine = E;
