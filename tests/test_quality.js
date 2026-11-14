@@ -30,5 +30,9 @@ assert(seg('v2 + حساسية سمك').consec <= 2); ok('م5: يوم بقول ع
     p.days.forEach((d, di) => { const today = {}; d.slots.forEach((s) => s.lines.forEach((l) => { if (cx.tierOf(l.name) !== 2 || l.manual) return; n2++; const k = fam(l.name); if (today[k]) bad++; today[k] = 1; (days[k] = days[k] || {})[di] = 1; })); });
     Object.keys(days).forEach((k) => { if (Object.keys(days[k]).length > 3) bad++; }); }
   assert.strictEqual(bad, 0, 'مخالفات «قلّل»: ' + bad); ok('م5: صنف «قلّل» مرة يومياً و3 أيام أسبوعياً على الأكثر (فحص ' + n2 + ' سطراً، ضغط + كوليسترول، مع البنك وبدونه)'); }
+{ const E = require('../src/engine.js'), D = require('../src/data.json'); let a = 0, b = 0;
+  for (let i = 0; i < 12; i++) { const c = { name: 'ت', sex: i % 2 ? 'ذكر' : 'أنثى', age: 30 + i * 2, weight: 65 + i * 3, height: 158 + i, activity: D.settings.activity[1][0], goal: D.settings.goals[i % 3][0], meals: 3 + (i % 4), macroMode: 'auto_pf', cuisine: i % 2 ? 'sa' : 'eg', conditions: [], allergens: [], keywords: [], love: [], avoid: [], noBank: { B: true, L: true, D: true, S: true } };
+    a += E.planReport(E.planWeek(Object.assign({}, c, { v2: true }), D), D).score; b += E.planReport(E.planWeek(c, D), D).score; }
+  assert(a > b, a + ' / ' + b); ok('م8: تقرير جودة الخطة يميّز المحرك الجديد (متوسط ' + Math.round(a / 12) + ' مقابل ' + Math.round(b / 12) + ' للمحرك الحالي)'); }
 A.res.forEach((r) => assert.strictEqual(r.err, 0, r.seg)); assert(A.res.every((r) => r.pct.missing === 0)); ok('لا أخطاء ولا أسطر بلا صنف في ' + A.res.length + ' فئة');
 console.log('\nنجح ' + n + ' اختبارات');

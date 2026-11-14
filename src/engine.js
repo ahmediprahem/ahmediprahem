@@ -803,6 +803,27 @@ E.ctx = function (client, D) {
     var q = E.qtyNum(f.upe * e, f.us, E.fmeta(f).st); if (q < 4 || q >= 8) return ''; var c = q / 16, a = Math.round(c * 4) / 4, b = Math.round(c * 3) / 3, cc = Math.abs(b - c) < Math.abs(a - c) ? b : a, t = { 0.25: '¼', 0.5: '½', 0.75: '¾' }[cc] || (Math.abs(cc - 1 / 3) < 0.01 ? '⅓' : Math.abs(cc - 2 / 3) < 0.01 ? '⅔' : ''); if (!t) return '';
     return t + ' كوب ' + ((al && al[f.n]) || f.dn || f.n);
   };
+  E.planReport = function (plan, D) {                       // م8: تقرير «قابلية التنفيذ» لخطة واحدة (نفس مقاييس أداة التدقيق): {score, n:{…}, items:[{code,msg,n}]}
+    var M = byN(D), c = plan.client || {}, T = plan.targets ? plan.targets.kcal : 0, n = { crowd: 0, prot3: 0, lunchSmall: 0, dupDay: 0, eggs: 0, sweet: 0, kcal: 0, garnish: 0, tiny: 0 }, rep = {}, meals = 0, eggMax = E.EGG_DAY, PR = { meat: 1, fish: 1, egg: 1, proc: 1, cheese: 1, leg: 1, tofu: 1 };
+    E.ctx(c, D).rules.forEach(function (r) { if (r.max_per_day && E.EGGS.indexOf(r.kw) >= 0) eggMax = Math.min(eggMax, r.max_per_day); });
+    plan.days.forEach(function (d) { var seen = {}, dup = 0, eg = 0, sw = 0, lm = 0, leg = 0, k = 0;
+      d.slots.forEach(function (s) { if (!s.lines.length) return; meals++; var ro = {}, va = 0, vg = 0;
+        s.lines.forEach(function (l) { var f = M[l.name]; if (!f || l.missing) return; var m = E.fmeta(f), q = E.qtyNum(f.upe * l.e, f.us, m.st); k += E.lineMacros(f, l.e)[3];
+          if (PR[m.r]) ro[m.r === 'proc' ? 'meat' : m.r] = 1; if (seen[f.n]) dup = 1; seen[f.n] = 1; if (E.EGGS.indexOf(f.n) >= 0) eg += q; if (m.r === 'sweet') sw = 1;
+          if (m.r === 'veg') { va++; if (GARNISH.test(f.n)) vg++; } if ((m.r === 'meat' || m.r === 'fish' || m.r === 'proc') && f.us === 'جم' && q < 30) n.tiny++;
+          if (s.type === 'L' && (m.r === 'meat' || m.r === 'fish') && f.us === 'جم') lm = Math.max(lm, q); if (s.type === 'L' && m.r === 'leg') leg = 1;
+          if (PR[m.r] && s.type !== 'S') { var key = s.type + '|' + fam(f.n); (rep[key] = rep[key] || {})[d.day] = 1; } });
+        if (s.lines.length > E.maxItems({ meals: c.meals, v2: true }, s.type)) n.crowd++; if (Object.keys(ro).length >= 3) n.prot3++; if (va && va === vg) n.garnish++; });
+      if (dup) n.dupDay++; if (eg > eggMax + 1e-9) n.eggs++; if (sw) n.sweet++; if (lm < 90 && !leg && (c.allergens || []).indexOf('لا آكل اللحوم (نباتي)') < 0) n.lunchSmall++; if (T && Math.abs(k - T) / T > 0.07) n.kcal++; });
+    var reps = Object.keys(rep).filter(function (x) { return Object.keys(rep[x]).length >= 4; }).map(function (x) { return x.split('|')[1]; });
+    var items = [], add = function (code, cnt, w, msg) { if (cnt > 0) items.push({ code: code, n: cnt, w: w * cnt, msg: msg }); };
+    add('kcal', n.kcal, 6, n.kcal + ' يوم سعراته تبعد أكثر من 7٪ عن الهدف'); add('eggs', n.eggs, 6, n.eggs + ' يوم فيه بيض فوق الحد'); add('prot3', n.prot3, 4, n.prot3 + ' وجبة فيها 3 مصادر بروتين');
+    add('crowd', n.crowd, 3, n.crowd + ' وجبة مزدحمة (أصناف كثيرة)'); add('dup', n.dupDay, 3, n.dupDay + ' يوم فيه الصنف نفسه مرتين'); add('lunch', n.lunchSmall, 2, n.lunchSmall + ' غداء بروتينه الرئيسي أقل من 90 جم');
+    add('rep', reps.length, 3, 'يتكرر 4 أيام أو أكثر في الوجبة نفسها: ' + reps.join('، ')); add('garnish', n.garnish, 2, n.garnish + ' وجبة خضارها «تزيين» فقط'); add('tiny', n.tiny, 2, n.tiny + ' سطر لحم أقل من 30 جم');
+    if (n.sweet > 3) add('sweet', n.sweet - 3, 2, n.sweet + ' أيام فيها حلويات (الحد 3)');
+    items.sort(function (a, b) { return b.w - a.w; }); var sc = Math.max(0, Math.round(100 - items.reduce(function (a, x) { return a + x.w; }, 0)));
+    return { score: sc, n: n, reps: reps, meals: meals, items: items };
+  };
   E.hint = function (f, e) {                                // م2: مقياس يدوي للعدّ الكبير (أكثر من 12 حبة)
     var m = E.fmeta(f), q = E.qtyNum(f.upe * e, f.us, m.st); if (!/^حبة/.test(f.us) || q <= 12) return '';
     return m.r === 'nuts' || m.r === 'olive' ? '(قبضة يد صغيرة)' : m.r === 'fruit' ? (q >= 20 ? '(نحو كوب)' : '(نحو نصف كوب)') : '';
