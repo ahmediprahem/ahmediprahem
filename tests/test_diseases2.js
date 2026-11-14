@@ -36,3 +36,13 @@ console.log('\nنجح ' + n + ' اختباراً');
   for (let i = 0; i < 12; i++) { const c = base({ v2: true, conditions: [[CH], ['سكري النوع الثاني'], [HD]][i % 3], meals: 4 + (i % 2), age: 30 + i, weight: 65 + i * 2 }), p = E.planWeek(c, D); swapped += p.fit.dayCapped || 0; tot++;
     p.days.forEach((d) => { let q = 0; d.slots.forEach((s) => s.lines.forEach((l) => { if (EGGS.includes(l.name)) q += l.e * (D.foods.find((f) => f.n === l.name).upe || 1); })); if (q > 1 + 1e-9) viol++; }); }
   assert.strictEqual(viol, 0, 'أيام فوق الحد: ' + viol); console.log('✔ بيضة كاملة يومياً كحدّ أعلى مطبّق (' + swapped + ' استبدالات في ' + tot + ' عملاء)'); }
+// م5 (قرارات المالك، الدفعة الثانية): السمن والزبدة «قلّل» عند السكري والضغط، الكبدة مرة أسبوعياً بحد 100 جم، الدمياطي «قلّل» عند الكوليسترول، وحصة فاكهة واحدة في الجلسة عند السكري
+{ const DM = 'سكري النوع الثاني';
+  assert.strictEqual(tier(base({ conditions: [DM], v2: true }), 'سمن بلدي'), 2); assert.strictEqual(tier(base({ conditions: [HT], v2: true }), 'زبدة'), 2); assert.strictEqual(tier(base({ conditions: [HT], v2: true }), 'زبدة الفول السوداني'), 0); console.log('✔ السمن والزبدة «قلّل» عند السكري والضغط (وزبدة الفول السوداني لا تتأثر)');
+  assert.strictEqual(tier(base({ conditions: [CH], v2: true }), 'جبنة دمياطي (فيتا)'), 2); assert.strictEqual(tier(base({ conditions: [CH], v2: true }), 'زيتون أخضر'), 0); console.log('✔ الدمياطي «قلّل» عند الكوليسترول، والزيتون بلا تغيير');
+  const M = {}; D.foods.forEach((f) => { M[f.n] = f; }); let fruitBad = 0, livWeek = 0, livBig = 0, kcOff = 0, ses = 0;
+  for (let i = 0; i < 30; i++) { const c = base({ v2: true, conditions: [DM].concat(i % 2 ? [HT] : []), meals: 3 + (i % 4), age: 30 + i, weight: 70 + i, noBank: i % 3 ? { B: true, L: true, D: true, S: true } : {} }), p = E.planWeek(c, D); let lw = 0;
+    p.days.forEach((d) => { if (Math.abs(E.dayKcal(d, D) - p.targets.kcal) / p.targets.kcal > 0.07) kcOff++; d.slots.forEach((s) => { ses++; if (s.lines.filter((l) => l.g === 10).reduce((a, l) => a + l.e, 0) > 1 + 1e-9) fruitBad++; s.lines.forEach((l) => { if (/كبد أو قلوب/.test(l.name)) { lw++; if (E.qtyNum(M[l.name].upe * l.e, 'جم', 5) > 100) livBig++; } }); }); }); if (lw > 1) livWeek++; }
+  assert.strictEqual(fruitBad, 0, 'جلسات فيها أكثر من حصة فاكهة: ' + fruitBad); console.log('✔ السكري: حصة فاكهة واحدة في كل جلسة (' + ses + ' جلسة)');
+  assert.strictEqual(livWeek, 0); assert.strictEqual(livBig, 0); console.log('✔ الكبدة عند السكري/الضغط: مرة أسبوعياً على الأكثر وبحد 100 جم');
+  assert(kcOff <= 0.05 * 30 * 7, kcOff); console.log('✔ السعرات بقيت ضمن ±7٪ في ' + (210 - kcOff) + ' من 210 يوماً'); }
