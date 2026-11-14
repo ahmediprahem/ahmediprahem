@@ -6,8 +6,10 @@ const { chromium } = require('playwright');
   const shot = async n => { await p.waitForTimeout(500); await p.screenshot({ path: out + '/w' + String(shots.length).padStart(2, '0') + '_' + n + '.png' }); shots.push(n); };
   const next = async () => { await p.click('#cta'); };
   const satisfy = async () => { for (let k = 0; k < 14; k++) { const s = await p.$('.sugg:not([hidden])'); if (!s) break; await s.click(); await p.waitForTimeout(150); } };
-  await next(); // welcome
   res.countryDisabled = await p.$eval('#cta', e => e.disabled); await p.click('.cc[data-v="eg"]'); res.countryEnabled = !(await p.$eval('#cta', e => e.disabled)); await shot('country'); await next();
+  await p.waitForTimeout(1600); res.story1 = await p.$eval('.intro', e => e.innerText.replace(/\s+/g, ' ').slice(0, 120)); res.typing = !(await p.$eval('.intro', e => e.classList.contains('fin'))); await shot('story1');
+  for (let k = 0; k < 4; k++) { const fin = await p.$eval('.intro', e => e.classList.contains('fin')); if (!fin) await next(); if (k === 2) await shot('story3'); await next(); }
+  res.welcome = await p.$eval('.body h1', e => e.innerText); await next(); // welcome
   await next(); await next(); await next(); await next(); await next(); await next(); await next(); await next(); // who body health target act meals week bintro(+)
   // أول شاشة بروتين الفطور: الزر معطّل حتى الحد الأدنى
   res.proDisabled = await p.$eval('#cta', e => e.disabled);
