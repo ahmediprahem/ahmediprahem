@@ -6,7 +6,7 @@ const N = +process.argv[2] || 40, OUT = process.argv[3];
 const M = {}; D.foods.forEach((f) => { M[f.n] = f; });
 let seed = 7; const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; }, pick = (a) => a[Math.floor(rnd() * a.length)];
 const act = D.settings.activity.map((a) => a[0]), goals = D.settings.goals.map((g) => g[0]);
-const GARNISH = /^(بصل|بصل أخضر|بقدونس|فجل|كرفس|جرجير|خس|نعناع|كزبرة|ثوم)$/;
+const GARNISH = /^(بصل|بصل أخضر|بقدونس|فجل|كرفس|نعناع|كزبرة|ثوم)$/;      // الجرجير والخس سلطة حقيقية
 const PROT = { meat: 1, fish: 1, egg: 1, proc: 1, cheese: 1, leg: 1, tofu: 1 }, COUNT_U = /^(حبة|حبة صغيرة|حبة متوسطة|حبة كبيرة|بياضة|بيضة)$/;
 const mk = (o) => { const male = rnd() < 0.45; return Object.assign({ name: 'ع', sex: male ? 'ذكر' : 'أنثى', age: 20 + Math.floor(rnd() * 45), weight: (male ? 70 : 58) + Math.floor(rnd() * 50), height: (male ? 165 : 152) + Math.floor(rnd() * 22), activity: pick(act.slice(0, 4)), goal: pick(goals.slice(0, 5)), meals: pick([3, 4, 5, 6]), macroMode: pick(['auto_pf', 'auto_pc']), cuisine: pick(['eg', 'sa']), budget: pick([1, 2, 3]), conditions: [], allergens: [], keywords: [], love: [], avoid: [] }, o); };
 const NB = { B: true, L: true, D: true, S: true };
@@ -28,7 +28,7 @@ const SEG = [
   ['v2 + سعرات عالية (رجل نشيط زيادة)', () => mk({ v2: true, noBank: NB, sex: 'ذكر', weight: 85 + Math.floor(rnd() * 25), height: 178 + Math.floor(rnd() * 12), activity: act[3], goal: goals[4] })],
 ];
 const KEYS = ['mealMany', 'prot3', 'lunchSmall', 'lunchShare', 'tinyProt', 'tinyBread', 'bigCount', 'oddFrac', 'garnishOnly', 'rawVegBig', 'eggs3', 'sweetDay', 'dupDay', 'rep4', 'kcalOff', 'consec', 'costHi', 'snackDairyOnly', 'dinnerNoStarch', 'fruitBig', 'missing'];
-const LABEL = { mealMany: 'وجبة مزدحمة (رئيسية >5 أصناف، أو >6 عند 3 وجبات، أو سناك >3)', prot3: '3 مصادر بروتين أو أكثر في وجبة', lunchSmall: 'بروتين الغداء الرئيسي أقل من 90 جم', lunchShare: 'الغداء يحمل أقل من 30% من بروتين اليوم', tinyProt: 'سطر لحم/دجاج/سمك أقل من 30 جم', tinyBread: 'خبز أقل من نصف رغيف', bigCount: 'عدّ أكثر من 12 حبة', oddFrac: 'كمية بكسر غريب (¼ ¾ ⅓ ⅔ مع عدد، أو ½ ملعقة)', garnishOnly: 'خضار الوجبة «تزيين» فقط (بصل/بقدونس/فجل…)', rawVegBig: 'خضار أكثر من 1.5 كوب في سطر', eggs3: 'يوم فيه أكثر من بيضتين كاملتين', sweetDay: 'يوم فيه حلويات/سكريات', dupDay: 'الصنف نفسه مرتين في اليوم', rep4: 'مصدر بروتين يتكرر 4 أيام أو أكثر في الوجبة نفسها', kcalOff: 'يوم سعراته تبعد أكثر من 7% عن الهدف', consec: 'الغداء نفس البروتين يومين متتاليين', costHi: 'صنف غالٍ مع ميزانية منخفضة', snackDairyOnly: 'سناك ألبان/أجبان فقط', dinnerNoStarch: 'فطور أو عشاء بلا نشويات', fruitBig: 'فاكهة أكثر من حصتين في جلسة', missing: 'سطر بلا صنف' };
+const LABEL = { mealMany: 'وجبة مزدحمة (رئيسية >5 أصناف، أو >6 عند 3 وجبات، أو سناك >3)', prot3: '3 مصادر بروتين أو أكثر في وجبة', lunchSmall: 'بروتين الغداء الرئيسي أقل من 90 جم', lunchShare: 'الغداء يحمل أقل من 30% من بروتين اليوم', tinyProt: 'سطر لحم/دجاج/سمك أقل من 30 جم', tinyBread: 'خبز أقل من نصف رغيف', bigCount: 'عدّ أكثر من 12 حبة بلا مقياس يدوي', oddFrac: 'صنف يُعدّ بكسر غير النصف (¾ حبة، ⅓ بيضة…)', garnishOnly: 'خضار الوجبة «تزيين» فقط (بصل/بقدونس/فجل…)', rawVegBig: 'خضار أكثر من 1.5 كوب في سطر', eggs3: 'يوم فيه أكثر من بيضتين كاملتين', sweetDay: 'يوم فيه حلويات/سكريات', dupDay: 'الصنف نفسه مرتين في اليوم', rep4: 'مصدر بروتين يتكرر 4 أيام أو أكثر في الوجبة نفسها', kcalOff: 'يوم سعراته تبعد أكثر من 7% عن الهدف', consec: 'الغداء نفس البروتين يومين متتاليين', costHi: 'صنف غالٍ مع ميزانية منخفضة', snackDairyOnly: 'سناك ألبان/أجبان فقط', dinnerNoStarch: 'فطور أو عشاء بلا نشويات', fruitBig: 'فاكهة أكثر من حصتين في جلسة', missing: 'سطر بلا صنف' };
 const BASE = { mealMany: 'meals', prot3: 'meals', lunchSmall: 'days', lunchShare: 'days', tinyProt: 'lines', tinyBread: 'lines', bigCount: 'lines', oddFrac: 'lines', garnishOnly: 'meals', rawVegBig: 'lines', eggs3: 'days', sweetDay: 'days', dupDay: 'days', rep4: 'clients', kcalOff: 'days', consec: 'days', costHi: 'lines', snackDairyOnly: 'snacks', dinnerNoStarch: 'bd', fruitBig: 'meals', missing: 'lines' };
 const audit = (c) => {
   const r = { meals: 0, days: 0, lines: 0, snacks: 0, bd: 0, clients: 1 }; KEYS.forEach((k) => { r[k] = 0; });
@@ -46,8 +46,8 @@ const audit = (c) => {
         if (l.g >= 2 && l.g <= 5) { dayProt += l.e; if (s.type === 'L') { lunchProt += l.e; if ((m.r === 'meat' || m.r === 'fish') && f.us === 'جم') lunchMain = Math.max(lunchMain, q); if (!lcls && E.protClass(f)) lcls = E.protClass(f); } }
         if ((m.r === 'meat' || m.r === 'fish' || m.r === 'proc') && f.us === 'جم' && q < 30) r.tinyProt++;
         if (m.r === 'bread' && /رغيف/.test(f.us) && q < 0.5) r.tinyBread++;
-        if (COUNT_U.test(f.us) && q > 12) r.bigCount++;
-        const fr = q - Math.floor(q + 1e-9); if ((f.us !== 'جم' && f.us !== 'مل') && ((q > 1 && fr > 0.01 && Math.abs(fr - 0.5) > 0.02) || (/ملعقة/.test(f.us) && q < 1))) r.oddFrac++;
+        if (COUNT_U.test(f.us) && q > 12 && !(l.text && /\(قبضة|\(نحو/.test(l.text))) r.bigCount++;
+        const fr = q - Math.floor(q + 1e-9); if (!/^(جم|مل|كوب|ملعقة|رغيف)/.test(f.us) && fr > 0.01 && Math.abs(fr - 0.5) > 0.02) r.oddFrac++;      // كسر غير النصف لصنف يُعدّ (حبة/بيضة…)؛ ربع الرغيف والأكواب والملاعق بالأثلاث والأرباع مألوفة في جداول الأخصائيين
         if (m.r === 'veg') { vegAll++; if (GARNISH.test(f.n)) vegG++; if (f.us === 'كوب' && q > 1.5) r.rawVegBig++; }
         if (m.r === 'grain' || m.r === 'bread' || m.r === 'cereal' || m.r === 'tuber') starch++;
         if (m.r === 'fruit' || m.r === 'juice') fruitE += l.e;

@@ -175,6 +175,7 @@ E.ctx = function (client, D) {
     return (sh[0] + ' ' + sh[1] + ' ' + ((al && al[f.n]) || f.n)).replace(/\s+/g, ' ').trim();
   };
   E.lineMacros = function (f, e) { var qn = E.qtyNum(f.upe * e, f.us, f.st), k = f.units ? qn / f.units : 0; return f.mac.map(function (x) { return x * k; }); };
+  var LEAFY = /^(جرجير|خس|سبانخ نيئة|بقدونس)$/, GARNISH = /^(بصل|بصل أخضر|بقدونس|فجل|كرفس|نعناع|كزبرة|ثوم)$/;
   var fam = function (n) { return n.replace(/\s*\(?معلبة?\)?|\s*مطبوخة?$/g, '').trim(); };      // عائلة الصنف (فول مدمس = فول مدمس معلب) لحساب التكرار
   var hash = function (s) { var h = 2166136261; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
   // ================================================ مخطِّط الأسبوع (حالة مشتركة + تخطيط وجبة واحدة قابل لإعادة الاستخدام عند التعديل اليدوي)
@@ -329,7 +330,7 @@ E.ctx = function (client, D) {
       var R = rem[g]; if (!(R > 0)) return; var c = pool([g]), n = 0; if (v2) c = c.filter(function (f) { return E.canAdd(lines, f, D); }); if (v2 && !(g === 9 && t === 'L' && !st.compact)) maxN = 1;      // م1 (v2): صنف واحد للمجموعة، والباقي يُمدَّد أو يُرحَّل
       R -= ext(function (l) { return l.g === g; }, R)[0]; if (R < 0.5) return;          // صنف المجموعة الموجود في الوجبة يُمدَّد أولاً
       while (R >= 0.5 && n < (maxN || 2)) {
-        var f = pick(c, function (f) { var m = E.fmeta(f); return base(f, k + n) - (v2 && g === 1 && t !== 'L' ? tuP(f) : 0) + (rs[m.r] || 0) - 2 * Math.max(0, R - cap(f, R)) - (n && has[m.r] ? 4 : 0) - 1.2 * (dayRole[m.r] || 0) * (g === 9 ? 0.3 : 1); });
+        var f = pick(c, function (f) { var m = E.fmeta(f); return base(f, k + n) - (v2 && g === 1 && t !== 'L' ? tuP(f) : 0) - (v2 && g === 9 && GARNISH.test(f.n) && !cx.love[f.n] ? 5 : 0) + (rs[m.r] || 0) - 2 * Math.max(0, R - cap(f, R)) - (n && has[m.r] ? 4 : 0) - 1.2 * (dayRole[m.r] || 0) * (g === 9 ? 0.3 : 1); });
         if (!f) break; var e = put(f, Math.min(R, cap(f, R))); if (!e) break; R -= e; n++;
         if (R >= 0.5 && (t === 'S' || st.compact || g === 0 || g === 10 || g === 11)) R -= ext(function (l) { return l.g === g; }, R, g === 0 ? 1.5 : 1.4)[0];      // سناك/وجبة مزدحمة: الباقي على الصنف نفسه بدل صنف ثانٍ
         c = c.filter(function (x) { return x !== f; });
@@ -667,6 +668,8 @@ E.ctx = function (client, D) {
   E.canAdd = function (lines, f, D) { return hardN(lines.concat([{ name: f.n }]), D) <= hardN(lines, D); };
   E.lim = function (f, type, D) {                           // {min, max} بحصص الاستبدال للسطر: حد الدور والوجبة مع سقف الصنف نفسه (mx)
     var m = E.fmeta(f), L = D.limits && D.limits.roles && D.limits.roles[m.r] && D.limits.roles[m.r][type], cp = Math.max(0.5, Math.floor(m.mx / f.upe * 2 + 1e-9) / 2), mx = L ? Math.min(L[1], cp) : cp;
+    var pc = m.r === 'veg' && f.us === 'كوب' && m.prep === 0 ? (LEAFY.test(f.n) ? 2 : 1.5) : 0;      // م2: خضار نيئة حتى كوب ونصف (الورقية كوبان)
+    if (pc) mx = Math.max(0.5, Math.min(mx, Math.floor(pc / f.upe * 2 + 1e-9) / 2));
     return { min: L ? Math.min(L[0], mx) : 0.5, max: mx };
   };
   E.altOk = function (f, line, type, slotLines, D) { return line.e <= E.lim(f, type, D).max + 1e-9 && (!slotLines || E.canAdd(slotLines.filter(function (x) { return x !== line; }), f, D)); };
@@ -731,7 +734,7 @@ E.ctx = function (client, D) {
         if (!done) {
           var used = {}; (day ? day.slots : [s]).forEach(function (s2) { s2.lines.forEach(function (q) { used[q.name] = 1; }); });      // لا صنف مكرر في اليوم نفسه
           var cult = E.cultOf(plan.client, D), softN = function (ls) { return E.mealConflicts(ls, D, cult).filter(function (x) { return x.sev === 'soft'; }).length; }, role0 = E.fmeta(f).r;
-          var alts = E.alternatives(l, s.type, nv, D, 24).map(function (a, ix) { return { a: a, ix: ix }; }).filter(function (o) { var a = o.a, fa = M[a.name]; return !used[a.name] && fa && E.canAdd(s.lines, fa, D) && softN(s.lines.concat([{ name: a.name }])) <= softN(s.lines); })
+          var alts = E.alternatives(l, s.type, nv, D, 24).map(function (a, ix) { return { a: a, ix: ix }; }).filter(function (o) { var a = o.a, fa = M[a.name]; return !used[a.name] && fa && E.canAdd(s.lines, fa, D) && softN(s.lines.concat([{ name: a.name }])) <= softN(s.lines) && !(role0 === 'cheese' && E.fmeta(fa).r === 'cheese'); })      // لا نوعا جبن في وجبة
             .sort(function (x, y) { return ((E.fmeta(M[y.a.name]).r === role0) - (E.fmeta(M[x.a.name]).r === role0)) || (x.ix - y.ix); }).map(function (o) { return o.a; });
           for (var q = 0; q < alts.length && surplus >= 0.5; q++) { var f3 = M[alts[q].name], l3 = E.lim(f3, s.type, D), take = Math.min(l3.max, Math.max(surplus, l3.min)), keepE = l.e - take; if (take < 0.5 || keepE < lm.min - 1e-9) continue;    // السطر الجديد لا يقل عن حدّه الأدنى ولا يُنقص الأصلي عن حدّه
             s.lines.push({ g: l.g, name: f3.n, e: take, text: E.lineText(f3, take, plan.client.alias), tier: alts[q].tier, bank: false, split: true }); l.e = keepE; surplus = Math.max(0, l.e - lm.max); }
@@ -746,6 +749,10 @@ E.ctx = function (client, D) {
       if (tgt) { tgt.e += la.e; tgt.text = E.lineText(M[tgt.name], tgt.e, plan.client.alias); s.lines.splice(a, 1); a--; res.merged++; } else res.minLeft++;
     }
   };
+  E.hint = function (f, e) {                                // م2: مقياس يدوي للعدّ الكبير (أكثر من 12 حبة)
+    var m = E.fmeta(f), q = E.qtyNum(f.upe * e, f.us, m.st); if (!/^حبة/.test(f.us) || q <= 12) return '';
+    return m.r === 'nuts' || m.r === 'olive' ? '(قبضة يد صغيرة)' : m.r === 'fruit' ? (q >= 20 ? '(نحو كوب)' : '(نحو نصف كوب)') : '';
+  };
   E.fitPass = function (plan, D) {                          // نتيجة {capped, merged, left, minLeft, hard, soft}
     var res = { capped: 0, merged: 0, left: 0, minLeft: 0, hard: 0, soft: 0, dayLimit: [] }, cult = E.cultOf(plan.client, D), cxf = E.ctx(plan.client, D), dl = cxf.rules.filter(function (r) { return r.max_per_day; });
     var M0 = byN(D), c0 = {}, k0; for (k0 in plan.client) c0[k0] = plan.client[k0]; c0.v2 = false;
@@ -758,7 +765,7 @@ E.ctx = function (client, D) {
         if (!done) break; } });
     }); };
     enforce(); plan.days.forEach(function (d) { d.slots.forEach(function (s) { fixSlot(plan, s, D, res, d); }); }); enforce();      // مرة ثانية: الضبط قد يضيف صنفاً محدوداً
-    plan.days.forEach(function (d) { d.slots.forEach(function (s) { E.mealConflicts(s.lines, D, cult).forEach(function (x) { res[x.sev === 'hard' ? 'hard' : 'soft']++; }); }); });
+    plan.days.forEach(function (d) { d.slots.forEach(function (s) { E.mealConflicts(s.lines, D, cult).forEach(function (x) { res[x.sev === 'hard' ? 'hard' : 'soft']++; }); s.lines.forEach(function (l) { var f = M0[l.name]; if (f) { var h = E.hint(f, l.e); if (h && l.text.indexOf(h) < 0) l.text += ' ' + h; } }); }); });
     if (dl.length) plan.days.forEach(function (d) {            // حدّ يومي (البيض…): يُبلَّغ به الأخصائي (التنفيذ التلقائي لاحقاً)
       dl.forEach(function (r) { var n = 0; d.slots.forEach(function (sl) { sl.lines.forEach(function (l) { if (r.exact ? l.name === r.kw : l.name.indexOf(r.kw) >= 0) { var f = D.foods.filter(function (x) { return x.n === l.name; })[0]; n += l.e * (f && f.upe || 1); } }); }); if (n > r.max_per_day + 1e-9) res.dayLimit.push({ day: d.name, food: r.kw, qty: n, max: r.max_per_day, cond: r.cond }); });
     });
