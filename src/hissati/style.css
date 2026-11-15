@@ -1073,3 +1073,15 @@ button.plsub:not([disabled]){text-decoration:underline dotted;text-underline-off
 .scr.qz .pk{background:#fff;border-color:var(--line);color:var(--text)}.scr.qz select.inp option{color:#101736;background:#fff}
 .scr.qz .srch{background:#fff;border-color:var(--line)}.scr.qz .srch input{color:var(--text)}.scr.qz .tabs button{background:#fff;color:var(--mut)}.scr.qz .tabs button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
 html:has(.scr.qz),body:has(.scr.qz){background:#fff!important}body:has(.scr.qz)::after,body:has(.scr.qz)::before{display:none}body:has(.scr.qz) #app,body:has(.scr.qz) .app{background:#fff}
+
+/* 1.07 أيقونات النموذج: رموز الأصناف، بطاقتا الجنس، رسم الأسبوع */
+.food .e{font-size:19px;line-height:1}.food .st{font-size:11px;font-weight:700;border-radius:99px;padding:0 7px}
+.food.love .st{background:var(--mint);color:#fff}.food.no .st{background:#8b92b0;color:#fff}.scr.qz .food.no .n{text-decoration:line-through}.scr.qz .food.no{text-decoration:none}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}.opts{display:grid;gap:10px}
+.opt{border:1.5px solid var(--line);background:var(--glass);border-radius:20px;padding:16px;text-align:start;display:flex;flex-direction:column;gap:6px;color:var(--text);transition:border-color .2s,background .2s,transform .15s}
+.opt:active{transform:scale(.98)}.opt b{font-size:calc(17px*var(--fs))}.opt .d{color:var(--mut);font-size:calc(14px*var(--fs));line-height:1.55}
+.opt .sym{width:44px;height:44px;border-radius:14px;background:rgba(127,127,160,.14);display:grid;place-items:center;font-size:24px;font-weight:700}
+.opt .orow{display:flex;align-items:center;gap:14px}.opt .badge{font-size:12px;font-weight:700;color:var(--mint);background:rgba(111,227,169,.16);border-radius:99px;padding:1px 10px;align-self:flex-start}
+.wk{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;width:120px;flex:none;direction:ltr}.wk i{height:11px;border-radius:4px}
+.scr.qz .opt{background:#fff}.scr.qz .opt.on{border-color:var(--acc);background:var(--accS)}.scr.qz .opt.on .sym{background:var(--acc);color:#fff}.scr.qz .opt .sym{background:rgba(16,23,54,.07)}.scr.qz .opt .badge{color:var(--ok);background:var(--okS)}
+.opt.on{border-color:var(--mint)}
