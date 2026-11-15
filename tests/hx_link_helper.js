@@ -32,7 +32,7 @@ module.exports = async function linked(tag, errs, opts) {
   await hxCheck(); await d.waitForSelector('.hxreq:not(.wait)'); await d.click('[data-a="hxOk"]'); if (opts.preImport) { await d.waitForFunction(() => DPApp.S.clients.some((c) => c.hx && c.hx.planV >= 1), null, { timeout: 20000 }); await cPoll(); await m.waitForSelector('.tabbar', { timeout: 15000 }); return { b, d, m, env, RELAY, credTxt, hxCheck, cPoll, C, close: async () => { await b.close(); srv.close(); site.close(); } }; } await d.waitForSelector('main [data-a="gen"]');
   await d.evaluate(() => { const c = DPApp.S.clients.find((x) => x.code === DPApp.S.cur); c.goal = c.goal || DATA.settings.goals[2][0]; c.activity = c.activity || DATA.settings.activity[2][0]; if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); });
   if (opts.afterApprove) await opts.afterApprove(d, m);
-  if (opts.path !== 'tailor') { await d.click('main [data-a="gen"]'); } await d.waitForSelector('.pnav');
+  if (opts.path !== 'tailor') { await d.click('main [data-a="gen"]'); await d.waitForSelector('.pnav'); } else await d.waitForSelector('.pw .pwcard', { timeout: 20000 });
   await d.evaluate(() => DPApp.A.tab('hx')); await d.click('main [data-a="hxSendPlan"]'); await d.waitForFunction(() => (DPApp.S.clients[0].hx || {}).planV >= 1, null, { timeout: 15000 });
   await cPoll(); await m.waitForSelector('.tabbar', { timeout: 10000 });
   // 0.60: الشكل الجديد لـ«اليوم» يُضبط صراحة: الاختبارات القائمة على الشكل الحالي، والجديدة تطلب opts.today2

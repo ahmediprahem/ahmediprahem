@@ -34,7 +34,7 @@ function pwTiles(c) {                                                 // 2) اخ
   var cc = PL.cc(c), K = pwKcal(c), A0 = PL.assess(c, cc, K.k), sel = c.plib ? c.plib.lib : PWS.sel[c.code], eng = c.planSrc !== 'plib' && c.v2 && c.plan;
   var tile = function (x) {
     var on = sel === x.lib && !eng, R = x.R, lab = { ok: 'مناسب', caution: 'بحذر', excluded: 'مستبعد' }[x.st];
-    return '<button class="pwt ' + x.st + (on ? ' on' : '') + '" data-a="pwPick" data-v="' + x.lib + '"' + (x.st === 'excluded' ? ' disabled aria-disabled="true"' : '') + ' title="' + esc(x.why.join(' • ')) + '"><span class="pwn">' + String(x.lib).padStart(2, '0') + '</span><b>' + esc(x.n) + '</b>'
+    return '<button class="pwt pw-' + x.st + (on ? ' on' : '') + '" data-a="pwPick" data-v="' + x.lib + '"' + (x.st === 'excluded' ? ' disabled aria-disabled="true"' : '') + ' title="' + esc(x.why.join(' • ')) + '"><span class="pwn">' + String(x.lib).padStart(2, '0') + '</span><b>' + esc(x.n) + '</b>'
       + '<small>' + R.lo + '–' + R.hi + ' سعرة • ك' + R.c + '٪ ب' + R.p + '٪ د' + R.f + '٪' + (x.m === 'g' ? ' • بالجرام' : '') + '</small><span class="pwst">' + (x.pref ? '★ ' : '') + lab + '</span>' + (x.why.length ? '<em>' + esc(x.why[0]) + (x.why.length > 1 ? ' (+' + (x.why.length - 1) + ')' : '') + '</em>' : '') + '</button>';
   };
   var nEx = A0.filter(function (x) { return x.st === 'excluded'; }).length;

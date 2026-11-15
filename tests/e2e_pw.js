@@ -13,7 +13,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   const know = await p.textContent('.pw .pwcard'); assert(/تعرّف على العميل/.test(know) && /سكري النوع الثاني/.test(know) && /بعد العجز/.test(know)); ok('١ تعرّف على العميل: البيانات والحالة والسعرات (الحرق، الاحتياج، بعد العجز)');
   const tiles = await p.$$eval('.pwt:not(.eng)', (b) => b.map((x) => ({ lib: +x.dataset.v, cls: x.className, dis: x.disabled, t: x.textContent })));
   assert.strictEqual(tiles.length, 30, 'ثلاثون نظاماً'); const keto = tiles.find((x) => x.lib === 7), fast = tiles.find((x) => x.lib === 30), kids = tiles.find((x) => x.lib === 22);
-  assert(keto.dis && /excluded/.test(keto.cls) && fast.dis && kids.dis); assert(/مستبعد/.test(keto.t)); ok('٢ ثلاثون مربعاً؛ الكيتو والصيام المتقطع وأنظمة الأطفال معطّلة مع السبب لحالة العميل');
+  assert(keto.dis && /pw-excluded/.test(keto.cls) && fast.dis && kids.dis); assert(/مستبعد/.test(keto.t)); ok('٢ ثلاثون مربعاً؛ الكيتو والصيام المتقطع وأنظمة الأطفال معطّلة مع السبب لحالة العميل');
   assert.strictEqual(tiles[0].lib, 28, 'المفضّل للسكري أولاً'); ok('المرشّح للسكري (مقاومة الإنسولين) في أول المربعات');
   await p.click('.pwt[data-v="1"]'); await p.waitForSelector('#pwv'); const opts = await p.$$eval('#pwv option', (o) => o.map((x) => ({ v: x.value, d: x.disabled }))); assert(opts.length >= 2); ok('٣ اختيار نظام يعرض أنواعه ومستواه الأقرب للسعرات');
   await p.click('[data-a="pwApply"]'); await p.waitForSelector('.pwmeal .pwit'); let c = await C(); assert.strictEqual(c.planSrc, 'plib'); assert(c.plib && c.plib.doc && c.plib.doc.days.length === 7 && c.plib.lib === 1); ok('التطبيق: خطة أسبوع من المكتبة محفوظة مع العميل');
