@@ -45,7 +45,7 @@ const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html'));
   ok('محرر استبيان الجرامات: قسم جديد بأسئلة «مقياس» و«رقم بوحدة»، حذف سؤال وترتيب الأسئلة، ونسخة ورقية للطباعة فيها جدول التدريب والأسئلة الجديدة');
   // ---- 4) دعوة بنظام الجرامات
   await d.click('[data-a="setTab"][data-v="hx"]'); await d.fill('#hx_relay', RELAY); await d.fill('#hx_key', 'k'); await d.fill('#hx_name', 'د. أحمد حامد'); await d.click('[data-a="hxReg"]'); await d.waitForSelector('main .ok');
-  await d.evaluate(() => DPApp.A.hxv()); await d.click('main [data-a="hxInvForm"]'); await d.fill('#hxi_l', 'كابتن خالد'); await d.selectOption('#hxi_s', 'g'); await d.click('[data-a="hxInvMake"]'); await d.waitForSelector('.hxinv.made .hxlink');
+  await d.evaluate(() => DPApp.A.hxv()); await d.click('main [data-a="hxInvForm"]'); if (await d.$('#hxi_s')) await d.selectOption('#hxi_s', 'ex'); await d.fill('#hxi_l', 'كابتن خالد'); await d.selectOption('#hxi_s', 'g'); await d.click('[data-a="hxInvMake"]'); await d.waitForSelector('.hxinv.made .hxlink');
   assert((await d.textContent('.hxinv.made')).includes('نظام الجرامات')); const link = (await d.textContent('.hxinv.made .hxlink')).trim();
   const cat = JSON.parse(env.DB._raw.prepare('SELECT cat FROM invites').get().cat); assert.strictEqual(cat.sys, 'g'); assert(cat.fcats.includes('نشويات وحبوب') && cat.dayTypes.includes('تدريب ثقيل') && cat.form.steps.some((s) => s.t === 'نومك وتعافيك'));
   ok('دعوة بنظام الجرامات: تحمل استبيان الجرامات المعدّل وأغذية النظام وفئاتها وأنواع أيام التدريب');
@@ -80,7 +80,7 @@ const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html'));
   await m.waitForTimeout(2800); await cPoll(); await d.click('main [data-a="hxCheck"]'); await d.waitForSelector('.hxtab .hxday'); assert((await d.textContent('.hxtab')).includes(alt));
   ok('خطة الجرامات تصل «زنها»: سعرات كل يوم حسب نوع التدريب، الأصناف بالجرامات، ماكروز كل وجبة، وبدائل بجرامات مكافئة؛ والتبديل والمتابعة تعود إلى «حصة»');
   // ---- 8) استبيان الحصص المعدّل يصل أيضاً
-  await d.evaluate(() => DPApp.A.hxv()); await d.click('main [data-a="hxInvForm"]'); await d.fill('#hxi_l', 'سارة'); await d.click('[data-a="hxInvMake"]'); await d.waitForSelector('.hxinv.made .hxlink');
+  await d.evaluate(() => DPApp.A.hxv()); await d.click('main [data-a="hxInvForm"]'); if (await d.$('#hxi_s')) await d.selectOption('#hxi_s', 'ex'); await d.fill('#hxi_l', 'سارة'); await d.click('[data-a="hxInvMake"]'); await d.waitForSelector('.hxinv.made .hxlink');
   const link2 = (await d.textContent('.hxinv.made .hxlink')).trim(), j = await (async () => { const c = await b.newContext({ ...devices['Pixel 7'] }); await c.addInitScript(() => { try { localStorage.setItem('hissati_onb', '1'); } catch (e) { } }); return c.newPage(); })(); j.on('pageerror', (e) => errs.push('حصص: ' + e));
   await j.goto(link2); await j.click('[data-act="go"][data-v="pin"]'); for (let i = 0; i < 2; i++) for (const k of '1357') await j.click(`.pad [data-v="${k}"]`); await j.waitForSelector('.prog');
   assert((await j.textContent('.hd')).includes('من 5')); await j.fill('#f_phone', '0511111111'); await j.fill('#f_age', '30'); await j.fill('#f_weight', '70'); await j.fill('#f_height', '165'); await j.click('[data-act="set"][data-k="sex"][data-v="أنثى"]'); await j.click('.foot .btn');

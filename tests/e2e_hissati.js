@@ -37,7 +37,7 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
   assert.deepStrictEqual(await d.evaluate(() => DPApp.S.settings.hx), { relay: RELAY, regKey: 'clinic-key' });
   ok('«حصة» تُربط بالمحطة بمفتاح التسجيل (الخطأ يُرفض برسالة واضحة)، ويُحفظ العنوان للمستخدمين');
   // ---- 2) الدعوة
-  await d.evaluate(() => DPApp.A.hxv()); await d.click('main [data-a="hxInvForm"]'); await shot(d, 'd0_invite_form'); await d.fill('#hxi_l', 'سارة أحمد'); await d.fill('#hxi_p', '0554079404'); await d.click('[data-a="hxInvMake"]');
+  await d.evaluate(() => DPApp.A.hxv()); await d.click('main [data-a="hxInvForm"]'); await shot(d, 'd0_invite_form'); if (await d.$('#hxi_s')) await d.selectOption('#hxi_s', 'ex'); await d.fill('#hxi_l', 'سارة أحمد'); await d.fill('#hxi_p', '0554079404'); await d.click('[data-a="hxInvMake"]');
   await d.waitForSelector('.hxinv.made .hxlink'); const link = (await d.textContent('.hxinv.made .hxlink')).trim(), wa = await d.getAttribute('.hxinv.made a[data-hxwa]', 'href');
   assert(link.startsWith(RELAY + '/#t=') && /#t=[\w-]{24}\.[\w-]{11}$/.test(link), link); assert(wa.startsWith('https://wa.me/966554079404?text=') && decodeURIComponent(wa).includes(link), wa);
   const relayInv = env.DB._raw.prepare('SELECT h, label, cat FROM invites').get(); assert.strictEqual(relayInv.label, 'سارة أحمد'); assert(!relayInv.cat.includes('0554079404') && JSON.parse(relayInv.cat).bank.length > 50);
@@ -160,7 +160,7 @@ const DEMO_FILE = path.resolve(__dirname, '../src/hissati/demo_state.json'), ADM
   await d.fill('#hxMsg', 'وصلتني رسالتك على الجهاز الجديد؟').catch(async () => { await d.click('.hxlinked .cl'); await d.fill('#hxMsg', 'وصلتني رسالتك على الجهاز الجديد؟'); }); await d.press('#hxMsg', 'Enter'); await d.waitForTimeout(500);
   await ip.click('[data-act="tab"][data-v="today"]'); await ip.evaluate(() => window.HissatiApp.poll()); await ip.waitForSelector('.chatbtn .nb');
   ok('نقل الحساب برمز (كمن سجّل في Safari ثم ثبّت التطبيق): الرمز الخطأ يُرفض، والصحيح ينقل الخطة والمحادثة برمز دخول جديد، ويُمسح الحساب من المتصفح القديم، وتصل الرسائل للجهاز الجديد');
-  await d.evaluate(() => DPApp.A.hxv()); await d.click('main [data-a="hxInvForm"]'); await d.fill('#hxi_l', 'خالد'); await d.click('[data-a="hxInvMake"]'); await d.waitForSelector('.hxinv.made .hxlink');
+  await d.evaluate(() => DPApp.A.hxv()); await d.click('main [data-a="hxInvForm"]'); if (await d.$('#hxi_s')) await d.selectOption('#hxi_s', 'ex'); await d.fill('#hxi_l', 'خالد'); await d.click('[data-a="hxInvMake"]'); await d.waitForSelector('.hxinv.made .hxlink');
   const link2 = (await d.textContent('.hxinv.made .hxlink')).trim(), jctx = await b.newContext({ ...devices['iPhone 13'] }), jp = await jctx.newPage(); jp.on('pageerror', (e) => errs.push('دعوة: ' + e));
   await jp.goto(RELAY + '/'); await jp.fill('#invIn', 'مرحباً خالد، رابطك: ' + link2); await jp.click('[data-act="useInv"]');
   {     // شاشات المستخدم الجديد: بداية حيّة ← 3 قصص تفاعلية ← اختيار الشكل ← الدعوة؛ مرة واحدة على الجهاز

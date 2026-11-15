@@ -22,7 +22,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   await m.click('[data-act="tab"][data-v="today"]'); await m.click('[data-act="sub"][data-v="progress"]'); pt = await m.textContent('.pts'); assert(/15/.test(pt) && /باقي 15 نقطة على «وجبة مفتوحة»/.test(pt), pt);
   await d.evaluate(() => DPApp.A.tab('ci')); assert(/النقاط والدعوات/.test(await d.textContent('.ci')) && /شهادة تقدير/.test(await d.textContent('.ci')));
   // دعوة بكود العميل: عميل ثانٍ يشترك
-  await d.evaluate(() => DPApp.A.hxv()); await d.click('main [data-a="hxInvForm"]'); await d.fill('#hxi_l', 'هالة'); await d.fill('#hxi_p', '01005556667'); await d.fill('#hxi_r', ref.toLowerCase()); await d.click('[data-a="hxInvMake"]');
+  await d.evaluate(() => DPApp.A.hxv()); await d.click('main [data-a="hxInvForm"]'); if (await d.$('#hxi_s')) await d.selectOption('#hxi_s', 'ex'); await d.fill('#hxi_l', 'هالة'); await d.fill('#hxi_p', '01005556667'); await d.fill('#hxi_r', ref.toLowerCase()); await d.click('[data-a="hxInvMake"]');
   await d.waitForSelector('.hxinv.made .hxlink'); const link2 = (await d.textContent('.hxinv.made .hxlink')).trim();
   const { devices } = require('playwright'); const ctx2 = await b.newContext({ ...devices['iPhone 13'] }); await ctx2.addInitScript(() => { try { localStorage.setItem('hissati_onb', '1'); } catch (e) { } }); const m2 = await ctx2.newPage();
   await m2.goto(link2); await m2.waitForSelector('.invite .dr'); await m2.click('[data-act="go"][data-v="pin"]'); for (const k of '56785678') await m2.click(`.pad [data-v="${k}"]`); await m2.waitForSelector('.prog');

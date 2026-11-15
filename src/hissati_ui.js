@@ -68,7 +68,7 @@ function hxRegister(relay, regKey, name, lic) {
 }
 // ---------- قوائم النظام التي يختار منها العميل (تُرفق بالدعوة؛ بيانات عامة لا بيانات شخصية)
 function hxForm(sys) { return HForms.normalize(((eff().forms || {})[sys]), sys); }   // الاستبيان المعتمد (إعدادات «الاستبيانات»)
-function hxCat(sys) {
+function hxCat(sys, path) {
   var b = BR();
   if (sys === 'g') {                                                 // نظام الجرامات: أغذيته وفئاتها، والمراحل وأنواع الأيام
     var AD = window.ATHLETE, fc = [], fi = {}; AD.foods.forEach(function (f) { if (fi[f.g] === undefined) { fi[f.g] = fc.length; fc.push(f.g); } });
@@ -79,7 +79,7 @@ function hxCat(sys) {
     v: 1, sys: 'ex', form: hxForm('ex'), dname: HX.st.name, clinic: b.clinic || '', groups: D.groups, days: D.days,
     bank: D.bank.filter(function (x) { return x.on; }).map(function (x) { return [x.n, x.m, ((x.ing || [])[0] || {}).n || '']; }),
     foods: D.foods.filter(function (f) { return f.on !== 0; }).map(function (f) { return [f.n, f.g]; }),
-    conditions: D.conditions.slice(), allergens: D.allergens.map(function (a) { return a.label; }),
+    conditions: D.conditions.filter(function (k) { return path === 'tailor' || (D.condExp || []).indexOf(k) < 0; }),      // حالات القواعد الجديدة تُسأل في مسار التفصيل فقط (قواعدها تعمل مع v2) allergens: D.allergens.map(function (a) { return a.label; }),
     activity: D.settings.activity.map(function (a) { return a[0]; }), goals: D.settings.goals.map(function (g) { return g[0]; })
   };
 }
@@ -93,11 +93,11 @@ function hxCredMake(h, inv, un, pw) {                              // اسم م�
   un = un || ('hs' + hxRnd(6)); pw = pw || (hxRnd(4) + '-' + hxRnd(4) + '-' + hxRnd(4));
   return Promise.all([HXC0.userHash(un), HXC0.credSeal(pw, inv.tok + '.' + inv.fp)]).then(function (r) { return hxFetch('POST', '/v1/creds', { uh: r[0], h: h, salt: r[1].salt, iter: r[1].iter, blob: r[1].blob }, true).then(function () { inv.cu = un; inv.cp = pw; inv.cuh = r[0]; return hxSave(); }); });
 }
-function hxInvite(label, phone, days, sys) {
+function hxInvite(label, phone, days, sys, path) {
   var tok = HXC0.token(), exp = Math.floor(Date.now() / 1000) + days * 86400, h;
   return Promise.all([HXC0.tokenHash(tok), HXC0.fpOf(HX.st.ident.encPub)]).then(function (r) {
-    h = r[0]; HX.st.inv[h] = { tok: tok, fp: r[1], label: label, phone: phone, exp: exp, at: Date.now(), sys: sys === 'g' ? 'g' : 'ex' };
-    return hxFetch('POST', '/v1/invites', { h: h, label: label, exp: exp, cat: hxCat(sys) }, true);
+    h = r[0]; HX.st.inv[h] = { tok: tok, fp: r[1], label: label, phone: phone, exp: exp, at: Date.now(), sys: sys === 'g' ? 'g' : 'ex', path: sys === 'g' ? 'g' : path === 'tailor' ? 'tailor' : 'custom' };      // المسار: tailor تفصيل (v2 وخطة تلقائية) • g جرامات • custom يحدده الأخصائي
+    return hxFetch('POST', '/v1/invites', { h: h, label: label, exp: exp, cat: hxCat(sys, path) }, true);
   }).then(function () { return hxSave(); }).then(function () { return HX.st.inv[h]; }).catch(function (e) { delete HX.st.inv[h]; throw e; });
 }
 // ---------- الإرسال للعميل (مشفّر لمفتاحه، ومعه السر المشترك)
@@ -243,10 +243,15 @@ function hxApprove(cid) {
   if (g && +req.intake.nmeals >= 2 && typeof athSetMealCount === 'function') athSetMealCount(c, Math.min(8, +req.intake.nmeals));
   if (!g && hxQA(req.intake).length) c.notes += '\nإجابات الاستبيان:\n' + hxQA(req.intake).map(function (x) { return '• ' + x[0] + ': ' + x[1]; }).join('\n');
   c.hx = { cid: cid, enc: req.encPub, tok: HX.st.inv[req.h].tok, label: req.label, msgs: req.msgs || [], unread: req.unread || 0, logs: {}, weights: [[Date.now(), c.weight]], prefLog: [], prefs: { food: req.intake.food || {}, like: req.intake.like || {}, nope: req.intake.nope || {} }, intake: req.intake, planV: 0, since: Date.now(), quiz: req.quiz || null };
+  var tailor = !g && iv0 && iv0.path === 'tailor', auto = false; c.path = g ? 'g' : tailor ? 'tailor' : 'custom';
+  if (tailor) {                                                      // مسار التفصيل: المحرك الجديد، بلا وجبات البنك، وخطة تُولَّد فوراً للمراجعة (لا تصل العميل قبل أن يرسلها الأخصائي)
+    c.v2 = true; c.noBank = { B: true, L: true, D: true, S: true }; c.favMeals = []; c.excludedMeals = [];
+    try { c.plan = E.planWeek(ec(c), D); auto = true; } catch (e) { c.plan = null; }
+  }
   S.clients.push(c);
   return persist(c).then(function () { return hxSend(c, { t: 'status', st: 'approved', code: c.code, dname: HX.st.name }); }).then(function () {
     delete HX.st.reqs[cid]; delete HX.st.inv[req.h]; return hxSave();
-  }).then(function () { S.view = 'client'; S.cur = c.code; S.tab = 'client'; S.versions = []; render(); toast('✓ اعتُمد «' + c.name + '» عميلاً جديداً (' + c.code + ') — راجع بياناته ثم ولّد الخطة وأرسلها إلى «زنها»'); });
+  }).then(function () { S.view = 'client'; S.cur = c.code; S.tab = auto ? 'plan' : 'client'; if (auto) S.page = 'sum'; S.versions = []; render(); toast(auto ? '✓ اعتُمد «' + c.name + '» وتولّدت خطته بمسار التفصيل — راجعها ثم أرسلها إلى «زنها»' : '✓ اعتُمد «' + c.name + '» عميلاً جديداً (' + c.code + ') — راجع بياناته ثم ولّد الخطة وأرسلها إلى «زنها»'); });
 }
 // ---------- لقطة الخطة لتطبيق العميل (نفس شكل نموذج «زنها»: [مجموعة، صنف، نص، بدائل[[صنف، نص]]])
 function hxSnap(c) {
@@ -301,7 +306,7 @@ function hxSetPage() {
 function hxInvForm(pre) {
   // 0.60: تُملأ مسبقاً من ملف العميل حين تُفتح من تبويب «زنها» أو «تصدير وإرسال»
   pre = pre || HX.pre || {};
-  return '<div class="ucard hxform"><h3>دعوة عميل إلى «زنها»</h3><div class="row"><div><label>اسم العميل</label><input id="hxi_l" maxlength="80" placeholder="مثال: سارة أحمد" value="' + esc(pre.l || '') + '"></div><div><label>جوال العميل (للواتساب)</label><input id="hxi_p" type="tel" inputmode="tel" dir="ltr" placeholder="05xxxxxxxx" value="' + esc(pre.p || '') + '"></div><div><label>نظام الخطة</label><select id="hxi_s"><option value="ex">نظام الحصص</option><option value="g">نظام الجرامات</option></select></div><div><label>صلاحية الرابط</label><select id="hxi_d">' + HX_DAYS.map(function (x) { return '<option value="' + x[0] + '"' + (x[0] === 7 ? ' selected' : '') + '>' + x[1] + '</option>'; }).join('') + '</select></div></div>'
+  return '<div class="ucard hxform"><h3>دعوة عميل إلى «زنها»</h3><div class="row"><div><label>اسم العميل</label><input id="hxi_l" maxlength="80" placeholder="مثال: سارة أحمد" value="' + esc(pre.l || '') + '"></div><div><label>جوال العميل (للواتساب)</label><input id="hxi_p" type="tel" inputmode="tel" dir="ltr" placeholder="05xxxxxxxx" value="' + esc(pre.p || '') + '"></div><div><label>نظام الخطة</label><select id="hxi_s" title="مسار العميل"><option value="tailor">مسار التفصيل: يعبّئ العميل بياناته فتتولد الخطة تلقائياً</option><option value="g">مسار الجرامات (الرياضيون)</option><option value="ex"' + (HX.cform ? ' selected' : '') + '>حدّد بنفسك: استبيانك وخطتك بيدك</option></select></div><div><label>صلاحية الرابط</label><select id="hxi_d">' + HX_DAYS.map(function (x) { return '<option value="' + x[0] + '"' + (x[0] === 7 ? ' selected' : '') + '>' + x[1] + '</option>'; }).join('') + '</select></div></div>'
     + '<div class="row"><div><label>ربط بعميل موجود</label><select id="hxi_c"><option value="">عميل جديد (يُنشأ عند اعتماد طلبه)</option>' + S.clients.filter(function (q) { return !q.hx; }).map(function (q) { return '<option value="' + esc(q.code) + '"' + (pre.cl === q.code ? ' selected' : '') + '>' + esc(q.name || q.code) + ' (' + esc(q.code) + ')</option>'; }).join('') + '</select></div><div><label>طريقة دخول العميل</label><select id="hxi_m"><option value="link">رابط على واتساب</option><option value="cred"' + (pre.m === 'cred' ? ' selected' : '') + '>اسم مستخدم وكلمة سر (بدل الرابط)</option></select></div><div><label>اسم المستخدم (اختياري)</label><input id="hxi_u" dir="ltr" autocomplete="off" maxlength="30" placeholder="يُولَّد تلقائياً إن تُرك فارغاً" value="' + esc(pre.u || '') + '"></div><div><label>كلمة السر (اختياري)</label><input id="hxi_pw" dir="ltr" autocomplete="off" maxlength="40" placeholder="تُولَّد قوية تلقائياً (موصى به)"></div></div><p class="small">باسم مستخدم وكلمة سر يدخل العميل «زنها» مباشرة دون رابط. كلمة السر تُغلِّف الدعوة على جهازك ولا تراها المحطة، ويُنصح بتركها تُولَّد تلقائياً.</p>'
     + '<p class="two"><button data-a="hxInvMake">إنشاء الرابط</button><button class="sec" data-a="hxInvForm">إلغاء</button></p></div>';
 }
@@ -443,13 +448,13 @@ Object.assign(A, {
   hxInvC: function () { var c = cur(); if (!c) return; HX.cform = HX.cform === c.code && !HX.made ? null : c.code; HX.made = null; HX.madeFor = null; S.tab = 'link'; main(); var i = $('#hxi_p'); if (i && !i.value) i.focus(); },
   hxSendOrInvite: function () { var c = cur(); if (!c) return; if (c.hx) { A.hxSendPlan(); return; } HX.cform = c.code; HX.made = null; HX.madeFor = null; S.tab = 'link'; main(); window.scrollTo(0, 0); toast('«' + (c.name || 'العميل') + '» لم يتصل بـ«زنها» بعد — أرسل له الدعوة أولاً'); },
   hxInvMake: function () {
-    var l = ($('#hxi_l').value || '').trim(), ph = ($('#hxi_p').value || '').trim(), d = +$('#hxi_d').value || 7, sy = ($('#hxi_s') || {}).value === 'g' ? 'g' : 'ex';
+    var l = ($('#hxi_l').value || '').trim(), ph = ($('#hxi_p').value || '').trim(), d = +$('#hxi_d').value || 7, pv = ($('#hxi_s') || {}).value, sy = pv === 'g' ? 'g' : 'ex', pth = pv === 'tailor' ? 'tailor' : 'custom';
     if (!l) { toast('اكتب اسم العميل'); return; }
     var fc = S.view === 'client' && cur() && S.tab === 'link' && !cur().hx ? cur().code : null;
     var link = ($('#hxi_c') || {}).value || '', lc = link && S.clients.filter(function (q) { return q.code === link; })[0]; if (lc && lc.kind === 'athlete') sy = 'g';
     var cred = ($('#hxi_m') || {}).value === 'cred', un = (($('#hxi_u') || {}).value || '').trim().toLowerCase(), pw = (($('#hxi_pw') || {}).value || '').trim();
     if (cred) { if (un && !/^[a-z0-9._-]{3,30}$/.test(un)) { toast('اسم المستخدم: 3 إلى 30 حرفاً إنجليزياً صغيراً أو أرقاماً أو . _ -'); return; } if (pw && (pw.length < 10 || !/[A-Za-z]/.test(pw) || !/\d/.test(pw))) { toast('كلمة السر: 10 أحرف على الأقل وفيها حروف وأرقام'); return; } }
-    hxInvite(l, ph, d, sy).then(function (inv) {
+    hxInvite(l, ph, d, sy, pth).then(function (inv) {
       var h = Object.keys(HX.st.inv).filter(function (q) { return HX.st.inv[q] === inv; })[0]; if (lc) inv.cl = lc.code; if (!cred) { HX.form = false; HX.made = h; HX.madeFor = fc; if (fc) HX.cform = null; main(); toast('✓ جاهز — أرسل الرابط على واتساب أو انسخه'); return; }
       return hxCredMake(h, inv, un, pw).then(function () { HX.form = false; HX.pre = null; HX.made = h; HX.madeFor = fc; if (fc) HX.cform = null; main(); toast('✓ جاهز — أرسل اسم المستخدم وكلمة السر'); }).catch(function (e) { return hxFetch('POST', '/v1/invites/revoke', { h: h }, true).catch(function () { }).then(function () { delete HX.st.inv[h]; return hxSave(); }).then(function () { throw e; }); });
     }).catch(hxErr);

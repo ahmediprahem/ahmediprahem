@@ -3,7 +3,7 @@ const assert = require('assert'), { devices } = require('playwright'), linked = 
 let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
 (async () => {
   const { b, d, close } = await linked('intro', errs), shot = process.env.IN_SHOT;
-  await d.evaluate(() => DPApp.A.hxv()); await d.click('main [data-a="hxInvForm"]'); await d.fill('#hxi_l', 'سارة'); await d.click('[data-a="hxInvMake"]'); await d.waitForSelector('.hxinv.made .hxlink'); const LINK = (await d.textContent('.hxinv.made .hxlink')).trim();
+  await d.evaluate(() => DPApp.A.hxv()); await d.click('main [data-a="hxInvForm"]'); if (await d.$('#hxi_s')) await d.selectOption('#hxi_s', 'ex'); await d.fill('#hxi_l', 'سارة'); await d.click('[data-a="hxInvMake"]'); await d.waitForSelector('.hxinv.made .hxlink'); const LINK = (await d.textContent('.hxinv.made .hxlink')).trim();
   const open = async () => { const c = await b.newContext({ ...devices['Pixel 7'] }); await c.addInitScript(() => { window.__vib = 0; navigator.vibrate = () => { window.__vib++; return true; }; }); const p = await c.newPage(); p.on('pageerror', (e) => errs.push(String(e))); await p.goto(LINK); return p; };
   const p = await open(); await p.waitForSelector('.intro.in-cc'); assert.strictEqual(await p.locator('.in-c').count(), 19); assert(/من أي بلد أنت/.test(await p.innerText('.in-top')));
   if (shot) await p.screenshot({ path: shot + '0.png' }); ok('أول فتح: شاشة «من أي بلد أنت؟» بتسع عشرة دولة قبل أي شيء');
