@@ -1,0 +1,4694 @@
+{
+ "sum": {
+  "n": 50,
+  "ok": 50,
+  "errs": [],
+  "sec": 68
+ },
+ "rows": [
+  {
+   "i": 0,
+   "profile": {
+    "i": 0,
+    "sex": "أنثى",
+    "age": 63,
+    "weight": 88,
+    "height": 172,
+    "act": 1,
+    "goal": 0,
+    "meals": 3,
+    "cuisine": "sa",
+    "budget": 2,
+    "conditions": [],
+    "allergens": [
+     "حساسية السمك"
+    ],
+    "freq": {
+     "poultry": 5,
+     "red": 2,
+     "fish": 0
+    },
+    "bank": false,
+    "fishDairy": true
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 1784,
+    "box": true,
+    "trial": true,
+    "score": 97,
+    "v1score": 38,
+    "items": [
+     "يتكرر 4 أيام أو أكثر في الوجبة نفسها: بياض بيض"
+    ],
+    "n": {
+     "crowd": 0,
+     "prot3": 0,
+     "lunchSmall": 0,
+     "dupDay": 0,
+     "eggs": 0,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "v1n": {
+     "crowd": 0,
+     "prot3": 0,
+     "lunchSmall": 1,
+     "dupDay": 0,
+     "eggs": 7,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 3,
+     "tiny": 0
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 103,
+    "fish": 0,
+    "eggOver": 0,
+    "sweetDays": 0,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 1,
+    "fit": {
+     "capped": 1,
+     "merged": 0,
+     "left": 10,
+     "minLeft": 0,
+     "hard": 0,
+     "soft": 0,
+     "dayLimit": [],
+     "dayCapped": 6,
+     "rebal": 4
+    },
+    "sched": "poultry red poultry red poultry leg poultry"
+   },
+   "app": {
+    "alts": 74,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 3,
+    "days": 7
+   }
+  },
+  {
+   "i": 1,
+   "profile": {
+    "i": 1,
+    "sex": "ذكر",
+    "age": 60,
+    "weight": 108,
+    "height": 174,
+    "act": 3,
+    "goal": 1,
+    "meals": 4,
+    "cuisine": "sa",
+    "budget": 1,
+    "conditions": [
+     "سكري النوع الثاني",
+     "ارتفاع الكوليسترول والدهون",
+     "ضغط الدم المرتفع"
+    ],
+    "allergens": [
+     "حساسية المكسرات"
+    ],
+    "freq": {
+     "poultry": 4,
+     "red": 1,
+     "fish": 2
+    },
+    "bank": true,
+    "fishDairy": false
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 2730,
+    "box": true,
+    "trial": true,
+    "score": 74,
+    "v1score": 0,
+    "items": [
+     "4 وجبة مزدحمة (أصناف كثيرة)",
+     "4 يوم فيه الصنف نفسه مرتين",
+     "1 سطر لحم أقل من 30 جم"
+    ],
+    "n": {
+     "crowd": 4,
+     "prot3": 0,
+     "lunchSmall": 0,
+     "dupDay": 4,
+     "eggs": 0,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 1
+    },
+    "v1n": {
+     "crowd": 19,
+     "prot3": 8,
+     "lunchSmall": 0,
+     "dupDay": 4,
+     "eggs": 1,
+     "sweet": 0,
+     "kcal": 3,
+     "garnish": 3,
+     "tiny": 0
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 130,
+    "fish": 3,
+    "eggOver": 0,
+    "sweetDays": 0,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 0,
+    "fit": {
+     "capped": 12,
+     "merged": 0,
+     "left": 5,
+     "minLeft": 0,
+     "hard": 0,
+     "soft": 0,
+     "dayLimit": [],
+     "fruitMoved": 8,
+     "rebal": 1
+    },
+    "sched": "poultry fish poultry fish poultry red poultry"
+   },
+   "app": {
+    "alts": 93,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 4,
+    "days": 7
+   }
+  },
+  {
+   "i": 2,
+   "profile": {
+    "i": 2,
+    "sex": "أنثى",
+    "age": 58,
+    "weight": 121,
+    "height": 150,
+    "act": 2,
+    "goal": 3,
+    "meals": 4,
+    "cuisine": "sa",
+    "budget": 2,
+    "conditions": [
+     "مقاومة الإنسولين / ما قبل السكري"
+    ],
+    "allergens": [
+     "حساسية القمح / الجلوتين (سيلياك)"
+    ],
+    "freq": {
+     "poultry": 2,
+     "red": 3,
+     "fish": 2
+    },
+    "bank": true,
+    "fishDairy": true
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 2880,
+    "box": true,
+    "trial": true,
+    "score": 71,
+    "v1score": 18,
+    "items": [
+     "5 وجبة مزدحمة (أصناف كثيرة)",
+     "3 يوم فيه الصنف نفسه مرتين",
+     "يتكرر 4 أيام أو أكثر في الوجبة نفسها: حمص مسلوق",
+     "1 سطر لحم أقل من 30 جم"
+    ],
+    "n": {
+     "crowd": 5,
+     "prot3": 0,
+     "lunchSmall": 0,
+     "dupDay": 3,
+     "eggs": 0,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 1
+    },
+    "v1n": {
+     "crowd": 15,
+     "prot3": 0,
+     "lunchSmall": 0,
+     "dupDay": 7,
+     "eggs": 1,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 2,
+     "tiny": 0
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 129,
+    "fish": 2,
+    "eggOver": 0,
+    "sweetDays": 0,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 0,
+    "fit": {
+     "capped": 3,
+     "merged": 0,
+     "left": 14,
+     "minLeft": 3,
+     "hard": 0,
+     "soft": 0,
+     "dayLimit": [],
+     "fruitMoved": 10,
+     "rebal": 15
+    },
+    "sched": "red poultry fish red poultry fish red"
+   },
+   "app": {
+    "alts": 83,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 4,
+    "days": 7
+   }
+  },
+  {
+   "i": 3,
+   "profile": {
+    "i": 3,
+    "sex": "أنثى",
+    "age": 61,
+    "weight": 72,
+    "height": 162,
+    "act": 2,
+    "goal": 0,
+    "meals": 4,
+    "cuisine": "eg",
+    "budget": 3,
+    "conditions": [
+     "النقرس",
+     "دهون الكبد (MASLD)"
+    ],
+    "allergens": [],
+    "freq": null,
+    "bank": false,
+    "fishDairy": false
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 1713,
+    "box": true,
+    "trial": true,
+    "score": 100,
+    "v1score": 39,
+    "items": [],
+    "n": {
+     "crowd": 0,
+     "prot3": 0,
+     "lunchSmall": 0,
+     "dupDay": 0,
+     "eggs": 0,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "v1n": {
+     "crowd": 2,
+     "prot3": 0,
+     "lunchSmall": 1,
+     "dupDay": 0,
+     "eggs": 6,
+     "sweet": 5,
+     "kcal": 0,
+     "garnish": 2,
+     "tiny": 0
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 108,
+    "fish": 11,
+    "eggOver": 0,
+    "sweetDays": 0,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 0,
+    "fit": {
+     "capped": 0,
+     "merged": 0,
+     "left": 2,
+     "minLeft": 1,
+     "hard": 0,
+     "soft": 0,
+     "dayLimit": [
+      {
+       "day": "الأربعاء",
+       "food": "بيضة كاملة",
+       "qty": 2.258,
+       "max": 2,
+       "cond": "حدّ عام"
+      }
+     ],
+     "dayCapped": 5,
+     "rebal": 1
+    },
+    "sched": "poultry fish poultry red poultry fish red"
+   },
+   "app": {
+    "alts": 83,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 4,
+    "days": 7
+   }
+  },
+  {
+   "i": 4,
+   "profile": {
+    "i": 4,
+    "sex": "أنثى",
+    "age": 54,
+    "weight": 64,
+    "height": 161,
+    "act": 2,
+    "goal": 1,
+    "meals": 5,
+    "cuisine": "eg",
+    "budget": 1,
+    "conditions": [
+     "أمراض القلب"
+    ],
+    "allergens": [
+     "حساسية البيض"
+    ],
+    "freq": {
+     "poultry": 3,
+     "red": 2,
+     "fish": 2
+    },
+    "bank": true,
+    "fishDairy": true
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 1384,
+    "box": true,
+    "trial": true,
+    "score": 67,
+    "v1score": 24,
+    "items": [
+     "3 يوم سعراته تبعد أكثر من 7٪ عن الهدف",
+     "4 يوم فيه الصنف نفسه مرتين",
+     "يتكرر 4 أيام أو أكثر في الوجبة نفسها: جبنة قريش"
+    ],
+    "n": {
+     "crowd": 0,
+     "prot3": 0,
+     "lunchSmall": 0,
+     "dupDay": 4,
+     "eggs": 0,
+     "sweet": 3,
+     "kcal": 3,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "v1n": {
+     "crowd": 1,
+     "prot3": 0,
+     "lunchSmall": 1,
+     "dupDay": 5,
+     "eggs": 0,
+     "sweet": 7,
+     "kcal": 6,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 118,
+    "fish": 8,
+    "eggOver": 0,
+    "sweetDays": 3,
+    "fruitOver": 0,
+    "kcalOff": 3,
+    "leg": 0,
+    "fit": {
+     "capped": 0,
+     "merged": 0,
+     "left": 1,
+     "minLeft": 1,
+     "hard": 0,
+     "soft": 7,
+     "dayLimit": [],
+     "rebal": 1
+    },
+    "sched": "poultry fish poultry red poultry fish red"
+   },
+   "app": {
+    "alts": 80,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 5,
+    "days": 7
+   }
+  },
+  {
+   "i": 5,
+   "profile": {
+    "i": 5,
+    "sex": "أنثى",
+    "age": 59,
+    "weight": 76,
+    "height": 159,
+    "act": 1,
+    "goal": 0,
+    "meals": 5,
+    "cuisine": "sa",
+    "budget": 3,
+    "conditions": [],
+    "allergens": [
+     "حساسية المكسرات"
+    ],
+    "freq": {
+     "poultry": 5,
+     "red": 2,
+     "fish": 0
+    },
+    "bank": false,
+    "fishDairy": true
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 1534,
+    "box": true,
+    "trial": true,
+    "score": 100,
+    "v1score": 64,
+    "items": [],
+    "n": {
+     "crowd": 0,
+     "prot3": 0,
+     "lunchSmall": 0,
+     "dupDay": 0,
+     "eggs": 0,
+     "sweet": 3,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "v1n": {
+     "crowd": 1,
+     "prot3": 0,
+     "lunchSmall": 4,
+     "dupDay": 0,
+     "eggs": 1,
+     "sweet": 7,
+     "kcal": 0,
+     "garnish": 4,
+     "tiny": 0
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 117,
+    "fish": 0,
+    "eggOver": 0,
+    "sweetDays": 3,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 0,
+    "fit": {
+     "capped": 0,
+     "merged": 0,
+     "left": 0,
+     "minLeft": 0,
+     "hard": 0,
+     "soft": 0,
+     "dayLimit": [],
+     "rebal": 2
+    },
+    "sched": "poultry red poultry red poultry poultry poultry"
+   },
+   "app": {
+    "alts": 81,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 5,
+    "days": 7
+   }
+  },
+  {
+   "i": 6,
+   "profile": {
+    "i": 6,
+    "sex": "أنثى",
+    "age": 58,
+    "weight": 101,
+    "height": 165,
+    "act": 2,
+    "goal": 0,
+    "meals": 3,
+    "cuisine": "eg",
+    "budget": 3,
+    "conditions": [
+     "خمول الغدة"
+    ],
+    "allergens": [
+     "حساسية الحليب (بروتين الحليب)"
+    ],
+    "freq": {
+     "poultry": 2,
+     "red": 3,
+     "fish": 2
+    },
+    "bank": true,
+    "fishDairy": false
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 2215,
+    "box": true,
+    "trial": true,
+    "score": 48,
+    "v1score": 0,
+    "items": [
+     "6 وجبة مزدحمة (أصناف كثيرة)",
+     "4 وجبة فيها 3 مصادر بروتين",
+     "5 يوم فيه الصنف نفسه مرتين",
+     "يتكرر 4 أيام أو أكثر في الوجبة نفسها: فول مدمس"
+    ],
+    "n": {
+     "crowd": 6,
+     "prot3": 4,
+     "lunchSmall": 0,
+     "dupDay": 5,
+     "eggs": 0,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "v1n": {
+     "crowd": 7,
+     "prot3": 4,
+     "lunchSmall": 1,
+     "dupDay": 7,
+     "eggs": 4,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 2
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 126,
+    "fish": 12,
+    "eggOver": 0,
+    "sweetDays": 0,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 0,
+    "fit": {
+     "capped": 3,
+     "merged": 3,
+     "left": 1,
+     "minLeft": 1,
+     "hard": 0,
+     "soft": 0,
+     "dayLimit": [
+      {
+       "day": "الاثنين",
+       "food": "بيضة كاملة",
+       "qty": 2.129,
+       "max": 2,
+       "cond": "حدّ عام"
+      }
+     ],
+     "dayCapped": 1,
+     "rebal": 1
+    },
+    "sched": "red poultry fish red poultry fish red"
+   },
+   "app": {
+    "alts": 79,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 3,
+    "days": 7
+   }
+  },
+  {
+   "i": 7,
+   "profile": {
+    "i": 7,
+    "sex": "أنثى",
+    "age": 63,
+    "weight": 71,
+    "height": 174,
+    "act": 2,
+    "goal": 3,
+    "meals": 5,
+    "cuisine": "sa",
+    "budget": 2,
+    "conditions": [
+     "سكري النوع الثاني"
+    ],
+    "allergens": [
+     "لا آكل اللحوم (نباتي)"
+    ],
+    "freq": {
+     "poultry": 3,
+     "red": 2,
+     "fish": 2
+    },
+    "bank": false,
+    "fishDairy": true
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 2298,
+    "box": true,
+    "trial": true,
+    "score": 59,
+    "v1score": 1,
+    "items": [
+     "5 وجبة فيها 3 مصادر بروتين",
+     "3 وجبة مزدحمة (أصناف كثيرة)",
+     "3 يوم فيه الصنف نفسه مرتين",
+     "يتكرر 4 أيام أو أكثر في الوجبة نفسها: توفو Tofu"
+    ],
+    "n": {
+     "crowd": 3,
+     "prot3": 5,
+     "lunchSmall": 0,
+     "dupDay": 3,
+     "eggs": 0,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "v1n": {
+     "crowd": 7,
+     "prot3": 7,
+     "lunchSmall": 0,
+     "dupDay": 1,
+     "eggs": 4,
+     "sweet": 0,
+     "kcal": 1,
+     "garnish": 4,
+     "tiny": 0
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 140,
+    "fish": 0,
+    "eggOver": 0,
+    "sweetDays": 0,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 1,
+    "fit": {
+     "capped": 10,
+     "merged": 0,
+     "left": 4,
+     "minLeft": 2,
+     "hard": 0,
+     "soft": 0,
+     "dayLimit": [],
+     "cut": 1,
+     "dayCapped": 1,
+     "fruitMoved": 9,
+     "rebal": 0
+    },
+    "sched": "   leg   "
+   },
+   "app": {
+    "alts": 91,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 5,
+    "days": 7
+   }
+  },
+  {
+   "i": 8,
+   "profile": {
+    "i": 8,
+    "sex": "أنثى",
+    "age": 55,
+    "weight": 63,
+    "height": 171,
+    "act": 0,
+    "goal": 0,
+    "meals": 4,
+    "cuisine": "eg",
+    "budget": 3,
+    "conditions": [],
+    "allergens": [],
+    "freq": null,
+    "bank": false,
+    "fishDairy": false
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 1265,
+    "box": true,
+    "trial": true,
+    "score": 100,
+    "v1score": 21,
+    "items": [],
+    "n": {
+     "crowd": 0,
+     "prot3": 0,
+     "lunchSmall": 0,
+     "dupDay": 0,
+     "eggs": 0,
+     "sweet": 3,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "v1n": {
+     "crowd": 0,
+     "prot3": 0,
+     "lunchSmall": 1,
+     "dupDay": 0,
+     "eggs": 6,
+     "sweet": 5,
+     "kcal": 4,
+     "garnish": 2,
+     "tiny": 0
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 99,
+    "fish": 9,
+    "eggOver": 0,
+    "sweetDays": 3,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 0,
+    "fit": {
+     "capped": 0,
+     "merged": 0,
+     "left": 1,
+     "minLeft": 0,
+     "hard": 0,
+     "soft": 0,
+     "dayLimit": [
+      {
+       "day": "الأحد",
+       "food": "بيضة كاملة",
+       "qty": 2.258,
+       "max": 2,
+       "cond": "حدّ عام"
+      },
+      {
+       "day": "الخميس",
+       "food": "بيضة كاملة",
+       "qty": 2.258,
+       "max": 2,
+       "cond": "حدّ عام"
+      }
+     ],
+     "dayCapped": 4,
+     "rebal": 2
+    },
+    "sched": "poultry fish poultry red poultry fish red"
+   },
+   "app": {
+    "alts": 79,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 4,
+    "days": 7
+   }
+  },
+  {
+   "i": 9,
+   "profile": {
+    "i": 9,
+    "sex": "أنثى",
+    "age": 19,
+    "weight": 105,
+    "height": 167,
+    "act": 1,
+    "goal": 0,
+    "meals": 4,
+    "cuisine": "sa",
+    "budget": 1,
+    "conditions": [],
+    "allergens": [],
+    "freq": {
+     "poultry": 4,
+     "red": 1,
+     "fish": 2
+    },
+    "bank": true,
+    "fishDairy": true
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 2277,
+    "box": true,
+    "trial": true,
+    "score": 88,
+    "v1score": 0,
+    "items": [
+     "3 يوم فيه الصنف نفسه مرتين",
+     "1 وجبة مزدحمة (أصناف كثيرة)"
+    ],
+    "n": {
+     "crowd": 1,
+     "prot3": 0,
+     "lunchSmall": 0,
+     "dupDay": 3,
+     "eggs": 0,
+     "sweet": 3,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "v1n": {
+     "crowd": 11,
+     "prot3": 0,
+     "lunchSmall": 4,
+     "dupDay": 5,
+     "eggs": 2,
+     "sweet": 5,
+     "kcal": 4,
+     "garnish": 2,
+     "tiny": 0
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 124,
+    "fish": 2,
+    "eggOver": 0,
+    "sweetDays": 3,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 0,
+    "fit": {
+     "capped": 6,
+     "merged": 0,
+     "left": 8,
+     "minLeft": 0,
+     "hard": 0,
+     "soft": 0,
+     "dayLimit": [
+      {
+       "day": "الأربعاء",
+       "food": "بيضة كاملة",
+       "qty": 2.258,
+       "max": 2,
+       "cond": "حدّ عام"
+      }
+     ],
+     "rebal": 5
+    },
+    "sched": "poultry fish poultry fish poultry red poultry"
+   },
+   "app": {
+    "alts": 110,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 4,
+    "days": 7
+   }
+  },
+  {
+   "i": 10,
+   "profile": {
+    "i": 10,
+    "sex": "ذكر",
+    "age": 65,
+    "weight": 122,
+    "height": 162,
+    "act": 1,
+    "goal": 2,
+    "meals": 4,
+    "cuisine": "eg",
+    "budget": 2,
+    "conditions": [],
+    "allergens": [
+     "حساسية السمك",
+     "حساسية الحليب (بروتين الحليب)"
+    ],
+    "freq": {
+     "poultry": 4,
+     "red": 1,
+     "fish": 2
+    },
+    "bank": true,
+    "fishDairy": true
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 2630,
+    "box": true,
+    "trial": true,
+    "score": 49,
+    "v1score": 0,
+    "items": [
+     "13 وجبة مزدحمة (أصناف كثيرة)",
+     "3 يوم فيه الصنف نفسه مرتين",
+     "يتكرر 4 أيام أو أكثر في الوجبة نفسها: فول مدمس"
+    ],
+    "n": {
+     "crowd": 13,
+     "prot3": 0,
+     "lunchSmall": 0,
+     "dupDay": 3,
+     "eggs": 0,
+     "sweet": 3,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "v1n": {
+     "crowd": 16,
+     "prot3": 1,
+     "lunchSmall": 0,
+     "dupDay": 6,
+     "eggs": 6,
+     "sweet": 5,
+     "kcal": 0,
+     "garnish": 3,
+     "tiny": 4
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 147,
+    "fish": 0,
+    "eggOver": 0,
+    "sweetDays": 3,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 0,
+    "fit": {
+     "capped": 5,
+     "merged": 2,
+     "left": 9,
+     "minLeft": 1,
+     "hard": 0,
+     "soft": 0,
+     "dayLimit": [],
+     "rebal": 1
+    },
+    "sched": "poultry red poultry poultry leg poultry poultry"
+   },
+   "app": {
+    "alts": 89,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 4,
+    "days": 7
+   }
+  },
+  {
+   "i": 11,
+   "profile": {
+    "i": 11,
+    "sex": "ذكر",
+    "age": 41,
+    "weight": 92,
+    "height": 174,
+    "act": 3,
+    "goal": 2,
+    "meals": 5,
+    "cuisine": "eg",
+    "budget": 3,
+    "conditions": [
+     "سكري النوع الثاني",
+     "ضغط الدم المرتفع"
+    ],
+    "allergens": [],
+    "freq": {
+     "poultry": 4,
+     "red": 1,
+     "fish": 2
+    },
+    "bank": false,
+    "fishDairy": true
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 3118,
+    "box": true,
+    "trial": true,
+    "score": 100,
+    "v1score": 49,
+    "items": [],
+    "n": {
+     "crowd": 0,
+     "prot3": 0,
+     "lunchSmall": 0,
+     "dupDay": 0,
+     "eggs": 0,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "v1n": {
+     "crowd": 12,
+     "prot3": 1,
+     "lunchSmall": 0,
+     "dupDay": 0,
+     "eggs": 0,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 3,
+     "tiny": 1
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 145,
+    "fish": 2,
+    "eggOver": 0,
+    "sweetDays": 0,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 0,
+    "fit": {
+     "capped": 23,
+     "merged": 0,
+     "left": 18,
+     "minLeft": 0,
+     "hard": 0,
+     "soft": 0,
+     "dayLimit": [],
+     "fruitMoved": 10,
+     "rebal": 2
+    },
+    "sched": "poultry fish poultry fish poultry red poultry"
+   },
+   "app": {
+    "alts": 100,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 5,
+    "days": 7
+   }
+  },
+  {
+   "i": 12,
+   "profile": {
+    "i": 12,
+    "sex": "أنثى",
+    "age": 59,
+    "weight": 88,
+    "height": 160,
+    "act": 3,
+    "goal": 0,
+    "meals": 6,
+    "cuisine": "sa",
+    "budget": 3,
+    "conditions": [
+     "ضغط الدم المرتفع"
+    ],
+    "allergens": [
+     "عدم تحمل اللاكتوز"
+    ],
+    "freq": {
+     "poultry": 3,
+     "red": 2,
+     "fish": 2
+    },
+    "bank": true,
+    "fishDairy": true
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 2206,
+    "box": true,
+    "trial": true,
+    "score": 63,
+    "v1score": 0,
+    "items": [
+     "6 يوم فيه الصنف نفسه مرتين",
+     "5 وجبة مزدحمة (أصناف كثيرة)",
+     "1 غداء بروتينه الرئيسي أقل من 90 جم",
+     "1 سطر لحم أقل من 30 جم"
+    ],
+    "n": {
+     "crowd": 5,
+     "prot3": 0,
+     "lunchSmall": 1,
+     "dupDay": 6,
+     "eggs": 0,
+     "sweet": 3,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 1
+    },
+    "v1n": {
+     "crowd": 8,
+     "prot3": 0,
+     "lunchSmall": 5,
+     "dupDay": 7,
+     "eggs": 2,
+     "sweet": 7,
+     "kcal": 5,
+     "garnish": 2,
+     "tiny": 0
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 142,
+    "fish": 2,
+    "eggOver": 0,
+    "sweetDays": 3,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 0,
+    "fit": {
+     "capped": 5,
+     "merged": 1,
+     "left": 1,
+     "minLeft": 0,
+     "hard": 0,
+     "soft": 0,
+     "dayLimit": [
+      {
+       "day": "الثلاثاء",
+       "food": "بيضة كاملة",
+       "qty": 2.258,
+       "max": 2,
+       "cond": "حدّ عام"
+      }
+     ],
+     "rebal": 5
+    },
+    "sched": "poultry fish poultry red poultry fish red"
+   },
+   "app": {
+    "alts": 89,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 5,
+    "days": 7
+   }
+  },
+  {
+   "i": 13,
+   "profile": {
+    "i": 13,
+    "sex": "ذكر",
+    "age": 23,
+    "weight": 134,
+    "height": 167,
+    "act": 2,
+    "goal": 0,
+    "meals": 4,
+    "cuisine": "sa",
+    "budget": 3,
+    "conditions": [
+     "ضغط الدم المرتفع",
+     "ارتفاع الكوليسترول والدهون"
+    ],
+    "allergens": [
+     "حساسية البيض"
+    ],
+    "freq": null,
+    "bank": true,
+    "fishDairy": true
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 3274,
+    "box": true,
+    "trial": true,
+    "score": 68,
+    "v1score": 19,
+    "items": [
+     "5 وجبة مزدحمة (أصناف كثيرة)",
+     "2 وجبة فيها 3 مصادر بروتين",
+     "3 سطر لحم أقل من 30 جم",
+     "1 يوم فيه الصنف نفسه مرتين"
+    ],
+    "n": {
+     "crowd": 5,
+     "prot3": 2,
+     "lunchSmall": 0,
+     "dupDay": 1,
+     "eggs": 0,
+     "sweet": 3,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 3
+    },
+    "v1n": {
+     "crowd": 13,
+     "prot3": 0,
+     "lunchSmall": 0,
+     "dupDay": 3,
+     "eggs": 0,
+     "sweet": 5,
+     "kcal": 3,
+     "garnish": 4,
+     "tiny": 0
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 132,
+    "fish": 2,
+    "eggOver": 0,
+    "sweetDays": 3,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 0,
+    "fit": {
+     "capped": 17,
+     "merged": 0,
+     "left": 27,
+     "minLeft": 0,
+     "hard": 0,
+     "soft": 0,
+     "dayLimit": [],
+     "rebal": 4
+    },
+    "sched": "poultry fish poultry red poultry fish red"
+   },
+   "app": {
+    "alts": 107,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 4,
+    "days": 7
+   }
+  },
+  {
+   "i": 14,
+   "profile": {
+    "i": 14,
+    "sex": "ذكر",
+    "age": 31,
+    "weight": 96,
+    "height": 189,
+    "act": 1,
+    "goal": 2,
+    "meals": 3,
+    "cuisine": "eg",
+    "budget": 3,
+    "conditions": [
+     "دهون الكبد (MASLD)"
+    ],
+    "allergens": [
+     "حساسية البيض"
+    ],
+    "freq": null,
+    "bank": true,
+    "fishDairy": true
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 2738,
+    "box": true,
+    "trial": true,
+    "score": 65,
+    "v1score": 38,
+    "items": [
+     "5 يوم فيه الصنف نفسه مرتين",
+     "4 وجبة مزدحمة (أصناف كثيرة)",
+     "2 وجبة فيها 3 مصادر بروتين"
+    ],
+    "n": {
+     "crowd": 4,
+     "prot3": 2,
+     "lunchSmall": 0,
+     "dupDay": 5,
+     "eggs": 0,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "v1n": {
+     "crowd": 12,
+     "prot3": 2,
+     "lunchSmall": 0,
+     "dupDay": 4,
+     "eggs": 0,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 130,
+    "fish": 6,
+    "eggOver": 0,
+    "sweetDays": 0,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 0,
+    "fit": {
+     "capped": 9,
+     "merged": 0,
+     "left": 7,
+     "minLeft": 0,
+     "hard": 0,
+     "soft": 2,
+     "dayLimit": [],
+     "rebal": 0
+    },
+    "sched": "poultry fish poultry red poultry fish red"
+   },
+   "app": {
+    "alts": 98,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 3,
+    "days": 7
+   }
+  },
+  {
+   "i": 15,
+   "profile": {
+    "i": 15,
+    "sex": "ذكر",
+    "age": 45,
+    "weight": 132,
+    "height": 178,
+    "act": 2,
+    "goal": 0,
+    "meals": 3,
+    "cuisine": "sa",
+    "budget": 2,
+    "conditions": [
+     "أمراض القلب"
+    ],
+    "allergens": [
+     "لا آكل اللحوم (نباتي)"
+    ],
+    "freq": {
+     "poultry": 4,
+     "red": 1,
+     "fish": 2
+    },
+    "bank": false,
+    "fishDairy": true
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 3179,
+    "box": true,
+    "trial": true,
+    "score": 59,
+    "v1score": 0,
+    "items": [
+     "5 وجبة فيها 3 مصادر بروتين",
+     "5 وجبة مزدحمة (أصناف كثيرة)",
+     "يتكرر 4 أيام أو أكثر في الوجبة نفسها: فول مدمس، توفو Tofu"
+    ],
+    "n": {
+     "crowd": 5,
+     "prot3": 5,
+     "lunchSmall": 0,
+     "dupDay": 0,
+     "eggs": 0,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "v1n": {
+     "crowd": 15,
+     "prot3": 9,
+     "lunchSmall": 0,
+     "dupDay": 0,
+     "eggs": 3,
+     "sweet": 0,
+     "kcal": 6,
+     "garnish": 5,
+     "tiny": 0
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 129,
+    "fish": 0,
+    "eggOver": 0,
+    "sweetDays": 0,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 1,
+    "fit": {
+     "capped": 27,
+     "merged": 0,
+     "left": 9,
+     "minLeft": 0,
+     "hard": 0,
+     "soft": 0,
+     "dayLimit": [],
+     "cut": 2,
+     "dayCapped": 1,
+     "rebal": 9
+    },
+    "sched": "   leg   "
+   },
+   "app": {
+    "alts": 94,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 3,
+    "days": 7
+   }
+  },
+  {
+   "i": 16,
+   "profile": {
+    "i": 16,
+    "sex": "ذكر",
+    "age": 62,
+    "weight": 126,
+    "height": 188,
+    "act": 0,
+    "goal": 0,
+    "meals": 5,
+    "cuisine": "",
+    "budget": 2,
+    "conditions": [
+     "سكري النوع الثاني",
+     "ارتفاع الكوليسترول والدهون",
+     "ضغط الدم المرتفع"
+    ],
+    "allergens": [
+     "لا آكل اللحوم (نباتي)"
+    ],
+    "freq": {
+     "poultry": 4,
+     "red": 1,
+     "fish": 2
+    },
+    "bank": false,
+    "fishDairy": true
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 2306,
+    "box": true,
+    "trial": true,
+    "score": 72,
+    "v1score": 0,
+    "items": [
+     "4 وجبة فيها 3 مصادر بروتين",
+     "2 يوم فيه الصنف نفسه مرتين",
+     "1 وجبة مزدحمة (أصناف كثيرة)",
+     "يتكرر 4 أيام أو أكثر في الوجبة نفسها: جبن خالي أو قليل الدسم (1 غم دهون أو أقل)"
+    ],
+    "n": {
+     "crowd": 1,
+     "prot3": 4,
+     "lunchSmall": 0,
+     "dupDay": 2,
+     "eggs": 0,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "v1n": {
+     "crowd": 10,
+     "prot3": 11,
+     "lunchSmall": 0,
+     "dupDay": 0,
+     "eggs": 5,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 1,
+     "tiny": 0
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 138,
+    "fish": 0,
+    "eggOver": 0,
+    "sweetDays": 0,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 1,
+    "fit": {
+     "capped": 10,
+     "merged": 0,
+     "left": 10,
+     "minLeft": 2,
+     "hard": 0,
+     "soft": 0,
+     "dayLimit": [],
+     "dayCapped": 2,
+     "cut": 3,
+     "fruitMoved": 12,
+     "rebal": 2
+    },
+    "sched": "   leg   "
+   },
+   "app": {
+    "alts": 87,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 5,
+    "days": 7
+   }
+  },
+  {
+   "i": 17,
+   "profile": {
+    "i": 17,
+    "sex": "أنثى",
+    "age": 36,
+    "weight": 116,
+    "height": 159,
+    "act": 2,
+    "goal": 0,
+    "meals": 3,
+    "cuisine": "eg",
+    "budget": 1,
+    "conditions": [
+     "أمراض القلب"
+    ],
+    "allergens": [
+     "حساسية البيض"
+    ],
+    "freq": {
+     "poultry": 5,
+     "red": 2,
+     "fish": 0
+    },
+    "bank": true,
+    "fishDairy": true
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 2560,
+    "box": true,
+    "trial": true,
+    "score": 73,
+    "v1score": 51,
+    "items": [
+     "5 يوم فيه الصنف نفسه مرتين",
+     "3 وجبة مزدحمة (أصناف كثيرة)",
+     "يتكرر 4 أيام أو أكثر في الوجبة نفسها: فول مدمس"
+    ],
+    "n": {
+     "crowd": 3,
+     "prot3": 0,
+     "lunchSmall": 0,
+     "dupDay": 5,
+     "eggs": 0,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "v1n": {
+     "crowd": 9,
+     "prot3": 0,
+     "lunchSmall": 0,
+     "dupDay": 5,
+     "eggs": 0,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 1,
+     "tiny": 1
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 129,
+    "fish": 0,
+    "eggOver": 0,
+    "sweetDays": 0,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 0,
+    "fit": {
+     "capped": 6,
+     "merged": 0,
+     "left": 14,
+     "minLeft": 0,
+     "hard": 0,
+     "soft": 0,
+     "dayLimit": [],
+     "rebal": 1
+    },
+    "sched": "poultry red poultry red poultry poultry poultry"
+   },
+   "app": {
+    "alts": 91,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 3,
+    "days": 7
+   }
+  },
+  {
+   "i": 18,
+   "profile": {
+    "i": 18,
+    "sex": "ذكر",
+    "age": 24,
+    "weight": 98,
+    "height": 186,
+    "act": 1,
+    "goal": 1,
+    "meals": 5,
+    "cuisine": "eg",
+    "budget": 2,
+    "conditions": [
+     "أمراض القلب"
+    ],
+    "allergens": [
+     "حساسية السمك"
+    ],
+    "freq": null,
+    "bank": true,
+    "fishDairy": false
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 2288,
+    "box": true,
+    "trial": true,
+    "score": 76,
+    "v1score": 0,
+    "items": [
+     "3 وجبة فيها 3 مصادر بروتين",
+     "3 يوم فيه الصنف نفسه مرتين",
+     "يتكرر 4 أيام أو أكثر في الوجبة نفسها: عدس أصفر (شوربة)"
+    ],
+    "n": {
+     "crowd": 0,
+     "prot3": 3,
+     "lunchSmall": 0,
+     "dupDay": 3,
+     "eggs": 0,
+     "sweet": 3,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "v1n": {
+     "crowd": 12,
+     "prot3": 7,
+     "lunchSmall": 0,
+     "dupDay": 4,
+     "eggs": 7,
+     "sweet": 7,
+     "kcal": 2,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 142,
+    "fish": 0,
+    "eggOver": 0,
+    "sweetDays": 3,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 1,
+    "fit": {
+     "capped": 2,
+     "merged": 0,
+     "left": 6,
+     "minLeft": 0,
+     "hard": 0,
+     "soft": 0,
+     "dayLimit": [],
+     "dayCapped": 4,
+     "rebal": 1
+    },
+    "sched": "poultry red poultry red poultry leg poultry"
+   },
+   "app": {
+    "alts": 103,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 5,
+    "days": 7
+   }
+  },
+  {
+   "i": 19,
+   "profile": {
+    "i": 19,
+    "sex": "أنثى",
+    "age": 50,
+    "weight": 106,
+    "height": 162,
+    "act": 0,
+    "goal": 0,
+    "meals": 5,
+    "cuisine": "",
+    "budget": 2,
+    "conditions": [],
+    "allergens": [
+     "حساسية السمك",
+     "حساسية الحليب (بروتين الحليب)"
+    ],
+    "freq": {
+     "poultry": 4,
+     "red": 1,
+     "fish": 2
+    },
+    "bank": false,
+    "fishDairy": true
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 1744,
+    "box": true,
+    "trial": true,
+    "score": 100,
+    "v1score": 0,
+    "items": [],
+    "n": {
+     "crowd": 0,
+     "prot3": 0,
+     "lunchSmall": 0,
+     "dupDay": 0,
+     "eggs": 0,
+     "sweet": 3,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "v1n": {
+     "crowd": 5,
+     "prot3": 0,
+     "lunchSmall": 1,
+     "dupDay": 3,
+     "eggs": 7,
+     "sweet": 7,
+     "kcal": 0,
+     "garnish": 6,
+     "tiny": 3
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 139,
+    "fish": 0,
+    "eggOver": 0,
+    "sweetDays": 3,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 1,
+    "fit": {
+     "capped": 2,
+     "merged": 0,
+     "left": 0,
+     "minLeft": 1,
+     "hard": 0,
+     "soft": 0,
+     "dayLimit": [],
+     "rebal": 2
+    },
+    "sched": "poultry red poultry poultry leg poultry poultry"
+   },
+   "app": {
+    "alts": 77,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 5,
+    "days": 7
+   }
+  },
+  {
+   "i": 20,
+   "profile": {
+    "i": 20,
+    "sex": "أنثى",
+    "age": 43,
+    "weight": 97,
+    "height": 161,
+    "act": 3,
+    "goal": 3,
+    "meals": 5,
+    "cuisine": "sa",
+    "budget": 2,
+    "conditions": [
+     "سكري النوع الثاني"
+    ],
+    "allergens": [
+     "لا آكل اللحوم (نباتي)"
+    ],
+    "freq": {
+     "poultry": 5,
+     "red": 2,
+     "fish": 0
+    },
+    "bank": true,
+    "fishDairy": true
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 3010,
+    "box": true,
+    "trial": true,
+    "score": 85,
+    "v1score": 51,
+    "items": [
+     "4 يوم فيه الصنف نفسه مرتين",
+     "1 وجبة مزدحمة (أصناف كثيرة)"
+    ],
+    "n": {
+     "crowd": 1,
+     "prot3": 0,
+     "lunchSmall": 0,
+     "dupDay": 4,
+     "eggs": 0,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "v1n": {
+     "crowd": 12,
+     "prot3": 0,
+     "lunchSmall": 0,
+     "dupDay": 2,
+     "eggs": 0,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 2,
+     "tiny": 0
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 148,
+    "fish": 0,
+    "eggOver": 0,
+    "sweetDays": 0,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 3,
+    "fit": {
+     "capped": 20,
+     "merged": 0,
+     "left": 12,
+     "minLeft": 0,
+     "hard": 0,
+     "soft": 0,
+     "dayLimit": [],
+     "fruitMoved": 8,
+     "rebal": 1
+    },
+    "sched": "   leg   "
+   },
+   "app": {
+    "alts": 91,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 5,
+    "days": 7
+   }
+  },
+  {
+   "i": 21,
+   "profile": {
+    "i": 21,
+    "sex": "ذكر",
+    "age": 45,
+    "weight": 81,
+    "height": 178,
+    "act": 0,
+    "goal": 0,
+    "meals": 4,
+    "cuisine": "sa",
+    "budget": 2,
+    "conditions": [
+     "النقرس",
+     "دهون الكبد (MASLD)"
+    ],
+    "allergens": [
+     "حساسية الحليب (بروتين الحليب)"
+    ],
+    "freq": {
+     "poultry": 4,
+     "red": 1,
+     "fish": 2
+    },
+    "bank": false,
+    "fishDairy": false
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 1793,
+    "box": true,
+    "trial": true,
+    "score": 82,
+    "v1score": 14,
+    "items": [
+     "5 وجبة مزدحمة (أصناف كثيرة)",
+     "يتكرر 4 أيام أو أكثر في الوجبة نفسها: صدر دجاج بدون جلد"
+    ],
+    "n": {
+     "crowd": 5,
+     "prot3": 0,
+     "lunchSmall": 0,
+     "dupDay": 0,
+     "eggs": 0,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "v1n": {
+     "crowd": 2,
+     "prot3": 3,
+     "lunchSmall": 0,
+     "dupDay": 3,
+     "eggs": 5,
+     "sweet": 5,
+     "kcal": 0,
+     "garnish": 4,
+     "tiny": 4
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 117,
+    "fish": 12,
+    "eggOver": 0,
+    "sweetDays": 0,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 0,
+    "fit": {
+     "capped": 7,
+     "merged": 2,
+     "left": 1,
+     "minLeft": 0,
+     "hard": 1,
+     "soft": 0,
+     "dayLimit": [],
+     "rebal": 2
+    },
+    "sched": "poultry fish poultry fish poultry red poultry"
+   },
+   "app": {
+    "alts": 80,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 4,
+    "days": 7
+   }
+  },
+  {
+   "i": 22,
+   "profile": {
+    "i": 22,
+    "sex": "ذكر",
+    "age": 24,
+    "weight": 68,
+    "height": 178,
+    "act": 1,
+    "goal": 1,
+    "meals": 4,
+    "cuisine": "sa",
+    "budget": 2,
+    "conditions": [
+     "دهون الكبد (MASLD)"
+    ],
+    "allergens": [],
+    "freq": null,
+    "bank": false,
+    "fishDairy": true
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 1807,
+    "box": true,
+    "trial": true,
+    "score": 94,
+    "v1score": 11,
+    "items": [
+     "1 وجبة مزدحمة (أصناف كثيرة)",
+     "يتكرر 4 أيام أو أكثر في الوجبة نفسها: بياض بيض"
+    ],
+    "n": {
+     "crowd": 1,
+     "prot3": 0,
+     "lunchSmall": 0,
+     "dupDay": 0,
+     "eggs": 0,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "v1n": {
+     "crowd": 9,
+     "prot3": 0,
+     "lunchSmall": 1,
+     "dupDay": 0,
+     "eggs": 6,
+     "sweet": 5,
+     "kcal": 0,
+     "garnish": 7,
+     "tiny": 0
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 117,
+    "fish": 5,
+    "eggOver": 0,
+    "sweetDays": 0,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 0,
+    "fit": {
+     "capped": 0,
+     "merged": 0,
+     "left": 4,
+     "minLeft": 0,
+     "hard": 0,
+     "soft": 0,
+     "dayLimit": [
+      {
+       "day": "الأحد",
+       "food": "بيضة كاملة",
+       "qty": 2.258,
+       "max": 2,
+       "cond": "حدّ عام"
+      },
+      {
+       "day": "السبت",
+       "food": "بيضة كاملة",
+       "qty": 2.258,
+       "max": 2,
+       "cond": "حدّ عام"
+      }
+     ],
+     "dayCapped": 3,
+     "rebal": 1
+    },
+    "sched": "poultry fish poultry red poultry fish red"
+   },
+   "app": {
+    "alts": 90,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 4,
+    "days": 7
+   }
+  },
+  {
+   "i": 23,
+   "profile": {
+    "i": 23,
+    "sex": "ذكر",
+    "age": 45,
+    "weight": 120,
+    "height": 172,
+    "act": 2,
+    "goal": 1,
+    "meals": 4,
+    "cuisine": "eg",
+    "budget": 2,
+    "conditions": [
+     "سكري النوع الثاني"
+    ],
+    "allergens": [
+     "حساسية الحليب (بروتين الحليب)"
+    ],
+    "freq": {
+     "poultry": 5,
+     "red": 2,
+     "fish": 0
+    },
+    "bank": true,
+    "fishDairy": true
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 2685,
+    "box": true,
+    "trial": true,
+    "score": 55,
+    "v1score": 0,
+    "items": [
+     "7 يوم فيه الصنف نفسه مرتين",
+     "5 وجبة مزدحمة (أصناف كثيرة)",
+     "1 يوم سعراته تبعد أكثر من 7٪ عن الهدف",
+     "يتكرر 4 أيام أو أكثر في الوجبة نفسها: فول مدمس"
+    ],
+    "n": {
+     "crowd": 5,
+     "prot3": 0,
+     "lunchSmall": 0,
+     "dupDay": 7,
+     "eggs": 0,
+     "sweet": 0,
+     "kcal": 1,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "v1n": {
+     "crowd": 17,
+     "prot3": 7,
+     "lunchSmall": 0,
+     "dupDay": 7,
+     "eggs": 5,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 2,
+     "tiny": 3
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 131,
+    "fish": 8,
+    "eggOver": 0,
+    "sweetDays": 0,
+    "fruitOver": 0,
+    "kcalOff": 1,
+    "leg": 0,
+    "fit": {
+     "capped": 4,
+     "merged": 0,
+     "left": 8,
+     "minLeft": 1,
+     "hard": 0,
+     "soft": 0,
+     "dayLimit": [],
+     "fruitMoved": 19,
+     "rebal": 8
+    },
+    "sched": "poultry red poultry red poultry poultry poultry"
+   },
+   "app": {
+    "alts": 81,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 4,
+    "days": 7
+   }
+  },
+  {
+   "i": 24,
+   "profile": {
+    "i": 24,
+    "sex": "أنثى",
+    "age": 23,
+    "weight": 117,
+    "height": 148,
+    "act": 0,
+    "goal": 2,
+    "meals": 5,
+    "cuisine": "sa",
+    "budget": 3,
+    "conditions": [
+     "أمراض الكلى",
+     "ضغط الدم المرتفع"
+    ],
+    "allergens": [
+     "حساسية السمك",
+     "حساسية الحليب (بروتين الحليب)"
+    ],
+    "freq": {
+     "poultry": 3,
+     "red": 2,
+     "fish": 2
+    },
+    "bank": true,
+    "fishDairy": true
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 2183,
+    "box": true,
+    "trial": true,
+    "score": 71,
+    "v1score": 10,
+    "items": [
+     "7 يوم فيه الصنف نفسه مرتين",
+     "1 وجبة مزدحمة (أصناف كثيرة)",
+     "يتكرر 4 أيام أو أكثر في الوجبة نفسها: مرتديلا ديك رومي أو الأنواع القليلة الدسم",
+     "1 سطر لحم أقل من 30 جم"
+    ],
+    "n": {
+     "crowd": 1,
+     "prot3": 0,
+     "lunchSmall": 0,
+     "dupDay": 7,
+     "eggs": 0,
+     "sweet": 3,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 1
+    },
+    "v1n": {
+     "crowd": 4,
+     "prot3": 0,
+     "lunchSmall": 2,
+     "dupDay": 7,
+     "eggs": 5,
+     "sweet": 7,
+     "kcal": 0,
+     "garnish": 3,
+     "tiny": 0
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 142,
+    "fish": 0,
+    "eggOver": 0,
+    "sweetDays": 3,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 1,
+    "fit": {
+     "capped": 1,
+     "merged": 0,
+     "left": 0,
+     "minLeft": 2,
+     "hard": 0,
+     "soft": 0,
+     "dayLimit": [],
+     "rebal": 4
+    },
+    "sched": "poultry red poultry red poultry leg poultry"
+   },
+   "app": {
+    "alts": 85,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 5,
+    "days": 7
+   }
+  },
+  {
+   "i": 25,
+   "profile": {
+    "i": 25,
+    "sex": "ذكر",
+    "age": 38,
+    "weight": 133,
+    "height": 166,
+    "act": 2,
+    "goal": 0,
+    "meals": 6,
+    "cuisine": "eg",
+    "budget": 3,
+    "conditions": [
+     "سكري النوع الثاني"
+    ],
+    "allergens": [],
+    "freq": null,
+    "bank": false,
+    "fishDairy": true
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 3133,
+    "box": true,
+    "trial": true,
+    "score": 100,
+    "v1score": 47,
+    "items": [],
+    "n": {
+     "crowd": 0,
+     "prot3": 0,
+     "lunchSmall": 0,
+     "dupDay": 0,
+     "eggs": 0,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "v1n": {
+     "crowd": 13,
+     "prot3": 1,
+     "lunchSmall": 0,
+     "dupDay": 0,
+     "eggs": 0,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 2,
+     "tiny": 0
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 145,
+    "fish": 2,
+    "eggOver": 0,
+    "sweetDays": 0,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 0,
+    "fit": {
+     "capped": 23,
+     "merged": 0,
+     "left": 9,
+     "minLeft": 0,
+     "hard": 0,
+     "soft": 0,
+     "dayLimit": [],
+     "dayCapped": 2,
+     "fruitMoved": 13,
+     "rebal": 3
+    },
+    "sched": "poultry fish poultry red poultry fish red"
+   },
+   "app": {
+    "alts": 104,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 5,
+    "days": 7
+   }
+  },
+  {
+   "i": 26,
+   "profile": {
+    "i": 26,
+    "sex": "ذكر",
+    "age": 52,
+    "weight": 93,
+    "height": 183,
+    "act": 0,
+    "goal": 1,
+    "meals": 5,
+    "cuisine": "eg",
+    "budget": 2,
+    "conditions": [
+     "ارتفاع الكوليسترول والدهون"
+    ],
+    "allergens": [],
+    "freq": {
+     "poultry": 2,
+     "red": 3,
+     "fish": 2
+    },
+    "bank": false,
+    "fishDairy": true
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 1683,
+    "box": true,
+    "trial": true,
+    "score": 97,
+    "v1score": 41,
+    "items": [
+     "يتكرر 4 أيام أو أكثر في الوجبة نفسها: بياض بيض"
+    ],
+    "n": {
+     "crowd": 0,
+     "prot3": 0,
+     "lunchSmall": 0,
+     "dupDay": 0,
+     "eggs": 0,
+     "sweet": 3,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "v1n": {
+     "crowd": 0,
+     "prot3": 0,
+     "lunchSmall": 1,
+     "dupDay": 0,
+     "eggs": 7,
+     "sweet": 7,
+     "kcal": 0,
+     "garnish": 2,
+     "tiny": 0
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 113,
+    "fish": 4,
+    "eggOver": 0,
+    "sweetDays": 3,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 0,
+    "fit": {
+     "capped": 0,
+     "merged": 0,
+     "left": 6,
+     "minLeft": 0,
+     "hard": 0,
+     "soft": 0,
+     "dayLimit": [],
+     "dayCapped": 6,
+     "rebal": 8
+    },
+    "sched": "red poultry fish red poultry fish red"
+   },
+   "app": {
+    "alts": 78,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 5,
+    "days": 7
+   }
+  },
+  {
+   "i": 27,
+   "profile": {
+    "i": 27,
+    "sex": "أنثى",
+    "age": 26,
+    "weight": 111,
+    "height": 151,
+    "act": 0,
+    "goal": 3,
+    "meals": 4,
+    "cuisine": "sa",
+    "budget": 2,
+    "conditions": [
+     "أمراض الكلى",
+     "ضغط الدم المرتفع"
+    ],
+    "allergens": [
+     "حساسية المكسرات"
+    ],
+    "freq": {
+     "poultry": 4,
+     "red": 1,
+     "fish": 2
+    },
+    "bank": false,
+    "fishDairy": false
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 2365,
+    "box": true,
+    "trial": true,
+    "score": 97,
+    "v1score": 31,
+    "items": [
+     "1 وجبة مزدحمة (أصناف كثيرة)"
+    ],
+    "n": {
+     "crowd": 1,
+     "prot3": 0,
+     "lunchSmall": 0,
+     "dupDay": 0,
+     "eggs": 0,
+     "sweet": 3,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "v1n": {
+     "crowd": 9,
+     "prot3": 1,
+     "lunchSmall": 2,
+     "dupDay": 0,
+     "eggs": 2,
+     "sweet": 5,
+     "kcal": 1,
+     "garnish": 4,
+     "tiny": 2
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 122,
+    "fish": 2,
+    "eggOver": 0,
+    "sweetDays": 3,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 0,
+    "fit": {
+     "capped": 6,
+     "merged": 0,
+     "left": 0,
+     "minLeft": 0,
+     "hard": 0,
+     "soft": 0,
+     "dayLimit": [],
+     "rebal": 2
+    },
+    "sched": "poultry fish poultry fish poultry red poultry"
+   },
+   "app": {
+    "alts": 107,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 4,
+    "days": 7
+   }
+  },
+  {
+   "i": 28,
+   "profile": {
+    "i": 28,
+    "sex": "ذكر",
+    "age": 28,
+    "weight": 115,
+    "height": 172,
+    "act": 0,
+    "goal": 3,
+    "meals": 4,
+    "cuisine": "",
+    "budget": 3,
+    "conditions": [
+     "النقرس",
+     "دهون الكبد (MASLD)"
+    ],
+    "allergens": [],
+    "freq": {
+     "poultry": 5,
+     "red": 2,
+     "fish": 0
+    },
+    "bank": true,
+    "fishDairy": true
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 2758,
+    "box": true,
+    "trial": true,
+    "score": 85,
+    "v1score": 0,
+    "items": [
+     "4 وجبة مزدحمة (أصناف كثيرة)",
+     "1 يوم فيه الصنف نفسه مرتين"
+    ],
+    "n": {
+     "crowd": 4,
+     "prot3": 0,
+     "lunchSmall": 0,
+     "dupDay": 1,
+     "eggs": 0,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "v1n": {
+     "crowd": 19,
+     "prot3": 9,
+     "lunchSmall": 0,
+     "dupDay": 4,
+     "eggs": 2,
+     "sweet": 5,
+     "kcal": 1,
+     "garnish": 5,
+     "tiny": 0
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 130,
+    "fish": 0,
+    "eggOver": 0,
+    "sweetDays": 0,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 0,
+    "fit": {
+     "capped": 7,
+     "merged": 1,
+     "left": 7,
+     "minLeft": 0,
+     "hard": 0,
+     "soft": 0,
+     "dayLimit": [
+      {
+       "day": "الاثنين",
+       "food": "بيضة كاملة",
+       "qty": 2.258,
+       "max": 2,
+       "cond": "حدّ عام"
+      }
+     ],
+     "rebal": 1
+    },
+    "sched": "poultry red poultry red poultry poultry poultry"
+   },
+   "app": {
+    "alts": 102,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 4,
+    "days": 7
+   }
+  },
+  {
+   "i": 29,
+   "profile": {
+    "i": 29,
+    "sex": "ذكر",
+    "age": 19,
+    "weight": 122,
+    "height": 173,
+    "act": 3,
+    "goal": 0,
+    "meals": 4,
+    "cuisine": "eg",
+    "budget": 2,
+    "conditions": [
+     "سكري النوع الثاني",
+     "ضغط الدم المرتفع"
+    ],
+    "allergens": [],
+    "freq": {
+     "poultry": 4,
+     "red": 1,
+     "fish": 2
+    },
+    "bank": true,
+    "fishDairy": false
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 3564,
+    "box": true,
+    "trial": true,
+    "score": 79,
+    "v1score": 0,
+    "items": [
+     "4 وجبة مزدحمة (أصناف كثيرة)",
+     "1 يوم سعراته تبعد أكثر من 7٪ عن الهدف",
+     "يتكرر 4 أيام أو أكثر في الوجبة نفسها: فول مدمس"
+    ],
+    "n": {
+     "crowd": 4,
+     "prot3": 0,
+     "lunchSmall": 0,
+     "dupDay": 0,
+     "eggs": 0,
+     "sweet": 0,
+     "kcal": 1,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "v1n": {
+     "crowd": 18,
+     "prot3": 6,
+     "lunchSmall": 0,
+     "dupDay": 2,
+     "eggs": 1,
+     "sweet": 0,
+     "kcal": 7,
+     "garnish": 1,
+     "tiny": 0
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 127,
+    "fish": 2,
+    "eggOver": 0,
+    "sweetDays": 0,
+    "fruitOver": 0,
+    "kcalOff": 1,
+    "leg": 0,
+    "fit": {
+     "capped": 8,
+     "merged": 0,
+     "left": 24,
+     "minLeft": 0,
+     "hard": 0,
+     "soft": 0,
+     "dayLimit": [],
+     "fruitMoved": 10,
+     "rebal": 30
+    },
+    "sched": "poultry fish poultry fish poultry red poultry"
+   },
+   "app": {
+    "alts": 92,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 4,
+    "days": 7
+   }
+  },
+  {
+   "i": 30,
+   "profile": {
+    "i": 30,
+    "sex": "أنثى",
+    "age": 51,
+    "weight": 97,
+    "height": 157,
+    "act": 3,
+    "goal": 0,
+    "meals": 6,
+    "cuisine": "sa",
+    "budget": 3,
+    "conditions": [
+     "سكري النوع الثاني",
+     "ضغط الدم المرتفع"
+    ],
+    "allergens": [
+     "حساسية الحليب (بروتين الحليب)"
+    ],
+    "freq": null,
+    "bank": true,
+    "fishDairy": true
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 2398,
+    "box": true,
+    "trial": true,
+    "score": 71,
+    "v1score": 0,
+    "items": [
+     "5 وجبة مزدحمة (أصناف كثيرة)",
+     "4 يوم فيه الصنف نفسه مرتين",
+     "1 سطر لحم أقل من 30 جم"
+    ],
+    "n": {
+     "crowd": 5,
+     "prot3": 0,
+     "lunchSmall": 0,
+     "dupDay": 4,
+     "eggs": 0,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 1
+    },
+    "v1n": {
+     "crowd": 13,
+     "prot3": 2,
+     "lunchSmall": 3,
+     "dupDay": 7,
+     "eggs": 2,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 2,
+     "tiny": 2
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 144,
+    "fish": 10,
+    "eggOver": 0,
+    "sweetDays": 0,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 0,
+    "fit": {
+     "capped": 7,
+     "merged": 3,
+     "left": 2,
+     "minLeft": 2,
+     "hard": 0,
+     "soft": 0,
+     "dayLimit": [],
+     "fruitMoved": 24,
+     "rebal": 6
+    },
+    "sched": "poultry fish poultry red poultry fish red"
+   },
+   "app": {
+    "alts": 71,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 5,
+    "days": 7
+   }
+  },
+  {
+   "i": 31,
+   "profile": {
+    "i": 31,
+    "sex": "ذكر",
+    "age": 21,
+    "weight": 76,
+    "height": 185,
+    "act": 3,
+    "goal": 3,
+    "meals": 3,
+    "cuisine": "sa",
+    "budget": 1,
+    "conditions": [
+     "خمول الغدة"
+    ],
+    "allergens": [],
+    "freq": {
+     "poultry": 5,
+     "red": 2,
+     "fish": 0
+    },
+    "bank": false,
+    "fishDairy": true
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 3383,
+    "box": true,
+    "trial": true,
+    "score": 91,
+    "v1score": 0,
+    "items": [
+     "1 وجبة فيها 3 مصادر بروتين",
+     "1 وجبة مزدحمة (أصناف كثيرة)",
+     "1 سطر لحم أقل من 30 جم"
+    ],
+    "n": {
+     "crowd": 1,
+     "prot3": 1,
+     "lunchSmall": 0,
+     "dupDay": 0,
+     "eggs": 0,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 1
+    },
+    "v1n": {
+     "crowd": 15,
+     "prot3": 9,
+     "lunchSmall": 0,
+     "dupDay": 0,
+     "eggs": 1,
+     "sweet": 0,
+     "kcal": 7,
+     "garnish": 3,
+     "tiny": 0
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 124,
+    "fish": 0,
+    "eggOver": 0,
+    "sweetDays": 0,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 0,
+    "fit": {
+     "capped": 15,
+     "merged": 1,
+     "left": 3,
+     "minLeft": 0,
+     "hard": 0,
+     "soft": 0,
+     "dayLimit": [
+      {
+       "day": "الثلاثاء",
+       "food": "بيضة كاملة",
+       "qty": 2.258,
+       "max": 2,
+       "cond": "حدّ عام"
+      }
+     ],
+     "rebal": 57
+    },
+    "sched": "poultry red poultry red poultry poultry poultry"
+   },
+   "app": {
+    "alts": 90,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 3,
+    "days": 7
+   }
+  },
+  {
+   "i": 32,
+   "profile": {
+    "i": 32,
+    "sex": "أنثى",
+    "age": 21,
+    "weight": 81,
+    "height": 151,
+    "act": 2,
+    "goal": 3,
+    "meals": 3,
+    "cuisine": "eg",
+    "budget": 1,
+    "conditions": [
+     "أمراض الكلى",
+     "ضغط الدم المرتفع"
+    ],
+    "allergens": [
+     "عدم تحمل اللاكتوز"
+    ],
+    "freq": {
+     "poultry": 4,
+     "red": 1,
+     "fish": 2
+    },
+    "bank": false,
+    "fishDairy": true
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 2556,
+    "box": true,
+    "trial": true,
+    "score": 82,
+    "v1score": 54,
+    "items": [
+     "4 يوم فيه الصنف نفسه مرتين",
+     "1 يوم سعراته تبعد أكثر من 7٪ عن الهدف"
+    ],
+    "n": {
+     "crowd": 0,
+     "prot3": 0,
+     "lunchSmall": 0,
+     "dupDay": 4,
+     "eggs": 0,
+     "sweet": 0,
+     "kcal": 1,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "v1n": {
+     "crowd": 4,
+     "prot3": 0,
+     "lunchSmall": 0,
+     "dupDay": 4,
+     "eggs": 0,
+     "sweet": 0,
+     "kcal": 2,
+     "garnish": 2,
+     "tiny": 0
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 121,
+    "fish": 1,
+    "eggOver": 0,
+    "sweetDays": 0,
+    "fruitOver": 0,
+    "kcalOff": 1,
+    "leg": 3,
+    "fit": {
+     "capped": 17,
+     "merged": 0,
+     "left": 0,
+     "minLeft": 4,
+     "hard": 0,
+     "soft": 0,
+     "dayLimit": [],
+     "rebal": 8
+    },
+    "sched": "poultry fish poultry fish poultry red poultry"
+   },
+   "app": {
+    "alts": 81,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 3,
+    "days": 7
+   }
+  },
+  {
+   "i": 33,
+   "profile": {
+    "i": 33,
+    "sex": "أنثى",
+    "age": 22,
+    "weight": 56,
+    "height": 163,
+    "act": 1,
+    "goal": 0,
+    "meals": 4,
+    "cuisine": "sa",
+    "budget": 2,
+    "conditions": [
+     "خمول الغدة"
+    ],
+    "allergens": [
+     "حساسية السمك",
+     "حساسية الحليب (بروتين الحليب)"
+    ],
+    "freq": null,
+    "bank": false,
+    "fishDairy": true
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 1548,
+    "box": true,
+    "trial": true,
+    "score": 97,
+    "v1score": 21,
+    "items": [
+     "1 وجبة مزدحمة (أصناف كثيرة)"
+    ],
+    "n": {
+     "crowd": 1,
+     "prot3": 0,
+     "lunchSmall": 0,
+     "dupDay": 0,
+     "eggs": 0,
+     "sweet": 3,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "v1n": {
+     "crowd": 4,
+     "prot3": 0,
+     "lunchSmall": 1,
+     "dupDay": 1,
+     "eggs": 7,
+     "sweet": 5,
+     "kcal": 0,
+     "garnish": 3,
+     "tiny": 2
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 120,
+    "fish": 0,
+    "eggOver": 0,
+    "sweetDays": 3,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 1,
+    "fit": {
+     "capped": 2,
+     "merged": 0,
+     "left": 0,
+     "minLeft": 0,
+     "hard": 0,
+     "soft": 0,
+     "dayLimit": [],
+     "rebal": 4
+    },
+    "sched": "poultry red poultry red poultry leg poultry"
+   },
+   "app": {
+    "alts": 68,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 4,
+    "days": 7
+   }
+  },
+  {
+   "i": 34,
+   "profile": {
+    "i": 34,
+    "sex": "أنثى",
+    "age": 52,
+    "weight": 104,
+    "height": 151,
+    "act": 2,
+    "goal": 2,
+    "meals": 3,
+    "cuisine": "eg",
+    "budget": 1,
+    "conditions": [
+     "خمول الغدة"
+    ],
+    "allergens": [
+     "عدم تحمل اللاكتوز"
+    ],
+    "freq": {
+     "poultry": 5,
+     "red": 2,
+     "fish": 0
+    },
+    "bank": false,
+    "fishDairy": false
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 2422,
+    "box": true,
+    "trial": true,
+    "score": 85,
+    "v1score": 64,
+    "items": [
+     "4 يوم فيه الصنف نفسه مرتين",
+     "1 وجبة مزدحمة (أصناف كثيرة)"
+    ],
+    "n": {
+     "crowd": 1,
+     "prot3": 0,
+     "lunchSmall": 0,
+     "dupDay": 4,
+     "eggs": 0,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "v1n": {
+     "crowd": 5,
+     "prot3": 0,
+     "lunchSmall": 0,
+     "dupDay": 4,
+     "eggs": 0,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 2,
+     "tiny": 1
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 127,
+    "fish": 0,
+    "eggOver": 0,
+    "sweetDays": 0,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 0,
+    "fit": {
+     "capped": 15,
+     "merged": 0,
+     "left": 2,
+     "minLeft": 2,
+     "hard": 0,
+     "soft": 0,
+     "dayLimit": [],
+     "rebal": 1
+    },
+    "sched": "poultry red poultry red poultry poultry poultry"
+   },
+   "app": {
+    "alts": 80,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 3,
+    "days": 7
+   }
+  },
+  {
+   "i": 35,
+   "profile": {
+    "i": 35,
+    "sex": "أنثى",
+    "age": 51,
+    "weight": 120,
+    "height": 173,
+    "act": 0,
+    "goal": 1,
+    "meals": 5,
+    "cuisine": "sa",
+    "budget": 3,
+    "conditions": [
+     "ارتفاع الكوليسترول والدهون"
+    ],
+    "allergens": [
+     "حساسية القمح / الجلوتين (سيلياك)"
+    ],
+    "freq": null,
+    "bank": true,
+    "fishDairy": true
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 1738,
+    "box": true,
+    "trial": true,
+    "score": 76,
+    "v1score": 0,
+    "items": [
+     "7 يوم فيه الصنف نفسه مرتين",
+     "يتكرر 4 أيام أو أكثر في الوجبة نفسها: لحم مفروم (≤10% دهن)"
+    ],
+    "n": {
+     "crowd": 0,
+     "prot3": 0,
+     "lunchSmall": 0,
+     "dupDay": 7,
+     "eggs": 0,
+     "sweet": 3,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "v1n": {
+     "crowd": 6,
+     "prot3": 0,
+     "lunchSmall": 1,
+     "dupDay": 6,
+     "eggs": 5,
+     "sweet": 7,
+     "kcal": 5,
+     "garnish": 1,
+     "tiny": 0
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 135,
+    "fish": 3,
+    "eggOver": 0,
+    "sweetDays": 3,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 0,
+    "fit": {
+     "capped": 1,
+     "merged": 0,
+     "left": 2,
+     "minLeft": 0,
+     "hard": 0,
+     "soft": 1,
+     "dayLimit": [],
+     "dayCapped": 2,
+     "rebal": 3
+    },
+    "sched": "poultry fish poultry red poultry fish red"
+   },
+   "app": {
+    "alts": 81,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 5,
+    "days": 7
+   }
+  },
+  {
+   "i": 36,
+   "profile": {
+    "i": 36,
+    "sex": "ذكر",
+    "age": 56,
+    "weight": 135,
+    "height": 172,
+    "act": 3,
+    "goal": 0,
+    "meals": 5,
+    "cuisine": "eg",
+    "budget": 2,
+    "conditions": [
+     "سكري النوع الثاني",
+     "ضغط الدم المرتفع"
+    ],
+    "allergens": [
+     "عدم تحمل اللاكتوز"
+    ],
+    "freq": null,
+    "bank": true,
+    "fishDairy": true
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 3459,
+    "box": true,
+    "trial": true,
+    "score": 46,
+    "v1score": 0,
+    "items": [
+     "10 وجبة مزدحمة (أصناف كثيرة)",
+     "5 يوم فيه الصنف نفسه مرتين",
+     "1 وجبة فيها 3 مصادر بروتين",
+     "يتكرر 4 أيام أو أكثر في الوجبة نفسها: فول مدمس",
+     "1 سطر لحم أقل من 30 جم"
+    ],
+    "n": {
+     "crowd": 10,
+     "prot3": 1,
+     "lunchSmall": 0,
+     "dupDay": 5,
+     "eggs": 0,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 1
+    },
+    "v1n": {
+     "crowd": 18,
+     "prot3": 8,
+     "lunchSmall": 0,
+     "dupDay": 5,
+     "eggs": 2,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 156,
+    "fish": 2,
+    "eggOver": 0,
+    "sweetDays": 0,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 0,
+    "fit": {
+     "capped": 19,
+     "merged": 0,
+     "left": 26,
+     "minLeft": 2,
+     "hard": 0,
+     "soft": 0,
+     "dayLimit": [],
+     "cut": 1,
+     "fruitMoved": 13,
+     "rebal": 7
+    },
+    "sched": "poultry fish poultry red poultry fish red"
+   },
+   "app": {
+    "alts": 78,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 5,
+    "days": 7
+   }
+  },
+  {
+   "i": 37,
+   "profile": {
+    "i": 37,
+    "sex": "أنثى",
+    "age": 58,
+    "weight": 103,
+    "height": 149,
+    "act": 1,
+    "goal": 1,
+    "meals": 3,
+    "cuisine": "eg",
+    "budget": 3,
+    "conditions": [
+     "سكري النوع الثاني",
+     "ضغط الدم المرتفع"
+    ],
+    "allergens": [],
+    "freq": {
+     "poultry": 5,
+     "red": 2,
+     "fish": 0
+    },
+    "bank": false,
+    "fishDairy": false
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 1577,
+    "box": true,
+    "trial": true,
+    "score": 86,
+    "v1score": 68,
+    "items": [
+     "4 يوم فيه الصنف نفسه مرتين",
+     "1 سطر لحم أقل من 30 جم"
+    ],
+    "n": {
+     "crowd": 0,
+     "prot3": 0,
+     "lunchSmall": 0,
+     "dupDay": 4,
+     "eggs": 0,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 1
+    },
+    "v1n": {
+     "crowd": 3,
+     "prot3": 0,
+     "lunchSmall": 2,
+     "dupDay": 0,
+     "eggs": 0,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 5,
+     "tiny": 0
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 111,
+    "fish": 2,
+    "eggOver": 0,
+    "sweetDays": 0,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 0,
+    "fit": {
+     "capped": 1,
+     "merged": 0,
+     "left": 0,
+     "minLeft": 0,
+     "hard": 0,
+     "soft": 0,
+     "dayLimit": [
+      {
+       "day": "الاثنين",
+       "food": "بيضة كاملة",
+       "qty": 1.129,
+       "max": 1,
+       "cond": "حالة صحية"
+      }
+     ],
+     "dayCapped": 2,
+     "fruitMoved": 7,
+     "rebal": 1
+    },
+    "sched": "poultry red poultry red poultry poultry poultry"
+   },
+   "app": {
+    "alts": 81,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 3,
+    "days": 7
+   }
+  },
+  {
+   "i": 38,
+   "profile": {
+    "i": 38,
+    "sex": "ذكر",
+    "age": 27,
+    "weight": 94,
+    "height": 168,
+    "act": 2,
+    "goal": 1,
+    "meals": 3,
+    "cuisine": "",
+    "budget": 2,
+    "conditions": [
+     "النقرس",
+     "دهون الكبد (MASLD)"
+    ],
+    "allergens": [],
+    "freq": {
+     "poultry": 5,
+     "red": 2,
+     "fish": 0
+    },
+    "bank": false,
+    "fishDairy": true
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 2383,
+    "box": true,
+    "trial": true,
+    "score": 97,
+    "v1score": 46,
+    "items": [
+     "1 وجبة مزدحمة (أصناف كثيرة)"
+    ],
+    "n": {
+     "crowd": 1,
+     "prot3": 0,
+     "lunchSmall": 0,
+     "dupDay": 0,
+     "eggs": 0,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "v1n": {
+     "crowd": 3,
+     "prot3": 5,
+     "lunchSmall": 0,
+     "dupDay": 0,
+     "eggs": 1,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 6,
+     "tiny": 2
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 122,
+    "fish": 0,
+    "eggOver": 0,
+    "sweetDays": 0,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 0,
+    "fit": {
+     "capped": 7,
+     "merged": 1,
+     "left": 3,
+     "minLeft": 0,
+     "hard": 0,
+     "soft": 0,
+     "dayLimit": [
+      {
+       "day": "الخميس",
+       "food": "بيضة كاملة",
+       "qty": 2.258,
+       "max": 2,
+       "cond": "حدّ عام"
+      }
+     ],
+     "rebal": 0
+    },
+    "sched": "poultry red poultry red poultry poultry poultry"
+   },
+   "app": {
+    "alts": 93,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 3,
+    "days": 7
+   }
+  },
+  {
+   "i": 39,
+   "profile": {
+    "i": 39,
+    "sex": "أنثى",
+    "age": 42,
+    "weight": 57,
+    "height": 175,
+    "act": 2,
+    "goal": 1,
+    "meals": 4,
+    "cuisine": "",
+    "budget": 3,
+    "conditions": [
+     "أمراض القلب"
+    ],
+    "allergens": [
+     "عدم تحمل اللاكتوز"
+    ],
+    "freq": {
+     "poultry": 5,
+     "red": 2,
+     "fish": 0
+    },
+    "bank": true,
+    "fishDairy": true
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 1504,
+    "box": true,
+    "trial": true,
+    "score": 85,
+    "v1score": 0,
+    "items": [
+     "3 يوم فيه الصنف نفسه مرتين",
+     "يتكرر 4 أيام أو أكثر في الوجبة نفسها: بياض بيض، جبنة موزاريلا"
+    ],
+    "n": {
+     "crowd": 0,
+     "prot3": 0,
+     "lunchSmall": 0,
+     "dupDay": 3,
+     "eggs": 0,
+     "sweet": 3,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "v1n": {
+     "crowd": 10,
+     "prot3": 0,
+     "lunchSmall": 1,
+     "dupDay": 5,
+     "eggs": 4,
+     "sweet": 5,
+     "kcal": 6,
+     "garnish": 1,
+     "tiny": 0
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 120,
+    "fish": 2,
+    "eggOver": 0,
+    "sweetDays": 3,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 0,
+    "fit": {
+     "capped": 2,
+     "merged": 0,
+     "left": 1,
+     "minLeft": 1,
+     "hard": 0,
+     "soft": 1,
+     "dayLimit": [],
+     "dayCapped": 4,
+     "cut": 1,
+     "rebal": 6
+    },
+    "sched": "poultry red poultry red poultry poultry poultry"
+   },
+   "app": {
+    "alts": 77,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 4,
+    "days": 7
+   }
+  },
+  {
+   "i": 40,
+   "profile": {
+    "i": 40,
+    "sex": "أنثى",
+    "age": 34,
+    "weight": 62,
+    "height": 153,
+    "act": 2,
+    "goal": 1,
+    "meals": 6,
+    "cuisine": "sa",
+    "budget": 3,
+    "conditions": [
+     "ارتفاع الكوليسترول والدهون"
+    ],
+    "allergens": [],
+    "freq": null,
+    "bank": false,
+    "fishDairy": true
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 1430,
+    "box": true,
+    "trial": true,
+    "score": 94,
+    "v1score": 40,
+    "items": [
+     "1 يوم فيه الصنف نفسه مرتين",
+     "يتكرر 4 أيام أو أكثر في الوجبة نفسها: بياض بيض"
+    ],
+    "n": {
+     "crowd": 0,
+     "prot3": 0,
+     "lunchSmall": 0,
+     "dupDay": 1,
+     "eggs": 0,
+     "sweet": 3,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "v1n": {
+     "crowd": 0,
+     "prot3": 0,
+     "lunchSmall": 1,
+     "dupDay": 0,
+     "eggs": 4,
+     "sweet": 7,
+     "kcal": 2,
+     "garnish": 4,
+     "tiny": 0
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 116,
+    "fish": 5,
+    "eggOver": 0,
+    "sweetDays": 3,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 0,
+    "fit": {
+     "capped": 0,
+     "merged": 0,
+     "left": 6,
+     "minLeft": 1,
+     "hard": 0,
+     "soft": 1,
+     "dayLimit": [],
+     "dayCapped": 6,
+     "rebal": 2
+    },
+    "sched": "poultry fish poultry red poultry fish red"
+   },
+   "app": {
+    "alts": 80,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 5,
+    "days": 7
+   }
+  },
+  {
+   "i": 41,
+   "profile": {
+    "i": 41,
+    "sex": "أنثى",
+    "age": 50,
+    "weight": 110,
+    "height": 159,
+    "act": 3,
+    "goal": 2,
+    "meals": 6,
+    "cuisine": "sa",
+    "budget": 2,
+    "conditions": [
+     "سكري النوع الثاني"
+    ],
+    "allergens": [
+     "حساسية السمك"
+    ],
+    "freq": {
+     "poultry": 3,
+     "red": 2,
+     "fish": 2
+    },
+    "bank": false,
+    "fishDairy": false
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 2903,
+    "box": true,
+    "trial": true,
+    "score": 94,
+    "v1score": 48,
+    "items": [
+     "1 وجبة مزدحمة (أصناف كثيرة)",
+     "1 يوم فيه الصنف نفسه مرتين"
+    ],
+    "n": {
+     "crowd": 1,
+     "prot3": 0,
+     "lunchSmall": 0,
+     "dupDay": 1,
+     "eggs": 0,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "v1n": {
+     "crowd": 10,
+     "prot3": 1,
+     "lunchSmall": 0,
+     "dupDay": 1,
+     "eggs": 0,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 4,
+     "tiny": 2
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 143,
+    "fish": 0,
+    "eggOver": 0,
+    "sweetDays": 0,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 1,
+    "fit": {
+     "capped": 19,
+     "merged": 0,
+     "left": 2,
+     "minLeft": 0,
+     "hard": 0,
+     "soft": 0,
+     "dayLimit": [],
+     "fruitMoved": 13,
+     "rebal": 4
+    },
+    "sched": "poultry red poultry red poultry leg poultry"
+   },
+   "app": {
+    "alts": 101,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 5,
+    "days": 7
+   }
+  },
+  {
+   "i": 42,
+   "profile": {
+    "i": 42,
+    "sex": "أنثى",
+    "age": 40,
+    "weight": 117,
+    "height": 154,
+    "act": 0,
+    "goal": 0,
+    "meals": 3,
+    "cuisine": "",
+    "budget": 1,
+    "conditions": [
+     "ضغط الدم المرتفع",
+     "ارتفاع الكوليسترول والدهون"
+    ],
+    "allergens": [
+     "لا آكل اللحوم (نباتي)"
+    ],
+    "freq": null,
+    "bank": false,
+    "fishDairy": false
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 1876,
+    "box": true,
+    "trial": true,
+    "score": 55,
+    "v1score": 14,
+    "items": [
+     "6 وجبة فيها 3 مصادر بروتين",
+     "5 وجبة مزدحمة (أصناف كثيرة)",
+     "يتكرر 4 أيام أو أكثر في الوجبة نفسها: توفو Tofu، جبن خالي أو قليل الدسم (1 غم دهون أو أقل)"
+    ],
+    "n": {
+     "crowd": 5,
+     "prot3": 6,
+     "lunchSmall": 0,
+     "dupDay": 0,
+     "eggs": 0,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "v1n": {
+     "crowd": 7,
+     "prot3": 8,
+     "lunchSmall": 0,
+     "dupDay": 0,
+     "eggs": 3,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 3,
+     "tiny": 0
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 122,
+    "fish": 0,
+    "eggOver": 0,
+    "sweetDays": 0,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 1,
+    "fit": {
+     "capped": 11,
+     "merged": 0,
+     "left": 4,
+     "minLeft": 1,
+     "hard": 0,
+     "soft": 0,
+     "dayLimit": [],
+     "cut": 1,
+     "dayCapped": 1,
+     "rebal": 6
+    },
+    "sched": "   leg   "
+   },
+   "app": {
+    "alts": 76,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 3,
+    "days": 7
+   }
+  },
+  {
+   "i": 43,
+   "profile": {
+    "i": 43,
+    "sex": "ذكر",
+    "age": 22,
+    "weight": 123,
+    "height": 187,
+    "act": 1,
+    "goal": 0,
+    "meals": 5,
+    "cuisine": "eg",
+    "budget": 2,
+    "conditions": [
+     "خمول الغدة"
+    ],
+    "allergens": [],
+    "freq": {
+     "poultry": 4,
+     "red": 1,
+     "fish": 2
+    },
+    "bank": false,
+    "fishDairy": true
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 2904,
+    "box": true,
+    "trial": true,
+    "score": 97,
+    "v1score": 9,
+    "items": [
+     "1 وجبة مزدحمة (أصناف كثيرة)"
+    ],
+    "n": {
+     "crowd": 1,
+     "prot3": 0,
+     "lunchSmall": 0,
+     "dupDay": 0,
+     "eggs": 0,
+     "sweet": 3,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "v1n": {
+     "crowd": 11,
+     "prot3": 4,
+     "lunchSmall": 0,
+     "dupDay": 0,
+     "eggs": 1,
+     "sweet": 7,
+     "kcal": 3,
+     "garnish": 2,
+     "tiny": 0
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 147,
+    "fish": 4,
+    "eggOver": 0,
+    "sweetDays": 3,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 0,
+    "fit": {
+     "capped": 13,
+     "merged": 1,
+     "left": 12,
+     "minLeft": 1,
+     "hard": 0,
+     "soft": 1,
+     "dayLimit": [
+      {
+       "day": "الثلاثاء",
+       "food": "بيضة كاملة",
+       "qty": 2.258,
+       "max": 2,
+       "cond": "حدّ عام"
+      },
+      {
+       "day": "الخميس",
+       "food": "بيضة كاملة",
+       "qty": 2.258,
+       "max": 2,
+       "cond": "حدّ عام"
+      }
+     ],
+     "rebal": 3
+    },
+    "sched": "poultry fish poultry fish poultry red poultry"
+   },
+   "app": {
+    "alts": 113,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 5,
+    "days": 7
+   }
+  },
+  {
+   "i": 44,
+   "profile": {
+    "i": 44,
+    "sex": "أنثى",
+    "age": 43,
+    "weight": 90,
+    "height": 175,
+    "act": 1,
+    "goal": 1,
+    "meals": 4,
+    "cuisine": "sa",
+    "budget": 2,
+    "conditions": [],
+    "allergens": [
+     "حساسية الحليب (بروتين الحليب)"
+    ],
+    "freq": {
+     "poultry": 4,
+     "red": 1,
+     "fish": 2
+    },
+    "bank": true,
+    "fishDairy": true
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 1724,
+    "box": true,
+    "trial": true,
+    "score": 88,
+    "v1score": 22,
+    "items": [
+     "3 يوم فيه الصنف نفسه مرتين",
+     "1 وجبة مزدحمة (أصناف كثيرة)"
+    ],
+    "n": {
+     "crowd": 1,
+     "prot3": 0,
+     "lunchSmall": 0,
+     "dupDay": 3,
+     "eggs": 0,
+     "sweet": 3,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "v1n": {
+     "crowd": 3,
+     "prot3": 1,
+     "lunchSmall": 0,
+     "dupDay": 6,
+     "eggs": 3,
+     "sweet": 5,
+     "kcal": 1,
+     "garnish": 1,
+     "tiny": 4
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 117,
+    "fish": 10,
+    "eggOver": 0,
+    "sweetDays": 3,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 0,
+    "fit": {
+     "capped": 2,
+     "merged": 0,
+     "left": 1,
+     "minLeft": 1,
+     "hard": 0,
+     "soft": 0,
+     "dayLimit": [],
+     "rebal": 5
+    },
+    "sched": "poultry fish poultry fish poultry red poultry"
+   },
+   "app": {
+    "alts": 69,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 4,
+    "days": 7
+   }
+  },
+  {
+   "i": 45,
+   "profile": {
+    "i": 45,
+    "sex": "ذكر",
+    "age": 20,
+    "weight": 93,
+    "height": 188,
+    "act": 3,
+    "goal": 0,
+    "meals": 5,
+    "cuisine": "eg",
+    "budget": 2,
+    "conditions": [
+     "سكري النوع الثاني",
+     "ارتفاع الكوليسترول والدهون",
+     "ضغط الدم المرتفع"
+    ],
+    "allergens": [
+     "حساسية السمك",
+     "حساسية الحليب (بروتين الحليب)"
+    ],
+    "freq": null,
+    "bank": false,
+    "fishDairy": true
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 3217,
+    "box": true,
+    "trial": true,
+    "score": 85,
+    "v1score": 0,
+    "items": [
+     "3 وجبة مزدحمة (أصناف كثيرة)",
+     "2 يوم فيه الصنف نفسه مرتين"
+    ],
+    "n": {
+     "crowd": 3,
+     "prot3": 0,
+     "lunchSmall": 0,
+     "dupDay": 2,
+     "eggs": 0,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "v1n": {
+     "crowd": 17,
+     "prot3": 1,
+     "lunchSmall": 0,
+     "dupDay": 7,
+     "eggs": 7,
+     "sweet": 0,
+     "kcal": 2,
+     "garnish": 1,
+     "tiny": 2
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 145,
+    "fish": 0,
+    "eggOver": 0,
+    "sweetDays": 0,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 1,
+    "fit": {
+     "capped": 20,
+     "merged": 0,
+     "left": 14,
+     "minLeft": 3,
+     "hard": 0,
+     "soft": 0,
+     "dayLimit": [],
+     "cut": 1,
+     "fruitMoved": 24,
+     "rebal": 36
+    },
+    "sched": "poultry red poultry red poultry leg poultry"
+   },
+   "app": {
+    "alts": 76,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 5,
+    "days": 7
+   }
+  },
+  {
+   "i": 46,
+   "profile": {
+    "i": 46,
+    "sex": "ذكر",
+    "age": 33,
+    "weight": 115,
+    "height": 165,
+    "act": 0,
+    "goal": 3,
+    "meals": 3,
+    "cuisine": "",
+    "budget": 2,
+    "conditions": [
+     "خمول الغدة"
+    ],
+    "allergens": [
+     "حساسية السمك"
+    ],
+    "freq": null,
+    "bank": true,
+    "fishDairy": true
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 2676,
+    "box": true,
+    "trial": true,
+    "score": 83,
+    "v1score": 0,
+    "items": [
+     "3 يوم فيه الصنف نفسه مرتين",
+     "2 وجبة فيها 3 مصادر بروتين"
+    ],
+    "n": {
+     "crowd": 0,
+     "prot3": 2,
+     "lunchSmall": 0,
+     "dupDay": 3,
+     "eggs": 0,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "v1n": {
+     "crowd": 14,
+     "prot3": 9,
+     "lunchSmall": 0,
+     "dupDay": 3,
+     "eggs": 3,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 125,
+    "fish": 0,
+    "eggOver": 0,
+    "sweetDays": 0,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 1,
+    "fit": {
+     "capped": 1,
+     "merged": 1,
+     "left": 8,
+     "minLeft": 0,
+     "hard": 0,
+     "soft": 0,
+     "dayLimit": [
+      {
+       "day": "الجمعة",
+       "food": "بيضة كاملة",
+       "qty": 2.258,
+       "max": 2,
+       "cond": "حدّ عام"
+      }
+     ],
+     "rebal": 1
+    },
+    "sched": "poultry red poultry red poultry leg poultry"
+   },
+   "app": {
+    "alts": 92,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 3,
+    "days": 7
+   }
+  },
+  {
+   "i": 47,
+   "profile": {
+    "i": 47,
+    "sex": "أنثى",
+    "age": 62,
+    "weight": 70,
+    "height": 155,
+    "act": 1,
+    "goal": 0,
+    "meals": 4,
+    "cuisine": "eg",
+    "budget": 2,
+    "conditions": [
+     "ضغط الدم المرتفع",
+     "ارتفاع الكوليسترول والدهون"
+    ],
+    "allergens": [
+     "حساسية القمح / الجلوتين (سيلياك)"
+    ],
+    "freq": {
+     "poultry": 4,
+     "red": 1,
+     "fish": 2
+    },
+    "bank": false,
+    "fishDairy": true
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 1397,
+    "box": true,
+    "trial": true,
+    "score": 97,
+    "v1score": 0,
+    "items": [
+     "يتكرر 4 أيام أو أكثر في الوجبة نفسها: بياض بيض"
+    ],
+    "n": {
+     "crowd": 0,
+     "prot3": 0,
+     "lunchSmall": 0,
+     "dupDay": 0,
+     "eggs": 0,
+     "sweet": 3,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "v1n": {
+     "crowd": 1,
+     "prot3": 0,
+     "lunchSmall": 1,
+     "dupDay": 0,
+     "eggs": 7,
+     "sweet": 5,
+     "kcal": 5,
+     "garnish": 5,
+     "tiny": 0
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 96,
+    "fish": 5,
+    "eggOver": 0,
+    "sweetDays": 3,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 0,
+    "fit": {
+     "capped": 0,
+     "merged": 0,
+     "left": 6,
+     "minLeft": 0,
+     "hard": 0,
+     "soft": 0,
+     "dayLimit": [],
+     "dayCapped": 6,
+     "rebal": 1
+    },
+    "sched": "poultry fish poultry fish poultry red poultry"
+   },
+   "app": {
+    "alts": 78,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 4,
+    "days": 7
+   }
+  },
+  {
+   "i": 48,
+   "profile": {
+    "i": 48,
+    "sex": "ذكر",
+    "age": 46,
+    "weight": 96,
+    "height": 182,
+    "act": 1,
+    "goal": 2,
+    "meals": 4,
+    "cuisine": "sa",
+    "budget": 2,
+    "conditions": [
+     "أمراض القلب"
+    ],
+    "allergens": [],
+    "freq": {
+     "poultry": 2,
+     "red": 3,
+     "fish": 2
+    },
+    "bank": false,
+    "fishDairy": false
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 2575,
+    "box": true,
+    "trial": true,
+    "score": 91,
+    "v1score": 13,
+    "items": [
+     "3 وجبة مزدحمة (أصناف كثيرة)"
+    ],
+    "n": {
+     "crowd": 3,
+     "prot3": 0,
+     "lunchSmall": 0,
+     "dupDay": 0,
+     "eggs": 0,
+     "sweet": 3,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "v1n": {
+     "crowd": 9,
+     "prot3": 2,
+     "lunchSmall": 0,
+     "dupDay": 0,
+     "eggs": 6,
+     "sweet": 5,
+     "kcal": 0,
+     "garnish": 3,
+     "tiny": 0
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 121,
+    "fish": 11,
+    "eggOver": 0,
+    "sweetDays": 3,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 0,
+    "fit": {
+     "capped": 5,
+     "merged": 0,
+     "left": 5,
+     "minLeft": 0,
+     "hard": 0,
+     "soft": 0,
+     "dayLimit": [],
+     "dayCapped": 6,
+     "rebal": 1
+    },
+    "sched": "red poultry fish red poultry fish red"
+   },
+   "app": {
+    "alts": 107,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 4,
+    "days": 7
+   }
+  },
+  {
+   "i": 49,
+   "profile": {
+    "i": 49,
+    "sex": "أنثى",
+    "age": 66,
+    "weight": 53,
+    "height": 152,
+    "act": 3,
+    "goal": 1,
+    "meals": 3,
+    "cuisine": "eg",
+    "budget": 3,
+    "conditions": [
+     "ضغط الدم المرتفع",
+     "ارتفاع الكوليسترول والدهون"
+    ],
+    "allergens": [],
+    "freq": {
+     "poultry": 5,
+     "red": 2,
+     "fish": 0
+    },
+    "bank": true,
+    "fishDairy": false
+   },
+   "ok": true,
+   "notes": [],
+   "pro": {
+    "kcal": 1206,
+    "box": true,
+    "trial": true,
+    "score": 70,
+    "v1score": 23,
+    "items": [
+     "6 يوم فيه الصنف نفسه مرتين",
+     "يتكرر 4 أيام أو أكثر في الوجبة نفسها: بياض بيض، جبنة قريش",
+     "3 سطر لحم أقل من 30 جم"
+    ],
+    "n": {
+     "crowd": 0,
+     "prot3": 0,
+     "lunchSmall": 0,
+     "dupDay": 6,
+     "eggs": 0,
+     "sweet": 0,
+     "kcal": 0,
+     "garnish": 0,
+     "tiny": 3
+    },
+    "v1n": {
+     "crowd": 5,
+     "prot3": 0,
+     "lunchSmall": 1,
+     "dupDay": 7,
+     "eggs": 2,
+     "sweet": 0,
+     "kcal": 3,
+     "garnish": 0,
+     "tiny": 0
+    },
+    "banned": 0,
+    "missing": 0,
+    "lines": 111,
+    "fish": 4,
+    "eggOver": 0,
+    "sweetDays": 0,
+    "fruitOver": 0,
+    "kcalOff": 0,
+    "leg": 0,
+    "fit": {
+     "capped": 2,
+     "merged": 0,
+     "left": 1,
+     "minLeft": 4,
+     "hard": 0,
+     "soft": 0,
+     "dayLimit": [],
+     "dayCapped": 2,
+     "cut": 1,
+     "rebal": 4
+    },
+    "sched": "poultry red poultry red poultry poultry poultry"
+   },
+   "app": {
+    "alts": 66,
+    "badAlt": 0,
+    "same": true,
+    "plate": true,
+    "und": false,
+    "meals": 3,
+    "days": 7
+   }
+  }
+ ]
+}
