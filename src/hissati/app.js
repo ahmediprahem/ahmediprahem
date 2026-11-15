@@ -690,7 +690,7 @@ function scrLock() {
 function head(t, act, v, sub) { return '<div class="hd"><button class="back" data-act="' + act + '" data-v="' + v + '" aria-label="رجوع">' + I('back') + '</button><div class="t">' + (sub ? '<div class="stepk">' + sub + '</div>' : '') + '<h2>' + t + '</h2></div></div>'; }
 // ---------- الاستبيان: يُعرض كما أعدّه الأخصائي (يصل مع الدعوة؛ HForms يكمّل ما ينقصه). نظامان: الحصص (ex) والجرامات (g)
 let FS = [], SYS = 'ex';
-function mkForm() { const f = HForms.normalize(S.cat && S.cat.form, S.cat && S.cat.form && S.cat.form.sys); SYS = f.sys; FS = HForms.visibleSteps(f); }
+function mkForm() { const f0 = S.cat && S.cat.form, sy = f0 && f0.sys || (S.cat && S.cat.sys); const f = HForms.normalize(sy !== 'g' ? Object.assign({}, f0 || {}, { tailor: 1 }) : f0, sy); SYS = f.sys; FS = HForms.visibleSteps(f); }   // 1.05: الاستبيان الموحّد دائماً لنظام الحصص (حتى الدعوات القديمة)
 const vq = (st) => st.q.filter((q) => !q.hide);
 const lab = (q, forId) => (forId ? '<label for="' + forId + '">' : '<span class="lbl">') + esc(q.label) + (q.req ? ' <span class="req">*</span>' : '') + (forId ? '</label>' : '</span>') + (q.help ? '<div class="dim">' + esc(q.help) + '</div>' : '');
 function inp(k, label, type, extra) { const nm = type === 'number', ph = type === 'tel'; return '<div class="field"><label for="f_' + k + '">' + label + '</label><input class="inp" id="f_' + k + '" data-bind="' + k + '" type="' + (nm ? 'text' : type || 'text') + '"' + (nm ? ' data-numf="1" autocomplete="off"' : ph ? ' data-tel="1"' : '') + ' value="' + esc(S.p[k]) + '" ' + (extra || '') + '></div>'; }
@@ -708,23 +708,47 @@ function tlFoods(t, role) { const ti = MEALS.findIndex((m) => m[0] === t), cz = 
 const tlName = (f) => f[6] || f[0];
 function tlCount(t, role, st) { const m = tlP().mfood[t] || {}; return tlFoods(t, role).filter((f) => m[f[0]] === (st || 'love')).length; }
 function tlMealOk(t) { const mn = TL_MIN[t] || {}; return Object.keys(mn).every((r) => tlCount(t, r) >= Math.min(mn[r], tlFoods(t, r).length)); }
-function tlFoodsHtml() {
-  const p = tlP(), ms = tlMeals(), cur = ms.includes(V.tlm) ? V.tlm : ms[0]; V.tlm = cur; const mn = TL_MIN[cur] || {}, m = p.mfood[cur] || (p.mfood[cur] = {});
-  const tabs = '<div class="segc tlm">' + ms.map((t) => { const M = MEALS.find((x) => x[0] === t); return '<button class="' + (t === cur ? 'on' : '') + '" data-act="tlm" data-v="' + t + '">' + (tlMealOk(t) ? I('check') : '') + M[1] + '</button>'; }).join('') + '</div>';
-  const secs = TL_ROLES.filter((r) => mn[r[0]] || tlFoods(cur, r[0]).length && ['veg', 'fat', 'dairy', 'fruit'].includes(r[0])).map((r) => {
-    const list = tlFoods(cur, r[0]); if (!list.length) return ''; const need = Math.min(mn[r[0]] || 0, list.length), got = tlCount(cur, r[0]), open = V.tlmore && V.tlmore[cur + r[0]];
-    return '<section class="card tlsec"><div class="mhd"><h3>' + r[1] + '</h3>' + (need ? '<span class="tlreq' + (got >= need ? ' ok' : '') + '">' + (got >= need ? I('check') : '') + got + ' من ' + need + '</span>' : '<span class="dim">اختياري</span>') + '</div><div class="fgrid">'
-      + list.slice(0, open ? 60 : 12).map((f) => { const st = m[f[0]]; return '<button class="food ' + (st || '') + '" data-act="mf" data-k="' + cur + '" data-v="' + esc(f[0]) + '" aria-pressed="' + (st ? 'true' : 'false') + '">' + (st === 'love' ? I('up') : st === 'no' ? I('down') : '') + esc(tlName(f)) + '</button>'; }).join('') + '</div>'
-      + '<div class="row">' + (list.length > 12 && !open ? '<button class="link" data-act="tlmore" data-v="' + cur + r[0] + '">عرض المزيد (' + (list.length - 12) + ')</button>' : '') + (need && got < need ? '<button class="link" data-act="mfsug" data-k="' + cur + '" data-v="' + r[0] + '">' + I('sparkle') + ' اقترح لي</button>' : '') + '</div></section>';
-  }).join('');
-  return '<p class="mut">' + 'المس الصنف مرة: <b style="color:var(--mint)">أحبه</b>، ومرتين: <b style="color:var(--coral)">لا آكله</b>. نحتاج حداً أدنى في كل قسم لنفصّل خطتك.</p>' + tabs + secs;
+// 1.05 اختيار الأكلات كما في النموذج: مقدمة الفطور بالطبق ← شاشة لكل قسم في الفطور ← شاشة لكل وجبة بعده؛ الطبق يمتلئ مع الاختيار
+const TL_SEC = { B: ['pro', 'carb', 'dairy', 'fruit', 'veg', 'fat'], L: ['pro', 'carb', 'veg', 'fat'], D: ['pro', 'carb', 'veg', 'fat'], S: ['fruit', 'dairy', 'fat', 'carb'] };
+const TL_C = { pro: '#ff7a59', carb: '#ffc94d', dairy: '#7fb0ff', fruit: '#ff8fb1', veg: '#3fbf93', fat: '#c9a0ff' };
+const TL_TIP = { pro: 'البروتين يطيل الشبع، فنحرص على وجوده في كل وجبة.', carb: 'لا نلغي النشويات، بل نختار كميتها لتناسب هدفك.', dairy: 'الألبان تضيف الكالسيوم والبروتين.', fruit: 'الفواكه تضيف الألياف وطعماً حلواً صحياً.', vegfat: 'الخضار تملأ الطبق بسعرات قليلة، والدهون الصحية بكمية صغيرة تكفي.' };
+const tlRN = (r) => TL_ROLES.find((x) => x[0] === r)[1], tlMN = (t) => MEALS.find((m) => m[0] === t)[1];
+const tlNeed = (t, r) => Math.min((TL_MIN[t] || {})[r] || 0, tlFoods(t, r).length);
+const tlSecs = (t) => TL_SEC[t].filter((r) => tlFoods(t, r).length);
+function tlSeq() { const q = ['in']; ['pro', 'carb', 'dairy', 'fruit', 'vegfat'].forEach((g) => { if (tlGs('B:' + g).length) q.push('B:' + g); }); tlMeals().slice(1).forEach((t) => { if (tlSecs(t).length) q.push(t); }); return q; }
+function tlGs(id) { if (id === 'in') return []; const [t, g] = id.split(':'); return g ? (g === 'vegfat' ? ['veg', 'fat'] : [g]).filter((r) => tlFoods(t, r).length) : tlSecs(t); }
+const tlSubOk = (id) => { const t = id.split(':')[0]; return tlGs(id).every((r) => tlCount(t, r) >= tlNeed(t, r)); };
+function tlPlate(t, size, anim) {
+  const ws = tlSecs(t).map((r) => { const n = tlNeed(t, r), c = tlCount(t, r); return { c: TL_C[r], f: anim ? 0 : n ? Math.min(1, c / n) : c ? 1 : 0 }; }), N = ws.length || 1, R = 50, gap = N > 1 ? 2.4 : 0;
+  const pt = (a) => { const r = (a - 90) * Math.PI / 180; return (60 + R * Math.cos(r)).toFixed(2) + ' ' + (60 + R * Math.sin(r)).toFixed(2); };
+  const wd = (i) => { if (N === 1) return 'M60 10a50 50 0 1 0 .01 0Z'; const a = i * 360 / N + gap, b = (i + 1) * 360 / N - gap; return 'M60 60L' + pt(a) + 'A' + R + ' ' + R + ' 0 ' + (b - a > 180 ? 1 : 0) + ' 1 ' + pt(b) + 'Z'; };
+  return '<div class="tlpb"><svg class="tlplate' + (anim ? ' anim' : '') + '" viewBox="0 0 120 120" width="' + size + '" height="' + size + '" role="img" aria-label="طبق ' + tlMN(t) + '"><circle class="rim" cx="60" cy="60" r="57"/><circle class="well" cx="60" cy="60" r="52.5"/>'
+    + ws.map((w, i) => '<path class="wb" d="' + wd(i) + '"/><path class="wf" d="' + wd(i) + '" style="fill:' + w.c + ';--s:' + Math.sqrt(w.f).toFixed(3) + (anim ? ';animation-delay:' + (.2 + i * .28) + 's' : '') + '"/>').join('') + '<circle class="hub" cx="60" cy="60" r="5"/></svg></div>';
+}
+function tlSecHtml(t, r) {
+  const m = tlP().mfood[t] || (S.p.mfood[t] = {}), list = tlFoods(t, r), need = tlNeed(t, r), got = tlCount(t, r), open = V.tlmore && V.tlmore[t + r];
+  return '<section class="card tlsec" data-sec="' + r + '"><div class="mhd"><h3><i class="tldot" style="background:' + TL_C[r] + '"></i>' + tlRN(r) + ' <small class="dim">(' + list.length + ')</small></h3>'
+    + (need ? '<span class="tlreq' + (got >= need ? ' ok' : '') + '">' + (got >= need ? I('check') + 'اكتمل' : 'اخترت ' + got + ' من ' + need + ' على الأقل') + '</span>' : '<span class="dim">اختياري</span>') + '</div>'
+    + (need && got < need ? '<button class="link tlsug" data-act="mfsug" data-k="' + t + '" data-v="' + r + '">' + I('sparkle') + ' اقترح لي الأشهر</button>' : '')
+    + (list.length > 12 ? '<input class="inp tlq" type="search" data-tlq="1" placeholder="ابحث في ' + tlRN(r) + '…" aria-label="بحث في ' + tlRN(r) + '">' : '')
+    + '<div class="fgrid">' + list.map((f, i) => { const st = m[f[0]]; return '<button class="food ' + (st || '') + (i >= 16 && !open ? ' xtra' : '') + '" data-act="mf" data-k="' + t + '" data-v="' + esc(f[0]) + '" aria-pressed="' + (st ? 'true' : 'false') + '"' + (i >= 16 && !open ? ' hidden' : '') + '>' + (st === 'love' ? I('up') : st === 'no' ? I('down') : '') + esc(tlName(f)) + '</button>'; }).join('') + '</div>'
+    + (list.length > 16 && !open ? '<button class="link" data-act="tlmore" data-v="' + t + r + '">عرض المزيد (' + (list.length - 16) + ')</button>' : '') + '</section>';
+}
+function tlSubHtml(id) {
+  if (id === 'in') return '<h3 class="tlh">لنبنِ وجباتك، نبدأ بالفطور</h3>' + tlPlate('B', 190, 1) + '<div class="legend tlleg">' + tlSecs('B').map((r) => '<span><i class="dot" style="background:' + TL_C[r] + '"></i>' + tlRN(r) + '</span>').join('') + '</div>'
+    + '<div class="banner info">' + I('sun') + '<span>الفطور الصحي يكون <b>متنوعاً بين مصادر مختلفة</b>. والأفضل أن نبدأ بمصادر <b>البروتين</b> مثل البيض أو الفول أو الجبن.</span></div>';
+  const [t, g] = id.split(':'), gs = tlGs(id), ok = tlSubOk(id);
+  const title = g ? (g === 'vegfat' ? 'الخضار والدهون التي تحبها في ' + tlMN(t) : 'أضف مصادر ' + tlRN(g) + ' التي تحبها في ' + tlMN(t)) : 'ماذا تحب في ' + tlMN(t) + '؟';
+  return tlPlate(t, 120) + '<h3 class="tlh">' + title + '</h3><p class="mut">المس الصنف مرة: <b style="color:var(--mint)">أحبه</b>. مرتين: <b style="color:var(--coral)">لا آكله</b>. ثلاث: عادي.</p>'
+    + gs.map((r) => tlSecHtml(t, r)).join('') + '<p class="tlhint' + (ok ? ' ok' : '') + '">' + (ok ? 'ممتاز، يكفي هذا لنفصّل لك الخطة.' : 'نحتاج حداً أدنى من المفضلة في كل قسم لنفصّل لك خطة مناسبة.') + '</p>'
+    + (g && TL_TIP[g] ? '<div class="banner info">' + I('heart') + '<span>' + TL_TIP[g] + '</span></div>' : '');
 }
 function tlBmiRange() { const m = (+S.p.height || 165) / 100; return [Math.round(18.5 * m * m), Math.round(24.9 * m * m)]; }
 const BQ = {                                       // الأسئلة الأساسية: عرض بنص الأخصائي، وحفظ في حقل ثابت يفهمه «حصة»
   target: (q) => { tlP(); const r = tlBmiRange(), w = +numOnly(S.p.weight) || 0; return inp('target', esc(q.label) + ' (كجم)', 'number', 'inputmode="decimal" placeholder="مثال: ' + Math.min(w || r[1], r[1]) + '"') + '<div class="banner info">' + I('heart') + '<span>الوزن الصحي لطولك بين <b>' + r[0] + '</b> و<b>' + r[1] + '</b> كجم. يمكنك تركه فارغاً ويحدده أخصائيك معك.</span></div>'; },
   week: (q) => { tlP(); return '<div class="field">' + lab(q) + seg('week', ['mix', 'varied', 'fixed'], S.p.week, ['فطور وعشاء ثابتان وغداء متنوع', 'أيام مختلفة', 'قائمة ثابتة وبدائل']) + '</div>'; },
   real: (q) => { tlP(); return '<div class="field"><span class="lbl">من يطبخ في بيتك؟</span>' + seg('cook', ['me', 'fam', 'out'], S.p.cook, ['أنا', 'أهلي', 'أطلب غالباً']) + '</div><div class="field"><span class="lbl">كم مرة تأكل خارج البيت؟</span>' + seg('out', ['rare', 'some', 'often'], S.p.out, ['نادراً', 'مرة أو مرتين أسبوعياً', 'كثيراً']) + '</div><div class="field"><span class="lbl">هل تصوم؟</span>' + seg('fast', ['no', 'mt', 'rm'], S.p.fast, ['لا', 'الاثنين والخميس', 'رمضان فقط']) + '</div>'; },
-  mfoods: () => tlFoodsHtml(),
+  mfoods: () => { const q = tlSeq(); S.tls = Math.max(0, Math.min(q.length - 1, S.tls | 0)); return tlSubHtml(q[S.tls]); },
   freq: (q) => { const f = tlP().freq, tot = f.poultry + f.red + f.fish, row = (k, l, ic) => '<div class="card tlfq"><span aria-hidden="true">' + ic + '</span><b>' + l + '</b><span class="stp"><button data-act="fq" data-k="' + k + '" data-v="-1" aria-label="أنقص ' + l + '">−</button><b>' + f[k] + '</b><button data-act="fq" data-k="' + k + '" data-v="1" aria-label="زد ' + l + '">+</button></span></div>';
     return '<p class="mut">' + esc(q.label) + ' (من 7 أيام، بلا تكرار متتالٍ)</p>' + row('poultry', 'الدجاج', '🍗') + row('red', 'اللحم', '🥩') + row('fish', 'السمك', '🐟') + '<p class="' + (tot === 7 ? 'ok' : 'dim') + '">المجموع ' + tot + ' من 7' + (tot !== 7 ? ' — يضبطه أخصائيك تلقائياً' : '') + (f.red > 3 ? '. اللحم الأحمر يُقيَّد بثلاث مرات أسبوعياً حسب التوصيات.' : '') + '</p>'; },
   scale: (q) => { tlP(); return '<div class="field">' + lab(q) + seg('scale', ['yes', 'mix', 'no'], S.p.scale, ['بالجرام (عندي ميزان)', 'جرامات للحوم والنشويات', 'مقاييس منزلية']) + '</div>'; },
@@ -792,10 +816,11 @@ const WHY = { weight: 'وزنك وطولك يضبطان كمياتك بدقة', 
 function scrWizard() {
   mkForm(); const N = FS.length; if (S.step > N) S.step = N; const s = S.step, st = FS[s - 1];
   const body = vq(st).map((q) => q.b ? (BQ[q.id] ? BQ[q.id](q) : '') : cqHtml(q)).join('');
-  return '<div class="scr">' + head(esc(st.t), 'step', s - 1, 'الخطوة ' + s + ' من ' + N)
+  const mq = vq(st).some((q) => q.id === 'mfoods') ? tlSeq() : null, sub = mq && S.tls < mq.length - 1;      // اختيار الأكلات: شاشات فرعية قبل الخطوة التالية
+  return '<div class="scr">' + (mq && S.tls > 0 ? head(esc(st.t), 'tls', S.tls - 1, 'الخطوة ' + s + ' من ' + N + ' • ' + (S.tls + 1) + '/' + mq.length) : head(esc(st.t), 'step', s - 1, 'الخطوة ' + s + ' من ' + N + (mq ? ' • 1/' + mq.length : '')))
     + '<div class="prog"><i style="width:' + Math.round(s / N * 100) + '%"></i></div>'
     + '<div class="scroll"><div class="stack">' + (() => { const w = [...new Set(vq(st).filter((q) => q.b && WHY[q.id]).map((q) => WHY[q.id]))]; return w.length ? '<p class="why" role="note">' + I('lock') + ' لماذا نسأل؟ ' + w.join(' • ') + '</p>' : ''; })() + (s === 1 && S.req === 'changes' && S.reqMsg ? '<div class="banner warn">' + I('msg') + '<span><b>' + esc(S.dname) + ':</b> ' + esc(S.reqMsg) + '</span></div>' : '') + body + '</div></div>'
-    + '<div class="foot"><button class="btn full" data-act="step" data-v="' + (s + 1) + '" ' + (stepOk(st) ? '' : 'disabled') + '>' + (s === N ? 'مراجعة' : 'التالي') + '</button></div></div>';
+    + '<div class="foot">' + (sub ? '<button class="btn full" data-act="tls" data-v="' + (S.tls + 1) + '" ' + (tlSubOk(mq[S.tls]) ? '' : 'disabled') + '>' + (S.tls ? 'التالي' : 'لنبدأ') + '</button>' : '<button class="btn full" data-act="step" data-v="' + (s + 1) + '" ' + (stepOk(st) ? '' : 'disabled') + '>' + (s === N ? 'مراجعة' : 'التالي') + '</button>') + '</div></div>';
 }
 function foodGrid(catKey, qKey) {
   const cats = foodCats(), cat = Math.min(S[catKey] || 0, cats.length - 1), q = (S[qKey] || '').trim();
@@ -2548,11 +2573,11 @@ document.addEventListener('click', (e) => {
     case 'sendc': { const t = $('#chatIn'); if (!sendMsg(t && t.value)) return; focusChat = true; break; }
     case 'refresh': toast('جارٍ التحقق…'); poll().then(() => toast(S.req === 'approved' ? 'اعتمدك أخصائيك — خطتك قيد الإعداد' : 'لا جديد بعد')); return;
     case 'go': if (v === 'pin') { V.screen = 'pin'; V.pin = V.pin1 = ''; V.err = ''; } break;
-    case 'step': { mkForm(); const n = +v; if (n < 1) return; if (n > FS.length) S.screen = 'review'; else { S.screen = 'wizard'; S.step = n; } break; }
+    case 'step': { mkForm(); const n = +v; if (n < 1) return; if (n > FS.length) S.screen = 'review'; else { if (vq(FS[n - 1]).some((q) => q.id === 'mfoods')) S.tls = S.screen === 'wizard' && n < S.step ? tlSeq().length - 1 : 0; S.screen = 'wizard'; S.step = n; } break; }
+    case 'tls': { const q = tlSeq(); S.tls = Math.max(0, Math.min(q.length - 1, +v)); requestAnimationFrame(() => { const sc = $('.scroll'); if (sc) sc.scrollTop = 0; }); break; }
     case 'cq1': { S.p.cq = S.p.cq || {}; S.p.cq[k] = S.p.cq[k] === v ? '' : v; break; }
     case 'cqm': { S.p.cq = S.p.cq || {}; const a = S.p.cq[k] = Array.isArray(S.p.cq[k]) ? S.p.cq[k] : [], i = a.indexOf(v); i < 0 ? a.push(v) : a.splice(i, 1); break; }
     case 'set': S.p[k] = isNaN(+v) || k === 'sex' || k === 'gphase' ? v : +v; break;
-    case 'tlm': V.tlm = v; break;
     case 'tlmore': V.tlmore = V.tlmore || {}; V.tlmore[v] = 1; break;
     case 'mf': { const m = tlP().mfood[k] || (S.p.mfood[k] = {}), cur = m[v], nx = cur === 'love' ? 'no' : cur === 'no' ? undefined : 'love'; if (nx) m[v] = nx; else delete m[v]; if (nx === 'love' && navigator.vibrate) try { navigator.vibrate(8); } catch (e) { } break; }
     case 'mfsug': { const m = tlP().mfood[k] || (S.p.mfood[k] = {}), need = Math.min((TL_MIN[k] || {})[v] || 0, tlFoods(k, v).length) - tlCount(k, v); tlFoods(k, v).filter((f) => !m[f[0]]).slice(0, Math.max(0, need)).forEach((f) => { m[f[0]] = 'love'; }); break; }
@@ -2818,6 +2843,7 @@ document.addEventListener('input', (e) => {
   if (e.target.id === 'sdNote' && V.sd != null && S.sd) { const dn = (S.sd.dn[V.sd] = S.sd.dn[V.sd] || { t: [], n: '' }); dn.n = e.target.value.slice(0, 600); }
   if (V.hf && e.target.id && e.target.id.startsWith('hf_')) V.hf.d[e.target.id.slice(3)] = e.target.value;       // ما يكتبه العميل يبقى إن أُعيد الرسم
   const t = e.target;
+  if (t.dataset.tlq) { const q = t.value.trim(), sec = t.closest('.tlsec'); if (sec) sec.querySelectorAll('.food').forEach((b) => { b.hidden = q ? !b.textContent.includes(q) : b.classList.contains('xtra'); }); return; }   // بحث أصناف القسم بلا إعادة رسم
   if (t.dataset.qkq) { const q = t.value.trim(); if (V.qfree) V.qfree.q = q; document.querySelectorAll('.qksr').forEach((b) => { b.hidden = !!q && !b.textContent.includes(q); }); return; }   // بحث السور بلا إعادة رسم
   if (t.dataset.bind || t.dataset.cq || t.dataset.schm || t.dataset.scht) {
     if (t.dataset.bind) S.p[t.dataset.bind] = t.value; else if (t.dataset.cq) { S.p.cq = S.p.cq || {}; S.p.cq[t.dataset.cq] = t.value; } else if (t.dataset.schm) sched()[+t.dataset.schm].min = +t.value || 0; else sched()[+t.dataset.scht].time = t.value;
