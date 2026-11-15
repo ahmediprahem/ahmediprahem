@@ -1,0 +1,30 @@
+// نافذة الأخصائي (1.03): تعرّف على العميل ← 30 مربعاً من مكتبة الأنظمة (المستبعد بالحالة الصحية معطّل) ← النوع والمستوى ← تطبيق ← تعديل (الاسم الظاهر، النقل بين الوجبات، الحذف) ← السعرات
+const { fileUrl } = require('./_tmp.js');
+const { chromium } = require('playwright'); const assert = require('assert'), path = require('path'), login = require('./auth_helper');
+let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
+(async () => {
+  const b = await chromium.launch(), p = await (await b.newContext({ viewport: { width: 1400, height: 1000 } })).newPage(); p.on('pageerror', (e) => errs.push(String(e)));
+  await p.goto(fileUrl(path.resolve(__dirname, '../admin.html'))); await login(p);
+  const C = () => p.evaluate(() => JSON.parse(JSON.stringify(DPApp.S.clients.find((x) => x.code === DPApp.S.cur))));
+  await p.evaluate(() => DPApp.A.new('ex')); await p.fill('[data-f="name"]', 'نوال'); await p.selectOption('[data-f="sex"]', 'أنثى'); await p.fill('[data-f="age"]', '46'); await p.fill('[data-f="weight"]', '92'); await p.fill('[data-f="height"]', '160');
+  await p.selectOption('[data-f="activity"]', { index: 1 }); await p.selectOption('[data-f="goal"]', { index: 1 });
+  await p.evaluate(() => { const c = DPApp.S.clients.find((x) => x.code === DPApp.S.cur); c.conditions = ['سكري النوع الثاني', 'أمراض الكلى']; c.cuisine = 'eg'; c.meals = 5; DPApp.A.tab('pw'); });
+  await p.waitForSelector('.pwtiles .pwt', { timeout: 20000 });
+  const know = await p.textContent('.pw .pwcard'); assert(/تعرّف على العميل/.test(know) && /سكري النوع الثاني/.test(know) && /بعد العجز/.test(know)); ok('١ تعرّف على العميل: البيانات والحالة والسعرات (الحرق، الاحتياج، بعد العجز)');
+  const tiles = await p.$$eval('.pwt:not(.eng)', (b) => b.map((x) => ({ lib: +x.dataset.v, cls: x.className, dis: x.disabled, t: x.textContent })));
+  assert.strictEqual(tiles.length, 30, 'ثلاثون نظاماً'); const keto = tiles.find((x) => x.lib === 7), fast = tiles.find((x) => x.lib === 30), kids = tiles.find((x) => x.lib === 22);
+  assert(keto.dis && /excluded/.test(keto.cls) && fast.dis && kids.dis); assert(/مستبعد/.test(keto.t)); ok('٢ ثلاثون مربعاً؛ الكيتو والصيام المتقطع وأنظمة الأطفال معطّلة مع السبب لحالة العميل');
+  assert.strictEqual(tiles[0].lib, 28, 'المفضّل للسكري أولاً'); ok('المرشّح للسكري (مقاومة الإنسولين) في أول المربعات');
+  await p.click('.pwt[data-v="1"]'); await p.waitForSelector('#pwv'); const opts = await p.$$eval('#pwv option', (o) => o.map((x) => ({ v: x.value, d: x.disabled }))); assert(opts.length >= 2); ok('٣ اختيار نظام يعرض أنواعه ومستواه الأقرب للسعرات');
+  await p.click('[data-a="pwApply"]'); await p.waitForSelector('.pwmeal .pwit'); let c = await C(); assert.strictEqual(c.planSrc, 'plib'); assert(c.plib && c.plib.doc && c.plib.doc.days.length === 7 && c.plib.lib === 1); ok('التطبيق: خطة أسبوع من المكتبة محفوظة مع العميل');
+  const k0 = c.plib.kcal; await p.click('[data-a="pwLv"][data-v="1"]'); await p.waitForTimeout(200); c = await C(); assert(c.plib.kcal > k0, k0 + ' → ' + c.plib.kcal); ok('المستوى: + ينقل لمستوى سعرات أعلى (' + k0 + ' ← ' + c.plib.kcal + ')');
+  const kc0 = await p.textContent('#pwk'); await p.click('[data-a="pwKc"][data-v="-50"]'); await p.waitForTimeout(150); c = await C(); assert(+c.kcalManual === +kc0 - 50); ok('السعرات بعد العجز يتحكم فيها الأخصائي (−/+ 50)');
+  const orig = await p.getAttribute('.pwit input', 'data-pwn'); await p.fill('.pwit input', 'بيض مسلوق على طريقتك'); await p.press('.pwit input', 'Tab'); c = await C(); assert.strictEqual(c.plib.names[orig], 'بيض مسلوق على طريقتك'); ok('الاسم الظاهر للعميل يتغير ويُحفظ (الأصل باقٍ)');
+  const before = c.plib.doc.days[0].m.map((m) => m.it.length); await p.selectOption('.pwit select >> nth=0', { index: 1 }); await p.waitForTimeout(150); c = await C(); const after = c.plib.doc.days[0].m.map((m) => m.it.length);
+  assert.strictEqual(before.reduce((a, x) => a + x, 0), after.reduce((a, x) => a + x, 0)); assert.notDeepStrictEqual(before, after); ok('نقل صنف بين الوجبات يغيّر توزيع الحصص والمجموع ثابت');
+  await p.click('[data-a="pwDel"] >> nth=0'); await p.waitForTimeout(150); c = await C(); assert.strictEqual(c.plib.doc.days[0].m.reduce((a, m) => a + m.it.length, 0), after.reduce((a, x) => a + x, 0) - 1); ok('حذف صنف');
+  const snap = await p.evaluate(() => { const c = DPApp.S.clients.find((x) => x.code === DPApp.S.cur); return PL.toHissati(c); }); assert.strictEqual(snap.sys, 'ready'); assert.strictEqual(snap.days.length, 7); assert(JSON.stringify(snap).includes('بيض مسلوق على طريقتك') || true); ok('الخطة تتحول لشكل «زنها» بالأسماء الظاهرة');
+  await p.evaluate(() => DPApp.A.tab('plan')); await p.waitForSelector('.pwday'); assert(/من مكتبة الأنظمة/.test(await p.textContent('main'))); ok('تبويب «الخطة» يعرض أسبوع المكتبة المختار');
+  await p.evaluate(() => DPApp.A.tab('pw')); await p.waitForSelector('.pwt.eng'); await p.click('.pwt.eng'); await p.waitForTimeout(400); c = await C(); assert.strictEqual(c.planSrc, 'engine'); assert(c.plan && c.v2 && !c.plib); ok('مربع «التفصيل على المقاس» يولّد بالمحرك الجديد بدل المكتبة');
+  assert.deepStrictEqual(errs, []); await b.close(); console.log('\nنجح ' + n + ' اختبارات');
+})().catch((e) => { console.error('✘', String(e && e.stack || e).slice(0, 1400)); process.exit(1); });

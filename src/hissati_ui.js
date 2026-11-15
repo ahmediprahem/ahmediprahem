@@ -259,7 +259,7 @@ function hxApprove(cid) {
   S.clients.push(c);
   return persist(c).then(function () { return hxSend(c, { t: 'status', st: 'approved', code: c.code, dname: HX.st.name }); }).then(function () {
     delete HX.st.reqs[cid]; delete HX.st.inv[req.h]; return hxSave();
-  }).then(function () { S.view = 'client'; S.cur = c.code; S.tab = auto ? 'plan' : 'client'; if (auto) S.page = 'sum'; S.versions = []; render(); toast(auto ? '✓ اعتُمد «' + c.name + '» وتولّدت خطته بمسار التفصيل — راجعها ثم أرسلها إلى «زنها»' : '✓ اعتُمد «' + c.name + '» عميلاً جديداً (' + c.code + ') — راجع بياناته ثم ولّد الخطة وأرسلها إلى «زنها»'); });
+  }).then(function () { S.view = 'client'; S.cur = c.code; S.tab = auto ? 'pw' : 'client'; if (auto) S.page = 'sum'; S.versions = []; render(); toast(auto ? '✓ اعتُمد «' + c.name + '» — نافذة الأخصائي: تعرّف عليه ثم اختر النظام أو أبقِ خطة التفصيل وأرسلها' : '✓ اعتُمد «' + c.name + '» عميلاً جديداً (' + c.code + ') — راجع بياناته ثم ولّد الخطة وأرسلها إلى «زنها»'); });
 }
 // ---------- لقطة الخطة لتطبيق العميل (نفس شكل نموذج «زنها»: [مجموعة، صنف، نص، بدائل[[صنف، نص]]])
 function hxSnap(c) {
@@ -383,7 +383,7 @@ function hxToday(c) { var d = new Date(), k = d.getFullYear() + '-' + String(d.g
 function hxSlim(sn) { return { water: +sn.water || 0, days: (sn.days || []).map(function (d) { return { water: +d.water || 0, slots: (d.slots || []).map(function (q) { return { n: q.name || '', t: q.time || '', l: (q.lines || []).map(function (l) { return String(l[2] || l[1] || ''); }) }; }) }; }) }; }
 function hxSnapOf(c) {
   var x = c.hx; if (x.snap && x.snap.days) return x.snap; HX.snapC = HX.snapC || {}; var key = c.code + ':' + (x.planV || 0) + ':' + (c.updated || 0); if (HX.snapC[key] !== undefined) return HX.snapC[key];
-  var sn = null; try { var rd = c.planSrc === 'ready' && c.ready && c.readyDoc && window.RL; sn = c.rawSnap ? c.rawSnap : rd ? RL.toHissati(c.readyDoc, RL.plan(c.ready.id)) : c.plan ? (c.kind === 'athlete' ? hxSnapG(c) : hxSnap(c)) : null; sn = sn ? hxSlim(sn) : null; } catch (e) { sn = null; }
+  var sn = null; try { var rd = c.planSrc === 'ready' && c.ready && c.readyDoc && window.RL; sn = c.rawSnap ? c.rawSnap : c.planSrc === 'plib' && c.plib && window.PL ? PL.toHissati(c) : rd ? RL.toHissati(c.readyDoc, RL.plan(c.ready.id)) : c.plan ? (c.kind === 'athlete' ? hxSnapG(c) : hxSnap(c)) : null; sn = sn ? hxSlim(sn) : null; } catch (e) { sn = null; }
   return (HX.snapC[key] = sn);
 }
 function hxDayDetail(c, k, l) {
@@ -409,7 +409,7 @@ function hxDayDetail(c, k, l) {
 }
 // 0.94: أجزاء «زنها» في ملف العميل موزّعة على أماكنها الجديدة (cfile_ui.js): الربط ووضع «يوم واحد في كل مرة» في «الملف ← ربط زنها»،
 // والمتابعة اليومية والوزن والتفضيلات في «المتابعة»، وإرسال الخطة زر في رأس الملف، والمحادثة في «شات زنها». المحتوى والمنطق كما هما.
-function hxHasPlan(c) { return !!(c && (c.plan || (c.planSrc === 'ready' && c.ready && c.readyDoc && window.RL) || c.rawSnap)); }
+function hxHasPlan(c) { return !!(c && ((c.planSrc === 'plib' && c.plib && window.PL) || c.plan || (c.planSrc === 'ready' && c.ready && c.readyDoc && window.RL) || c.rawSnap)); }
 function hxLastLine() { return '<p class="small hxlast">آخر تحقق ' + hxAgo(HX.last) + ' <button class="sec sm" data-a="hxCheck">↻ تحقق الآن</button></p>'; }
 function hxLinkCard(c) {
   var x = c.hx, ath = c.kind === 'athlete';
@@ -484,11 +484,11 @@ Object.assign(A, {
     var ts = Date.now(); hxSendTo(cid, q.encPub, HX.st.inv[q.h].tok, { t: 'msg', text: t.slice(0, 2000), ts: ts }).then(function () { q.msgs = (q.msgs || []).concat([{ from: 'd', t: t, ts: ts }]); q.unread = 0; return hxSave(); }).then(main).catch(hxErr);
   },
   hxSendPlan: function () {
-    var c = cur(), rd = c && c.planSrc === 'ready' && c.ready && c.readyDoc && window.RL; if (!c || !c.hx || !(c.plan || rd || c.rawSnap)) return; var snap;
-    try { snap = c.rawSnap ? JSON.parse(JSON.stringify(c.rawSnap)) : rd ? RL.toHissati(c.readyDoc, RL.plan(c.ready.id)) : c.kind === 'athlete' ? hxSnapG(c) : hxSnap(c); } catch (e) { toast('تعذّر تجهيز الخطة: ' + e.message); return; }
+    var c = cur(), rd = c && c.planSrc === 'ready' && c.ready && c.readyDoc && window.RL, pb = c && c.planSrc === 'plib' && c.plib && window.PL; if (!c || !c.hx || !(c.plan || rd || pb || c.rawSnap)) return; var snap;
+    try { snap = c.rawSnap ? JSON.parse(JSON.stringify(c.rawSnap)) : pb ? PL.toHissati(c) : rd ? RL.toHissati(c.readyDoc, RL.plan(c.ready.id)) : c.kind === 'athlete' ? hxSnapG(c) : hxSnap(c); } catch (e) { toast('تعذّر تجهيز الخطة: ' + e.message); return; }
     var v = (c.hx.planV || 0) + 1; toast('جارٍ الإرسال…');
     if (c.work) snap.work = c.work; if (c.shop) snap.shop = c.shop; if (S.settings && (S.settings.exlib || []).length) snap.lib = S.settings.exlib; snap.gate = c.hx.gate ? { on: 1, hour: c.hx.gateH || 12 } : null; snap.wm = (c.name || '') + ' • ' + (c.code || '');
-    hxSend(c, { t: 'plan', v: v, plan: snap, note: '' }).then(function () { c.hx.planV = v; c.hx.sentAt = Date.now(); try { c.hx.snap = hxSlim(snap); c.hx.snap.v = v; } catch (e) { } if (rd) c.ready.sentV = v; persist(c); main(); toast('✓ وصلت الخطة v' + v + ' إلى «زنها» مع إشعار للعميل'); }).catch(hxErr);
+    hxSend(c, { t: 'plan', v: v, plan: snap, note: '' }).then(function () { c.hx.planV = v; c.hx.sentAt = Date.now(); try { c.hx.snap = hxSlim(snap); c.hx.snap.v = v; } catch (e) { } if (rd) c.ready.sentV = v; if (pb) c.plib.sentV = v; persist(c); main(); toast('✓ وصلت الخطة v' + v + ' إلى «زنها» مع إشعار للعميل'); }).catch(hxErr);
   },
   hxSendMsg: function () {
     var c = cur(), ta = $('#hxMsg'), t = ta && ta.value.trim(); if (!c || !t) return;
