@@ -16,10 +16,10 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   ok('سلامة الخطة: عميل حصص جديد بلا هدف ولا نشاط افتراضيين (مطلوب)، ولا توليد بالمحرك ولا من البنك قبل تحديدهما');
   assert(await p.isVisible('main [data-a="genBank"]') && await p.isVisible('main [data-a="gen"]:has-text("ولّد خطة جديدة")')); assert.strictEqual(await p.locator('main :text("ولّد الخطة ←")').count(), 0);
   assert.strictEqual(await p.locator('main .rdbox').count(), 0, 'لا صندوق أعلى الصفحة');
-  const h = await p.evaluate(() => document.querySelector('main').scrollHeight); assert(h < 1150, 'ارتفاع الصفحة ' + h);
+  const h = await p.evaluate(() => document.querySelector('main').scrollHeight); assert(h < 1200, 'ارتفاع الصفحة ' + h);      // 1.01: +50 لبطاقة المحرك الجديد أعلى الملف (قرار المالك: ظاهرة)
   assert(!(await p.isVisible('[data-f="proGkg"]')), 'الماكروز مطوية'); await p.click('details.fold > summary'); assert(await p.isVisible('[data-f="proGkg"]'));
-  await p.click('details.rddd >> nth=0 >> summary'); await p.check('[data-ck="conditions"] >> nth=2'); await p.click('main h3, main .t', { force: true }).catch(() => { });
-  assert(/مقاومة/.test(await p.textContent('details.rddd >> nth=0 >> summary'))); assert((await C()).conditions.some((x) => /مقاومة/.test(x)));
+  await p.click('details.rddd:has([data-ck="conditions"]) > summary'); await p.check('[data-ck="conditions"] >> nth=2'); await p.click('main h3, main .t', { force: true }).catch(() => { });
+  assert(/مقاومة/.test(await p.textContent('details.rddd:has([data-ck="conditions"]) > summary'))); assert((await C()).conditions.some((x) => /مقاومة/.test(x)));
   ok('«بيانات العميل» أقصر بالثلث: الحالة الصحية والحساسية وخيارات الأصناف قوائم منسدلة (الملخص يتحدث ويُحفظ)، والماكروز مطوية، وزرّا «ولّد خطة من البنك» و«ولّد خطة جديدة»');
   // ---- منتقي البنك
   await p.click('main [data-a="genBank"]'); await p.waitForSelector('.rdbank'); assert.strictEqual(await p.evaluate(() => DPApp.S.tab), 'plan');

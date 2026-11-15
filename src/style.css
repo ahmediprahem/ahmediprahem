@@ -417,4 +417,4 @@ header .hdast{display:none!important}
 .tcmp{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums}.tcmp th,.tcmp td{padding:4px 8px;border-bottom:1px solid var(--line,#ccd);text-align:center}.tcmp tbody th{text-align:right;font-weight:500}
 
 /* المحرك الجديد في أعلى ملف العميل */
-.tcard{margin:0 0 12px;padding:10px 14px;border-radius:14px;border:1.5px solid color-mix(in srgb,var(--accent,#3fbf93) 60%,transparent);background:color-mix(in srgb,var(--accent,#3fbf93) 8%,transparent)}.tcard #mtailor{margin:0}
+.tcard{margin:0 0 4px;padding:0 12px 4px;border-radius:14px;border:1.5px solid color-mix(in srgb,var(--accent,#3fbf93) 60%,transparent);background:color-mix(in srgb,var(--accent,#3fbf93) 8%,transparent)}.tcard #mtailor{margin:0}
