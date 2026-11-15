@@ -77,10 +77,10 @@ function hxCat(sys, path) {
   }
   var tl = path === 'tailor';
   return {
-    v: 1, sys: 'ex', path: tl ? 'tailor' : 'custom', form: tl ? HForms.defaults('tailor') : hxForm('ex'), dname: HX.st.name, clinic: b.clinic || '', groups: D.groups, days: D.days,
+    v: 1, sys: 'ex', path: tl ? 'tailor' : 'custom', form: HForms.normalize(Object.assign({ tailor: 1 }, { steps: hxForm('ex').steps }), 'ex'), dname: HX.st.name,      // 1.04: الاستبيان الموحّد للجميع (+ أسئلة الأخصائي المضافة) clinic: b.clinic || '', groups: D.groups, days: D.days,
     bank: D.bank.filter(function (x) { return x.on; }).map(function (x) { return [x.n, x.m, ((x.ing || [])[0] || {}).n || '']; }),
-    foods: D.foods.filter(function (f) { return f.on !== 0; }).map(function (f) { if (!tl) return [f.n, f.g]; var m = E.fmeta(f); return [f.n, f.g, (f.m || []).join(''), m.r, m.cz, m.x ? 1 : 0, f.dn || '']; }),      // التفصيل: وجبات الصنف ودوره ومطبخه لاختيار أكلات كل وجبة
-    conditions: D.conditions.filter(function (k) { return path === 'tailor' || (D.condExp || []).indexOf(k) < 0; }),      // حالات القواعد الجديدة تُسأل في مسار التفصيل فقط (قواعدها تعمل مع v2) allergens: D.allergens.map(function (a) { return a.label; }),
+    foods: D.foods.filter(function (f) { return f.on !== 0; }).map(function (f) { var m = E.fmeta(f); return [f.n, f.g, (f.m || []).join(''), m.r, m.cz, m.x ? 1 : 0, f.dn || '']; }),      // التفصيل: وجبات الصنف ودوره ومطبخه لاختيار أكلات كل وجبة
+    conditions: D.conditions.slice(),      // حالات القواعد الجديدة تُسأل في مسار التفصيل فقط (قواعدها تعمل مع v2) allergens: D.allergens.map(function (a) { return a.label; }),
     activity: D.settings.activity.map(function (a) { return a[0]; }), goals: D.settings.goals.map(function (g) { return g[0]; })
   };
 }
@@ -242,7 +242,7 @@ function hxApprove(cid) {
   var iv0 = HX.st.inv[req.h], ex = iv0 && iv0.cl && S.clients.filter(function (q) { return q.code === iv0.cl && !q.hx; })[0]; if (ex) return hxApproveLinked(cid, req, ex);
   var g = req.intake.sys === 'g', c = newClient(g ? 'ath' : ''); Object.assign(c, g ? hxMapG(req.intake) : hxMap(req.intake));
   if (g && +req.intake.nmeals >= 2 && typeof athSetMealCount === 'function') athSetMealCount(c, Math.min(8, +req.intake.nmeals));
-  if (!g && req.intake.path === 'tailor') {                         // 1.02: إجابات مسار التفصيل ← ملف العميل
+  if (!g && (req.intake.path === 'tailor' || req.intake.tform)) {                         // 1.02: إجابات مسار التفصيل ← ملف العميل
     var it = req.intake, fr = it.freq || {}, pan = { B: {}, L: {}, D: {}, S: {} };
     if (fr && (+fr.poultry + +fr.red + +fr.fish) > 0) c.freq = { poultry: +fr.poultry || 0, red: +fr.red || 0, fish: +fr.fish || 0 };
     Object.keys(it.mfood || {}).forEach(function (t) { if (!pan[t]) return; Object.keys(it.mfood[t]).forEach(function (n) { if (it.mfood[t][n] === 'love' && D.foods.some(function (f) { return f.n === n; })) pan[t][n] = 'h'; }); }); c.pantry = pan;

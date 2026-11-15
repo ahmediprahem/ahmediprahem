@@ -2576,7 +2576,7 @@ document.addEventListener('click', (e) => {
     case 'submit': {
       if (V.busy) return; V.busy = true; render();
       HXC.fpOf(S.ident.encPub).then((fp) => {
-        const p = JSON.parse(JSON.stringify(S.p)); ['age', 'weight', 'height', 'bf'].forEach((x) => { p[x] = +numOnly(p[x]) || 0; }); p.phone = latin(p.phone); mkForm(); p.sys = SYS; p.qa = intakeQA(); if (SYS === 'g') p.sched = sched(); if (S.cat && S.cat.path === 'tailor') { p.path = 'tailor'; p.cc = tlCC(); try { p.ccRaw = localStorage.getItem(INTRO_CC) || ''; } catch (e) { } p.target = +numOnly(p.target) || 0; Object.keys(p.mfood || {}).forEach((t) => Object.keys(p.mfood[t]).forEach((n) => { if (p.mfood[t][n] === 'no') p.food[n] = 'no'; else if (!p.food[n]) p.food[n] = 'love'; })); }
+        const p = JSON.parse(JSON.stringify(S.p)); ['age', 'weight', 'height', 'bf'].forEach((x) => { p[x] = +numOnly(p[x]) || 0; }); p.phone = latin(p.phone); mkForm(); p.sys = SYS; p.qa = intakeQA(); if (SYS === 'g') p.sched = sched(); if (S.cat && S.cat.form && S.cat.form.tailor) { p.tform = 1; p.path = S.cat.path === 'tailor' ? 'tailor' : 'custom'; p.cc = tlCC(); try { p.ccRaw = localStorage.getItem(INTRO_CC) || ''; } catch (e) { } p.target = +numOnly(p.target) || 0; Object.keys(p.mfood || {}).forEach((t) => Object.keys(p.mfood[t]).forEach((n) => { if (p.mfood[t][n] === 'no') p.food[n] = 'no'; else if (!p.food[n]) p.food[n] = 'love'; })); }
         if (!S.weights.length && p.weight) S.weights.push([now(), p.weight]);
         S.req = 'sent'; S.reqMsg = ''; S.screen = 'sent';
         return send({ t: 'intake', p, fp });

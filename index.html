@@ -4384,7 +4384,13 @@ E.ctx = function (client, D) {
   var clone = function (o) { return JSON.parse(JSON.stringify(o)); };
   // يكمّل استبياناً محفوظاً بما أُضيف للافتراضي لاحقاً، ويحذف الأساسي المجهول، ويمنع إخفاء الأساسي جداً
   function normalize(spec, sys) {
-    if (spec && spec.tailor) return DEF.tailor();      // مسار التفصيل: الاستبيان ثابت (لا يُعدَّل)
+    if (spec && spec.tailor) {                                           // 1.04 الاستبيان الموحّد: أسئلة التفصيل ثابتة، وأسئلة الأخصائي المضافة في قسم أخير
+      var T = DEF.tailor(), extra = [], seenX = {};
+      (spec.steps || []).forEach(function (s) { if (!s || s.hide) return; (s.q || []).forEach(function (q) { if (!q || q.b || q.hide || !q.id || seenX[q.id]) return; var t = TYPES.some(function (x) { return x[0] === q.type; }) ? q.type : 'text', c = { id: String(q.id).slice(0, 24), type: t, label: String(q.label || '').slice(0, 160) || 'سؤال', req: q.req ? 1 : 0 };
+        if (q.help) c.help = String(q.help).slice(0, 200); if (t === 'num' && q.unit) c.unit = String(q.unit).slice(0, 20); if (t === 'one' || t === 'many') { c.opts = (q.opts || []).map(function (o) { return String(o).trim().slice(0, 80); }).filter(Boolean).slice(0, 20); if (!c.opts.length) c.opts = ['نعم', 'لا']; } seenX[c.id] = 1; extra.push(c); }); });
+      if (extra.length) T.steps.push({ id: 'custom_x', t: String(spec.xt || 'أسئلة أخصائيك').slice(0, 60), custom: 1, q: extra });
+      return T;
+    }
     sys = sys === 'g' ? 'g' : 'ex'; var d = DEF[sys](); if (!spec || !spec.steps) return d;
     var dq = {}, dstep = {}; d.steps.forEach(function (s) { s.q.forEach(function (q) { dq[q.id] = q; dstep[q.id] = s.id; }); });
     var out = { sys: sys, steps: [] }, seen = {};
@@ -5548,10 +5554,10 @@ function hxCat(sys, path) {
   }
   var tl = path === 'tailor';
   return {
-    v: 1, sys: 'ex', path: tl ? 'tailor' : 'custom', form: tl ? HForms.defaults('tailor') : hxForm('ex'), dname: HX.st.name, clinic: b.clinic || '', groups: D.groups, days: D.days,
+    v: 1, sys: 'ex', path: tl ? 'tailor' : 'custom', form: HForms.normalize(Object.assign({ tailor: 1 }, { steps: hxForm('ex').steps }), 'ex'), dname: HX.st.name,      // 1.04: الاستبيان الموحّد للجميع (+ أسئلة الأخصائي المضافة) clinic: b.clinic || '', groups: D.groups, days: D.days,
     bank: D.bank.filter(function (x) { return x.on; }).map(function (x) { return [x.n, x.m, ((x.ing || [])[0] || {}).n || '']; }),
-    foods: D.foods.filter(function (f) { return f.on !== 0; }).map(function (f) { if (!tl) return [f.n, f.g]; var m = E.fmeta(f); return [f.n, f.g, (f.m || []).join(''), m.r, m.cz, m.x ? 1 : 0, f.dn || '']; }),      // التفصيل: وجبات الصنف ودوره ومطبخه لاختيار أكلات كل وجبة
-    conditions: D.conditions.filter(function (k) { return path === 'tailor' || (D.condExp || []).indexOf(k) < 0; }),      // حالات القواعد الجديدة تُسأل في مسار التفصيل فقط (قواعدها تعمل مع v2) allergens: D.allergens.map(function (a) { return a.label; }),
+    foods: D.foods.filter(function (f) { return f.on !== 0; }).map(function (f) { var m = E.fmeta(f); return [f.n, f.g, (f.m || []).join(''), m.r, m.cz, m.x ? 1 : 0, f.dn || '']; }),      // التفصيل: وجبات الصنف ودوره ومطبخه لاختيار أكلات كل وجبة
+    conditions: D.conditions.slice(),      // حالات القواعد الجديدة تُسأل في مسار التفصيل فقط (قواعدها تعمل مع v2) allergens: D.allergens.map(function (a) { return a.label; }),
     activity: D.settings.activity.map(function (a) { return a[0]; }), goals: D.settings.goals.map(function (g) { return g[0]; })
   };
 }
@@ -5713,7 +5719,7 @@ function hxApprove(cid) {
   var iv0 = HX.st.inv[req.h], ex = iv0 && iv0.cl && S.clients.filter(function (q) { return q.code === iv0.cl && !q.hx; })[0]; if (ex) return hxApproveLinked(cid, req, ex);
   var g = req.intake.sys === 'g', c = newClient(g ? 'ath' : ''); Object.assign(c, g ? hxMapG(req.intake) : hxMap(req.intake));
   if (g && +req.intake.nmeals >= 2 && typeof athSetMealCount === 'function') athSetMealCount(c, Math.min(8, +req.intake.nmeals));
-  if (!g && req.intake.path === 'tailor') {                         // 1.02: إجابات مسار التفصيل ← ملف العميل
+  if (!g && (req.intake.path === 'tailor' || req.intake.tform)) {                         // 1.02: إجابات مسار التفصيل ← ملف العميل
     var it = req.intake, fr = it.freq || {}, pan = { B: {}, L: {}, D: {}, S: {} };
     if (fr && (+fr.poultry + +fr.red + +fr.fish) > 0) c.freq = { poultry: +fr.poultry || 0, red: +fr.red || 0, fish: +fr.fish || 0 };
     Object.keys(it.mfood || {}).forEach(function (t) { if (!pan[t]) return; Object.keys(it.mfood[t]).forEach(function (n) { if (it.mfood[t][n] === 'love' && D.foods.some(function (f) { return f.n === n; })) pan[t][n] = 'h'; }); }); c.pantry = pan;
@@ -6012,7 +6018,7 @@ function fmAddForm(si) {
 }
 function formsPage() {
   var sys = fmSys(), spec = fmSpec(), n = spec.steps.length;
-  return '<h3>📝 استبيانات «زنها»</h3><p class="small">ما يملؤه العميل في «زنها» عند التسجيل. لكل نظام استبيانه: غيّر نص أي سؤال، أخفِ ما لا تحتاجه، رتّب الأقسام والأسئلة، وأضف أسئلة بأنواع مختلفة أو أقساماً جديدة. يُرسل الاستبيان مع كل دعوة جديدة، وتصلك الإجابات في طلب العميل وفي ملاحظاته.</p>'
+  return '<div class="ok small">1.04: استبيان العميل موحّد للجميع في نظام الحصص (أسئلة التفصيل: الهدف، الصحة، اليوم، أكلات كل وجبة، الغداء، الكميات). الأسئلة التي تضيفها هنا تظهر للعميل في قسم أخير «أسئلة أخصائيك»، وتعديل نصوص الأسئلة الأساسية لم يعد يظهر له. استبيان الجرامات كما هو.</div><h3>📝 استبيانات «زنها»</h3><p class="small">ما يملؤه العميل في «زنها» عند التسجيل. لكل نظام استبيانه: غيّر نص أي سؤال، أخفِ ما لا تحتاجه، رتّب الأقسام والأسئلة، وأضف أسئلة بأنواع مختلفة أو أقساماً جديدة. يُرسل الاستبيان مع كل دعوة جديدة، وتصلك الإجابات في طلب العميل وفي ملاحظاته.</p>'
     + '<div class="tabs"><button class="' + (sys === 'ex' ? 'on' : '') + '" data-a="fmSys" data-v="ex">نظام الحصص</button><button class="' + (sys === 'g' ? 'on' : '') + '" data-a="fmSys" data-v="g">نظام الجرامات</button></div>'
     + '<p class="two"><button data-a="fmStepAdd">+ قسم جديد</button><button class="sec" data-a="fmPrint">🖨 نسخة ورقية للطباعة</button><button class="sec" data-a="fmReset">استعادة الاستبيان الافتراضي</button></p>'
     + spec.steps.map(function (st, si) {

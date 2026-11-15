@@ -42,7 +42,13 @@
   var clone = function (o) { return JSON.parse(JSON.stringify(o)); };
   // يكمّل استبياناً محفوظاً بما أُضيف للافتراضي لاحقاً، ويحذف الأساسي المجهول، ويمنع إخفاء الأساسي جداً
   function normalize(spec, sys) {
-    if (spec && spec.tailor) return DEF.tailor();      // مسار التفصيل: الاستبيان ثابت (لا يُعدَّل)
+    if (spec && spec.tailor) {                                           // 1.04 الاستبيان الموحّد: أسئلة التفصيل ثابتة، وأسئلة الأخصائي المضافة في قسم أخير
+      var T = DEF.tailor(), extra = [], seenX = {};
+      (spec.steps || []).forEach(function (s) { if (!s || s.hide) return; (s.q || []).forEach(function (q) { if (!q || q.b || q.hide || !q.id || seenX[q.id]) return; var t = TYPES.some(function (x) { return x[0] === q.type; }) ? q.type : 'text', c = { id: String(q.id).slice(0, 24), type: t, label: String(q.label || '').slice(0, 160) || 'سؤال', req: q.req ? 1 : 0 };
+        if (q.help) c.help = String(q.help).slice(0, 200); if (t === 'num' && q.unit) c.unit = String(q.unit).slice(0, 20); if (t === 'one' || t === 'many') { c.opts = (q.opts || []).map(function (o) { return String(o).trim().slice(0, 80); }).filter(Boolean).slice(0, 20); if (!c.opts.length) c.opts = ['نعم', 'لا']; } seenX[c.id] = 1; extra.push(c); }); });
+      if (extra.length) T.steps.push({ id: 'custom_x', t: String(spec.xt || 'أسئلة أخصائيك').slice(0, 60), custom: 1, q: extra });
+      return T;
+    }
     sys = sys === 'g' ? 'g' : 'ex'; var d = DEF[sys](); if (!spec || !spec.steps) return d;
     var dq = {}, dstep = {}; d.steps.forEach(function (s) { s.q.forEach(function (q) { dq[q.id] = q; dstep[q.id] = s.id; }); });
     var out = { sys: sys, steps: [] }, seen = {};
