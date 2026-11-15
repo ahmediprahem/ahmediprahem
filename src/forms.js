@@ -19,6 +19,16 @@
         { id: 'habits', t: 'يومك', q: [B('wake', 'أستيقظ عادة'), B('sleep', 'أنام عادة'), B('nmeals', 'كم وجبة تفضّل في اليوم؟'), B('wdays', 'أيام التمرين')] }
       ] };
     },
+    tailor: function () {                                              // 1.02 مسار التفصيل: أسئلة النموذج التفاعلي (الهدف، الصحة، اليوم، أصناف كل وجبة، الغداء، الكميات)
+      return { sys: 'ex', tailor: 1, steps: [
+        { id: 'basic', t: 'بياناتك', q: BASIC() },
+        { id: 'goal', t: 'هدفك', q: [B('target', 'وزنك المستهدف'), B('act', 'نشاطك اليومي'), B('goal', 'سرعة الوصول')] },
+        { id: 'health', t: 'صحتك', q: [B('cond', 'هل لديك أي من هذه الحالات؟'), B('allg', 'الحساسية وما لا تأكله'), B('meds', 'أدوية أو مكملات تتناولها'), B('notes', 'أي شيء آخر يحتاج أخصائيك معرفته')] },
+        { id: 'day', t: 'يومك', q: [B('nmeals', 'كم وجبة تفضّل في اليوم؟'), B('week', 'شكل أسبوعك'), B('real', 'واقعك')] },
+        { id: 'mfoods', t: 'أكلاتك', q: [B('mfoods', 'اختر ما تحبه في كل وجبة')] },
+        { id: 'lunch', t: 'غداؤك', q: [B('freq', 'كم مرة تريد في الغداء كل أسبوع؟'), B('scale', 'كيف تحب أن نكتب الكميات؟')] }
+      ] };
+    },
     g: function () {
       return { sys: 'g', steps: [
         { id: 'basic', t: 'بياناتك', q: BASIC().concat([B('bf', 'نسبة الدهون % (إن كنت تعرفها)'), B('sport', 'رياضتك'), B('gphase', 'هدفك الحالي')]) },
@@ -32,6 +42,7 @@
   var clone = function (o) { return JSON.parse(JSON.stringify(o)); };
   // يكمّل استبياناً محفوظاً بما أُضيف للافتراضي لاحقاً، ويحذف الأساسي المجهول، ويمنع إخفاء الأساسي جداً
   function normalize(spec, sys) {
+    if (spec && spec.tailor) return DEF.tailor();      // مسار التفصيل: الاستبيان ثابت (لا يُعدَّل)
     sys = sys === 'g' ? 'g' : 'ex'; var d = DEF[sys](); if (!spec || !spec.steps) return d;
     var dq = {}, dstep = {}; d.steps.forEach(function (s) { s.q.forEach(function (q) { dq[q.id] = q; dstep[q.id] = s.id; }); });
     var out = { sys: sys, steps: [] }, seen = {};
@@ -63,5 +74,5 @@
     if (q.type === 'num') return v + (q.unit ? ' ' + q.unit : ''); return String(v);
   }
   function answered(q, v) { return !(v == null || v === '' || (Array.isArray(v) && !v.length)); }
-  return { TYPES: TYPES, defaults: function (sys) { return DEF[sys === 'g' ? 'g' : 'ex'](); }, normalize: normalize, visibleSteps: visibleSteps, uid: uid, answerText: answerText, answered: answered };
+  return { TYPES: TYPES, defaults: function (sys) { return DEF[sys === 'g' ? 'g' : sys === 'tailor' ? 'tailor' : 'ex'](); }, normalize: normalize, visibleSteps: visibleSteps, uid: uid, answerText: answerText, answered: answered };
 });

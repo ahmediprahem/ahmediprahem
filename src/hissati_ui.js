@@ -75,10 +75,11 @@ function hxCat(sys, path) {
     return { v: 1, sys: 'g', dname: HX.st.name, clinic: b.clinic || '', days: D.days, form: hxForm('g'), fcats: fc, foods: AD.foods.filter(function (f) { return !f.hidden; }).map(function (f) { return [f.n, fi[f.g]]; }),
       phases: AD.phases.map(function (x) { return x.n; }), dayTypes: AD.dayTypes.map(function (x) { return x.n; }), conditions: D.conditions.slice(), allergens: D.allergens.map(function (a) { return a.label; }) };
   }
+  var tl = path === 'tailor';
   return {
-    v: 1, sys: 'ex', form: hxForm('ex'), dname: HX.st.name, clinic: b.clinic || '', groups: D.groups, days: D.days,
+    v: 1, sys: 'ex', path: tl ? 'tailor' : 'custom', form: tl ? HForms.defaults('tailor') : hxForm('ex'), dname: HX.st.name, clinic: b.clinic || '', groups: D.groups, days: D.days,
     bank: D.bank.filter(function (x) { return x.on; }).map(function (x) { return [x.n, x.m, ((x.ing || [])[0] || {}).n || '']; }),
-    foods: D.foods.filter(function (f) { return f.on !== 0; }).map(function (f) { return [f.n, f.g]; }),
+    foods: D.foods.filter(function (f) { return f.on !== 0; }).map(function (f) { if (!tl) return [f.n, f.g]; var m = E.fmeta(f); return [f.n, f.g, (f.m || []).join(''), m.r, m.cz, m.x ? 1 : 0, f.dn || '']; }),      // التفصيل: وجبات الصنف ودوره ومطبخه لاختيار أكلات كل وجبة
     conditions: D.conditions.filter(function (k) { return path === 'tailor' || (D.condExp || []).indexOf(k) < 0; }),      // حالات القواعد الجديدة تُسأل في مسار التفصيل فقط (قواعدها تعمل مع v2) allergens: D.allergens.map(function (a) { return a.label; }),
     activity: D.settings.activity.map(function (a) { return a[0]; }), goals: D.settings.goals.map(function (g) { return g[0]; })
   };
@@ -241,6 +242,13 @@ function hxApprove(cid) {
   var iv0 = HX.st.inv[req.h], ex = iv0 && iv0.cl && S.clients.filter(function (q) { return q.code === iv0.cl && !q.hx; })[0]; if (ex) return hxApproveLinked(cid, req, ex);
   var g = req.intake.sys === 'g', c = newClient(g ? 'ath' : ''); Object.assign(c, g ? hxMapG(req.intake) : hxMap(req.intake));
   if (g && +req.intake.nmeals >= 2 && typeof athSetMealCount === 'function') athSetMealCount(c, Math.min(8, +req.intake.nmeals));
+  if (!g && req.intake.path === 'tailor') {                         // 1.02: إجابات مسار التفصيل ← ملف العميل
+    var it = req.intake, fr = it.freq || {}, pan = { B: {}, L: {}, D: {}, S: {} };
+    if (fr && (+fr.poultry + +fr.red + +fr.fish) > 0) c.freq = { poultry: +fr.poultry || 0, red: +fr.red || 0, fish: +fr.fish || 0 };
+    Object.keys(it.mfood || {}).forEach(function (t) { if (!pan[t]) return; Object.keys(it.mfood[t]).forEach(function (n) { if (it.mfood[t][n] === 'love' && D.foods.some(function (f) { return f.n === n; })) pan[t][n] = 'h'; }); }); c.pantry = pan;
+    if (it.cc === 'eg' || it.cc === 'sa') c.cuisine = it.cc; c.life = it.cook === 'out' ? 'quick' : it.out === 'often' ? 'travel' : 'home';
+    c.notes += '\nمسار التفصيل: ' + ['الوزن المستهدف ' + (+it.target ? it.target + ' كجم' : 'لم يحدده'), 'الأسبوع: ' + ({ mix: 'فطور وعشاء ثابتان وغداء متنوع', varied: 'أيام مختلفة', fixed: 'قائمة ثابتة وبدائل' }[it.week] || '—'), 'الطبخ: ' + ({ me: 'بنفسه', fam: 'أهله', out: 'يطلب غالباً' }[it.cook] || '—'), 'خارج البيت: ' + ({ rare: 'نادراً', some: 'مرة أو مرتين أسبوعياً', often: 'كثيراً' }[it.out] || '—'), 'الصيام: ' + ({ no: 'لا', mt: 'الاثنين والخميس', rm: 'رمضان فقط' }[it.fast] || '—'), 'الكميات: ' + ({ yes: 'بالجرام', mix: 'جرامات للحوم والنشويات', no: 'مقاييس منزلية' }[it.scale] || '—'), 'البلد: ' + (it.ccRaw || '—')].join(' • ');
+  }
   if (!g && hxQA(req.intake).length) c.notes += '\nإجابات الاستبيان:\n' + hxQA(req.intake).map(function (x) { return '• ' + x[0] + ': ' + x[1]; }).join('\n');
   c.hx = { cid: cid, enc: req.encPub, tok: HX.st.inv[req.h].tok, label: req.label, msgs: req.msgs || [], unread: req.unread || 0, logs: {}, weights: [[Date.now(), c.weight]], prefLog: [], prefs: { food: req.intake.food || {}, like: req.intake.like || {}, nope: req.intake.nope || {} }, intake: req.intake, planV: 0, since: Date.now(), quiz: req.quiz || null };
   var tailor = !g && iv0 && iv0.path === 'tailor', auto = false; c.path = g ? 'g' : tailor ? 'tailor' : 'custom';
