@@ -11,7 +11,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   await p.waitForSelector('#tg .obn'); const note = await p.textContent('#tg .obn'); assert(/الوزن المعدّل/.test(note) && /BMI ≥ 30/.test(note), note);
   let c = await C(); const T = await p.evaluate((x) => DPEngine.targets(x, DATA), c); assert(T.obese && Math.abs(T.pro / T.adjbw - 1.3) < 0.21 && T.pro < 112 * 1.2, JSON.stringify([T.pro, T.adjbw]));
   ok('السمنة: البروتين على الوزن المعدّل (~1.3 جم/كجم) وملاحظة تشرح ذلك ونسب الماكروز');
-  await p.click('details.rddd:has([data-bf]) > summary'); await p.check('[data-bf="proActual"]'); await p.waitForTimeout(150); assert(!(await p.isVisible('#tg .obn')), 'الوزن الفعلي يلغي الملاحظة'); c = await C(); assert.strictEqual(c.proRef, 'actual');
+  await p.click('details.rddd:has([data-bf="proActual"]) > summary'); await p.check('[data-bf="proActual"]'); await p.waitForTimeout(150); assert(!(await p.isVisible('#tg .obn')), 'الوزن الفعلي يلغي الملاحظة'); c = await C(); assert.strictEqual(c.proRef, 'actual');
   if (!(await p.isVisible('[data-bf="proActual"]'))) await p.click('details.rddd:has([data-bf]) > summary'); await p.uncheck('[data-bf="proActual"]'); await p.waitForSelector('#tg .obn'); c = await C(); assert(!c.proRef);
   ok('خيار «البروتين على الوزن الفعلي» يعمل ذهاباً وإياباً');
   await p.selectOption('[data-f="cuisine"]', 'eg'); await p.selectOption('[data-f="budget"]', '1'); await p.selectOption('[data-f="life"]', 'quick'); if (!(await p.isVisible('[data-nb="S"]'))) await p.click('details.rddd:has([data-bf]) > summary'); await p.check('[data-nb="S"]'); await p.check('[data-nb="B"]'); await p.check('[data-nb="L"]'); await p.check('[data-nb="D"]');
