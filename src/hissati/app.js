@@ -817,7 +817,7 @@ function scrWizard() {
   mkForm(); const N = FS.length; if (S.step > N) S.step = N; const s = S.step, st = FS[s - 1];
   const body = vq(st).map((q) => q.b ? (BQ[q.id] ? BQ[q.id](q) : '') : cqHtml(q)).join('');
   const mq = vq(st).some((q) => q.id === 'mfoods') ? tlSeq() : null, sub = mq && S.tls < mq.length - 1;      // اختيار الأكلات: شاشات فرعية قبل الخطوة التالية
-  return '<div class="scr">' + (mq && S.tls > 0 ? head(esc(st.t), 'tls', S.tls - 1, 'الخطوة ' + s + ' من ' + N + ' • ' + (S.tls + 1) + '/' + mq.length) : head(esc(st.t), 'step', s - 1, 'الخطوة ' + s + ' من ' + N + (mq ? ' • 1/' + mq.length : '')))
+  return '<div class="scr qz">' + (mq && S.tls > 0 ? head(esc(st.t), 'tls', S.tls - 1, 'الخطوة ' + s + ' من ' + N + ' • ' + (S.tls + 1) + '/' + mq.length) : head(esc(st.t), 'step', s - 1, 'الخطوة ' + s + ' من ' + N + (mq ? ' • 1/' + mq.length : '')))
     + '<div class="prog"><i style="width:' + Math.round(s / N * 100) + '%"></i></div>'
     + '<div class="scroll"><div class="stack">' + (() => { const w = [...new Set(vq(st).filter((q) => q.b && WHY[q.id]).map((q) => WHY[q.id]))]; return w.length ? '<p class="why" role="note">' + I('lock') + ' لماذا نسأل؟ ' + w.join(' • ') + '</p>' : ''; })() + (s === 1 && S.req === 'changes' && S.reqMsg ? '<div class="banner warn">' + I('msg') + '<span><b>' + esc(S.dname) + ':</b> ' + esc(S.reqMsg) + '</span></div>' : '') + body + '</div></div>'
     + '<div class="foot">' + (sub ? '<button class="btn full" data-act="tls" data-v="' + (S.tls + 1) + '" ' + (tlSubOk(mq[S.tls]) ? '' : 'disabled') + '>' + (S.tls ? 'التالي' : 'لنبدأ') + '</button>' : '<button class="btn full" data-act="step" data-v="' + (s + 1) + '" ' + (stepOk(st) ? '' : 'disabled') + '>' + (s === N ? 'مراجعة' : 'التالي') + '</button>') + '</div></div>';
@@ -852,7 +852,7 @@ function scrReview() {
   mkForm(); const N = FS.length;
   const sec = (st, i) => '<section class="card rv"><div class="rh"><h3>' + esc(st.t) + '</h3><button class="link" data-act="step" data-v="' + (i + 1) + '">تعديل</button></div><dl class="kv">'
     + vq(st).map((q) => { const t = q.b ? bqText(q) : HForms.answerText(q, (S.p.cq || {})[q.id]); return t ? '<dt>' + esc(q.label) + '</dt><dd' + (q.id === 'phone' ? ' dir="ltr" style="text-align:right"' : '') + '>' + esc(t) + '</dd>' : ''; }).join('') + '</dl></section>';
-  return '<div class="scr">' + head('راجع بياناتك', 'step', N) + '<div class="scroll"><div class="stack">' + FS.map(sec).join('')
+  return '<div class="scr qz">' + head('راجع بياناتك', 'step', N) + '<div class="scroll"><div class="stack">' + FS.map(sec).join('')
     + '<label class="consent"><input type="checkbox" id="consent" data-act="consent" ' + (S.consent ? 'checked' : '') + '><span>أوافق على حفظ بياناتي الصحية مشفّرة ومشاركتها مع ' + esc(S.dname) + ' فقط لإعداد خطتي ومتابعتي.</span></label>'
     + '</div></div><div class="foot"><button class="btn full" data-act="submit" ' + (S.consent && !V.busy ? '' : 'disabled') + '>' + I('send') + (V.busy ? ' جارٍ الإرسال…' : ' أرسل إلى أخصائيك') + '</button></div></div>';
 }

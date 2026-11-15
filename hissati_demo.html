@@ -1048,6 +1048,39 @@ button.plsub:not([disabled]){text-decoration:underline dotted;text-underline-off
 .tlsec h3 small{font-weight:400}.tlsug{align-self:flex-start}.tlq{min-height:40px}
 .tlhint{font-size:calc(14px*var(--fs));color:var(--coral);background:var(--coralBg);border-radius:12px;padding:8px 12px;margin:0}.tlhint.ok{color:var(--mint);background:rgba(111,227,169,.14)}
 
+/* 1.06 الاستبيان بألوان النموذج التجريبي الأخير: خلفية بيضاء بتدرّج باستيل في الأعلى، نص كحلي، برتقالي للفعل، أخضر لـ«أحبه» */
+.scr.qz{--text:#101736;--mut:#58618a;--dim:#8a91ad;--line:rgba(16,23,54,.12);--line2:rgba(16,23,54,.2);--glass:#fff;--glass2:#f3f5fc;--glass3:#ffeadb;--mint:#0f8f6b;--coral:#c2410c;--coralBg:#fff1e8;--amber:#a85200;--acc:#e0540a;--accS:#ffeadb;--ok:#0f8f6b;--okS:#dff5ec;--warnS:#fff1d6;--bg:#fff;--hi:none;
+  background:#fff;color:var(--text);color-scheme:light;isolation:isolate}
+.scr.qz::before{content:"";position:absolute;inset:0 0 auto 0;height:260px;z-index:-1;pointer-events:none;background:radial-gradient(60% 90% at 92% 0,#ffd9c2,transparent 72%),radial-gradient(60% 90% at 6% 0,#ddd0ff,transparent 72%),radial-gradient(46% 70% at 50% -8%,#c8f2e2,transparent 72%)}
+.scr.qz h2,.scr.qz h3,.scr.qz b{color:var(--text)}
+.scr.qz .hd .back{border-radius:50%;background:rgba(255,255,255,.8);border-color:var(--line);color:var(--text)}.scr.qz .hd .back svg{stroke:var(--text)}
+.scr.qz .prog{background:rgba(16,23,54,.07);height:8px;border-radius:8px}.scr.qz .prog i{background:linear-gradient(90deg,#ff9a4a,#e0540a);border-radius:8px}
+.scr.qz .stepk{color:var(--acc);font-weight:600}
+.scr.qz .card{background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:none}
+.scr.qz .btn{background:#e0540a;color:#fff;border:0;border-radius:18px;min-height:54px;box-shadow:0 10px 22px rgba(224,84,10,.3)}.scr.qz .btn[disabled]{opacity:.4;box-shadow:none}
+.scr.qz .btn.sec{background:#fff;color:var(--text);border:1px solid var(--line);box-shadow:none}
+.scr.qz .foot{background:linear-gradient(to bottom,rgba(255,255,255,0),#fff 34%)}
+.scr.qz .inp{background:#fff;border:1.5px solid var(--line);color:var(--text)}.scr.qz .inp::placeholder{color:#9aa1bd}.scr.qz .inp:focus{border-color:var(--acc);outline:0}
+.scr.qz .field label,.scr.qz .lbl{color:var(--mut)}
+.scr.qz .chip,.scr.qz .act{background:#fff;border:1.5px solid var(--line);color:var(--text);border-radius:99px}.scr.qz .act{border-radius:20px}
+.scr.qz .chip.on,.scr.qz .act.on{border-color:var(--acc);background:var(--accS);color:var(--acc);font-weight:700}
+.scr.qz .act .bars i{background:rgba(16,23,54,.12)}.scr.qz .act .bars i.f{background:var(--acc)}
+.scr.qz .segc{background:rgba(16,23,54,.05);border-color:var(--line)}.scr.qz .segc button{color:var(--mut)}.scr.qz .segc button.on{background:#fff;color:var(--acc);font-weight:700;box-shadow:0 2px 8px rgba(16,23,54,.1)}
+.scr.qz .food{background:#fff;border:1.5px solid var(--line);color:var(--text);border-radius:99px;min-height:44px}
+.scr.qz .food.love{border-color:var(--ok);background:var(--okS);color:#0b5f48}
+.scr.qz .food.no{opacity:.55;border-style:dashed;background:#fff;color:var(--mut);text-decoration:line-through}
+.scr.qz .banner.info{background:#fff;border:1px dashed var(--line);color:var(--text)}.scr.qz .banner.warn{background:var(--warnS);border-color:#ffd58a;color:#7a3d00}.scr.qz .banner.ok{background:var(--okS);border-color:#9fdcc6;color:#0b5f48}
+.scr.qz .why{background:#fff;border-color:var(--line);color:var(--mut)}
+.scr.qz .link{color:var(--acc)}.scr.qz .tlsug{color:var(--acc);font-weight:700}
+.scr.qz .tlreq{background:var(--warnS);color:#a85200}.scr.qz .tlreq.ok{background:var(--okS);color:var(--ok)}
+.scr.qz .tlhint{background:var(--warnS);color:#a85200}.scr.qz .tlhint.ok{background:var(--okS);color:var(--ok)}
+.scr.qz .tlplate{filter:drop-shadow(0 8px 14px rgba(16,23,54,.12))}.scr.qz .tlplate .rim{fill:#fff;stroke:var(--line)}.scr.qz .tlplate .well,.scr.qz .tlplate .wb{fill:rgba(16,23,54,.07)}.scr.qz .tlplate .hub{fill:#fff;stroke:var(--line)}
+.scr.qz .tlfq .stp button{background:#fff;border-color:var(--line);color:var(--text)}
+.scr.qz .kv dt{color:var(--mut)}.scr.qz .ok{color:var(--ok)}.scr.qz .need{color:#a85200}
+.scr.qz .pk{background:#fff;border-color:var(--line);color:var(--text)}.scr.qz select.inp option{color:#101736;background:#fff}
+.scr.qz .srch{background:#fff;border-color:var(--line)}.scr.qz .srch input{color:var(--text)}.scr.qz .tabs button{background:#fff;color:var(--mut)}.scr.qz .tabs button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+html:has(.scr.qz),body:has(.scr.qz){background:#fff!important}body:has(.scr.qz)::after,body:has(.scr.qz)::before{display:none}body:has(.scr.qz) #app,body:has(.scr.qz) .app{background:#fff}
+
 /* ==========================================================================
    «حصتي» — themes.css  •  ثيم «وردة» (data-theme="rose") وثيم «نبض» (data-theme="pulse")
    يُحمَّل بعد code/style.css. الثيم الحالي يبقى الافتراضي: بلا data-theme لا يتغيّر شيء.
@@ -4447,7 +4480,7 @@ function scrWizard() {
   mkForm(); const N = FS.length; if (S.step > N) S.step = N; const s = S.step, st = FS[s - 1];
   const body = vq(st).map((q) => q.b ? (BQ[q.id] ? BQ[q.id](q) : '') : cqHtml(q)).join('');
   const mq = vq(st).some((q) => q.id === 'mfoods') ? tlSeq() : null, sub = mq && S.tls < mq.length - 1;      // اختيار الأكلات: شاشات فرعية قبل الخطوة التالية
-  return '<div class="scr">' + (mq && S.tls > 0 ? head(esc(st.t), 'tls', S.tls - 1, 'الخطوة ' + s + ' من ' + N + ' • ' + (S.tls + 1) + '/' + mq.length) : head(esc(st.t), 'step', s - 1, 'الخطوة ' + s + ' من ' + N + (mq ? ' • 1/' + mq.length : '')))
+  return '<div class="scr qz">' + (mq && S.tls > 0 ? head(esc(st.t), 'tls', S.tls - 1, 'الخطوة ' + s + ' من ' + N + ' • ' + (S.tls + 1) + '/' + mq.length) : head(esc(st.t), 'step', s - 1, 'الخطوة ' + s + ' من ' + N + (mq ? ' • 1/' + mq.length : '')))
     + '<div class="prog"><i style="width:' + Math.round(s / N * 100) + '%"></i></div>'
     + '<div class="scroll"><div class="stack">' + (() => { const w = [...new Set(vq(st).filter((q) => q.b && WHY[q.id]).map((q) => WHY[q.id]))]; return w.length ? '<p class="why" role="note">' + I('lock') + ' لماذا نسأل؟ ' + w.join(' • ') + '</p>' : ''; })() + (s === 1 && S.req === 'changes' && S.reqMsg ? '<div class="banner warn">' + I('msg') + '<span><b>' + esc(S.dname) + ':</b> ' + esc(S.reqMsg) + '</span></div>' : '') + body + '</div></div>'
     + '<div class="foot">' + (sub ? '<button class="btn full" data-act="tls" data-v="' + (S.tls + 1) + '" ' + (tlSubOk(mq[S.tls]) ? '' : 'disabled') + '>' + (S.tls ? 'التالي' : 'لنبدأ') + '</button>' : '<button class="btn full" data-act="step" data-v="' + (s + 1) + '" ' + (stepOk(st) ? '' : 'disabled') + '>' + (s === N ? 'مراجعة' : 'التالي') + '</button>') + '</div></div>';
@@ -4482,7 +4515,7 @@ function scrReview() {
   mkForm(); const N = FS.length;
   const sec = (st, i) => '<section class="card rv"><div class="rh"><h3>' + esc(st.t) + '</h3><button class="link" data-act="step" data-v="' + (i + 1) + '">تعديل</button></div><dl class="kv">'
     + vq(st).map((q) => { const t = q.b ? bqText(q) : HForms.answerText(q, (S.p.cq || {})[q.id]); return t ? '<dt>' + esc(q.label) + '</dt><dd' + (q.id === 'phone' ? ' dir="ltr" style="text-align:right"' : '') + '>' + esc(t) + '</dd>' : ''; }).join('') + '</dl></section>';
-  return '<div class="scr">' + head('راجع بياناتك', 'step', N) + '<div class="scroll"><div class="stack">' + FS.map(sec).join('')
+  return '<div class="scr qz">' + head('راجع بياناتك', 'step', N) + '<div class="scroll"><div class="stack">' + FS.map(sec).join('')
     + '<label class="consent"><input type="checkbox" id="consent" data-act="consent" ' + (S.consent ? 'checked' : '') + '><span>أوافق على حفظ بياناتي الصحية مشفّرة ومشاركتها مع ' + esc(S.dname) + ' فقط لإعداد خطتي ومتابعتي.</span></label>'
     + '</div></div><div class="foot"><button class="btn full" data-act="submit" ' + (S.consent && !V.busy ? '' : 'disabled') + '>' + I('send') + (V.busy ? ' جارٍ الإرسال…' : ' أرسل إلى أخصائيك') + '</button></div></div>';
 }
