@@ -4,7 +4,7 @@
    - تقدّم تطبيق «زنها» نفسه على الصفحة الرئيسية (/)، فرابط الدعوة = عنوان هذه المحطة.
    - الجداول تُنشأ تلقائياً أول مرة؛ يكفي ربط قاعدة D1 باسم DB. متغير اختياري REG_KEY: مفتاح تسجيل الأخصائيين (بدونه يقبل أي «حصة»).
    - لا تسجّل أي محتوى (لا console.log). يُبنى منه worker/relay/dist/worker.js بـ py build_web.py (يُضمَّن تطبيق «زنها» وأيقونته). */
-const VER = '1.13';
+const VER = '1.14';
 // ---- 1.7: رخصة الأخصائي: كود تفعيل موقَّع بمفتاح المدير (ADMIN_PUB، مفتاح عام) يغني عن مفتاح التسجيل، فيُربط الأخصائي تلقائياً دون سر في الموقع
 const b64uBytes = (x) => { x = x.replace(/-/g, '+').replace(/_/g, '/'); while (x.length % 4) x += '='; const b = atob(x), u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; };
 async function licOk(tok, env) {
@@ -138,6 +138,13 @@ async function api(req, env, url, ctx) {
   const body = method === 'POST' ? await req.text() : ''; if (body.length > LIM.body) return err(413, 'big', 'الطلب أكبر من المسموح');
   let J = {}; if (body) { try { J = JSON.parse(body); } catch { return err(400, 'json', 'صيغة غير صالحة'); } }
   if (p === '/v1/health') return json({ ok: true, ver: VER, reg: !!env.REG_KEY, lic: !!env.ADMIN_PUB });
+  if (p === '/v1/st' && method === 'GET') {                         // 1.12 حزمة الملصقات (عامة، تُخزَّن في المتصفح)
+    const n = await one(db, "SELECT v FROM kv WHERE k = 'st.n'"); if (!n) return json({ ok: true, st: {} });
+    const [cnt, ver] = String(n.v).split('|'), rows = await all(db, "SELECT k, v FROM kv WHERE k LIKE 'st.%' AND k != 'st.n'"), parts = [];
+    rows.forEach((r) => { parts[+r.k.slice(3)] = r.v; }); if (parts.length !== +cnt) return json({ ok: true, st: {} });
+    if (req.headers.get('if-none-match') === '"' + ver + '"') return new Response(null, { status: 304, headers: { etag: '"' + ver + '"', ...CORS } });
+    return new Response('{"ok":true,"st":' + parts.join('') + '}', { headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'public, max-age=3600', etag: '"' + ver + '"', ...CORS } });
+  }
   if (p === '/v1/register' && method === 'POST') {
     if (!validJwk(J.sigPub) || !validJwk(J.encPub)) return err(400, 'keys', 'مفاتيح غير صالحة');
     if (env.REG_KEY && J.regKey !== env.REG_KEY && !(await licOk(J.lic, env))) return err(403, 'regkey', 'مفتاح التسجيل غير صحيح أو رخصة التفعيل غير صالحة');

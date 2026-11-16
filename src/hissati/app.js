@@ -255,7 +255,7 @@ function handle(p) {
   }
   if (p.t === 'lib' && Array.isArray(p.lib)) { S.lib = cleanLib(p.lib); return true; }
   if (p.t === 'msg' && p.text) {
-    S.msgs.push(Object.assign({ from: 'd', t: String(p.text).slice(0, 2000), ts: p.ts || now() }, p.vo && window.HXV && HXV.clean(p.vo) ? { vo: HXV.clean(p.vo) } : {}, window.HXST && HXST[p.sk] ? { sk: String(p.sk) } : {})); S.msgs = S.msgs.slice(-300);
+    S.msgs.push(Object.assign({ from: 'd', t: String(p.text).slice(0, 2000), ts: p.ts || now() }, p.vo && window.HXV && HXV.clean(p.vo) ? { vo: HXV.clean(p.vo) } : {}, /^[a-z]\d{2}$/.test(String(p.sk || '')) ? { sk: String(p.sk) } : window.HXSK && HXSK.okImg(p.ski) ? { ski: p.ski } : {})); S.msgs = S.msgs.slice(-300);
     if (S.chat && !document.hidden) readReceipt(); else { S.unreadC++; notify('رسالة من ' + S.dname, String(p.text).slice(0, 80)); }
     return true;
   }
@@ -2305,10 +2305,21 @@ function bubbles() {
     const mine = m.from === 'c', d = new Date(m.ts).toLocaleDateString('ar', { weekday: 'long', day: 'numeric', month: 'short' }), sep = d !== last ? '<span class="daysep">' + d + '</span>' : '', cont = !sep && prev && prev.from === m.from && m.ts - prev.ts < 120000; last = d; prev = m;
     if (m.del) return sep + '<div class="bub mdel' + (mine ? ' me' : '') + '">🚫 ' + (mine ? 'حذفت هذه الرسالة' : 'حُذفت هذه الرسالة') + '<div class="mt"><span>' + hm(m.ts) + '</span></div></div>';      // 1.09 الحذف للجميع
     const sel = mine && V.msel === m.ts;
-    return sep + '<div class="bub' + (mine ? ' me' : '') + (cont ? ' cont' : '') + (sel ? ' sel' : '') + (m.sk ? ' stk' : '') + '"' + (mine ? ' data-act="msel" data-v="' + m.ts + '" title="المس للحذف"' : '') + '>' + (m.ctx ? '<span class="cx">بخصوص: ' + esc(m.ctx) + '</span><br>' : '') + (m.sk && window.HXST && HXST[m.sk] ? '<img class="hxsk" src="' + HXST[m.sk][2] + '" alt="' + esc(HXST[m.sk][1]) + '">' : m.vo && window.HXV ? HXV.html(m.vo) : esc(m.t)) + (sel ? '<button class="mdelb" data-act="mdel" data-v="' + m.ts + '">🗑 حذف للجميع</button>' : '')
+    return sep + '<div class="bub' + (mine ? ' me' : '') + (cont ? ' cont' : '') + (sel ? ' sel' : '') + (m.sk || m.ski ? ' stk' : '') + '"' + (mine ? ' data-act="msel" data-v="' + m.ts + '" title="المس للحذف"' : '') + '>' + (m.ctx ? '<span class="cx">بخصوص: ' + esc(m.ctx) + '</span><br>' : '') + (m.sk || m.ski ? skImg(m, mine) : m.vo && window.HXV ? HXV.html(m.vo) : esc(m.t)) + (sel ? '<button class="mdelb" data-act="mdel" data-v="' + m.ts + '">🗑 حذف للجميع</button>' : '')
       + '<div class="mt"><span>' + hm(m.ts) + '</span>' + (mine ? '<span class="' + (m.read ? 'rd' : '') + '">' + (m.read ? '✓✓ قُرئت' : S.outbox.some((q) => q.t === 'msg' && q.ts === m.ts) ? '◷ بانتظار الإنترنت' : '✓ أُرسلت') + '</span>' : '') + '</div></div>';
   }).join('');
 }
+function skImg(m, mine) {                          // 1.12 ملصق جاهز (من الحزمة) أو ملصق صنعه أحد الطرفين
+  if (m.ski) return '<img class="hxsk" src="' + m.ski + '" alt="ملصق">' + (!mine && !(S.myst || []).some((x) => x.img === m.ski) ? '<button class="link sksave" data-act="skSave" data-v="' + m.ts + '">＋ أضف لملصقاتي</button>' : '');
+  if (window.HXST && HXST[m.sk]) return '<img class="hxsk" src="' + HXST[m.sk][2] + '" alt="' + esc(HXST[m.sk][1]) + '">';
+  if (window.HXSK) HXSK.load(API, render); return '<span class="dim">🖼 ' + esc(m.t) + '</span>';
+}
+function skPanel() {
+  const mine = (S.myst || []).map((x, i) => '<span class="skm"><button data-act="skMine" data-v="' + i + '" aria-label="ملصقي"><img src="' + x.img + '" alt=""></button><button class="skx" data-act="skDel" data-v="' + i + '" aria-label="حذف من ملصقاتي">✕</button></span>').join('');
+  const pack = window.HXST ? Object.keys(HXST).filter((k) => HXST[k][0] === 'c' && (!HXST[k][3] || !S.p.sex || HXST[k][3] === (S.p.sex === 'ذكر' ? 'm' : 'f'))).map((k) => '<button data-act="sk" data-v="' + k + '" aria-label="' + esc(HXST[k][1]) + '"><img src="' + HXST[k][2] + '" alt="" loading="lazy"></button>').join('') : (HXSK.load(API, render), '<p class="dim" style="grid-column:1/-1">جارٍ تحميل الملصقات…</p>');
+  return '<div class="skp" role="listbox" aria-label="الملصقات"><p class="skh">ملصقاتي</p><button class="sknew" data-act="skNew" aria-label="إنشاء ملصق من صورة">＋<small>ملصق من صورة</small></button>' + mine + '<p class="skh">ملصقات زنها</p>' + pack + '</div>';
+}
+function sendSki(img) { V.skp = 0; const m = { from: 'c', t: 'ملصق', ts: now(), ski: img }; S.msgs.push(m); S.msgs = S.msgs.slice(-300); return send({ t: 'msg', text: m.t, ski: img, ts: m.ts }).then(render); }
 function scrChat() {
   const empty = S.msgs.length ? '' : '<div class="empty" style="padding:20px 6px">' + emptyArt('chat') + '<h3>ابدأ الحديث</h3><p class="mut">اكتب لأخصائيك أي سؤال عن خطتك أو يومك. يصله إشعار.</p></div>';
   return '<div class="scr"><div class="chat"><div class="who"><button class="back" data-act="chatClose" aria-label="رجوع" style="width:40px;height:40px;border-radius:13px;display:grid;place-items:center;background:var(--glass);border:1px solid var(--line)">' + I('back') + '</button><div class="av sm">' + esc(drInit()) + '</div><div style="flex:1;min-width:0"><b>' + esc(S.dname) + '</b><div class="dim">يرد عادة خلال ساعات العمل</div></div></div>'
@@ -2316,8 +2327,8 @@ function scrChat() {
     + (S.msgs.length ? '' : '<div class="qr">' + CLIENT_Q.map((q) => '<button data-act="qmsg" data-v="' + esc(q) + '">' + esc(q) + '</button>').join('') + '</div>')
     + (S.ctx ? '<div class="ctxbar">' + I('utensils') + '<span>بخصوص: ' + esc(S.ctx) + '</span><button class="link" data-act="ctxClear" aria-label="إزالة">' + I('x') + '</button></div>' : '')
     + (V.vrec ? '<div class="composer vrec"><button class="vx" data-act="vcancel" aria-label="إلغاء التسجيل">' + I('x') + '</button><span class="vdot" aria-hidden="true"></span><b id="vrT">0:00</b><span class="dim">' + (V.vrec === 2 ? 'جارٍ الإرسال…' : 'يسجّل… حتى 5 دقائق') + '</span><button class="snd" data-act="vsend" aria-label="إرسال الرسالة الصوتية"' + (V.vrec === 2 ? ' disabled' : '') + '>' + I('send') + '</button></div>'
-      : (V.skp && window.HXST ? '<div class="skp" role="listbox" aria-label="الملصقات">' + Object.keys(HXST).filter((k) => HXST[k][0] === 'c' && (!HXST[k][3] || !S.p.sex || HXST[k][3] === (S.p.sex === 'ذكر' ? 'm' : 'f'))).map((k) => '<button data-act="sk" data-v="' + k + '" aria-label="' + esc(HXST[k][1]) + '"><img src="' + HXST[k][2] + '" alt="" loading="lazy"></button>').join('') + '</div>' : '')
-      + '<div class="composer">' + (window.HXST ? '<button class="mic' + (V.skp ? ' on' : '') + '" data-act="skp" aria-label="الملصقات" aria-expanded="' + !!V.skp + '">😊</button>' : '') + '<textarea id="chatIn" rows="1" maxlength="2000" placeholder="اكتب رسالتك…" aria-label="رسالتك"></textarea>' + (window.HXV && HXV.ok() ? '<button class="mic" data-act="vrec" aria-label="تسجيل رسالة صوتية">🎤</button>' : '') + '<button class="snd" data-act="sendc" aria-label="إرسال">' + I('send') + '</button></div>') + '</div></div>';
+      : (V.skp ? skPanel() : '')
+      + '<div class="composer">' + (window.HXSK ? '<button class="mic' + (V.skp ? ' on' : '') + '" data-act="skp" aria-label="الملصقات" aria-expanded="' + !!V.skp + '">😊</button>' : '') + '<textarea id="chatIn" rows="1" maxlength="2000" placeholder="اكتب رسالتك…" aria-label="رسالتك"></textarea>' + (window.HXV && HXV.ok() ? '<button class="mic" data-act="vrec" aria-label="تسجيل رسالة صوتية">🎤</button>' : '') + '<button class="snd" data-act="sendc" aria-label="إرسال">' + I('send') + '</button></div>') + '</div></div>';
 }
 function sendMsg(text) {
   text = String(text || '').trim().slice(0, 2000); if (!text || S.removed) return false;
@@ -2586,6 +2597,10 @@ document.addEventListener('click', (e) => {
     case 'qmsg': sendMsg(v); break;
     case 'vrec': HXV.start((t) => { const e = $('#vrT'); if (e) e.textContent = t; }, () => { const b = document.querySelector('[data-act="vsend"]'); if (b) b.click(); }).then(() => { V.vrec = 1; render(); }).catch((e) => toast(e.message)); return;      // 1.08 رسالة صوتية (حتى 5 دقائق، تُحذف بعد 7 أيام)
     case 'skp': V.skp = !V.skp; break;      // 1.10 الملصقات
+    case 'skNew': HXSK.pick((f) => { const t = prompt('نص على الملصق (اختياري)', '') || ''; HXSK.make(f, t).then((img) => { S.myst = [{ img }].concat(S.myst || []).slice(0, 40); save(); render(); toast('أُضيف إلى ملصقاتي ✓'); }).catch((e) => toast(e.message)); }); return;      // 1.12 ملصقاتي (مثل واتساب)
+    case 'skMine': { const x = (S.myst || [])[+v]; if (x && !S.removed) sendSki(x.img); return; }
+    case 'skDel': if (confirm('حذف الملصق من ملصقاتي؟')) { S.myst.splice(+v, 1); save(); } break;
+    case 'skSave': { const m = S.msgs.find((x) => x.ts === +v && x.ski); if (m) { S.myst = [{ img: m.ski }].concat((S.myst || []).filter((x) => x.img !== m.ski)).slice(0, 40); save(); toast('أُضيف إلى ملصقاتي ✓'); } break; }
     case 'sk': { const S0 = window.HXST && HXST[v]; if (!S0 || S.removed) break; V.skp = 0; const m = { from: 'c', t: 'ملصق: ' + S0[1], ts: now(), sk: v }; S.msgs.push(m); S.msgs = S.msgs.slice(-300); send({ t: 'msg', text: m.t, sk: v, ts: m.ts }).then(render); break; }
     case 'msel': V.msel = V.msel === +v ? 0 : +v; break;
     case 'mdel': { const m = S.msgs.find((x) => x.from === 'c' && x.ts === +v && !x.del); V.msel = 0; if (!m || !confirm('حذف الرسالة لك ولأخصائيك؟')) break;

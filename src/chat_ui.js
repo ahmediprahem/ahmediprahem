@@ -24,7 +24,7 @@ function chThread(c) {
     var cont = prev && prev.from === m.from && m.ts - prev.ts < 120000; prev = m;
     if (m.del) { out += '<div class="chb chdel' + (m.from === 'd' ? ' me' : '') + '"><span class="cht3">🚫 ' + (m.from === 'd' ? 'حذفت هذه الرسالة' : 'حُذفت هذه الرسالة') + '</span><small class="chtm">' + chTime(m.ts) + '</small></div>'; return; }      // 1.09 الحذف للجميع
     var sel = m.from === 'd' && CHT.msel === m.ts;
-    out += '<div class="chb' + (m.from === 'd' ? ' me' : '') + (cont ? ' cont' : '') + (sel ? ' sel' : '') + (m.sk ? ' stk' : '') + '"' + (m.from === 'd' ? ' data-a="czMsel" data-v="' + m.ts + '" title="المس للحذف"' : '') + '>' + (sel ? '<button class="chdelb" data-a="czDel" data-v="' + m.ts + '">🗑 حذف للجميع</button>' : '') + (m.ctx ? '<small class="chcx">بخصوص: ' + esc(m.ctx) + '</small>' : '') + '<span class="cht3">' + (m.sk && window.HXST && HXST[m.sk] ? '<img class="hxsk" src="' + HXST[m.sk][2] + '" alt="' + esc(HXST[m.sk][1]) + '">' : m.vo && window.HXV ? HXV.html(m.vo) : esc(m.t).replace(/\n/g, '<br>')) + '</span><small class="chtm">' + chTime(m.ts) + (m.from === 'd' ? ' <i class="' + (m.read ? 'rd' : '') + '">' + (m.read ? '✓✓' : '✓') + '</i>' : '') + '</small></div>';
+    out += '<div class="chb' + (m.from === 'd' ? ' me' : '') + (cont ? ' cont' : '') + (sel ? ' sel' : '') + (m.sk || m.ski ? ' stk' : '') + '"' + (m.from === 'd' ? ' data-a="czMsel" data-v="' + m.ts + '" title="المس للحذف"' : '') + '>' + (sel ? '<button class="chdelb" data-a="czDel" data-v="' + m.ts + '">🗑 حذف للجميع</button>' : '') + (m.ctx ? '<small class="chcx">بخصوص: ' + esc(m.ctx) + '</small>' : '') + '<span class="cht3">' + (m.sk || m.ski ? chSkImg(m) : m.vo && window.HXV ? HXV.html(m.vo) : esc(m.t).replace(/\n/g, '<br>')) + '</span><small class="chtm">' + chTime(m.ts) + (m.from === 'd' ? ' <i class="' + (m.read ? 'rd' : '') + '">' + (m.read ? '✓✓' : '✓') + '</i>' : '') + '</small></div>';
   });
   return out || '<div class="empty chempty"><p class="small">لا رسائل بعد. ما يكتبه العميل من «راسل الأخصائي» يظهر هنا مع إشعار، وتستطيع أن تبدأ أنت.</p></div>';
 }
@@ -34,10 +34,26 @@ function chPage() {
   var main = gsel ? gpMain() : c ? '<section class="chm"><header class="chh"><button class="sec sm chback" data-a="czBack" aria-label="رجوع إلى المحادثات">›</button><span class="cav">' + esc(initial(c.name)) + '</span><div><b>' + esc(c.name || c.code) + '</b><small>' + (c.hx.sentAt ? 'خطته v' + (c.hx.planV || 1) + ' • ' : '') + 'آخر تحقق ' + hxAgo(HX.last) + '</small></div><button class="sec sm" data-a="czFile" data-v="' + esc(c.code) + '" style="margin-inline-start:auto">فتح ملفه</button></header>'
     + '<div class="chbody" id="chBody">' + chThread(c) + '</div><div class="chquick">' + CH_QUICK.map(function (q, i) { return '<button class="chip" data-a="czQuick" data-v="' + i + '">' + esc(q) + '</button>'; }).join('') + '</div>'
     + (CHT.rec ? '<div class="chcomp chrec"><button class="sec" data-a="czRecX" aria-label="إلغاء التسجيل">✕</button><span class="vdot" aria-hidden="true"></span><b id="chRT">0:00</b><span class="small" style="flex:1">' + (CHT.rec === 2 ? 'جارٍ الإرسال…' : 'يسجّل… حتى 5 دقائق') + '</span><button data-a="czRecSend" aria-label="إرسال الرسالة الصوتية"' + (CHT.rec === 2 ? ' disabled' : '') + '>➤</button></div></section>'
-      : (CHT.skp && window.HXST ? '<div class="chskp" aria-label="الملصقات">' + Object.keys(HXST).filter(function (k) { return HXST[k][0] === 'd'; }).map(function (k) { return '<button data-a="czSk" data-v="' + k + '" title="' + esc(HXST[k][1]) + '"><img src="' + HXST[k][2] + '" alt="' + esc(HXST[k][1]) + '" loading="lazy"></button>'; }).join('') + '</div>' : '')
-      + '<div class="chcomp">' + (window.HXST ? '<button class="sec chmic' + (CHT.skp ? ' on' : '') + '" data-a="czSkp" aria-label="الملصقات">😊</button>' : '') + '<textarea id="chIn" rows="1" maxlength="2000" placeholder="اكتب رسالة…" aria-label="رسالة للعميل"></textarea>' + (window.HXV && HXV.ok() ? '<button class="sec chmic" data-a="czRec" aria-label="تسجيل رسالة صوتية">🎤</button>' : '') + '<button data-a="czSend" aria-label="إرسال">➤</button></div></section>')
+      : (CHT.skp ? chSkPanel() : '')
+      + '<div class="chcomp">' + (window.HXSK ? '<button class="sec chmic' + (CHT.skp ? ' on' : '') + '" data-a="czSkp" aria-label="الملصقات">😊</button>' : '') + '<textarea id="chIn" rows="1" maxlength="2000" placeholder="اكتب رسالة…" aria-label="رسالة للعميل"></textarea>' + (window.HXV && HXV.ok() ? '<button class="sec chmic" data-a="czRec" aria-label="تسجيل رسالة صوتية">🎤</button>' : '') + '<button data-a="czSend" aria-label="إرسال">➤</button></div></section>')
     : '<section class="chm chnone"><div class="empty"><p><b>شات زنها</b></p><p class="small">اختر عميلاً من القائمة لتبدأ المحادثة. كل الرسائل مشفّرة بين جوالك وجواله.</p></div></section>';
   return '<div class="chwrap' + (c || gsel ? ' open' : '') + '"><div class="chlbar"><button class="chexit" data-a="home" aria-label="رجوع إلى زنها برو">›</button><b>شات زنها</b></div><div class="hxtop"><h2>💬 شات زنها</h2><small class="small">محادثات الأخصائي مع عملائه، مشفّرة طرفاً لطرف.</small></div><div class="chgrid">' + side + main + '</div></div>';
+}
+function chMyst() { try { return JSON.parse(localStorage.getItem('zn_myst') || '[]'); } catch (e) { return []; } }      // 1.12 ملصقاتي (على هذا الجهاز)
+function chMystSet(a) { try { localStorage.setItem('zn_myst', JSON.stringify(a.slice(0, 40))); } catch (e) { toast('لا مساحة لحفظ الملصق'); } }
+function chSkImg(m) {
+  if (m.ski) return '<img class="hxsk" src="' + m.ski + '" alt="ملصق">' + (m.from !== 'd' && !chMyst().some(function (x) { return x.img === m.ski; }) ? '<button class="sec sm sksave" data-a="czSkSave" data-v="' + m.ts + '">＋ أضف لملصقاتي</button>' : '');
+  if (window.HXST && HXST[m.sk]) return '<img class="hxsk" src="' + HXST[m.sk][2] + '" alt="' + esc(HXST[m.sk][1]) + '">';
+  if (window.HXSK) HXSK.load(hxRelay(), function () { chRe(true); }); return '<span class="small">🖼 ' + esc(m.t) + '</span>';
+}
+function chSkPanel() {
+  var mine = chMyst().map(function (x, i) { return '<span class="skm"><button data-a="czSkMine" data-v="' + i + '" title="ملصقي"><img src="' + x.img + '" alt=""></button><button class="skx" data-a="czSkDel" data-v="' + i + '" aria-label="حذف من ملصقاتي">✕</button></span>'; }).join('');
+  var pack = window.HXST ? Object.keys(HXST).filter(function (k) { return HXST[k][0] === 'd'; }).map(function (k) { return '<button data-a="czSk" data-v="' + k + '" title="' + esc(HXST[k][1]) + '"><img src="' + HXST[k][2] + '" alt="' + esc(HXST[k][1]) + '" loading="lazy"></button>'; }).join('') : (HXSK.load(hxRelay(), function () { chRe(true); }), '<p class="small" style="grid-column:1/-1">جارٍ تحميل الملصقات…</p>');
+  return '<div class="chskp" aria-label="الملصقات"><p class="skh">ملصقاتي</p><button class="sknew" data-a="czSkNew" title="إنشاء ملصق من صورة">＋<small>ملصق من صورة</small></button>' + mine + '<p class="skh">ملصقات زنها</p>' + pack + '</div>';
+}
+function chSendSki(img) {
+  var c = S.clients.filter(function (x) { return x.code === CHT.sel && x.hx; })[0]; if (!c) return; CHT.skp = false; var ts = Date.now();
+  hxSend(c, { t: 'msg', text: 'ملصق', ski: img, ts: ts }).then(function () { c.hx.msgs = (c.hx.msgs || []).concat([{ from: 'd', t: 'ملصق', ts: ts, ski: img }]); c.hx.unread = 0; persist(c); chRe(true); chRail(); }).catch(hxErr);
 }
 function chRe(keep) { if (S.view !== 'chat') return; CHT.keep = !!keep; main(); }
 function chPaint() {                                                   // رسم الصفحة مع الإبقاء على ما يكتبه الأخصائي وموضع التمرير
@@ -58,6 +74,10 @@ function chRead(c) {
 function chRail() { var n = chUnread(); [].forEach.call(document.querySelectorAll('[data-a="zchat"] em'), function (b) { b.textContent = n || ''; b.style.display = n ? '' : 'none'; }); var tb = document.querySelector('#tabbar [data-v="zchat"]'); if (tb) { var e = tb.querySelector('em'); if (!e && n) { e = document.createElement('em'); e.className = 'hxnb'; tb.appendChild(e); } if (e) { e.textContent = n || ''; e.style.display = n ? '' : 'none'; } } }
 Object.assign(A, {
   czSkp: function () { CHT.skp = !CHT.skp; chRe(true); },      // 1.10 الملصقات
+  czSkNew: function () { HXSK.pick(function (f) { var t = prompt('نص على الملصق (اختياري)', '') || ''; HXSK.make(f, t).then(function (img) { chMystSet([{ img: img }].concat(chMyst())); chRe(true); toast('أُضيف إلى ملصقاتي ✓'); }).catch(function (e) { toast(e.message); }); }); },
+  czSkMine: function (v) { var x = chMyst()[+v]; if (x) chSendSki(x.img); },
+  czSkDel: function (v) { if (!confirm('حذف الملصق من ملصقاتي؟')) return; var a = chMyst(); a.splice(+v, 1); chMystSet(a); chRe(true); },
+  czSkSave: function (v) { var c = S.clients.filter(function (x) { return x.code === CHT.sel && x.hx; })[0], m = c && chMsgs(c).filter(function (x) { return x.ts === +v && x.ski; })[0]; if (!m) return; chMystSet([{ img: m.ski }].concat(chMyst().filter(function (x) { return x.img !== m.ski; }))); chRe(true); toast('أُضيف إلى ملصقاتي ✓'); },
   czSk: function (v) {
     var c = S.clients.filter(function (x) { return x.code === CHT.sel && x.hx; })[0], S0 = window.HXST && HXST[v]; if (!c || !S0) return; CHT.skp = false; var ts = Date.now(), t = 'ملصق: ' + S0[1];
     hxSend(c, { t: 'msg', text: t, sk: v, ts: ts }).then(function () { c.hx.msgs = (c.hx.msgs || []).concat([{ from: 'd', t: t, ts: ts, sk: v }]); c.hx.unread = 0; persist(c); chRe(true); chRail(); }).catch(hxErr);
