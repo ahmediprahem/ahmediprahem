@@ -14,7 +14,8 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [], SH = pr
   await m.click('.skp [data-act="sk"][data-v="c07"]'); await m.waitForSelector('.bub.stk img.hxsk'); ok('العميل أرسل ملصقاً فظهر صورةً في المحادثة'); await cPoll();
   await d.evaluate((c) => { DPApp.A.zchat(); DPApp.A.czOpen(c); }, code); await hxCheck(); await d.waitForSelector('#chBody .chb.stk img.hxsk'); ok('وصل الملصق للأخصائي صورةً');
   await d.click('[data-a="czSkp"]'); await d.waitForSelector('.chskp img'); const ds = await d.$$eval('.chskp [data-a="czSk"]', (b) => b.map((x) => x.dataset.v)); assert(await d.evaluate((ks) => ks.every((k) => HXST[k][0] === 'd'), ds) && ds.length >= 45); ok('لوحة الأخصائي فيها ملصقاته فقط');
-  if (SH) await d.screenshot({ path: SH + '/pro_panel.png' });
+  await d.click('[data-a="czStg"][data-v="f"]'); await d.waitForSelector('.chskp img'); assert(await d.evaluate(() => [...document.querySelectorAll('.chskp [data-a="czSk"]')].every((b) => HXST[b.dataset.v][3] !== 'm') && [...document.querySelectorAll('.chskp [data-a="czSk"]')].some((b) => HXST[b.dataset.v][3] === 'f'))); ok('الأخصائية تختار شخصيتها: تظهر ملصقات الأخصائية والمحايدة فقط');
+  if (SH) await d.screenshot({ path: SH + '/pro_panel.png' }); await d.click('[data-a="czStg"][data-v=""]'); await d.waitForSelector('.chskp img');
   await d.click('.chskp [data-a="czSk"][data-v="d21"]'); await d.waitForFunction(() => document.querySelectorAll('#chBody .chb.me.stk').length === 1); await cPoll();
   await m.waitForFunction(() => document.querySelectorAll('.bub:not(.me).stk img').length === 1, null, { timeout: 8000 }); ok('ملصق الأخصائي وصل للعميل');
   await m.click('[data-act="skp"]'); await m.waitForSelector('[data-act="skNew"]');

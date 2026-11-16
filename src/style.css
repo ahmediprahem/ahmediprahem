@@ -464,3 +464,15 @@ header .hdast{display:none!important}
 .chskp .sknew{display:grid;place-items:center;align-content:center;gap:2px;font-size:26px;border:1.5px dashed var(--line,#ccd)!important;min-height:84px}.chskp .sknew small{font-size:11px;opacity:.7}
 .chskp .skm{position:relative;display:block}.chskp .skm>button:first-child{width:100%}.chskp .skx{position:absolute;top:-4px;inset-inline-start:-4px;width:22px;height:22px;border-radius:50%;background:#e5484d;color:#fff;font-size:11px;display:grid;place-items:center;padding:0;border:0}
 .chb .sksave{display:block;margin-top:4px}
+
+/* 1.13 شخصية الملصقات */
+.chskp .skg{display:inline-flex;gap:4px;margin-inline-start:8px;vertical-align:middle}.chskp .skg button{font-size:12px;padding:2px 10px;border-radius:99px;border:1px solid var(--line,#ccd);background:transparent;cursor:pointer;font-weight:600}.chskp .skg button.on{background:var(--accent,#3fbf93);border-color:var(--accent,#3fbf93);color:#fff}
+/* لوحة الملصقات في «زنها Pro»: أزرار شفافة بارتفاع الصورة (لا يرث تنسيق الأزرار العام) */
+.chskp>button,.chskp .skm>button:first-child{background:transparent!important;height:auto!important;min-height:0!important;padding:4px!important;box-shadow:none!important;border:1px solid transparent!important;color:inherit!important;line-height:0}
+.chskp>button:hover,.chskp .skm>button:first-child:hover{border-color:var(--line,#ccd)!important;background:rgba(127,127,160,.08)!important}
+.chskp .sknew{border:1.5px dashed var(--line,#ccd)!important;line-height:1.2!important;color:inherit!important;min-height:84px!important}
+.chskp .skg button{background:transparent!important;color:inherit!important;height:auto!important;min-height:0!important;box-shadow:none!important;padding:2px 10px!important;line-height:1.4}.chskp .skg button.on{background:var(--accent,#3fbf93)!important;color:#fff!important}
+.chskp .skx{height:22px!important;min-height:0!important;padding:0!important;line-height:1!important}
+.chskp{grid-auto-rows:auto;align-items:start}
+.chskp>button,.chskp .skm>button:first-child{display:block!important;overflow:hidden!important;width:100%!important}.chskp>button img,.chskp .skm img{width:100%!important;height:auto!important;max-height:120px;object-fit:contain;display:block}
+.chskp{flex:0 0 auto!important;grid-auto-rows:max-content!important;min-height:180px}.chskp>button,.chskp .skm>button:first-child{overflow:visible!important}

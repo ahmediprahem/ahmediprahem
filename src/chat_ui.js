@@ -46,10 +46,11 @@ function chSkImg(m) {
   if (window.HXST && HXST[m.sk]) return '<img class="hxsk" src="' + HXST[m.sk][2] + '" alt="' + esc(HXST[m.sk][1]) + '">';
   if (window.HXSK) HXSK.load(hxRelay(), function () { chRe(true); }); return '<span class="small">🖼 ' + esc(m.t) + '</span>';
 }
+function chStg() { try { return localStorage.getItem('zn_stg') || ''; } catch (e) { return ''; } }      // 1.13 شخصية ملصقات الأخصائي (أخصائي/أخصائية)
 function chSkPanel() {
   var mine = chMyst().map(function (x, i) { return '<span class="skm"><button data-a="czSkMine" data-v="' + i + '" title="ملصقي"><img src="' + x.img + '" alt=""></button><button class="skx" data-a="czSkDel" data-v="' + i + '" aria-label="حذف من ملصقاتي">✕</button></span>'; }).join('');
-  var pack = window.HXST ? Object.keys(HXST).filter(function (k) { return HXST[k][0] === 'd'; }).map(function (k) { return '<button data-a="czSk" data-v="' + k + '" title="' + esc(HXST[k][1]) + '"><img src="' + HXST[k][2] + '" alt="' + esc(HXST[k][1]) + '" loading="lazy"></button>'; }).join('') : (HXSK.load(hxRelay(), function () { chRe(true); }), '<p class="small" style="grid-column:1/-1">جارٍ تحميل الملصقات…</p>');
-  return '<div class="chskp" aria-label="الملصقات"><p class="skh">ملصقاتي</p><button class="sknew" data-a="czSkNew" title="إنشاء ملصق من صورة">＋<small>ملصق من صورة</small></button>' + mine + '<p class="skh">ملصقات زنها</p>' + pack + '</div>';
+  var pack = window.HXST ? Object.keys(HXST).filter(function (k) { var g = chStg(); return HXST[k][0] === 'd' && (!HXST[k][3] || !g || HXST[k][3] === g); }).map(function (k) { return '<button data-a="czSk" data-v="' + k + '" title="' + esc(HXST[k][1]) + '"><img src="' + HXST[k][2] + '" alt="' + esc(HXST[k][1]) + '" loading="lazy"></button>'; }).join('') : (HXSK.load(hxRelay(), function () { chRe(true); }), '<p class="small" style="grid-column:1/-1">جارٍ تحميل الملصقات…</p>');
+  return '<div class="chskp" aria-label="الملصقات"><p class="skh">ملصقاتي</p><button class="sknew" data-a="czSkNew" title="إنشاء ملصق من صورة">＋<small>ملصق من صورة</small></button>' + mine + '<p class="skh">ملصقات زنها <span class="skg">' + [['', 'الكل'], ['m', 'أخصائي'], ['f', 'أخصائية']].map(function (x) { return '<button class="' + (chStg() === x[0] ? 'on' : '') + '" data-a="czStg" data-v="' + x[0] + '">' + x[1] + '</button>'; }).join('') + '</span></p>' + pack + '</div>';
 }
 function chSendSki(img) {
   var c = S.clients.filter(function (x) { return x.code === CHT.sel && x.hx; })[0]; if (!c) return; CHT.skp = false; var ts = Date.now();
@@ -74,6 +75,7 @@ function chRead(c) {
 function chRail() { var n = chUnread(); [].forEach.call(document.querySelectorAll('[data-a="zchat"] em'), function (b) { b.textContent = n || ''; b.style.display = n ? '' : 'none'; }); var tb = document.querySelector('#tabbar [data-v="zchat"]'); if (tb) { var e = tb.querySelector('em'); if (!e && n) { e = document.createElement('em'); e.className = 'hxnb'; tb.appendChild(e); } if (e) { e.textContent = n || ''; e.style.display = n ? '' : 'none'; } } }
 Object.assign(A, {
   czSkp: function () { CHT.skp = !CHT.skp; chRe(true); },      // 1.10 الملصقات
+  czStg: function (v) { try { localStorage.setItem('zn_stg', v || ''); } catch (e) { } chRe(true); },
   czSkNew: function () { HXSK.pick(function (f) { var t = prompt('نص على الملصق (اختياري)', '') || ''; HXSK.make(f, t).then(function (img) { chMystSet([{ img: img }].concat(chMyst())); chRe(true); toast('أُضيف إلى ملصقاتي ✓'); }).catch(function (e) { toast(e.message); }); }); },
   czSkMine: function (v) { var x = chMyst()[+v]; if (x) chSendSki(x.img); },
   czSkDel: function (v) { if (!confirm('حذف الملصق من ملصقاتي؟')) return; var a = chMyst(); a.splice(+v, 1); chMystSet(a); chRe(true); },
