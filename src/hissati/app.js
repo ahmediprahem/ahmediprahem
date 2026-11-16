@@ -255,7 +255,7 @@ function handle(p) {
   }
   if (p.t === 'lib' && Array.isArray(p.lib)) { S.lib = cleanLib(p.lib); return true; }
   if (p.t === 'msg' && p.text) {
-    S.msgs.push({ from: 'd', t: String(p.text).slice(0, 2000), ts: p.ts || now() }); S.msgs = S.msgs.slice(-300);
+    S.msgs.push(Object.assign({ from: 'd', t: String(p.text).slice(0, 2000), ts: p.ts || now() }, p.vo && window.HXV && HXV.clean(p.vo) ? { vo: HXV.clean(p.vo) } : {})); S.msgs = S.msgs.slice(-300);
     if (S.chat && !document.hidden) readReceipt(); else { S.unreadC++; notify('رسالة من ' + S.dname, String(p.text).slice(0, 80)); }
     return true;
   }
@@ -2302,7 +2302,7 @@ function bubbles() {
   let last = '', prev = null;
   return S.msgs.map((m) => {
     const mine = m.from === 'c', d = new Date(m.ts).toLocaleDateString('ar', { weekday: 'long', day: 'numeric', month: 'short' }), sep = d !== last ? '<span class="daysep">' + d + '</span>' : '', cont = !sep && prev && prev.from === m.from && m.ts - prev.ts < 120000; last = d; prev = m;
-    return sep + '<div class="bub' + (mine ? ' me' : '') + (cont ? ' cont' : '') + '">' + (m.ctx ? '<span class="cx">بخصوص: ' + esc(m.ctx) + '</span><br>' : '') + esc(m.t)
+    return sep + '<div class="bub' + (mine ? ' me' : '') + (cont ? ' cont' : '') + '">' + (m.ctx ? '<span class="cx">بخصوص: ' + esc(m.ctx) + '</span><br>' : '') + (m.vo && window.HXV ? HXV.html(m.vo) : esc(m.t))
       + '<div class="mt"><span>' + hm(m.ts) + '</span>' + (mine ? '<span class="' + (m.read ? 'rd' : '') + '">' + (m.read ? '✓✓ قُرئت' : S.outbox.some((q) => q.t === 'msg' && q.ts === m.ts) ? '◷ بانتظار الإنترنت' : '✓ أُرسلت') + '</span>' : '') + '</div></div>';
   }).join('');
 }
@@ -2312,7 +2312,8 @@ function scrChat() {
     + (S.replyAt ? '<div class="replyb">' + I('clock') + ' يرد أخصائيك على الرسائل يومياً الساعة ' + esc(hm12(S.replyAt)) + ' — اكتب متى شئت.</div>' : '') + '<div class="thread" id="thread">' + empty + bubbles() + '</div>'
     + (S.msgs.length ? '' : '<div class="qr">' + CLIENT_Q.map((q) => '<button data-act="qmsg" data-v="' + esc(q) + '">' + esc(q) + '</button>').join('') + '</div>')
     + (S.ctx ? '<div class="ctxbar">' + I('utensils') + '<span>بخصوص: ' + esc(S.ctx) + '</span><button class="link" data-act="ctxClear" aria-label="إزالة">' + I('x') + '</button></div>' : '')
-    + '<div class="composer"><textarea id="chatIn" rows="1" maxlength="2000" placeholder="اكتب رسالتك…" aria-label="رسالتك"></textarea><button class="snd" data-act="sendc" aria-label="إرسال">' + I('send') + '</button></div></div></div>';
+    + (V.vrec ? '<div class="composer vrec"><button class="vx" data-act="vcancel" aria-label="إلغاء التسجيل">' + I('x') + '</button><span class="vdot" aria-hidden="true"></span><b id="vrT">0:00</b><span class="dim">' + (V.vrec === 2 ? 'جارٍ الإرسال…' : 'يسجّل… حتى 5 دقائق') + '</span><button class="snd" data-act="vsend" aria-label="إرسال الرسالة الصوتية"' + (V.vrec === 2 ? ' disabled' : '') + '>' + I('send') + '</button></div>'
+      : '<div class="composer"><textarea id="chatIn" rows="1" maxlength="2000" placeholder="اكتب رسالتك…" aria-label="رسالتك"></textarea>' + (window.HXV && HXV.ok() ? '<button class="mic" data-act="vrec" aria-label="تسجيل رسالة صوتية">🎤</button>' : '') + '<button class="snd" data-act="sendc" aria-label="إرسال">' + I('send') + '</button></div>') + '</div></div>';
 }
 function sendMsg(text) {
   text = String(text || '').trim().slice(0, 2000); if (!text || S.removed) return false;
@@ -2579,6 +2580,9 @@ document.addEventListener('click', (e) => {
     case 'ask': { const sl = dayPlan(TODAY).slots[+v]; S.ctx = sl.name + (sl.meal ? ' (' + sl.meal + ')' : ''); S.chat = true; focusChat = true; break; }
     case 'ctxClear': S.ctx = ''; break;
     case 'qmsg': sendMsg(v); break;
+    case 'vrec': HXV.start((t) => { const e = $('#vrT'); if (e) e.textContent = t; }, () => { const b = document.querySelector('[data-act="vsend"]'); if (b) b.click(); }).then(() => { V.vrec = 1; render(); }).catch((e) => toast(e.message)); return;      // 1.08 رسالة صوتية (حتى 5 دقائق، تُحذف بعد 7 أيام)
+    case 'vcancel': HXV.stop(true); V.vrec = 0; break;
+    case 'vsend': { if (V.vrec !== 1) return; V.vrec = 2; render(); HXV.stop().then((r) => r ? HXV.upload(r, (p, o) => api('POST', p, o)) : null).then((vo) => { V.vrec = 0; if (!vo) { render(); return; } const m = { from: 'c', t: HXV.label(vo.d), ts: now(), vo }; S.msgs.push(m); S.msgs = S.msgs.slice(-300); return send({ t: 'msg', text: m.t, vo, ts: m.ts }).then(render); }).catch((e) => { V.vrec = 0; render(); toast('تعذّر إرسال الرسالة الصوتية: ' + e.message); }); return; }
     case 'sendc': { const t = $('#chatIn'); if (!sendMsg(t && t.value)) return; focusChat = true; break; }
     case 'refresh': toast('جارٍ التحقق…'); poll().then(() => toast(S.req === 'approved' ? 'اعتمدك أخصائيك — خطتك قيد الإعداد' : 'لا جديد بعد')); return;
     case 'go': if (v === 'pin') { V.screen = 'pin'; V.pin = V.pin1 = ''; V.err = ''; } break;
@@ -2867,3 +2871,5 @@ window.addEventListener('offline', () => { V.online = false; render(); });
 window.HissatiApp = { mcLeft, remItems, whDayOk, badge: () => V.badge, wheel: { dayOk: whDayOk, cats: () => whCats().map((i) => whx().cats[i].id), dia: whDia, text: (id, i) => { const ci = whx().cats.findIndex((c) => c.id === id); return whText(ci, i); }, maybe: () => { WHL.shown = false; whMaybe(); }, open: (m) => whOpen(m) }, state: () => S, toast, poll, flush, feed: () => FD, feedLoad: fdLoad, celebrateTest: (id) => celebrate(id), sound: { avail: sndAvail, quiet: sndPrayerQuiet, times: prNow, playing: () => SND.playing, state: () => (SND.ctx ? SND.ctx.state : 'none'), vol: () => snd().vol, level: () => { if (!SND.an) return 0; const b = new Float32Array(SND.an.fftSize); SND.an.getFloatTimeDomainData(b); let t = 0, pk = 0; for (const x of b) { t += x * x; pk = Math.max(pk, Math.abs(x)); } return { rms: Math.sqrt(t / b.length), peak: pk }; } },  alarm: (items) => almShow(items), alarmTick: almTick, alarmFire: almFire, remItems, render, prayTimes, khams: { portions: khPortions, range: khRange, state: khState, rel: khRel, meta: () => QM, cert: khCertCanvas, stats: khStats } };     // للاختبارات
 boot();
 })();
+
+document.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('[data-hxv]'); if (!b || !window.HXV) return; e.preventDefault(); e.stopPropagation(); HXV.toggle(b.dataset.hxv, (p, o) => api('POST', p, o), (er) => toast(er.message)); }, true);   // تشغيل الرسائل الصوتية

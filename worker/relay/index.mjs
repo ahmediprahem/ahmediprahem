@@ -4,7 +4,7 @@
    - تقدّم تطبيق «زنها» نفسه على الصفحة الرئيسية (/)، فرابط الدعوة = عنوان هذه المحطة.
    - الجداول تُنشأ تلقائياً أول مرة؛ يكفي ربط قاعدة D1 باسم DB. متغير اختياري REG_KEY: مفتاح تسجيل الأخصائيين (بدونه يقبل أي «حصة»).
    - لا تسجّل أي محتوى (لا console.log). يُبنى منه worker/relay/dist/worker.js بـ py build_web.py (يُضمَّن تطبيق «زنها» وأيقونته). */
-const VER = '1.11';
+const VER = '1.12';
 // ---- 1.7: رخصة الأخصائي: كود تفعيل موقَّع بمفتاح المدير (ADMIN_PUB، مفتاح عام) يغني عن مفتاح التسجيل، فيُربط الأخصائي تلقائياً دون سر في الموقع
 const b64uBytes = (x) => { x = x.replace(/-/g, '+').replace(/_/g, '/'); while (x.length % 4) x += '='; const b = atob(x), u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; };
 async function licOk(tok, env) {
@@ -22,7 +22,7 @@ const SW_JS = /*HISSATI_SW*/''/*END*/;
 const QURAN_TXT = /*QURAN_TXT*/''/*END*/;                      // 0.58: نص المصحف (Tanzil، بلا تعديل) وخط Amiri Quran؛ يُطلبان عند فتح القارئ فقط ويُحفظان على الجوال
 const QURAN_FONT = /*QURAN_FONT*/''/*END*/;
 const ICONS = /*HISSATI_ICONS*/{}/*END*/;                          // أيقونات التثبيت من المتصفح: icon-192 / icon-512 / maskable-512 / apple-180
-const LIM = { remind: 24, chunk: 900000, chunks: 40, keep: 7, xfer: 1500000, xferTtl: 900, body: 1600000, box: 450000, cat: 300000, label: 80, invitesActive: 300, perHour: 400, inbox: 100, skew: 300, groups: 60, gbox: 12000, gperHour: 600, gpoll: 100, gimg: 330000, gTtl: 30 * 86400, gimgTtl: 7 * 86400 };
+const LIM = { remind: 24, chunk: 900000, chunks: 40, keep: 7, xfer: 1500000, xferTtl: 900, body: 1600000, box: 450000, cat: 300000, label: 80, invitesActive: 300, perHour: 400, inbox: 100, skew: 300, groups: 60, gbox: 12000, gperHour: 600, gpoll: 100, gimg: 330000, gTtl: 30 * 86400, gimgTtl: 7 * 86400, vchunk: 610000, vparts: 10, vTtl: 7 * 86400, vperHour: 120 };
 const enc = new TextEncoder();
 const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-methods': 'GET, POST, OPTIONS', 'access-control-allow-headers': 'authorization, content-type', 'access-control-max-age': '86400' };
 const json = (o, status = 200) => new Response(JSON.stringify(o), { status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', ...CORS } });
@@ -293,6 +293,21 @@ async function api(req, env, url, ctx) {
     const n = await one(db, 'SELECT COUNT(*) AS n FROM grps WHERE did = ?', me.id); if (n && n.n >= LIM.groups) return err(429, 'many', 'عدد المجموعات كبير');
     await run(db, 'INSERT INTO grps (gid, did, ah, created) VALUES (?, ?, ?, ?)', gid, me.id, ah, now()); return json({ ok: true });
   }
+  if (p === '/v1/vm/put' || p === '/v1/vm/get') {                 // 1.08 الرسائل الصوتية: نص مشفّر (المفتاح داخل الرسالة طرفاً لطرف)، يُحذف بعد 7 أيام
+    if (method !== 'POST') return err(405, 'method', 'POST فقط'); const k0 = String(J.k || ''), i = parseInt(J.i, 10);
+    if (!(i >= 0 && i < LIM.vparts)) return err(400, 'part', 'جزء غير صالح');
+    if (p === '/v1/vm/get') {
+      if (!/^[A-Za-z0-9_-]{24}$/.test(k0)) return err(400, 'key', 'مفتاح غير صالح');
+      const r = await one(db, 'SELECT data, created FROM media WHERE key = ?', 'v.' + k0 + '.' + i); if (!r || r.created < now() - LIM.vTtl) return err(404, 'gone', 'انتهت صلاحية الرسالة الصوتية');
+      return json({ ok: true, c: r.data });
+    }
+    const c = String(J.c || ''); if (!c || !/^[A-Za-z0-9_-]+$/.test(c) || c.length > LIM.vchunk) return err(413, 'big', 'التسجيل أكبر من المسموح');
+    let k = k0;
+    if (i === 0) { const n = await one(db, "SELECT COUNT(*) AS n FROM media WHERE did = ? AND type = 'audio/enc' AND created > ?", me.id, now() - 3600); if (n && n.n >= LIM.vperHour) return err(429, 'rate', 'رسائل صوتية كثيرة خلال ساعة'); k = b64u(crypto.getRandomValues(new Uint8Array(18))); }
+    else { const f = await one(db, 'SELECT did FROM media WHERE key = ?', 'v.' + k + '.0'); if (!/^[A-Za-z0-9_-]{24}$/.test(k) || !f || f.did !== me.id) return err(403, 'key', 'لا صلاحية لهذا التسجيل'); }
+    await run(db, 'INSERT OR REPLACE INTO media (key, did, type, size, store, data, created) VALUES (?, ?, ?, ?, ?, ?, ?)', 'v.' + k + '.' + i, me.id, 'audio/enc', Math.floor(c.length * 0.75), 'd1', c, now());
+    return json({ ok: true, k });
+  }
   if (p === '/v1/g/send' || p === '/v1/g/poll' || p === '/v1/g/media') {
     if (method !== 'POST') return err(405, 'method', 'POST فقط'); const g = await one(db, 'SELECT gid, did, ah FROM grps WHERE gid = ?', String(J.gid || ''));
     if (!g || b64u(await sha256('ga.' + String(J.ga || ''))) !== g.ah) return err(403, 'group', 'لا صلاحية لهذه المجموعة');
@@ -421,7 +436,7 @@ function appPage(url) {
   if (url.pathname === '/radio/quran') {
     return fetch('https://n08.radiojar.com/8s5u5tpdtwzuv', { redirect: 'manual' }).then((r) => { const l = r.headers.get('location') || ''; if (/^https?:\/\/[a-z0-9.-]+\.radiojar\.com\//i.test(l)) return new Response(null, { status: 302, headers: { location: l.replace(/^http:/i, 'https:'), 'cache-control': 'no-store' } }); throw 0; }).catch(() => new Response('unavailable', { status: 503, headers: { 'cache-control': 'no-store' } }));
   }
-  if (url.pathname === '/' || url.pathname === '/index.html') return new Response(APP_HTML, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-cache', 'x-content-type-options': 'nosniff', 'referrer-policy': 'no-referrer', 'x-frame-options': 'DENY', 'content-security-policy': "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob: 'self'; media-src 'self' https://everyayah.com https://www.hisnmuslim.com https://*.radiojar.com; frame-src https://www.youtube-nocookie.com; font-src data: 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'" } });
+  if (url.pathname === '/' || url.pathname === '/index.html') return new Response(APP_HTML, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-cache', 'x-content-type-options': 'nosniff', 'referrer-policy': 'no-referrer', 'x-frame-options': 'DENY', 'content-security-policy': "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob: 'self'; media-src 'self' blob: https://everyayah.com https://www.hisnmuslim.com https://*.radiojar.com; frame-src https://www.youtube-nocookie.com; font-src data: 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'" } });
   if (url.pathname === '/q/v1/quran.txt' && QURAN_TXT) return new Response(QURAN_TXT, { headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'public, max-age=31536000, immutable', 'x-content-type-options': 'nosniff' } });
   if (url.pathname === '/q/v1/font.ttf' && QURAN_FONT) return new Response(Uint8Array.from(atob(QURAN_FONT), (c) => c.charCodeAt(0)), { headers: { 'content-type': 'font/ttf', 'cache-control': 'public, max-age=31536000, immutable', 'x-content-type-options': 'nosniff' } });
   if (url.pathname === '/sw.js' && SW_JS) return new Response(SW_JS, { headers: { 'content-type': 'text/javascript; charset=utf-8', 'cache-control': 'no-cache', 'x-content-type-options': 'nosniff' } });
@@ -449,6 +464,6 @@ export default {
 };
 async function gcGroups(env) {                                    // مجموعات التحدي: الرسائل 30 يوماً والصور 7 أيام
   const db = env.DB; if (!db) return 0; await init(db); const t = now();
-  await run(db, 'DELETE FROM gmsgs WHERE ts < ?', t - LIM.gTtl); await run(db, "DELETE FROM media WHERE type = 'application/octet-stream' AND created < ?", t - LIM.gimgTtl); return 1;
+  await run(db, 'DELETE FROM gmsgs WHERE ts < ?', t - LIM.gTtl); await run(db, "DELETE FROM media WHERE type = 'application/octet-stream' AND created < ?", t - LIM.gimgTtl); await run(db, "DELETE FROM media WHERE type = 'audio/enc' AND created < ?", t - LIM.vTtl); return 1;
 }
 export const _test = { reset: () => { ready = null; vapidC = null; jwtC.clear(); } };

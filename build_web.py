@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """يجمع المحرك والواجهة والبيانات والشعار في ملفين: admin.html (واجهة الإدارة) و index.html (قالب المستخدمين — يُفعَّل من ملف يصدّره المدير): py build_web.py"""
 import os, json, base64
-H = os.path.dirname(os.path.abspath(__file__)); R = lambda p: open(os.path.join(H, 'src', p), encoding='utf-8').read() + ('\n' + open(os.path.join(H, 'src', 'grp_core.js'), encoding='utf-8').read() if p == 'hx_crypto.js' else '')
+H = os.path.dirname(os.path.abspath(__file__)); R = lambda p: open(os.path.join(H, 'src', p), encoding='utf-8').read() + ('\n' + open(os.path.join(H, 'src', 'grp_core.js'), encoding='utf-8').read() + '\n' + open(os.path.join(H, 'src', 'hx_voice.js'), encoding='utf-8').read() if p == 'hx_crypto.js' else '')
 # خط الثيم الزجاجي (IBM Plex Sans Arabic — رخصة OFL في assets/fonts) مضمَّن data: بلا اتصال خارجي
 RANGES = {'arabic': 'U+0600-06FF,U+0750-077F,U+08A0-08FF,U+200C-200E,U+2010-2011,U+FB50-FDFF,U+FE70-FEFC', 'latin': 'U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD'}
 def font_css():
@@ -35,7 +35,7 @@ for _f in os.listdir(os.path.join(H, 'worker', 'site', 'static')): shutil.copy(o
 # 0.95: واجهة الإدارة على الإنترنت (zenha-admin): نسخة admin.html أصلاً ثابتاً للخادم، مع ترويسات الأمان
 os.makedirs(os.path.join(H, 'worker', 'admin', 'public'), exist_ok=True)
 open(os.path.join(H, 'worker', 'admin', 'public', 'index.html'), 'w', encoding='utf-8').write(admin)
-open(os.path.join(H, 'worker', 'admin', 'public', '_headers'), 'w', encoding='utf-8').write("/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: no-referrer\n  X-Frame-Options: DENY\n  X-Robots-Tag: noindex, nofollow\n  Cache-Control: no-cache\n  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()\n  Content-Security-Policy: default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob: 'self'; media-src data: blob:; font-src data:; connect-src 'self' https:; worker-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'\n")
+open(os.path.join(H, 'worker', 'admin', 'public', '_headers'), 'w', encoding='utf-8').write("/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: no-referrer\n  X-Frame-Options: DENY\n  X-Robots-Tag: noindex, nofollow\n  Cache-Control: no-cache\n  Permissions-Policy: camera=(), microphone=(self), geolocation=(), payment=()\n  Content-Security-Policy: default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob: 'self'; media-src data: blob:; font-src data:; connect-src 'self' https:; worker-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'\n")
 # «حصتي»: تطبيق العميل ملف واحد (hissati.html)، ونسخة المحطة الوسيطة الجاهزة للصق في Cloudflare (worker/relay/dist/worker.js) وهي تقدّمه على «/»
 import re
 A = R('assets.js'); js = lambda k: json.loads('"' + re.search(k + r':"((?:[^"\\]|\\.)*)"', A).group(1) + '"')

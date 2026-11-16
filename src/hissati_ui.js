@@ -149,7 +149,7 @@ function hxReq(req, p, enc) {                                     // قبل ال
       req.intake = p.p; req.st = 'new'; req.at = p.ts || Date.now(); toast('📲 طلب جديد من «زنها»: ' + p.p.name); return 1;
     });
   }
-  if (p.t === 'msg' && p.text) { req.msgs = (req.msgs || []).concat([{ from: 'c', t: String(p.text).slice(0, 2000), ts: p.ts, ctx: p.ctx || '' }]).slice(-200); req.unread = (req.unread || 0) + 1; toast('💬 ' + (req.intake ? req.intake.name : req.label) + ': ' + String(p.text).slice(0, 60)); return 1; }
+  if (p.t === 'msg' && p.text) { req.msgs = (req.msgs || []).concat([hxVo({ from: 'c', t: String(p.text).slice(0, 2000), ts: p.ts, ctx: p.ctx || '' }, p)]).slice(-200); req.unread = (req.unread || 0) + 1; toast('💬 ' + (req.intake ? req.intake.name : req.label) + ': ' + String(p.text).slice(0, 60)); return 1; }
   if (p.t === 'rq') { var q0 = hxQuiz(p); if (!q0) return 0; req.quiz = q0; toast('🧭 ' + ((req.intake || {}).name || req.label) + ' أجاب على أسئلة اختيار النظام'); return 1; }
   return 0;
 }
@@ -191,7 +191,7 @@ function hxIn(c, p) {                                              // بعد ا�
     if (add.length) toast('🚫 ' + nm + ': أُضيف إلى «يتجنبها» — ' + add.slice(0, 3).join('، ')); return 1;
   }
   if (p.t === 'health') { x.health = { cond: (p.cond || []).filter(function (k) { return D.conditions.indexOf(k) >= 0; }), allg: p.allg || [], note: String(p.note || '').slice(0, 500), at: p.ts }; toast('🩺 ' + nm + ' يطلب تعديل حالته الصحية'); return 1; }
-  if (p.t === 'msg' && p.text) { x.msgs = (x.msgs || []).concat([{ from: 'c', t: String(p.text).slice(0, 2000), ts: p.ts, ctx: String(p.ctx || '').slice(0, 120) }]).slice(-300); x.unread = (x.unread || 0) + 1; toast('💬 ' + nm + ': ' + String(p.text).slice(0, 60)); return 1; }
+  if (p.t === 'msg' && p.text) { x.msgs = (x.msgs || []).concat([hxVo({ from: 'c', t: String(p.text).slice(0, 2000), ts: p.ts, ctx: String(p.ctx || '').slice(0, 120) }, p)]).slice(-300); x.unread = (x.unread || 0) + 1; toast('💬 ' + nm + ': ' + String(p.text).slice(0, 60)); return 1; }
   if (p.t === 'read') { (x.msgs || []).forEach(function (q) { if (q.from === 'd' && q.ts <= p.upTo) q.read = 1; }); return 0; }
   if (p.t === 'rq') { var q = hxQuiz(p); if (!q) return 0; x.quiz = q; if (RDS && RDS.ans) delete RDS.ans[c.code]; toast('🧭 ' + nm + (q.pick && window.RL ? ' اختار من المكتبة: ' + RL.label(RL.plan(q.pick)) : ' أجاب على أسئلة اختيار النظام')); return 1; }
   return 0;
@@ -350,8 +350,9 @@ function hxMini(q) {                                                // محاد�
   if (!(q.msgs || []).length) return '';
   return '<details class="hxmini"' + (q.unread ? ' open' : '') + '><summary>💬 رسائل (' + q.msgs.length + ')' + (q.unread ? ' <em class="hxnb">' + q.unread + '</em>' : '') + '</summary>' + hxThread(q.msgs) + '<div class="hxcomp"><textarea data-hxr="' + q.cid + '" rows="1" placeholder="ردّك…"></textarea><button class="sm" data-a="hxReqMsg" data-v="' + q.cid + '">إرسال</button></div></details>';
 }
+function hxVo(m, p) { var v = p.vo && window.HXV && HXV.clean(p.vo); if (v) m.vo = v; return m; }   // 1.08 رسالة صوتية واردة
 function hxThread(msgs) {
-  return '<div class="hxthread">' + (msgs || []).map(function (m) { return '<div class="hxb' + (m.from === 'd' ? ' me' : '') + '">' + (m.ctx ? '<small class="hxcx">بخصوص: ' + esc(m.ctx) + '</small>' : '') + esc(m.t) + '<small>' + new Date(m.ts).toLocaleString('ar', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' }) + (m.from === 'd' ? (m.read ? ' ✓✓' : ' ✓') : '') + '</small></div>'; }).join('') + '</div>';
+  return '<div class="hxthread">' + (msgs || []).map(function (m) { return '<div class="hxb' + (m.from === 'd' ? ' me' : '') + '">' + (m.ctx ? '<small class="hxcx">بخصوص: ' + esc(m.ctx) + '</small>' : '') + (m.vo && window.HXV ? HXV.html(m.vo) : esc(m.t)) + '<small>' + new Date(m.ts).toLocaleString('ar', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' }) + (m.from === 'd' ? (m.read ? ' ✓✓' : ' ✓') : '') + '</small></div>'; }).join('') + '</div>';
 }
 // 0.60: تبويب «زنها» ظاهر لكل عميل — لغير المرتبط حالة فارغة تشرح ما سيحصل عليه، وزر دعوة واحد يؤدي إلى مسار الدعوة نفسه
 function hxEmptyTab(c) {

@@ -1093,6 +1093,17 @@ html:has(.scr.qz),body:has(.scr.qz){background:#fff!important}body:has(.scr.qz):
 .scr.qz .opt{background:#fff}.scr.qz .opt.on{border-color:var(--acc);background:var(--accS)}.scr.qz .opt.on .sym{background:var(--acc);color:#fff}.scr.qz .opt .sym{background:rgba(16,23,54,.07)}.scr.qz .opt .badge{color:var(--ok);background:var(--okS)}
 .opt.on{border-color:var(--mint)}
 
+/* 1.08 الرسائل الصوتية */
+.composer .mic{width:44px;height:44px;border-radius:50%;flex:none;display:grid;place-items:center;background:var(--glass);border:1px solid var(--line);font-size:20px}
+.composer.vrec{align-items:center}.composer.vrec b{font-variant-numeric:tabular-nums;font-size:calc(17px*var(--fs))}.composer.vrec .dim{flex:1}
+.composer .vx{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--glass);border:1px solid var(--line);color:var(--coral)}
+.vdot{width:12px;height:12px;border-radius:50%;background:#ff4d4f;animation:vblink 1s infinite}@keyframes vblink{50%{opacity:.25}}
+.hxv{display:inline-flex;align-items:center;gap:8px;min-width:190px;vertical-align:middle}.hxv.off{min-width:0;opacity:.7;font-style:italic}
+.hxvp{width:36px;height:36px;border-radius:50%;flex:none;display:grid;place-items:center;background:var(--mint,#3fbf93);color:#04261a;font-size:14px;border:0;cursor:pointer}
+.hxvb{flex:1;height:5px;border-radius:5px;background:rgba(127,127,160,.3);overflow:hidden;min-width:70px}.hxvb i{display:block;height:100%;width:0;background:currentColor;transition:width .2s linear}
+.hxvd{font-variant-numeric:tabular-nums;font-size:13px}.hxvx{font-size:11px;opacity:.7;white-space:nowrap}
+@media (prefers-reduced-motion:reduce){.vdot{animation:none}}
+
 /* ==========================================================================
    «حصتي» — themes.css  •  ثيم «وردة» (data-theme="rose") وثيم «نبض» (data-theme="pulse")
    يُحمَّل بعد code/style.css. الثيم الحالي يبقى الافتراضي: بلا data-theme لا يتغيّر شيء.
@@ -2465,6 +2476,78 @@ html[data-theme="sun"] .btn:not(.sec){background:#F26A0A linear-gradient(180deg,
   function visible(msgs) { var seen = {}; return msgs.filter(function (m) { var b = m.body || m; if (!b || b.t !== 'rank') return true; var k = (b.fin ? 'f' : 'd') + (b.day || ''); if (seen[k]) return false; seen[k] = 1; return true; }); }
   return { shrink: resize, imgGet: imgGet, hydrate: hydrate, visible: visible, TOOLS: TOOLS, PRESETS: PRESETS, REWARDS: REWARDS, tool: tool, byId: function (id) { return BYID[id] || null; }, makeChal: makeChal, dayKey: dayKey, addDays: addDays, range: range, state: state, daysLeft: daysLeft, board: board, todayLeft: todayLeft, rewards: rewards, rewardLabel: rewardLabel, rankText: rankText, codeOf: codeOf, normCode: normCode, fx: fx, chime: chime, mute: function (m) { muted = !!m; }, copy: copy };
 });
+
+// ================= الرسائل الصوتية (1.08) — مشتركة بين «زنها» و«زنها Pro» (تُلحق بـ hx_crypto.js عند البناء)
+// التسجيل على الجهاز ← تشفير AES-GCM بمفتاح عشوائي ← رفع النص المشفّر للمحطة على أجزاء ← المفتاح يسافر داخل الرسالة المشفّرة طرفاً لطرف.
+// المحطة لا تسمع شيئاً، وتحذف التسجيل بعد 7 أيام. لا يُحفظ الصوت في التطبيق: يُجلب عند الاستماع فقط ويبقى في الذاكرة حتى إغلاق الصفحة.
+(function (root) {
+  var MAXS = 300, CH = 600000, TTL = 7 * 86400000, C = root.crypto, SB = C && C.subtle;
+  var b64u = function (buf) { var b = new Uint8Array(buf), s = ''; for (var i = 0; i < b.length; i += 8192) s += String.fromCharCode.apply(null, b.subarray(i, i + 8192)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
+  var unb64u = function (s) { s = String(s).replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; var b = atob(s), u = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; };
+  var R = null, reg = {}, urls = {}, cur = null;
+  function ok() { return !!(root.navigator && navigator.mediaDevices && navigator.mediaDevices.getUserMedia && root.MediaRecorder && SB); }
+  function mime() { var c = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/webm', 'audio/ogg;codecs=opus', 'audio/aac']; for (var i = 0; i < c.length; i++) { try { if (MediaRecorder.isTypeSupported(c[i])) return c[i]; } catch (e) { } } return ''; }
+  function fmt(s) { s = Math.max(0, Math.round(s)); return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2); }
+  function start(onTick, onMax) {
+    if (!ok()) return Promise.reject(new Error('جهازك أو متصفحك لا يدعم تسجيل الصوت'));
+    if (R) return Promise.resolve();
+    return navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } }).then(function (st) {
+      var m = mime(), o = { audioBitsPerSecond: 24000 }; if (m) o.mimeType = m; var mr; try { mr = new MediaRecorder(st, o); } catch (e) { mr = new MediaRecorder(st); }
+      R = { mr: mr, st: st, parts: [], t0: Date.now(), m: mr.mimeType || m || 'audio/webm' };
+      mr.ondataavailable = function (e) { if (e.data && e.data.size) R.parts.push(e.data); };
+      mr.start(1000);
+      R.tm = setInterval(function () { var s = (Date.now() - R.t0) / 1000; if (onTick) onTick(fmt(s), s); if (s >= MAXS && onMax) onMax(); }, 250);
+    }).catch(function (e) { R = null; throw new Error(e && e.name === 'NotAllowedError' ? 'اسمح للتطبيق باستعمال الميكروفون من إعدادات المتصفح' : (e && e.message) || 'تعذّر بدء التسجيل'); });
+  }
+  function stop(cancel) {
+    if (!R) return Promise.resolve(null); var r = R; R = null; clearInterval(r.tm);
+    return new Promise(function (res) {
+      var done = function () { r.st.getTracks().forEach(function (t) { t.stop(); }); if (cancel) return res(null); var d = Math.min(MAXS, (Date.now() - r.t0) / 1000); if (d < 0.8 || !r.parts.length) return res(null); res({ blob: new Blob(r.parts, { type: r.m.split(';')[0] }), d: Math.round(d), m: r.m.split(';')[0] }); };
+      if (r.mr.state === 'inactive') return done(); r.mr.onstop = done; try { r.mr.stop(); } catch (e) { done(); }
+    });
+  }
+  function upload(rec, post) {                         // post(path, obj) → Promise(json) موقّع من التطبيق
+    var key, iv = C.getRandomValues(new Uint8Array(12));
+    return SB.generateKey({ name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt']).then(function (k) { key = k; return rec.blob.arrayBuffer(); })
+      .then(function (buf) { return SB.encrypt({ name: 'AES-GCM', iv: iv }, key, buf); })
+      .then(function (ct) {
+        var s = b64u(ct), parts = []; for (var i = 0; i < s.length; i += CH) parts.push(s.slice(i, i + CH)); if (parts.length > 10) throw new Error('التسجيل أطول من المسموح');
+        return post('/v1/vm/put', { i: 0, c: parts[0] }).then(function (j) { var k = j.k, ch = Promise.resolve(); parts.slice(1).forEach(function (p, i) { ch = ch.then(function () { return post('/v1/vm/put', { k: k, i: i + 1, c: p }); }); }); return ch.then(function () { return { k: k, n: parts.length }; }); });
+      }).then(function (o) { return SB.exportKey('raw', key).then(function (raw) { var meta = { k: o.k, n: o.n, a: b64u(raw), iv: b64u(iv), d: rec.d, m: rec.m, x: Date.now() + TTL }; urls[o.k] = URL.createObjectURL(rec.blob); return meta; }); });
+  }
+  function clean(v) {                                  // تنقية بيانات الرسالة الصوتية الواردة
+    if (!v || typeof v !== 'object' || !/^[A-Za-z0-9_-]{24}$/.test(String(v.k)) || !/^[A-Za-z0-9_-]{43}$/.test(String(v.a)) || !/^[A-Za-z0-9_-]{16}$/.test(String(v.iv))) return null;
+    var m = /^audio\/[a-z0-9.+-]{1,20}$/.test(String(v.m)) ? v.m : 'audio/webm';
+    return { k: v.k, n: Math.max(1, Math.min(10, v.n | 0)), a: v.a, iv: v.iv, d: Math.max(1, Math.min(MAXS, v.d | 0)), m: m, x: +v.x || Date.now() + TTL };
+  }
+  function gone(v) { return !v || Date.now() > v.x; }
+  function html(v) {
+    if (!v) return ''; reg[v.k] = v;
+    if (gone(v)) return '<span class="hxv off">🎤 رسالة صوتية انتهت صلاحيتها</span>';
+    var left = Math.max(1, Math.ceil((v.x - Date.now()) / 86400000));
+    return '<span class="hxv" data-hxvk="' + v.k + '"><button type="button" class="hxvp" data-hxv="' + v.k + '" aria-label="تشغيل الرسالة الصوتية">▶</button><span class="hxvb"><i></i></span><span class="hxvd">' + fmt(v.d) + '</span><small class="hxvx" title="تُحذف تلقائياً">⏳ ' + left + ' ي</small></span>';
+  }
+  function getUrl(v, post) {
+    if (urls[v.k]) return Promise.resolve(urls[v.k]); var parts = [], ch = Promise.resolve();
+    for (var i = 0; i < v.n; i++) (function (i) { ch = ch.then(function () { return post('/v1/vm/get', { k: v.k, i: i }).then(function (j) { parts[i] = j.c; }); }); })(i);
+    return ch.then(function () { return SB.importKey('raw', unb64u(v.a), 'AES-GCM', false, ['decrypt']); })
+      .then(function (key) { return SB.decrypt({ name: 'AES-GCM', iv: unb64u(v.iv) }, key, unb64u(parts.join(''))); })
+      .then(function (pt) { urls[v.k] = URL.createObjectURL(new Blob([pt], { type: v.m })); return urls[v.k]; });
+  }
+  function ui(k) { return document.querySelectorAll('[data-hxvk="' + k + '"]'); }
+  function paint(k, f, play) { [].forEach.call(ui(k), function (el) { var i = el.querySelector('.hxvb i'), b = el.querySelector('.hxvp'); if (i) i.style.width = Math.round(f * 100) + '%'; if (b) b.textContent = play ? '❚❚' : '▶'; }); }
+  function toggle(k, post, onErr) {
+    var v = reg[k]; if (!v) return; if (cur && cur.k === k) { if (cur.a.paused) { cur.a.play(); paint(k, cur.a.currentTime / (cur.a.duration || v.d), 1); } else { cur.a.pause(); paint(k, cur.a.currentTime / (cur.a.duration || v.d), 0); } return; }
+    if (cur) { cur.a.pause(); paint(cur.k, 0, 0); cur = null; }
+    if (gone(v)) { if (onErr) onErr(new Error('انتهت صلاحية الرسالة الصوتية')); return; }
+    [].forEach.call(ui(k), function (el) { var b = el.querySelector('.hxvp'); if (b) b.textContent = '…'; });
+    getUrl(v, post).then(function (u) {
+      var a = new Audio(u); cur = { k: k, a: a }; a.ontimeupdate = function () { paint(k, a.currentTime / (isFinite(a.duration) && a.duration ? a.duration : v.d), !a.paused); };
+      a.onended = function () { paint(k, 0, 0); if (cur && cur.k === k) cur = null; }; return a.play().then(function () { paint(k, 0, 1); });
+    }).catch(function (e) { paint(k, 0, 0); if (e && (e.status === 404 || e.code === 'gone')) { v.x = 0; if (onErr) onErr(new Error('انتهت صلاحية الرسالة الصوتية')); } else if (onErr) onErr(e); });
+  }
+  root.HXV = { ok: ok, start: start, stop: stop, upload: upload, clean: clean, html: html, toggle: toggle, fmt: fmt, rec: function () { return !!R; }, MAXS: MAXS, label: function (d) { return '🎤 رسالة صوتية (' + fmt(d) + ')'; } };
+})(typeof self !== 'undefined' ? self : this);
 </script><script>// ================= استبيانات التسجيل في «زنها» (مشترك بين «زنها Pro» و«زنها» والاختبارات)
 // لكل نظام استبيان: الحصص (ex) والجرامات (g). الاستبيان = أقسام (خطوات) فيها أسئلة:
 //   - أسئلة أساسية (b:1) لها مكان ثابت في ملف العميل (الاسم، الوزن، جدول التدريب…): يغيّر الأخصائي نصها أو يخفيها، والأساسية جداً (lock) لا تُخفى.
@@ -3482,7 +3565,7 @@ function handle(p) {
   }
   if (p.t === 'lib' && Array.isArray(p.lib)) { S.lib = cleanLib(p.lib); return true; }
   if (p.t === 'msg' && p.text) {
-    S.msgs.push({ from: 'd', t: String(p.text).slice(0, 2000), ts: p.ts || now() }); S.msgs = S.msgs.slice(-300);
+    S.msgs.push(Object.assign({ from: 'd', t: String(p.text).slice(0, 2000), ts: p.ts || now() }, p.vo && window.HXV && HXV.clean(p.vo) ? { vo: HXV.clean(p.vo) } : {})); S.msgs = S.msgs.slice(-300);
     if (S.chat && !document.hidden) readReceipt(); else { S.unreadC++; notify('رسالة من ' + S.dname, String(p.text).slice(0, 80)); }
     return true;
   }
@@ -5977,7 +6060,7 @@ function bubbles() {
   let last = '', prev = null;
   return S.msgs.map((m) => {
     const mine = m.from === 'c', d = new Date(m.ts).toLocaleDateString('ar', { weekday: 'long', day: 'numeric', month: 'short' }), sep = d !== last ? '<span class="daysep">' + d + '</span>' : '', cont = !sep && prev && prev.from === m.from && m.ts - prev.ts < 120000; last = d; prev = m;
-    return sep + '<div class="bub' + (mine ? ' me' : '') + (cont ? ' cont' : '') + '">' + (m.ctx ? '<span class="cx">بخصوص: ' + esc(m.ctx) + '</span><br>' : '') + esc(m.t)
+    return sep + '<div class="bub' + (mine ? ' me' : '') + (cont ? ' cont' : '') + '">' + (m.ctx ? '<span class="cx">بخصوص: ' + esc(m.ctx) + '</span><br>' : '') + (m.vo && window.HXV ? HXV.html(m.vo) : esc(m.t))
       + '<div class="mt"><span>' + hm(m.ts) + '</span>' + (mine ? '<span class="' + (m.read ? 'rd' : '') + '">' + (m.read ? '✓✓ قُرئت' : S.outbox.some((q) => q.t === 'msg' && q.ts === m.ts) ? '◷ بانتظار الإنترنت' : '✓ أُرسلت') + '</span>' : '') + '</div></div>';
   }).join('');
 }
@@ -5987,7 +6070,8 @@ function scrChat() {
     + (S.replyAt ? '<div class="replyb">' + I('clock') + ' يرد أخصائيك على الرسائل يومياً الساعة ' + esc(hm12(S.replyAt)) + ' — اكتب متى شئت.</div>' : '') + '<div class="thread" id="thread">' + empty + bubbles() + '</div>'
     + (S.msgs.length ? '' : '<div class="qr">' + CLIENT_Q.map((q) => '<button data-act="qmsg" data-v="' + esc(q) + '">' + esc(q) + '</button>').join('') + '</div>')
     + (S.ctx ? '<div class="ctxbar">' + I('utensils') + '<span>بخصوص: ' + esc(S.ctx) + '</span><button class="link" data-act="ctxClear" aria-label="إزالة">' + I('x') + '</button></div>' : '')
-    + '<div class="composer"><textarea id="chatIn" rows="1" maxlength="2000" placeholder="اكتب رسالتك…" aria-label="رسالتك"></textarea><button class="snd" data-act="sendc" aria-label="إرسال">' + I('send') + '</button></div></div></div>';
+    + (V.vrec ? '<div class="composer vrec"><button class="vx" data-act="vcancel" aria-label="إلغاء التسجيل">' + I('x') + '</button><span class="vdot" aria-hidden="true"></span><b id="vrT">0:00</b><span class="dim">' + (V.vrec === 2 ? 'جارٍ الإرسال…' : 'يسجّل… حتى 5 دقائق') + '</span><button class="snd" data-act="vsend" aria-label="إرسال الرسالة الصوتية"' + (V.vrec === 2 ? ' disabled' : '') + '>' + I('send') + '</button></div>'
+      : '<div class="composer"><textarea id="chatIn" rows="1" maxlength="2000" placeholder="اكتب رسالتك…" aria-label="رسالتك"></textarea>' + (window.HXV && HXV.ok() ? '<button class="mic" data-act="vrec" aria-label="تسجيل رسالة صوتية">🎤</button>' : '') + '<button class="snd" data-act="sendc" aria-label="إرسال">' + I('send') + '</button></div>') + '</div></div>';
 }
 function sendMsg(text) {
   text = String(text || '').trim().slice(0, 2000); if (!text || S.removed) return false;
@@ -6254,6 +6338,9 @@ document.addEventListener('click', (e) => {
     case 'ask': { const sl = dayPlan(TODAY).slots[+v]; S.ctx = sl.name + (sl.meal ? ' (' + sl.meal + ')' : ''); S.chat = true; focusChat = true; break; }
     case 'ctxClear': S.ctx = ''; break;
     case 'qmsg': sendMsg(v); break;
+    case 'vrec': HXV.start((t) => { const e = $('#vrT'); if (e) e.textContent = t; }, () => { const b = document.querySelector('[data-act="vsend"]'); if (b) b.click(); }).then(() => { V.vrec = 1; render(); }).catch((e) => toast(e.message)); return;      // 1.08 رسالة صوتية (حتى 5 دقائق، تُحذف بعد 7 أيام)
+    case 'vcancel': HXV.stop(true); V.vrec = 0; break;
+    case 'vsend': { if (V.vrec !== 1) return; V.vrec = 2; render(); HXV.stop().then((r) => r ? HXV.upload(r, (p, o) => api('POST', p, o)) : null).then((vo) => { V.vrec = 0; if (!vo) { render(); return; } const m = { from: 'c', t: HXV.label(vo.d), ts: now(), vo }; S.msgs.push(m); S.msgs = S.msgs.slice(-300); return send({ t: 'msg', text: m.t, vo, ts: m.ts }).then(render); }).catch((e) => { V.vrec = 0; render(); toast('تعذّر إرسال الرسالة الصوتية: ' + e.message); }); return; }
     case 'sendc': { const t = $('#chatIn'); if (!sendMsg(t && t.value)) return; focusChat = true; break; }
     case 'refresh': toast('جارٍ التحقق…'); poll().then(() => toast(S.req === 'approved' ? 'اعتمدك أخصائيك — خطتك قيد الإعداد' : 'لا جديد بعد')); return;
     case 'go': if (v === 'pin') { V.screen = 'pin'; V.pin = V.pin1 = ''; V.err = ''; } break;
@@ -6707,4 +6794,6 @@ window.addEventListener('offline', () => { V.online = false; render(); });
 window.HissatiApp = { mcLeft, remItems, whDayOk, badge: () => V.badge, wheel: { dayOk: whDayOk, cats: () => whCats().map((i) => whx().cats[i].id), dia: whDia, text: (id, i) => { const ci = whx().cats.findIndex((c) => c.id === id); return whText(ci, i); }, maybe: () => { WHL.shown = false; whMaybe(); }, open: (m) => whOpen(m) }, state: () => S, toast, poll, flush, feed: () => FD, feedLoad: fdLoad, celebrateTest: (id) => celebrate(id), sound: { avail: sndAvail, quiet: sndPrayerQuiet, times: prNow, playing: () => SND.playing, state: () => (SND.ctx ? SND.ctx.state : 'none'), vol: () => snd().vol, level: () => { if (!SND.an) return 0; const b = new Float32Array(SND.an.fftSize); SND.an.getFloatTimeDomainData(b); let t = 0, pk = 0; for (const x of b) { t += x * x; pk = Math.max(pk, Math.abs(x)); } return { rms: Math.sqrt(t / b.length), peak: pk }; } },  alarm: (items) => almShow(items), alarmTick: almTick, alarmFire: almFire, remItems, render, prayTimes, khams: { portions: khPortions, range: khRange, state: khState, rel: khRel, meta: () => QM, cert: khCertCanvas, stats: khStats } };     // للاختبارات
 boot();
 })();
+
+document.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('[data-hxv]'); if (!b || !window.HXV) return; e.preventDefault(); e.stopPropagation(); HXV.toggle(b.dataset.hxv, (p, o) => api('POST', p, o), (er) => toast(er.message)); }, true);   // تشغيل الرسائل الصوتية
 </script></body></html>

@@ -439,3 +439,12 @@ header .hdast{display:none!important}
 @media (max-width:600px){.pwit{grid-template-columns:1fr auto}.pwit select{grid-column:1/-1}}
 .pwal{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:6px;margin-top:8px}.pwal label{display:grid;gap:2px;font-size:13px}
 .pwnotes pre{white-space:pre-wrap;font:inherit;font-size:13px;margin:6px 0 0}.pwday ul{margin:4px 0 0;padding-inline-start:18px}
+
+/* 1.08 الرسائل الصوتية */
+.chcomp .chmic{font-size:18px}.chcomp.chrec{align-items:center;gap:10px}.chcomp.chrec b{font-variant-numeric:tabular-nums}
+.vdot{width:12px;height:12px;border-radius:50%;background:#e5484d;animation:vblink 1s infinite;flex:none}@keyframes vblink{50%{opacity:.25}}
+.hxv{display:inline-flex;align-items:center;gap:8px;min-width:200px;vertical-align:middle}.hxv.off{min-width:0;opacity:.7;font-style:italic}
+.hxvp{width:34px;height:34px;border-radius:50%;flex:none;display:grid;place-items:center;background:var(--accent,#3fbf93);color:#fff;font-size:13px;border:0;padding:0;cursor:pointer}
+.hxvb{flex:1;height:5px;border-radius:5px;background:rgba(127,127,160,.3);overflow:hidden;min-width:70px}.hxvb i{display:block;height:100%;width:0;background:currentColor;transition:width .2s linear}
+.hxvd{font-variant-numeric:tabular-nums;font-size:13px}.hxvx{font-size:11px;opacity:.7;white-space:nowrap}
+@media (prefers-reduced-motion:reduce){.vdot{animation:none}}

@@ -22,7 +22,7 @@ function chThread(c) {
   msgs.forEach(function (m) {
     var d = ctDay(m.ts); if (d !== last) { out += '<div class="chsep"><span>' + esc(d) + '</span></div>'; last = d; prev = null; }
     var cont = prev && prev.from === m.from && m.ts - prev.ts < 120000; prev = m;
-    out += '<div class="chb' + (m.from === 'd' ? ' me' : '') + (cont ? ' cont' : '') + '">' + (m.ctx ? '<small class="chcx">بخصوص: ' + esc(m.ctx) + '</small>' : '') + '<span class="cht3">' + esc(m.t).replace(/\n/g, '<br>') + '</span><small class="chtm">' + chTime(m.ts) + (m.from === 'd' ? ' <i class="' + (m.read ? 'rd' : '') + '">' + (m.read ? '✓✓' : '✓') + '</i>' : '') + '</small></div>';
+    out += '<div class="chb' + (m.from === 'd' ? ' me' : '') + (cont ? ' cont' : '') + '">' + (m.ctx ? '<small class="chcx">بخصوص: ' + esc(m.ctx) + '</small>' : '') + '<span class="cht3">' + (m.vo && window.HXV ? HXV.html(m.vo) : esc(m.t).replace(/\n/g, '<br>')) + '</span><small class="chtm">' + chTime(m.ts) + (m.from === 'd' ? ' <i class="' + (m.read ? 'rd' : '') + '">' + (m.read ? '✓✓' : '✓') + '</i>' : '') + '</small></div>';
   });
   return out || '<div class="empty chempty"><p class="small">لا رسائل بعد. ما يكتبه العميل من «راسل الأخصائي» يظهر هنا مع إشعار، وتستطيع أن تبدأ أنت.</p></div>';
 }
@@ -31,7 +31,8 @@ function chPage() {
   var side = '<div class="chl"><div class="chsearch"><input id="chQ" type="search" placeholder="ابحث عن عميل" value="' + esc(CHT.q) + '" aria-label="بحث في المحادثات"></div><div class="chrows">' + chList() + '</div></div>';
   var main = gsel ? gpMain() : c ? '<section class="chm"><header class="chh"><button class="sec sm chback" data-a="czBack" aria-label="رجوع إلى المحادثات">›</button><span class="cav">' + esc(initial(c.name)) + '</span><div><b>' + esc(c.name || c.code) + '</b><small>' + (c.hx.sentAt ? 'خطته v' + (c.hx.planV || 1) + ' • ' : '') + 'آخر تحقق ' + hxAgo(HX.last) + '</small></div><button class="sec sm" data-a="czFile" data-v="' + esc(c.code) + '" style="margin-inline-start:auto">فتح ملفه</button></header>'
     + '<div class="chbody" id="chBody">' + chThread(c) + '</div><div class="chquick">' + CH_QUICK.map(function (q, i) { return '<button class="chip" data-a="czQuick" data-v="' + i + '">' + esc(q) + '</button>'; }).join('') + '</div>'
-    + '<div class="chcomp"><textarea id="chIn" rows="1" maxlength="2000" placeholder="اكتب رسالة…" aria-label="رسالة للعميل"></textarea><button data-a="czSend" aria-label="إرسال">➤</button></div></section>'
+    + (CHT.rec ? '<div class="chcomp chrec"><button class="sec" data-a="czRecX" aria-label="إلغاء التسجيل">✕</button><span class="vdot" aria-hidden="true"></span><b id="chRT">0:00</b><span class="small" style="flex:1">' + (CHT.rec === 2 ? 'جارٍ الإرسال…' : 'يسجّل… حتى 5 دقائق') + '</span><button data-a="czRecSend" aria-label="إرسال الرسالة الصوتية"' + (CHT.rec === 2 ? ' disabled' : '') + '>➤</button></div></section>'
+      : '<div class="chcomp"><textarea id="chIn" rows="1" maxlength="2000" placeholder="اكتب رسالة…" aria-label="رسالة للعميل"></textarea>' + (window.HXV && HXV.ok() ? '<button class="sec chmic" data-a="czRec" aria-label="تسجيل رسالة صوتية">🎤</button>' : '') + '<button data-a="czSend" aria-label="إرسال">➤</button></div></section>')
     : '<section class="chm chnone"><div class="empty"><p><b>شات زنها</b></p><p class="small">اختر عميلاً من القائمة لتبدأ المحادثة. كل الرسائل مشفّرة بين جوالك وجواله.</p></div></section>';
   return '<div class="chwrap' + (c || gsel ? ' open' : '') + '"><div class="chlbar"><button class="chexit" data-a="home" aria-label="رجوع إلى زنها برو">›</button><b>شات زنها</b></div><div class="hxtop"><h2>💬 شات زنها</h2><small class="small">محادثات الأخصائي مع عملائه، مشفّرة طرفاً لطرف.</small></div><div class="chgrid">' + side + main + '</div></div>';
 }
@@ -53,6 +54,15 @@ function chRead(c) {
 }
 function chRail() { var n = chUnread(); [].forEach.call(document.querySelectorAll('[data-a="zchat"] em'), function (b) { b.textContent = n || ''; b.style.display = n ? '' : 'none'; }); var tb = document.querySelector('#tabbar [data-v="zchat"]'); if (tb) { var e = tb.querySelector('em'); if (!e && n) { e = document.createElement('em'); e.className = 'hxnb'; tb.appendChild(e); } if (e) { e.textContent = n || ''; e.style.display = n ? '' : 'none'; } } }
 Object.assign(A, {
+  czRec: function () { HXV.start(function (t) { var e = $('#chRT'); if (e) e.textContent = t; }, function () { A.czRecSend(); }).then(function () { CHT.rec = 1; chRe(true); }).catch(function (e) { toast(e.message); }); },      // 1.08 رسالة صوتية (حتى 5 دقائق، تُحذف بعد 7 أيام)
+  czRecX: function () { HXV.stop(true); CHT.rec = 0; chRe(true); },
+  czRecSend: function () {
+    var c = S.clients.filter(function (x) { return x.code === CHT.sel && x.hx; })[0]; if (!c || CHT.rec !== 1) return; CHT.rec = 2; chRe(true);
+    HXV.stop().then(function (r) { return r ? HXV.upload(r, function (p, o) { return hxFetch('POST', p, o, true); }) : null; }).then(function (vo) {
+      if (!vo) { CHT.rec = 0; chRe(true); return; } var ts = Date.now(), t = HXV.label(vo.d);
+      return hxSend(c, { t: 'msg', text: t, vo: vo, ts: ts }).then(function () { c.hx.msgs = (c.hx.msgs || []).concat([{ from: 'd', t: t, ts: ts, vo: vo }]); c.hx.unread = 0; persist(c); CHT.rec = 0; chRe(true); chRail(); });
+    }).catch(function (e) { CHT.rec = 0; chRe(true); toast('تعذّر إرسال الرسالة الصوتية: ' + e.message); });
+  },
   zchat: function () { S.view = 'chat'; S.cur = null; render(); var c = S.clients.filter(function (x) { return x.code === CHT.sel; })[0]; if (c) chRead(c); var bd = $('#chBody'); if (bd) bd.scrollTop = bd.scrollHeight; },
   czOpen: function (v) { CHT.sel = v; var c = S.clients.filter(function (x) { return x.code === v; })[0]; chRead(c); chRe(true); var t = $('#chIn'); if (t && !matchMedia('(max-width:700px)').matches) t.focus(); },
   czBack: function () { CHT.sel = ''; chRe(); },
@@ -73,3 +83,4 @@ document.addEventListener('keydown', function (e) { var t = e.target; if (t && t
 (function (f) { hxRe = function () { if (S.view === 'chat') { var c = S.clients.filter(function (x) { return x.code === CHT.sel; })[0]; if (c && c.hx && c.hx.unread && !document.hidden) chRead(c); main(); chRail(); return; } return f.apply(this, arguments); }; })(hxRe);
 (function (f) { if (typeof hxRail === 'function') hxRail = function () { f.apply(this, arguments); chRail(); }; })(typeof hxRail === 'function' ? hxRail : null);
 window.CHX = { unread: chUnread, thread: chThread, day: ctDay };       // للاختبارات
+document.addEventListener('click', function (e) { var b = e.target.closest && e.target.closest('[data-hxv]'); if (!b || !window.HXV) return; e.preventDefault(); e.stopPropagation(); HXV.toggle(b.dataset.hxv, function (p, o) { return hxFetch('POST', p, o, true); }, function (er) { toast(er.message); }); }, true);   // تشغيل الرسائل الصوتية

@@ -1085,3 +1085,14 @@ html:has(.scr.qz),body:has(.scr.qz){background:#fff!important}body:has(.scr.qz):
 .wk{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;width:120px;flex:none;direction:ltr}.wk i{height:11px;border-radius:4px}
 .scr.qz .opt{background:#fff}.scr.qz .opt.on{border-color:var(--acc);background:var(--accS)}.scr.qz .opt.on .sym{background:var(--acc);color:#fff}.scr.qz .opt .sym{background:rgba(16,23,54,.07)}.scr.qz .opt .badge{color:var(--ok);background:var(--okS)}
 .opt.on{border-color:var(--mint)}
+
+/* 1.08 الرسائل الصوتية */
+.composer .mic{width:44px;height:44px;border-radius:50%;flex:none;display:grid;place-items:center;background:var(--glass);border:1px solid var(--line);font-size:20px}
+.composer.vrec{align-items:center}.composer.vrec b{font-variant-numeric:tabular-nums;font-size:calc(17px*var(--fs))}.composer.vrec .dim{flex:1}
+.composer .vx{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--glass);border:1px solid var(--line);color:var(--coral)}
+.vdot{width:12px;height:12px;border-radius:50%;background:#ff4d4f;animation:vblink 1s infinite}@keyframes vblink{50%{opacity:.25}}
+.hxv{display:inline-flex;align-items:center;gap:8px;min-width:190px;vertical-align:middle}.hxv.off{min-width:0;opacity:.7;font-style:italic}
+.hxvp{width:36px;height:36px;border-radius:50%;flex:none;display:grid;place-items:center;background:var(--mint,#3fbf93);color:#04261a;font-size:14px;border:0;cursor:pointer}
+.hxvb{flex:1;height:5px;border-radius:5px;background:rgba(127,127,160,.3);overflow:hidden;min-width:70px}.hxvb i{display:block;height:100%;width:0;background:currentColor;transition:width .2s linear}
+.hxvd{font-variant-numeric:tabular-nums;font-size:13px}.hxvx{font-size:11px;opacity:.7;white-space:nowrap}
+@media (prefers-reduced-motion:reduce){.vdot{animation:none}}
