@@ -448,3 +448,7 @@ header .hdast{display:none!important}
 .hxvb{flex:1;height:5px;border-radius:5px;background:rgba(127,127,160,.3);overflow:hidden;min-width:70px}.hxvb i{display:block;height:100%;width:0;background:currentColor;transition:width .2s linear}
 .hxvd{font-variant-numeric:tabular-nums;font-size:13px}.hxvx{font-size:11px;opacity:.7;white-space:nowrap}
 @media (prefers-reduced-motion:reduce){.vdot{animation:none}}
+
+/* 1.09 حذف الرسائل */
+.chb.chdel{font-style:italic;opacity:.65}.chb[data-a="czMsel"]{cursor:pointer}.chb.sel{outline:2px solid #e5484d;outline-offset:2px}
+.chdelb{display:block;margin-bottom:6px;padding:3px 10px;border-radius:10px;border:1px solid #e5484d;background:rgba(229,72,77,.1);color:#c62f35;font-weight:700;font-size:12.5px;cursor:pointer}

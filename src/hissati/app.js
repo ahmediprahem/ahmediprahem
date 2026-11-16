@@ -278,6 +278,7 @@ function handle(p) {
   if (p.t === 'supp' && Array.isArray(p.list)) { S.supps = p.list.slice(0, 20).map((x) => ({ n: String(x.n || '').slice(0, 60), k: x.k === 'h' ? 'h' : 's', dose: String(x.dose || '').slice(0, 120), note: String(x.note || '').slice(0, 120), warn: String(x.warn || '').slice(0, 160) })); notify('💊 رشّح لك أخصائيك مكملات', S.supps.map((x) => x.n).join('، ')); return true; }
   if (p.t === 'gate') { setGate(p.on ? { on: 1, hour: p.hour } : null); return true; }
   if (p.t === 'read') { S.msgs.forEach((m) => { if (m.from === 'c' && m.ts <= p.upTo) m.read = true; }); return true; }
+  if (p.t === 'msgdel') { const m = S.msgs.find((x) => x.from === 'd' && x.ts === p.ts); if (m) { m.del = 1; m.t = ''; delete m.vo; } return true; }   // 1.09 حذف الأخصائي لرسالته
   return false;
 }
 function readReceipt() { S.unreadC = 0; const last = S.msgs.filter((m) => m.from === 'd').slice(-1)[0]; if (last && !last.rr) { last.rr = 1; send({ t: 'read', upTo: last.ts }); } }
@@ -2302,7 +2303,9 @@ function bubbles() {
   let last = '', prev = null;
   return S.msgs.map((m) => {
     const mine = m.from === 'c', d = new Date(m.ts).toLocaleDateString('ar', { weekday: 'long', day: 'numeric', month: 'short' }), sep = d !== last ? '<span class="daysep">' + d + '</span>' : '', cont = !sep && prev && prev.from === m.from && m.ts - prev.ts < 120000; last = d; prev = m;
-    return sep + '<div class="bub' + (mine ? ' me' : '') + (cont ? ' cont' : '') + '">' + (m.ctx ? '<span class="cx">بخصوص: ' + esc(m.ctx) + '</span><br>' : '') + (m.vo && window.HXV ? HXV.html(m.vo) : esc(m.t))
+    if (m.del) return sep + '<div class="bub mdel' + (mine ? ' me' : '') + '">🚫 ' + (mine ? 'حذفت هذه الرسالة' : 'حُذفت هذه الرسالة') + '<div class="mt"><span>' + hm(m.ts) + '</span></div></div>';      // 1.09 الحذف للجميع
+    const sel = mine && V.msel === m.ts;
+    return sep + '<div class="bub' + (mine ? ' me' : '') + (cont ? ' cont' : '') + (sel ? ' sel' : '') + '"' + (mine ? ' data-act="msel" data-v="' + m.ts + '" title="المس للحذف"' : '') + '>' + (m.ctx ? '<span class="cx">بخصوص: ' + esc(m.ctx) + '</span><br>' : '') + (m.vo && window.HXV ? HXV.html(m.vo) : esc(m.t)) + (sel ? '<button class="mdelb" data-act="mdel" data-v="' + m.ts + '">🗑 حذف للجميع</button>' : '')
       + '<div class="mt"><span>' + hm(m.ts) + '</span>' + (mine ? '<span class="' + (m.read ? 'rd' : '') + '">' + (m.read ? '✓✓ قُرئت' : S.outbox.some((q) => q.t === 'msg' && q.ts === m.ts) ? '◷ بانتظار الإنترنت' : '✓ أُرسلت') + '</span>' : '') + '</div></div>';
   }).join('');
 }
@@ -2581,6 +2584,10 @@ document.addEventListener('click', (e) => {
     case 'ctxClear': S.ctx = ''; break;
     case 'qmsg': sendMsg(v); break;
     case 'vrec': HXV.start((t) => { const e = $('#vrT'); if (e) e.textContent = t; }, () => { const b = document.querySelector('[data-act="vsend"]'); if (b) b.click(); }).then(() => { V.vrec = 1; render(); }).catch((e) => toast(e.message)); return;      // 1.08 رسالة صوتية (حتى 5 دقائق، تُحذف بعد 7 أيام)
+    case 'msel': V.msel = V.msel === +v ? 0 : +v; break;
+    case 'mdel': { const m = S.msgs.find((x) => x.from === 'c' && x.ts === +v && !x.del); V.msel = 0; if (!m || !confirm('حذف الرسالة لك ولأخصائيك؟')) break;
+      const q = S.outbox.findIndex((x) => x.t === 'msg' && x.ts === m.ts); if (m.vo) api('POST', '/v1/vm/del', { k: m.vo.k }).catch(() => { });
+      m.del = 1; m.t = ''; delete m.vo; delete m.ctx; if (q >= 0) { S.outbox.splice(q, 1); save(); } else send({ t: 'msgdel', ts: m.ts }); toast('حُذفت الرسالة'); break; }
     case 'vcancel': HXV.stop(true); V.vrec = 0; break;
     case 'vsend': { if (V.vrec !== 1) return; V.vrec = 2; render(); HXV.stop().then((r) => r ? HXV.upload(r, (p, o) => api('POST', p, o)) : null).then((vo) => { V.vrec = 0; if (!vo) { render(); return; } const m = { from: 'c', t: HXV.label(vo.d), ts: now(), vo }; S.msgs.push(m); S.msgs = S.msgs.slice(-300); return send({ t: 'msg', text: m.t, vo, ts: m.ts }).then(render); }).catch((e) => { V.vrec = 0; render(); toast('تعذّر إرسال الرسالة الصوتية: ' + e.message); }); return; }
     case 'sendc': { const t = $('#chatIn'); if (!sendMsg(t && t.value)) return; focusChat = true; break; }

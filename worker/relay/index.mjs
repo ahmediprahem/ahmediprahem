@@ -4,7 +4,7 @@
    - تقدّم تطبيق «زنها» نفسه على الصفحة الرئيسية (/)، فرابط الدعوة = عنوان هذه المحطة.
    - الجداول تُنشأ تلقائياً أول مرة؛ يكفي ربط قاعدة D1 باسم DB. متغير اختياري REG_KEY: مفتاح تسجيل الأخصائيين (بدونه يقبل أي «حصة»).
    - لا تسجّل أي محتوى (لا console.log). يُبنى منه worker/relay/dist/worker.js بـ py build_web.py (يُضمَّن تطبيق «زنها» وأيقونته). */
-const VER = '1.12';
+const VER = '1.13';
 // ---- 1.7: رخصة الأخصائي: كود تفعيل موقَّع بمفتاح المدير (ADMIN_PUB، مفتاح عام) يغني عن مفتاح التسجيل، فيُربط الأخصائي تلقائياً دون سر في الموقع
 const b64uBytes = (x) => { x = x.replace(/-/g, '+').replace(/_/g, '/'); while (x.length % 4) x += '='; const b = atob(x), u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; };
 async function licOk(tok, env) {
@@ -292,6 +292,10 @@ async function api(req, env, url, ctx) {
     if (await one(db, 'SELECT gid FROM grps WHERE gid = ?', gid)) return err(409, 'dup', 'المجموعة موجودة');
     const n = await one(db, 'SELECT COUNT(*) AS n FROM grps WHERE did = ?', me.id); if (n && n.n >= LIM.groups) return err(429, 'many', 'عدد المجموعات كبير');
     await run(db, 'INSERT INTO grps (gid, did, ah, created) VALUES (?, ?, ?, ?)', gid, me.id, ah, now()); return json({ ok: true });
+  }
+  if (p === '/v1/vm/del' && method === 'POST') {                  // 1.09 حذف رسالة صوتية للجميع: المرسل فقط
+    const k = String(J.k || ''); if (!/^[A-Za-z0-9_-]{24}$/.test(k)) return err(400, 'key', 'مفتاح غير صالح');
+    for (let i = 0; i < LIM.vparts; i++) await run(db, 'DELETE FROM media WHERE key = ? AND did = ?', 'v.' + k + '.' + i, me.id); return json({ ok: true });
   }
   if (p === '/v1/vm/put' || p === '/v1/vm/get') {                 // 1.08 الرسائل الصوتية: نص مشفّر (المفتاح داخل الرسالة طرفاً لطرف)، يُحذف بعد 7 أيام
     if (method !== 'POST') return err(405, 'method', 'POST فقط'); const k0 = String(J.k || ''), i = parseInt(J.i, 10);

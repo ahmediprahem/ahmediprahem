@@ -1096,3 +1096,7 @@ html:has(.scr.qz),body:has(.scr.qz){background:#fff!important}body:has(.scr.qz):
 .hxvb{flex:1;height:5px;border-radius:5px;background:rgba(127,127,160,.3);overflow:hidden;min-width:70px}.hxvb i{display:block;height:100%;width:0;background:currentColor;transition:width .2s linear}
 .hxvd{font-variant-numeric:tabular-nums;font-size:13px}.hxvx{font-size:11px;opacity:.7;white-space:nowrap}
 @media (prefers-reduced-motion:reduce){.vdot{animation:none}}
+
+/* 1.09 حذف الرسائل */
+.bub.mdel{font-style:italic;opacity:.65}.bub[data-act="msel"]{cursor:pointer}.bub.sel{outline:2px solid var(--coral);outline-offset:2px}
+.mdelb{display:block;margin-top:6px;padding:4px 12px;border-radius:12px;background:var(--coralBg);border:1px solid var(--coral);color:var(--coral);font-weight:700;font-size:calc(13px*var(--fs))}

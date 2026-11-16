@@ -448,6 +448,10 @@ header .hdast{display:none!important}
 .hxvb{flex:1;height:5px;border-radius:5px;background:rgba(127,127,160,.3);overflow:hidden;min-width:70px}.hxvb i{display:block;height:100%;width:0;background:currentColor;transition:width .2s linear}
 .hxvd{font-variant-numeric:tabular-nums;font-size:13px}.hxvx{font-size:11px;opacity:.7;white-space:nowrap}
 @media (prefers-reduced-motion:reduce){.vdot{animation:none}}
+
+/* 1.09 حذف الرسائل */
+.chb.chdel{font-style:italic;opacity:.65}.chb[data-a="czMsel"]{cursor:pointer}.chb.sel{outline:2px solid #e5484d;outline-offset:2px}
+.chdelb{display:block;margin-bottom:6px;padding:3px 10px;border-radius:10px;border:1px solid #e5484d;background:rgba(229,72,77,.1);color:#c62f35;font-weight:700;font-size:12.5px;cursor:pointer}
 </style><style id="thm">/* ===== ثيم «Linear داكن» (وهو أيضاً أساس الثيم «الزجاجي» الذي يضيف فوقه theme_glass.css) — طبقة إضافية فقط، لا تُحذف قواعد القالب الكلاسيكي ولا تُعطَّل. يعمل عند html:is([data-theme="linear"],[data-theme="glass"]) وعلى الشاشة فقط (الطباعة والتصدير كما هما). ===== */
 @media screen{
 html:is([data-theme="linear"],[data-theme="glass"]){color-scheme:dark;--lbg:#0b1329;--lpanel:rgba(255,255,255,.045);--lpanel2:rgba(255,255,255,.08);--lline:rgba(255,255,255,.10);--lline2:rgba(255,255,255,.2);--ltext:#f4f6fc;--lmut:#a3b2d6;--lacc:#22c55e;--lacc-d:#052e16;--lglow:rgba(34,197,94,.22);--lerr:#fca5a5;--lwarn:#fde68a}
@@ -5707,6 +5711,7 @@ function hxReq(req, p, enc) {                                     // قبل ال
       req.intake = p.p; req.st = 'new'; req.at = p.ts || Date.now(); toast('📲 طلب جديد من «زنها»: ' + p.p.name); return 1;
     });
   }
+  if (p.t === 'msgdel') { hxDelIn(req.msgs, p, req); return 1; }
   if (p.t === 'msg' && p.text) { req.msgs = (req.msgs || []).concat([hxVo({ from: 'c', t: String(p.text).slice(0, 2000), ts: p.ts, ctx: p.ctx || '' }, p)]).slice(-200); req.unread = (req.unread || 0) + 1; toast('💬 ' + (req.intake ? req.intake.name : req.label) + ': ' + String(p.text).slice(0, 60)); return 1; }
   if (p.t === 'rq') { var q0 = hxQuiz(p); if (!q0) return 0; req.quiz = q0; toast('🧭 ' + ((req.intake || {}).name || req.label) + ' أجاب على أسئلة اختيار النظام'); return 1; }
   return 0;
@@ -5751,6 +5756,7 @@ function hxIn(c, p) {                                              // بعد ا�
   if (p.t === 'health') { x.health = { cond: (p.cond || []).filter(function (k) { return D.conditions.indexOf(k) >= 0; }), allg: p.allg || [], note: String(p.note || '').slice(0, 500), at: p.ts }; toast('🩺 ' + nm + ' يطلب تعديل حالته الصحية'); return 1; }
   if (p.t === 'msg' && p.text) { x.msgs = (x.msgs || []).concat([hxVo({ from: 'c', t: String(p.text).slice(0, 2000), ts: p.ts, ctx: String(p.ctx || '').slice(0, 120) }, p)]).slice(-300); x.unread = (x.unread || 0) + 1; toast('💬 ' + nm + ': ' + String(p.text).slice(0, 60)); return 1; }
   if (p.t === 'read') { (x.msgs || []).forEach(function (q) { if (q.from === 'd' && q.ts <= p.upTo) q.read = 1; }); return 0; }
+  if (p.t === 'msgdel') { hxDelIn(x.msgs, p, x); return 1; }
   if (p.t === 'rq') { var q = hxQuiz(p); if (!q) return 0; x.quiz = q; if (RDS && RDS.ans) delete RDS.ans[c.code]; toast('🧭 ' + nm + (q.pick && window.RL ? ' اختار من المكتبة: ' + RL.label(RL.plan(q.pick)) : ' أجاب على أسئلة اختيار النظام')); return 1; }
   return 0;
 }
@@ -5908,9 +5914,10 @@ function hxMini(q) {                                                // محاد�
   if (!(q.msgs || []).length) return '';
   return '<details class="hxmini"' + (q.unread ? ' open' : '') + '><summary>💬 رسائل (' + q.msgs.length + ')' + (q.unread ? ' <em class="hxnb">' + q.unread + '</em>' : '') + '</summary>' + hxThread(q.msgs) + '<div class="hxcomp"><textarea data-hxr="' + q.cid + '" rows="1" placeholder="ردّك…"></textarea><button class="sm" data-a="hxReqMsg" data-v="' + q.cid + '">إرسال</button></div></details>';
 }
+function hxDelIn(msgs, p, o) { var m = (msgs || []).filter(function (q) { return q.from === 'c' && q.ts === p.ts && !q.del; })[0]; if (!m) return; m.del = 1; m.t = ''; delete m.vo; delete m.ctx; if (o.unread) o.unread--; }   // 1.09 حذف العميل لرسالته
 function hxVo(m, p) { var v = p.vo && window.HXV && HXV.clean(p.vo); if (v) m.vo = v; return m; }   // 1.08 رسالة صوتية واردة
 function hxThread(msgs) {
-  return '<div class="hxthread">' + (msgs || []).map(function (m) { return '<div class="hxb' + (m.from === 'd' ? ' me' : '') + '">' + (m.ctx ? '<small class="hxcx">بخصوص: ' + esc(m.ctx) + '</small>' : '') + (m.vo && window.HXV ? HXV.html(m.vo) : esc(m.t)) + '<small>' + new Date(m.ts).toLocaleString('ar', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' }) + (m.from === 'd' ? (m.read ? ' ✓✓' : ' ✓') : '') + '</small></div>'; }).join('') + '</div>';
+  return '<div class="hxthread">' + (msgs || []).map(function (m) { return '<div class="hxb' + (m.from === 'd' ? ' me' : '') + '">' + (m.ctx ? '<small class="hxcx">بخصوص: ' + esc(m.ctx) + '</small>' : '') + (m.del ? '<i>🚫 حُذفت هذه الرسالة</i>' : m.vo && window.HXV ? HXV.html(m.vo) : esc(m.t)) + '<small>' + new Date(m.ts).toLocaleString('ar', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' }) + (m.from === 'd' ? (m.read ? ' ✓✓' : ' ✓') : '') + '</small></div>'; }).join('') + '</div>';
 }
 // 0.60: تبويب «زنها» ظاهر لكل عميل — لغير المرتبط حالة فارغة تشرح ما سيحصل عليه، وزر دعوة واحد يؤدي إلى مسار الدعوة نفسه
 function hxEmptyTab(c) {
@@ -6949,7 +6956,7 @@ function chList() {
   var q = String(CHT.q || '').trim().toLowerCase(), rows = chClients().filter(function (c) { return !q || String(c.name || c.code).toLowerCase().indexOf(q) >= 0; }).sort(function (a, b) { var x = chLast(a), y = chLast(b); return (y ? y.ts : 0) - (x ? x.ts : 0) || String(a.name).localeCompare(String(b.name), 'ar'); });
   return (q ? '' : gpRows()) + rows.map(function (c) {
     var m = chLast(c), un = (c.hx && c.hx.unread) || 0;
-    return '<button class="chrow' + (CHT.sel === c.code ? ' on' : '') + '" data-a="czOpen" data-v="' + esc(c.code) + '"><span class="cav">' + esc(initial(c.name)) + '</span><span class="cht2"><b>' + esc(c.name || c.code) + '</b><small>' + (m ? (m.from === 'd' ? (m.read ? '✓✓ ' : '✓ ') : '') + esc(String(m.t || '').slice(0, 60)) : 'ابدأ المحادثة') + '</small></span><span class="chmeta">' + (m ? '<small' + (un ? ' class="un"' : '') + '>' + esc(ctDay(m.ts) === 'اليوم' ? chTime(m.ts) : ctDay(m.ts)) + '</small>' : '') + (un ? '<em class="hxnb">' + un + '</em>' : '') + '</span></button>';
+    return '<button class="chrow' + (CHT.sel === c.code ? ' on' : '') + '" data-a="czOpen" data-v="' + esc(c.code) + '"><span class="cav">' + esc(initial(c.name)) + '</span><span class="cht2"><b>' + esc(c.name || c.code) + '</b><small>' + (m ? (m.from === 'd' ? (m.read ? '✓✓ ' : '✓ ') : '') + (m.del ? '🚫 حُذفت رسالة' : esc(String(m.t || '').slice(0, 60))) : 'ابدأ المحادثة') + '</small></span><span class="chmeta">' + (m ? '<small' + (un ? ' class="un"' : '') + '>' + esc(ctDay(m.ts) === 'اليوم' ? chTime(m.ts) : ctDay(m.ts)) + '</small>' : '') + (un ? '<em class="hxnb">' + un + '</em>' : '') + '</span></button>';
   }).join('') || '<p class="small" style="padding:12px">لا عملاء مرتبطون بـ«زنها» بعد. ادعُ عميلاً من تبويب «📲 زنها» في ملفه ليظهر هنا.</p>';
 }
 function chThread(c) {
@@ -6958,7 +6965,9 @@ function chThread(c) {
   msgs.forEach(function (m) {
     var d = ctDay(m.ts); if (d !== last) { out += '<div class="chsep"><span>' + esc(d) + '</span></div>'; last = d; prev = null; }
     var cont = prev && prev.from === m.from && m.ts - prev.ts < 120000; prev = m;
-    out += '<div class="chb' + (m.from === 'd' ? ' me' : '') + (cont ? ' cont' : '') + '">' + (m.ctx ? '<small class="chcx">بخصوص: ' + esc(m.ctx) + '</small>' : '') + '<span class="cht3">' + (m.vo && window.HXV ? HXV.html(m.vo) : esc(m.t).replace(/\n/g, '<br>')) + '</span><small class="chtm">' + chTime(m.ts) + (m.from === 'd' ? ' <i class="' + (m.read ? 'rd' : '') + '">' + (m.read ? '✓✓' : '✓') + '</i>' : '') + '</small></div>';
+    if (m.del) { out += '<div class="chb chdel' + (m.from === 'd' ? ' me' : '') + '"><span class="cht3">🚫 ' + (m.from === 'd' ? 'حذفت هذه الرسالة' : 'حُذفت هذه الرسالة') + '</span><small class="chtm">' + chTime(m.ts) + '</small></div>'; return; }      // 1.09 الحذف للجميع
+    var sel = m.from === 'd' && CHT.msel === m.ts;
+    out += '<div class="chb' + (m.from === 'd' ? ' me' : '') + (cont ? ' cont' : '') + (sel ? ' sel' : '') + '"' + (m.from === 'd' ? ' data-a="czMsel" data-v="' + m.ts + '" title="المس للحذف"' : '') + '>' + (sel ? '<button class="chdelb" data-a="czDel" data-v="' + m.ts + '">🗑 حذف للجميع</button>' : '') + (m.ctx ? '<small class="chcx">بخصوص: ' + esc(m.ctx) + '</small>' : '') + '<span class="cht3">' + (m.vo && window.HXV ? HXV.html(m.vo) : esc(m.t).replace(/\n/g, '<br>')) + '</span><small class="chtm">' + chTime(m.ts) + (m.from === 'd' ? ' <i class="' + (m.read ? 'rd' : '') + '">' + (m.read ? '✓✓' : '✓') + '</i>' : '') + '</small></div>';
   });
   return out || '<div class="empty chempty"><p class="small">لا رسائل بعد. ما يكتبه العميل من «راسل الأخصائي» يظهر هنا مع إشعار، وتستطيع أن تبدأ أنت.</p></div>';
 }
@@ -6990,6 +6999,12 @@ function chRead(c) {
 }
 function chRail() { var n = chUnread(); [].forEach.call(document.querySelectorAll('[data-a="zchat"] em'), function (b) { b.textContent = n || ''; b.style.display = n ? '' : 'none'; }); var tb = document.querySelector('#tabbar [data-v="zchat"]'); if (tb) { var e = tb.querySelector('em'); if (!e && n) { e = document.createElement('em'); e.className = 'hxnb'; tb.appendChild(e); } if (e) { e.textContent = n || ''; e.style.display = n ? '' : 'none'; } } }
 Object.assign(A, {
+  czMsel: function (v) { CHT.msel = CHT.msel === +v ? 0 : +v; chRe(true); },
+  czDel: function (v) {
+    var c = S.clients.filter(function (x) { return x.code === CHT.sel && x.hx; })[0], m = c && chMsgs(c).filter(function (x) { return x.from === 'd' && x.ts === +v && !x.del; })[0]; CHT.msel = 0; if (!m || !confirm('حذف الرسالة لك وللعميل؟')) { chRe(true); return; }
+    if (m.vo) hxFetch('POST', '/v1/vm/del', { k: m.vo.k }, true).catch(function () { });
+    hxSend(c, { t: 'msgdel', ts: m.ts }).then(function () { m.del = 1; m.t = ''; delete m.vo; delete m.ctx; persist(c); chRe(true); toast('حُذفت الرسالة'); }).catch(hxErr);
+  },
   czRec: function () { HXV.start(function (t) { var e = $('#chRT'); if (e) e.textContent = t; }, function () { A.czRecSend(); }).then(function () { CHT.rec = 1; chRe(true); }).catch(function (e) { toast(e.message); }); },      // 1.08 رسالة صوتية (حتى 5 دقائق، تُحذف بعد 7 أيام)
   czRecX: function () { HXV.stop(true); CHT.rec = 0; chRe(true); },
   czRecSend: function () {
