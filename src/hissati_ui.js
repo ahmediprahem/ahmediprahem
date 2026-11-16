@@ -353,9 +353,9 @@ function hxMini(q) {                                                // محاد�
   return '<details class="hxmini"' + (q.unread ? ' open' : '') + '><summary>💬 رسائل (' + q.msgs.length + ')' + (q.unread ? ' <em class="hxnb">' + q.unread + '</em>' : '') + '</summary>' + hxThread(q.msgs) + '<div class="hxcomp"><textarea data-hxr="' + q.cid + '" rows="1" placeholder="ردّك…"></textarea><button class="sm" data-a="hxReqMsg" data-v="' + q.cid + '">إرسال</button></div></details>';
 }
 function hxDelIn(msgs, p, o) { var m = (msgs || []).filter(function (q) { return q.from === 'c' && q.ts === p.ts && !q.del; })[0]; if (!m) return; m.del = 1; m.t = ''; delete m.vo; delete m.ctx; if (o.unread) o.unread--; }   // 1.09 حذف العميل لرسالته
-function hxVo(m, p) { var v = p.vo && window.HXV && HXV.clean(p.vo); if (v) m.vo = v; return m; }   // 1.08 رسالة صوتية واردة
+function hxVo(m, p) { var v = p.vo && window.HXV && HXV.clean(p.vo); if (v) m.vo = v; if (p.sk && window.HXST && HXST[p.sk]) m.sk = String(p.sk); return m; }   // 1.08 رسالة صوتية واردة
 function hxThread(msgs) {
-  return '<div class="hxthread">' + (msgs || []).map(function (m) { return '<div class="hxb' + (m.from === 'd' ? ' me' : '') + '">' + (m.ctx ? '<small class="hxcx">بخصوص: ' + esc(m.ctx) + '</small>' : '') + (m.del ? '<i>🚫 حُذفت هذه الرسالة</i>' : m.vo && window.HXV ? HXV.html(m.vo) : esc(m.t)) + '<small>' + new Date(m.ts).toLocaleString('ar', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' }) + (m.from === 'd' ? (m.read ? ' ✓✓' : ' ✓') : '') + '</small></div>'; }).join('') + '</div>';
+  return '<div class="hxthread">' + (msgs || []).map(function (m) { return '<div class="hxb' + (m.from === 'd' ? ' me' : '') + '">' + (m.ctx ? '<small class="hxcx">بخصوص: ' + esc(m.ctx) + '</small>' : '') + (m.del ? '<i>🚫 حُذفت هذه الرسالة</i>' : m.sk && window.HXST && HXST[m.sk] ? '<img class="hxsk" src="' + HXST[m.sk][2] + '" alt="' + esc(HXST[m.sk][1]) + '">' : m.vo && window.HXV ? HXV.html(m.vo) : esc(m.t)) + '<small>' + new Date(m.ts).toLocaleString('ar', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' }) + (m.from === 'd' ? (m.read ? ' ✓✓' : ' ✓') : '') + '</small></div>'; }).join('') + '</div>';
 }
 // 0.60: تبويب «زنها» ظاهر لكل عميل — لغير المرتبط حالة فارغة تشرح ما سيحصل عليه، وزر دعوة واحد يؤدي إلى مسار الدعوة نفسه
 function hxEmptyTab(c) {

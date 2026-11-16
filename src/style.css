@@ -452,3 +452,9 @@ header .hdast{display:none!important}
 /* 1.09 حذف الرسائل */
 .chb.chdel{font-style:italic;opacity:.65}.chb[data-a="czMsel"]{cursor:pointer}.chb.sel{outline:2px solid #e5484d;outline-offset:2px}
 .chdelb{display:block;margin-bottom:6px;padding:3px 10px;border-radius:10px;border:1px solid #e5484d;background:rgba(229,72,77,.1);color:#c62f35;font-weight:700;font-size:12.5px;cursor:pointer}
+
+/* 1.10 الملصقات */
+.chb.stk{background:none!important;border-color:transparent!important;box-shadow:none!important;padding:2px}.hxsk{display:block;width:128px;height:auto;max-height:150px;object-fit:contain}
+.chskp{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:6px;max-height:300px;overflow-y:auto;padding:10px;border-top:1px solid var(--line,#dde)}
+.chskp button{border-radius:12px;padding:4px;background:transparent;border:1px solid transparent;cursor:pointer}.chskp button:hover{border-color:var(--line,#dde);background:rgba(127,127,160,.08)}.chskp img{width:100%;height:auto;display:block}
+.chcomp .chmic.on{outline:2px solid var(--accent,#3fbf93)}
