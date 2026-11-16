@@ -6,7 +6,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [], SH = pr
   const hxCheck = async () => { await d.evaluate(() => DPApp.A.hxv()); await hc(); await d.evaluate((c) => { DPApp.A.zchat(); DPApp.A.czOpen(c); }, code); };
   const all = await m.evaluate(() => Object.values(window.HXST).map((x) => x[0])); assert(all.filter((x) => x === 'c').length >= 25 && all.filter((x) => x === 'd').length >= 45); ok('ملصقات: ' + all.filter((x) => x === 'd').length + ' للأخصائي و' + all.filter((x) => x === 'c').length + ' للعميل');
   await m.click('[data-act="chat"] >> nth=0'); await m.click('[data-act="skp"]'); await m.waitForSelector('.skp img');
-  const cs = await m.$$eval('.skp [data-act="sk"]', (b) => b.map((x) => x.dataset.v)); assert(cs.length >= 25); assert(await m.evaluate((ks) => ks.every((k) => HXST[k][0] === 'c'), cs)); ok('لوحة العميل فيها ملصقات العميل فقط');
+  const cs = await m.$$eval('.skp [data-act="sk"]', (b) => b.map((x) => x.dataset.v)); assert(cs.length >= 25); assert(await m.evaluate((ks) => ks.every((k) => HXST[k][0] === 'c' && HXST[k][3] !== 'm'), cs)); assert(await m.evaluate(() => Object.values(HXST).filter((x) => x[3] === 'm').length >= 25)); ok('لوحة العميلة: ملصقات العميل بشخصية امرأة والمحايدة فقط (وملصقات الرجل للعملاء الرجال)');
   if (SH) await m.screenshot({ path: SH + '/client_panel.png' });
   await m.click('.skp [data-act="sk"][data-v="c07"]'); await m.waitForSelector('.bub.stk img.hxsk'); ok('العميل أرسل ملصقاً فظهر صورةً في المحادثة'); await cPoll();
   await d.evaluate((c) => { DPApp.A.zchat(); DPApp.A.czOpen(c); }, code); await hxCheck(); await d.waitForSelector('#chBody .chb.stk img.hxsk'); ok('وصل الملصق للأخصائي صورةً');

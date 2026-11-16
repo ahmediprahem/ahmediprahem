@@ -8,7 +8,7 @@ from scipy import ndimage as nd
 
 H = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 D = os.path.join(H, 'design', 'stickers')
-SRC = {'a': os.path.join(D, 'src', 'sheet_a.jpg'), 'c': os.path.join(D, 'src', 'sheet_c.png')}
+SRC = {'a': os.path.join(D, 'src', 'sheet_a.jpg'), 'c': os.path.join(D, 'src', 'sheet_c.png'), 'm1': os.path.join(D, 'src', 'sheet_m1.jpg'), 'm2': os.path.join(D, 'src', 'sheet_m2.jpg')}
 FONT = os.path.join(D, 'plex_bold.ttf')
 
 # صناديق الملصقات في اللوحتين (x0, y0, x1, y1)
@@ -27,6 +27,18 @@ BOX = {
  'c05': ('c', 835, 8, 987, 212), 'c06': ('c', 990, 8, 1118, 212), 'c07': ('c', 1122, 8, 1258, 212), 'c08': ('c', 1262, 8, 1410, 212),
  'c16': ('c', 972, 222, 1092, 412), 'c17': ('c', 1135, 222, 1265, 412), 'c18': ('c', 1270, 222, 1396, 412), 'c27': ('c', 1100, 425, 1210, 628),
 }
+# لوحتا العميل الرجل (1.11): خلفية كريمية
+MB = {'m1:00': (0, 15, 148, 175), 'm1:01': (157, 15, 272, 175), 'm1:02': (287, 22, 412, 175), 'm1:03': (430, 22, 556, 178), 'm1:04': (573, 22, 682, 175), 'm1:05': (693, 15, 795, 175),
+ 'm1:06': (808, 25, 918, 175), 'm1:07': (930, 15, 1035, 175), 'm1:08': (1045, 15, 1150, 175), 'm1:09': (1160, 22, 1258, 178), 'm2:00': (0, 15, 150, 178), 'm2:02': (287, 22, 412, 175),
+ 'm1:11': (135, 192, 278, 335), 'm1:13': (425, 192, 556, 338), 'm1:15': (678, 198, 800, 342), 'm1:16': (808, 198, 918, 335), 'm1:17': (930, 198, 1040, 338), 'm1:18': (1048, 190, 1148, 338),
+ 'm1:21': (135, 352, 262, 516), 'm1:22': (258, 350, 402, 512), 'm1:24': (543, 350, 657, 517), 'm1:25': (668, 355, 792, 517), 'm1:28': (1005, 352, 1132, 518),
+ 'm1:30': (5, 527, 128, 672), 'm1:31': (140, 527, 262, 675), 'm1:32': (266, 527, 398, 675), 'm1:33': (418, 527, 540, 675), 'm1:34': (548, 527, 676, 678), 'm1:35': (675, 527, 775, 672),
+ 'm1:36': (778, 527, 925, 678), 'm1:37': (930, 527, 1015, 680), 'm1:38': (1022, 527, 1145, 680), 'm1:39': (1152, 527, 1250, 666),
+ 'm1:44': (532, 690, 668, 832), 'm1:45': (672, 690, 790, 832), 'm1:46': (790, 690, 898, 832), 'm1:47': (905, 690, 1020, 832), 'm1:48': (1022, 690, 1150, 832)}
+for k, v in MB.items(): BOX[k] = (k.split(':')[0],) + v
+# جنس شخصية ملصق العميل: f امرأة، m رجل، وبلا قيمة = محايد (يظهر للجميع)
+GF = 'c01 c02 c03 c04 c06 c07 c08 c09 c10 c11 c12 c14 c16 c17 c19 c20 c21 c22 c26 c27 c28 c30'.split()
+GN = 'c05 c13 c15 c18 c23 c24 c25 c29 m10 m17 m18 m30 m33'.split()
 # الملصقات: (المعرّف، المصدر، الجهة d=الأخصائي c=العميل، النص الظاهر/البديل، تصحيح اختياري: (مستطيل نسبي يغطي النص القديم، النص الجديد، إضافة أعلى))
 FIX = lambda r, t, pad=0: {'r': r, 't': t, 'pad': pad}
 ST = [
@@ -67,6 +79,19 @@ ST = [
  ('c25', 'a43', 'c', 'زاد وزني قليلاً', FIX((.06, .0, .94, .34), 'زاد وزني\nقليلاً')), ('c26', 'c08', 'c', 'جرّبت وصفة جديدة', FIX((.0, .0, 1, .24), 'جرّبت وصفة جديدة')),
  ('c27', 'a11', 'c', 'لا أحب هذه الأكلة', FIX((.0, .0, 1, .3), 'لا أحب\nهذه الأكلة')), ('c28', 'c01', 'c', 'شكراً لك', FIX((.54, .06, 1, .4), 'شكراً\nلك')),
  ('c29', 'a12', 'c', 'نمت جيداً', FIX((.1, .0, .9, .24), 'نمت جيداً')), ('c30', 'a25', 'c', 'سؤال سريع؟', FIX((.06, .0, .94, .24), 'سؤال سريع؟')),
+ # ——— العميل (الرجل) — 1.11 ———
+ ('m01', 'm1:00', 'c', 'أنا التزمت!', None), ('m02', 'm1:01', 'c', 'ركضت اليوم!', FIX((0, 0, 1, .24), 'ركضت اليوم!')), ('m03', 'm1:02', 'c', 'جاهز للتمرين!', FIX((0, 0, 1, .18), 'جاهز للتمرين!', .14)),
+ ('m04', 'm1:03', 'c', 'تمرّنت اليوم!', FIX((.06, 0, .94, .2), 'تمرّنت اليوم!')), ('m05', 'm1:04', 'c', 'أنا أقوى', None), ('m06', 'm1:05', 'c', 'هل هدفي قريب؟', FIX((0, 0, 1, .3), 'هل هدفي\nقريب؟')),
+ ('m07', 'm1:06', 'c', 'هدفي قريب', None), ('m08', 'm1:07', 'c', 'كان صعباً لكن قاومت!', FIX((0, 0, 1, .3), 'كان صعباً\nلكن قاومت!')), ('m09', 'm1:08', 'c', 'أشعر بنشاط وحيوية!', FIX((0, 0, 1, .3), 'أشعر بنشاط\nوحيوية!')),
+ ('m10', 'm1:09', 'c', 'ملتزم جداً', None), ('m11', 'm2:00', 'c', 'مستمر!', FIX((0, 0, 1, .2), 'مستمر!')), ('m12', 'm2:02', 'c', 'يوم تمرين!', FIX((0, 0, 1, .16), 'يوم تمرين!', .14)),
+ ('m13', 'm1:11', 'c', 'الشيف اليوم', None), ('m14', 'm1:13', 'c', 'جهّزت وجباتي', FIX((.5, 0, 1, .4), 'جهّزت\nوجباتي')), ('m15', 'm1:15', 'c', 'ما أقدر الآن', FIX((0, 0, 1, .24), 'ما أقدر الآن')),
+ ('m16', 'm1:16', 'c', 'طبخت بنفسي!', FIX((0, 0, 1, .18), 'طبخت بنفسي!', .14)), ('m17', 'm1:17', 'c', 'هل هذه وجبة مفتوحة؟', None), ('m18', 'm1:18', 'c', 'أرز بني؟', FIX((0, 0, 1, .4), 'أرز بني؟')),
+ ('m19', 'm1:21', 'c', 'جميل جداً!', None), ('m20', 'm1:22', 'c', 'أنجزتها!', FIX((0, 0, 1, .24), 'أنجزتها!')), ('m21', 'm1:24', 'c', 'تمام', None), ('m22', 'm1:25', 'c', 'حاضر', None),
+ ('m23', 'm1:28', 'c', 'شربت مائي!', FIX((.3, 0, 1, .36), 'شربت\nمائي!')), ('m24', 'm1:30', 'c', 'أتمرّن في المكتب', FIX((0, 0, 1, .24), 'أتمرّن في المكتب')), ('m25', 'm1:31', 'c', 'الضغط كثير اليوم', None),
+ ('m26', 'm1:32', 'c', 'هل هذا مسموح؟', None), ('m27', 'm1:33', 'c', 'هل الأرز كربوهيدرات؟', None), ('m28', 'm1:34', 'c', 'هل يمكنني تأجيل المتابعة؟', None),
+ ('m29', 'm1:35', 'c', 'أتنفّس بعمق', FIX((0, 0, 1, .24), 'أتنفّس بعمق')), ('m30', 'm1:36', 'c', 'وقت النوم', FIX((0, 0, 1, .3), 'وقت النوم')), ('m31', 'm1:37', 'c', 'جادّ هذه المرة!', FIX((0, 0, 1, .32), 'جادّ هذه\nالمرة!')),
+ ('m32', 'm1:38', 'c', 'ماذا تعني «وجبة متوازنة»؟', FIX((0, 0, 1, .36), 'ماذا تعني\nوجبة متوازنة؟')), ('m33', 'm1:39', 'c', 'نجم زنها', FIX((0, 0, 1, .28), 'نجم زنها')),
+ ('m34', 'm1:44', 'c', 'صوري بعد 3 شهور!', None), ('m35', 'm1:45', 'c', 'بروتيني اليوم!', None), ('m36', 'm1:46', 'c', 'وزني مثالي', None), ('m37', 'm1:47', 'c', 'بعد التمرين', None), ('m38', 'm1:48', 'c', 'معاً أقوى', None),
 ]
 FILLS = ['#eaf4ff', '#fff3d6', '#e6f7ec', '#ffe9f0', '#f0eaff']
 
@@ -74,6 +99,13 @@ def cut(k):
     s, x0, y0, x1, y1 = BOX[k]; src = Image.open(SRC[s]).convert('RGB')
     if s == 'c': x0, y0, x1, y1 = x0 - 6, y0 - 6, x1 + 6, y1 + 6
     im = src.crop((x0, y0, x1, y1)); mn = np.array(im).astype(int).min(2)
+    if s in ('m1', 'm2'):                                  # خلفية كريمية: كل ما يختلف عنها، مع ضم الفقاعة المنفصلة عن الشخصية
+        a = np.array(im).astype(int); bgc = np.array([253, 249, 238]); lab, n = nd.label(np.abs(a - bgc).max(2) < 14); edge = set(np.unique(np.concatenate([lab[0], lab[-1], lab[:, 0], lab[:, -1]]))) - {0}
+        st = ~np.isin(lab, list(edge)); st = nd.binary_opening(st, iterations=2); st = nd.binary_fill_holes(st); L, m = nd.label(st); h, w = st.shape; keep = np.zeros_like(st)
+        for j, o in enumerate(nd.find_objects(L)):
+            cy, cx = (o[0].start + o[0].stop) / 2, (o[1].start + o[1].stop) / 2; comp = L == j + 1
+            if comp.sum() > 250 and .08 * w < cx < .92 * w and .05 * h < cy < .95 * h: keep |= comp
+        al = Image.fromarray((keep * 255).astype('uint8')).filter(ImageFilter.GaussianBlur(0.8)); out = im.convert('RGBA'); out.putalpha(al); return out.crop(out.getbbox())
     if s == 'a':
         lab, n = nd.label(mn > 232); edge = set(np.unique(np.concatenate([lab[0], lab[-1], lab[:, 0], lab[:, -1]]))) - {0}
         st = ~np.isin(lab, list(edge)); st = nd.binary_dilation(st, iterations=3); st = nd.binary_opening(st, iterations=1)
@@ -114,9 +146,9 @@ def main():
     for i, (sid, src, side, label, fx) in enumerate(ST):
         if src not in cache: cache[src] = cut(src)
         im = cache[src].copy(); im = bubble(im, fx, i) if fx else im.resize((im.width * 3, im.height * 3), Image.LANCZOS)
-        im.thumbnail((200, 200), Image.LANCZOS); b = io.BytesIO(); im.save(b, 'WEBP', quality=72, method=6)
-        out[sid] = [side, label, 'data:image/webp;base64,' + base64.b64encode(b.getvalue()).decode()]; prev.append((sid, im))
-    js = '// مولَّد بـ tools/stickers_build.py — لا تعدّله يدوياً. ملصقات المحادثة: [الجهة d/c، النص، الصورة]\n(function (r) { r.HXST = ' + json.dumps(out, ensure_ascii=False, separators=(',', ':')) + '; })(typeof self !== \'undefined\' ? self : this);\n'
+        im.thumbnail((184, 184), Image.LANCZOS); b = io.BytesIO(); im.save(b, 'WEBP', quality=66, method=6)
+        out[sid] = [side, label, 'data:image/webp;base64,' + base64.b64encode(b.getvalue()).decode(), 'f' if sid in GF else 'm' if sid.startswith('m') and sid not in GN else '']; prev.append((sid, im))
+    js = '// مولَّد بـ tools/stickers_build.py — لا تعدّله يدوياً. ملصقات المحادثة: [الجهة d/c، النص، الصورة، جنس شخصية العميل f/m أو محايد]\n(function (r) { r.HXST = ' + json.dumps(out, ensure_ascii=False, separators=(',', ':')) + '; })(typeof self !== \'undefined\' ? self : this);\n'
     open(os.path.join(H, 'src', 'stickers.js'), 'w', encoding='utf-8').write(js)
     S, cols = 140, 12; rows = (len(prev) + cols - 1) // cols; sh = Image.new('RGB', (cols * S, rows * S), (246, 247, 251)); dr = ImageDraw.Draw(sh)
     for i, (sid, im) in enumerate(prev):
