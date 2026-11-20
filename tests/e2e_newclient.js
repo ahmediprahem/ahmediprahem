@@ -40,7 +40,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   await p.fill('[data-f="age"]', '25'); await p.fill('[data-f="weight"]', '75'); await p.fill('[data-f="height"]', '178'); await p.press('[data-f="height"]', 'Tab'); await p.waitForTimeout(200); assert(/BMR/.test(await p.textContent('#atg')));
   ok('نظام الجرامات: نفس القاعدة (لا 28/80/178 مسبقة، ولا أهداف ولا توليد قبل الإكمال)');
   // ---- 5) لا عملاء فارغون
-  await p.click('.rail [data-a="home"]'); const n0 = await count(), d0 = await dbCount();
+  await p.click('.rail [data-a="home"]'); await p.waitForTimeout(800); const n0 = await count(), d0 = await dbCount();      // 1.25: يُنتظر حفظ «لاعب» من القسم السابق (كان يُحسب بعد العدّ فيفشل أحياناً)
   for (let i = 0; i < 3; i++) { await p.evaluate(() => DPApp.A.new('ex')); await p.waitForSelector('[data-f="name"]'); }
   await p.evaluate(() => DPApp.A.new('ath')); await p.waitForSelector('[data-f="name"]'); await p.fill('[data-f="age"]', '30');
   await p.click('.rail [data-a="home"]'); await p.waitForTimeout(400);
