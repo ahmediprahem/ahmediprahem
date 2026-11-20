@@ -90,6 +90,23 @@ function genGrid(c, g) {
     + '<div class="row genmv"><div><label for="gen_mg">انقل حصة من</label><select id="gen_mg">' + gs.map(function (gi) { return '<option value="' + gi + '">' + esc(D.groups[gi]) + '</option>'; }).join('') + '</select></div><div><label for="gen_mf">من وجبة</label><select id="gen_mf">' + opts + '</select></div><div><label for="gen_mt">إلى وجبة</label><select id="gen_mt">' + opts + '</select></div><div><label>&nbsp;</label><button class="sec" data-a="genMove">⇄ انقل</button></div></div>'
     + '<p class="small">النقل يحفظ الأصناف المختارة: الصنف نفسه يُنقص من وجبة ويُضاف إلى الأخرى، ومجموع اليوم لا يتغيّر.</p></div>';
 }
+// ---- 1.21 المرحلة 6: محرر اليوم — كمية كل صنف (تحدّث الوجبة واليوم والمتبقي)، والبدائل بأنواعها بفرق السعرات وسبب الترشيح، ووجبة من البنك بالمطابقة المرنة
+var GENX = { subs: null, meals: null };
+function genDv(x) { var r = function (v) { return (v > 0 ? '+' : '') + Math.round(v); }; return '<span class="gdv">' + r(x.dk != null ? x.dk : x.k) + ' سعرة • ك ' + r(x.dc != null ? x.dc : x.c) + ' • ب ' + r(x.dp != null ? x.dp : x.p) + ' • د ' + r(x.df != null ? x.df : x.f) + '</span>'; }
+function genEditor(c, g, T) {
+  var p = c.plan; if (!p || !p.days || !p.days.length || c.kind === 'athlete') return ''; var di = Math.min(g.day || 0, p.days.length - 1), d = p.days[di], n = d.nominal || [0, 0, 0];
+  return '<div class="ucard genedit"><h3>محرر ' + esc(dayName(p, di)) + '</h3>' + genHud({ c: n[0], p: n[1], f: n[2], k: n[0] * 4 + n[1] * 4 + n[2] * 9 }, T)
+    + d.slots.map(function (s, si) {
+      var mv = GENX.meals === si ? E.mealMatch(ec(c), E.slotReq(s), s.type, D, 8) : null;
+      return '<div class="gslot"><h4>' + esc(mealNm(p, s)) + (s.meal ? ' <small>' + esc(s.meal) + '</small>' : '') + (s.flex ? ' <span class="gxk">' + E.MATCH_AR[s.flex] + '</span>' : '') + ' <button class="link" data-a="genMeals" data-v="' + si + '">وجبة من البنك</button></h4>'
+        + (mv ? '<ul class="gml">' + (mv.length ? mv.map(function (m, k) { return '<li class="lv-' + m.lvl + '"><b>' + esc(m.n) + '</b> <span class="gxk">' + m.lvl + ' ' + E.MATCH_AR[m.lvl] + '</span> ' + genDv(m.dv) + (m.lvl !== 'D' ? ' <button class="sm" data-a="genMealPick" data-v="' + si + ',' + k + '">اختر</button>' : '') + '</li>'; }).join('') : '<li class="small">لا وجبات في البنك تناسب هذه الوجبة.</li>') + '</ul>' : '')
+        + '<ul class="glines">' + s.lines.map(function (l, li) {
+          if (l.missing) return '<li class="small warn">' + esc(l.text || '') + '</li>'; var key = si + ',' + li, sb = GENX.subs === key ? E.subs(l, s.type, p, D, 12) : null;
+          return '<li><span class="gln">' + esc(l.text) + '</span> <input type="number" class="n" min="0" step="0.5" value="' + l.e + '" data-ge="' + key + '" aria-label="حصص ' + esc(l.name) + '"> <button class="link" data-a="genSubs" data-v="' + key + '">بدائل</button>'
+            + (sb ? '<ul class="gsubs">' + (sb.length ? sb.map(function (x, k) { return '<li><span class="gxk">' + x.type + ' ' + E.SUBT_AR[x.type] + '</span> <b>' + esc(x.text) + '</b> ' + genDv(x) + ' <small>' + esc(x.why) + '</small> <button class="sm" data-a="genSubPick" data-v="' + key + ',' + k + '">اختر</button></li>'; }).join('') : '<li class="small">لا بدائل مناسبة.</li>') + '</ul>' : '') + '</li>';
+        }).join('') + '</ul></div>';
+    }).join('') + '</div>';
+}
 function genPlanStep(c, g) {
   var po = planOf(c), ck = null; if (c.plan && c.plan.days && c.plan.targets && c.kind !== 'athlete' && po.src === 'engine') try { ck = E.checkPlan(c.plan, D); } catch (e) { }
   var T = null; try { T = c.kind === 'athlete' ? null : E.targets(ec(c), D); } catch (e) { }
@@ -97,12 +114,15 @@ function genPlanStep(c, g) {
   return man + '<div class="ucard genplan gen-' + (ck ? 'st-' + ck.st : 'none') + '" data-st="' + (ck ? ck.st : '') + '"><h3>' + (g.path === 'ready' ? 'خطة جاهزة' : 'خطة يدوية') + '</h3>'
     + (po.has ? '<p>الخطة الحالية: <b>' + esc(po.label) + '</b>' + (po.kcal ? ' • ' + Math.round(po.kcal) + ' سعرة' : '') + '</p>' : '<p class="small">لا خطة بعد.</p>')
     + (ck ? '<p class="genst">' + { ok: '✔ مطابقة', warn: '⚠ تحتاج نظرك', block: '⛔ غير مطابقة' }[ck.st] + ': ' + ck.ok + ' أيام مطابقة، ' + ck.warn + ' تنبيه، ' + ck.block + ' مانع</p>' : '')
-    + '<p>' + (man ? '' : '<button data-a="genBuild">' + (po.has ? '↻ أعد التوليد' : '⚙ ولّد الخطة') + '</button> ') + (po.has ? '<button class="sec" data-a="tab" data-v="plan">افتح الخطة للتعديل</button> ' : '') + '<button class="sec" data-a="genStep" data-v="5">التالي: المراجعة والإرسال ›</button></p></div>' + (g.path === 'manual' ? genGrid(c, g) : '');
+    + '<p>' + (man ? '' : '<button data-a="genBuild">' + (po.has ? '↻ أعد التوليد' : '⚙ ولّد الخطة') + '</button> ') + (po.has ? '<button class="sec" data-a="tab" data-v="plan">افتح الخطة للتعديل</button> ' : '') + '<button class="sec" data-a="genStep" data-v="5">التالي: المراجعة والإرسال ›</button></p></div>' + (g.path === 'manual' ? genGrid(c, g) : '') + (T && po.src === 'engine' ? genEditor(c, g, T) : '');
 }
 function genSend(c, g) {
   var po = planOf(c), ck = null, T = null; try { T = c.kind === 'athlete' ? null : E.targets(ec(c), D); if (po.src === 'engine' && c.plan && c.plan.days && c.kind !== 'athlete') ck = E.checkPlan(c.plan, D); } catch (e) { }
   var st = ck ? ck.st : T && T.lowBlock ? 'block' : 'ok', ic = { ok: '✔', warn: '⚠', block: '⛔' }[st];
+  var pf = []; try { if (po.has && c.kind !== 'athlete') pf = E.prefScan(ec(c), [JSON.stringify(po.snap())], D); } catch (e) { }
+  if (pf.length && st === 'ok') { st = 'warn'; ic = '⚠'; }
   return '<div class="ucard gensend gen-st-' + st + '" data-st="' + st + '"><h3>' + ic + ' ' + E.ST_AR[st] + '</h3>'
+    + (pf.length ? '<div class="chkb st-warn genpref">⚠ في الخطة أصناف لا تناسب تفضيلات العميل: ' + pf.map(function (x) { return '<b>' + esc(x.n) + '</b> (' + x.why + ')'; }).join('، ') + '. راجعها قبل الإرسال.</div>' : '')
     + (ck ? '<ul>' + ck.days.map(function (d, i) { return '<li class="st-' + d.st + '">' + esc(dayName(c.plan, i)) + ': ' + { ok: '✔', warn: '⚠', block: '⛔' }[d.st] + ' ' + E.ST_AR[d.st] + (d.reasons.length ? ' — ' + esc(d.reasons[0]) : '') + '</li>'; }).join('') + '</ul>' : '')
     + (T && T.lowBlock ? '<p class="err">السعرات اليدوية تحت الحد الآمن بلا تأكيد: أكّدها من «البيانات».</p>' : '')
     + (!po.has ? '<p class="small">ولّد الخطة أولاً.</p>' : c.hx ? '<p><button data-a="hxSendPlan"' + (T && T.lowBlock ? ' disabled' : '') + '>' + IC('send') + ' أرسل الخطة إلى «زنها»</button></p>' : '<p><button class="sec" data-a="tab" data-v="link">اربط العميل بـ«زنها» لإرسال الخطة</button></p>')
@@ -122,6 +142,7 @@ function genPage() {
 (function (f) { main0 = function () { if (S.view === 'gen') { $('main').innerHTML = genPage(); return; } return f.apply(this, arguments); }; })(main0);
 document.addEventListener('change', function (e) {
   var t = e.target, c = cur(); if (!c || !t.dataset) return;
+  if (t.dataset.ge && c.plan) { var q = t.dataset.ge.split(',').map(Number); E.setLineE(c.plan, genOf(c).day || 0, q[0], q[1], Math.max(0, +t.value || 0), D); GENX.subs = null; save(); main(); return; }
   if (t.dataset.gc != null) { var G = genCounts(c), cn = G.cn.slice(); cn[+t.dataset.gc] = Math.max(0, Math.round(+t.value || 0)); c.baseCounts = cn; save(); main(); return; }
   if (!t.dataset.gk) return; var g = genOf(c); g[t.dataset.gk] = t.dataset.gk === 'fastPat' || t.dataset.gk === 'day' ? +t.value : t.value; save(); main();
 });
@@ -134,6 +155,10 @@ Object.assign(A, {
   genUnex: function (v) { var c = cur(); if (!c) return; c.excludedFoods = (c.excludedFoods || []).filter(function (n) { return n !== v; }); c.avoid = (c.avoid || []).filter(function (n) { return n !== v; }); genOf(c).rev = null; save(); main(); toast('أُرجع «' + v + '»'); },
   genEx: function (v) { var c = cur(); if (!c || !v) return; c.excludedFoods = c.excludedFoods || []; if (c.excludedFoods.indexOf(v) < 0) c.excludedFoods.push(v); genOf(c).rev = null; save(); main(); toast('استُبعد «' + v + '»'); },
   genAdd: function () { var i = $('#gen_add'), v = i && i.value.trim(); if (!v) return; if (!D.foods.some(function (f) { return f.n === v; })) { toast('اختر صنفاً من القائمة'); return; } A.genEx(v); },
+  genSubs: function (v) { GENX.subs = GENX.subs === v ? null : v; GENX.meals = null; main(); },
+  genMeals: function (v) { GENX.meals = GENX.meals === +v ? null : +v; GENX.subs = null; main(); },
+  genSubPick: function (v) { var c = cur(); if (!c || !c.plan) return; var q = v.split(',').map(Number), d = genOf(c).day || 0, s = c.plan.days[d].slots[q[0]], l = s.lines[q[1]], x = E.subs(l, s.type, c.plan, D, 12)[q[2]]; if (!x) return; E.applySub(c.plan, d, q[0], q[1], x, D); GENX.subs = null; save(); main(); toast('استُبدل: ' + x.text); },
+  genMealPick: function (v) { var c = cur(); if (!c || !c.plan) return; var q = v.split(',').map(Number), d = genOf(c).day || 0, s = c.plan.days[d].slots[q[0]], m = E.mealMatch(ec(c), E.slotReq(s), s.type, D, 8)[q[1]]; if (!m) return; var r = E.placeMeal(c.plan, d, q[0], m, D); GENX.meals = null; save(); main(); toast('«' + m.n + '» (' + E.MATCH_AR[m.lvl] + ')' + (r.done ? '، وعُوّض ' + r.done + ' حصة في باقي اليوم' : '') + (r.left ? '؛ بقي ' + r.left + ' حصة بلا تعويض' : '')); },
   genReset: function () { var c = cur(); if (!c) return; delete c.baseCounts; save(); main(); toast('رجعت الحصص لاقتراح النظام'); },
   genMove: function () { var c = cur(); if (!c || !c.plan) return; var g = genOf(c), gi = +$('#gen_mg').value, f = +$('#gen_mf').value, t = +$('#gen_mt').value; if (f === t) { toast('اختر وجبتين مختلفتين'); return; } if (!E.moveEx(c.plan, g.day || 0, gi, f, t, D)) { toast('لا توجد حصة من هذه المجموعة في الوجبة المختارة'); return; } save(); main(); toast('نُقلت حصة'); },
   genBuild: function () { var c = cur(); if (!c) return; var g = genOf(c); if (g.path === 'ready' && c.kind !== 'athlete') { S.tab = 'pw'; render(); return; } A.gen(); S.tab = 'gen'; g.step = 4; save(); render(); }

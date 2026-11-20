@@ -935,5 +935,63 @@ E.ctx = function (client, D) {
     else B.lines.push({ g: g, name: la.name, e: step, text: by[la.name] ? E.lineText(by[la.name], step, al) : la.name, tier: la.tier || 0, bank: false, manual: true });
     A.edited = B.edited = true; E.syncCounts(day); E.dayStats(day, plan.targets, D); return true;
   };
+  // ================================================ 1.21 المرحلة 6: المطابقة المرنة (المحرك 3) والبدائل (المحرك 4)
+  // مستويات مطابقة وجبة البنك لنصيب الوجبة من الحصص: A مطابقة بالمجموعات • B قريبة: ضمن نسبة المطابقة نفسها على مستوى الوجبة (قرار المالك)
+  // C قابلة للتعويض: حتى ضعف النسبة، ويُعوَّض الفرق في باقي اليوم • D غير مناسبة. اللحوم تُقارن بقيمتها من البروتين والدهون لا بدرجتها (الكبسة).
+  E.MATCH_AR = { A: 'مطابقة', B: 'قريبة', C: 'قابلة للتعويض', D: 'غير مناسبة' };
+  E.mealMatch = function (client, tg, type, D, n) {
+    var st = E.state(client, D, {}), tv = E.countsVals(tg, D), tIdx = { B: 0, L: 1, D: 2, S: 3 }[type], out = [];
+    st.bank.forEach(function (x) {
+      if (tIdx != null && x.b.m && !x.b.m[tIdx]) return; var mv = E.countsVals(x.prof, D), r = E.checkVals(mv, tv), exact = x.prof.every(function (v, g) { return Math.abs(v - (+tg[g] || 0)) < 0.01; });
+      var lvl = exact ? 'A' : r.st === 'ok' ? 'B' : r.st === 'warn' ? 'C' : 'D', dv = { k: mv.k - tv.k, c: mv.c - tv.c, p: mv.p - tv.p, f: mv.f - tv.f };
+      out.push({ n: x.b.n, lvl: lvl, dv: dv, reasons: r.reasons, prof: x.prof, ings: x.ings.map(function (q) { return { n: q.f.n, g: q.f.g, e: q.e }; }), score: (lvl.charCodeAt(0) - 65) * 1e4 + Math.abs(dv.k) });
+    });
+    return out.sort(function (a, b) { return a.score - b.score; }).slice(0, n || 12);
+  };
+  E.placeMeal = function (plan, d, si, m, D) {                  // يضع وجبة البنك في الوجبة، ثم يعوّض الفرق بالمجموعات في باقي وجبات اليوم
+    var day = plan.days[d], s = day.slots[si], by = {}, al = plan.client && plan.client.alias; D.foods.forEach(function (f) { by[f.n] = f; });
+    var old = E.slotReq(s); s.lines = m.ings.map(function (q) { return { g: q.g, name: q.n, e: q.e, text: by[q.n] ? E.lineText(by[q.n], q.e, al) : q.n, tier: 0, bank: true }; }); s.meal = m.n; s.edited = true; s.flex = m.lvl;
+    var diff = old.map(function (v, g) { return (+m.prof[g] || 0) - v; }), res = E.compensate(plan, d, si, diff, D); E.syncCounts(day); E.dayStats(day, plan.targets, D); return res;
+  };
+  E.compensate = function (plan, d, skip, diff, D) {            // diff[g] > 0: زيادة في الوجبة تُنقص من باقي اليوم؛ < 0: نقص يُضاف. اللحوم تُعامل مجموعة واحدة (2–5)
+    var day = plan.days[d], by = {}, al = plan.client && plan.client.alias, res = { done: 0, left: 0 }; D.foods.forEach(function (f) { by[f.n] = f; });
+    var pool = function (g) { return g >= 2 && g <= 5 ? [2, 3, 4, 5] : g >= 6 && g <= 8 ? [6, 7, 8] : [g]; }, seen = {};
+    diff.forEach(function (dv, g) {
+      var P = pool(g), key = P.join(); if (seen[key]) return; seen[key] = 1; var need = 0; P.forEach(function (q) { need += diff[q] || 0; }); need = Math.round(need * 2) / 2; if (Math.abs(need) < 0.5) return;
+      day.slots.forEach(function (s, k) { if (k === skip || Math.abs(need) < 0.5) return; s.lines.forEach(function (l) {
+        if (Math.abs(need) < 0.5 || l.missing || P.indexOf(l.g) < 0 || !by[l.name]) return;
+        var ch = need > 0 ? -Math.min(need, l.e) : Math.min(-need, Math.max(0, E.lim(by[l.name], s.type, D).max - l.e)); ch = Math.round(ch * 2) / 2; if (!ch) return;
+        l.e = Math.round((l.e + ch) * 2) / 2; l.manual = true; l.text = E.lineText(by[l.name], l.e, al); need += ch; res.done += Math.abs(ch); s.edited = true;
+      }); s.lines = s.lines.filter(function (l) { return l.missing || l.e > 0; }); });
+      res.left += Math.abs(need);
+    });
+    return res;
+  };
+  // البدائل بأنواعها: 1 من المجموعة نفسها بالحصص نفسها • 2 من مجموعة قريبة بكمية تعادل الماكرو الأساسي • 3 بالسعرات نفسها (±10%) — مع فرق السعرات والماكروز وسبب الترشيح
+  E.SUBT_AR = { 1: 'المجموعة نفسها', 2: 'مجموعة قريبة', 3: 'السعرات نفسها' };
+  E.subs = function (line, slotType, plan, D, n) {
+    var by = {}; D.foods.forEach(function (f) { by[f.n] = f; }); var f0 = by[line.name]; if (!f0) return [];
+    var cx = E.ctx(plan.client, D), tIdx = { B: 0, L: 1, D: 2, S: 3 }[slotType], m0 = E.lineMacros(f0, line.e), k0 = m0[0] * 4 + m0[1] * 4 + m0[2] * 9, out = [], seen = {}; seen[f0.n] = 1;
+    var pm = f0.g >= 2 && f0.g <= 5 ? 1 : f0.g === 11 ? 2 : 0;    // الماكرو الأساسي: بروتين للحوم، دهون للدهون، وإلا الكربوهيدرات
+    var ok = function (f) { return f.on && !seen[f.n] && cx.ok(f) && !cx.avoid[f.n] && (tIdx == null || !f.m || f.m[tIdx]); };
+    var add = function (f, e, t, why) { e = Math.max(0.5, Math.round(e * 2) / 2); var m = E.lineMacros(f, e), k = m[0] * 4 + m[1] * 4 + m[2] * 9; seen[f.n] = 1; out.push({ type: t, name: f.n, g: f.g, e: e, text: E.lineText(f, e, plan.client.alias), dk: k - k0, dc: m[0] - m0[0], dp: m[1] - m0[1], df: m[2] - m0[2], why: why + (cx.love[f.n] ? '، ويحبه العميل' : '') }); };
+    var cands = D.foods.filter(ok).sort(function (a, b) { return (cx.love[b.n] ? 1 : 0) - (cx.love[a.n] ? 1 : 0) || a.o - b.o; });
+    var r0 = E.fmeta(f0).r; cands.filter(function (f) { return f.g === f0.g; }).sort(function (a, b) { return (E.fmeta(b).r === r0) - (E.fmeta(a).r === r0); }).slice(0, 4).forEach(function (f) { add(f, line.e, 1, 'من ' + D.groups[f.g] + ' بالحصص نفسها'); });
+    (E.POOLS[f0.g] || []).concat(E.SUB[f0.g] || []).filter(function (g, i, a) { return g !== f0.g && a.indexOf(g) === i; }).forEach(function (g) {
+      cands.filter(function (f) { return f.g === g; }).slice(0, 2).forEach(function (f) { var u = E.lineMacros(f, 1)[pm], e2 = u > 0 ? Math.max(0.5, Math.round(m0[pm] / u * 2) / 2) : 0, m2 = e2 ? E.lineMacros(f, e2) : null; if (m2 && Math.abs(m2[0] * 4 + m2[1] * 4 + m2[2] * 9 - k0) <= 0.2 * k0) add(f, e2, 2, 'من ' + D.groups[g] + ': كمية تعادل ' + ['الكربوهيدرات', 'البروتين', 'الدهون'][pm]); });
+    });
+    cands.filter(function (f) { return !seen[f.n] && f.g !== f0.g; }).some(function (f) { var u = E.lineMacros(f, 1), uk = u[0] * 4 + u[1] * 4 + u[2] * 9; if (!(uk > 0)) return false; var e = Math.round(k0 / uk * 2) / 2; if (e < 0.5) return false; var mk = E.lineMacros(f, e), kk = mk[0] * 4 + mk[1] * 4 + mk[2] * 9; if (Math.abs(kk - k0) <= 0.1 * k0 && (pm !== 1 || mk[1] >= 0.7 * m0[1])) add(f, e, 3, 'بالسعرات نفسها تقريباً'); return out.filter(function (x) { return x.type === 3; }).length >= 3; });
+    return out.slice(0, n || 12);
+  };
+  E.applySub = function (plan, d, si, li, sub, D) {
+    var s = plan.days[d].slots[si], l = s.lines[li], f = D.foods.filter(function (x) { return x.n === sub.name; })[0]; if (!f) return false;
+    l.name = f.n; l.g = f.g; l.e = sub.e; l.text = E.lineText(f, sub.e, plan.client && plan.client.alias); l.manual = true; l.sub = sub.type; delete l.label; s.edited = true; E.syncCounts(plan.days[d]); E.dayStats(plan.days[d], plan.targets, D); return true;
+  };
+  // تفضيلات العميل على أي خطة قبل الإرسال: أسماء الأصناف المستبعدة أو المرفوضة التي تظهر في نصوص الخطة (محرك أو مكتبة أو جاهزة)
+  E.prefScan = function (client, texts, D) {
+    var cx = E.ctx(client, D), hits = {}, all = texts.join(' \n ');
+    D.foods.forEach(function (f) { if (!f.on) return; var bad = !cx.ok(f) ? 'مستبعد' : cx.avoid[f.n] ? 'لا يحبه العميل' : ''; if (bad && f.n.length > 2 && all.indexOf(f.n) >= 0) hits[f.n] = bad; });
+    return Object.keys(hits).map(function (n) { return { n: n, why: hits[n] }; });
+  };
   if (typeof module !== 'undefined' && module.exports) module.exports = E; else root.DPEngine = E;
 })(typeof window !== 'undefined' ? window : this);
