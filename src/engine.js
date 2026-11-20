@@ -544,7 +544,8 @@ E.ctx = function (client, D) {
     }
     var base = E.baseSuggestion(client, D);
     var plan = { client: client, targets: T, days: days, meals: meals, version: 1, generated: new Date().toISOString(), base: { counts: manual ? client.baseCounts.map(Number) : base.counts, manual: !!manual, auto: base.counts }, phr: opt.phrases || E.pickPhrases(D.phrases || [], D.tips || [], 9, opt.seed) };
-    if (client.v2) plan.fit = E.fitPass(plan, D); plan.quality = E.planQuality(plan, D); return plan;
+    if (client.v2) { plan.fit = E.fitPass(plan, D); days.forEach(function (dy) { E.dayStats(dy, T, D); }); }      // 1.20: تمريرة الضبط تغيّر الأسطر، فتُعاد المجاميع لتطابق ما في الخطة فعلاً
+    plan.quality = E.planQuality(plan, D); return plan;
   };
   E.regenSlot = function (plan, d, k, new11, D) {        // يغيّر المجموعات التي تغيّر عددها فقط؛ بقية الأصناف تبقى كما هي حرفياً (بما فيها التسميات والتقسيم)
     return E.regenSlotG(plan, d, k, E.adjustCols(E.actualGroups(plan.days[d].slots[k]), new11), D);
@@ -920,6 +921,19 @@ E.ctx = function (client, D) {
   E.srcOf = function (f, D) {                                   // شارة مصدر القيم: f.src صريح، أو متوسط المجموعة إن طابقت قيمها حصة المجموعة
     if (!f) return 'draft'; if (f.src && E.SRC[f.src]) return f.src; var ex = D && D.EX && D.EX[f.g]; if (!ex || !f.mac) return 'draft';
     var x = f.exv || 1; return [0, 1, 2].every(function (k) { return Math.abs(f.mac[k] - ex[k] * x) < 0.6; }) ? 'avg' : 'item';
+  };
+  // ================================================ 1.20 المرحلة 5: المسار اليدوي — قيم الحصص، ونقل حصة بين الوجبات مع حفظ الأصناف المختارة
+  E.countsVals = function (cn, D) { var v = { c: 0, p: 0, f: 0 }; for (var g = 0; g < 13; g++) { var x = +cn[g] || 0; v.c += x * D.EX[g][0]; v.p += x * D.EX[g][1]; v.f += x * D.EX[g][2]; } v.k = v.c * 4 + v.p * 4 + v.f * 9; return v; };
+  E.slotReq = function (slot) { var a = new Array(13).fill(0); (slot.lines || []).forEach(function (l) { if (!l.missing) a[l.g] += l.e; }); return a; };
+  E.moveEx = function (plan, d, g, from, to, D) {              // حصة واحدة من المجموعة g: تُنقص من صنف في الوجبة from، وتُضاف للصنف نفسه من المجموعة في الوجبة to (أو يُنقل الصنف نفسه إليها)
+    var day = plan.days[d], A = day.slots[from], B = day.slots[to]; if (!A || !B || from === to) return false;
+    var li = -1; A.lines.forEach(function (l, i) { if (li < 0 && l.g === g && !l.missing && l.e >= 1) li = i; }); if (li < 0) A.lines.forEach(function (l, i) { if (li < 0 && l.g === g && !l.missing && l.e > 0) li = i; }); if (li < 0) return false;
+    var la = A.lines[li], step = Math.min(1, la.e), by = {}; D.foods.forEach(function (f) { by[f.n] = f; });
+    var lb = B.lines.filter(function (l) { return l.g === g && !l.missing && l.name === la.name; })[0] || B.lines.filter(function (l) { return l.g === g && !l.missing && !l.bank; })[0], al = plan.client && plan.client.alias;
+    la.e = Math.round((la.e - step) * 2) / 2; if (la.e <= 0) A.lines.splice(li, 1); else if (by[la.name]) { la.text = E.lineText(by[la.name], la.e, al); la.manual = true; }
+    if (lb) { lb.e += step; lb.manual = true; if (by[lb.name]) lb.text = E.lineText(by[lb.name], lb.e, al); }
+    else B.lines.push({ g: g, name: la.name, e: step, text: by[la.name] ? E.lineText(by[la.name], step, al) : la.name, tier: la.tier || 0, bank: false, manual: true });
+    A.edited = B.edited = true; E.syncCounts(day); E.dayStats(day, plan.targets, D); return true;
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = E; else root.DPEngine = E;
 })(typeof window !== 'undefined' ? window : this);

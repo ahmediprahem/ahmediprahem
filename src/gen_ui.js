@@ -61,12 +61,43 @@ function genSetup(c, g) {
     + (g.week === 'fast' ? '<div class="genfast"><h4>يوم الصيام</h4><div class="genopts">' + GEN_FAST.map(function (f) { return opt('fastPat', f[0], f[1], f[2] ? f[2].map(function (q) { return q[0] + ' ' + Math.round(q[1] * 100) + '%'; }).join(' • ') : 'توزيع تكتبه أنت'); }).join('') + '</div><p class="small">بالسعرات نفسها لباقي الأيام. النسب قابلة للتعديل.</p></div>' : '')
     + '<p class="genfoot"><button data-a="genStep" data-v="4">التالي: الخطة ›</button></p></div>';
 }
+// ---- 1.20 المرحلة 5: المسار اليدوي — حصص صحيحة قابلة للشرح، مؤشر علوي، لوحة المكتمل والناقص، وشبكة نقل الحصص بين الوجبات
+var GEN_PREF_G = [5, 6, 8];                                   // لحوم عالية الدهون وحليب خالٍ وحليب كامل: حسب تفضيل العميل (قرار المالك)
+function genCounts(c) { var sug = E.baseSuggestion(ec(c), D), cn = c.baseCounts && c.baseCounts.length === 13 && c.baseCounts.some(function (x) { return +x > 0; }) ? c.baseCounts.map(Number) : sug.counts.slice(); return { cn: cn, sug: sug, manual: cn !== sug.counts && !!c.baseCounts }; }
+function genHud(v, T) {
+  var r = E.checkVals(v, { k: T.kcal, c: T.cho, p: T.pro, f: T.fat }), pc = function (x, m) { return v.k ? Math.round(x * m / v.k * 100) : 0; }, d = r.dims, cell = function (k, l, x, u, m) { var s = d[k] ? d[k].st : 'ok'; return '<div class="ghc st-' + s + '"><small>' + l + '</small><b>' + Math.round(x) + u + '</b>' + (m ? '<em>' + pc(x, m) + '%</em>' : '') + '<i>الهدف ' + Math.round(d[k] ? d[k].tgt : 0) + '</i></div>'; };
+  return '<div class="genhud st-' + r.st + '" data-st="' + r.st + '">' + cell('k', 'السعرات', v.k, '', 0) + cell('c', 'كربوهيدرات', v.c, ' جم', 4) + cell('p', 'بروتين', v.p, ' جم', 4) + cell('f', 'دهون', v.f, ' جم', 9) + '</div>'
+    + (r.st === 'ok' ? '<p class="ok small">✔ مطابق: ضمن ±' + Math.round(E.CHECK.kcal * 100) + '% سعرات و±' + Math.round(E.CHECK.mac * 100) + '% لكل ماكرو.</p>' : '<ul class="small genwhy">' + r.reasons.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>');
+}
+function genManual(c, g, T) {
+  var G = genCounts(c), cn = G.cn, sg = G.sug.counts, v = E.countsVals(cn, D), sv = E.countsVals(sg, D), sk = E.checkVals(sv, { k: T.kcal, c: T.cho, p: T.pro, f: T.fat });
+  var heart = (c.conditions || []).some(function (x) { return x === 'أمراض القلب' || x === 'ارتفاع الكوليسترول والدهون'; });
+  var row = function (gi) { var d = cn[gi] - sg[gi], st = d === 0 ? '<span class="ok">✓ مكتمل</span>' : d < 0 ? '<span class="warn">ناقص ' + (-d) + '</span>' : '<span class="warn">زائد ' + d + '</span>';
+    return '<tr data-g="' + gi + '"><td>' + esc(D.groups[gi]) + '</td><td><input type="number" class="n" min="0" step="1" data-gc="' + gi + '" value="' + cn[gi] + '" aria-label="حصص ' + esc(D.groups[gi]) + '"></td><td>' + sg[gi] + '</td><td>' + st + '</td></tr>'; };
+  var main = [0, 1, 2, 3, 4, 7, 9, 10, 11, 12], warnHF = cn[5] > 0 && heart ? '<p class="err small">⛔ لحوم عالية الدهون مع ' + esc((c.conditions || []).join('، ')) + ': لا تُستعمل (قرار المالك).</p>' : cn[5] > 1 ? '<p class="warn small">⚠ لحوم عالية الدهون: الحد الأقصى المقترح حصة واحدة يومياً.</p>' : '';
+  return '<div class="ucard genman"><h3>الحصص اليومية</h3>' + genHud(v, T)
+    + (sk.st !== 'ok' ? '<p class="small genf">ℹ اقتراح النظام هو <b>أقرب حل ممكن بحصص صحيحة</b> وليس مطابقاً تماماً: ' + esc(sk.reasons.join('؛ ')) + '.</p>' : '<p class="small">ℹ اقتراح النظام مطابق للهدف بحصص صحيحة.</p>')
+    + '<div class="genman2"><table class="st gentbl"><tr><th>المجموعة</th><th>حصصك</th><th>اقتراح النظام</th><th>الحالة</th></tr>' + main.map(row).join('') + '</table>'
+    + '<details class="fold"' + (GEN_PREF_G.some(function (q) { return cn[q] > 0; }) ? ' open' : '') + '><summary>مجموعات حسب تفضيل العميل (لحوم عالية الدهون، حليب خالٍ، حليب كامل)</summary><table class="st gentbl">' + GEN_PREF_G.map(row).join('') + '</table></details></div>' + warnHF
+    + '<p class="small">حصص صحيحة فقط (قرار المالك).</p><p><button data-a="genBuild">⚙ ولّد الخطة بهذه الحصص</button> ' + (c.baseCounts ? '<button class="sec" data-a="genReset">↺ عُد لاقتراح النظام</button>' : '') + '</p></div>';
+}
+function genGrid(c, g) {
+  var p = c.plan; if (!p || !p.days || !p.days.length || c.kind === 'athlete') return ''; var di = Math.min(g.day || 0, p.days.length - 1), d = p.days[di], req = d.slots.map(E.slotReq), gs = [];
+  for (var gi = 0; gi < 13; gi++) if (req.some(function (a) { return a[gi] > 0; })) gs.push(gi);
+  var nm = function (s) { return esc(mealNm(p, s)); }, opts = d.slots.map(function (s, k) { return '<option value="' + k + '">' + nm(s) + '</option>'; }).join('');
+  return '<div class="ucard gengrid"><h3>توزيع الحصص على الوجبات</h3><p><label for="gen_day">اليوم</label> <select id="gen_day" data-gk="day">' + p.days.map(function (x, i) { return '<option value="' + i + '"' + (i === di ? ' selected' : '') + '>' + esc(dayName(p, i)) + '</option>'; }).join('') + '</select></p>'
+    + '<table class="st gentbl"><tr><th>المجموعة</th>' + d.slots.map(function (s) { return '<th>' + nm(s) + '</th>'; }).join('') + '<th>اليوم</th></tr>' + gs.map(function (gi) { var t = 0; return '<tr><td>' + esc(D.groups[gi]) + '</td>' + req.map(function (a) { t += a[gi]; return '<td>' + (a[gi] ? num(a[gi]) : '') + '</td>'; }).join('') + '<td><b>' + num(t) + '</b></td></tr>'; }).join('') + '</table>'
+    + '<div class="row genmv"><div><label for="gen_mg">انقل حصة من</label><select id="gen_mg">' + gs.map(function (gi) { return '<option value="' + gi + '">' + esc(D.groups[gi]) + '</option>'; }).join('') + '</select></div><div><label for="gen_mf">من وجبة</label><select id="gen_mf">' + opts + '</select></div><div><label for="gen_mt">إلى وجبة</label><select id="gen_mt">' + opts + '</select></div><div><label>&nbsp;</label><button class="sec" data-a="genMove">⇄ انقل</button></div></div>'
+    + '<p class="small">النقل يحفظ الأصناف المختارة: الصنف نفسه يُنقص من وجبة ويُضاف إلى الأخرى، ومجموع اليوم لا يتغيّر.</p></div>';
+}
 function genPlanStep(c, g) {
   var po = planOf(c), ck = null; if (c.plan && c.plan.days && c.plan.targets && c.kind !== 'athlete' && po.src === 'engine') try { ck = E.checkPlan(c.plan, D); } catch (e) { }
-  return '<div class="ucard genplan gen-' + (ck ? 'st-' + ck.st : 'none') + '" data-st="' + (ck ? ck.st : '') + '"><h3>' + (g.path === 'ready' ? 'خطة جاهزة' : 'خطة يدوية') + '</h3>'
+  var T = null; try { T = c.kind === 'athlete' ? null : E.targets(ec(c), D); } catch (e) { }
+  var man = g.path === 'manual' && T ? genManual(c, g, T) : '';
+  return man + '<div class="ucard genplan gen-' + (ck ? 'st-' + ck.st : 'none') + '" data-st="' + (ck ? ck.st : '') + '"><h3>' + (g.path === 'ready' ? 'خطة جاهزة' : 'خطة يدوية') + '</h3>'
     + (po.has ? '<p>الخطة الحالية: <b>' + esc(po.label) + '</b>' + (po.kcal ? ' • ' + Math.round(po.kcal) + ' سعرة' : '') + '</p>' : '<p class="small">لا خطة بعد.</p>')
     + (ck ? '<p class="genst">' + { ok: '✔ مطابقة', warn: '⚠ تحتاج نظرك', block: '⛔ غير مطابقة' }[ck.st] + ': ' + ck.ok + ' أيام مطابقة، ' + ck.warn + ' تنبيه، ' + ck.block + ' مانع</p>' : '')
-    + '<p><button data-a="genBuild">' + (po.has ? '↻ أعد التوليد' : '⚙ ولّد الخطة') + '</button> ' + (po.has ? '<button class="sec" data-a="tab" data-v="plan">افتح الخطة للتعديل</button> ' : '') + '<button class="sec" data-a="genStep" data-v="5">التالي: المراجعة والإرسال ›</button></p></div>';
+    + '<p>' + (man ? '' : '<button data-a="genBuild">' + (po.has ? '↻ أعد التوليد' : '⚙ ولّد الخطة') + '</button> ') + (po.has ? '<button class="sec" data-a="tab" data-v="plan">افتح الخطة للتعديل</button> ' : '') + '<button class="sec" data-a="genStep" data-v="5">التالي: المراجعة والإرسال ›</button></p></div>' + (g.path === 'manual' ? genGrid(c, g) : '');
 }
 function genSend(c, g) {
   var po = planOf(c), ck = null, T = null; try { T = c.kind === 'athlete' ? null : E.targets(ec(c), D); if (po.src === 'engine' && c.plan && c.plan.days && c.kind !== 'athlete') ck = E.checkPlan(c.plan, D); } catch (e) { }
@@ -89,7 +120,11 @@ function genPage() {
     }).join('') + '</div></div>';
 }
 (function (f) { main0 = function () { if (S.view === 'gen') { $('main').innerHTML = genPage(); return; } return f.apply(this, arguments); }; })(main0);
-document.addEventListener('change', function (e) { var t = e.target, c = cur(); if (!c || !t.dataset || !t.dataset.gk) return; var g = genOf(c); g[t.dataset.gk] = t.dataset.gk === 'fastPat' ? +t.value : t.value; save(); main(); });
+document.addEventListener('change', function (e) {
+  var t = e.target, c = cur(); if (!c || !t.dataset) return;
+  if (t.dataset.gc != null) { var G = genCounts(c), cn = G.cn.slice(); cn[+t.dataset.gc] = Math.max(0, Math.round(+t.value || 0)); c.baseCounts = cn; save(); main(); return; }
+  if (!t.dataset.gk) return; var g = genOf(c); g[t.dataset.gk] = t.dataset.gk === 'fastPat' || t.dataset.gk === 'day' ? +t.value : t.value; save(); main();
+});
 Object.assign(A, {
   genTab: function () { document.body.classList.remove('menu'); S.view = 'gen'; S.cur = null; render(); window.scrollTo(0, 0); },
   genPick: function (v) { return A.pick(v).then(function () { S.tab = 'gen'; render(); }); },
@@ -99,5 +134,7 @@ Object.assign(A, {
   genUnex: function (v) { var c = cur(); if (!c) return; c.excludedFoods = (c.excludedFoods || []).filter(function (n) { return n !== v; }); c.avoid = (c.avoid || []).filter(function (n) { return n !== v; }); genOf(c).rev = null; save(); main(); toast('أُرجع «' + v + '»'); },
   genEx: function (v) { var c = cur(); if (!c || !v) return; c.excludedFoods = c.excludedFoods || []; if (c.excludedFoods.indexOf(v) < 0) c.excludedFoods.push(v); genOf(c).rev = null; save(); main(); toast('استُبعد «' + v + '»'); },
   genAdd: function () { var i = $('#gen_add'), v = i && i.value.trim(); if (!v) return; if (!D.foods.some(function (f) { return f.n === v; })) { toast('اختر صنفاً من القائمة'); return; } A.genEx(v); },
+  genReset: function () { var c = cur(); if (!c) return; delete c.baseCounts; save(); main(); toast('رجعت الحصص لاقتراح النظام'); },
+  genMove: function () { var c = cur(); if (!c || !c.plan) return; var g = genOf(c), gi = +$('#gen_mg').value, f = +$('#gen_mf').value, t = +$('#gen_mt').value; if (f === t) { toast('اختر وجبتين مختلفتين'); return; } if (!E.moveEx(c.plan, g.day || 0, gi, f, t, D)) { toast('لا توجد حصة من هذه المجموعة في الوجبة المختارة'); return; } save(); main(); toast('نُقلت حصة'); },
   genBuild: function () { var c = cur(); if (!c) return; var g = genOf(c); if (g.path === 'ready' && c.kind !== 'athlete') { S.tab = 'pw'; render(); return; } A.gen(); S.tab = 'gen'; g.step = 4; save(); render(); }
 });

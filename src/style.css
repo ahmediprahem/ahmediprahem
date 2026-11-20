@@ -498,3 +498,10 @@ header .hdast{display:none!important}
 .gensend li.st-ok,.gensend li.st-warn,.gensend li.st-block{border:0;background:none;padding:2px 0}
 .genlist{display:grid;gap:6px}.genlist .cl{display:flex;gap:10px;align-items:center;text-align:start;width:100%}
 .genfoot{margin-top:12px}
+/* 1.20 المسار اليدوي */
+.genhud{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:6px 0;padding:8px;border:2px solid;border-radius:12px}
+.genhud.st-ok{border-color:#0f9f73}.genhud.st-warn{border-color:#d08a00}.genhud.st-block{border-color:#c62f35}
+.ghc{display:flex;flex-direction:column;align-items:center;padding:6px;border-radius:8px;border:1.5px solid transparent}.ghc b{font-size:18px;font-variant-numeric:tabular-nums}.ghc em,.ghc i{font-size:12px;font-style:normal;opacity:.8}
+.ghc.st-warn{border-color:#d08a00}.ghc.st-block{border-color:#c62f35}
+.gentbl input.n{width:70px}.gentbl td,.gentbl th{text-align:center}.gentbl td:first-child{text-align:start}
+@media (max-width:600px){.genhud{grid-template-columns:repeat(2,minmax(0,1fr))}}
