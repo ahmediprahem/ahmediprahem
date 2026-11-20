@@ -1108,8 +1108,11 @@ E.ctx = function (client, D) {
   };
   E.eqvPlan = function (client, D, opt) {
     opt = opt || {}; var meals = +client.meals || 5, T = E.targets(client, D), cx = E.ctx(client, D), sl = E.slots(meals, D), al = client.alias;
-    var cn = (client.baseCounts || []).map(Number), dist = E.mealDistOk(client, meals, D) || E.suggestDist(cn, meals, D), picks = client.eqvPicks || {}, days = [], seed = opt.seed || 0;
+    var cn0 = (client.baseCounts || []).map(Number), defs = (client.eqvDays && client.eqvDays.length ? client.eqvDays : [{ cn: cn0, md: client.mealDist, picks: client.eqvPicks }]).map(function (x) {      // 1.27: أيام متعددة، لكل يوم جدوله وتوزيعه واختياراته
+      var c2 = (x.cn || cn0).map(Number), md2 = E.mealDistOk({ baseCounts: c2, mealDist: x.md }, meals, D) || E.suggestDist(c2, meals, D); return { cn: c2, md: md2, picks: x.picks || {} }; });
+    var week = client.eqvWeek || [], days = [], seed = opt.seed || 0;
     for (var d = 0; d < 7; d++) {
+      var k0 = week[d] != null && defs[week[d]] ? week[d] : d % defs.length, cn = defs[k0].cn, dist = defs[k0].md, picks = defs[k0].picks;
       var usedDay = {}, slots = [];
       sl.forEach(function (s, si) {
         var row = dist[si]; if (!s.active || !row || !row.some(function (x) { return x > 0; })) return; var lines = [];
@@ -1127,12 +1130,18 @@ E.ctx = function (client, D) {
         });
         slots.push({ si: s.i, name: s.name, type: s.type, pct: s.pct, kcal: Math.round(T.kcal * s.pct), target: row.slice(), meal: '', lines: lines, time: D.times ? D.times[s.i] : '' });
       });
-      var dy = { day: d, name: D.days[d], solver: { counts: cn.slice(), manual: true }, counts: cn.slice(), short: [], slots: slots, eqv: true };
+      var dy = { day: d, name: D.days[d], solver: { counts: cn.slice(), manual: true }, counts: cn.slice(), short: [], slots: slots, eqv: true, eqvDay: k0 };
       E.syncCounts(dy); days.push(E.dayStats(dy, T, D));
     }
-    var plan = { client: client, targets: T, days: days, meals: meals, version: 1, generated: new Date().toISOString(), method: 'eqv', eqv: { dist: dist.map(function (r) { return r.slice(); }), counts: cn.slice() },
-      base: { counts: cn.slice(), manual: true, auto: E.baseSuggestion(client, D).counts }, phr: E.pickPhrases(D.phrases || [], D.tips || [], 9, seed) };
+    var plan = { client: client, targets: T, days: days, meals: meals, version: 1, generated: new Date().toISOString(), method: 'eqv', eqv: { days: defs.length, dist: defs[0].md.map(function (r) { return r.slice(); }), counts: defs[0].cn.slice() },
+      base: { counts: defs[0].cn.slice(), manual: true, auto: E.baseSuggestion(client, D).counts }, phr: E.pickPhrases(D.phrases || [], D.tips || [], 9, seed) };
     plan.quality = E.planQuality(plan, D); return plan;
+  };
+  E.eqvAutoMeal = function (client, D, si, row, type, salt, used) {      // يولّد وجبة: صنف لكل مجموعة من أفضل المرشحين (بذرة حتمية)، بلا تكرار داخل الوجبة
+    var cx = E.ctx(client, D), out = {}; used = used || {};
+    E.EQV_ORDER.forEach(function (g) { var e = +row[g] || 0; if (!(e > 0)) return; var c = E.eqvCands(client, g, type, D, cx, e).filter(function (f) { return !used[f.n]; }).slice(0, 6); if (!c.length) return;
+      var h = 2166136261; String(salt + '_' + si + '_' + g).split('').forEach(function (ch) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); }); var f = c[(h >>> 0) % c.length]; out[si + '_' + g] = f.n; used[f.n] = 1; });
+    return out;
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = E; else root.DPEngine = E;
 })(typeof window !== 'undefined' ? window : this);

@@ -519,3 +519,9 @@ header .hdast{display:none!important}
 .eqsum td{font-weight:700;background:rgba(11,20,64,.03)}.eqmeals{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 10px}.eqmeals .on{border-color:#0f9f73!important;color:#0f9f73}
 .eqdish{border:1px solid rgba(11,20,64,.12);border-radius:12px;padding:10px}.eqdish select{max-width:260px}
 .mf{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.mc{font-size:12.5px;font-weight:700;padding:3px 9px;border-radius:99px}.mc.kc{background:#efedfb;color:#6d5bd0}.mc.pr{background:#e8f1fd;color:#2f80ed}.mc.cb{background:#fdf0e5;color:#c4661b}.mc.ft{background:#fdf6d9;color:#8a6c00}
+/* 1.27 أيام متعددة، توليد تلقائي، استيراد، تصدير */
+.eqdays{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:0 0 10px;padding:8px;border-radius:12px;background:rgba(11,20,64,.03)}.eqdays .on{border-color:#0f9f73!important;color:#0f9f73}
+.eqweek{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:10px 0}.eqweek label{display:inline-flex;gap:4px;align-items:center}
+.eqauto{display:inline-flex;gap:6px;margin-inline-start:10px;vertical-align:middle}
+.eqexp{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px;padding:12px;border:2px solid #0f9f73;border-radius:12px;background:rgba(15,159,115,.06)}
+.genreqs .genreq{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:8px 0;border-top:1px solid rgba(11,20,64,.08)}.genreqs .genreq button{margin-inline-start:auto}
