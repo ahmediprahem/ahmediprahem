@@ -53,6 +53,7 @@ const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html')), PW = 'نسخ-آ
   await pick(A, 'سارة أحمد'); await A.evaluate(() => DPApp.A.tab('ver')); assert((await A.textContent('main')).includes('قبل المزامنة'));
   ok('التعارض: عُدّل نفس العميل على الجهازين ← الأحدث يغلب، ونسخة الجهاز الأخرى تُحفظ «إصداراً» فلا يضيع شيء');
   // ---- 5) استقرار: لا رفع متكرر بلا تعديل
+  await A.waitForTimeout(1500);      // 1.24: تنتهي كتابة نسخة التعارض («قبل المزامنة») أولاً، فلا تُحسب رفعاً إضافياً
   await A.evaluate(() => DPApp.A.tab('client')); await vault(A); await A.click('[data-a="vtNow"]'); await toastWait(A, /أُخذت نسخة/); const h1 = env.DB._raw.prepare('SELECT head FROM vaults').get().head;
   await B.click('[data-a="vtSyncNow"]'); await B.waitForTimeout(1500); await vault(B); assert(!(await B.textContent('main .ok')).includes('بانتظار الرفع'), 'B لا يجب أن يعيد الرفع بعد دمج نسخة لا جديد فيها منه');
   await A.click('[data-a="vtSyncNow"]'); await toastWait(A, /لا جديد/); assert.strictEqual(env.DB._raw.prepare('SELECT head FROM vaults').get().head, h1);
