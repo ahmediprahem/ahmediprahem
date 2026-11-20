@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>تصاميم تجريبية زنها Pro</title>
+<style>
+@font-face{font-family:Plex;src:url(../../../assets/fonts/ibm-plex-sans-arabic-arabic-400-normal.woff2) format('woff2');font-weight:400}
+@font-face{font-family:Plex;src:url(../../../assets/fonts/ibm-plex-sans-arabic-arabic-700-normal.woff2) format('woff2');font-weight:700}
+@font-face{font-family:Plex;src:url(../../../assets/fonts/ibm-plex-sans-arabic-latin-400-normal.woff2) format('woff2');font-weight:400;unicode-range:U+0000-00FF}
+@font-face{font-family:Plex;src:url(../../../assets/fonts/ibm-plex-sans-arabic-latin-700-normal.woff2) format('woff2');font-weight:700;unicode-range:U+0000-00FF}
+:root{--navy:#0b1440;--mut:#5b6685;--bg:#f4f7fb;--card:#fff;--line:#e3e8f0;--mint:#30d0a0;--acc:#0f9f73;--ok:#0f8f6b;--warn:#b25e00;--err:#c62f35;
+/* رموز الماكروز (اقتراح): لون + شكل ثابتان في كل الشاشات، مختلفة عن ألوان الحالة */
+--kc:#6d5bd0;--pr:#2f80ed;--cb:#f2994a;--ft:#e0b100;--fb:#8a6d3b}
+*{box-sizing:border-box}body{margin:0;background:#dfe5ee;font-family:Plex,system-ui,sans-serif;color:var(--navy);font-size:15px}
+.frame{width:1440px;height:900px;background:var(--bg);display:flex;overflow:hidden;position:relative}
+.rail{width:76px;background:#fff;border-inline-start:1px solid var(--line);display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 0}
+.rail .lg{width:44px;height:44px;border-radius:12px;background:linear-gradient(145deg,#70f0a0,#30d0a0);display:grid;place-items:center;color:#04261a;font-weight:700;font-size:22px;margin-bottom:10px}
+.rail .it{width:48px;height:48px;border-radius:12px;display:grid;place-items:center;color:var(--mut);font-size:20px}.rail .it.on{background:#e6f8f1;color:var(--acc)}
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.top{height:64px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 24px;gap:14px}
+.top h1{font-size:20px;margin:0;flex:1}.av{width:36px;height:36px;border-radius:50%;background:var(--mint);display:grid;place-items:center;font-weight:700;color:#04261a}
+.wrap{padding:18px 24px;display:flex;flex-direction:column;gap:14px;min-height:0;flex:1}
+.ch{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 18px;display:flex;align-items:center;gap:14px}
+.ch .ph{width:52px;height:52px;border-radius:50%;background:linear-gradient(145deg,#a7f3cc,#5fd49b);display:grid;place-items:center;font-weight:700;font-size:22px;color:#06281a}
+.ch b{font-size:18px}.chip{display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border-radius:99px;font-size:12.5px;font-weight:700;background:#eef2f7;color:var(--mut)}
+.chip.g{background:#e6f8f1;color:var(--ok)}.chip.r{background:#fdecec;color:var(--err)}.chip.a{background:#fff3e0;color:var(--warn)}
+.meta{color:var(--mut);font-size:13px;display:flex;gap:16px;margin-inline-start:auto;align-items:center}
+.btn{border:0;border-radius:10px;padding:10px 16px;font:inherit;font-weight:700;cursor:pointer;background:var(--acc);color:#fff}.btn.sec{background:#fff;color:var(--navy);border:1.5px solid var(--line)}.btn.or{background:#ffefe3;color:#b4541a}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);align-items:flex-end}
+.tabs span{padding:10px 14px;color:var(--mut);font-weight:700;border-bottom:3px solid transparent;display:flex;gap:6px;align-items:center}.tabs span.on{color:var(--navy);border-bottom-color:var(--acc)}
+.tabs .n{width:20px;height:20px;border-radius:50%;background:#eef2f7;font-size:11px;display:grid;place-items:center}.tabs .on .n{background:var(--acc);color:#fff}
+.body{display:flex;gap:16px;min-height:0;flex:1}
+.col{flex:1;display:flex;flex-direction:column;gap:12px;min-width:0;overflow:hidden}
+.bar{display:flex;gap:10px;align-items:center}
+.sel{background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:8px 12px;font-weight:700;display:flex;gap:8px;align-items:center}
+.seg{display:flex;background:#eef2f7;border-radius:10px;padding:3px;margin-inline-start:auto}.seg span{padding:7px 16px;border-radius:8px;font-weight:700;color:var(--mut)}.seg .on{background:#fff;color:var(--navy);box-shadow:0 1px 3px rgba(11,20,64,.12)}
+.meal{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.mh{display:flex;align-items:center;gap:10px;margin-bottom:8px}.mh .t{color:var(--mut);font-size:13px;font-variant-numeric:tabular-nums}.mh b{font-size:16px}.mh .ex{display:flex;gap:4px;margin-inline-start:auto}
+.ex i{font-style:normal;font-size:11.5px;padding:1px 8px;border-radius:99px;background:#f1f4f9;color:var(--mut);font-weight:700}
+.ln{display:flex;align-items:center;gap:10px;padding:7px 10px;border:1px solid var(--line);border-radius:10px;margin-bottom:6px}
+.ln .h{color:#b6bfd0;cursor:grab}.ln .q{font-weight:700;font-variant-numeric:tabular-nums;min-width:74px}.ln .nm{flex:1}.ln .sb{font-size:11px;padding:0 6px;border:1px solid currentColor;border-radius:8px;color:var(--mut)}
+.ln .ic{color:var(--mut);font-size:15px;width:28px;text-align:center}
+.or{display:flex;gap:6px;margin:-2px 34px 6px 0;flex-wrap:wrap}.or span{font-size:13px;padding:3px 10px;border:1px dashed #c9d2e0;border-radius:8px;color:var(--mut)}.or b{color:var(--acc);font-size:12px}
+.add{border:1.5px dashed #c9d2e0;border-radius:10px;padding:7px;text-align:center;color:var(--acc);font-weight:700;font-size:14px}
+.mf{display:flex;gap:6px;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+.mc{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:700;padding:3px 9px;border-radius:99px}
+.mc.kc{background:#efedfb;color:var(--kc)}.mc.pr{background:#e8f1fd;color:var(--pr)}.mc.cb{background:#fdf0e5;color:#c4661b}.mc.ft{background:#fdf6d9;color:#8a6c00}.mc.fb{background:#f3eee6;color:var(--fb)}
+.mst{margin-inline-start:auto;font-size:12.5px;font-weight:700}
+.side{width:340px;display:flex;flex-direction:column;gap:12px}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.card h3{margin:0 0 10px;font-size:15px;display:flex;align-items:center;gap:8px}
+.kbar{height:10px;border-radius:99px;background:#eef0fb;overflow:hidden;margin:6px 0 12px}.kbar i{display:block;height:100%;background:var(--kc);border-radius:99px}
+.don{display:flex;gap:14px;align-items:center}
+.mrow{margin:7px 0}.mrow .l{display:flex;justify-content:space-between;font-size:13.5px;font-weight:700}.mrow .l span{color:var(--mut);font-weight:400}
+.pb{height:7px;border-radius:99px;background:#f0f2f6;overflow:hidden;margin-top:4px;position:relative}.pb i{display:block;height:100%;border-radius:99px}.pb .tg{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--navy);opacity:.35}
+.st{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;font-weight:700;font-size:13.5px}.st.ok{background:#e6f8f1;color:var(--ok)}.st.w{background:#fff3e0;color:var(--warn)}
+.mini{display:flex;justify-content:space-between}.mini div{display:flex;flex-direction:column;align-items:center;font-size:12px;color:var(--mut);gap:3px}
+.sym{display:inline-grid;place-items:center;width:16px;height:16px}
+.tbl{width:100%;border-collapse:collapse;font-size:13.5px}.tbl th{color:var(--mut);font-weight:400;text-align:start;padding:6px 8px;border-bottom:1px solid var(--line)}.tbl td{padding:8px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+.d{font-size:11.5px;font-weight:700;padding:1px 7px;border-radius:99px}.d.z{background:#e6f8f1;color:var(--ok)}.d.p{background:#fff3e0;color:var(--warn)}
+.note{position:absolute;background:var(--navy);color:#fff;font-size:13px;padding:6px 10px;border-radius:8px;max-width:260px;box-shadow:0 6px 18px rgba(11,20,64,.25)}
+.note::before{content:attr(data-n);display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--mint);color:#04261a;font-weight:700;margin-inline-end:6px}
+/* جوال */
+.phone{width:390px;height:844px;background:var(--bg);overflow:hidden;position:relative;display:flex;flex-direction:column}
+.ptop{height:56px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 14px;gap:10px;font-weight:700}
+.pbody{padding:12px;display:flex;flex-direction:column;gap:10px;flex:1;overflow:hidden}
+.sumbar{position:absolute;bottom:72px;left:10px;right:10px;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 -4px 20px rgba(11,20,64,.1);padding:10px 12px;display:flex;align-items:center;gap:10px}
+.tabbar{position:absolute;bottom:0;left:0;right:0;height:64px;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-around;align-items:center;font-size:11.5px;color:var(--mut)}
+.tabbar span{display:flex;flex-direction:column;align-items:center;gap:2px}.tabbar .on{color:var(--acc);font-weight:700}
+</style></head><body>
+
+<!-- ============ 1) صفحة الخطة: بطاقات وجبات + ملخص ثابت ============ -->
+<section id="m1" class="frame">
+  <nav class="rail"><div class="lg">z</div><div class="it">☀</div><div class="it">👥</div><div class="it on">✦</div><div class="it">💬</div><div class="it">📚</div><div class="it">📅</div><div class="it">⚙</div></nav>
+  <div class="main">
+    <div class="top"><h1>زيارة اليوم • توليد الخطة</h1><span class="chip">🔔</span><span class="chip">✉</span><div class="av">h</div></div>
+    <div class="wrap">
+      <div class="ch"><div class="ph">س</div><div><b>سلمى أحمد</b><div style="display:flex;gap:6px;margin-top:4px"><span class="chip g">نزول وزن</span><span class="chip">عميلة جديدة</span><span class="chip r">⚠ سكري (أدوية)</span><span class="chip">مرتبطة بزنها</span></div></div>
+        <div class="meta"><span>33 سنة • 82 كجم • 162 سم</span><span>الزيارة 3</span><button class="btn or">إنهاء الزيارة ⚑</button></div></div>
+      <div class="tabs"><span><i class="n">1</i>البيانات</span><span><i class="n">2</i>القياسات</span><span><i class="n">3</i>التخطيط</span><span class="on"><i class="n">4</i>الخطة</span><span><i class="n">5</i>المتابعة</span><span><i class="n">6</i>التوصيات</span><span><i class="n">7</i>التسليم</span></div>
+      <div class="body">
+        <div class="col">
+          <div class="bar"><span class="sel">📅 أيام الأسبوع العادية ▾</span><span class="sel" style="color:var(--mut)">🌙 الاثنين والخميس (صيام)</span><span class="sel" style="color:var(--mut)">＋ نسخة لأيام محددة</span>
+            <div class="seg"><span class="on">بناء</span><span>تحليل</span></div></div>
+          <div class="meal">
+            <div class="mh"><span class="t">07:30</span><b>الفطور</b><div class="ex"><i>2 نشويات</i><i>2 بروتين</i><i>1 خضار</i><i>1 دهون</i></div><span class="ic" style="color:var(--mut)">⋮</span></div>
+            <div class="ln"><span class="h">⠿</span><span class="q">60 جم</span><span class="nm">خبز عربي صغير</span><span class="sb">متوسط مجموعة</span><span class="ic">⇄</span><span class="ic">🗑</span></div>
+            <div class="ln"><span class="h">⠿</span><span class="q">2 بيضة</span><span class="nm">بيض مسلوق</span><span class="sb">USDA</span><span class="ic">⇄</span><span class="ic">🗑</span></div>
+            <div class="or"><b>أو</b><span>60 جم جبنة قريش</span><span>½ كوب لبنة قليلة الدسم</span><span>80 جم تونة بالماء</span></div>
+            <div class="ln"><span class="h">⠿</span><span class="q">1 كوب</span><span class="nm">خيار وطماطم</span><span class="ic">⇄</span><span class="ic">🗑</span></div>
+            <div class="add">＋ أضف صنفاً</div>
+            <div class="mf"><span class="mc kc">🔥 395 سعرة</span><span class="mc pr">◆ 23 جم</span><span class="mc cb">● 38 جم</span><span class="mc ft">✦ 16 جم</span><span class="mc fb">▲ 5 جم</span><span class="mst" style="color:var(--ok)">✔ ضمن نصيب الوجبة</span></div>
+          </div>
+          <div class="meal">
+            <div class="mh"><span class="t">14:00</span><b>الغداء</b><div class="ex"><i>2 نشويات</i><i>3 لحوم</i><i>2 خضار</i><i>1 دهون</i></div></div>
+            <div class="ln"><span class="h">⠿</span><span class="q">120 جم</span><span class="nm">صدر دجاج مشوي</span><span class="sb">USDA</span><span class="ic">⇄</span><span class="ic">🗑</span></div>
+            <div class="ln"><span class="h">⠿</span><span class="q">⅔ كوب</span><span class="nm">أرز أبيض مطبوخ</span><span class="sb">متوسط مجموعة</span><span class="ic">⇄</span><span class="ic">🗑</span></div>
+            <div class="mf"><span class="mc kc">🔥 610 سعرة</span><span class="mc pr">◆ 41 جم</span><span class="mc cb">● 62 جم</span><span class="mc ft">✦ 18 جم</span><span class="mc fb">▲ 6 جم</span><span class="mst" style="color:var(--warn)">⚠ +8% عن نصيبها، يُعوَّض في العشاء</span></div>
+          </div>
+        </div>
+        <aside class="side">
+          <div class="card"><h3>🔥 الطاقة <span style="margin-inline-start:auto">1512 <small style="color:var(--mut)">/ 1544 سعرة</small></span></h3><div class="kbar"><i style="width:98%"></i></div>
+            <div class="don"><svg width="120" height="120" viewBox="0 0 42 42"><circle cx="21" cy="21" r="15.9" fill="none" stroke="#f0f2f6" stroke-width="6"/>
+              <circle cx="21" cy="21" r="15.9" fill="none" stroke="#2f80ed" stroke-width="6" stroke-dasharray="25 75" stroke-dashoffset="25"/>
+              <circle cx="21" cy="21" r="15.9" fill="none" stroke="#f2994a" stroke-width="6" stroke-dasharray="45 55" stroke-dashoffset="0"/>
+              <circle cx="21" cy="21" r="15.9" fill="none" stroke="#e0b100" stroke-width="6" stroke-dasharray="30 70" stroke-dashoffset="-45"/>
+              <text x="21" y="20" text-anchor="middle" font-size="5" font-weight="700" fill="#0b1440">98%</text><text x="21" y="26" text-anchor="middle" font-size="3.2" fill="#5b6685">من الهدف</text></svg>
+              <div style="flex:1">
+                <div class="mrow"><div class="l"><span style="color:var(--pr);font-weight:700">◆ بروتين</span>96 <span>/ 97 جم</span></div><div class="pb"><i style="width:99%;background:var(--pr)"></i></div></div>
+                <div class="mrow"><div class="l"><span style="color:#c4661b;font-weight:700">● كارب</span>168 <span>/ 174 جم</span></div><div class="pb"><i style="width:96%;background:var(--cb)"></i></div></div>
+                <div class="mrow"><div class="l"><span style="color:#8a6c00;font-weight:700">✦ دهون</span>49 <span>/ 52 جم</span></div><div class="pb"><i style="width:94%;background:var(--ft)"></i></div></div>
+                <div class="mrow"><div class="l"><span style="color:var(--fb);font-weight:700">▲ ألياف</span>21 <span>/ 25 جم*</span></div><div class="pb"><i style="width:84%;background:var(--fb)"></i></div></div>
+              </div></div>
+            <div class="st ok">✔ مطابق: ضمن ±5% سعرات و±10% لكل ماكرو</div>
+          </div>
+          <div class="card"><h3>الوجبات</h3><div class="mini">
+            <div><svg width="40" height="40" viewBox="0 0 42 42"><circle cx="21" cy="21" r="15.9" fill="none" stroke="#e6f8f1" stroke-width="7"/><circle cx="21" cy="21" r="15.9" fill="none" stroke="#0f9f73" stroke-width="7" stroke-dasharray="100 0"/></svg>الفطور</div>
+            <div><svg width="40" height="40" viewBox="0 0 42 42"><circle cx="21" cy="21" r="15.9" fill="none" stroke="#fff3e0" stroke-width="7"/><circle cx="21" cy="21" r="15.9" fill="none" stroke="#b25e00" stroke-width="7" stroke-dasharray="100 0"/></svg>الغداء</div>
+            <div><svg width="40" height="40" viewBox="0 0 42 42"><circle cx="21" cy="21" r="15.9" fill="none" stroke="#e6f8f1" stroke-width="7"/><circle cx="21" cy="21" r="15.9" fill="none" stroke="#0f9f73" stroke-width="7" stroke-dasharray="100 0"/></svg>سناك</div>
+            <div><svg width="40" height="40" viewBox="0 0 42 42"><circle cx="21" cy="21" r="15.9" fill="none" stroke="#e6f8f1" stroke-width="7"/><circle cx="21" cy="21" r="15.9" fill="none" stroke="#0f9f73" stroke-width="7" stroke-dasharray="100 0"/></svg>العشاء</div></div></div>
+          <div class="card"><h3>آخر ما سجّلته العميلة</h3><div style="font-size:13.5px;color:var(--mut);line-height:1.8">أمس: الفطور ✔ كما هو • الغداء ⇄ بدّلت الأرز ببرغل • العشاء ✕ تخطّت<br>الماء: 6 من 8 أكواب</div></div>
+        </aside>
+      </div>
+    </div>
+  </div>
+  <div class="note" data-n="1" style="top:150px;left:330px">زر «إنهاء الزيارة» يحفظ لقطة الزيارة (الخطة والقياس والملاحظة)</div>
+  <div class="note" data-n="2" style="top:226px;left:860px">خطوات الزيارة مرقّمة بترتيب البروتوكول</div>
+  <div class="note" data-n="3" style="top:478px;left:520px">البدائل تحت الصنف «أو» مباشرة</div>
+  <div class="note" data-n="4" style="top:640px;left:26px">ملخص ثابت: الهدف والفعلي لكل ماكرو بلونه ورمزه، مع حالة الفحص</div>
+</section>
+
+<!-- ============ 2) مكافئ بالوزن ============ -->
+<section id="m2" class="frame" style="width:1100px;height:700px;align-items:center;justify-content:center">
+  <div class="card" style="width:900px;padding:22px 24px">
+    <h3 style="font-size:18px">⇄ بدائل بالوزن لـ: <span style="color:var(--acc)">120 جم صدر دجاج مشوي</span> <span class="chip" style="margin-inline-start:auto">المرجع: 37 جم بروتين • 198 سعرة</span></h3>
+    <div class="bar" style="margin:6px 0 12px"><span class="sel">🔍 ابحث عن صنف…</span><span class="sel">المجموعة: اللحوم ▾</span><span class="sel">طابق على: ◆ البروتين ▾</span><div class="seg"><span class="on">نفس المجموعة</span><span>مجموعة قريبة</span><span>نفس السعرات</span></div></div>
+    <table class="tbl"><tr><th>الصنف</th><th>الكمية المحسوبة</th><th>بالمقياس المنزلي</th><th>🔥 سعرات</th><th>◆ بروتين</th><th>● كارب</th><th>✦ دهون</th><th>المصدر</th><th></th></tr>
+      <tr><td><b>سمك بلطي مشوي</b></td><td>145 جم</td><td>قطعة متوسطة</td><td>186 <span class="d z">−12</span></td><td>37 <span class="d z">0</span></td><td>0</td><td>3.8 <span class="d z">−0.5</span></td><td><span class="sb ln" style="border:1px solid #ccd;padding:0 6px;border-radius:8px;font-size:11px">USDA</span></td><td><button class="btn" style="padding:6px 12px">＋</button></td></tr>
+      <tr><td><b>لحم بقري قليل الدهن</b></td><td>130 جم</td><td>كف اليد</td><td>234 <span class="d p">+36</span></td><td>37 <span class="d z">0</span></td><td>0</td><td>9.1 <span class="d p">+4.8</span></td><td><span style="font-size:11px;color:var(--mut)">متوسط مجموعة</span></td><td><button class="btn" style="padding:6px 12px">＋</button></td></tr>
+      <tr><td><b>تونة معلبة بالماء</b></td><td>140 جم</td><td>علبة صغيرة</td><td>162 <span class="d z">−36</span></td><td>37 <span class="d z">0</span></td><td>0</td><td>1.2 <span class="d z">−3.1</span></td><td><span style="font-size:11px;color:var(--mut)">USDA</span></td><td><button class="btn" style="padding:6px 12px">＋</button></td></tr>
+      <tr><td><b>جبنة قريش</b></td><td>300 جم</td><td>1¼ كوب</td><td>246 <span class="d p">+48</span></td><td>37 <span class="d z">0</span></td><td>10 <span class="d p">+10</span></td><td>4.3 <span class="d z">0</span></td><td><span style="font-size:11px;color:var(--mut)">متوسط مجموعة</span></td><td><button class="btn" style="padding:6px 12px">＋</button></td></tr>
+    </table>
+    <p style="color:var(--mut);font-size:13px;margin:12px 0 0">الكمية = بروتين المرجع ÷ بروتين الصنف لكل جرام، تقريب إلى أقرب مقياس منزلي. الشريحة الخضراء ضمن المطابقة، والكهرمانية فرق يُعوَّض في اليوم. (فكرة «حساب المكافئ على صنف مرجعي» من Nutrium، بأسلوب نظام البدائل)</p>
+  </div>
+</section>
+
+<!-- ============ 3) التخطيط ============ -->
+<section id="m3" class="frame" style="width:1100px;height:720px;align-items:center;justify-content:center">
+  <div style="display:flex;gap:16px;width:1000px">
+    <div class="card" style="flex:1"><h3 style="font-size:17px">التخطيط: الاحتياج والماكروز</h3>
+      <div class="bar" style="flex-wrap:wrap;margin-bottom:10px"><span class="sel">صيغة الحرق: Mifflin-St Jeor ▾</span><span class="sel">النشاط: خفيف (1.375) ▾</span><span class="sel">الهدف: خسارة متوسطة −500 ▾</span></div>
+      <div style="font-size:13.5px;color:var(--mut);margin-bottom:12px">ℹ الحرق الأساسي 1487 × 1.375 = 2044 − 500 = <b style="color:var(--navy)">1544 سعرة</b>. الحد الأدنى الآمن 1200.</div>
+      <table class="tbl"><tr><th>الماكرو</th><th>النسبة</th><th></th><th>سعرات</th><th>جرامات</th><th>جم/كجم</th></tr>
+        <tr><td><b style="color:var(--pr)">◆ بروتين</b></td><td>25%</td><td style="width:240px"><div class="pb" style="height:10px"><i style="width:25%;background:var(--pr)"></i></div></td><td>386</td><td><b>97</b></td><td>1.2*</td></tr>
+        <tr><td><b style="color:#c4661b">● كربوهيدرات</b></td><td>45%</td><td><div class="pb" style="height:10px"><i style="width:45%;background:var(--cb)"></i></div></td><td>695</td><td><b>174</b></td><td>2.1</td></tr>
+        <tr><td><b style="color:#8a6c00">✦ دهون</b></td><td>30%</td><td><div class="pb" style="height:10px"><i style="width:30%;background:var(--ft)"></i></div></td><td>463</td><td><b>51</b></td><td>0.6</td></tr>
+        <tr><td><b style="color:var(--fb)">▲ ألياف</b></td><td colspan="3" style="color:var(--mut)">الهدف من مرجع يعتمده المالك</td><td><b>—</b></td><td></td></tr></table>
+      <p style="font-size:12.5px;color:var(--mut)">* محسوب على الوزن المعدّل (BMI ≥ 30). أشرطة قابلة للسحب، والمجموع يبقى 100%.</p></div>
+    <div class="card" style="width:330px"><h3>أيام بأهداف مختلفة</h3>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="ln" style="margin:0"><b style="flex:1">الأيام العادية</b><span class="chip">5 أيام</span><span>1544</span></div>
+        <div class="ln" style="margin:0"><b style="flex:1">🌙 صيام الاثنين والخميس</b><span class="chip">يومان</span><span>1544</span></div>
+        <div class="ln" style="margin:0;border-style:dashed;color:var(--acc);justify-content:center"><b>＋ يوم تدريب / راحة</b></div></div>
+      <p style="font-size:12.5px;color:var(--mut);margin-top:12px">فكرة «حتى 7 تخطيطات» من Nutrium: كل نسخة خطة ترتبط بهدف يومها. قيم الفرق بين الأيام قرار سريري للمالك.</p>
+      <h3 style="margin-top:16px">رموز الماكروز (موحّدة)</h3><div style="display:flex;flex-wrap:wrap;gap:6px"><span class="mc kc">🔥 طاقة</span><span class="mc pr">◆ بروتين</span><span class="mc cb">● كارب</span><span class="mc ft">✦ دهون</span><span class="mc fb">▲ ألياف</span></div>
+      <p style="font-size:12.5px;color:var(--mut)">ألوان الحالة تبقى محجوزة: أخضر مطابق، كهرماني تنبيه، أحمر مانع.</p></div>
+  </div>
+</section>
+
+<!-- ============ 4) الجوال ============ -->
+<section id="m4" style="display:flex;gap:24px;padding:20px;background:#dfe5ee;width:880px">
+  <div class="phone">
+    <div class="ptop"><span style="flex:1">سلمى أحمد • الخطة</span><span class="chip g">✔ مطابق</span></div>
+    <div class="pbody">
+      <div style="display:flex;gap:6px;overflow:hidden"><span class="chip g" style="padding:6px 12px">الأيام العادية</span><span class="chip" style="padding:6px 12px">🌙 الصيام</span><span class="chip" style="padding:6px 12px">＋ نسخة</span></div>
+      <div class="meal"><div class="mh"><span class="t">07:30</span><b>الفطور</b><span class="mst" style="color:var(--ok)">✔</span></div>
+        <div class="ln"><span class="q">60 جم</span><span class="nm">خبز عربي</span><span class="ic">⇄</span></div>
+        <div class="ln"><span class="q">2 بيضة</span><span class="nm">بيض مسلوق</span><span class="ic">⇄</span></div>
+        <div class="or" style="margin-right:0"><b>أو</b><span>60 جم قريش</span><span>½ كوب لبنة</span></div>
+        <div class="mf" style="flex-wrap:wrap"><span class="mc kc">🔥 395</span><span class="mc pr">◆ 23</span><span class="mc cb">● 38</span><span class="mc ft">✦ 16</span></div></div>
+      <div class="meal"><div class="mh"><span class="t">14:00</span><b>الغداء</b><span class="mst" style="color:var(--warn)">⚠ +8%</span></div>
+        <div class="ln"><span class="q">120 جم</span><span class="nm">صدر دجاج</span><span class="ic">⇄</span></div></div>
+    </div>
+    <div class="sumbar"><svg width="44" height="44" viewBox="0 0 42 42"><circle cx="21" cy="21" r="15.9" fill="none" stroke="#f0f2f6" stroke-width="6"/><circle cx="21" cy="21" r="15.9" fill="none" stroke="#6d5bd0" stroke-width="6" stroke-dasharray="98 2"/></svg>
+      <div style="flex:1;font-size:13px"><b>1512 / 1544 سعرة</b><div style="display:flex;gap:8px;color:var(--mut)"><span style="color:var(--pr)">◆ 96/97</span><span style="color:#c4661b">● 168/174</span><span style="color:#8a6c00">✦ 49/52</span></div></div><span style="font-size:20px">⌃</span></div>
+    <div class="tabbar"><span>☀<br>اليوم</span><span>👥<br>العملاء</span><span class="on">✦<br>توليد الخطة</span><span>💬<br>الشات</span><span>⋯<br>المزيد</span></div>
+  </div>
+  <div class="phone">
+    <div class="ptop"><span style="flex:1">التحليل • الأحد</span><div class="seg" style="margin:0"><span>بناء</span><span class="on">تحليل</span></div></div>
+    <div class="pbody">
+      <div class="card"><h3>المخطط مقابل الحالي</h3>
+        <div class="mrow"><div class="l"><span style="color:var(--kc);font-weight:700">🔥 طاقة</span>1512 <span>/ 1544</span></div><div class="pb"><i style="width:98%;background:var(--kc)"></i></div></div>
+        <div class="mrow"><div class="l"><span style="color:var(--pr);font-weight:700">◆ بروتين</span>96 <span>/ 97</span></div><div class="pb"><i style="width:99%;background:var(--pr)"></i></div></div>
+        <div class="mrow"><div class="l"><span style="color:#c4661b;font-weight:700">● كارب</span>168 <span>/ 174</span></div><div class="pb"><i style="width:96%;background:var(--cb)"></i></div></div></div>
+      <div class="card"><h3>توزيع الوجبات</h3>
+        <div style="display:flex;align-items:flex-end;gap:10px;height:120px">
+          <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%"><div style="height:62%;background:linear-gradient(var(--pr) 0 25%,var(--cb) 25% 70%,var(--ft) 70%);border-radius:8px 8px 0 0"></div><small style="text-align:center;color:var(--mut)">فطور</small></div>
+          <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%"><div style="height:24%;background:linear-gradient(var(--pr) 0 10%,var(--cb) 10% 80%,var(--ft) 80%);border-radius:8px 8px 0 0"></div><small style="text-align:center;color:var(--mut)">سناك</small></div>
+          <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%"><div style="height:96%;background:linear-gradient(var(--pr) 0 30%,var(--cb) 30% 72%,var(--ft) 72%);border-radius:8px 8px 0 0"></div><small style="text-align:center;color:var(--mut)">غداء</small></div>
+          <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%"><div style="height:58%;background:linear-gradient(var(--pr) 0 28%,var(--cb) 28% 66%,var(--ft) 66%);border-radius:8px 8px 0 0"></div><small style="text-align:center;color:var(--mut)">عشاء</small></div></div></div>
+      <div class="card"><h3>أكثر الأصناف مساهمة في الكارب</h3><div style="font-size:13.5px;line-height:1.9">أرز أبيض 62 جم • خبز عربي 30 جم • موز 27 جم</div></div>
+    </div>
+    <div class="tabbar"><span>☀<br>اليوم</span><span>👥<br>العملاء</span><span class="on">✦<br>توليد الخطة</span><span>💬<br>الشات</span><span>⋯<br>المزيد</span></div>
+  </div>
+</section>
+</body></html>
