@@ -52,9 +52,9 @@ function newMenu() {
 // ---- «اليوم»: ما يحتاج الأخصائي فعله الآن أولاً؛ الترحيب سطر واحد، ولا بلاطات تكرر التنقل
 function tdStat(a, icon, n, label) { return '<button class="tdk' + (n ? ' has' : '') + '" data-a="' + a + '">' + IC(icon) + '<b>' + n + '</b><small>' + label + '</small></button>'; }
 function homeGlass() {
-  var cs = S.clients.slice().sort(function (a, b) { return (b.updated || b.created) - (a.updated || a.created); }), withPlan = cs.filter(function (c) { return c.plan || c.planSrc === 'ready'; }).length, ath = cs.filter(function (c) { return c.kind === 'athlete'; }).length;
+  var cs = S.clients.slice().sort(function (a, b) { return (b.updated || b.created) - (a.updated || a.created); }), withPlan = cs.filter(function (c) { return planOf(c).has; }).length, ath = cs.filter(function (c) { return c.kind === 'athlete'; }).length;
   var n = navCounts(), fol = wkItems().filter(function (i) { return /:follow$/.test(i.key); }).length;
-  var recent = cs.slice(0, 6).map(function (c) { return '<div class="cl" data-a="pick" data-v="' + c.code + '"><span class="cav">' + esc(initial(c.name)) + '</span><b>' + esc(c.name || '(بلا اسم)') + '</b><small>' + c.code + (c.phone ? ' • ' + esc(c.phone) : '') + (c.plan ? ' • له خطة' : '') + '</small></div>'; }).join('');
+  var recent = cs.slice(0, 6).map(function (c) { return '<div class="cl" data-a="pick" data-v="' + c.code + '"><span class="cav">' + esc(initial(c.name)) + '</span><b>' + esc(c.name || '(بلا اسم)') + '</b><small>' + c.code + (c.phone ? ' • ' + esc(c.phone) : '') + (planOf(c).has ? ' • له خطة' : '') + '</small></div>'; }).join('');
   return '<div class="home ghome today">'
     + '<div class="tdh"><h2>اليوم</h2><p class="tdhi">أهلاً' + (firstName() ? '، ' + esc(firstName()) : '') + ' • ' + esc(wkDate(wkDay())) + '</p></div>'
     + bakCard()

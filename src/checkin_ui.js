@@ -13,7 +13,7 @@ function ciTab(c) {
   var W = ciWeights(c), w0 = W.length ? W[0].w : +c.weight, wl = W.length ? W[W.length - 1].w : +c.weight, today = ciDay(0);
   var ap = (c.appts || []).filter(function (a) { return a.d === today && !a.st; })[0], seen = (c.att || []).indexOf(today) >= 0;
   var health = (c.conditions || []).concat((c.allergens || []).map(function (x) { return 'حساسية: ' + x; }));
-  var plan = c.planSrc === 'ready' && c.ready ? '📗 ' + esc(c.ready.label) + ' • ' + new Date(c.ready.at).toLocaleDateString('ar') : c.plan ? '⚙ خطة المحرك ' + (c.plan.targets ? c.plan.targets.kcal + ' سعرة' : '') + (c.plan.generated ? ' • ' + new Date(c.plan.generated).toLocaleDateString('ar') : '') : 'لا خطة بعد';
+  var po = planOf(c), plan = esc(po.label) + (po.at ? ' • ' + new Date(po.at).toLocaleDateString('ar') : '');      // 1.15: مصدر واحد (كانت خطط مكتبة الأنظمة تُعرض «خطة المحرك»)
   var logs = (c.hx || {}).logs || {}, days = [], s = 0, n = 0;
   for (var i = -6; i <= 0; i++) { var k = ciDay(i), l = logs[k]; days.push([k, l]); if (l && l.n) { s += l.done / l.n; n++; } }
   var rows = days.slice().reverse().map(function (q) {

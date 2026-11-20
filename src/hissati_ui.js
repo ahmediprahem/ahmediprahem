@@ -212,7 +212,7 @@ function hxHabits(l) { var h = l.h || {}; return Object.keys(h).filter(function 
 function hxMap(q) {
   var food = q.food || {}, flat = function (o) { return ['B', 'L', 'D', 'S'].reduce(function (a, k) { return a.concat((o || {})[k] || []); }, []); }, act = D.settings.activity[+q.act] || D.settings.activity[2], goal = D.settings.goals[+q.goal] || D.settings.goals[2];
   var nums = function (v, lo, hi, d) { v = +v; return v >= lo && v <= hi ? v : d; }, al = D.allergens.map(function (a) { return a.label; });
-  var notes = [q.meds ? 'الأدوية والمكملات: ' + q.meds : '', q.notes ? 'ملاحظات العميل: ' + q.notes : '', 'الاستيقاظ ' + (q.wake || '—') + ' • النوم ' + (q.sleep || '—') + (q.wdays && q.wdays.length ? ' • التمرين: ' + q.wdays.map(function (i) { return D.days[i]; }).join('، ') : ''), 'سُجّل من «زنها» ' + new Date().toLocaleDateString('ar')].filter(Boolean).join('\n');
+  var notes = [q.meds ? 'الأدوية والمكملات: ' + q.meds : '', q.notes ? 'ملاحظات العميل: ' + q.notes : '', (q.ws ? 'الاستيقاظ ' + (q.wake || '—') + ' • النوم ' + (q.sleep || '—') : '') + (q.wdays && q.wdays.length ? ' • التمرين: ' + q.wdays.map(function (i) { return D.days[i]; }).join('، ') : ''), 'سُجّل من «زنها» ' + new Date().toLocaleDateString('ar')].filter(Boolean).join('\n');
   return {
     name: String(q.name || '').trim().slice(0, 80), phone: String(q.phone || '').slice(0, 30), sex: q.sex === 'أنثى' ? 'أنثى' : 'ذكر', age: nums(q.age, 5, 110, 30), weight: nums(q.weight, 20, 400, 80), height: nums(q.height, 80, 250, 170),
     wdays: Array.isArray(q.wdays) ? q.wdays.filter(function (d) { return d >= 0 && d <= 6; }).map(Number) : [],
@@ -225,7 +225,7 @@ function hxMapG(q) {                                                // استب�
   var AD = window.ATHLETE, food = q.food || {}, nums = function (v, lo, hi, d) { v = +v; return v >= lo && v <= hi ? v : d; }, types = AD.dayTypes.map(function (x) { return x.n; }), fn = AD.foods.map(function (f) { return f.n; });
   var sch = Array.isArray(q.sched) && q.sched.length === 7 ? q.sched.map(function (x) { var t = types.indexOf(x && x.type) >= 0 ? x.type : types[0]; return { type: t, min: t === types[0] ? 0 : nums(x.min, 0, 600, 60), time: /^\d{2}:\d{2}$/.test(x.time || '') ? x.time : '' }; }) : null;
   var notes = [(q.cond || []).length || (q.allg || []).length ? 'الحالة الصحية والحساسية: ' + (q.cond || []).concat(q.allg || []).join('، ') : '', q.meds ? 'الأدوية: ' + q.meds : '', q.supp ? 'المكملات: ' + q.supp : '', q.notes ? 'ملاحظات العميل: ' + q.notes : '',
-    'الاستيقاظ ' + (q.wake || '—') + ' • النوم ' + (q.sleep || '—'), hxQA(q).length ? 'إجابات الاستبيان:\n' + hxQA(q).map(function (x) { return '• ' + x[0] + ': ' + x[1]; }).join('\n') : '', 'سُجّل من «زنها» ' + new Date().toLocaleDateString('ar')].filter(Boolean).join('\n');
+    q.ws ? 'الاستيقاظ ' + (q.wake || '—') + ' • النوم ' + (q.sleep || '—') : '', hxQA(q).length ? 'إجابات الاستبيان:\n' + hxQA(q).map(function (x) { return '• ' + x[0] + ': ' + x[1]; }).join('\n') : '', 'سُجّل من «زنها» ' + new Date().toLocaleDateString('ar')].filter(Boolean).join('\n');
   var o = { name: String(q.name || '').trim().slice(0, 80), phone: String(q.phone || '').slice(0, 30), sex: q.sex === 'أنثى' ? 'أنثى' : 'ذكر', age: nums(q.age, 5, 110, 28), weight: nums(q.weight, 20, 400, 80), height: nums(q.height, 80, 250, 175), bf: nums(q.bf, 3, 70, '') ,
     sport: String(q.sport || '').slice(0, 60), love: Object.keys(food).filter(function (f) { return food[f] === 'love' && fn.indexOf(f) >= 0; }), avoid: Object.keys(food).filter(function (f) { return food[f] === 'no' && fn.indexOf(f) >= 0; }), notes: notes };
   if (AD.phases.some(function (x) { return x.n === q.gphase; })) o.phase = q.gphase; if (sch) o.schedule = sch;
@@ -236,7 +236,7 @@ function hxApproveLinked(cid, req, c) {                            // دعوة �
   c.hx = { cid: cid, enc: req.encPub, tok: HX.st.inv[req.h].tok, label: req.label, msgs: req.msgs || [], unread: req.unread || 0, logs: {}, weights: [[Date.now(), +it.weight || c.weight]], prefLog: [], prefs: { food: it.food || {}, like: it.like || {}, nope: it.nope || {} }, intake: it, planV: 0, since: Date.now(), quiz: req.quiz || null };
   return persist(c).then(function () { return hxSend(c, { t: 'status', st: 'approved', code: c.code, dname: HX.st.name }); }).then(function () { delete HX.st.reqs[cid]; delete HX.st.inv[req.h]; return hxSave(); }).then(function () {
     S.view = 'client'; S.cur = c.code; S.tab = 'client'; S.versions = []; render(); toast('✓ رُبط «' + c.name + '» بـ«زنها»' + (c.plan || c.rawSnap ? ' — جارٍ إرسال خطته وبرنامجه…' : ''));
-    if (c.plan || c.rawSnap || (c.planSrc === 'ready' && c.ready)) setTimeout(function () { A.hxSendPlan(); }, 200);
+    if (planOf(c).has) setTimeout(function () { A.hxSendPlan(); }, 200);
   });
 }
 function hxApprove(cid) {
@@ -248,6 +248,7 @@ function hxApprove(cid) {
     var it = req.intake, fr = it.freq || {}, pan = { B: {}, L: {}, D: {}, S: {} };
     if (fr && (+fr.poultry + +fr.red + +fr.fish) > 0) c.freq = { poultry: +fr.poultry || 0, red: +fr.red || 0, fish: +fr.fish || 0 };
     Object.keys(it.mfood || {}).forEach(function (t) { if (!pan[t]) return; Object.keys(it.mfood[t]).forEach(function (n) { if (it.mfood[t][n] === 'love' && D.foods.some(function (f) { return f.n === n; })) pan[t][n] = 'h'; }); }); c.pantry = pan;
+    c.intakePrefs = { fast: { no: 'no', mt: 'mt', rm: 'rm' }[it.fast] || '', week: { mix: 'mix', varied: 'varied', fixed: 'fixed' }[it.week] || '', cook: { me: 'me', fam: 'fam', out: 'out' }[it.cook] || '', out: { rare: 'rare', some: 'some', often: 'often' }[it.out] || '', scale: { yes: 'yes', mix: 'mix', no: 'no' }[it.scale] || '', target: +it.target > 0 && +it.target < 400 ? +it.target : 0 };      // 1.15 م0: حقول تقرؤها المحركات وتبويب التوليد
     if (it.cc === 'eg' || it.cc === 'sa') c.cuisine = it.cc; c.life = it.cook === 'out' ? 'quick' : it.out === 'often' ? 'travel' : 'home';
     c.notes += '\nمسار التفصيل: ' + ['الوزن المستهدف ' + (+it.target ? it.target + ' كجم' : 'لم يحدده'), 'الأسبوع: ' + ({ mix: 'فطور وعشاء ثابتان وغداء متنوع', varied: 'أيام مختلفة', fixed: 'قائمة ثابتة وبدائل' }[it.week] || '—'), 'الطبخ: ' + ({ me: 'بنفسه', fam: 'أهله', out: 'يطلب غالباً' }[it.cook] || '—'), 'خارج البيت: ' + ({ rare: 'نادراً', some: 'مرة أو مرتين أسبوعياً', often: 'كثيراً' }[it.out] || '—'), 'الصيام: ' + ({ no: 'لا', mt: 'الاثنين والخميس', rm: 'رمضان فقط' }[it.fast] || '—'), 'الكميات: ' + ({ yes: 'بالجرام', mix: 'جرامات للحوم والنشويات', no: 'مقاييس منزلية' }[it.scale] || '—'), 'البلد: ' + (it.ccRaw || '—')].join(' • ');
   }
@@ -384,10 +385,20 @@ function hxOff(o) { var r = {}; if (o && typeof o === 'object') Object.keys(o).f
 function hxWalk(h) { h = h || {}; var a = []; if (+h.walkMin) a.push(+h.walkMin + ' دقيقة'); if (+h.steps && !HX_HB.steps) a.push(+h.steps + ' خطوة'); if (+h.walkM) a.push(+h.walkM + ' متر'); return a.length ? '🚶 ' + a.join(' • ') : ''; }
 function hxToday(c) { var d = new Date(), k = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'), l = (c.hx.logs || {})[k]; return l && l.n ? Math.round(l.done / l.n * 100) : 0; }
 // ---- 0.90: المتابعة اليومية المفصّلة: خطة اليوم صنفاً صنفاً (عمله / لم يعمله / بدّله)، والماء بالأكواب، والعادات، وما خرج به عن النظام
+// 1.15 م0: مصدر واحد لخطة العميل. الأولوية كما كانت في hxSnapOf: الخطة الخام المستوردة ← مكتبة الأنظمة ← الخطط الجاهزة ← المحرك/الرياضي
+function planOf(c) {
+  var none = { src: '', has: false, label: 'لا خطة بعد', kcal: 0, at: 0, snap: function () { return null; } }; if (!c) return none;
+  if (c.rawSnap) return { src: 'raw', has: true, label: '📥 خطة مستوردة', kcal: 0, at: c.updated || 0, snap: function () { return JSON.parse(JSON.stringify(c.rawSnap)); } };
+  if (c.planSrc === 'plib' && c.plib && window.PL) return { src: 'plib', has: true, label: '📗 ' + (c.plib.name || '') + (c.plib.vname ? ' — ' + c.plib.vname : ''), kcal: +c.plib.kcal || 0, at: c.plib.at || 0, snap: function () { return PL.toHissati(c); } };
+  if (c.planSrc === 'ready' && c.ready && c.readyDoc && window.RL) return { src: 'ready', has: true, label: '📗 ' + (c.ready.label || ''), kcal: 0, at: c.ready.at || 0, snap: function () { return RL.toHissati(c.readyDoc, RL.plan(c.ready.id)); } };
+  if (c.plan) { var ath = c.kind === 'athlete', t = c.plan.targets; return { src: ath ? 'athlete' : 'engine', has: true, label: (ath ? '🏋 خطة الرياضي' : '⚙ خطة المحرك') + (t && t.kcal ? ' ' + Math.round(t.kcal) + ' سعرة' : ''), kcal: t && t.kcal ? Math.round(t.kcal) : 0, at: c.plan.generated ? Date.parse(c.plan.generated) || 0 : 0, snap: function () { return ath ? hxSnapG(c) : hxSnap(c); } }; }
+  return none;
+}
+window.planOf = planOf;      // للاختبارات
 function hxSlim(sn) { return { water: +sn.water || 0, days: (sn.days || []).map(function (d) { return { water: +d.water || 0, slots: (d.slots || []).map(function (q) { return { n: q.name || '', t: q.time || '', l: (q.lines || []).map(function (l) { return String(l[2] || l[1] || ''); }) }; }) }; }) }; }
 function hxSnapOf(c) {
   var x = c.hx; if (x.snap && x.snap.days) return x.snap; HX.snapC = HX.snapC || {}; var key = c.code + ':' + (x.planV || 0) + ':' + (c.updated || 0); if (HX.snapC[key] !== undefined) return HX.snapC[key];
-  var sn = null; try { var rd = c.planSrc === 'ready' && c.ready && c.readyDoc && window.RL; sn = c.rawSnap ? c.rawSnap : c.planSrc === 'plib' && c.plib && window.PL ? PL.toHissati(c) : rd ? RL.toHissati(c.readyDoc, RL.plan(c.ready.id)) : c.plan ? (c.kind === 'athlete' ? hxSnapG(c) : hxSnap(c)) : null; sn = sn ? hxSlim(sn) : null; } catch (e) { sn = null; }
+  var sn = null; try { var po = planOf(c); sn = po.has ? po.snap() : null; sn = sn ? hxSlim(sn) : null; } catch (e) { sn = null; }
   return (HX.snapC[key] = sn);
 }
 function hxDayDetail(c, k, l) {
@@ -413,7 +424,7 @@ function hxDayDetail(c, k, l) {
 }
 // 0.94: أجزاء «زنها» في ملف العميل موزّعة على أماكنها الجديدة (cfile_ui.js): الربط ووضع «يوم واحد في كل مرة» في «الملف ← ربط زنها»،
 // والمتابعة اليومية والوزن والتفضيلات في «المتابعة»، وإرسال الخطة زر في رأس الملف، والمحادثة في «شات زنها». المحتوى والمنطق كما هما.
-function hxHasPlan(c) { return !!(c && ((c.planSrc === 'plib' && c.plib && window.PL) || c.plan || (c.planSrc === 'ready' && c.ready && c.readyDoc && window.RL) || c.rawSnap)); }
+function hxHasPlan(c) { return planOf(c).has; }
 function hxLastLine() { return '<p class="small hxlast">آخر تحقق ' + hxAgo(HX.last) + ' <button class="sec sm" data-a="hxCheck">↻ تحقق الآن</button></p>'; }
 function hxLinkCard(c) {
   var x = c.hx, ath = c.kind === 'athlete';
@@ -488,8 +499,8 @@ Object.assign(A, {
     var ts = Date.now(); hxSendTo(cid, q.encPub, HX.st.inv[q.h].tok, { t: 'msg', text: t.slice(0, 2000), ts: ts }).then(function () { q.msgs = (q.msgs || []).concat([{ from: 'd', t: t, ts: ts }]); q.unread = 0; return hxSave(); }).then(main).catch(hxErr);
   },
   hxSendPlan: function () {
-    var c = cur(), rd = c && c.planSrc === 'ready' && c.ready && c.readyDoc && window.RL, pb = c && c.planSrc === 'plib' && c.plib && window.PL; if (!c || !c.hx || !(c.plan || rd || pb || c.rawSnap)) return; var snap;
-    try { snap = c.rawSnap ? JSON.parse(JSON.stringify(c.rawSnap)) : pb ? PL.toHissati(c) : rd ? RL.toHissati(c.readyDoc, RL.plan(c.ready.id)) : c.kind === 'athlete' ? hxSnapG(c) : hxSnap(c); } catch (e) { toast('تعذّر تجهيز الخطة: ' + e.message); return; }
+    var c = cur(), po = planOf(c), rd = po.src === 'ready', pb = po.src === 'plib'; if (!c || !c.hx || !po.has) return; var snap;
+    try { snap = po.snap(); } catch (e) { toast('تعذّر تجهيز الخطة: ' + e.message); return; }
     var v = (c.hx.planV || 0) + 1; toast('جارٍ الإرسال…');
     if (c.work) snap.work = c.work; if (c.shop) snap.shop = c.shop; if (S.settings && (S.settings.exlib || []).length) snap.lib = S.settings.exlib; snap.gate = c.hx.gate ? { on: 1, hour: c.hx.gateH || 12 } : null; snap.wm = (c.name || '') + ' • ' + (c.code || '');
     hxSend(c, { t: 'plan', v: v, plan: snap, note: '' }).then(function () { c.hx.planV = v; c.hx.sentAt = Date.now(); try { c.hx.snap = hxSlim(snap); c.hx.snap.v = v; } catch (e) { } if (rd) c.ready.sentV = v; if (pb) c.plib.sentV = v; persist(c); main(); toast('✓ وصلت الخطة v' + v + ' إلى «زنها» مع إشعار للعميل'); }).catch(hxErr);

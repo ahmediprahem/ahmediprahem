@@ -248,7 +248,7 @@ function handle(p) {
   if (p.t === 'plan' && p.plan && Array.isArray(p.plan.days) && p.plan.days.length) {
     const pl = p.plan; S.pm = { sys: pl.sys || 'ex', kcal: pl.kcal, pro: pl.pro, cho: pl.cho, fat: pl.fat, water: pl.water, dayNames: pl.dayNames, groups: pl.groups, recipes: pl.recipes && typeof pl.recipes === 'object' ? pl.recipes : {}, ready: pl.ready && typeof pl.ready === 'object' ? { id: String(pl.ready.id || ''), name: String(pl.ready.name || '').slice(0, 80) } : null };
     S.work = cleanWork(pl.work); S.lib = cleanLib(pl.lib); S.shop = cleanShop(pl.shop); if (!S.work && S.pt === 'work') S.pt = 'meals'; if (S.shopSig !== JSON.stringify(S.shop)) { S.shopSig = JSON.stringify(S.shop); S.shopOk = {}; }
-    S.plan = JSON.parse(JSON.stringify(pl.days)); S.pv = +p.v || 1; mkData(); S.wm = String(pl.wm || '').slice(0, 80); setGate(pl.gate); if (S.req !== 'approved') S.req = 'approved';
+    const oldPlan = S.plan; S.plan = JSON.parse(JSON.stringify(pl.days)); if (oldPlan) remapLogs(oldPlan, S.plan); S.pv = +p.v || 1; mkData(); S.wm = String(pl.wm || '').slice(0, 80); setGate(pl.gate); if (S.req !== 'approved') S.req = 'approved';
     foodsOf('no').forEach((f) => { if (foodInPlan(f)) applyDislike(f); });
     const first = S.screen !== 'app'; S.screen = 'app'; if (first) S.tab = 'today'; if (!S.planAt) S.planAt = now(); remSync();
     notify(first ? 'وصلت خطتك من ' + S.dname : 'وصلت خطتك المحدَّثة (الإصدار ' + S.pv + ')', 'افتح «زنها» لترى يومك'); return true;
@@ -522,6 +522,17 @@ function mtSheet() {
     + '<button class="btn full" data-act="mtSave">' + I('check') + ' احفظ مواعيدي</button>' + (S.mt && Object.keys(S.mt).length ? '<button class="btn sec full" data-act="mtReset">ارجع لمواعيد أخصائيي</button>' : '');
 }
 function mtRead() { const out = {}; mtNames().forEach(([n], i) => { const g = (k) => +(($('#mt' + k + i) || {}).value || 0), h = g('h') % 12 + (g('a') ? 12 : 0); out[n] = String(h).padStart(2, '0') + ':' + String(g('m')).padStart(2, '0'); }); return out; }
+// 1.15 م0 (قرار المالك): سجل اليوم يبقى مع الصنف نفسه عند وصول خطة محدّثة، ويُحذف إن أُزيل الصنف. المفاتيح تبقى بصيغتها (وجبة_سطر) فيقرؤها «زنها Pro» كما هي
+function remapLogs(oldP, newP, LOG) {
+  LOG = LOG || (S && S.log) || {};
+  const nm = (l) => String((l && (l[1] || l[2])) || '');
+  Object.keys(LOG).forEach((k) => {
+    if (k < dkey(new Date(now() - 14 * 864e5))) return; const L = LOG[k], dow = new Date(k + 'T12:00:00').getDay(), od = oldP[dow % oldP.length], nd = newP[dow % newP.length]; if (!L || !od || !nd) return;
+    const find = (si, name, used) => { const tryS = (j) => { const s2 = nd.slots[j]; if (!s2) return -1; for (let q = 0; q < s2.lines.length; q++) if (!used[j + '_' + q] && nm(s2.lines[q]) === name) return q; return -1; };
+      let q = tryS(si); if (q >= 0) return si + '_' + q; const sn = od.slots[si] && od.slots[si].name; for (let j = 0; j < nd.slots.length; j++) if (j !== si && nd.slots[j].name === sn) { q = tryS(j); if (q >= 0) return j + '_' + q; } return null; };
+    ['ck', 'sw'].forEach((f) => { const src = L[f] || {}, out = {}, used = {}; Object.keys(src).forEach((key) => { const [si, li] = key.split('_').map(Number), ol = od.slots[si] && od.slots[si].lines[li]; if (!ol) return; const nk = find(si, nm(ol), used); if (nk) { used[nk] = 1; out[nk] = src[key]; } }); L[f] = out; });
+  });
+}
 const dl = (dow) => { const k = dateFor(dow); return (S.log[k] = S.log[k] || { ck: {}, sw: {}, note: {}, skip: {}, water: 0 }); };
 const lineT = (l) => l[2];
 function itemsOfDay(d) { let n = 0, done = 0; const L = S.log[dateFor(d)] || { ck: {} }; dayPlan(d).slots.forEach((s, si) => s.lines.forEach((l, li) => { n++; if (L.ck[si + '_' + li]) done++; })); return [done, n]; }
@@ -2639,7 +2650,7 @@ document.addEventListener('click', (e) => {
     case 'submit': {
       if (V.busy) return; V.busy = true; render();
       HXC.fpOf(S.ident.encPub).then((fp) => {
-        const p = JSON.parse(JSON.stringify(S.p)); ['age', 'weight', 'height', 'bf'].forEach((x) => { p[x] = +numOnly(p[x]) || 0; }); p.phone = latin(p.phone); mkForm(); p.sys = SYS; p.qa = intakeQA(); if (SYS === 'g') p.sched = sched(); if (S.cat && S.cat.form && S.cat.form.tailor) { p.tform = 1; p.path = S.cat.path === 'tailor' ? 'tailor' : 'custom'; p.cc = tlCC(); try { p.ccRaw = localStorage.getItem(INTRO_CC) || ''; } catch (e) { } p.target = +numOnly(p.target) || 0; Object.keys(p.mfood || {}).forEach((t) => Object.keys(p.mfood[t]).forEach((n) => { if (p.mfood[t][n] === 'no') p.food[n] = 'no'; else if (!p.food[n]) p.food[n] = 'love'; })); }
+        const p = JSON.parse(JSON.stringify(S.p)); ['age', 'weight', 'height', 'bf'].forEach((x) => { p[x] = +numOnly(p[x]) || 0; }); p.phone = latin(p.phone); mkForm(); p.sys = SYS; p.qa = intakeQA(); p.ws = FS.some((st) => vq(st).some((q) => q.id === 'wake')) ? 1 : 0; if (SYS === 'g') p.sched = sched(); if (S.cat && S.cat.form && S.cat.form.tailor) { p.tform = 1; p.path = S.cat.path === 'tailor' ? 'tailor' : 'custom'; p.cc = tlCC(); try { p.ccRaw = localStorage.getItem(INTRO_CC) || ''; } catch (e) { } p.target = +numOnly(p.target) || 0; Object.keys(p.mfood || {}).forEach((t) => Object.keys(p.mfood[t]).forEach((n) => { if (p.mfood[t][n] === 'no') p.food[n] = 'no'; else if (!p.food[n]) p.food[n] = 'love'; })); }
         if (!S.weights.length && p.weight) S.weights.push([now(), p.weight]);
         S.req = 'sent'; S.reqMsg = ''; S.screen = 'sent';
         return send({ t: 'intake', p, fp });
@@ -2893,7 +2904,7 @@ document.addEventListener('input', (e) => {
 /*GRPCL*/
 window.addEventListener('online', () => { V.online = true; poll(); });
 window.addEventListener('offline', () => { V.online = false; render(); });
-window.HissatiApp = { mcLeft, remItems, whDayOk, badge: () => V.badge, wheel: { dayOk: whDayOk, cats: () => whCats().map((i) => whx().cats[i].id), dia: whDia, text: (id, i) => { const ci = whx().cats.findIndex((c) => c.id === id); return whText(ci, i); }, maybe: () => { WHL.shown = false; whMaybe(); }, open: (m) => whOpen(m) }, state: () => S, toast, poll, flush, feed: () => FD, feedLoad: fdLoad, celebrateTest: (id) => celebrate(id), sound: { avail: sndAvail, quiet: sndPrayerQuiet, times: prNow, playing: () => SND.playing, state: () => (SND.ctx ? SND.ctx.state : 'none'), vol: () => snd().vol, level: () => { if (!SND.an) return 0; const b = new Float32Array(SND.an.fftSize); SND.an.getFloatTimeDomainData(b); let t = 0, pk = 0; for (const x of b) { t += x * x; pk = Math.max(pk, Math.abs(x)); } return { rms: Math.sqrt(t / b.length), peak: pk }; } },  alarm: (items) => almShow(items), alarmTick: almTick, alarmFire: almFire, remItems, render, prayTimes, khams: { portions: khPortions, range: khRange, state: khState, rel: khRel, meta: () => QM, cert: khCertCanvas, stats: khStats } };     // للاختبارات
+window.HissatiApp = { remapLogs, mcLeft, remItems, whDayOk, badge: () => V.badge, wheel: { dayOk: whDayOk, cats: () => whCats().map((i) => whx().cats[i].id), dia: whDia, text: (id, i) => { const ci = whx().cats.findIndex((c) => c.id === id); return whText(ci, i); }, maybe: () => { WHL.shown = false; whMaybe(); }, open: (m) => whOpen(m) }, state: () => S, toast, poll, flush, feed: () => FD, feedLoad: fdLoad, celebrateTest: (id) => celebrate(id), sound: { avail: sndAvail, quiet: sndPrayerQuiet, times: prNow, playing: () => SND.playing, state: () => (SND.ctx ? SND.ctx.state : 'none'), vol: () => snd().vol, level: () => { if (!SND.an) return 0; const b = new Float32Array(SND.an.fftSize); SND.an.getFloatTimeDomainData(b); let t = 0, pk = 0; for (const x of b) { t += x * x; pk = Math.max(pk, Math.abs(x)); } return { rms: Math.sqrt(t / b.length), peak: pk }; } },  alarm: (items) => almShow(items), alarmTick: almTick, alarmFire: almFire, remItems, render, prayTimes, khams: { portions: khPortions, range: khRange, state: khState, rel: khRel, meta: () => QM, cert: khCertCanvas, stats: khStats } };     // للاختبارات
 boot();
 })();
 
