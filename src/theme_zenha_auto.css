@@ -1,0 +1,246 @@
+/* مولَّد بـ tools/theme_zenha_gen.py — لا تعدّله يدوياً. المظهر الفاتح بهوية «زنها» مقابل كل لون مصمَّم للداكن. */
+@media screen{
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) ::selection{background:rgba(15,159,115,0.24)}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) a{color:#0f9f73}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) header{background:#ffffff;-webkit-backdrop-filter:none;backdrop-filter:none}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) aside,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) main{box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) main h2,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) main h3,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) aside h2{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) input,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) select,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) textarea{background:rgba(11,20,64,0.035);color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) input::placeholder,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) textarea::placeholder{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) select option{background:#ffffff;color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .chk{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) button:focus-visible{outline:2px solid rgba(11,20,64,0.22)}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) button.sec{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) button.sec:hover{background:rgba(11,20,64,0.064)}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) button.o{color:#b25e00}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) button.r{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .tabs button:hover,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .day-tabs button:hover,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .pnav button:hover{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .tabs button.on,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .day-tabs button.on,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .pnav button.on{background:rgba(15,159,115,0.10);color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .cl{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .cl.on{background:rgba(15,159,115,0.08)}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .sbh:hover{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .sidebtn{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .sidebtn:hover{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .sidebtn.on{background:rgba(15,159,115,0.08);color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .t{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .ok,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .gok{background:rgba(15,159,115,0.08);color:#0f9f73}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .chips span{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .toast{background:#ffffff;color:#0b1440;box-shadow:0 1px 2px rgba(11,20,64,.05),0 6px 18px rgba(11,20,64,.06)}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .addbox,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .mcard,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .ucard,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .appcard,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .minicard,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .rembox,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .gbox{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .applink,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .mchip,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .fopt,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .fpick,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .fres,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .gprev,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .hm,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .at,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .cu,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .dims{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) main summary[style*="background"],html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) main span[style*="background"]{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .pg{background:rgba(11,20,64,0.080);box-shadow:0 1px 2px rgba(11,20,64,.05),0 6px 18px rgba(11,20,64,.06)}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .pg input,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .pg select,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .pg textarea{background:rgba(11,20,64,0.080);border:1px solid rgba(11,20,64,0.22)}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .pg button{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .pg button.o{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .pg button.r{background:#ffffff;color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .pg .gdw{background:rgba(11,20,64,0.080)}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .pg select option{background:rgba(11,20,64,0.080)}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .home{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .gcard{background:rgba(11,20,64,0.037);box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .gcard h2,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .gcard h3{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .gcard [style*="color:#253464"],html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) #gate [style*="color:#253464"]{color:#0b1440!important}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .gcard [style*="color:#a33"],html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) #gate [style*="color:#a33"]{color:#c62f35!important}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .gdev{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .hud{background:#ffffff;color:#0b1440;-webkit-backdrop-filter:none;backdrop-filter:none}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .hud .hudh,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .hud .hudmt{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .hud .huda{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .hud .hudbtn,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .hud .hudchip{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .hud .hudr.hs-low .hudq,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .hud .hudsum.hs-low{color:#c62f35}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .hud .hudr.hs-ok .hudq,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .hud .hudsum.hs-ok,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .hud .hudok{color:#0f9f73}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .hud .hudr.hs-over .hudq{color:#b25e00}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .hud .hudr.hf-neu .hudq,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .hud .hudr.hf-neu.hs-ok .hudq{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .hud .hudr.hs-low .huda small{color:#c62f35}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .hud .hudr.hs-over .huda small{color:#b25e00}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .bank .bkh{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .bank .bkb{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .bank .bkb.off{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .bank .bkb.own{background:rgba(15,159,115,0.11);color:#0f9f73}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .bank .bkb.new{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .bank .bkcat.on{background:rgba(15,159,115,0.10);color:#0f9f73}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .bank .bkmv{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .bank .bked{background:#ffffff}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .bkbuild{background:#ffffff;color:#0b1440;box-shadow:0 1px 2px rgba(11,20,64,.05),0 6px 18px rgba(11,20,64,.06)}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .bkbuild .bkbh{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .bkbuild .bkbb{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .bkbuild .bkrt td,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .bkbuild .bkrt th{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .bkst.ok{background:rgba(15,159,115,0.11);color:#0f9f73}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .bkst.ms{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .bkst.sk{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .bkbuild .chk{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .dtpre{background:rgba(11,20,64,0.037);color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .dtp .dth{background:rgba(11,20,64,0.037);color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .dtp .dtm{background:rgba(11,20,64,0.021)}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .dt-bl{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .dt-in{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .dtb{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .dtp{background:#ffffff;color:#0b1440;-webkit-backdrop-filter:none;backdrop-filter:none}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .dtp .dtb-b,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .dtp .dtcard,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .dtp .dtpre,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .dtp .dtm,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .dtp .dtmode,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .dtp .dtin,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .dtp .dtsug,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .dtp .dtchips span{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .dtp .dtb-u{background:rgba(15,159,115,0.13);color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .dtp .dtrow,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .dtp .dtrule,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .dtp .dtday,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .dtp .dtchg{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .thcard{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .thcard.on{background:rgba(15,159,115,0.08)}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .thsw.ln i{background:rgba(11,20,64,0.055)}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .thsw.ln b{background:rgba(11,20,64,0.046);border:1px solid rgba(11,20,64,0.18)}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .hxb.me{background:rgba(15,159,115,0.13)}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .hxbar{background:rgba(11,20,64,0.055)}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .hxlink{background:#ffffff}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .fmb.c{background:rgba(15,159,115,0.11);color:#0f9f73}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .lf.l0{color:#0f9f73}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .lf.l1{color:#b25e00}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .lf.l2{color:#c62f35}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .medsum small.dn{color:#0f9f73}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .medsum small.up{color:#c62f35}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .fdcm.dr{background:rgba(15,159,115,0.08)}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .fdst.wait{color:#b25e00}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .fdst.no{color:#c62f35}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .lnk{color:#c62f35}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .wkappt.today{background:rgba(15,159,115,0.08)}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .wkst.ok{background:rgba(15,159,115,0.10);color:#0f9f73}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .wkst.no{color:#c62f35}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .wkst.late{color:#b25e00}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .wklate h3,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .wkit.p0 .wkgo b{color:#c62f35}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .phcm{color:#0f9f73}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .chrow em.ok{background:rgba(15,159,115,0.11);color:#0f9f73}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .chrow.done{background:rgba(15,159,115,0.08)}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .dxh{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .dxd h4{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .dxb{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .dxb.gstrong{background:rgba(15,159,115,0.13);color:#0f9f73}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .dxb.gmid{color:#b25e00}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .dxb.gweak{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .dxbox,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .dxfix{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .rdtbl th{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .rdrow small,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .rdnote{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .rdopt,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .rddd>summary,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .rdddb{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .rdddb{background:#ffffff}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .rdot small,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .rdexp1{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .fold>summary{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .needb{color:#b25e00}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) details.tbm>summary,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) details.im>summary{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) details.tbm>summary.o{color:#b25e00}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .tbp,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .imx{background:#ffffff;color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .tbp small{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .bakrem b{color:#b25e00}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .hudhl{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .cikpi small,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .cid .ciex{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .ciup.good{color:#0f9f73}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .ciup.bad{color:#c62f35}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .cihl{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .cid.off .ciex{color:#b25e00}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .cid.low span:nth-child(3){color:#c62f35}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .cidl dt{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .ciimgs figcaption,html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .cibd figcaption{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .apconf.ok{background:rgba(15,159,115,0.11);color:#0f9f73}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .apconf.chg{color:#b25e00}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .dxb.draft{color:#b25e00}
+html[data-tone="light"][data-theme="glass"] ::selection{background:rgba(15,159,115,0.24)}
+html[data-tone="light"][data-theme="glass"] header{background:#ffffff;-webkit-backdrop-filter:none;backdrop-filter:none}
+html[data-tone="light"][data-theme="glass"] .uchip{color:#0b1440}
+html[data-tone="light"][data-theme="glass"] .hsrch{background:rgba(11,20,64,0.046)}
+html[data-tone="light"][data-theme="glass"] .hsrch input{color:#0b1440}
+html[data-tone="light"][data-theme="glass"] header button.sec{background:rgba(11,20,64,0.046)}
+html[data-tone="light"][data-theme="glass"] .cav{box-shadow:none}
+html[data-tone="light"][data-theme="glass"] aside>.rail,html[data-tone="light"][data-theme="glass"] aside>.clients,html[data-tone="light"][data-theme="glass"] main{background:#ffffff}
+html[data-tone="light"][data-theme="glass"] .rail .sidebtn{color:#0b1440}
+html[data-tone="light"][data-theme="glass"] .rail .sidebtn:hover{background:rgba(11,20,64,0.042);color:#0b1440}
+html[data-tone="light"][data-theme="glass"] .rail .sidebtn.on{background:#ffffff;color:#0b1440}
+html[data-tone="light"][data-theme="glass"] .rail .sbh:hover{background:rgba(11,20,64,0.037)}
+html[data-tone="light"][data-theme="glass"] .rail .cltog em{background:rgba(11,20,64,0.064)}
+html[data-tone="light"][data-theme="glass"] .clients .cnt{background:rgba(11,20,64,0.055)}
+html[data-tone="light"][data-theme="glass"] .srch{background:rgba(11,20,64,0.042)}
+html[data-tone="light"][data-theme="glass"] .srch input{color:#0b1440}
+html[data-tone="light"][data-theme="glass"] .cl{background:rgba(11,20,64,0.037)}
+html[data-tone="light"][data-theme="glass"] .cl .cav{color:#0b1440;box-shadow:none}
+html[data-tone="light"][data-theme="glass"] .cl b{color:#0b1440}
+html[data-tone="light"][data-theme="glass"] .cl:hover{background:rgba(11,20,64,0.055)}
+html[data-tone="light"][data-theme="glass"] input,html[data-tone="light"][data-theme="glass"] select,html[data-tone="light"][data-theme="glass"] textarea{background:rgba(11,20,64,0.042);box-shadow:none}
+html[data-tone="light"][data-theme="glass"] select option{background:#ffffff}
+html[data-tone="light"][data-theme="glass"] button{border:1px solid rgba(11,20,64,0.22);box-shadow:none}
+html[data-tone="light"][data-theme="glass"] button:hover{box-shadow:none}
+html[data-tone="light"][data-theme="glass"] button.sec{background:rgba(11,20,64,0.051);color:#0b1440}
+html[data-tone="light"][data-theme="glass"] button.sec:hover{background:rgba(11,20,64,0.077)}
+html[data-tone="light"][data-theme="glass"] button.o{background:#ffffff;color:#0b1440}
+html[data-tone="light"][data-theme="glass"] button.r{color:#0b1440}
+html[data-tone="light"][data-theme="glass"] .tabs{background:#ffffff}
+html[data-tone="light"][data-theme="glass"] .tabs button.on{background:rgba(11,20,64,0.080);color:#0b1440;box-shadow:0 1px 2px rgba(11,20,64,.05),0 6px 18px rgba(11,20,64,.06)}
+html[data-tone="light"][data-theme="glass"] .day-tabs button.on,html[data-tone="light"][data-theme="glass"] .pnav button.on{background:rgba(15,159,115,0.11)}
+html[data-tone="light"][data-theme="glass"] main h3{color:#0b1440}
+html[data-tone="light"][data-theme="glass"] .thcard.on{background:rgba(15,159,115,0.08)}
+html[data-tone="light"][data-theme="glass"] .toast{background:#ffffff;-webkit-backdrop-filter:none;backdrop-filter:none}
+html[data-tone="light"][data-theme="glass"] .ghome .hero{background:#ffffff}
+html[data-tone="light"][data-theme="glass"] .ghome .hero h2{color:#0b1440}
+html[data-tone="light"][data-theme="glass"] .ghome .stats b{color:#0b1440}
+html[data-tone="light"][data-theme="glass"] .ghome .qa{color:#0b1440}
+html[data-tone="light"][data-theme="glass"] .ghome .qa:hover{background:rgba(11,20,64,0.064)}
+html[data-tone="light"][data-theme="glass"] .ghome .qa .qai{box-shadow:none}
+html[data-tone="light"][data-theme="glass"] .gcard{background:rgba(11,20,64,0.046);-webkit-backdrop-filter:none;backdrop-filter:none}
+html[data-tone="light"][data-theme="glass"] .pg{background:#ffffff}
+html[data-tone="light"][data-theme="glass"] .pg .ph,html[data-tone="light"][data-theme="glass"] .pg table.dt td.f b{color:#b25e00}
+html[data-tone="light"][data-theme="glass"] .pg .plogo{background:rgba(11,20,64,0.080)}
+html[data-tone="light"][data-theme="glass"] .pg p[style*="color:#253464"]{color:#0b1440!important}
+html[data-tone="light"][data-theme="glass"] .pg td[style*="background:#fff"]{background:rgba(11,20,64,0.037)!important;color:#0b1440!important}
+html[data-tone="light"][data-theme="glass"] .pg .mh small,html[data-tone="light"][data-theme="glass"] .pg .mh span{color:#0b1440}
+html[data-tone="light"][data-theme="glass"] .pg .th-n,html[data-tone="light"][data-theme="glass"] .pg table.at th,html[data-tone="light"][data-theme="glass"] .pg table.gt tr.tot td,html[data-tone="light"][data-theme="glass"] .pg table.dt tr.tot td,html[data-tone="light"][data-theme="glass"] .pg .cards .b,html[data-tone="light"][data-theme="glass"] .pg .kp .b{background:#ffffff;color:#0b1440}
+html[data-tone="light"][data-theme="glass"] .pg table th:not([class*="th-"]){color:#0b1440}
+html[data-tone="light"][data-theme="glass"] .pg table.gt td.v,html[data-tone="light"][data-theme="glass"] .pg table.st td.v,html[data-tone="light"][data-theme="glass"] .pg table.dt td.v{background:rgba(11,20,64,0.037);color:#0b1440}
+html[data-tone="light"][data-theme="glass"] .pg table.dt td.f{background:rgba(11,20,64,0.028);color:#0b1440}
+html[data-tone="light"][data-theme="glass"] .pg table.p td.f{background:rgba(11,20,64,0.037);color:#0b1440}
+html[data-tone="light"][data-theme="glass"] .pg input,html[data-tone="light"][data-theme="glass"] .pg select,html[data-tone="light"][data-theme="glass"] .pg textarea{background:rgba(11,20,64,0.046);color:#0b1440}
+html[data-tone="light"][data-theme="glass"] .pg input::placeholder{color:#0b1440}
+html[data-tone="light"][data-theme="glass"] .pg input.n,html[data-tone="light"][data-theme="glass"] .pg input.tm,html[data-tone="light"][data-theme="glass"] .pg input.le{color:#0b1440}
+html[data-tone="light"][data-theme="glass"] .pg select option{background:#ffffff;color:#0b1440}
+html[data-tone="light"][data-theme="glass"] .pg button{border:1px solid rgba(11,20,64,0.22);box-shadow:none}
+html[data-tone="light"][data-theme="glass"] .pg button.sec{background:rgba(11,20,64,0.055);color:#0b1440}
+html[data-tone="light"][data-theme="glass"] .pg button.o{color:#0b1440}
+html[data-tone="light"][data-theme="glass"] .pg button.r{color:#0b1440}
+html[data-tone="light"][data-theme="glass"] .pg .mh .sec{background:rgba(11,20,64,0.080);color:#0b1440}
+html[data-tone="light"][data-theme="glass"] .pg .mcard{background:rgba(11,20,64,0.033)}
+html[data-tone="light"][data-theme="glass"] .pg table.at td{color:#0b1440}
+html[data-tone="light"][data-theme="glass"] .pg table.at tr.mt td{background:rgba(15,159,115,0.10);color:#0f9f73}
+html[data-tone="light"][data-theme="glass"] .pg .madd{background:rgba(11,20,64,0.028)}
+html[data-tone="light"][data-theme="glass"] .pg table.dt tr:not(.sum){background:rgba(11,20,64,0.028)}
+html[data-tone="light"][data-theme="glass"] .pg .tcards div{background:rgba(11,20,64,0.042)}
+html[data-tone="light"][data-theme="glass"] .pg .tcards b{color:#0b1440}
+html[data-tone="light"][data-theme="glass"] .pg .okb{background:rgba(15,159,115,0.11);color:#0f9f73}
+html[data-tone="light"][data-theme="glass"] .pg .badb{color:#0b1440}
+html[data-tone="light"][data-theme="glass"] .pg .hm,html[data-tone="light"][data-theme="glass"] .pg .hmdef{color:#0b1440}
+html[data-tone="light"][data-theme="glass"] .pg .diff.bad{color:#c62f35}
+html[data-tone="light"][data-theme="glass"] .pg .fres{background:#ffffff}
+html[data-tone="light"][data-theme="glass"] .pg .gdw{background:rgba(11,20,64,0.028)}
+html[data-tone="light"][data-theme="glass"] .pg .gdw h3{color:#0b1440}
+html[data-tone="light"][data-theme="glass"] .pg .gdt th{background:rgba(11,20,64,0.046);color:#0b1440}
+html[data-tone="light"][data-theme="glass"] .pg .gdf td{background:rgba(11,20,64,0.033)}
+html[data-tone="light"][data-theme="glass"] .pg .gd-ok{color:#0f9f73}
+html[data-tone="light"][data-theme="glass"] .pg .gd-bad{color:#c62f35}
+html[data-tone="light"][data-theme="glass"] .hud,html[data-tone="light"][data-theme="glass"] .dtp,html[data-tone="light"][data-theme="glass"] .bkbuild{background:#ffffff;-webkit-backdrop-filter:none;backdrop-filter:none}
+html[data-tone="light"][data-theme="glass"] .dtfab{background:rgba(11,20,64,0.064);-webkit-backdrop-filter:none;backdrop-filter:none;color:#0b1440}
+html[data-tone="light"][data-theme="glass"] header{background:#ffffff}
+html[data-tone="light"][data-theme="glass"] #tabbar{background:#ffffff;-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:0 1px 2px rgba(11,20,64,.05),0 6px 18px rgba(11,20,64,.06)}
+html[data-tone="light"][data-theme="glass"] #tabbar button.on{background:rgba(11,20,64,0.073);color:#0b1440}
+html[data-tone="light"][data-theme="glass"] header,html[data-tone="light"][data-theme="glass"] #tabbar{background:#ffffff}
+html[data-tone="light"][data-theme="glass"] .gcard{background:#ffffff}
+html[data-tone="light"][data-theme="glass"] .bakrem b{color:#b25e00}
+html[data-tone="light"][data-theme="glass"] .sbrow{border-bottom:1px solid rgba(11,20,64,0.12)}
+html[data-tone="light"][data-theme="glass"] .sbrow:hover{background:rgba(11,20,64,0.033)}
+html[data-tone="light"][data-theme="glass"] .chrow{border-bottom:1px solid rgba(11,20,64,0.11)}
+html[data-tone="light"][data-theme="glass"] .chrow:hover{background:rgba(11,20,64,0.037)}
+html[data-tone="light"][data-theme="glass"] .chrow.on{background:rgba(15,159,115,0.10)}
+html[data-tone="light"][data-theme="glass"] .hxdc.ok{color:#0f9f73}
+html[data-tone="light"][data-theme="glass"] .hxdc.no{color:#c62f35}
+html[data-tone="light"][data-theme="glass"] .hxdc.pt{color:#b25e00}
+html[data-tone="light"][data-theme="glass"] .rail .sidebtn.on{background:rgba(11,20,64,0.064);color:#0b1440}
+html[data-tone="light"][data-theme="glass"] .tdk.has{background:rgba(15,159,115,0.08)}
+html[data-tone="light"][data-theme="glass"] .newb{border:1px solid rgba(11,20,64,0.22)}
+html[data-tone="light"][data-theme="glass"] details.newm .tbp{background:#ffffff;-webkit-backdrop-filter:none;backdrop-filter:none}
+html[data-tone="light"][data-theme="glass"] .mrow .mri{background:rgba(15,159,115,0.10)}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .cfname{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .cfb{background:rgba(15,159,115,0.11);color:#0f9f73}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .cfb.w{color:#b25e00}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .cfb.no{color:#c62f35}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .cfb.n{background:rgba(11,20,64,0.055);color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .cfseg>button:hover{color:#0b1440}
+html[data-tone="light"]:is([data-theme="linear"],[data-theme="glass"]) .cfseg>button.on{color:#0b1440}
+html[data-tone="light"][data-theme="linear"] .tabs.cftabs{background:#ffffff}
+html[data-tone="light"][data-theme="glass"] .tabs.cftabs{background:#ffffff;box-shadow:0 1px 2px rgba(11,20,64,.05),0 6px 18px rgba(11,20,64,.06)}
+}

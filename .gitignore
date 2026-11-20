@@ -5,3 +5,4 @@ worker/admin/public/index.html
 worker/admin/.wrangler/
 worker/site/public/
 worker/site/.wrangler/
+__pycache__/

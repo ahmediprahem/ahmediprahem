@@ -1,0 +1,45 @@
+/* ===== 1.17 المظهر الفاتح بهوية «زنها» (الافتراضي بقرار المالك). طبقة ألوان فوق تخطيط «الزجاجي» نفسه (html[data-theme="glass"][data-tone="light"]):
+   الكحلي العميق للنصوص والعناوين، والنعناعي لوناً مميزاً (درجة أغمق على الأبيض للتباين)، وألوان حالة محجوزة: أخضر / كهرماني / أحمر.
+   الشاشة فقط؛ الطباعة والملفات المصدَّرة كما هي. ===== */
+@media screen{
+html[data-tone="light"]{
+  --zn-navy:#0b1440;--zn-navy2:#1d2a5b;--zn-mint:#30d0a0;--zn-mint2:#70f0a0;--zn-acc:#0f9f73;--zn-acc-h:#0c8a63;--zn-ok:#0f8f6b;--zn-warn:#b25e00;--zn-err:#c62f35;
+  --lbg:#f4f7fb;--ltext:#0b1440;--lmut:#55607f;--lacc:#0f9f73;--lacc-d:#04261a;--lglow:rgba(15,159,115,.16);--lerr:#c62f35;--lwarn:#b25e00;
+  --lpanel:#ffffff;--lpanel2:#f1f5f9;--lline:rgba(11,20,64,.10);--lline2:rgba(11,20,64,.18);
+  --gblur:none;--ghi:none;--gsh:0 1px 2px rgba(11,20,64,.05),0 8px 24px rgba(11,20,64,.06);
+  --accent:#0f9f73;--line:rgba(11,20,64,.12);--mut:#55607f;--card:#ffffff;
+  color-scheme:light}
+html[data-tone="light"] body{background:var(--lbg)!important;color:var(--ltext)!important}
+html[data-tone="light"] body::before{background:radial-gradient(45% 30% at 85% 0%,rgba(48,208,160,.16),transparent 70%),radial-gradient(40% 28% at 10% 0%,rgba(11,20,64,.07),transparent 70%)!important;animation:none!important;filter:none!important}
+html[data-tone="light"] body::after{display:none!important}
+/* النصوص */
+html[data-tone="light"] h1,html[data-tone="light"] h2,html[data-tone="light"] h3,html[data-tone="light"] h4,html[data-tone="light"] b,html[data-tone="light"] strong,html[data-tone="light"] label{color:var(--zn-navy)}
+html[data-tone="light"] .small,html[data-tone="light"] small{color:var(--lmut)}
+html[data-tone="light"] a{color:var(--zn-acc)}
+/* الأسطح: بطاقات بيضاء بظل خفيف بدل الزجاج */
+html[data-tone="light"] .ucard,html[data-tone="light"] .card,html[data-tone="light"] .rail,html[data-tone="light"] #rail,html[data-tone="light"] .side,html[data-tone="light"] aside,html[data-tone="light"] main,html[data-tone="light"] .panel,html[data-tone="light"] .box,
+html[data-tone="light"] .chl,html[data-tone="light"] .chm,html[data-tone="light"] .tdcard,html[data-tone="light"] .cfh,html[data-tone="light"] .pwcard,html[data-tone="light"] .hxreq,html[data-tone="light"] details{
+  background-color:#ffffff;color:var(--ltext);border-color:var(--lline);backdrop-filter:none!important;-webkit-backdrop-filter:none!important;box-shadow:var(--gsh)}
+html[data-tone="light"] header,html[data-tone="light"] .top,html[data-tone="light"] #top,html[data-tone="light"] .hdr{background:rgba(255,255,255,.92)!important;color:var(--zn-navy);border-color:var(--lline)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;box-shadow:0 1px 0 var(--lline)}
+/* الحقول */
+html[data-tone="light"] input,html[data-tone="light"] select,html[data-tone="light"] textarea{background:#ffffff!important;color:var(--zn-navy)!important;border:1.5px solid var(--lline2)!important;box-shadow:none!important}
+html[data-tone="light"] input::placeholder,html[data-tone="light"] textarea::placeholder{color:#8a93ad!important}
+html[data-tone="light"] input:focus,html[data-tone="light"] select:focus,html[data-tone="light"] textarea:focus{border-color:var(--zn-acc)!important;outline:2px solid rgba(15,159,115,.25)!important;outline-offset:1px}
+html[data-tone="light"] option{color:var(--zn-navy);background:#fff}
+/* الأزرار والتبويبات: ألوانها من الطبقة المولَّدة (theme_zenha_auto.css)؛ هنا الثانوية فقط بيضاء بحدود واضحة */
+html[data-tone="light"][data-theme="glass"] button.sec,html[data-tone="light"][data-theme="glass"] .btn.sec{background:#ffffff!important;color:var(--zn-navy)!important;border:1px solid var(--lline2)!important;box-shadow:none!important}
+html[data-tone="light"][data-theme="glass"] button.sec:hover{background:#f1f5f9!important}
+/* ألوان الحالة المحجوزة */
+html[data-tone="light"] .ok,html[data-tone="light"] .good{color:var(--zn-ok)}
+html[data-tone="light"] .warn,html[data-tone="light"] .warnb{color:var(--zn-warn)}
+html[data-tone="light"] .err,html[data-tone="light"] .bad{color:var(--zn-err)}
+html[data-tone="light"] .safeb{background:#fdecec;border-color:var(--zn-err);color:var(--zn-navy)}
+/* الجداول */
+html[data-tone="light"] table{color:var(--zn-navy)}html[data-tone="light"] th{background:#f1f5f9;color:var(--zn-navy)}html[data-tone="light"] td,html[data-tone="light"] th{border-color:var(--lline)!important}
+/* الإشعارات والقوائم المنبثقة */
+html[data-tone="light"] .toast{background:var(--zn-navy)!important;color:#fff!important}
+html[data-tone="light"] .sheet,html[data-tone="light"] .modal,html[data-tone="light"] .pop,html[data-tone="light"] .menu{background:#ffffff!important;color:var(--ltext)!important;border-color:var(--lline)!important}
+/* أرقام بعرض ثابت وخط أساسي مقروء */
+html[data-tone="light"] body{font-size:15px}
+html[data-tone="light"] .num,html[data-tone="light"] td,html[data-tone="light"] .kcal{font-variant-numeric:tabular-nums}
+}

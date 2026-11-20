@@ -12,6 +12,7 @@ const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html'));
   assert(await vis('#gsp .hxlogo svg .hx-mark')); assert.strictEqual(await p.locator('#gate video').count(), 0); assert.strictEqual(await vis('header'), false);
   assert(/زنها/.test(await p.getAttribute('#gsp .hxlogo svg', 'aria-label'))); ok('شاشة الدخول: شعار «حصة» الجديد متجهي متحرك (بلا فيديو)، بطاقة زجاجية، والترويسة الفارغة مخفية');
   await login(p);
+  await p.evaluate(() => { DPApp.S.settings.ui = Object.assign({}, DPApp.S.settings.ui, { theme: 'glass' }); DPApp.A.themeToggle(); DPApp.A.themeToggle(); DPApp.A.themeToggle(); DPApp.A.themeToggle(); });      // 1.17: هذا الاختبار للزجاجي الداكن (الافتراضي صار الفاتح)
   // ---- 2) الأيقونات الخطية
   const ic = await p.evaluate(() => { const w = [...document.querySelectorAll('.ico-w')]; return { n: w.length, glyphKept: w.every(x => x.querySelector('svg.ico') && x.querySelector('.ico-g').textContent.length > 0), lockText: document.querySelector('header [data-a="lock"]').textContent }; });
   assert(ic.n > 0 && ic.glyphKept, JSON.stringify(ic)); assert(ic.lockText.includes('🔒') && ic.lockText.includes('قفل')); assert(await vis('header [data-a="lock"] svg.ico'));
