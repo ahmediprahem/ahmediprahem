@@ -5,12 +5,12 @@
 // S.tab يحمل اسم القسم الداخلي. الأسماء القديمة تبقى صالحة: «hx» يقود إلى «المتابعة اليومية» للمرتبط وإلى «ربط زنها» لغيره (cfNorm).
 var CF_G = [
   ['file', 'الملف', 'user', ['client', 'med', 'link']],
-  ['plan', 'الخطة', 'utensils', ['plan', 'pw', 'ver']],
+  ['plan', 'الخطة', 'utensils', ['plan', 'gen', 'pw', 'ver']],
   ['follow', 'المتابعة', 'activity', ['ci', 'day', 'ph', 'chal']],
   ['appt', 'المواعيد', 'calendar', ['appt']],
   ['sub', 'الاشتراك', 'card', ['sub']]
 ];
-var CF_L = { client: 'البيانات', med: 'الملف الطبي', link: 'ربط زنها', plan: 'الخطة', pw: 'نافذة الأخصائي', ver: 'الإصدارات', ci: 'الحضور', day: 'المتابعة اليومية', ph: 'صور الوجبات', chal: 'التحديات' };
+var CF_L = { client: 'البيانات', med: 'الملف الطبي', link: 'ربط زنها', plan: 'الخطة', gen: 'توليد الخطة', pw: 'نافذة الأخصائي', ver: 'الإصدارات', ci: 'الحضور', day: 'المتابعة اليومية', ph: 'صور الوجبات', chal: 'التحديات' };
 function cfGroup(t) { for (var i = 0; i < CF_G.length; i++) if (CF_G[i][3].indexOf(t) >= 0) return CF_G[i]; return CF_G[0]; }
 function cfNorm(v, c) {                                            // توافق خلفي: أسماء التبويبات القديمة وأسماء المجموعات تقود إلى القسم الصحيح
   if (v === 'hx' || v === 'zenha') return c && c.hx ? 'day' : 'link';
@@ -59,6 +59,7 @@ function cfBody(c) {
   if (t === 'med') return medTab(c);
   if (t === 'link') return x ? '<div class="hxtab cflink">' + hxLinkCard(c) + hxGateCard(c) + '</div>' : hxEmptyTab(c);
   if (t === 'plan') return planTab(c);
+  if (t === 'gen') return genTab(c);
   if (t === 'pw') return pwTab(c);
   if (t === 'ver') return verTab(c);
   if (t === 'ci') return ciTab(c);

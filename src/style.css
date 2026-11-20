@@ -485,3 +485,16 @@ header .hdast{display:none!important}
 .st-ok{border-color:#0f9f73;background:rgba(15,159,115,.07)}.st-warn{border-color:#d08a00;background:rgba(208,138,0,.08)}.st-block{border-color:#c62f35;background:rgba(198,47,53,.07)}
 .chkb button{margin-inline-start:8px}.tgx{margin:6px 0;opacity:.9}
 .srcb{display:inline-block;font-size:11px;padding:0 6px;border-radius:8px;border:1px solid currentColor;opacity:.8;margin-inline-start:4px}
+/* 1.19 تبويب «توليد الخطة» */
+.gensteps{display:flex;flex-wrap:wrap;gap:6px;list-style:none;padding:0;margin:0 0 12px}
+.gensteps button{display:inline-flex;align-items:center;gap:6px}.gensteps i{font-style:normal;display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;border:1.5px solid currentColor;font-size:12px}
+.gensteps .gs-on button{border-color:#0f9f73;box-shadow:0 0 0 2px rgba(15,159,115,.25)}.gensteps .gs-done i{background:#0f9f73;color:#fff;border-color:#0f9f73}
+.gxl{list-style:none;padding:0;margin:8px 0;display:grid;gap:4px}.gx{padding:6px 10px;border-radius:8px;border-inline-start:4px solid #c62f35;background:rgba(198,47,53,.05)}
+.gx-caution{border-inline-start-color:#d08a00;background:rgba(208,138,0,.07)}.gx-avoid,.gx-manual,.gx-kw{border-inline-start-color:#55607f;background:rgba(85,96,127,.06)}
+.gxk{font-size:12px;padding:0 6px;border-radius:8px;border:1px solid currentColor;margin-inline-start:4px}
+.genopts{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin:6px 0 12px}
+.genopt{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border:1.5px solid rgba(11,20,64,.18);border-radius:10px;cursor:pointer}.genopt.on{border-color:#0f9f73;background:rgba(15,159,115,.07)}.genopt input{position:absolute;opacity:0;pointer-events:none}
+.genplan,.gensend{border:2px solid rgba(11,20,64,.15)}.gen-st-ok{border-color:#0f9f73!important}.gen-st-warn{border-color:#d08a00!important}.gen-st-block{border-color:#c62f35!important}
+.gensend li.st-ok,.gensend li.st-warn,.gensend li.st-block{border:0;background:none;padding:2px 0}
+.genlist{display:grid;gap:6px}.genlist .cl{display:flex;gap:10px;align-items:center;text-align:start;width:100%}
+.genfoot{margin-top:12px}

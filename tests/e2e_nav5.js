@@ -5,7 +5,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   const { d, close } = await linked('nav5', errs);
   const vis = (s) => d.evaluate((q) => { const e = document.querySelector(q); return !!e && e.getClientRects().length > 0; }, s);
   const rail = await d.evaluate(() => [...document.querySelectorAll('.rail .sidebtn')].map((b) => b.dataset.a));
-  assert.deepStrictEqual(rail, ['home', 'clients', 'zchat', 'bank', 'ready', 'feed', 'appts', 'subs', 'settings'], rail.join()); assert.strictEqual(await d.locator('.rail .rgrp').count(), 2);
+  assert.deepStrictEqual(rail, ['home', 'clients', 'genTab', 'zchat', 'bank', 'ready', 'feed', 'appts', 'subs', 'settings'], rail.join()); assert.strictEqual(await d.locator('.rail .rgrp').count(), 2);
   ok('الشريط الجانبي: اليوم، العملاء، شات زنها، ثم مجموعتا «المكتبة» و«الإدارة» (٩ عناصر بدل ٢٠)');
   assert.strictEqual(await d.locator('.rail [data-a="hxv"], .rail [data-a="exportUsers"], .rail [data-a="export"]').count(), 0); ok('الطلبات والنسخ الاحتياطي والتصدير خرجت من الشريط');
   await d.evaluate(() => DPApp.A.home()); assert(await vis('.today .tdh')); assert(await vis('.tdks')); assert.strictEqual(await d.locator('.today .qgrid').count(), 0); ok('«اليوم»: عنوان ومؤشرات ما ينتظر الأخصائي بلا بلاطات تكرر التنقل');

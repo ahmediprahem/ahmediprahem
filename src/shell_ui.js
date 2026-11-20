@@ -23,6 +23,7 @@ function glassSide() {
   $('aside').innerHTML = '<nav class="rail" aria-label="التنقل">'
     + railBtn('home', 'sunrise', 'اليوم', n.today)
     + railBtn('clients', 'users', 'العملاء', n.clients).replace('</span></button>', '</span><i class="rcnt">' + S.clients.length + '</i></button>')
+    + railBtn('genTab', 'sparkles', 'توليد الخطة', S.view === 'gen')
     + railBtn('zchat', 'message', 'شات زنها', n.chat, 1)
     + '<div class="rgrp" role="group" aria-label="المكتبة"><small class="rgl">المكتبة</small>' + railBtn('bank', 'utensils', 'بنك الوجبات', S.view === 'bank') + railBtn('ready', 'layers', 'الخطط الجاهزة', S.view === 'ready' || S.view === 'lib') + railBtn('feed', 'megaphone', 'التثقيف', S.view === 'feed', 1) + '</div>'
     + '<div class="rgrp" role="group" aria-label="الإدارة"><small class="rgl">الإدارة</small>' + railBtn('appts', 'calendar', 'المواعيد', S.view === 'appts', 1) + railBtn('subs', 'card', 'الاشتراكات', S.view === 'subs', 1) + railBtn('settings', 'settings', 'الإعدادات', S.view === 'settings' || S.view === 'users') + '</div>'
@@ -76,7 +77,7 @@ function navRow(a, v, icon, t, d, badge) { return '<button class="mrow" data-a="
 function morePage() {
   var n = navCounts(), left = CFG.exp ? Math.ceil((CFG.exp * 1000 - Date.now()) / 86400000) : null;
   return '<div class="morepage"><h2>المزيد</h2><p class="small">' + esc(CFG.userLabel || '') + (left !== null ? ' • ينتهي التفعيل بعد ' + left + ' يوم' : '') + '</p>'
-    + '<div class="mrows">' + navRow('appts', '', 'calendar', 'المواعيد', 'مواعيد اليوم والأسبوع والمتابعات', n.appt) + navRow('subs', '', 'card', 'الاشتراكات', 'المتبقي لكل عميل والمدفوعات والتمديد', n.subs) + navRow('nav', 'settings', 'settings', 'الإعدادات', 'البيانات الغذائية وزنها والمظهر والاستبيانات')
+    + '<div class="mrows">' + navRow('genTab', '', 'sparkles', 'توليد الخطة', 'مراجعة العميل والاستبعاد، ثم الإعداد والخطة') + navRow('appts', '', 'calendar', 'المواعيد', 'مواعيد اليوم والأسبوع والمتابعات', n.appt) + navRow('subs', '', 'card', 'الاشتراكات', 'المتبقي لكل عميل والمدفوعات والتمديد', n.subs) + navRow('nav', 'settings', 'settings', 'الإعدادات', 'البيانات الغذائية وزنها والمظهر والاستبيانات')
     + navRow('setTools', '', 'tool', 'النسخ الاحتياطي والأدوات', 'نسخة احتياطية واسترجاع واستيراد عميل' + (S.mode === 'admin' ? ' وأدوات الإدارة' : '')) + navRow('dtToggle', '', 'bot', 'المساعد', 'اطلب تعديل الخطة بالعربية واعتمد قبل التنفيذ') + '</div></div>';
 }
 // ---- «النسخ الاحتياطي والأدوات» داخل الإعدادات: ما كان أسفل القائمة الجانبية، بنفس الإجراءات ونفس شروط الظهور (أدوات الإدارة للمدير فقط)

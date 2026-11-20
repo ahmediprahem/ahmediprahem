@@ -1,0 +1,103 @@
+// ================= 1.19 المرحلة 4: تبويب «توليد الخطة» — يُدمج داخل app.js عند /*GENUI*/
+// بند جانبي «توليد الخطة» يفتح قائمة العملاء مع «＋ عميل جديد»، واختيار العميل يفتح ملفه على قسم «توليد» (مجموعة «الخطة»).
+// الخطوات: 1 العميل • 2 المراجعة والاستبعاد (سبب كل استبعاد، ويعتمده الأخصائي) • 3 الإعداد (النظام، الوجبات، جاهز أو يدوي، شكل الأسبوع) • 4 الخطة • 5 المراجعة والإرسال.
+// لا نظام موازٍ: الحقول هي الحقول الحالية (excludedFoods وavoid وmeals وdiet)، والجديد c.gen = { step, rev, path, week, fastPat }.
+// قرار المالك: الاستبعاد الصحي «بحذر» تنبيه فقط بلا استبعاد تلقائي حتى يعتمد قائمة مايكل (قواعد «تجنّب» القائمة كما كانت).
+var GEN_STEPS = [['client', 'العميل'], ['rev', 'المراجعة والاستبعاد'], ['setup', 'الإعداد'], ['plan', 'الخطة'], ['send', 'المراجعة والإرسال']];
+var GEN_WEEK = [['fixed', 'ثابت', 'اليوم نفسه كل أيام الأسبوع'], ['var', 'متغير', 'أيام مختلفة بالسعرات نفسها'], ['fast', 'صيام الاثنين والخميس', 'صيام سنّة يومي الاثنين والخميس، بالسعرات نفسها']];
+// أنماط يوم الصيام (قرار المالك): بالسعرات نفسها، والنسب الافتراضية قابلة للتعديل
+var GEN_FAST = [[1, 'فطور + وجبة خفيفة + سحور', [['الفطور', 0.45], ['وجبة خفيفة', 0.2], ['السحور', 0.35]]], [2, 'وجبة خفيفة + فطور + وجبة خفيفة + سحور', [['وجبة خفيفة', 0.1], ['الفطور', 0.4], ['وجبة خفيفة', 0.15], ['السحور', 0.35]]], [3, 'يحددها الأخصائي يدوياً', null]];
+function genOf(c) { var g = c.gen || (c.gen = {}); if (!g.step) g.step = 2; if (!g.path) g.path = 'manual'; if (!g.week) g.week = 'var'; if (!g.fastPat) g.fastPat = 1; return g; }
+// قائمة الاستبعاد مع السبب: ما يستبعده المحرك فعلاً، وما عليه «بحذر» (تنبيه فقط)
+function genExcl(c) {
+  var x = ec(c), cx = E.ctx(x, D), kinds = { allergy: 'حساسية', kw: 'كلمة مستبعدة', manual: 'استبعده الأخصائي', avoid: 'لا يحبه', health: 'منع صحي', caution: 'بحذر' }, out = [], ex = {}, al = [];
+  (x.allergens || []).forEach(function (lab) { var a = D.allergens.filter(function (q) { return q.label === lab; })[0]; if (a) a.kw.forEach(function (k) { al.push([k, lab]); }); });
+  (x.excludedFoods || []).forEach(function (n) { ex[n] = 1; });
+  D.foods.forEach(function (f) {
+    if (!f.on) return; var n = f.n, why = [], k = '', p = ' ' + n + ' ';
+    var a = al.filter(function (q) { return n.indexOf(q[0]) >= 0; })[0]; if (a) { k = 'allergy'; why.push(a[1]); }
+    else if (ex[n]) { k = 'manual'; }
+    else if ((x.keywords || []).some(function (q) { return q && n.indexOf(q) >= 0; })) { k = 'kw'; why.push((x.keywords || []).filter(function (q) { return q && n.indexOf(q) >= 0; })[0]); }
+    else if (cx.avoid[n]) { k = 'avoid'; if (c.diet && !(c.avoid || []).includes(n)) why.push('النظام الغذائي'); }
+    var rs = cx.rules.filter(function (r) { return r.exact ? n === r.kw : p.indexOf(r.kw) >= 0; });
+    var hard = rs.filter(function (r) { return r.tier === 'تجنّب'; })[0], soft = rs.filter(function (r) { return r.tier === 'قلّل / وقّت'; })[0];
+    if (!k && hard) { k = 'health'; why.push(hard.cond + ': ' + hard.why); }
+    if (!k && soft) { k = 'caution'; why.push(soft.cond + ': ' + soft.why); }
+    if (k) out.push({ n: n, g: f.g, k: k, kl: kinds[k], why: why.join(' • ') });
+  });
+  return out;
+}
+function genStepper(c, g) {
+  return '<ol class="gensteps" aria-label="خطوات توليد الخطة">' + GEN_STEPS.map(function (s, i) {
+    var n = i + 1, st = n < g.step ? 'done' : n === g.step ? 'on' : 'next';
+    return '<li class="gs-' + st + '"><button class="sec sm" data-a="genStep" data-v="' + n + '"' + (n === 1 ? ' disabled' : '') + (n === g.step ? ' aria-current="step"' : '') + '><i>' + (st === 'done' ? '✓' : n) + '</i> ' + s[1] + '</button></li>';
+  }).join('') + '</ol>';
+}
+function genCard(c) {
+  var T = null; try { T = c.kind === 'athlete' ? null : E.targets(ec(c), D); } catch (e) { }
+  var mf = c.hx && c.hx.intake && c.hx.intake.mfood, love = (c.love || []).slice(0, 12);
+  return '<div class="ucard gencl"><h3>' + esc(c.name || 'عميل بلا اسم') + ' <small>' + esc(c.code) + '</small></h3>'
+    + (typeof safetyBanner === 'function' ? safetyBanner(c.safety || (c.age > 0 && c.age < 18 ? { minor: true } : null)) : '')
+    + '<p class="small">' + [c.sex, c.age && c.age + ' سنة', c.weight && c.weight + ' كجم', c.height && c.height + ' سم', c.goal, c.activity].filter(Boolean).map(esc).join(' • ') + '</p>'
+    + ((c.conditions || []).length ? '<p><b>الحالة الصحية:</b> ' + c.conditions.map(esc).join('، ') + '</p>' : '') + ((c.allergens || []).length ? '<p><b>الحساسية:</b> ' + c.allergens.map(esc).join('، ') + '</p>' : '')
+    + (love.length ? '<p><b>يحب:</b> ' + love.map(esc).join('، ') + '</p>' : '') + (mf ? '<p class="small">اختيارات الأكلات لكل وجبة من استبيان «زنها» محفوظة وتُراعى في الخطة.</p>' : '')
+    + (T ? '<div class="tgx small">ℹ ' + esc(E.explain(T, c)) + '</div>' : '') + '</div>';
+}
+function genRev(c, g) {
+  var L = genExcl(c), hard = L.filter(function (x) { return x.k !== 'caution'; }), soft = L.filter(function (x) { return x.k === 'caution'; });
+  var row = function (x) { var can = x.k === 'manual' || (x.k === 'avoid' && (c.avoid || []).indexOf(x.n) >= 0); return '<li class="gx gx-' + x.k + '"><b>' + esc(x.n) + '</b> <span class="gxk">' + x.kl + '</span>' + (x.why ? ' <small>' + esc(x.why) + '</small>' : '') + (can ? ' <button class="link" data-a="genUnex" data-v="' + esc(x.n) + '">إرجاع</button>' : x.k === 'caution' ? ' <button class="link" data-a="genEx" data-v="' + esc(x.n) + '">استبعده</button>' : '') + '</li>'; };
+  return genCard(c) + '<div class="ucard genrev"><h3>الأصناف المستبعدة (' + hard.length + ')</h3><p class="small">كل صنف مع سبب استبعاده. «إرجاع» لما استبعدته أنت أو لا يحبه العميل؛ والحساسية تُعدَّل من بيانات العميل.</p>'
+    + (hard.length ? '<ul class="gxl">' + hard.map(row).join('') + '</ul>' : '<p class="small">لا أصناف مستبعدة.</p>')
+    + '<div class="row"><div><label for="gen_add">استبعد صنفاً</label><input id="gen_add" list="dl_gf" placeholder="اكتب اسم الصنف"></div><div><label>&nbsp;</label><button class="sec" data-a="genAdd">＋ استبعد</button></div></div><datalist id="dl_gf">' + D.foods.filter(function (f) { return f.on; }).map(function (f) { return '<option value="' + esc(f.n) + '">'; }).join('') + '</datalist>'
+    + (soft.length ? '<details class="fold"><summary>⚠ بحذر (' + soft.length + '): تنبيه فقط ولا تُستبعد تلقائياً</summary><ul class="gxl">' + soft.map(row).join('') + '</ul></details>' : '')
+    + '<p class="genfoot">' + (g.rev ? '<span class="ok">✔ اعتمدتَ المراجعة</span> ' : '') + '<button data-a="genRevOk">اعتمد المراجعة والتالي ›</button></p></div>';
+}
+function genSetup(c, g) {
+  var opt = function (k, v, t, d) { return '<label class="genopt' + (g[k] === v ? ' on' : '') + '"><input type="radio" name="gen_' + k + '" data-gk="' + k + '" value="' + v + '"' + (g[k] === v ? ' checked' : '') + '><b>' + t + '</b>' + (d ? '<small>' + d + '</small>' : '') + '</label>'; };
+  return '<div class="ucard gensetup"><h3>نوع النظام</h3>' + (c.kind === 'athlete' ? '<p class="small">نظام الجرامات (محرك الرياضيين).</p>' : dxClientBox(c))
+    + (c.kind === 'athlete' ? '' : '<div class="row">' + sel('meals', 'عدد الوجبات', [3, 4, 5, 6]) + '</div>')
+    + '<h3>طريقة البناء</h3><div class="genopts">' + opt('path', 'manual', 'يدوي جديد', 'النظام يحسب الحصص وتوزيعها، وتعدّل أنت') + opt('path', 'ready', 'جاهز من البنك', 'خطة جاهزة تناسب السعرات، ويُستبدل المستبعد تلقائياً') + '</div>'
+    + '<h3>شكل الأسبوع</h3><div class="genopts">' + GEN_WEEK.map(function (w) { return opt('week', w[0], w[1], w[2]); }).join('') + '</div>'
+    + (g.week === 'fast' ? '<div class="genfast"><h4>يوم الصيام</h4><div class="genopts">' + GEN_FAST.map(function (f) { return opt('fastPat', f[0], f[1], f[2] ? f[2].map(function (q) { return q[0] + ' ' + Math.round(q[1] * 100) + '%'; }).join(' • ') : 'توزيع تكتبه أنت'); }).join('') + '</div><p class="small">بالسعرات نفسها لباقي الأيام. النسب قابلة للتعديل.</p></div>' : '')
+    + '<p class="genfoot"><button data-a="genStep" data-v="4">التالي: الخطة ›</button></p></div>';
+}
+function genPlanStep(c, g) {
+  var po = planOf(c), ck = null; if (c.plan && c.plan.days && c.plan.targets && c.kind !== 'athlete' && po.src === 'engine') try { ck = E.checkPlan(c.plan, D); } catch (e) { }
+  return '<div class="ucard genplan gen-' + (ck ? 'st-' + ck.st : 'none') + '" data-st="' + (ck ? ck.st : '') + '"><h3>' + (g.path === 'ready' ? 'خطة جاهزة' : 'خطة يدوية') + '</h3>'
+    + (po.has ? '<p>الخطة الحالية: <b>' + esc(po.label) + '</b>' + (po.kcal ? ' • ' + Math.round(po.kcal) + ' سعرة' : '') + '</p>' : '<p class="small">لا خطة بعد.</p>')
+    + (ck ? '<p class="genst">' + { ok: '✔ مطابقة', warn: '⚠ تحتاج نظرك', block: '⛔ غير مطابقة' }[ck.st] + ': ' + ck.ok + ' أيام مطابقة، ' + ck.warn + ' تنبيه، ' + ck.block + ' مانع</p>' : '')
+    + '<p><button data-a="genBuild">' + (po.has ? '↻ أعد التوليد' : '⚙ ولّد الخطة') + '</button> ' + (po.has ? '<button class="sec" data-a="tab" data-v="plan">افتح الخطة للتعديل</button> ' : '') + '<button class="sec" data-a="genStep" data-v="5">التالي: المراجعة والإرسال ›</button></p></div>';
+}
+function genSend(c, g) {
+  var po = planOf(c), ck = null, T = null; try { T = c.kind === 'athlete' ? null : E.targets(ec(c), D); if (po.src === 'engine' && c.plan && c.plan.days && c.kind !== 'athlete') ck = E.checkPlan(c.plan, D); } catch (e) { }
+  var st = ck ? ck.st : T && T.lowBlock ? 'block' : 'ok', ic = { ok: '✔', warn: '⚠', block: '⛔' }[st];
+  return '<div class="ucard gensend gen-st-' + st + '" data-st="' + st + '"><h3>' + ic + ' ' + E.ST_AR[st] + '</h3>'
+    + (ck ? '<ul>' + ck.days.map(function (d, i) { return '<li class="st-' + d.st + '">' + esc(dayName(c.plan, i)) + ': ' + { ok: '✔', warn: '⚠', block: '⛔' }[d.st] + ' ' + E.ST_AR[d.st] + (d.reasons.length ? ' — ' + esc(d.reasons[0]) : '') + '</li>'; }).join('') + '</ul>' : '')
+    + (T && T.lowBlock ? '<p class="err">السعرات اليدوية تحت الحد الآمن بلا تأكيد: أكّدها من «البيانات».</p>' : '')
+    + (!po.has ? '<p class="small">ولّد الخطة أولاً.</p>' : c.hx ? '<p><button data-a="hxSendPlan"' + (T && T.lowBlock ? ' disabled' : '') + '>' + IC('send') + ' أرسل الخطة إلى «زنها»</button></p>' : '<p><button class="sec" data-a="tab" data-v="link">اربط العميل بـ«زنها» لإرسال الخطة</button></p>')
+    + '</div>';
+}
+function genTab(c) {
+  var g = genOf(c), body = g.step <= 2 ? genRev(c, g) : g.step === 3 ? genSetup(c, g) : g.step === 4 ? genPlanStep(c, g) : genSend(c, g);
+  return '<div class="gentab">' + genStepper(c, g) + body + '</div>';
+}
+function genPage() {
+  return '<div class="clpage genpage"><div class="hxtop"><h2>توليد الخطة</h2><span class="two"><button data-a="genNew" data-v="ex">＋ عميل جديد — الحصص</button> <button class="sec" data-a="genNew" data-v="ath">＋ عميل جديد — الجرامات</button></span></div>'
+    + '<p class="small">اختر العميل لتبدأ: مراجعة بياناته والاستبعاد، ثم الإعداد، ثم الخطة.</p>'
+    + '<div class="genlist">' + S.clients.slice().sort(function (a, b) { return (b.updated || b.created) - (a.updated || a.created); }).map(function (c) {
+      return '<button class="cl" data-a="genPick" data-v="' + esc(c.code) + '"><span class="cav">' + esc(initial(c.name)) + '</span><b>' + esc(c.name || '(بلا اسم)') + '</b><small>' + esc(c.code) + (c.kind === 'athlete' ? ' • جرامات' : '') + (planOf(c).has ? ' • لديه خطة' : '') + '</small></button>';
+    }).join('') + '</div></div>';
+}
+(function (f) { main0 = function () { if (S.view === 'gen') { $('main').innerHTML = genPage(); return; } return f.apply(this, arguments); }; })(main0);
+document.addEventListener('change', function (e) { var t = e.target, c = cur(); if (!c || !t.dataset || !t.dataset.gk) return; var g = genOf(c); g[t.dataset.gk] = t.dataset.gk === 'fastPat' ? +t.value : t.value; save(); main(); });
+Object.assign(A, {
+  genTab: function () { document.body.classList.remove('menu'); S.view = 'gen'; S.cur = null; render(); window.scrollTo(0, 0); },
+  genPick: function (v) { return A.pick(v).then(function () { S.tab = 'gen'; render(); }); },
+  genNew: function (v) { A.new(v === 'ath' ? 'ath' : 'ex'); S.tab = 'client'; render(); toast('أكمل بيانات العميل، ثم افتح «توليد» من مجموعة «الخطة»'); },
+  genStep: function (v) { var c = cur(); if (!c) return; genOf(c).step = Math.max(2, Math.min(5, +v)); save(); main(); window.scrollTo(0, 0); },
+  genRevOk: function () { var c = cur(); if (!c) return; var g = genOf(c); g.rev = Date.now(); g.step = 3; save(); main(); toast('اعتُمدت المراجعة'); },
+  genUnex: function (v) { var c = cur(); if (!c) return; c.excludedFoods = (c.excludedFoods || []).filter(function (n) { return n !== v; }); c.avoid = (c.avoid || []).filter(function (n) { return n !== v; }); genOf(c).rev = null; save(); main(); toast('أُرجع «' + v + '»'); },
+  genEx: function (v) { var c = cur(); if (!c || !v) return; c.excludedFoods = c.excludedFoods || []; if (c.excludedFoods.indexOf(v) < 0) c.excludedFoods.push(v); genOf(c).rev = null; save(); main(); toast('استُبعد «' + v + '»'); },
+  genAdd: function () { var i = $('#gen_add'), v = i && i.value.trim(); if (!v) return; if (!D.foods.some(function (f) { return f.n === v; })) { toast('اختر صنفاً من القائمة'); return; } A.genEx(v); },
+  genBuild: function () { var c = cur(); if (!c) return; var g = genOf(c); if (g.path === 'ready' && c.kind !== 'athlete') { S.tab = 'pw'; render(); return; } A.gen(); S.tab = 'gen'; g.step = 4; save(); render(); }
+});
