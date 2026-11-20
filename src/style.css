@@ -509,3 +509,5 @@ header .hdast{display:none!important}
 .gslot{border-top:1px solid rgba(11,20,64,.1);padding:8px 0}.gslot h4{margin:4px 0}.glines,.gsubs,.gml{list-style:none;padding:0;margin:4px 0;display:grid;gap:4px}
 .glines input.n{width:64px}.gsubs,.gml{padding-inline-start:16px}.gsubs li,.gml li{padding:4px 8px;border-radius:8px;background:rgba(11,20,64,.03)}
 .gdv{font-size:12px;font-variant-numeric:tabular-nums;opacity:.85}.gml .lv-A,.gml .lv-B{border-inline-start:3px solid #0f9f73}.gml .lv-C{border-inline-start:3px solid #d08a00}.gml .lv-D{border-inline-start:3px solid #c62f35;opacity:.7}
+/* 1.22 خريطة النص إلى الأصناف */
+.gtm{list-style:none;padding:0;display:grid;gap:4px}.gtm li{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:4px 8px;border-radius:8px;background:rgba(11,20,64,.03)}.gtm input{min-width:220px}.gtm-none{border-inline-start:3px solid #c62f35}.gtm-rule{border-inline-start:3px solid #d08a00}.gtm-manual{border-inline-start:3px solid #0f9f73}

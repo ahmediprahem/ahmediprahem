@@ -993,5 +993,51 @@ E.ctx = function (client, D) {
     D.foods.forEach(function (f) { if (!f.on) return; var bad = !cx.ok(f) ? 'مستبعد' : cx.avoid[f.n] ? 'لا يحبه العميل' : ''; if (bad && f.n.length > 2 && all.indexOf(f.n) >= 0) hits[f.n] = bad; });
     return Object.keys(hits).map(function (n) { return { n: n, why: hits[n] }; });
   };
+  // ================================================ 1.22 المرحلة 7: المسار الجاهز — خريطة نص الخطط الجاهزة إلى أصناف، استبدال المستبعد تلقائياً، والتحويل إلى صيغة المحرك
+  // الخريطة حتمية: (1) تصحيح الأخصائي المحفوظ، (2) أطول اسم صنف يظهر في النص، (3) قواعد كلمات مرتبة من الأخص إلى الأعم. ما لا يُعرف يبقى نصاً ويُعلَّم للمراجعة.
+  E.TRULES = [
+    [/بيصارة|فول مدمس|فول بال|فول /, 'فول مدمس'], [/عدس أصفر|شوربة عدس/, 'عدس أصفر (شوربة)'], [/عدس/, 'عدس مطبوخ'], [/حمص الشام|حمص مسلوق|حمص بال/, 'حمص مسلوق'], [/فاصوليا بيضاء|فاصوليا ناشفة/, 'فاصوليا بيضاء مطبوخة'], [/لوبيا/, 'لوبيا مطبوخة'],
+    [/بياض بيض|بياض/, 'بياض بيض'], [/بيض|بيضة|أومليت|عجة/, 'بيضة كاملة'], [/جبن(ة)? قريش|قريش/, 'جبنة قريش'], [/موتزاريلا|موزاريلا/, 'جبنة موزاريلا'], [/جبن(ة)? رومي/, 'جبنة رومي'], [/جبن(ة)? (بيضاء|فيتا|اسطنبولي)|دمياطي/, 'جبنة دمياطي (فيتا)'], [/لبنة/, 'لبنة قليلة الدسم'], [/جبن|جبنة/, 'جبن يحتوي على 3 غم دهون / أونصة أو أقل'],
+    [/تونة/, 'تونة معلبة بالماء'], [/سلمون/, 'سلمون'], [/سردين/, 'سمك السردين معلب'], [/جمبري|روبيان/, 'روبيان (جمبري)'], [/بلطي/, 'سمك بلطي مشوي'], [/بوري/, 'سمك بوري مشوي'], [/كنعد/, 'سمك كنعد مشوي'], [/سمك|فيليه/, 'سمك أبيض (هامور)'],
+    [/صدور? (فراخ|دجاج)|صدر/, 'صدر دجاج بدون جلد'], [/(فراخ|دجاج) مشوي|ربع فرخة|وراك|ورك/, 'دجاج مشوي بدون جلد'], [/فراخ|دجاج|شيش طاووق/, 'صدر دجاج بدون جلد'], [/ديك رومي/, 'لحم ديك رومي'], [/كبدة|كبد/, 'لحم كبد أو قلوب (مصدر عالٍ بالكوليسترول)'],
+    [/لحم مفروم|كفتة|برجر منزلي/, 'لحم مفروم (≤10% دهن)'], [/لحم|ستيك|بتلو|كباب/, 'لحم بقري قليل الدهن'],
+    [/زبادي يوناني/, 'زبادي يوناني خالي الدسم'], [/زبادي/, 'زبادي سادة قليل الدسم'], [/رايب|لبن رائب/, 'لبن رائب قليل الدسم'], [/لبن|حليب/, 'حليب قليل الدسم'],
+    [/عيش|خبز|رغيف|توست|شامي/, 'خبز عربي صغير'], [/أرز بني|رز بني/, 'أرز بني'], [/أرز|رز/, 'أرز أبيض'], [/مكرونة|معكرونة|باستا/, 'معكرونة مطبوخة'], [/فريك|برغل/, 'برغل مطبوخ'], [/شوفان/, 'شوفان جاف'], [/بطاطا|بطاطس حلوة/, 'بطاطا حلوة مسلوقة'], [/بطاطس/, 'بطاطس مسلوقة'], [/ذرة/, 'ذرة حلوة مسلوقة'], [/كينوا/, 'كينوا مطبوخة'], [/كسكس/, 'كسكس مطبوخ'],
+    [/بامية/, 'بامية مطبوخة'], [/ملوخية/, 'ملوخية مطبوخة'], [/كوسة|كوسا/, 'كوسا'], [/باذنجان|بتنجان/, 'باذنجان'], [/سبانخ/, 'سبانخ'], [/بروكلي/, 'بروكلي'], [/قرنبيط/, 'قرنبيط (زهرة) مطبوخ'], [/جزر/, 'جزر'], [/فاصوليا خضراء/, 'فاصوليا خضراء'], [/سلطة|خضار|خيار|طماطم|جرجير|خس|فلفل/, 'سلطة خضراء (خيار وطماطم وخس)'],
+    [/حمص/, 'حمص مسلوق'], [/توت/, 'توت أسود أو أحمر'], [/كنتالوب|كانتلوب/, 'شمام (كانتلوب)'], [/مانج/, 'مانجو'], [/قراصيا|برقوق مجفف/, 'برقوق مجفف (برون)'], [/أناناس/, 'أناناس طازج'], [/بسكويت/, 'بسكويت خالي الدسم'], [/كيك/, 'كيك سادة بدون كريما'],
+    [/يوسفي|يوسف أفندي/, 'يوسفي (مندرين)'], [/برتقال/, 'برتقال'], [/تفاح/, 'تفاح'], [/موز/, 'موز'], [/جوافة/, 'جوافة'], [/عنب/, 'عنب'], [/فراولة/, 'فراولة'], [/مانجو/, 'مانجو'], [/بطيخ/, 'بطيخ'], [/كمثرى/, 'كمثرى'], [/خوخ/, 'خوخ'], [/رمان/, 'رمان'], [/كيوي/, 'كيوي'], [/تمر|بلح/, 'تمر'], [/شمام|كانتلوب/, 'شمام'], [/فاكهة/, 'تفاح'],
+    [/زيت زيتون/, 'زيت زيتون'], [/زيت/, 'زيت (الذرة، عباد الشمس، الصويا)'], [/طحينة/, 'طحينة'], [/زبدة فول سوداني/, 'زبدة الفول السوداني (دهون)'], [/فول سوداني|سوداني/, 'فول سوداني'], [/لب قرع|لب سوري|بذور/, 'بذور اليقطين أو عباد الشمس'], [/لوز/, 'لوز'], [/عين جمل|جوز/, 'جوز'], [/مكسرات/, 'مكسرات مخلوطة (50% فستق)'], [/أفوكادو/, 'أفوكادو'], [/زيتون/, 'زيتون أخضر'], [/زبدة/, 'زبدة'], [/سمن/, 'سمن بلدي'],
+    [/عسل/, 'عسل'], [/مربى/, 'مربى'], [/سكر/, 'سكر أبيض']
+  ];
+  E.mapText = function (t, D, over) {
+    t = String(t || ''); if (over && over[t]) return { n: over[t], conf: 'manual' }; var by = {}; D.foods.forEach(function (f) { if (f.on) by[f.n] = f; });
+    var best = ''; Object.keys(by).forEach(function (n) { if (n.length > best.length && n.length >= 3 && t.indexOf(n) >= 0) best = n; }); if (best) return { n: best, conf: 'name' };
+    var u = t.replace(/\([^)]*\)/g, ' '); for (var i = 0; i < E.TRULES.length; i++) if (E.TRULES[i][0].test(u) && by[E.TRULES[i][1]]) return { n: E.TRULES[i][1], conf: 'rule' };
+    return null;
+  };
+  var PLK = { S: 0, Lg: 1, Meat: 3, Mi: 7, V: 9, F: 10, Ft: 11, O: 12 }, poolOf = function (g) { return g >= 2 && g <= 5 ? [2, 3, 4, 5] : g >= 6 && g <= 8 ? [6, 7, 8] : [g]; };
+  var typeOf = function (l) { return /إفطار|فطور/.test(l) ? 'B' : /غداء|غدا/.test(l) ? 'L' : /عشاء|عشا/.test(l) ? 'D' : /سحور/.test(l) ? 'D' : 'S'; };
+  E.fromDoc = function (doc, client, D, over) {                 // خطة جاهزة (مكتبة الأنظمة) ← خطة بصيغة المحرك: تُعدَّل وتُفحص مثل غيرها
+    var T = E.targets(client, D), cx = E.ctx(client, D), by = {}, al = client.alias, rep = [], unk = {}; D.foods.forEach(function (f) { by[f.n] = f; });
+    var days = []; for (var d = 0; d < 7; d++) {
+      var src = doc.days[d % doc.days.length], slots = src.m.map(function (m, si) {
+        var lines = m.it.map(function (t) { var mp = E.mapText(t, D, over), f = mp && by[mp.n]; if (!f) unk[t] = 1; return { g: f ? f.g : 12, name: f ? f.n : '', e: 0, text: t, tier: 0, bank: false, ready: 1, map: mp ? mp.conf : 'none' }; });
+        Object.keys(m.g || {}).forEach(function (k) {
+          var G = PLK[k], v = +m.g[k] || 0; if (G == null || !(v > 0)) return; var P = poolOf(G), ls = lines.filter(function (l) { return l.name && P.indexOf(l.g) >= 0; });
+          if (!ls.length) { lines.push({ g: G, name: '', e: v, text: '(' + D.groups[G] + ': ' + v + ' حصة)', tier: 0, bank: false, ready: 1, map: 'none' }); return; }
+          var each = Math.floor(v / ls.length * 2) / 2, rest = v - each * ls.length; ls.forEach(function (l, i) { l.e += each + (i === 0 ? rest : 0); });
+        });
+        lines.forEach(function (l) { var f = by[l.name]; if (!f || !(l.e > 0)) return; if (!cx.ok(f) || cx.avoid[f.n]) {
+          var tmp = { client: client, targets: T }, alt = E.subs(l, typeOf(m.l), tmp, D, 6).filter(function (x) { return x.type === 1; })[0] || E.subs(l, typeOf(m.l), tmp, D, 6)[0];
+          if (alt) { rep.push({ d: d, was: l.text, now: alt.text, why: !cx.ok(f) ? 'مستبعد' : 'لا يحبه العميل' }); l.was = l.text; l.name = alt.name; l.g = alt.g; l.e = alt.e; l.text = alt.text; l.auto = 1; }
+        } });
+        return { si: si, name: m.l, type: typeOf(m.l), pct: 0, kcal: PL_mk(m), target: 0, meal: '', lines: lines, time: m.time || '', req: null };
+      });
+      var dy = { day: d, name: D.days[d], counts: new Array(13).fill(0), short: [], slots: slots, custom: true, fromReady: 1 }; E.syncCounts(dy); dy.counts = dy.req.slice(); days.push(E.dayStats(dy, T, D));
+    }
+    var plan = { client: client, targets: T, days: days, meals: doc.days[0].m.length, version: 1, generated: new Date().toISOString(), base: { counts: days[0].counts.slice(), manual: true, auto: days[0].counts.slice() }, phr: E.pickPhrases(D.phrases || [], D.tips || [], 9, 1), fromReady: { id: doc.id, title: doc.title }, replaced: rep, unmapped: Object.keys(unk) };
+    return plan;
+  };
+  var PL_mk = function (m) { var k = 0, K = { S: 80, Lg: 100, Meat: 55, Mi: 90, V: 25, F: 60, Ft: 45, O: 60 }; Object.keys(m.g || {}).forEach(function (x) { k += (+m.g[x] || 0) * (K[x] || 0); }); return k; };
   if (typeof module !== 'undefined' && module.exports) module.exports = E; else root.DPEngine = E;
 })(typeof window !== 'undefined' ? window : this);

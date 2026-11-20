@@ -107,10 +107,27 @@ function genEditor(c, g, T) {
         }).join('') + '</ul></div>';
     }).join('') + '</div>';
 }
+// ---- 1.22 المرحلة 7: المسار الجاهز — مراجعة خريطة النص إلى الأصناف (تُحفظ للجميع)، والتحويل إلى خطة بصيغة المحرك مع استبدال المستبعد تلقائياً
+function genTmap() { return S.settings.tmap || (S.settings.tmap = {}); }
+function genReady(c, g) {
+  if (c.kind === 'athlete') return '';
+  var doc = c.plib && c.plib.doc; if (!doc) return '<div class="ucard genready"><h3>خطة جاهزة</h3><p class="small">اختر النظام الجاهز من «نافذة الأخصائي» (مكتبة الأنظمة)، ثم ارجع هنا لمراجعة الأصناف وتحويلها إلى خطة قابلة للتعديل.</p><p><button data-a="tab" data-v="pw">اختر نظاماً جاهزاً</button></p></div>';
+  var seen = {}, rows = [], cnt = { name: 0, rule: 0, manual: 0, none: 0 }, over = genTmap();
+  doc.days.forEach(function (d) { d.m.forEach(function (m) { m.it.forEach(function (t) { if (seen[t]) return; seen[t] = 1; var mp = E.mapText(t, D, over), k = mp ? mp.conf : 'none'; cnt[k]++; rows.push([t, mp, k]); }); }); });
+  var lbl = { name: 'بالاسم', rule: 'بقاعدة', manual: 'صحّحه أخصائي', none: 'غير معروف' }, rv = rows.filter(function (r) { return r[2] !== 'name'; });
+  var conv = c.plan && c.plan.fromReady && c.plan.fromReady.id === doc.id && c.planSrc !== 'plib';
+  return '<div class="ucard genready"><h3>خطة جاهزة: ' + esc(c.plib.name || doc.title) + (c.plib.vname ? ' — ' + esc(c.plib.vname) : '') + '</h3>'
+    + '<p class="small">ربط نصوص الخطة بالأصناف: ' + cnt.name + ' بالاسم، ' + cnt.rule + ' بقاعدة، ' + cnt.manual + ' صحّحها أخصائي، ' + cnt.none + ' غير معروفة. الخريطة تُبنى مرة وتُحفظ لكل العملاء.</p>'
+    + (rv.length ? '<details class="fold"' + (cnt.none ? ' open' : '') + '><summary>راجع الربط (' + rv.length + ')</summary><ul class="gtm">' + rv.map(function (r, i) { return '<li class="gtm-' + r[2] + '"><span>' + esc(r[0]) + '</span> ← <input list="dl_gf2" data-tm="' + esc(r[0]) + '" value="' + esc(r[1] ? r[1].n : '') + '" placeholder="اختر الصنف"> <small>' + lbl[r[2]] + '</small></li>'; }).join('') + '</ul><datalist id="dl_gf2">' + D.foods.filter(function (f) { return f.on; }).map(function (f) { return '<option value="' + esc(f.n) + '">'; }).join('') + '</datalist></details>' : '')
+    + (conv && c.plan.replaced && c.plan.replaced.length ? '<div class="chkb st-warn">استُبدل تلقائياً ما لا يناسب العميل:<ul>' + c.plan.replaced.slice(0, 12).map(function (x) { return '<li>' + esc(dayName(c.plan, x.d)) + ': ' + esc(x.was) + ' ← <b>' + esc(x.now) + '</b> (' + x.why + ')</li>'; }).join('') + '</ul></div>' : '')
+    + '<p><button data-a="genConv">' + (conv ? '↻ أعد التحويل' : '⇄ حوّل إلى خطة قابلة للتعديل والفحص') + '</button> <button class="sec" data-a="tab" data-v="pw">غيّر النظام</button></p>'
+    + (conv ? '<p class="small ok">✔ الخطة الآن بصيغة المحرك: تُعدَّل كمياتها وبدائلها وتُفحص مثل اليدوية. «وجبة من البنك» تعطي بديل الوجبة الكاملة (النوع 4).</p>' : '') + '</div>';
+}
 function genPlanStep(c, g) {
   var po = planOf(c), ck = null; if (c.plan && c.plan.days && c.plan.targets && c.kind !== 'athlete' && po.src === 'engine') try { ck = E.checkPlan(c.plan, D); } catch (e) { }
   var T = null; try { T = c.kind === 'athlete' ? null : E.targets(ec(c), D); } catch (e) { }
   var man = g.path === 'manual' && T ? genManual(c, g, T) : '';
+  if (g.path === 'ready') man = genReady(c, g);
   return man + '<div class="ucard genplan gen-' + (ck ? 'st-' + ck.st : 'none') + '" data-st="' + (ck ? ck.st : '') + '"><h3>' + (g.path === 'ready' ? 'خطة جاهزة' : 'خطة يدوية') + '</h3>'
     + (po.has ? '<p>الخطة الحالية: <b>' + esc(po.label) + '</b>' + (po.kcal ? ' • ' + Math.round(po.kcal) + ' سعرة' : '') + '</p>' : '<p class="small">لا خطة بعد.</p>')
     + (ck ? '<p class="genst">' + { ok: '✔ مطابقة', warn: '⚠ تحتاج نظرك', block: '⛔ غير مطابقة' }[ck.st] + ': ' + ck.ok + ' أيام مطابقة، ' + ck.warn + ' تنبيه، ' + ck.block + ' مانع</p>' : '')
@@ -142,6 +159,7 @@ function genPage() {
 (function (f) { main0 = function () { if (S.view === 'gen') { $('main').innerHTML = genPage(); return; } return f.apply(this, arguments); }; })(main0);
 document.addEventListener('change', function (e) {
   var t = e.target, c = cur(); if (!c || !t.dataset) return;
+  if (t.dataset.tm != null) { var tm = genTmap(), v0 = t.value.trim(); if (v0 && !D.foods.some(function (f) { return f.n === v0; })) { toast('اختر صنفاً من القائمة'); return; } if (v0) tm[t.dataset.tm] = v0; else delete tm[t.dataset.tm]; saveSettings(); main(); toast('حُفظ الربط'); return; }
   if (t.dataset.ge && c.plan) { var q = t.dataset.ge.split(',').map(Number); E.setLineE(c.plan, genOf(c).day || 0, q[0], q[1], Math.max(0, +t.value || 0), D); GENX.subs = null; save(); main(); return; }
   if (t.dataset.gc != null) { var G = genCounts(c), cn = G.cn.slice(); cn[+t.dataset.gc] = Math.max(0, Math.round(+t.value || 0)); c.baseCounts = cn; save(); main(); return; }
   if (!t.dataset.gk) return; var g = genOf(c); g[t.dataset.gk] = t.dataset.gk === 'fastPat' || t.dataset.gk === 'day' ? +t.value : t.value; save(); main();
@@ -155,6 +173,7 @@ Object.assign(A, {
   genUnex: function (v) { var c = cur(); if (!c) return; c.excludedFoods = (c.excludedFoods || []).filter(function (n) { return n !== v; }); c.avoid = (c.avoid || []).filter(function (n) { return n !== v; }); genOf(c).rev = null; save(); main(); toast('أُرجع «' + v + '»'); },
   genEx: function (v) { var c = cur(); if (!c || !v) return; c.excludedFoods = c.excludedFoods || []; if (c.excludedFoods.indexOf(v) < 0) c.excludedFoods.push(v); genOf(c).rev = null; save(); main(); toast('استُبعد «' + v + '»'); },
   genAdd: function () { var i = $('#gen_add'), v = i && i.value.trim(); if (!v) return; if (!D.foods.some(function (f) { return f.n === v; })) { toast('اختر صنفاً من القائمة'); return; } A.genEx(v); },
+  genConv: function () { var c = cur(); if (!c || !c.plib || !c.plib.doc) return; c.plan = E.fromDoc(Object.assign({ id: c.plib.id }, c.plib.doc), ec(c), D, genTmap()); c.planSrc = ''; save(); main(); toast('حُوّلت الخطة' + (c.plan.replaced.length ? '، واستُبدل ' + c.plan.replaced.length + ' صنفاً لا يناسب العميل' : '')); },
   genSubs: function (v) { GENX.subs = GENX.subs === v ? null : v; GENX.meals = null; main(); },
   genMeals: function (v) { GENX.meals = GENX.meals === +v ? null : +v; GENX.subs = null; main(); },
   genSubPick: function (v) { var c = cur(); if (!c || !c.plan) return; var q = v.split(',').map(Number), d = genOf(c).day || 0, s = c.plan.days[d].slots[q[0]], l = s.lines[q[1]], x = E.subs(l, s.type, c.plan, D, 12)[q[2]]; if (!x) return; E.applySub(c.plan, d, q[0], q[1], x, D); GENX.subs = null; save(); main(); toast('استُبدل: ' + x.text); },
