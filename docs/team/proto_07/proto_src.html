@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>نموذج الحمية بالبدائل</title>
+<style>
+@font-face{font-family:Plex;src:url(../../../assets/fonts/ibm-plex-sans-arabic-arabic-400-normal.woff2) format('woff2');font-weight:400}
+@font-face{font-family:Plex;src:url(../../../assets/fonts/ibm-plex-sans-arabic-arabic-700-normal.woff2) format('woff2');font-weight:700}
+@font-face{font-family:Plex;src:url(../../../assets/fonts/ibm-plex-sans-arabic-latin-400-normal.woff2) format('woff2');font-weight:400;unicode-range:U+0000-00FF}
+@font-face{font-family:Plex;src:url(../../../assets/fonts/ibm-plex-sans-arabic-latin-700-normal.woff2) format('woff2');font-weight:700;unicode-range:U+0000-00FF}
+:root{--navy:#0b1440;--mut:#5b6685;--bg:#f4f7fb;--line:#e3e8f0;--mint:#30d0a0;--acc:#0f9f73;--ok:#0f8f6b;--warn:#b25e00;--err:#c62f35;--kc:#6d5bd0;--pr:#2f80ed;--cb:#f2994a;--ft:#e0b100}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Plex,system-ui,sans-serif;color:var(--navy);font-size:15px}
+.app{display:flex;min-height:100vh}
+.rail{width:72px;background:#fff;border-inline-start:1px solid var(--line);display:flex;flex-direction:column;align-items:center;padding:14px 0;gap:8px}
+.lg{width:44px;height:44px;border-radius:12px;background:linear-gradient(145deg,#70f0a0,#30d0a0);display:grid;place-items:center;font-weight:700;font-size:22px;color:#04261a}
+.main{flex:1;padding:18px 24px;min-width:0}
+h1{font-size:20px;margin:0 0 4px}.sub{color:var(--mut);font-size:13.5px;margin-bottom:14px}
+.steps{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.steps button{font:inherit;font-weight:700;border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:8px 14px;color:var(--mut);cursor:pointer;display:flex;gap:6px;align-items:center}
+.steps button i{font-style:normal;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:#eef2f7;font-size:12px}
+.steps button.on{border-color:var(--acc);color:var(--navy)}.steps button.on i{background:var(--acc);color:#fff}.steps button.done i{background:#e6f8f1;color:var(--ok)}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:14px}
+.card h2{font-size:17px;margin:0 0 12px;display:flex;gap:8px;align-items:center}
+.row{display:flex;gap:12px;flex-wrap:wrap}.row>div{display:flex;flex-direction:column;gap:4px;min-width:140px}
+label{font-size:13px;color:var(--mut)}input,select{font:inherit;border:1.5px solid var(--line);border-radius:10px;padding:8px 10px;background:#fff;color:var(--navy)}
+input.n{width:64px;text-align:center;padding:6px}
+.big{font-size:28px;font-weight:700}.ex{color:var(--mut);font-size:13.5px;line-height:1.8}
+table{width:100%;border-collapse:collapse;font-size:14px}th{color:var(--mut);font-weight:400;text-align:start;padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:6px 8px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}tr.tot td{font-weight:700;background:#f8fafc}
+.ad{font-weight:700;padding:2px 8px;border-radius:99px;font-size:13px}.ad.ok{background:#e6f8f1;color:var(--ok)}.ad.w{background:#fff3e0;color:var(--warn)}.ad.b{background:#fdecec;color:var(--err)}
+.btn{font:inherit;font-weight:700;border:0;border-radius:10px;padding:9px 16px;background:var(--acc);color:#fff;cursor:pointer}.btn.sec{background:#fff;color:var(--navy);border:1.5px solid var(--line)}
+.bar{display:flex;gap:8px;align-items:center;margin:10px 0}
+.mt{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:12px;flex-wrap:wrap}.mt span{padding:9px 14px;font-weight:700;color:var(--mut);border-bottom:3px solid transparent;cursor:pointer}.mt span.on{color:var(--navy);border-bottom-color:var(--acc)}
+.dish{display:flex;gap:14px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:10px;align-items:flex-start}
+.dish .pic{width:74px;height:74px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff7e0,#ffd9a8);display:grid;place-items:center;font-size:30px;flex:none}
+.dish table td{border-bottom:1px dashed var(--line)}.dish h3{margin:0 0 6px;font-size:15px;text-align:center;background:#f4f7fb;border-radius:8px;padding:4px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.mc{font-size:12.5px;font-weight:700;padding:3px 9px;border-radius:99px}.mc.kc{background:#efedfb;color:var(--kc)}.mc.pr{background:#e8f1fd;color:var(--pr)}.mc.cb{background:#fdf0e5;color:#c4661b}.mc.ft{background:#fdf6d9;color:#8a6c00}
+.cov{font-size:12.5px;font-weight:700}.cov.ok{color:var(--ok)}.cov.w{color:var(--warn)}
+.side{position:sticky;top:12px}
+.grid2{display:grid;grid-template-columns:1fr 320px;gap:14px;align-items:start}
+.warnnote{font-size:12.5px;color:var(--warn);margin-top:6px}
+.hidden{display:none}
+</style></head><body>
+<div class="app">
+<nav class="rail"><div class="lg">z</div></nav>
+<div class="main">
+  <h1>توليد الخطة بالبدائل <span style="font-size:13px;color:var(--mut);font-weight:400">نموذج تجريبي: يحسب بأطعمة «زنها» الحالية</span></h1>
+  <div class="sub">الطريقة: الطاقة ← الماكروز ← الجدول التركيبي (عدد الحصص) ← التوزيع على الوجبات ← قائمة الطعام. <b id="cl"></b></div>
+  <div class="steps" id="steps"></div>
+  <div id="s1" class="stp"></div><div id="s2" class="stp"></div><div id="s3" class="stp"></div><div id="s4" class="stp"></div><div id="s5" class="stp"></div>
+</div></div>
+<script>
+const D = /*DATA*/null;
+const G = D.groups, EX = D.EX;
+const MEALS = [['الإفطار','B','07:30'],['سناك 1','S','10:30'],['الغداء','L','14:00'],['سناك 2','S','17:00'],['العشاء','D','20:30']];
+const PCT = [0.25,0.1,0.3,0.1,0.25];
+const S = { step:1, sex:'أنثى', age:35, w:82, h:162, f:'mifflin', pal:1.375, eta:false, goal:-500, pc:{c:45,p:25,f:30}, cn:new Array(13).fill(0), dist:MEALS.map(()=>new Array(13).fill(0)), meal:0, menu:{} };
+const STEPS = ['الطاقة','الماكروز','الجدول التركيبي','التوزيع على الوجبات','قائمة الطعام'];
+const r0 = (x)=>Math.round(x), r1=(x)=>Math.round(x*10)/10;
+// ---- 1) المعادلات (للنموذج؛ الاعتماد النهائي بموافقة المالك ومراجعة مايكل)
+const F = {
+  mifflin:['Mifflin-St Jeor (1990)', s=>10*s.w+6.25*s.h-5*s.age+(s.sex==='ذكر'?5:-161)],
+  hb84:['Harris-Benedict (مراجعة Roza & Shizgal 1984)', s=>s.sex==='ذكر'?88.362+13.397*s.w+4.799*s.h-5.677*s.age:447.593+9.247*s.w+3.098*s.h-4.330*s.age],
+};
+function energy(){ const b=F[S.f][1](S), tdee=b*S.pal, eta=S.eta?tdee*0.1:0, get=tdee+eta+S.goal; return {b,tdee,eta,get}; }
+function targets(){ const e=energy().get; return {k:e,c:e*S.pc.c/100/4,p:e*S.pc.p/100/4,f:e*S.pc.f/100/9}; }
+function sumCn(cn){ const v={c:0,p:0,f:0,k:0}; cn.forEach((x,g)=>{v.c+=x*EX[g][0];v.p+=x*EX[g][1];v.f+=x*EX[g][2];}); v.k=v.c*4+v.p*4+v.f*9; return v; }
+function adq(v,t){ const a=t>0?v/t*100:0, cls=a>=95&&a<=105?'ok':a>=90&&a<=110?'w':'b'; return '<span class="ad '+cls+'">'+r0(a)+'%</span>'; }
+// ---- اقتراح الحصص (شفاف، للنموذج): خضار 3، فاكهة 2، حليب قليل الدسم 2، ثم اللحوم من البروتين المتبقي، ثم النشويات من الكربوهيدرات، ثم الدهون
+function suggest(){ const t=targets(), cn=new Array(13).fill(0); cn[9]=3; cn[10]=2; cn[7]=2;
+  const pRest=t.p-cn[9]*2-cn[7]*8; let st=Math.max(0,Math.round((t.c-cn[9]*5-cn[10]*15-cn[7]*15)/15)); const pAfter=pRest-st*3; const meat=Math.max(0,Math.round(pAfter/7)); cn[3]=Math.ceil(meat*0.6); cn[2]=meat-cn[3]; cn[0]=st;
+  cn[11]=Math.max(0,Math.round((t.f-cn[3]*3-cn[2]*1-cn[7]*5)/5)); S.cn=cn; }
+function autoDist(){ S.dist=MEALS.map(()=>new Array(13).fill(0));
+  S.cn.forEach((n,g)=>{ if(!n)return; let w=PCT.slice(); if(g>=2&&g<=5) w=[0.3,0,0.4,0,0.3]; if(g===10) w=[0,0.5,0,0.5,0]; if(g>=6&&g<=8) w=[0.5,0,0,0.5,0]; if(g===9) w=[0.25,0,0.4,0,0.35];
+    const s=w.reduce((a,b)=>a+b,0); const raw=w.map(x=>n*x/s), fl=raw.map(Math.floor); let left=n-fl.reduce((a,b)=>a+b,0);
+    raw.map((x,i)=>[x-fl[i],i]).sort((a,b)=>b[0]-a[0]).slice(0,left).forEach(x=>fl[x[1]]++); fl.forEach((x,i)=>S.dist[i][g]=x); }); }
+function foodsOf(g,type){ const ti={B:0,L:1,D:2,S:3}[type]; return D.foods.filter(f=>f.on&&f.g===g&&(!f.m||f.m[ti])); }
+function qty(f,e){ const u=f.upe*e, gr=f.gpe*e; const fr=(x)=>{x=Math.max(0.25,Math.round(x*4)/4);const w=Math.floor(x+1e-9),d=x-w; const t=Math.abs(d-0.5)<0.13?'½':Math.abs(d-0.25)<0.13?'¼':Math.abs(d-0.75)<0.13?'¾':Math.abs(d-1/3)<0.1?'⅓':Math.abs(d-2/3)<0.1?'⅔':d>0.13?r1(d).toString().slice(1):''; return (w?w:'')+t||'0';};
+  return { g: (f.us==='جم'||f.us==='مل')? r0(u)+' '+f.us : r0(gr)+' جم', h: (f.us==='جم'||f.us==='مل'||u<0.2)? '' : fr(u)+' '+(u>1.01?f.up||f.us:f.us) }; }
+function render(){
+  const T=targets(), E=energy();
+  document.getElementById('cl').textContent='العميلة التجريبية: '+S.sex+' • '+S.age+' سنة • '+S.w+' كجم • '+S.h+' سم';
+  document.getElementById('steps').innerHTML=STEPS.map((s,i)=>'<button class="'+(S.step===i+1?'on':S.step>i+1?'done':'')+'" data-go="'+(i+1)+'"><i>'+(S.step>i+1?'✓':i+1)+'</i>'+s+'</button>').join('');
+  document.querySelectorAll('.stp').forEach((x,i)=>x.classList.toggle('hidden',S.step!==i+1));
+  // 1
+  document.getElementById('s1').innerHTML='<div class="card"><h2>1. الطاقة</h2><div class="row">'
+   +'<div><label>الجنس</label><select data-k="sex"><option'+(S.sex==='أنثى'?' selected':'')+'>أنثى</option><option'+(S.sex==='ذكر'?' selected':'')+'>ذكر</option></select></div>'
+   +'<div><label>العمر</label><input data-k="age" type="number" value="'+S.age+'"></div><div><label>الوزن (كجم)</label><input data-k="w" type="number" value="'+S.w+'"></div><div><label>الطول (سم)</label><input data-k="h" type="number" value="'+S.h+'"></div></div>'
+   +'<div class="row" style="margin-top:12px"><div style="min-width:280px"><label>المعادلة</label><select data-k="f">'+Object.keys(F).map(k=>'<option value="'+k+'"'+(S.f===k?' selected':'')+'>'+F[k][0]+'</option>').join('')+'</select></div>'
+   +'<div style="min-width:240px"><label>معامل النشاط</label><select data-k="pal">'+D.settings.activity.map(a=>'<option value="'+a[1]+'"'+(+S.pal===a[1]?' selected':'')+'>'+a[0]+' ('+a[1]+')</option>').join('')+'</select></div>'
+   +'<div><label>تأثير الهضم 10%</label><select data-k="eta"><option value="0"'+(!S.eta?' selected':'')+'>لا</option><option value="1"'+(S.eta?' selected':'')+'>نعم</option></select></div>'
+   +'<div style="min-width:220px"><label>الهدف</label><select data-k="goal">'+D.settings.goals.slice(0,5).map(a=>'<option value="'+a[1]+'"'+(+S.goal===a[1]?' selected':'')+'>'+a[0]+'</option>').join('')+'</select></div></div>'
+   +'<div class="row" style="margin-top:16px;align-items:flex-end"><div><label>الطاقة الكلية</label><span class="big">'+r0(E.get)+'</span><span style="color:var(--mut)"> سعرة</span></div>'
+   +'<div class="ex">الحرق الأساسي '+r0(E.b)+' × '+S.pal+' = '+r0(E.tdee)+(S.eta?' + هضم '+r0(E.eta):'')+' '+(S.goal<0?'− ':'+ ')+Math.abs(S.goal)+' = <b>'+r0(E.get)+'</b><br>المعادلة: '+F[S.f][0]+'</div></div>'
+   +'<div class="warnnote">نموذج: معادلة Harris-Benedict وتأثير الهضم إضافتان تحتاجان موافقة المالك.</div><div class="bar"><button class="btn" data-go="2">التالي: الماكروز ‹</button></div></div>';
+  // 2
+  const mrow=(k,l,c,div)=>'<tr><td><b style="color:'+c+'">'+l+'</b></td><td><input class="n" data-pc="'+k+'" type="number" value="'+S.pc[k]+'"> %</td><td>'+r0(T.k*S.pc[k]/100)+'</td><td><b>'+r0(T[k])+'</b> جم</td><td>'+r1(T[k]/S.w)+'</td></tr>';
+  const ps=S.pc.c+S.pc.p+S.pc.f;
+  document.getElementById('s2').innerHTML='<div class="card"><h2>2. توزيع الماكروز <span style="margin-inline-start:auto;font-size:14px">الطاقة '+r0(T.k)+' سعرة</span></h2><table><tr><th>الماكرو</th><th>النسبة</th><th>سعرات</th><th>جرامات</th><th>جم/كجم</th></tr>'
+   +mrow('c','● الكربوهيدرات','#c4661b')+mrow('p','◆ البروتين','var(--pr)')+mrow('f','✦ الدهون','#8a6c00')+'<tr class="tot"><td>المجموع</td><td>'+ps+'%</td><td colspan="3">'+(ps===100?'<span class="ad ok">✓ 100%</span>':'<span class="ad b">يجب أن يكون 100%</span>')+'</td></tr></table>'
+   +'<div class="bar"><button class="btn sec" data-go="1">› السابق</button><button class="btn" data-go="3">التالي: الجدول التركيبي ‹</button></div></div>';
+  // 3
+  const V=sumCn(S.cn);
+  document.getElementById('s3').innerHTML='<div class="grid2"><div class="card"><h2>3. الجدول التركيبي: كم حصة من كل مجموعة؟ <button class="btn sec" style="margin-inline-start:auto" data-act="suggest">✦ اقترح الحصص</button></h2>'
+   +'<table><tr><th>المجموعة</th><th>الحصص</th><th>سعرات</th><th>كربوهيدرات</th><th>بروتين</th><th>دهون</th></tr>'
+   +G.map((g,i)=>'<tr><td>'+g+'</td><td><input class="n" type="number" min="0" step="1" data-cn="'+i+'" value="'+S.cn[i]+'"></td><td>'+r0(S.cn[i]*EX[i][3])+'</td><td>'+S.cn[i]*EX[i][0]+'</td><td>'+S.cn[i]*EX[i][1]+'</td><td>'+S.cn[i]*EX[i][2]+'</td></tr>').join('')
+   +'<tr class="tot"><td>المجموع</td><td>'+S.cn.reduce((a,b)=>a+b,0)+'</td><td>'+r0(V.k)+'</td><td>'+r0(V.c)+'</td><td>'+r0(V.p)+'</td><td>'+r0(V.f)+'</td></tr>'
+   +'<tr><td>الهدف</td><td></td><td>'+r0(T.k)+'</td><td>'+r0(T.c)+'</td><td>'+r0(T.p)+'</td><td>'+r0(T.f)+'</td></tr>'
+   +'<tr class="tot"><td>نسبة الملاءمة</td><td></td><td>'+adq(V.k,T.k)+'</td><td>'+adq(V.c,T.c)+'</td><td>'+adq(V.p,T.p)+'</td><td>'+adq(V.f,T.f)+'</td></tr></table>'
+   +'<div class="ex" style="margin-top:8px">الملاءمة = المحسوب ÷ الهدف. أخضر 95–105%، كهرماني 90–110%، أحمر خارجها (نطاق النموذج، يعتمده المالك). قيمة كل حصة من جدول «زنها» (EX).</div>'
+   +'<div class="bar"><button class="btn sec" data-go="2">› السابق</button><button class="btn" data-go="4" data-act="dist0">التالي: التوزيع ‹</button></div></div>'
+   +'<div class="card side"><h2>الملخص</h2>'+pie(V)+'<div class="chips" style="justify-content:center"><span class="mc kc">🔥 '+r0(V.k)+' / '+r0(T.k)+'</span><span class="mc cb">● '+r0(V.c)+'</span><span class="mc pr">◆ '+r0(V.p)+'</span><span class="mc ft">✦ '+r0(V.f)+'</span></div></div></div>';
+  // 4
+  const colSum=g=>S.dist.reduce((a,m)=>a+m[g],0);
+  document.getElementById('s4').innerHTML='<div class="card"><h2>4. توزيع الحصص على الوجبات <button class="btn sec" style="margin-inline-start:auto" data-act="dist">↻ وزّع تلقائياً</button></h2>'
+   +'<table><tr><th>المجموعة</th>'+MEALS.map(m=>'<th>'+m[0]+'<br><small style="color:var(--mut)">'+m[2]+'</small></th>').join('')+'<th>المجموع</th><th>اليومي</th></tr>'
+   +G.map((g,i)=>S.cn[i]?'<tr><td>'+g+'</td>'+MEALS.map((m,k)=>'<td><input class="n" type="number" min="0" step="1" data-ds="'+k+','+i+'" value="'+S.dist[k][i]+'"></td>').join('')+'<td><b>'+colSum(i)+'</b></td><td>'+(colSum(i)===S.cn[i]?'<span class="ad ok">✓ '+S.cn[i]+'</span>':'<span class="ad b">'+S.cn[i]+'</span>')+'</td></tr>':'').join('')
+   +'<tr class="tot"><td>سعرات الوجبة</td>'+MEALS.map((m,k)=>'<td>'+r0(sumCn(S.dist[k]).k)+'</td>').join('')+'<td>'+r0(sumCn(S.cn).k)+'</td><td></td></tr></table>'
+   +'<div class="bar"><button class="btn sec" data-go="3">› السابق</button><button class="btn" data-go="5">التالي: قائمة الطعام ‹</button></div></div>';
+  // 5
+  const k=S.meal, m=MEALS[k], need=S.dist[k];
+  let body=''; need.forEach((n,g)=>{ if(!n)return; const fs=foodsOf(g,m[1]); const key=k+'_'+g; const sel=S.menu[key]||(fs[0]&&fs[0].n); S.menu[key]=sel; const f=fs.find(x=>x.n===sel)||fs[0]; const q=f?qty(f,n):{g:'',h:''};
+    body+='<tr><td><select data-mn="'+key+'">'+fs.map(x=>'<option'+(x.n===sel?' selected':'')+'>'+x.n+'</option>').join('')+'</select></td><td><b>'+q.g+'</b></td><td>'+q.h+'</td><td style="color:var(--mut)">'+n+' '+G[g]+'</td></tr>'; });
+  const mv=sumCn(need);
+  document.getElementById('s5').innerHTML='<div class="grid2"><div class="card"><h2>5. قائمة الطعام</h2><div class="mt">'+MEALS.map((x,i)=>'<span class="'+(i===k?'on':'')+'" data-ml="'+i+'">'+x[0]+'</span>').join('')+'</div>'
+   +'<div class="dish"><div class="pic">'+(['🍳','🍎','🍗','🥛','🥗'][k])+'</div><div style="flex:1"><h3>'+m[0]+' • '+m[2]+'</h3><table><tr><th>الصنف (من أطعمة «زنها»)</th><th>الوزن</th><th>المقياس المنزلي</th><th>يغطي</th></tr>'+body+'</table>'
+   +'<div class="chips"><span class="mc kc">🔥 '+r0(mv.k)+' سعرة</span><span class="mc cb">● '+r0(mv.c)+' جم</span><span class="mc pr">◆ '+r0(mv.p)+' جم</span><span class="mc ft">✦ '+r0(mv.f)+' جم</span></div></div></div>'
+   +'<div class="ex">كل سطر يغطي حصص مجموعته في هذه الوجبة: الوزن = عدد الحصص × جرامات الحصة، والمقياس المنزلي من بيانات الصنف. الأصناف مفلترة حسب صلاحيتها للوجبة.</div>'
+   +'<div class="bar"><button class="btn sec" data-go="4">› السابق</button></div></div>'
+   +'<div class="card side"><h2>اليوم</h2>'+pie(sumCn(S.cn))+'<div class="ex" style="text-align:center">'+MEALS.map((x,i)=>x[0]+': '+r0(sumCn(S.dist[i]).k)).join(' • ')+'</div></div></div>';
+}
+function pie(V){ const k=V.c*4+V.p*4+V.f*9||1, a=V.c*4/k*100, b=V.p*4/k*100, c=V.f*9/k*100;
+  return '<svg viewBox="0 0 42 42" width="170" height="170" style="display:block;margin:0 auto"><circle cx="21" cy="21" r="15.9" fill="none" stroke="#f0f2f6" stroke-width="7"/>'
+   +'<circle cx="21" cy="21" r="15.9" fill="none" stroke="#f2994a" stroke-width="7" stroke-dasharray="'+a+' '+(100-a)+'" stroke-dashoffset="25"/>'
+   +'<circle cx="21" cy="21" r="15.9" fill="none" stroke="#2f80ed" stroke-width="7" stroke-dasharray="'+b+' '+(100-b)+'" stroke-dashoffset="'+(25-a)+'"/>'
+   +'<circle cx="21" cy="21" r="15.9" fill="none" stroke="#e0b100" stroke-width="7" stroke-dasharray="'+c+' '+(100-c)+'" stroke-dashoffset="'+(25-a-b)+'"/>'
+   +'<text x="21" y="20" text-anchor="middle" font-size="4.6" font-weight="700" fill="#0b1440">'+r0(V.k)+'</text><text x="21" y="25.5" text-anchor="middle" font-size="3" fill="#5b6685">سعرة</text></svg>'
+   +'<div class="ex" style="text-align:center">كارب '+r0(a)+'% • بروتين '+r0(b)+'% • دهون '+r0(c)+'%</div>'; }
+document.addEventListener('click',e=>{ const t=e.target.closest('[data-go],[data-act],[data-ml]'); if(!t)return;
+  if(t.dataset.act==='suggest') suggest(); if(t.dataset.act==='dist'||(t.dataset.act==='dist0'&&!S.dist.some(m=>m.some(x=>x)))) autoDist();
+  if(t.dataset.ml!=null) S.meal=+t.dataset.ml; if(t.dataset.go) S.step=+t.dataset.go; render(); });
+document.addEventListener('change',e=>{ const t=e.target; if(t.dataset.k){ const k=t.dataset.k; S[k]=k==='sex'||k==='f'?t.value:k==='eta'?t.value==='1':+t.value; }
+  if(t.dataset.pc) S.pc[t.dataset.pc]=+t.value; if(t.dataset.cn) S.cn[+t.dataset.cn]=Math.max(0,Math.round(+t.value||0));
+  if(t.dataset.ds){ const q=t.dataset.ds.split(',').map(Number); S.dist[q[0]][q[1]]=Math.max(0,Math.round(+t.value||0)); }
+  if(t.dataset.mn) S.menu[t.dataset.mn]=t.value; render(); });
+window.PROTO={S,render,suggest,autoDist};
+render();
+</script></body></html>
