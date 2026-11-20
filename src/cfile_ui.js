@@ -48,7 +48,7 @@ function cfTabs(c) {
 }
 function cfSeg(c) {
   var g = cfGroup(S.tab); if (g[3].length < 2) return '';
-  return '<div class="cfseg" role="tablist" aria-label="أقسام ' + g[1] + '">' + g[3].map(function (k) {
+  return '<div class="cfseg" role="tablist" aria-label="أقسام ' + g[1] + '">' + g[3].filter(function (k) { return k !== 'pw' || S.tab === 'pw'; }).map(function (k) {      // 1.23: «نافذة الأخصائي» دُمجت في «توليد الخطة» فلا تظهر إلا حين تُفتح منه
     var on = S.tab === k; return '<button role="tab" aria-selected="' + on + '" class="' + (on ? 'on' : '') + '" data-a="tab" data-v="' + k + '">' + CF_L[k] + (k === 'ver' ? ' (' + S.versions.length + ')' : '') + cfNb(cfBadge(c, k)) + '</button>';
   }).join('') + '</div>';
 }

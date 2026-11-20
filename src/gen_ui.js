@@ -7,6 +7,9 @@ var GEN_STEPS = [['client', 'العميل'], ['rev', 'المراجعة والا�
 var GEN_WEEK = [['fixed', 'ثابت', 'اليوم نفسه كل أيام الأسبوع'], ['var', 'متغير', 'أيام مختلفة بالسعرات نفسها'], ['fast', 'صيام الاثنين والخميس', 'صيام سنّة يومي الاثنين والخميس، بالسعرات نفسها']];
 // أنماط يوم الصيام (قرار المالك): بالسعرات نفسها، والنسب الافتراضية قابلة للتعديل
 var GEN_FAST = [[1, 'فطور + وجبة خفيفة + سحور', [['الفطور', 0.45], ['وجبة خفيفة', 0.2], ['السحور', 0.35]]], [2, 'وجبة خفيفة + فطور + وجبة خفيفة + سحور', [['وجبة خفيفة', 0.1], ['الفطور', 0.4], ['وجبة خفيفة', 0.15], ['السحور', 0.35]]], [3, 'يحددها الأخصائي يدوياً', null]];
+// 1.23 المرحلة 8: شكل الأسبوع يُطبَّق على الخطة بعد التوليد أو التحويل (ثابت، أو صيام الاثنين والخميس بنمط المالك؛ النمط 3 يبدأ من النمط 1 ويوزّعه الأخصائي بشبكة النقل)
+function genFastPct(g) { var p = g.fastPat === 2 ? 2 : 1; return (g.fastPct && g.fastPct[p]) || E.FASTP[p].map(function (x) { return x[2]; }); }
+function genWeek(c) { var g = genOf(c); if (!c.plan || !c.plan.days || g.week === 'var') return; E.applyWeek(c.plan, g.week, g.fastPat === 2 ? 2 : 1, D, genFastPct(g)); if (g.week === 'fast') c.plan.fastPat = g.fastPat; }
 function genOf(c) { var g = c.gen || (c.gen = {}); if (!g.step) g.step = 2; if (!g.path) g.path = 'manual'; if (!g.week) g.week = 'var'; if (!g.fastPat) g.fastPat = 1; return g; }
 // قائمة الاستبعاد مع السبب: ما يستبعده المحرك فعلاً، وما عليه «بحذر» (تنبيه فقط)
 function genExcl(c) {
@@ -58,7 +61,7 @@ function genSetup(c, g) {
     + (c.kind === 'athlete' ? '' : '<div class="row">' + sel('meals', 'عدد الوجبات', [3, 4, 5, 6]) + '</div>')
     + '<h3>طريقة البناء</h3><div class="genopts">' + opt('path', 'manual', 'يدوي جديد', 'النظام يحسب الحصص وتوزيعها، وتعدّل أنت') + opt('path', 'ready', 'جاهز من البنك', 'خطة جاهزة تناسب السعرات، ويُستبدل المستبعد تلقائياً') + '</div>'
     + '<h3>شكل الأسبوع</h3><div class="genopts">' + GEN_WEEK.map(function (w) { return opt('week', w[0], w[1], w[2]); }).join('') + '</div>'
-    + (g.week === 'fast' ? '<div class="genfast"><h4>يوم الصيام</h4><div class="genopts">' + GEN_FAST.map(function (f) { return opt('fastPat', f[0], f[1], f[2] ? f[2].map(function (q) { return q[0] + ' ' + Math.round(q[1] * 100) + '%'; }).join(' • ') : 'توزيع تكتبه أنت'); }).join('') + '</div><p class="small">بالسعرات نفسها لباقي الأيام. النسب قابلة للتعديل.</p></div>' : '')
+    + (g.week === 'fast' ? '<div class="genfast"><h4>يوم الصيام</h4><div class="genopts">' + GEN_FAST.map(function (f) { return opt('fastPat', f[0], f[1], f[2] ? f[2].map(function (q) { return q[0] + ' ' + Math.round(q[1] * 100) + '%'; }).join(' • ') : 'توزيع تكتبه أنت'); }).join('') + '</div>' + (g.fastPat !== 3 ? '<div class="row genfp">' + E.FASTP[g.fastPat === 2 ? 2 : 1].map(function (x, i) { return '<div><label for="gen_fp' + i + '">' + x[0] + ' %</label><input id="gen_fp' + i + '" type="number" min="0" max="100" step="5" data-fp="' + i + '" value="' + Math.round(genFastPct(g)[i] * 100) + '"></div>'; }).join('') + '</div>' + (Math.abs(genFastPct(g).reduce(function (a, v) { return a + v; }, 0) - 1) > 0.001 ? '<p class="warn small">⚠ مجموع النسب ' + Math.round(genFastPct(g).reduce(function (a, v) { return a + v; }, 0) * 100) + '% (يُعاد تطبيعه إلى 100%).</p>' : '') : '<p class="small">يبدأ يوم الصيام بتوزيع النمط الأول، ثم توزّعه أنت بشبكة «انقل حصة».</p>') + '<p class="small">بالسعرات نفسها لباقي الأيام. النسب قابلة للتعديل.</p></div>' : '')
     + '<p class="genfoot"><button data-a="genStep" data-v="4">التالي: الخطة ›</button></p></div>';
 }
 // ---- 1.20 المرحلة 5: المسار اليدوي — حصص صحيحة قابلة للشرح، مؤشر علوي، لوحة المكتمل والناقص، وشبكة نقل الحصص بين الوجبات
@@ -147,7 +150,8 @@ function genSend(c, g) {
 }
 function genTab(c) {
   var g = genOf(c), body = g.step <= 2 ? genRev(c, g) : g.step === 3 ? genSetup(c, g) : g.step === 4 ? genPlanStep(c, g) : genSend(c, g);
-  return '<div class="gentab">' + genStepper(c, g) + body + '</div>';
+  var sent = c.hx && c.hx.planV ? '<div class="chkb st-ok gensent">📤 أُرسلت الخطة إلى «زنها» (v' + c.hx.planV + '). عدّلها في أي وقت ثم أرسلها إصداراً جديداً v' + (c.hx.planV + 1) + '؛ علامات «أكلت/بدّلت» عند العميل تبقى مع أصنافها. ' + (g.step < 4 ? '<button class="sm" data-a="genStep" data-v="4">عدّل الخطة المرسلة</button>' : '') + '</div>' : '';
+  return '<div class="gentab">' + sent + genStepper(c, g) + body + '</div>';
 }
 function genPage() {
   return '<div class="clpage genpage"><div class="hxtop"><h2>توليد الخطة</h2><span class="two"><button data-a="genNew" data-v="ex">＋ عميل جديد — الحصص</button> <button class="sec" data-a="genNew" data-v="ath">＋ عميل جديد — الجرامات</button></span></div>'
@@ -159,6 +163,7 @@ function genPage() {
 (function (f) { main0 = function () { if (S.view === 'gen') { $('main').innerHTML = genPage(); return; } return f.apply(this, arguments); }; })(main0);
 document.addEventListener('change', function (e) {
   var t = e.target, c = cur(); if (!c || !t.dataset) return;
+  if (t.dataset.fp != null) { var gq = genOf(c), pp = gq.fastPat === 2 ? 2 : 1, arr = genFastPct(gq).slice(); arr[+t.dataset.fp] = Math.max(0, Math.min(100, +t.value || 0)) / 100; gq.fastPct = gq.fastPct || {}; gq.fastPct[pp] = arr; save(); main(); return; }
   if (t.dataset.tm != null) { var tm = genTmap(), v0 = t.value.trim(); if (v0 && !D.foods.some(function (f) { return f.n === v0; })) { toast('اختر صنفاً من القائمة'); return; } if (v0) tm[t.dataset.tm] = v0; else delete tm[t.dataset.tm]; saveSettings(); main(); toast('حُفظ الربط'); return; }
   if (t.dataset.ge && c.plan) { var q = t.dataset.ge.split(',').map(Number); E.setLineE(c.plan, genOf(c).day || 0, q[0], q[1], Math.max(0, +t.value || 0), D); GENX.subs = null; save(); main(); return; }
   if (t.dataset.gc != null) { var G = genCounts(c), cn = G.cn.slice(); cn[+t.dataset.gc] = Math.max(0, Math.round(+t.value || 0)); c.baseCounts = cn; save(); main(); return; }
@@ -173,12 +178,12 @@ Object.assign(A, {
   genUnex: function (v) { var c = cur(); if (!c) return; c.excludedFoods = (c.excludedFoods || []).filter(function (n) { return n !== v; }); c.avoid = (c.avoid || []).filter(function (n) { return n !== v; }); genOf(c).rev = null; save(); main(); toast('أُرجع «' + v + '»'); },
   genEx: function (v) { var c = cur(); if (!c || !v) return; c.excludedFoods = c.excludedFoods || []; if (c.excludedFoods.indexOf(v) < 0) c.excludedFoods.push(v); genOf(c).rev = null; save(); main(); toast('استُبعد «' + v + '»'); },
   genAdd: function () { var i = $('#gen_add'), v = i && i.value.trim(); if (!v) return; if (!D.foods.some(function (f) { return f.n === v; })) { toast('اختر صنفاً من القائمة'); return; } A.genEx(v); },
-  genConv: function () { var c = cur(); if (!c || !c.plib || !c.plib.doc) return; c.plan = E.fromDoc(Object.assign({ id: c.plib.id }, c.plib.doc), ec(c), D, genTmap()); c.planSrc = ''; save(); main(); toast('حُوّلت الخطة' + (c.plan.replaced.length ? '، واستُبدل ' + c.plan.replaced.length + ' صنفاً لا يناسب العميل' : '')); },
+  genConv: function () { var c = cur(); if (!c || !c.plib || !c.plib.doc) return; c.plan = E.fromDoc(Object.assign({ id: c.plib.id }, c.plib.doc), ec(c), D, genTmap()); c.planSrc = ''; genWeek(c); save(); main(); toast('حُوّلت الخطة' + (c.plan.replaced.length ? '، واستُبدل ' + c.plan.replaced.length + ' صنفاً لا يناسب العميل' : '')); },
   genSubs: function (v) { GENX.subs = GENX.subs === v ? null : v; GENX.meals = null; main(); },
   genMeals: function (v) { GENX.meals = GENX.meals === +v ? null : +v; GENX.subs = null; main(); },
   genSubPick: function (v) { var c = cur(); if (!c || !c.plan) return; var q = v.split(',').map(Number), d = genOf(c).day || 0, s = c.plan.days[d].slots[q[0]], l = s.lines[q[1]], x = E.subs(l, s.type, c.plan, D, 12)[q[2]]; if (!x) return; E.applySub(c.plan, d, q[0], q[1], x, D); GENX.subs = null; save(); main(); toast('استُبدل: ' + x.text); },
   genMealPick: function (v) { var c = cur(); if (!c || !c.plan) return; var q = v.split(',').map(Number), d = genOf(c).day || 0, s = c.plan.days[d].slots[q[0]], m = E.mealMatch(ec(c), E.slotReq(s), s.type, D, 8)[q[1]]; if (!m) return; var r = E.placeMeal(c.plan, d, q[0], m, D); GENX.meals = null; save(); main(); toast('«' + m.n + '» (' + E.MATCH_AR[m.lvl] + ')' + (r.done ? '، وعُوّض ' + r.done + ' حصة في باقي اليوم' : '') + (r.left ? '؛ بقي ' + r.left + ' حصة بلا تعويض' : '')); },
   genReset: function () { var c = cur(); if (!c) return; delete c.baseCounts; save(); main(); toast('رجعت الحصص لاقتراح النظام'); },
   genMove: function () { var c = cur(); if (!c || !c.plan) return; var g = genOf(c), gi = +$('#gen_mg').value, f = +$('#gen_mf').value, t = +$('#gen_mt').value; if (f === t) { toast('اختر وجبتين مختلفتين'); return; } if (!E.moveEx(c.plan, g.day || 0, gi, f, t, D)) { toast('لا توجد حصة من هذه المجموعة في الوجبة المختارة'); return; } save(); main(); toast('نُقلت حصة'); },
-  genBuild: function () { var c = cur(); if (!c) return; var g = genOf(c); if (g.path === 'ready' && c.kind !== 'athlete') { S.tab = 'pw'; render(); return; } A.gen(); S.tab = 'gen'; g.step = 4; save(); render(); }
+  genBuild: function () { var c = cur(); if (!c) return; var g = genOf(c); if (g.path === 'ready' && c.kind !== 'athlete') { S.tab = 'pw'; render(); return; } A.gen(); if (c.plan && c.kind !== 'athlete') genWeek(c); S.tab = 'gen'; g.step = 4; save(); render(); }
 });

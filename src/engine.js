@@ -1039,5 +1039,28 @@ E.ctx = function (client, D) {
     return plan;
   };
   var PL_mk = function (m) { var k = 0, K = { S: 80, Lg: 100, Meat: 55, Mi: 90, V: 25, F: 60, Ft: 45, O: 60 }; Object.keys(m.g || {}).forEach(function (x) { k += (+m.g[x] || 0) * (K[x] || 0); }); return k; };
+  // ================================================ 1.23 المرحلة 8: شكل الأسبوع وصيام السنّة
+  E.fixWeek = function (plan, D) {                              // ثابت: اليوم الأول نفسه كل أيام الأسبوع (الأسماء كما هي)
+    var d0 = plan.days[0]; plan.days = plan.days.map(function (d, i) { if (!i) return d; var c = JSON.parse(JSON.stringify(d0)); c.day = d.day; c.name = d.name; return E.dayStats(c, plan.targets, D); }); plan.week = 'fixed'; return plan;
+  };
+  // صيام الاثنين والخميس (قرار المالك): بالسعرات نفسها؛ حصص اليوم تُوزَّع على وجبات الصيام بالنسب (أكبر باقٍ، أنصاف حصص) مع حفظ أصناف اليوم نفسها
+  E.FAST_DAYS = [1, 4];
+  E.FASTP = { 1: [['الفطور', 'L', 0.45], ['وجبة خفيفة', 'S', 0.2], ['السحور', 'D', 0.35]], 2: [['وجبة خفيفة', 'S', 0.1], ['الفطور', 'L', 0.4], ['وجبة خفيفة', 'S', 0.15], ['السحور', 'D', 0.35]] };
+  E.sunnahDay = function (plan, d, pat, D, pcts) {
+    var day = plan.days[d], P = (E.FASTP[pat] || E.FASTP[1]).map(function (x, i) { return [x[0], x[1], pcts && pcts[i] != null ? +pcts[i] : x[2]]; }), sum = P.reduce(function (a, x) { return a + x[2]; }, 0) || 1;
+    var src = []; day.slots.forEach(function (s) { s.lines.forEach(function (l) { if (!l.missing) src.push(JSON.parse(JSON.stringify(l))); }); });
+    var slots = P.map(function (x, i) { return { si: i, name: x[0], type: x[1], pct: x[2] / sum, kcal: 0, target: plan.targets ? plan.targets.kcal * x[2] / sum : 0, meal: '', lines: [], time: '', req: null, fast: 1 }; });
+    for (var g = 0; g < 13; g++) {
+      var ls = src.filter(function (l) { return l.g === g; }), tot = Math.round(ls.reduce(function (a, l) { return a + l.e; }, 0) * 2); if (!tot) continue;
+      var raw = slots.map(function (s) { return tot * s.pct; }), h = raw.map(Math.floor), left = tot - h.reduce(function (a, v) { return a + v; }, 0);
+      raw.map(function (v, i) { return [v - h[i], i]; }).sort(function (a, b) { return b[0] - a[0] || a[1] - b[1]; }).slice(0, left).forEach(function (x) { h[x[1]]++; });
+      var q = ls.map(function (l) { return { l: l, r: Math.round(l.e * 2) }; }), qi = 0;
+      h.forEach(function (need, si) { while (need > 0 && qi < q.length) { var take = Math.min(need, q[qi].r), l = q[qi].l, ex = slots[si].lines.filter(function (x) { return x.name === l.name; })[0], e = take / 2;
+        if (ex) ex.e += e; else slots[si].lines.push(Object.assign({}, l, { e: e })); need -= take; q[qi].r -= take; if (!q[qi].r) qi++; } });
+    }
+    var by = {}; D.foods.forEach(function (f) { by[f.n] = f; }); slots.forEach(function (s) { s.lines.forEach(function (l) { if (by[l.name]) l.text = E.lineText(by[l.name], l.e, plan.client && plan.client.alias); }); });
+    day.slots = slots; day.fast = 'sunnah'; day.fastPat = pat; E.syncCounts(day); return E.dayStats(day, plan.targets, D);
+  };
+  E.applyWeek = function (plan, mode, pat, D, pcts) { if (mode === 'fixed') E.fixWeek(plan, D); if (mode === 'fast') { E.FAST_DAYS.forEach(function (d) { if (plan.days[d]) E.sunnahDay(plan, d, pat === 2 ? 2 : 1, D, pcts); }); plan.week = 'fast'; plan.fastPat = pat; } return plan; };
   if (typeof module !== 'undefined' && module.exports) module.exports = E; else root.DPEngine = E;
 })(typeof window !== 'undefined' ? window : this);
