@@ -11,19 +11,42 @@
   // ================================================ 1.18 المرحلة 3: صيغ الحرق الأساسي باختيار الأخصائي (c.bmrF)
   // mifflin: Mifflin-St Jeor (1990) • katch: Katch-McArdle = 370 + 21.6 × الكتلة الخالية من الدهون • cunningham: Cunningham (1980) = 500 + 22 × الكتلة الخالية
   // الصيغتان الأخيرتان تحتاجان نسبة الدهون (c.bf %)؛ بدونها يُستعمل Mifflin مع ملاحظة صريحة
-  E.BMRF = [['mifflin', 'Mifflin-St Jeor'], ['katch', 'Katch-McArdle'], ['cunningham', 'Cunningham']];
+  // 1.26 (قرار المالك: «المعادلات الأكثر استعمالاً عالمياً مع تعليق متى تكون الأنسب»). كل المعاملات من مراجعها؛ للبالغين فقط.
+  // [المفتاح، الاسم، متى تُستعمل، المرجع]
+  E.BMRF = [
+    ['mifflin', 'Mifflin-St Jeor (1990)', 'الافتراضية: الأدق لأغلب البالغين، ومنهم أصحاب الوزن الزائد والسمنة (بالوزن الفعلي).', 'Mifflin 1990؛ Frankenfield 2005 (مراجعة الأكاديمية الأمريكية للتغذية)'],
+    ['hb84', 'Harris-Benedict المعدّلة (1984)', 'شائعة في المستشفيات والكتب؛ تميل إلى المبالغة مع السمنة، فتُستعمل للمقارنة أو حين يعتمدها فريق علاجي.', 'Roza & Shizgal 1984'],
+    ['hb19', 'Harris-Benedict الأصلية (1919)', 'المرجعية التاريخية؛ تبالغ أكثر من غيرها، فلا يُنصح بها إلا للمقارنة.', 'Harris & Benedict 1919'],
+    ['fao', 'FAO/WHO/UNU (1985)', 'بالوزن والعمر فقط: حين لا يُعرف الطول، وفي التقديرات العامة والإرشادات الدولية.', 'FAO/WHO/UNU 1985'],
+    ['schofield', 'Schofield (1985)', 'بالوزن والعمر (18–60 سنة): أساس توصيات منظمة الصحة؛ قد تبالغ في سكان المناطق الحارة.', 'Schofield 1985'],
+    ['owen', 'Owen (1986–1987)', 'بالوزن فقط: سريعة؛ تميل إلى التقليل، وأحياناً أدق للنساء الشابات.', 'Owen 1986 و1987'],
+    ['katch', 'Katch-McArdle', 'للرياضيين ومن تُعرف نسبة دهونه بدقة (تحتاج نسبة الدهون).', 'McArdle, Katch & Katch'],
+    ['cunningham', 'Cunningham (1980)', 'للرياضيين ذوي الكتلة العضلية العالية؛ تعطي قيماً أعلى (تحتاج نسبة الدهون).', 'Cunningham 1980']
+  ];
   E.bmrOf = function (c) {
-    var w = +c.weight || 0, h = +c.height || 0, a = +c.age || 0, bf = +c.bf > 0 && +c.bf < 70 ? +c.bf / 100 : null, f = c.bmrF || 'mifflin', note = '';
+    var w = +c.weight || 0, h = +c.height || 0, a = +c.age || 0, m = c.sex === 'ذكر', bf = +c.bf > 0 && +c.bf < 70 ? +c.bf / 100 : null, f = c.bmrF || 'mifflin', note = '';
+    if (!E.BMRF.some(function (x) { return x[0] === f; })) f = 'mifflin';
     if ((f === 'katch' || f === 'cunningham') && bf == null) { note = 'صيغة ' + (f === 'katch' ? 'Katch-McArdle' : 'Cunningham') + ' تحتاج نسبة الدهون: استُعملت Mifflin-St Jeor'; f = 'mifflin'; }
-    var ffm = bf == null ? null : w * (1 - bf), v = f === 'katch' ? 370 + 21.6 * ffm : f === 'cunningham' ? 500 + 22 * ffm : 10 * w + 6.25 * h - 5 * a + (c.sex === 'ذكر' ? 5 : -161);
-    return { v: v, f: f, label: E.BMRF.filter(function (x) { return x[0] === f; })[0][1], ffm: ffm, note: note };
+    if (f === 'schofield' && (a < 18 || a > 60)) { note = 'Schofield المعتمدة هنا للأعمار 18–60: استُعملت Mifflin-St Jeor'; f = 'mifflin'; }
+    if (a > 0 && a < 18) note = (note ? note + '. ' : '') + 'العمر أقل من 18: هذه المعادلات للبالغين، راجع منحنيات النمو';
+    var ffm = bf == null ? null : w * (1 - bf), v;
+    if (f === 'katch') v = 370 + 21.6 * ffm;
+    else if (f === 'cunningham') v = 500 + 22 * ffm;
+    else if (f === 'hb84') v = m ? 88.362 + 13.397 * w + 4.799 * h - 5.677 * a : 447.593 + 9.247 * w + 3.098 * h - 4.330 * a;
+    else if (f === 'hb19') v = m ? 66.473 + 13.7516 * w + 5.0033 * h - 6.755 * a : 655.0955 + 9.5634 * w + 1.8496 * h - 4.6756 * a;
+    else if (f === 'fao') v = m ? (a < 30 ? 15.3 * w + 679 : a <= 60 ? 11.6 * w + 879 : 13.5 * w + 487) : (a < 30 ? 14.7 * w + 496 : a <= 60 ? 8.7 * w + 829 : 10.5 * w + 596);
+    else if (f === 'schofield') v = m ? (a < 30 ? 15.057 * w + 692.2 : 11.472 * w + 873.1) : (a < 30 ? 14.818 * w + 486.6 : 8.126 * w + 845.6);
+    else if (f === 'owen') v = m ? 879 + 10.2 * w : 795 + 7.18 * w;
+    else v = 10 * w + 6.25 * h - 5 * a + (m ? 5 : -161);
+    var x = E.BMRF.filter(function (q) { return q[0] === f; })[0];
+    return { v: v, f: f, label: x[1], when: x[2], ref: x[3], ffm: ffm, note: note };
   };
   E.MODES = { auto_pf: 'تلقائي: بروتين g/kg + دهون %', auto_pc: 'تلقائي: بروتين g/kg + كربوهيدرات %', manual: 'يدوي (نسب مئوية)' };
   E.targets = function (c, D) {
     var S = D.settings, w = +c.weight, h = +c.height, a = +c.age, f = (D.settings.activity.filter(function (x) { return x[0] === c.activity; })[0] || [0, 1.2])[1];
     var goal = (S.goals.filter(function (x) { return x[0] === c.goal; })[0] || [0, 0])[1];
     var bmi = w > 0 && h > 0 ? w / Math.pow(h / 100, 2) : 0, ibw = (h - S.ibw_off) * (c.sex === 'أنثى' ? S.ibw_f : 1), adj = ibw + S.adj * (w - ibw);
-    var BM = E.bmrOf(c), bmr = BM.v, tdee = bmr * f, calc = tdee + goal;
+    var BM = E.bmrOf(c), bmr = BM.v, tdee = bmr * f * (c.eta ? 1.1 : 1), calc = tdee + goal;      // 1.26: تأثير الهضم 10% اختياري معطّل افتراضياً (معاملات النشاط تشمله)
     var kcal = +c.kcalManual > 0 ? +c.kcalManual : calc, mode = c.macroMode || 'auto_pf', pg = +c.proGkg || 1.8, cp = c.choPct == null ? 0.45 : +c.choPct, pp = c.proPct == null ? 0.25 : +c.proPct, fp = c.fatPct == null ? 0.3 : +c.fatPct;
     var floor = c.sex === 'ذكر' ? (S.min_kcal_m || 1500) : (S.min_kcal_f || S.min_kcal || 1200), floored = false;
     if (!(+c.kcalManual > 0) && c.kcalFloor !== false && kcal < floor && w > 0) { kcal = floor; floored = true; }     // حد أدنى آمن للسعرات (1200 للنساء، 1500 للرجال) في الحساب التلقائي
@@ -912,7 +935,7 @@ E.ctx = function (client, D) {
     return { st: st, days: days, ok: days.filter(function (d) { return d.st === 'ok'; }).length, warn: days.filter(function (d) { return d.st === 'warn'; }).length, block: days.filter(function (d) { return d.st === 'block'; }).length };
   };
   E.explain = function (T, c) {                                 // سطر يشرح الهدف: الصيغة، ومعامل النشاط، والهدف، والحد الأدنى
-    var r = Math.round, s = 'الحرق الأساسي ' + r(T.bmr) + ' (' + (T.bmrLabel || 'Mifflin-St Jeor') + (T.ffm ? '، كتلة خالية ' + T.ffm.toFixed(1) + ' كجم' : '') + ') × معامل النشاط ' + T.pal + ' = ' + r(T.tdee);
+    var r = Math.round, s = 'الحرق الأساسي ' + r(T.bmr) + ' بمعادلة ' + (T.bmrLabel || 'Mifflin-St Jeor') + (T.ffm ? '، كتلة خالية ' + T.ffm.toFixed(1) + ' كجم' : '') + ' × معامل النشاط ' + T.pal + ' = ' + r(T.tdee);
     if (T.manual) s += '؛ السعرات يدوية من الأخصائي: ' + r(T.kcal);
     else s += (T.goalAdj ? ' ' + (T.goalAdj > 0 ? '+ ' : '− ') + Math.abs(T.goalAdj) + ' للهدف = ' + r(T.calc) : '') + (T.floored ? '، رُفعت إلى الحد الأدنى الآمن ' + T.floor : '');
     return s + '. الحد الأدنى الآمن ' + T.floor + ' سعرة.';
@@ -1062,5 +1085,54 @@ E.ctx = function (client, D) {
     day.slots = slots; day.fast = 'sunnah'; day.fastPat = pat; E.syncCounts(day); return E.dayStats(day, plan.targets, D);
   };
   E.applyWeek = function (plan, mode, pat, D, pcts) { if (mode === 'fixed') E.fixWeek(plan, D); if (mode === 'fast') { E.FAST_DAYS.forEach(function (d) { if (plan.days[d]) E.sunnahDay(plan, d, pat === 2 ? 2 : 1, D, pcts); }); plan.week = 'fast'; plan.fastPat = pat; } return plan; };
+  // ================================================ 1.26 طريقة الحمية بالبدائل (قرار المالك: المسار الافتراضي الجديد)
+  // الجدول التركيبي = client.baseCounts (حصص صحيحة)، وجدول التوزيع = client.mealDist[وجبة][مجموعة] يتجاوز التوزيع الآلي متى طابق مجموعه الحصص.
+  E.ADEQ = { ok: [95, 105], warn: [90, 110] };               // نسبة الملاءمة الخضراء 95–105% للطاقة وكل ماكرو (قرار المالك)
+  E.adequacy = function (v, t) { var a = t > 0 ? v / t * 100 : 0; return { pct: a, st: a >= E.ADEQ.ok[0] && a <= E.ADEQ.ok[1] ? 'ok' : a >= E.ADEQ.warn[0] && a <= E.ADEQ.warn[1] ? 'warn' : 'block' }; };
+  E.mealDistOk = function (client, meals, D) {
+    var md = client.mealDist, cn = client.baseCounts; if (!md || !cn || cn.length !== 13) return null; var sl = E.slots(meals, D); if (md.length !== sl.length) return null;
+    for (var g = 0; g < 13; g++) { var s = 0; for (var k = 0; k < md.length; k++) { var v = +md[k][g] || 0; if (v && !sl[k].active) return null; s += v; } if (Math.abs(s - (+cn[g] || 0)) > 1e-9) return null; }
+    return md.map(function (r) { return r.map(Number); });
+  };
+  E.suggestDist = function (counts, meals, D) { return E.allocateDay(counts.map(Number), 0, meals, D, 1, true).perSlot; };      // اقتراح التوزيع (الأخصائي يعدّله)
+  // ---- بناء الخطة من الجدول التركيبي وجدول التوزيع مباشرة (طريقة البدائل): كل خانة (وجبة × مجموعة) = صنف من أطعمة «زنها» بحصصها بالضبط
+  E.EQV_ORDER = [2, 3, 4, 5, 1, 0, 6, 7, 8, 9, 10, 11, 12];   // البروتين أولاً ثم النشويات والألبان والخضار والفاكهة والدهون
+  var EQV_POP = null;
+  E.eqvCands = function (client, g, type, D, cx, e) {           // ترتيب حتمي: يحبه العميل، ثم الأنسب للوجبة، ثم الأشيع في بنك الوجبات، ثم ما تتسع حصته كاملة
+    cx = cx || E.ctx(client, D); var tIdx = { B: 0, L: 1, D: 2, S: 3 }[type];
+    if (!EQV_POP) { EQV_POP = {}; (D.bank || []).forEach(function (b) { (b.ing || []).forEach(function (ig) { EQV_POP[ig.n] = (EQV_POP[ig.n] || 0) + 1; }); }); }
+    var fit = function (f) { if (g >= 2 && g <= 5) { if (R_PROC.test(f.n)) return -3; if (type === 'B' || type === 'S') return R_BD.test(f.n) ? 2 : -1; return R_MEAT.test(f.n) ? 2 : R_BD.test(f.n) ? -1 : 0; } return 0; };
+    return D.foods.filter(function (f) { return f.on && f.g === g && cx.ok(f) && !cx.avoid[f.n] && (!f.m || tIdx == null || f.m[tIdx]); })
+      .map(function (f) { var whole = e ? (E.lim(f, type, D).max + 1e-9 >= e ? 1 : 0) : 0; return { f: f, t: cx.tierOf(f.n), s: (cx.love[f.n] ? 10 : 0) + 2 * fit(f) + Math.min(6, EQV_POP[f.n] || 0) + 1.5 * whole - 0.3 * ((f.cost || 2) - 1) }; })
+      .sort(function (a, b) { return (a.t === 2) - (b.t === 2) || b.s - a.s || (a.f.o || 0) - (b.f.o || 0); }).map(function (x) { return x.f; });
+  };
+  E.eqvPlan = function (client, D, opt) {
+    opt = opt || {}; var meals = +client.meals || 5, T = E.targets(client, D), cx = E.ctx(client, D), sl = E.slots(meals, D), al = client.alias;
+    var cn = (client.baseCounts || []).map(Number), dist = E.mealDistOk(client, meals, D) || E.suggestDist(cn, meals, D), picks = client.eqvPicks || {}, days = [], seed = opt.seed || 0;
+    for (var d = 0; d < 7; d++) {
+      var usedDay = {}, slots = [];
+      sl.forEach(function (s, si) {
+        var row = dist[si]; if (!s.active || !row || !row.some(function (x) { return x > 0; })) return; var lines = [];
+        E.EQV_ORDER.forEach(function (g) {
+          var e = +row[g] || 0; if (!(e > 0)) return; var cands = E.eqvCands(client, g, s.type, D, cx, e), key = si + '_' + g;
+          if (!cands.length) { lines.push({ g: g, name: '', e: e, text: e + ' حصة ' + D.groups[g] + ' (لا صنف مناسب)', missing: true, tier: 0, bank: false }); return; }
+          var pick = picks[key] && cands.filter(function (f) { return f.n === picks[key]; })[0];
+          if (!pick) { var fresh = cands.filter(function (f) { return !usedDay[f.n]; }), pool = (fresh.length ? fresh : cands).slice(0, 4); pick = pool[(d + si + g + seed) % pool.length]; }
+          var left = e, f = pick, guard = 0;
+          while (left > 0 && f && guard++ < 4) {
+            var mx = Math.max(1, Math.floor(E.lim(f, s.type, D).max + 1e-9)), take = Math.min(left, mx);
+            lines.push({ g: g, name: f.n, e: take, text: E.lineText(f, take, al), tier: cx.tierOf(f.n), bank: false, eqv: 1 }); usedDay[f.n] = 1; left -= take;
+            f = cands.filter(function (x) { return !usedDay[x.n]; })[0] || pick;
+          }
+        });
+        slots.push({ si: s.i, name: s.name, type: s.type, pct: s.pct, kcal: Math.round(T.kcal * s.pct), target: row.slice(), meal: '', lines: lines, time: D.times ? D.times[s.i] : '' });
+      });
+      var dy = { day: d, name: D.days[d], solver: { counts: cn.slice(), manual: true }, counts: cn.slice(), short: [], slots: slots, eqv: true };
+      E.syncCounts(dy); days.push(E.dayStats(dy, T, D));
+    }
+    var plan = { client: client, targets: T, days: days, meals: meals, version: 1, generated: new Date().toISOString(), method: 'eqv', eqv: { dist: dist.map(function (r) { return r.slice(); }), counts: cn.slice() },
+      base: { counts: cn.slice(), manual: true, auto: E.baseSuggestion(client, D).counts }, phr: E.pickPhrases(D.phrases || [], D.tips || [], 9, seed) };
+    plan.quality = E.planQuality(plan, D); return plan;
+  };
   if (typeof module !== 'undefined' && module.exports) module.exports = E; else root.DPEngine = E;
 })(typeof window !== 'undefined' ? window : this);

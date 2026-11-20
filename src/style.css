@@ -511,3 +511,11 @@ header .hdast{display:none!important}
 .gdv{font-size:12px;font-variant-numeric:tabular-nums;opacity:.85}.gml .lv-A,.gml .lv-B{border-inline-start:3px solid #0f9f73}.gml .lv-C{border-inline-start:3px solid #d08a00}.gml .lv-D{border-inline-start:3px solid #c62f35;opacity:.7}
 /* 1.22 خريطة النص إلى الأصناف */
 .gtm{list-style:none;padding:0;display:grid;gap:4px}.gtm li{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:4px 8px;border-radius:8px;background:rgba(11,20,64,.03)}.gtm input{min-width:220px}.gtm-none{border-inline-start:3px solid #c62f35}.gtm-rule{border-inline-start:3px solid #d08a00}.gtm-manual{border-inline-start:3px solid #0f9f73}
+/* 1.26 طريقة الحمية بالبدائل */
+.eqsteps{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}.eqsteps i{font-style:normal;display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;border:1.5px solid currentColor;font-size:11px}
+.eqsteps .on{border-color:#0f9f73!important;box-shadow:0 0 0 2px rgba(15,159,115,.2)}.eqsteps .done i{background:#0f9f73;color:#fff;border-color:#0f9f73}
+.eqwhen{display:block;max-width:340px;color:#55607f;margin-top:4px;line-height:1.5}.eqbig{font-size:15px}.eqbig b{font-size:30px}
+.ad{display:inline-block;font-weight:700;padding:1px 9px;border-radius:99px;font-size:13px}.ad.st-ok{background:#e6f8f1;color:#0f8f6b}.ad.st-warn{background:#fff3e0;color:#b25e00}.ad.st-block{background:#fdecec;color:#c62f35}
+.eqsum td{font-weight:700;background:rgba(11,20,64,.03)}.eqmeals{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 10px}.eqmeals .on{border-color:#0f9f73!important;color:#0f9f73}
+.eqdish{border:1px solid rgba(11,20,64,.12);border-radius:12px;padding:10px}.eqdish select{max-width:260px}
+.mf{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.mc{font-size:12.5px;font-weight:700;padding:3px 9px;border-radius:99px}.mc.kc{background:#efedfb;color:#6d5bd0}.mc.pr{background:#e8f1fd;color:#2f80ed}.mc.cb{background:#fdf0e5;color:#c4661b}.mc.ft{background:#fdf6d9;color:#8a6c00}
