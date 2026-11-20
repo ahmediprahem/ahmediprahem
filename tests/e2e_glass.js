@@ -51,7 +51,7 @@ const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html'));
   await mp.click('#tabbar [data-v="clients"]'); assert(await vis('#lst', mp)); assert(await vis('#tabbar button.on[data-v="clients"]', mp));
   await mp.evaluate(() => DPApp.A.new('ex')); assert.strictEqual(await mp.evaluate(() => document.body.classList.contains('menu')), false); assert(await vis('[data-f="name"]', mp)); assert(await sw() <= 1);
   await mp.click('#tabbar [data-v="more"]'); await mp.waitForSelector('.morepage'); assert(await vis('#tabbar button.on[data-v="more"]', mp)); assert(await sw() <= 1); await mp.click('.morepage [data-a="nav"][data-v="settings"]'); await mp.waitForSelector('.tabs [data-a="setTab"]'); assert(await sw() <= 1);
-  await mp.click('#tabbar [data-v="library"]'); await mp.waitForSelector('.bank'); assert(await sw() <= 1); await mp.click('#tabbar [data-v="home"]'); assert(await vis('.ghome', mp));
+  await mp.click('#tabbar [data-v="more"]'); await mp.click('.morepage [data-v="library"]'); await mp.waitForSelector('.bank'); assert(await sw() <= 1); await mp.click('#tabbar [data-v="home"]'); assert(await vis('.ghome', mp));
   ok('الجوال: «العملاء» يفتح درجاً بالعملاء والتنقل، واختيار عميل/عميل جديد يغلقه، والإعدادات ومحرر الحصص والرئيسية من الشريط السفلي بلا تمرير أفقي');
   assert.deepStrictEqual(errs, [], errs.join(' | ')); ok('لا أخطاء في وحدة التحكم'); console.log('\nنجح', n, 'اختبارات الثيم الزجاجي والتخطيط الجديد'); await b.close();
 })().catch(e => { console.log('✘', String(e).slice(0, 1200)); console.log('أخطاء:', JSON.stringify(errs).slice(0, 400)); process.exit(1); });

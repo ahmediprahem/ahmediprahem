@@ -40,13 +40,22 @@ function cfHead(c) {
     + '<details class="tbm cmore"><summary class="sec sm" aria-label="المزيد من إجراءات العميل" title="المزيد">' + IC('more') + '</summary><div class="tbp">'
     + '<button data-a="tab" data-v="link">' + IC('phone') + ' إدارة ربط «زنها»</button><button class="r" data-a="del">' + IC('trash') + ' حذف العميل</button></div></details></div></div>';
 }
+function cfMob() { try { return matchMedia('(max-width:900px)').matches && isGlass(); } catch (e) { return false; } }
+// 1.25 الجوال (الاجتماع 04): طبقة تنقل واحدة — شريط أفقي قابل للتمرير يجمع المجموعات وأقسامها، والحالي في المنتصف
+function cfFlat(c) {
+  return '<div class="tabs ctabs cftabs cfflat" role="tablist" aria-label="أقسام ملف العميل">' + CF_G.map(function (g, gi) {
+    return g[3].filter(function (k) { return k !== 'pw' || S.tab === 'pw'; }).map(function (k, i) { var on = S.tab === k, lbl = g[3].length < 2 ? g[1] : CF_L[k]; return '<button role="tab" aria-selected="' + on + '" class="' + (on ? 'on' : '') + (i === 0 && gi ? ' gsep' : '') + '" data-a="tab" data-v="' + k + '" data-g="' + g[0] + '">' + (i === 0 ? IC(g[2]) : '') + '<span>' + lbl + '</span>' + cfNb(cfBadge(c, k)) + '</button>'; }).join('');
+  }).join('') + '</div>';
+}
 function cfTabs(c) {
+  if (cfMob()) return cfFlat(c);
   var g0 = cfGroup(S.tab);
   return '<div class="tabs ctabs cftabs" role="tablist" aria-label="أقسام ملف العميل">' + CF_G.map(function (g) {
     var on = g === g0; return '<button role="tab" aria-selected="' + on + '" class="' + (on ? 'on' : '') + '" data-a="tab" data-v="' + g[3][0] + '" data-g="' + g[0] + '">' + IC(g[2]) + '<span>' + g[1] + '</span>' + cfNb(cfGBadge(c, g)) + '</button>';
   }).join('') + '</div>';
 }
 function cfSeg(c) {
+  if (cfMob()) return '';
   var g = cfGroup(S.tab); if (g[3].length < 2) return '';
   return '<div class="cfseg" role="tablist" aria-label="أقسام ' + g[1] + '">' + g[3].filter(function (k) { return k !== 'pw' || S.tab === 'pw'; }).map(function (k) {      // 1.23: «نافذة الأخصائي» دُمجت في «توليد الخطة» فلا تظهر إلا حين تُفتح منه
     var on = S.tab === k; return '<button role="tab" aria-selected="' + on + '" class="' + (on ? 'on' : '') + '" data-a="tab" data-v="' + k + '">' + CF_L[k] + (k === 'ver' ? ' (' + S.versions.length + ')' : '') + cfNb(cfBadge(c, k)) + '</button>';
@@ -100,3 +109,4 @@ Object.assign(A, {
 })(A.tab);
 (function (f) { main0 = function () { var r = f.apply(this, arguments); if (S.view === 'client' && cur()) cfCenter(); return r; }; })(main0);
 document.addEventListener('input', function (e) { var t = e.target; if (t && t.dataset && t.dataset.f === 'name') { var n = $('main .cfname'), a = $('main .cfhead .cav'); if (n) n.textContent = t.value.trim() || 'عميل بلا اسم'; if (a) a.textContent = initial(t.value); } });
+try { matchMedia('(max-width:900px)').addEventListener('change', function () { if (S.view === 'client' && cur()) main(); }); } catch (e) { }      // 1.25: عبور حد الجوال يعيد رسم ملف العميل بالتنقل المناسب

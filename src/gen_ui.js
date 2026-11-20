@@ -31,7 +31,8 @@ function genExcl(c) {
   return out;
 }
 function genStepper(c, g) {
-  return '<ol class="gensteps" aria-label="خطوات توليد الخطة">' + GEN_STEPS.map(function (s, i) {
+  var cs = GEN_STEPS[g.step - 1], mob = '<nav class="genstepm" aria-label="خطوات توليد الخطة"><button class="sec" data-a="genStep" data-v="' + (g.step - 1) + '"' + (g.step <= 2 ? ' disabled' : '') + ' aria-label="الخطوة السابقة">›</button><span><b>' + g.step + ' من ' + GEN_STEPS.length + '</b> • ' + cs[1] + '</span><button class="sec" data-a="genStep" data-v="' + (g.step + 1) + '"' + (g.step >= 5 ? ' disabled' : '') + ' aria-label="الخطوة التالية">‹</button></nav>';      // 1.25: شريط خطوات مضغوط للجوال
+  return mob + '<ol class="gensteps" aria-label="خطوات توليد الخطة">' + GEN_STEPS.map(function (s, i) {
     var n = i + 1, st = n < g.step ? 'done' : n === g.step ? 'on' : 'next';
     return '<li class="gs-' + st + '"><button class="sec sm" data-a="genStep" data-v="' + n + '"' + (n === 1 ? ' disabled' : '') + (n === g.step ? ' aria-current="step"' : '') + '><i>' + (st === 'done' ? '✓' : n) + '</i> ' + s[1] + '</button></li>';
   }).join('') + '</ol>';
@@ -187,6 +188,8 @@ function genPage() {
       return '<button class="cl" data-a="genPick" data-v="' + esc(c.code) + '"><span class="cav">' + esc(initial(c.name)) + '</span><b>' + esc(c.name || '(بلا اسم)') + '</b><small>' + esc(c.code) + (c.kind === 'athlete' ? ' • جرامات' : '') + (planOf(c).has ? ' • لديه خطة' : '') + '</small></button>';
     }).join('') + '</div></div>';
 }
+// 1.25: عميل جديد من «توليد الخطة» — زر ثابت يعيده إلى التوليد بعد إدخال بياناته (الاجتماع 04)
+(function (f) { clientTab = function (c) { return f.apply(this, arguments) + (S.genBack && S.genBack === c.code ? '<div class="genback"><button data-a="genGo">تابع إلى توليد الخطة ›</button></div>' : ''); }; })(clientTab);
 (function (f) { main0 = function () { if (S.view === 'gen') { $('main').innerHTML = genPage(); return; } return f.apply(this, arguments); }; })(main0);
 document.addEventListener('change', function (e) {
   var t = e.target, c = cur(); if (!c || !t.dataset) return;
@@ -199,7 +202,8 @@ document.addEventListener('change', function (e) {
 Object.assign(A, {
   genTab: function () { document.body.classList.remove('menu'); S.view = 'gen'; S.cur = null; render(); window.scrollTo(0, 0); },
   genPick: function (v) { return A.pick(v).then(function () { S.tab = 'gen'; render(); }); },
-  genNew: function (v) { A.new(v === 'ath' ? 'ath' : 'ex'); S.tab = 'client'; render(); toast('أكمل بيانات العميل، ثم افتح «توليد» من مجموعة «الخطة»'); },
+  genNew: function (v) { A.new(v === 'ath' ? 'ath' : 'ex'); S.genBack = S.cur; S.tab = 'client'; render(); toast('أكمل بيانات العميل، ثم «تابع إلى توليد الخطة»'); },
+  genGo: function () { var c = cur(); if (!c) return; if (!c.name || !c.sex) { toast('اكتب الاسم وحدّد الجنس أولاً'); return; } S.genBack = null; S.tab = 'gen'; save(); render(); window.scrollTo(0, 0); },
   genStep: function (v) { var c = cur(); if (!c) return; genOf(c).step = Math.max(2, Math.min(5, +v)); save(); main(); window.scrollTo(0, 0); },
   genRevOk: function () { var c = cur(); if (!c) return; var g = genOf(c); g.rev = Date.now(); g.step = 3; save(); main(); toast('اعتُمدت المراجعة'); },
   genUnex: function (v) { var c = cur(); if (!c) return; c.excludedFoods = (c.excludedFoods || []).filter(function (n) { return n !== v; }); c.avoid = (c.avoid || []).filter(function (n) { return n !== v; }); genOf(c).rev = null; save(); main(); toast('أُرجع «' + v + '»'); },

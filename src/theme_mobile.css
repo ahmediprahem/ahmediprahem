@@ -1,0 +1,72 @@
+/* ===== 1.25 واجهة الجوال (الاجتماع 04 وقرارات المالك). كل القواعد داخل حد 900px فالحاسوب لا يتغير، والطباعة لا تتأثر. ===== */
+/* ج1: لا تمرير أفقي — اختيارات الإعداد كانت أزرار راديو مطلقة الموضع بعرض الشاشة */
+.genopt{position:relative}
+.genopt input{position:absolute;inset-inline-start:0;top:0;width:1px!important;height:1px!important;margin:0;opacity:0;pointer-events:none}
+@media screen and (max-width:900px){
+  .genpage .hxtop{flex-wrap:wrap;gap:8px}
+  .genpage .hxtop .two{display:flex;flex-wrap:wrap;gap:8px;width:100%}
+  .genpage .hxtop .two button{flex:1 1 140px;min-width:0;white-space:normal}
+  main,.cfbody,.gentab,.ucard{min-width:0;max-width:100%}
+  .gentab .row>div{min-width:0}
+  .gentbl{display:block;overflow-x:auto;max-width:100%}
+}
+/* زر العودة إلى التوليد بعد بيانات عميل جديد: ثابت أسفل الشاشة */
+.genback{position:sticky;bottom:12px;z-index:30;display:flex;justify-content:center;margin:10px 0;order:99}
+.genback button{min-height:48px;padding:0 22px;border-radius:24px;font-weight:700;box-shadow:0 6px 20px rgba(11,20,64,.18)}
+@media screen and (max-width:900px){.genback{bottom:calc(76px + env(safe-area-inset-bottom,0px))}}
+/* ج3: ملف العميل على الجوال — رأس مضغوط، وطبقة تبويب واحدة، وخطوات مضغوطة، و«التالي» ثابت */
+.genstepm{display:none}
+@media screen and (max-width:900px){
+  .cfhead{flex-wrap:nowrap;gap:8px;padding:8px 10px;margin-bottom:8px}
+  .cfhead .cav{width:36px;height:36px;font-size:15px}
+  .cfhead .cfid{min-width:0;flex:1 1 auto}.cfhead .cfname{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .cfhead .cfbadges{display:none}
+  .cfhead .cfact{gap:6px;flex:none}.cfhead .cfact>button>span{display:none}
+  .cfhead .cfact>button{min-width:44px;min-height:44px;padding:0;display:inline-grid;place-items:center}
+  html[data-theme] .tabs.cftabs.cfflat{width:100%;gap:4px;margin:0 0 10px;padding-bottom:2px}
+  html[data-theme] .tabs.cftabs.cfflat>button{flex:0 0 auto!important;min-width:auto!important;flex-direction:row!important;gap:6px;min-height:44px;padding:6px 14px!important;font-size:14px!important;line-height:1.3}
+  html[data-theme] .tabs.cftabs.cfflat>button span{white-space:nowrap!important}
+  html[data-theme] .toast{bottom:calc(84px + env(safe-area-inset-bottom,0px))!important;left:50%!important;right:auto!important;transform:translateX(-50%);max-width:calc(100vw - 32px);text-align:center}
+  .cfflat>button.gsep{margin-inline-start:10px}
+  .gentab .gensteps{display:none}
+  .genstepm{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 10px;padding:4px;border-radius:12px;border:1px solid rgba(11,20,64,.12);background:#fff}
+  .genstepm button{min-width:44px;min-height:44px;font-size:22px;line-height:1;padding:0}
+  .genstepm span{flex:1;text-align:center;font-size:15px}
+  .genfoot{position:sticky;bottom:calc(72px + env(safe-area-inset-bottom,0px));z-index:20;margin:12px -4px 0;padding:8px;border-radius:12px;background:rgba(255,255,255,.96);box-shadow:0 -2px 12px rgba(11,20,64,.08)}
+  .genfoot button{min-height:48px;width:100%}
+}
+html:not([data-tone="light"]) .genstepm,html:not([data-tone="light"]) .genfoot{background:var(--lpanel,#1b2550)}
+/* ج4: صفحة الخطة على الجوال — شريط أدوات بسطر واحد، وترويسة الصفحة المطبوعة مختصرة على الشاشة فقط */
+@media screen and (max-width:900px){
+  html[data-theme] .toast{top:calc(66px + env(safe-area-inset-top,0px))!important;bottom:auto!important;z-index:60}
+  .pbar{display:flex;flex-wrap:nowrap;align-items:center;gap:6px}
+  .pbar .tbl{display:none}
+  .pbar>button,.pbar summary,.pbar .tbsplit>button{min-height:44px;min-width:44px;font-size:14px;padding:0 12px}
+  .pbar .tbsplit{display:inline-flex}
+  .pbar .tbx{flex:1 1 auto}.pbar .tbx>summary{width:100%;justify-content:center}
+  main .pg .phd .br{display:none}
+  main .pg .phd{padding:6px 0;margin:0 0 6px}
+  main .pg .phd h1{font-size:22px;margin:0}
+  main .pg .phd .ph{display:none}
+  .pnav{position:sticky;top:0;z-index:15;background:inherit}
+}
+/* ج5: اللمس والخط على الجوال — أهداف 44px وخط 14px على الأقل في الشاشات الأساسية */
+@media screen and (max-width:900px){
+  .pbar summary{display:inline-flex;align-items:center;justify-content:center}
+  html[data-theme] main button,html[data-theme] main summary,html[data-theme] main select,html[data-theme] main input:not([type=checkbox]):not([type=radio]),html[data-theme] main .btn,html[data-theme] #hd button,html[data-theme] #hud button{min-height:44px!important}
+  html[data-theme] main button,html[data-theme] main summary,html[data-theme] #hud button{min-width:44px!important}
+  html[data-theme] main button.link{padding:0 8px}
+  html[data-theme] main input[type=checkbox]{width:22px!important;height:22px!important;min-width:22px!important;min-height:22px}
+  html[data-theme] main :is(.small,small,label,button,summary,select,input,.gxk,.gdv,.tag,em,i,.ghc i,.ghc em,.hudt,.huddy,.hudsum,.cfid small,th,td,.needb,.srcb,.warn,.ok,.err,.tipb,.pg .sub){font-size:max(14px,1em)!important}
+  html[data-theme] main .pg :is(h4,p,li){font-size:max(14px,1em)!important}
+  html[data-theme] #hud :is(.hudt,.huddy,.hudsum,span,small){font-size:14px!important}
+}
+/* ج4 (تكملة): سطر الفحص مختصر في سطر واحد ويتمدد باللمس، وزر اسم اليوم أيقونة أعلى الصفحة */
+@media screen and (max-width:900px){
+  main .pg{position:relative}
+  main .pg>p.noprint{position:absolute;top:6px;inset-inline-end:6px;margin:0;z-index:2}
+  main .pg .tbl{display:none}
+  .pchk{cursor:pointer;padding:6px 10px}
+  .pchk:not(.open) :is(ul,.small,.srcs){display:none}
+  .pchk:not(.open)::after{content:' ▾';opacity:.7}
+}

@@ -6,7 +6,8 @@ var IC = function (n) { return window.HIcon ? HIcon.svg(n) : ''; };
 function railBtn(a, icon, label, on, badge) { return '<button class="sec sidebtn' + (on ? ' on' : '') + '" data-a="' + a + '" title="' + label + '"' + (on ? ' aria-current="page"' : '') + '>' + IC(icon) + '<span>' + label + '</span>' + (badge ? '<em class="hxnb"></em>' : '') + '</button>'; }
 function navIs() {                                               // أي قسم من الخمسة نشط الآن
   var v = S.view, c = v === 'client';
-  return { today: c && !S.cur, clients: v === 'clients' || (c && !!S.cur), chat: v === 'chat' || v === 'hx', lib: v === 'bank' || v === 'ready' || v === 'lib' || v === 'feed', admin: v === 'appts' || v === 'subs' || v === 'settings' || v === 'users' || v === 'more' };
+  var gen = v === 'gen' || (c && !!S.cur && S.tab === 'gen');      // 1.25: «توليد الخطة» في الشريط السفلي (قرار المالك)
+  return { today: c && !S.cur, gen: gen, clients: !gen && (v === 'clients' || (c && !!S.cur)), chat: v === 'chat' || v === 'hx', lib: v === 'bank' || v === 'ready' || v === 'lib' || v === 'feed', admin: v === 'appts' || v === 'subs' || v === 'settings' || v === 'users' || v === 'more' };
 }
 function navCounts() {                                           // أعداد ما ينتظر الأخصائي (للشارات ولملخص «اليوم»)
   var st = (typeof HX !== 'undefined' && HX && HX.st) || null, rq = st && st.reqs ? Object.keys(st.reqs).map(function (k) { return st.reqs[k]; }) : [];
@@ -33,7 +34,7 @@ function glassSide() {
 function tabbar() {                                                // شريط سفلي للجوال (يظهر بالـ CSS على الشاشات الصغيرة في الثيم الزجاجي فقط)
   var t = $('#tabbar'); if (!t) { t = document.createElement('nav'); t.id = 'tabbar'; t.setAttribute('aria-label', 'التنقل السريع'); document.body.appendChild(t); }
   var n = navIs(), it = function (a, icon, label, on, badge) { return '<button data-a="nav" data-v="' + a + '" class="' + (on ? 'on' : '') + '"' + (on ? ' aria-current="page"' : '') + '>' + IC(icon) + '<span>' + label + '</span>' + (badge ? '<em class="hxnb"></em>' : '') + '</button>'; };
-  t.innerHTML = it('home', 'sunrise', 'اليوم', n.today) + it('clients', 'users', 'العملاء', n.clients) + it('zchat', 'message', 'شات زنها', n.chat, 1) + it('library', 'book', 'المكتبة', n.lib) + it('more', 'more', 'المزيد', n.admin);
+  t.innerHTML = it('home', 'sunrise', 'اليوم', n.today) + it('clients', 'users', 'العملاء', n.clients) + it('genTab', 'sparkles', 'توليد الخطة', n.gen) + it('zchat', 'message', 'شات زنها', n.chat, 1) + it('more', 'more', 'المزيد', n.admin || n.lib);      // 1.25: «المكتبة» انتقلت إلى «المزيد» (قرار المالك)
 }
 function firstName() { return String(CFG.userLabel || '').replace(/^المدير:\s*/, '').trim(); }
 function bakAge() { var t = 0; try { t = +localStorage.getItem('hissa_lastbak') || 0; } catch (e) { } return t ? Math.floor((Date.now() - t) / 864e5) : -1; }
@@ -77,7 +78,7 @@ function navRow(a, v, icon, t, d, badge) { return '<button class="mrow" data-a="
 function morePage() {
   var n = navCounts(), left = CFG.exp ? Math.ceil((CFG.exp * 1000 - Date.now()) / 86400000) : null;
   return '<div class="morepage"><h2>المزيد</h2><p class="small">' + esc(CFG.userLabel || '') + (left !== null ? ' • ينتهي التفعيل بعد ' + left + ' يوم' : '') + '</p>'
-    + '<div class="mrows">' + navRow('genTab', '', 'sparkles', 'توليد الخطة', 'مراجعة العميل والاستبعاد، ثم الإعداد والخطة') + navRow('appts', '', 'calendar', 'المواعيد', 'مواعيد اليوم والأسبوع والمتابعات', n.appt) + navRow('subs', '', 'card', 'الاشتراكات', 'المتبقي لكل عميل والمدفوعات والتمديد', n.subs) + navRow('nav', 'settings', 'settings', 'الإعدادات', 'البيانات الغذائية وزنها والمظهر والاستبيانات')
+    + '<div class="mrows">' + navRow('nav', 'library', 'book', 'المكتبة', 'بنك الوجبات والخطط الجاهزة والتثقيف') + navRow('appts', '', 'calendar', 'المواعيد', 'مواعيد اليوم والأسبوع والمتابعات', n.appt) + navRow('subs', '', 'card', 'الاشتراكات', 'المتبقي لكل عميل والمدفوعات والتمديد', n.subs) + navRow('nav', 'settings', 'settings', 'الإعدادات', 'البيانات الغذائية وزنها والمظهر والاستبيانات')
     + navRow('setTools', '', 'tool', 'النسخ الاحتياطي والأدوات', 'نسخة احتياطية واسترجاع واستيراد عميل' + (S.mode === 'admin' ? ' وأدوات الإدارة' : '')) + navRow('dtToggle', '', 'bot', 'المساعد', 'اطلب تعديل الخطة بالعربية واعتمد قبل التنفيذ') + '</div></div>';
 }
 // ---- «النسخ الاحتياطي والأدوات» داخل الإعدادات: ما كان أسفل القائمة الجانبية، بنفس الإجراءات ونفس شروط الظهور (أدوات الإدارة للمدير فقط)
@@ -109,7 +110,7 @@ function secInject() {
     return f.apply(this, arguments);
   };
 })(main0);
-(function (f) { main = function () { var r = f.apply(this, arguments); try { secInject(); } catch (e) { } return r; }; })(main);
+(function (f) { main = function () { var r = f.apply(this, arguments); try { secInject(); } catch (e) { } try { if (isGlass() && $('#tabbar')) tabbar(); } catch (e) { } return r; }; })(main);      // 1.25: تمييز الشريط السفلي يتبع القسم الحالي (مثل «توليد الخطة» داخل ملف العميل)
 Object.assign(A, {
   home: function () { S.view = 'client'; S.cur = null; document.body.classList.remove('menu'); render(); window.scrollTo(0, 0); },
   clients: function (v) {
@@ -124,7 +125,7 @@ Object.assign(A, {
     if (v === 'home') return A.home();
     if (v === 'library') v = S.libTab || 'bank';
     if (v === 'settings' || v === 'bank' || v === 'ready' || v === 'lib') { S.view = v; render(); }
-    else if (/^(clients|more|zchat|hxv|feed|appts|subs)$/.test(v) && A[v]) A[v]();
+    else if (/^(clients|more|zchat|hxv|feed|appts|subs|genTab)$/.test(v) && A[v]) A[v]();
     window.scrollTo(0, 0);
   }
 });

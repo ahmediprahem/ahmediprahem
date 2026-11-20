@@ -1525,6 +1525,78 @@ html[data-tone="light"] .sheet,html[data-tone="light"] .modal,html[data-tone="li
 html[data-tone="light"] body{font-size:15px}
 html[data-tone="light"] .num,html[data-tone="light"] td,html[data-tone="light"] .kcal{font-variant-numeric:tabular-nums}
 }
+/* ===== 1.25 واجهة الجوال (الاجتماع 04 وقرارات المالك). كل القواعد داخل حد 900px فالحاسوب لا يتغير، والطباعة لا تتأثر. ===== */
+/* ج1: لا تمرير أفقي — اختيارات الإعداد كانت أزرار راديو مطلقة الموضع بعرض الشاشة */
+.genopt{position:relative}
+.genopt input{position:absolute;inset-inline-start:0;top:0;width:1px!important;height:1px!important;margin:0;opacity:0;pointer-events:none}
+@media screen and (max-width:900px){
+  .genpage .hxtop{flex-wrap:wrap;gap:8px}
+  .genpage .hxtop .two{display:flex;flex-wrap:wrap;gap:8px;width:100%}
+  .genpage .hxtop .two button{flex:1 1 140px;min-width:0;white-space:normal}
+  main,.cfbody,.gentab,.ucard{min-width:0;max-width:100%}
+  .gentab .row>div{min-width:0}
+  .gentbl{display:block;overflow-x:auto;max-width:100%}
+}
+/* زر العودة إلى التوليد بعد بيانات عميل جديد: ثابت أسفل الشاشة */
+.genback{position:sticky;bottom:12px;z-index:30;display:flex;justify-content:center;margin:10px 0;order:99}
+.genback button{min-height:48px;padding:0 22px;border-radius:24px;font-weight:700;box-shadow:0 6px 20px rgba(11,20,64,.18)}
+@media screen and (max-width:900px){.genback{bottom:calc(76px + env(safe-area-inset-bottom,0px))}}
+/* ج3: ملف العميل على الجوال — رأس مضغوط، وطبقة تبويب واحدة، وخطوات مضغوطة، و«التالي» ثابت */
+.genstepm{display:none}
+@media screen and (max-width:900px){
+  .cfhead{flex-wrap:nowrap;gap:8px;padding:8px 10px;margin-bottom:8px}
+  .cfhead .cav{width:36px;height:36px;font-size:15px}
+  .cfhead .cfid{min-width:0;flex:1 1 auto}.cfhead .cfname{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .cfhead .cfbadges{display:none}
+  .cfhead .cfact{gap:6px;flex:none}.cfhead .cfact>button>span{display:none}
+  .cfhead .cfact>button{min-width:44px;min-height:44px;padding:0;display:inline-grid;place-items:center}
+  html[data-theme] .tabs.cftabs.cfflat{width:100%;gap:4px;margin:0 0 10px;padding-bottom:2px}
+  html[data-theme] .tabs.cftabs.cfflat>button{flex:0 0 auto!important;min-width:auto!important;flex-direction:row!important;gap:6px;min-height:44px;padding:6px 14px!important;font-size:14px!important;line-height:1.3}
+  html[data-theme] .tabs.cftabs.cfflat>button span{white-space:nowrap!important}
+  html[data-theme] .toast{bottom:calc(84px + env(safe-area-inset-bottom,0px))!important;left:50%!important;right:auto!important;transform:translateX(-50%);max-width:calc(100vw - 32px);text-align:center}
+  .cfflat>button.gsep{margin-inline-start:10px}
+  .gentab .gensteps{display:none}
+  .genstepm{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 10px;padding:4px;border-radius:12px;border:1px solid rgba(11,20,64,.12);background:#fff}
+  .genstepm button{min-width:44px;min-height:44px;font-size:22px;line-height:1;padding:0}
+  .genstepm span{flex:1;text-align:center;font-size:15px}
+  .genfoot{position:sticky;bottom:calc(72px + env(safe-area-inset-bottom,0px));z-index:20;margin:12px -4px 0;padding:8px;border-radius:12px;background:rgba(255,255,255,.96);box-shadow:0 -2px 12px rgba(11,20,64,.08)}
+  .genfoot button{min-height:48px;width:100%}
+}
+html:not([data-tone="light"]) .genstepm,html:not([data-tone="light"]) .genfoot{background:var(--lpanel,#1b2550)}
+/* ج4: صفحة الخطة على الجوال — شريط أدوات بسطر واحد، وترويسة الصفحة المطبوعة مختصرة على الشاشة فقط */
+@media screen and (max-width:900px){
+  html[data-theme] .toast{top:calc(66px + env(safe-area-inset-top,0px))!important;bottom:auto!important;z-index:60}
+  .pbar{display:flex;flex-wrap:nowrap;align-items:center;gap:6px}
+  .pbar .tbl{display:none}
+  .pbar>button,.pbar summary,.pbar .tbsplit>button{min-height:44px;min-width:44px;font-size:14px;padding:0 12px}
+  .pbar .tbsplit{display:inline-flex}
+  .pbar .tbx{flex:1 1 auto}.pbar .tbx>summary{width:100%;justify-content:center}
+  main .pg .phd .br{display:none}
+  main .pg .phd{padding:6px 0;margin:0 0 6px}
+  main .pg .phd h1{font-size:22px;margin:0}
+  main .pg .phd .ph{display:none}
+  .pnav{position:sticky;top:0;z-index:15;background:inherit}
+}
+/* ج5: اللمس والخط على الجوال — أهداف 44px وخط 14px على الأقل في الشاشات الأساسية */
+@media screen and (max-width:900px){
+  .pbar summary{display:inline-flex;align-items:center;justify-content:center}
+  html[data-theme] main button,html[data-theme] main summary,html[data-theme] main select,html[data-theme] main input:not([type=checkbox]):not([type=radio]),html[data-theme] main .btn,html[data-theme] #hd button,html[data-theme] #hud button{min-height:44px!important}
+  html[data-theme] main button,html[data-theme] main summary,html[data-theme] #hud button{min-width:44px!important}
+  html[data-theme] main button.link{padding:0 8px}
+  html[data-theme] main input[type=checkbox]{width:22px!important;height:22px!important;min-width:22px!important;min-height:22px}
+  html[data-theme] main :is(.small,small,label,button,summary,select,input,.gxk,.gdv,.tag,em,i,.ghc i,.ghc em,.hudt,.huddy,.hudsum,.cfid small,th,td,.needb,.srcb,.warn,.ok,.err,.tipb,.pg .sub){font-size:max(14px,1em)!important}
+  html[data-theme] main .pg :is(h4,p,li){font-size:max(14px,1em)!important}
+  html[data-theme] #hud :is(.hudt,.huddy,.hudsum,span,small){font-size:14px!important}
+}
+/* ج4 (تكملة): سطر الفحص مختصر في سطر واحد ويتمدد باللمس، وزر اسم اليوم أيقونة أعلى الصفحة */
+@media screen and (max-width:900px){
+  main .pg{position:relative}
+  main .pg>p.noprint{position:absolute;top:6px;inset-inline-end:6px;margin:0;z-index:2}
+  main .pg .tbl{display:none}
+  .pchk{cursor:pointer;padding:6px 10px}
+  .pchk:not(.open) :is(ul,.small,.srcs){display:none}
+  .pchk:not(.open)::after{content:' ▾';opacity:.7}
+}
 </style></head>
 <body class="gating"><header id="hd"></header><div id="gate" style="display:flex"><div class="gcard" style="text-align:center"><div style="font-weight:700;color:#253464">حصة — جارٍ التحميل…</div></div></div><div id="app" style="display:none"><aside></aside><main></main></div>
 <noscript><div style="position:fixed;inset:0;background:#092061;color:#fff;padding:24px;text-align:center;font:16px Tahoma,Arial">هذا الملف يحتاج تفعيل JavaScript. افتحه مباشرة في Chrome أو Edge أو Safari (وليس من معاينة واتساب أو البريد).</div></noscript>
@@ -5180,9 +5252,9 @@ var d=[tot[0]-T.cho,tot[1]-T.pro,tot[2]-T.fat],bad=Math.abs(d[0])>tol[0]||Math.a
 h+='<tr class="tot"><td colspan="2">الإجمالي</td><td>'+num(tot[4])+'</td><td>'+Math.round(tot[0])+'</td><td>'+Math.round(tot[1])+'</td><td>'+Math.round(tot[2])+'</td><td>'+Math.round(tot[0]*4+tot[1]*4+tot[2]*9)+'</td></tr></table>'
 +(edit?'<div class="diff '+(bad?'bad':'')+'">'+(bad?'⚠':'✔')+' المستهدف: كربوهيدرات '+Math.round(T.cho)+' • بروتين '+Math.round(T.pro)+' • دهون '+Math.round(T.fat)+' • '+Math.round(T.kcal)+' سعرة — الفرق: '+d.map(function(x){return(x>0?'+':'')+Math.round(x)}).join(' / ')+' جم</div>':'')
 +(edit?'<p class="noprint"><button class="o sm" data-a="applyBase">طبّق هذا التوزيع على الأيام السبعة</button> <button class="sec sm" data-a="autoBase">عودة للاقتراح التلقائي</button></p>':'')+(edit?dayDistHtml(c,p):'')+ob(false,T.kcal)+'<div class="tipb">'+esc(p.phr[1][1])+'</div></div>';return h}
-function chkLine(d,T){var r=E.checkDay(d,T,D),k=Math.round(d.nominal[0]*4+d.nominal[1]*4+d.nominal[2]*9),ic={ok:'✔',warn:'⚠',block:'⛔'}[r.st],mb=r.meals.filter(function(m){return m.st!=='ok'}).length;return'<div class="pchk noprint st-'+r.st+'" data-st="'+r.st+'"><b>'+ic+' '+E.ST_AR[r.st]+'</b> '+k+' سعرة مقابل الهدف '+Math.round(T.kcal)+' (المطابقة ±'+Math.round(E.CHECK.kcal*100)+'% سعرات و±'+Math.round(E.CHECK.mac*100)+'% لكل ماكرو)'+(r.reasons.length?'<ul>'+r.reasons.map(function(x){return'<li>'+esc(x)+'</li>'}).join('')+'</ul>':'')+(mb?'<div class="small">'+mb+' وجبة خارج نصيبها من السعرات؛ يُعوَّض الفرق في باقي اليوم.</div>':'')+srcLine(d)+'</div>'}
+function chkLine(d,T){var r=E.checkDay(d,T,D),k=Math.round(d.nominal[0]*4+d.nominal[1]*4+d.nominal[2]*9),ic={ok:'✔',warn:'⚠',block:'⛔'}[r.st],mb=r.meals.filter(function(m){return m.st!=='ok'}).length;return'<div class="pchk noprint st-'+r.st+'" data-st="'+r.st+'" onclick="this.classList.toggle(\'open\')"><b>'+ic+' '+E.ST_AR[r.st]+'</b> '+k+' سعرة مقابل الهدف '+Math.round(T.kcal)+' (المطابقة ±'+Math.round(E.CHECK.kcal*100)+'% سعرات و±'+Math.round(E.CHECK.mac*100)+'% لكل ماكرو)'+(r.reasons.length?'<ul>'+r.reasons.map(function(x){return'<li>'+esc(x)+'</li>'}).join('')+'</ul>':'')+(mb?'<div class="small">'+mb+' وجبة خارج نصيبها من السعرات؛ يُعوَّض الفرق في باقي اليوم.</div>':'')+srcLine(d)+'</div>'}
 function srcLine(d){var by={},n={};D.foods.forEach(function(f){by[f.n]=f});d.slots.forEach(function(s){s.lines.forEach(function(l){if(l.missing)return;var k=E.srcOf(by[l.name],D);n[k]=(n[k]||0)+1})});var ks=Object.keys(n);return ks.length?'<div class="small srcs">مصدر قيم الأصناف: '+ks.map(function(k){return'<span class="srcb src-'+k+'">'+E.SRC[k]+' '+n[k]+'</span>'}).join(' ')+'</div>':''}
-function pgDay(c,p,di,edit){var T=p.targets,d=p.days[di],ph=p.phr[2+di],c11=E.colCounts(d.got),alts=E.altTable(p,di,D,5),nl=d.slots.reduce(function(a,s){return a+s.lines.length+((s.mealLabel||s.meal)?1:0)},0),ai=alts.reduce(function(a,x){return a+x[1].length},0),z=Math.min(1,Math.max(0.6,1000/(16*nl+2.6*d.slots.length+15.6*ai+40))).toFixed(2),h='<div class="pg" style="--z:'+z+'">'+hdr(dayName(p,di),'اليوم '+(di+1)+' من 7 • '+kcalLine(T.kcal,d.nominal),ph[0])+(edit?'<p class="noprint"><button class="sec sm" data-a="renDay" data-d="'+di+'">✎ تعديل اسم اليوم</button></p>':'')+(edit?chkLine(d,T):'')
+function pgDay(c,p,di,edit){var T=p.targets,d=p.days[di],ph=p.phr[2+di],c11=E.colCounts(d.got),alts=E.altTable(p,di,D,5),nl=d.slots.reduce(function(a,s){return a+s.lines.length+((s.mealLabel||s.meal)?1:0)},0),ai=alts.reduce(function(a,x){return a+x[1].length},0),z=Math.min(1,Math.max(0.6,1000/(16*nl+2.6*d.slots.length+15.6*ai+40))).toFixed(2),h='<div class="pg" style="--z:'+z+'">'+hdr(dayName(p,di),'اليوم '+(di+1)+' من 7 • '+kcalLine(T.kcal,d.nominal),ph[0])+(edit?'<p class="noprint"><button class="sec sm" data-a="renDay" data-d="'+di+'" aria-label="تعديل اسم اليوم">✎ <span class="tbl">تعديل اسم اليوم</span></button></p>':'')+(edit?chkLine(d,T):'')
 +(edit&&d.short.length?'<div class="warn">⚠ لم تتسع '+d.short.map(function(x){return num(x[1])+' حصة من '+D.groups[x[0]]}).join('، ')+' في سقوف الوجبات</div>':'')
 +'<table class="dt"><tr><th class="th-n" rowspan="3">الوجبة</th><th class="th-n" colspan="11">المجموعات الغذائية</th><th class="th-n" rowspan="3" style="width:42%">مكونات الوجبة</th></tr>'
 +'<tr>'+[['starch','نشويات'],['legumes','بقوليات'],['meat','لحوم (حسب نسبة الدهون)'],['milk','ألبان'],['veg','خضار'],['fruit','فاكهة'],['other','أخرى'],['fat','دهون']].map(function(q){var col=colors()[q[0]];return q[0]==='meat'?'<th colspan="4" style="background:'+col+';font-size:11px">'+q[1]+'</th>':'<th rowspan="2" style="background:'+col+';font-size:11px">'+q[1]+'</th>'}).join('')+'</tr>'
@@ -5199,7 +5271,7 @@ var pg=S.page,nav='<div class="pnav noprint"><button class="'+(pg==='sum'?'on':'
 var body=pg==='sum'?pgSum(c,p):pg==='grp'?pgGrp(c,p,true):pg==='all'?allPages(c,p,false):pgDay(c,p,pg,true);
 return planBar(c)+qualityBox(c,p)+nav+body}
 // 0.60: شريط خطة واحد لكل أنواع الخطط (المحرك والجرامات والبنك): نفس الأزرار والترتيب والأسماء، والأفعال نفسها تُوجَّه حسب نوع الخطة
-function planBar(c){var bank=c.planSrc==='ready'&&!!c.readyDoc,sv=c.hx&&c.hx.planV?' <small>آخر إرسال v'+c.hx.planV+'</small>':'';return'<div class="noprint pbar'+(bank?' pbank':'')+'"><button class="sec sm tbtpl" data-a="wkPick">📋 القوالب / اختر خطة أخرى</button> <details class="tbm tbx"><summary class="o sm">تصدير وإرسال ▾</summary><div class="tbp"><button data-a="hxSendOrInvite">📲 أرسل إلى «زنها»'+(c.hx?sv:' <small>(ادعُ العميل أولاً)</small>')+'</button><button data-a="docx">تصدير Word (.docx)</button><button data-a="print">تصدير PDF / طباعة</button><button data-a="html">صفحة HTML للعميل</button><small>اسم العيادة والأخصائي من «الإعدادات ← الحصص والبدائل»</small></div></details> <span class="tbsplit"><button class="sec sm" data-a="gen">⚙ إعادة توليد</button><details class="tbm tbgen"><summary class="sec sm" aria-label="خيارات إعادة التوليد">▾</summary><div class="tbp"><button data-a="gen">⚙ ولّد خطة جديدة</button><button data-a="genBank">📗 من البنك (الخطط الجاهزة)</button></div></details></span> <details class="tbm tbmore"><summary class="sec sm">المزيد ▾</summary><div class="tbp"><button data-a="wkSaveTpl">💾 حفظ كقالب</button><button data-a="ver">حفظ إصدار</button>'+(bank?(c.readyDoc.edited?'<button data-a="rdReset">↺ استعادة الأصل من المكتبة</button>':''):'<button data-a="newPhr">عبارات جديدة</button>')+'</div></details></div>'}
+function planBar(c){var bank=c.planSrc==='ready'&&!!c.readyDoc,sv=c.hx&&c.hx.planV?' <small>آخر إرسال v'+c.hx.planV+'</small>':'';return'<div class="noprint pbar'+(bank?' pbank':'')+'"><button class="sec sm tbtpl" data-a="wkPick" aria-label="القوالب / اختر خطة أخرى">📋 <span class="tbl">القوالب / اختر خطة أخرى</span></button> <details class="tbm tbx"><summary class="o sm">تصدير وإرسال ▾</summary><div class="tbp"><button data-a="hxSendOrInvite">📲 أرسل إلى «زنها»'+(c.hx?sv:' <small>(ادعُ العميل أولاً)</small>')+'</button><button data-a="docx">تصدير Word (.docx)</button><button data-a="print">تصدير PDF / طباعة</button><button data-a="html">صفحة HTML للعميل</button><small>اسم العيادة والأخصائي من «الإعدادات ← الحصص والبدائل»</small></div></details> <span class="tbsplit"><button class="sec sm" data-a="gen" aria-label="إعادة توليد">⚙ <span class="tbl">إعادة توليد</span></button><details class="tbm tbgen"><summary class="sec sm" aria-label="خيارات إعادة التوليد">▾</summary><div class="tbp"><button data-a="gen">⚙ ولّد خطة جديدة</button><button data-a="genBank">📗 من البنك (الخطط الجاهزة)</button></div></details></span> <details class="tbm tbmore"><summary class="sec sm">المزيد ▾</summary><div class="tbp"><button data-a="wkSaveTpl">💾 حفظ كقالب</button><button data-a="ver">حفظ إصدار</button>'+(bank?(c.readyDoc.edited?'<button data-a="rdReset">↺ استعادة الأصل من المكتبة</button>':''):'<button data-a="newPhr">عبارات جديدة</button>')+'</div></details></div>'}
 function qualityBox(c,p){var q=E.planQuality(p,D),cls=q.hard?'warn':'ok',it=q.items.filter(function(x){return x.h}).concat(q.items.filter(function(x){return!x.h}));return'<details class="qbox noprint '+cls+'" id="qbox"><summary>جودة الخطة: <b>'+q.score+'/100</b> · مخالفات صارمة '+q.hard+' · ملاحظات '+q.soft+'</summary>'+(it.length?'<ul>'+it.slice(0,40).map(function(x){return'<li>'+(x.h?'⛔ ':'• ')+(x.day>=0?esc(dayName(p,x.day))+' — '+esc(x.slot)+': ':'')+esc(x.msg)+'</li>'}).join('')+'</ul>':'<p class="small">كل الوجبات منظمة: صنف لكل دور، كميات واقعية، بلا تكرار جبن أو بروتين ثالث.</p>')+'</details>'}
 // 0.60: ملاحظات الإصدارات القديمة التي كتبها المساعد باسم «dt/hamed» تُعرض باسم «المساعد» (القيمة المحفوظة لا تتغير)
 function vNote(v){return String(v.note==null?'':v.note).replace(/^dt\/hamed — /,'المساعد — ')}
@@ -5991,7 +6063,8 @@ var IC = function (n) { return window.HIcon ? HIcon.svg(n) : ''; };
 function railBtn(a, icon, label, on, badge) { return '<button class="sec sidebtn' + (on ? ' on' : '') + '" data-a="' + a + '" title="' + label + '"' + (on ? ' aria-current="page"' : '') + '>' + IC(icon) + '<span>' + label + '</span>' + (badge ? '<em class="hxnb"></em>' : '') + '</button>'; }
 function navIs() {                                               // أي قسم من الخمسة نشط الآن
   var v = S.view, c = v === 'client';
-  return { today: c && !S.cur, clients: v === 'clients' || (c && !!S.cur), chat: v === 'chat' || v === 'hx', lib: v === 'bank' || v === 'ready' || v === 'lib' || v === 'feed', admin: v === 'appts' || v === 'subs' || v === 'settings' || v === 'users' || v === 'more' };
+  var gen = v === 'gen' || (c && !!S.cur && S.tab === 'gen');      // 1.25: «توليد الخطة» في الشريط السفلي (قرار المالك)
+  return { today: c && !S.cur, gen: gen, clients: !gen && (v === 'clients' || (c && !!S.cur)), chat: v === 'chat' || v === 'hx', lib: v === 'bank' || v === 'ready' || v === 'lib' || v === 'feed', admin: v === 'appts' || v === 'subs' || v === 'settings' || v === 'users' || v === 'more' };
 }
 function navCounts() {                                           // أعداد ما ينتظر الأخصائي (للشارات ولملخص «اليوم»)
   var st = (typeof HX !== 'undefined' && HX && HX.st) || null, rq = st && st.reqs ? Object.keys(st.reqs).map(function (k) { return st.reqs[k]; }) : [];
@@ -6018,7 +6091,7 @@ function glassSide() {
 function tabbar() {                                                // شريط سفلي للجوال (يظهر بالـ CSS على الشاشات الصغيرة في الثيم الزجاجي فقط)
   var t = $('#tabbar'); if (!t) { t = document.createElement('nav'); t.id = 'tabbar'; t.setAttribute('aria-label', 'التنقل السريع'); document.body.appendChild(t); }
   var n = navIs(), it = function (a, icon, label, on, badge) { return '<button data-a="nav" data-v="' + a + '" class="' + (on ? 'on' : '') + '"' + (on ? ' aria-current="page"' : '') + '>' + IC(icon) + '<span>' + label + '</span>' + (badge ? '<em class="hxnb"></em>' : '') + '</button>'; };
-  t.innerHTML = it('home', 'sunrise', 'اليوم', n.today) + it('clients', 'users', 'العملاء', n.clients) + it('zchat', 'message', 'شات زنها', n.chat, 1) + it('library', 'book', 'المكتبة', n.lib) + it('more', 'more', 'المزيد', n.admin);
+  t.innerHTML = it('home', 'sunrise', 'اليوم', n.today) + it('clients', 'users', 'العملاء', n.clients) + it('genTab', 'sparkles', 'توليد الخطة', n.gen) + it('zchat', 'message', 'شات زنها', n.chat, 1) + it('more', 'more', 'المزيد', n.admin || n.lib);      // 1.25: «المكتبة» انتقلت إلى «المزيد» (قرار المالك)
 }
 function firstName() { return String(CFG.userLabel || '').replace(/^المدير:\s*/, '').trim(); }
 function bakAge() { var t = 0; try { t = +localStorage.getItem('hissa_lastbak') || 0; } catch (e) { } return t ? Math.floor((Date.now() - t) / 864e5) : -1; }
@@ -6062,7 +6135,7 @@ function navRow(a, v, icon, t, d, badge) { return '<button class="mrow" data-a="
 function morePage() {
   var n = navCounts(), left = CFG.exp ? Math.ceil((CFG.exp * 1000 - Date.now()) / 86400000) : null;
   return '<div class="morepage"><h2>المزيد</h2><p class="small">' + esc(CFG.userLabel || '') + (left !== null ? ' • ينتهي التفعيل بعد ' + left + ' يوم' : '') + '</p>'
-    + '<div class="mrows">' + navRow('genTab', '', 'sparkles', 'توليد الخطة', 'مراجعة العميل والاستبعاد، ثم الإعداد والخطة') + navRow('appts', '', 'calendar', 'المواعيد', 'مواعيد اليوم والأسبوع والمتابعات', n.appt) + navRow('subs', '', 'card', 'الاشتراكات', 'المتبقي لكل عميل والمدفوعات والتمديد', n.subs) + navRow('nav', 'settings', 'settings', 'الإعدادات', 'البيانات الغذائية وزنها والمظهر والاستبيانات')
+    + '<div class="mrows">' + navRow('nav', 'library', 'book', 'المكتبة', 'بنك الوجبات والخطط الجاهزة والتثقيف') + navRow('appts', '', 'calendar', 'المواعيد', 'مواعيد اليوم والأسبوع والمتابعات', n.appt) + navRow('subs', '', 'card', 'الاشتراكات', 'المتبقي لكل عميل والمدفوعات والتمديد', n.subs) + navRow('nav', 'settings', 'settings', 'الإعدادات', 'البيانات الغذائية وزنها والمظهر والاستبيانات')
     + navRow('setTools', '', 'tool', 'النسخ الاحتياطي والأدوات', 'نسخة احتياطية واسترجاع واستيراد عميل' + (S.mode === 'admin' ? ' وأدوات الإدارة' : '')) + navRow('dtToggle', '', 'bot', 'المساعد', 'اطلب تعديل الخطة بالعربية واعتمد قبل التنفيذ') + '</div></div>';
 }
 // ---- «النسخ الاحتياطي والأدوات» داخل الإعدادات: ما كان أسفل القائمة الجانبية، بنفس الإجراءات ونفس شروط الظهور (أدوات الإدارة للمدير فقط)
@@ -6094,7 +6167,7 @@ function secInject() {
     return f.apply(this, arguments);
   };
 })(main0);
-(function (f) { main = function () { var r = f.apply(this, arguments); try { secInject(); } catch (e) { } return r; }; })(main);
+(function (f) { main = function () { var r = f.apply(this, arguments); try { secInject(); } catch (e) { } try { if (isGlass() && $('#tabbar')) tabbar(); } catch (e) { } return r; }; })(main);      // 1.25: تمييز الشريط السفلي يتبع القسم الحالي (مثل «توليد الخطة» داخل ملف العميل)
 Object.assign(A, {
   home: function () { S.view = 'client'; S.cur = null; document.body.classList.remove('menu'); render(); window.scrollTo(0, 0); },
   clients: function (v) {
@@ -6109,7 +6182,7 @@ Object.assign(A, {
     if (v === 'home') return A.home();
     if (v === 'library') v = S.libTab || 'bank';
     if (v === 'settings' || v === 'bank' || v === 'ready' || v === 'lib') { S.view = v; render(); }
-    else if (/^(clients|more|zchat|hxv|feed|appts|subs)$/.test(v) && A[v]) A[v]();
+    else if (/^(clients|more|zchat|hxv|feed|appts|subs|genTab)$/.test(v) && A[v]) A[v]();
     window.scrollTo(0, 0);
   }
 });
@@ -9098,13 +9171,22 @@ function cfHead(c) {
     + '<details class="tbm cmore"><summary class="sec sm" aria-label="المزيد من إجراءات العميل" title="المزيد">' + IC('more') + '</summary><div class="tbp">'
     + '<button data-a="tab" data-v="link">' + IC('phone') + ' إدارة ربط «زنها»</button><button class="r" data-a="del">' + IC('trash') + ' حذف العميل</button></div></details></div></div>';
 }
+function cfMob() { try { return matchMedia('(max-width:900px)').matches && isGlass(); } catch (e) { return false; } }
+// 1.25 الجوال (الاجتماع 04): طبقة تنقل واحدة — شريط أفقي قابل للتمرير يجمع المجموعات وأقسامها، والحالي في المنتصف
+function cfFlat(c) {
+  return '<div class="tabs ctabs cftabs cfflat" role="tablist" aria-label="أقسام ملف العميل">' + CF_G.map(function (g, gi) {
+    return g[3].filter(function (k) { return k !== 'pw' || S.tab === 'pw'; }).map(function (k, i) { var on = S.tab === k, lbl = g[3].length < 2 ? g[1] : CF_L[k]; return '<button role="tab" aria-selected="' + on + '" class="' + (on ? 'on' : '') + (i === 0 && gi ? ' gsep' : '') + '" data-a="tab" data-v="' + k + '" data-g="' + g[0] + '">' + (i === 0 ? IC(g[2]) : '') + '<span>' + lbl + '</span>' + cfNb(cfBadge(c, k)) + '</button>'; }).join('');
+  }).join('') + '</div>';
+}
 function cfTabs(c) {
+  if (cfMob()) return cfFlat(c);
   var g0 = cfGroup(S.tab);
   return '<div class="tabs ctabs cftabs" role="tablist" aria-label="أقسام ملف العميل">' + CF_G.map(function (g) {
     var on = g === g0; return '<button role="tab" aria-selected="' + on + '" class="' + (on ? 'on' : '') + '" data-a="tab" data-v="' + g[3][0] + '" data-g="' + g[0] + '">' + IC(g[2]) + '<span>' + g[1] + '</span>' + cfNb(cfGBadge(c, g)) + '</button>';
   }).join('') + '</div>';
 }
 function cfSeg(c) {
+  if (cfMob()) return '';
   var g = cfGroup(S.tab); if (g[3].length < 2) return '';
   return '<div class="cfseg" role="tablist" aria-label="أقسام ' + g[1] + '">' + g[3].filter(function (k) { return k !== 'pw' || S.tab === 'pw'; }).map(function (k) {      // 1.23: «نافذة الأخصائي» دُمجت في «توليد الخطة» فلا تظهر إلا حين تُفتح منه
     var on = S.tab === k; return '<button role="tab" aria-selected="' + on + '" class="' + (on ? 'on' : '') + '" data-a="tab" data-v="' + k + '">' + CF_L[k] + (k === 'ver' ? ' (' + S.versions.length + ')' : '') + cfNb(cfBadge(c, k)) + '</button>';
@@ -9158,6 +9240,7 @@ Object.assign(A, {
 })(A.tab);
 (function (f) { main0 = function () { var r = f.apply(this, arguments); if (S.view === 'client' && cur()) cfCenter(); return r; }; })(main0);
 document.addEventListener('input', function (e) { var t = e.target; if (t && t.dataset && t.dataset.f === 'name') { var n = $('main .cfname'), a = $('main .cfhead .cav'); if (n) n.textContent = t.value.trim() || 'عميل بلا اسم'; if (a) a.textContent = initial(t.value); } });
+try { matchMedia('(max-width:900px)').addEventListener('change', function () { if (S.view === 'client' && cur()) main(); }); } catch (e) { }      // 1.25: عبور حد الجوال يعيد رسم ملف العميل بالتنقل المناسب
 
 // ================= 1.19 المرحلة 4: تبويب «توليد الخطة» — يُدمج داخل app.js عند /*GENUI*/
 // بند جانبي «توليد الخطة» يفتح قائمة العملاء مع «＋ عميل جديد»، واختيار العميل يفتح ملفه على قسم «توليد» (مجموعة «الخطة»).
@@ -9192,7 +9275,8 @@ function genExcl(c) {
   return out;
 }
 function genStepper(c, g) {
-  return '<ol class="gensteps" aria-label="خطوات توليد الخطة">' + GEN_STEPS.map(function (s, i) {
+  var cs = GEN_STEPS[g.step - 1], mob = '<nav class="genstepm" aria-label="خطوات توليد الخطة"><button class="sec" data-a="genStep" data-v="' + (g.step - 1) + '"' + (g.step <= 2 ? ' disabled' : '') + ' aria-label="الخطوة السابقة">›</button><span><b>' + g.step + ' من ' + GEN_STEPS.length + '</b> • ' + cs[1] + '</span><button class="sec" data-a="genStep" data-v="' + (g.step + 1) + '"' + (g.step >= 5 ? ' disabled' : '') + ' aria-label="الخطوة التالية">‹</button></nav>';      // 1.25: شريط خطوات مضغوط للجوال
+  return mob + '<ol class="gensteps" aria-label="خطوات توليد الخطة">' + GEN_STEPS.map(function (s, i) {
     var n = i + 1, st = n < g.step ? 'done' : n === g.step ? 'on' : 'next';
     return '<li class="gs-' + st + '"><button class="sec sm" data-a="genStep" data-v="' + n + '"' + (n === 1 ? ' disabled' : '') + (n === g.step ? ' aria-current="step"' : '') + '><i>' + (st === 'done' ? '✓' : n) + '</i> ' + s[1] + '</button></li>';
   }).join('') + '</ol>';
@@ -9348,6 +9432,8 @@ function genPage() {
       return '<button class="cl" data-a="genPick" data-v="' + esc(c.code) + '"><span class="cav">' + esc(initial(c.name)) + '</span><b>' + esc(c.name || '(بلا اسم)') + '</b><small>' + esc(c.code) + (c.kind === 'athlete' ? ' • جرامات' : '') + (planOf(c).has ? ' • لديه خطة' : '') + '</small></button>';
     }).join('') + '</div></div>';
 }
+// 1.25: عميل جديد من «توليد الخطة» — زر ثابت يعيده إلى التوليد بعد إدخال بياناته (الاجتماع 04)
+(function (f) { clientTab = function (c) { return f.apply(this, arguments) + (S.genBack && S.genBack === c.code ? '<div class="genback"><button data-a="genGo">تابع إلى توليد الخطة ›</button></div>' : ''); }; })(clientTab);
 (function (f) { main0 = function () { if (S.view === 'gen') { $('main').innerHTML = genPage(); return; } return f.apply(this, arguments); }; })(main0);
 document.addEventListener('change', function (e) {
   var t = e.target, c = cur(); if (!c || !t.dataset) return;
@@ -9360,7 +9446,8 @@ document.addEventListener('change', function (e) {
 Object.assign(A, {
   genTab: function () { document.body.classList.remove('menu'); S.view = 'gen'; S.cur = null; render(); window.scrollTo(0, 0); },
   genPick: function (v) { return A.pick(v).then(function () { S.tab = 'gen'; render(); }); },
-  genNew: function (v) { A.new(v === 'ath' ? 'ath' : 'ex'); S.tab = 'client'; render(); toast('أكمل بيانات العميل، ثم افتح «توليد» من مجموعة «الخطة»'); },
+  genNew: function (v) { A.new(v === 'ath' ? 'ath' : 'ex'); S.genBack = S.cur; S.tab = 'client'; render(); toast('أكمل بيانات العميل، ثم «تابع إلى توليد الخطة»'); },
+  genGo: function () { var c = cur(); if (!c) return; if (!c.name || !c.sex) { toast('اكتب الاسم وحدّد الجنس أولاً'); return; } S.genBack = null; S.tab = 'gen'; save(); render(); window.scrollTo(0, 0); },
   genStep: function (v) { var c = cur(); if (!c) return; genOf(c).step = Math.max(2, Math.min(5, +v)); save(); main(); window.scrollTo(0, 0); },
   genRevOk: function () { var c = cur(); if (!c) return; var g = genOf(c); g.rev = Date.now(); g.step = 3; save(); main(); toast('اعتُمدت المراجعة'); },
   genUnex: function (v) { var c = cur(); if (!c) return; c.excludedFoods = (c.excludedFoods || []).filter(function (n) { return n !== v; }); c.avoid = (c.avoid || []).filter(function (n) { return n !== v; }); genOf(c).rev = null; save(); main(); toast('أُرجع «' + v + '»'); },
