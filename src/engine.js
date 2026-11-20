@@ -1108,11 +1108,13 @@ E.ctx = function (client, D) {
   };
   E.eqvPlan = function (client, D, opt) {
     opt = opt || {}; var meals = +client.meals || 5, T = E.targets(client, D), cx = E.ctx(client, D), sl = E.slots(meals, D), al = client.alias;
-    var cn0 = (client.baseCounts || []).map(Number), defs = (client.eqvDays && client.eqvDays.length ? client.eqvDays : [{ cn: cn0, md: client.mealDist, picks: client.eqvPicks }]).map(function (x) {      // 1.27: أيام متعددة، لكل يوم جدوله وتوزيعه واختياراته
+    var bc = client.baseCounts && client.baseCounts.length === 13 && client.baseCounts.some(function (x) { return +x > 0; }), cn0 = bc ? client.baseCounts.map(Number) : E.baseSuggestion(client, D).counts.slice(), defs = (client.eqvDays && client.eqvDays.length ? client.eqvDays : [{ cn: cn0, md: client.mealDist, picks: client.eqvPicks }]).map(function (x) {      // 1.27: أيام متعددة، لكل يوم جدوله وتوزيعه واختياراته
       var c2 = (x.cn || cn0).map(Number), md2 = E.mealDistOk({ baseCounts: c2, mealDist: x.md }, meals, D) || E.suggestDist(c2, meals, D); return { cn: c2, md: md2, picks: x.picks || {} }; });
     var week = client.eqvWeek || [], days = [], seed = opt.seed || 0;
     for (var d = 0; d < 7; d++) {
       var k0 = week[d] != null && defs[week[d]] ? week[d] : d % defs.length, cn = defs[k0].cn, dist = defs[k0].md, picks = defs[k0].picks;
+      var dco = !client.eqvDays && client.dayCounts && client.dayCounts[d] && client.dayCounts[d].length === 13 && client.dayCounts[d].some(function (x) { return +x > 0; }) ? client.dayCounts[d].map(Number) : null;      // توزيع خاص بيوم (جدول «تقسيم الحصص على الأيام») يبقى مدعوماً
+      if (dco) { cn = dco; dist = E.suggestDist(dco, meals, D); }
       var usedDay = {}, slots = [];
       sl.forEach(function (s, si) {
         var row = dist[si]; if (!s.active || !row || !row.some(function (x) { return x > 0; })) return; var lines = [];
