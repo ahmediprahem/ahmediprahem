@@ -9309,8 +9309,35 @@ function genSend(c, g) {
     + (!po.has ? '<p class="small">ولّد الخطة أولاً.</p>' : c.hx ? '<p><button data-a="hxSendPlan"' + (T && T.lowBlock ? ' disabled' : '') + '>' + IC('send') + ' أرسل الخطة إلى «زنها»</button></p>' : '<p><button class="sec" data-a="tab" data-v="link">اربط العميل بـ«زنها» لإرسال الخطة</button></p>')
     + '</div>';
 }
+// ---- 1.24 المرحلة 9: قسم الجرامات — الخطوات نفسها بمحرك الرياضيين (Ath)، والفحص بالحدود نفسها على كل يوم (السعرات مقابل سعرات الماكروز المستهدفة)
+function genAthT(c) { try { return Ath.targets(ec(c), AD); } catch (e) { return null; } }
+function genAthCheck(d) { var t = d.t || {}, g0 = d.got || {}; return E.checkVals({ k: g0.k, c: g0.c, p: g0.p, f: g0.f }, { k: t.macroKcal || t.kcal, c: t.c, p: t.p, f: t.f }); }
+function genAthPlanCk(c) { var p = c.plan; if (!p || p.kind !== 'athlete' && !(p.days && p.days[0] && p.days[0].meals)) return null; var days = p.days.map(genAthCheck), st = days.reduce(function (a, d) { return { ok: 0, warn: 1, block: 2 }[d.st] > { ok: 0, warn: 1, block: 2 }[a] ? d.st : a; }, 'ok'); return { st: st, days: days, ok: days.filter(function (d) { return d.st === 'ok'; }).length, warn: days.filter(function (d) { return d.st === 'warn'; }).length, block: days.filter(function (d) { return d.st === 'block'; }).length }; }
+function genAthRev(c, g) {
+  var T = genAthT(c), L = (c.avoid || []).map(function (n) { return { n: n, k: 'avoid' }; }).concat(String(c.keywords || '').split(/[,،\n]/).map(function (x) { return x.trim(); }).filter(Boolean).map(function (n) { return { n: n, k: 'kw' }; }));
+  return '<div class="ucard gencl"><h3>' + esc(c.name || 'عميل بلا اسم') + ' <small>' + esc(c.code) + ' • نظام الجرامات</small></h3>' + (typeof safetyBanner === 'function' ? safetyBanner(c.safety || null) : '')
+    + '<p class="small">' + [c.sex, c.age && c.age + ' سنة', c.weight && c.weight + ' كجم', c.height && c.height + ' سم', c.bf && 'دهون ' + c.bf + '%', c.sport, c.phase].filter(Boolean).map(esc).join(' • ') + '</p>'
+    + (T ? '<div class="tgx small">ℹ الحرق الأساسي ' + Math.round(T.bmr) + ' (' + esc(T.method) + (T.ffm ? '، كتلة خالية ' + T.ffm.toFixed(1) + ' كجم' : '') + ')؛ ' + esc(T.info || '') + '</div>' : '') + '</div>'
+    + '<div class="ucard genrev"><h3>المستبعد (' + L.length + ')</h3>' + (L.length ? '<ul class="gxl">' + L.map(function (x) { return '<li class="gx gx-' + (x.k === 'kw' ? 'kw' : 'avoid') + '"><b>' + esc(x.n) + '</b> <span class="gxk">' + (x.k === 'kw' ? 'كلمة مستبعدة' : 'لا يحبه') + '</span>' + (x.k === 'avoid' ? ' <button class="link" data-a="genUnex" data-v="' + esc(x.n) + '">إرجاع</button>' : '') + '</li>'; }).join('') + '</ul>' : '<p class="small">لا أصناف مستبعدة.</p>')
+    + '<p class="small">الحساسية والكلمات المستبعدة تُعدَّل من «البيانات».</p><p class="genfoot">' + (g.rev ? '<span class="ok">✔ اعتمدتَ المراجعة</span> ' : '') + '<button data-a="genRevOk">اعتمد المراجعة والتالي ›</button></p></div>';
+}
+function genAthSetup(c, g) {
+  return '<div class="ucard gensetup"><h3>إعداد نظام الجرامات</h3><div class="row">' + sel('phase', 'المرحلة', AD.phases.map(function (p) { return p.n; })) + sel('bmrF', 'صيغة الحرق الأساسي (مع نسبة الدهون)', ['katch', 'cunningham', 'mifflin'], function (o) { return [o, o === 'katch' ? 'Katch-McArdle' : o === 'cunningham' ? 'Cunningham' : 'Mifflin-St Jeor']; }) + '</div>'
+    + '<p class="small">جدول التدريب والماكروز التفصيلية في «البيانات». شكل الأسبوع يتبع جدول التدريب (أيام تدريب وراحة).</p><p class="genfoot"><button data-a="genStep" data-v="4">التالي: الخطة ›</button></p></div>';
+}
+function genAthPlan(c, g) {
+  var ck = genAthPlanCk(c), po = planOf(c);
+  return '<div class="ucard genplan gen-' + (ck ? 'st-' + ck.st : 'none') + '" data-st="' + (ck ? ck.st : '') + '"><h3>خطة الجرامات</h3>' + (po.has ? '<p>الخطة الحالية: <b>' + esc(po.label) + '</b></p>' : '<p class="small">لا خطة بعد.</p>')
+    + (ck ? '<ul class="small">' + c.plan.days.map(function (d, i) { var r = ck.days[i]; return '<li class="st-' + r.st + '">' + esc(d.name) + ' (' + esc(d.type || '') + '): ' + { ok: '✔', warn: '⚠', block: '⛔' }[r.st] + ' ' + E.ST_AR[r.st] + ' — ' + Math.round(d.got.k) + ' سعرة مقابل ' + Math.round(d.t.macroKcal || d.t.kcal) + (r.reasons.length ? ' • ' + esc(r.reasons[0]) : '') + '</li>'; }).join('') + '</ul>' : '')
+    + '<p><button data-a="genBuild">' + (po.has ? '↻ أعد التوليد' : '⚙ ولّد الخطة') + '</button> ' + (po.has ? '<button class="sec" data-a="tab" data-v="plan">افتح الخطة للتعديل بالجرامات</button> ' : '') + '<button class="sec" data-a="genStep" data-v="5">التالي: المراجعة والإرسال ›</button></p></div>';
+}
+function genAthSend(c, g) {
+  var ck = genAthPlanCk(c), po = planOf(c), st = ck ? ck.st : 'ok';
+  return '<div class="ucard gensend gen-st-' + st + '" data-st="' + st + '"><h3>' + { ok: '✔', warn: '⚠', block: '⛔' }[st] + ' ' + E.ST_AR[st] + '</h3>' + (ck ? '<ul>' + c.plan.days.map(function (d, i) { var r = ck.days[i]; return '<li class="st-' + r.st + '">' + esc(d.name) + ': ' + { ok: '✔', warn: '⚠', block: '⛔' }[r.st] + ' ' + E.ST_AR[r.st] + (r.reasons.length ? ' — ' + esc(r.reasons[0]) : '') + '</li>'; }).join('') + '</ul>' : '')
+    + (!po.has ? '<p class="small">ولّد الخطة أولاً.</p>' : c.hx ? '<p><button data-a="hxSendPlan">' + IC('send') + ' أرسل الخطة إلى «زنها»</button></p>' : '<p><button class="sec" data-a="tab" data-v="link">اربط العميل بـ«زنها» لإرسال الخطة</button></p>') + '</div>';
+}
 function genTab(c) {
-  var g = genOf(c), body = g.step <= 2 ? genRev(c, g) : g.step === 3 ? genSetup(c, g) : g.step === 4 ? genPlanStep(c, g) : genSend(c, g);
+  var g = genOf(c), ath = c.kind === 'athlete', body = g.step <= 2 ? (ath ? genAthRev : genRev)(c, g) : g.step === 3 ? (ath ? genAthSetup : genSetup)(c, g) : g.step === 4 ? (ath ? genAthPlan : genPlanStep)(c, g) : (ath ? genAthSend : genSend)(c, g);
   var sent = c.hx && c.hx.planV ? '<div class="chkb st-ok gensent">📤 أُرسلت الخطة إلى «زنها» (v' + c.hx.planV + '). عدّلها في أي وقت ثم أرسلها إصداراً جديداً v' + (c.hx.planV + 1) + '؛ علامات «أكلت/بدّلت» عند العميل تبقى مع أصنافها. ' + (g.step < 4 ? '<button class="sm" data-a="genStep" data-v="4">عدّل الخطة المرسلة</button>' : '') + '</div>' : '';
   return '<div class="gentab">' + sent + genStepper(c, g) + body + '</div>';
 }
