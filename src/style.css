@@ -479,3 +479,9 @@ header .hdast{display:none!important}
 
 /* 1.16 تنبيه السلامة */
 .safeb{border:1.5px solid #e5484d;background:rgba(229,72,77,.1);color:inherit;border-radius:12px;padding:10px 14px;margin:0 0 10px;line-height:1.6}.safeb b{color:#e5484d}
+/* 1.18 المرحلة 3: حالة الفحص — سليم (أخضر) / تنبيه (كهرماني) / مانع (أحمر)، والحواف تحمل اللون */
+.pchk,.chkb{border:2px solid;border-radius:10px;padding:8px 12px;margin:8px 0;font-size:14px;line-height:1.6}
+.pchk ul{margin:4px 0 0;padding-inline-start:20px}.pchk li{margin:0}
+.st-ok{border-color:#0f9f73;background:rgba(15,159,115,.07)}.st-warn{border-color:#d08a00;background:rgba(208,138,0,.08)}.st-block{border-color:#c62f35;background:rgba(198,47,53,.07)}
+.chkb button{margin-inline-start:8px}.tgx{margin:6px 0;opacity:.9}
+.srcb{display:inline-block;font-size:11px;padding:0 6px;border-radius:8px;border:1px solid currentColor;opacity:.8;margin-inline-start:4px}

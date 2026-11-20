@@ -8,12 +8,22 @@
   var sum = function (a) { return a.reduce(function (p, c) { return p + c; }, 0); };
   E.rnd = rnd;
   // ================================================ الأهداف
+  // ================================================ 1.18 المرحلة 3: صيغ الحرق الأساسي باختيار الأخصائي (c.bmrF)
+  // mifflin: Mifflin-St Jeor (1990) • katch: Katch-McArdle = 370 + 21.6 × الكتلة الخالية من الدهون • cunningham: Cunningham (1980) = 500 + 22 × الكتلة الخالية
+  // الصيغتان الأخيرتان تحتاجان نسبة الدهون (c.bf %)؛ بدونها يُستعمل Mifflin مع ملاحظة صريحة
+  E.BMRF = [['mifflin', 'Mifflin-St Jeor'], ['katch', 'Katch-McArdle'], ['cunningham', 'Cunningham']];
+  E.bmrOf = function (c) {
+    var w = +c.weight || 0, h = +c.height || 0, a = +c.age || 0, bf = +c.bf > 0 && +c.bf < 70 ? +c.bf / 100 : null, f = c.bmrF || 'mifflin', note = '';
+    if ((f === 'katch' || f === 'cunningham') && bf == null) { note = 'صيغة ' + (f === 'katch' ? 'Katch-McArdle' : 'Cunningham') + ' تحتاج نسبة الدهون: استُعملت Mifflin-St Jeor'; f = 'mifflin'; }
+    var ffm = bf == null ? null : w * (1 - bf), v = f === 'katch' ? 370 + 21.6 * ffm : f === 'cunningham' ? 500 + 22 * ffm : 10 * w + 6.25 * h - 5 * a + (c.sex === 'ذكر' ? 5 : -161);
+    return { v: v, f: f, label: E.BMRF.filter(function (x) { return x[0] === f; })[0][1], ffm: ffm, note: note };
+  };
   E.MODES = { auto_pf: 'تلقائي: بروتين g/kg + دهون %', auto_pc: 'تلقائي: بروتين g/kg + كربوهيدرات %', manual: 'يدوي (نسب مئوية)' };
   E.targets = function (c, D) {
     var S = D.settings, w = +c.weight, h = +c.height, a = +c.age, f = (D.settings.activity.filter(function (x) { return x[0] === c.activity; })[0] || [0, 1.2])[1];
     var goal = (S.goals.filter(function (x) { return x[0] === c.goal; })[0] || [0, 0])[1];
     var bmi = w > 0 && h > 0 ? w / Math.pow(h / 100, 2) : 0, ibw = (h - S.ibw_off) * (c.sex === 'أنثى' ? S.ibw_f : 1), adj = ibw + S.adj * (w - ibw);
-    var bmr = c.sex === 'ذكر' ? 10 * w + 6.25 * h - 5 * a + 5 : 10 * w + 6.25 * h - 5 * a - 161, tdee = bmr * f, calc = tdee + goal;
+    var BM = E.bmrOf(c), bmr = BM.v, tdee = bmr * f, calc = tdee + goal;
     var kcal = +c.kcalManual > 0 ? +c.kcalManual : calc, mode = c.macroMode || 'auto_pf', pg = +c.proGkg || 1.8, cp = c.choPct == null ? 0.45 : +c.choPct, pp = c.proPct == null ? 0.25 : +c.proPct, fp = c.fatPct == null ? 0.3 : +c.fatPct;
     var floor = c.sex === 'ذكر' ? (S.min_kcal_m || 1500) : (S.min_kcal_f || S.min_kcal || 1200), floored = false;
     if (!(+c.kcalManual > 0) && c.kcalFloor !== false && kcal < floor && w > 0) { kcal = floor; floored = true; }     // حد أدنى آمن للسعرات (1200 للنساء، 1500 للرجال) في الحساب التلقائي
@@ -32,10 +42,13 @@
     if (kcal < S.min_kcal) warn.push('السعرات أقل من الحد الأدنى المُعد (' + S.min_kcal + ')');
     if (tdee > 0 && (tdee - kcal) / tdee > S.max_def) warn.push('عجز مخطط مفرط');
     if (floored) warn.push('رُفعت السعرات إلى الحد الأدنى الآمن (' + floor + ')');
+    var lowManual = +c.kcalManual > 0 && w > 0 && kcal < floor, lowBlock = lowManual && !c.kcalLowOk;      // 1.18 (قرار المالك): السعرات اليدوية تحت الحد الآمن مانعة إلا بتأكيد صريح من الأخصائي
+    if (lowBlock) warn.push('السعرات اليدوية (' + Math.round(kcal) + ') أقل من الحد الآمن (' + floor + '): تحتاج تأكيداً صريحاً قبل الاعتماد');
+    if (BM.note) warn.push(BM.note);
     if (obese) { if (pro / adj < 1.0) warn.push('البروتين أقل من 1.0 جم/كجم من الوزن المعدّل'); } else if (w > 0 && pro / w < S.min_pro) warn.push('البروتين أقل من الحد الأدنى g/kg'); else if (w > 0 && pro / w > S.max_pro) warn.push('البروتين أعلى من الحد المُعد');
     if (mode === 'manual' && Math.abs(cp + pp + fp - 1) > 0.001) warn.push('مجموع النسب لا يساوي 100%');
     if (cho < 0 || fat < 0) warn.push('قيمة ماكروز سالبة — راجع المدخلات');
-    return { bmi: bmi, ibw: ibw, adjbw: adj, obese: obese, proW: pw, proG: pgx, bmr: bmr, pal: f, tdee: tdee, goalAdj: goal, calc: calc, kcal: kcal, cho: cho, pro: pro, fat: fat, water: w * S.water / 1000, warnings: warn };
+    return { bmrF: BM.f, bmrLabel: BM.label, ffm: BM.ffm, floor: floor, floored: floored, lowManual: lowManual, lowBlock: lowBlock, manual: +c.kcalManual > 0, bmi: bmi, ibw: ibw, adjbw: adj, obese: obese, proW: pw, proG: pgx, bmr: bmr, pal: f, tdee: tdee, goalAdj: goal, calc: calc, kcal: kcal, cho: cho, pro: pro, fat: fat, water: w * S.water / 1000, warnings: warn };
   };
   // ================================================ الوجبات النشطة وتوزيع السعرات
   E.slots = function (meals, D) { var p = D.settings.pct[String(meals)] || D.settings.pct['5']; return p.map(function (x, i) { return { i: i, pct: x, active: x > 0, type: D.settings.types[i], name: D.settings.slotNames[i] }; }); };
@@ -865,6 +878,48 @@ E.ctx = function (client, D) {
       dl.forEach(function (r) { var n = 0; d.slots.forEach(function (sl) { sl.lines.forEach(function (l) { if (mt(r, l.name)) { var f = D.foods.filter(function (x) { return x.n === l.name; })[0]; n += l.e * (f && f.upe || 1); } }); }); if (n > r.max_per_day + 1e-9) res.dayLimit.push({ day: d.name, food: r.kw, qty: n, max: r.max_per_day, cond: r.cond }); });
     });
     return res;
+  };
+  // ================================================ 1.18 المرحلة 3: نواة الفحص (المحرك 6) — سليم / تنبيه / مانع مع السبب، وشرح الهدف، وشارة مصدر القيم
+  // قرار المالك: المطابقة ±5% من السعرات و±10% لكل ماكرو من الهدف اليومي؛ بين الحد وضعفه تنبيه (كهرماني)؛ ما بعد الضعف مانع (أحمر).
+  E.CHECK = { kcal: 0.05, mac: 0.10 };
+  E.ST_AR = { ok: 'مطابق', warn: 'تنبيه', block: 'مانع' };
+  var MAC_AR = ['الكربوهيدرات', 'البروتين', 'الدهون'], rank = { ok: 0, warn: 1, block: 2 }, worst = function (a, b) { return rank[b] > rank[a] ? b : a; };
+  E.checkVals = function (got, tgt) {                         // got/tgt: {k, c, p, f}؛ النتيجة لكل بُعد: الفرق والنسبة والحالة
+    var dims = [['k', 'السعرات', E.CHECK.kcal, 'سعرة'], ['c', MAC_AR[0], E.CHECK.mac, 'جم'], ['p', MAC_AR[1], E.CHECK.mac, 'جم'], ['f', MAC_AR[2], E.CHECK.mac, 'جم']], st = 'ok', reasons = [], out = {};
+    dims.forEach(function (d) {
+      var g = +got[d[0]] || 0, t = +tgt[d[0]] || 0; if (!(t > 0)) return; var dv = g - t, r = Math.abs(dv) / t, s = r <= d[2] + 1e-9 ? 'ok' : r <= 2 * d[2] + 1e-9 ? 'warn' : 'block';
+      out[d[0]] = { got: g, tgt: t, dv: dv, pct: r, st: s }; st = worst(st, s);
+      if (s !== 'ok') reasons.push(d[1] + ' ' + (dv > 0 ? 'أعلى' : 'أقل') + ' من الهدف بـ' + Math.round(Math.abs(dv)) + ' ' + d[3] + ' (' + Math.round(r * 100) + '%، المسموح ±' + Math.round(d[2] * 100) + '%)');
+    });
+    return { st: st, reasons: reasons, dims: out };
+  };
+  var nomOf = function (day) { var n = day.nominal || [0, 0, 0]; return { c: n[0], p: n[1], f: n[2], k: n[0] * 4 + n[1] * 4 + n[2] * 9 }; };
+  E.checkDay = function (day, T, D) {
+    if (!day.nominal && D) E.dayStats(day, T, D);
+    var r = E.checkVals(nomOf(day), { k: T.kcal, c: T.cho, p: T.pro, f: T.fat });
+    r.meals = (day.slots || []).map(function (s) {               // الوجبة: السعرات مقابل نصيبها من الهدف (المطابقة المرنة على مستوى الوجبة بالنسبة نفسها)
+      var tk = +s.target || (s.pct ? s.pct * T.kcal : 0), gk = 0; if (!(tk > 0) || !D) return { si: s.si, st: 'ok' };
+      (s.lines || []).forEach(function (ln) { if (!ln.missing && D.EX[ln.g]) gk += ln.e * (D.EX[ln.g][0] * 4 + D.EX[ln.g][1] * 4 + D.EX[ln.g][2] * 9); });
+      var m = E.checkVals({ k: gk }, { k: tk }); return { si: s.si, st: m.st, got: gk, tgt: tk, reasons: m.reasons };
+    });
+    if (T.lowBlock) { r.st = 'block'; r.reasons.unshift('السعرات اليدوية أقل من الحد الآمن (' + T.floor + ') بلا تأكيد'); }
+    return r;
+  };
+  E.checkPlan = function (plan, D) {
+    var T = plan.targets, days = (plan.days || []).map(function (d) { return E.checkDay(d, T, D); }), st = days.reduce(function (a, d) { return worst(a, d.st); }, 'ok');
+    if (T && T.lowBlock) st = 'block';
+    return { st: st, days: days, ok: days.filter(function (d) { return d.st === 'ok'; }).length, warn: days.filter(function (d) { return d.st === 'warn'; }).length, block: days.filter(function (d) { return d.st === 'block'; }).length };
+  };
+  E.explain = function (T, c) {                                 // سطر يشرح الهدف: الصيغة، ومعامل النشاط، والهدف، والحد الأدنى
+    var r = Math.round, s = 'الحرق الأساسي ' + r(T.bmr) + ' (' + (T.bmrLabel || 'Mifflin-St Jeor') + (T.ffm ? '، كتلة خالية ' + T.ffm.toFixed(1) + ' كجم' : '') + ') × معامل النشاط ' + T.pal + ' = ' + r(T.tdee);
+    if (T.manual) s += '؛ السعرات يدوية من الأخصائي: ' + r(T.kcal);
+    else s += (T.goalAdj ? ' ' + (T.goalAdj > 0 ? '+ ' : '− ') + Math.abs(T.goalAdj) + ' للهدف = ' + r(T.calc) : '') + (T.floored ? '، رُفعت إلى الحد الأدنى الآمن ' + T.floor : '');
+    return s + '. الحد الأدنى الآمن ' + T.floor + ' سعرة.';
+  };
+  E.SRC = { usda: 'USDA', avg: 'متوسط مجموعة', item: 'قيمة الصنف', draft: 'مسودة' };
+  E.srcOf = function (f, D) {                                   // شارة مصدر القيم: f.src صريح، أو متوسط المجموعة إن طابقت قيمها حصة المجموعة
+    if (!f) return 'draft'; if (f.src && E.SRC[f.src]) return f.src; var ex = D && D.EX && D.EX[f.g]; if (!ex || !f.mac) return 'draft';
+    var x = f.exv || 1; return [0, 1, 2].every(function (k) { return Math.abs(f.mac[k] - ex[k] * x) < 0.6; }) ? 'avg' : 'item';
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = E; else root.DPEngine = E;
 })(typeof window !== 'undefined' ? window : this);

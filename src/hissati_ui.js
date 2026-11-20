@@ -508,6 +508,7 @@ Object.assign(A, {
   },
   hxSendPlan: function () {
     var c = cur(), po = planOf(c), rd = po.src === 'ready', pb = po.src === 'plib'; if (!c || !c.hx || !po.has) return; var snap;
+    if (c.kind !== 'athlete' && po.src === 'engine') { try { if (E.targets(ec(c), D).lowBlock) { toast('⛔ السعرات اليدوية أقل من الحد الآمن: أكّدها في ملف العميل قبل الإرسال'); return; } } catch (e) { } }      // 1.18 قرار المالك: مانع إلا بتأكيد صريح
     try { snap = po.snap(); } catch (e) { toast('تعذّر تجهيز الخطة: ' + e.message); return; }
     var v = (c.hx.planV || 0) + 1; toast('جارٍ الإرسال…');
     if (c.work) snap.work = c.work; if (c.shop) snap.shop = c.shop; if (S.settings && (S.settings.exlib || []).length) snap.lib = S.settings.exlib; snap.gate = c.hx.gate ? { on: 1, hour: c.hx.gateH || 12 } : null; snap.wm = (c.name || '') + ' • ' + (c.code || '');

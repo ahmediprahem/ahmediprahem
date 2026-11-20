@@ -11,7 +11,9 @@
   A.bmr = function (c) {
     var w = num(c.weight), h = num(c.height), a = num(c.age), bf = (c.bf === '' || c.bf == null || num(c.bf) <= 0) ? null : num(c.bf) / 100;
     if (bf == null) return { v: 10 * w + 6.25 * h - 5 * a + (c.sex === 'ذكر' ? 5 : -161), method: 'Mifflin-St Jeor', ffm: null };
-    var ffm = w * (1 - bf); return { v: 370 + 21.6 * ffm, method: 'Cunningham', ffm: ffm };
+    var ffm = w * (1 - bf), F = c.bmrF || 'katch';      // 1.18: 370 + 21.6×FFM هي Katch-McArdle (كانت مسمّاة Cunningham خطأً)؛ واختيار الأخصائي: Cunningham = 500 + 22×FFM أو Mifflin
+    if (F === 'mifflin') return { v: 10 * w + 6.25 * h - 5 * a + (c.sex === 'ذكر' ? 5 : -161), method: 'Mifflin-St Jeor', ffm: ffm };
+    return F === 'cunningham' ? { v: 500 + 22 * ffm, method: 'Cunningham', ffm: ffm } : { v: 370 + 21.6 * ffm, method: 'Katch-McArdle', ffm: ffm };
   };
   A.targets = function (c, AD) {
     var w = num(c.weight), ph = A.phase(AD, c.phase), b = A.bmr(c), F = AD.fac, M = A.manual(c, ph, b, w), days = (c.schedule || A.DEFAULT_SCHEDULE).map(function (s, i) {
