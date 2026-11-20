@@ -476,3 +476,6 @@ header .hdast{display:none!important}
 .chskp{grid-auto-rows:auto;align-items:start}
 .chskp>button,.chskp .skm>button:first-child{display:block!important;overflow:hidden!important;width:100%!important}.chskp>button img,.chskp .skm img{width:100%!important;height:auto!important;max-height:120px;object-fit:contain;display:block}
 .chskp{flex:0 0 auto!important;grid-auto-rows:max-content!important;min-height:180px}.chskp>button,.chskp .skm>button:first-child{overflow:visible!important}
+
+/* 1.16 تنبيه السلامة */
+.safeb{border:1.5px solid #e5484d;background:rgba(229,72,77,.1);color:inherit;border-radius:12px;padding:10px 14px;margin:0 0 10px;line-height:1.6}.safeb b{color:#e5484d}

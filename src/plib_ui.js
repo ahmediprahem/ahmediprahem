@@ -14,11 +14,12 @@ function pwLoad() {
 }
 function pwKcal(c) { try { var T = E.targets(ec(c), D); return { T: T, k: +c.kcalManual > 0 ? +c.kcalManual : Math.round(T.kcal) }; } catch (e) { return { T: null, k: 1500 }; } }
 function pwKnow(c) {                                                  // 1) تعرّف على العميل
+  var safeH = typeof safetyBanner === 'function' ? safetyBanner(c.safety || (c.age > 0 && c.age < 18 ? { minor: true } : null)) : '';
   var K = pwKcal(c), T = K.T, it = (c.hx && c.hx.intake) || {}, pan = c.pantry || {}, M = [['B', 'الفطور'], ['L', 'الغداء'], ['D', 'العشاء'], ['S', 'السناك']];
   var likes = M.map(function (m) { var n = Object.keys(pan[m[0]] || {}).filter(function (x) { return pan[m[0]][x] === 'h'; }); return n.length ? '<li><b>' + m[1] + '</b><span>' + esc(n.slice(0, 8).map(function (x) { return (c.alias && c.alias[x]) || x; }).join('، ')) + (n.length > 8 ? ' و' + (n.length - 8) + ' غيرها' : '') + '</span></li>' : ''; }).join('');
   var bmi = c.weight && c.height ? (c.weight / Math.pow(c.height / 100, 2)).toFixed(1) : '—';
   var row = function (k, v) { return v ? '<li><b>' + k + '</b><span>' + v + '</span></li>' : ''; };
-  return '<div class="ucard pwcard"><h3>١ تعرّف على العميل</h3><ul class="pwkv">'
+  return '<div class="ucard pwcard"><h3>١ تعرّف على العميل</h3>' + safeH + '<ul class="pwkv">'
     + row('الأساسيات', esc([c.sex, c.age ? c.age + ' سنة' : '', c.height ? c.height + ' سم' : '', c.weight ? c.weight + ' كجم' : ''].filter(Boolean).join(' • ')) + ' • مؤشر الكتلة ' + bmi)
     + row('الوزن المستهدف', +it.target ? it.target + ' كجم' : '')
     + row('النشاط والهدف', esc([c.activity, c.goal].filter(Boolean).join(' • ')))

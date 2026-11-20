@@ -781,8 +781,10 @@ const BQ = {                                       // الأسئلة الأسا�
   height: (q) => inp('height', esc(q.label), 'number', 'inputmode="numeric"'),
   bf: (q) => inp('bf', esc(q.label), 'number', 'inputmode="decimal" placeholder="اختياري"'),
   sport: (q) => inp('sport', esc(q.label), 'text', 'placeholder="مثال: كمال أجسام، كرة قدم، جري"'),
-  act: (q) => '<div class="field">' + lab(q) + '<div class="acts">' + DATA.activity.map((a, i) => '<button class="act' + (S.p.act === i ? ' on' : '') + '" data-act="set" data-k="act" data-v="' + i + '"><span class="bars">' + [0, 1, 2, 3, 4].map((j) => '<i class="' + (j <= i ? 'f' : '') + '" style="height:' + (6 + j * 4) + 'px"></i>').join('') + '</span><span>' + esc(a) + '</span></button>').join('') + '</div></div>',
-  goal: (q) => '<div class="field">' + lab(q) + '<div class="chips">' + DATA.goals.map((g, i) => '<button class="chip' + (S.p.goal === i ? ' on' : '') + '" data-act="set" data-k="goal" data-v="' + i + '">' + esc(goalLabel(i)) + '</button>').join('') + '</div></div>',
+  act: (q) => '<div class="field">' + lab(q) + '<div class="acts">' + DATA.activity.map((a, i) => '<button class="act' + (S.p.act === i ? ' on' : '') + '" data-act="set" data-k="act" data-v="' + i + '"><span class="bars">' + [0, 1, 2, 3, 4].map((j) => '<i class="' + (j <= i ? 'f' : '') + '" style="height:' + (6 + j * 4) + 'px"></i>').join('') + '</span><span>' + esc(actDay(i, a)) + '</span></button>').join('') + '</div></div>',
+  goal: (q) => '<div class="field">' + lab(q) + '<div class="opts">' + DATA.goals.map((g, i) => goalDay(i) === null ? '' : '<button class="opt' + (S.p.goal === i ? ' on' : '') + '" data-act="set" data-k="goal" data-v="' + i + '"><b>' + esc(goalDay(i)[0]) + '</b>' + (goalDay(i)[1] ? '<span class="d">' + esc(goalDay(i)[1]) + '</span>' : '') + '</button>').join('') + '</div></div>',
+  safe: (q) => { const f = S.p.sex === 'أنثى', yn = (k, t) => '<div class="field"><span class="lbl">' + t + '</span>' + seg(k, ['n', 'y'], S.p[k] || '', ['لا', 'نعم']) + '</div>';      // 1.16 أسئلة السلامة (قرار المالك)
+    return '<div class="banner warn">' + I('heart') + '<span>' + esc(q.label) + ': تساعد أخصائيك على خطة آمنة لك.</span></div>' + (f ? yn('preg', 'هل أنتِ حامل أو ترضعين؟') : '') + yn('dmed', 'هل تأخذ إنسولين أو أدوية لخفض السكر؟'); },
   gphase: (q) => '<div class="field">' + lab(q) + '<div class="chips">' + ((S.cat && S.cat.phases) || []).map((g) => '<button class="chip' + (S.p.gphase === g ? ' on' : '') + '" data-act="set" data-k="gphase" data-v="' + esc(g) + '">' + esc(g) + '</button>').join('') + '</div></div>',
   cond: (q) => '<div class="banner info">' + I('lock') + '<span>بياناتك الصحية تُشفَّر على جوالك ولا يقرؤها إلا أخصائيك.</span></div><div class="field">' + lab(q) + toggles('cond', DATA.conditions) + '</div>',
   allg: (q) => '<div class="field">' + lab(q) + toggles('allg', DATA.allergens) + '</div>',
@@ -821,6 +823,11 @@ function cqHtml(q) {                               // الأسئلة المخص�
   if (q.type === 'scale') return '<div class="field">' + lab(q) + '<div class="segc">' + [1, 2, 3, 4, 5].map((n) => '<button class="' + (String(v) === String(n) ? 'on' : '') + '" data-act="cq1" data-k="' + q.id + '" data-v="' + n + '">' + n + '</button>').join('') + '</div></div>';
   return '';
 }
+// 1.16 لغة يوم العميل (قرار المالك؛ النصوص في docs/team/questionnaire_copy_AR.md للمراجعة). المحفوظ يبقى رقم الترتيب نفسه
+const ACT_DAY = ['أغلب يومي جالس: مكتب أو بيت أو سيارة', 'أمشي قليلاً، أو رياضة خفيفة من يوم إلى 3 أيام في الأسبوع', 'أتحرك كثيراً في شغلي، أو أتمرن من 3 إلى 5 أيام', 'شغلي فيه مجهود، أو أتمرن من 6 إلى 7 أيام', 'مجهود بدني شاق كل يوم، أو تمرين مرتين في اليوم'];
+const actDay = (i, fb) => (DATA.activity.length === ACT_DAY.length && ACT_DAY[i]) || fb || '';
+const GOAL_DAY = [['أنزل وزني بهدوء', 'خطوة خطوة، بدون حرمان'], ['أنزل وزني بوتيرة أسرع', 'التزام أكبر ونتيجة أسرع'], ['أحافظ على وزني', 'أكل متوازن يثبّت وزني'], ['أزيد وزني بهدوء', 'زيادة صحية تدريجية'], ['أزيد وزني بوتيرة أسرع', 'لمن يحتاج زيادة أوضح'], null];
+const goalDay = (i) => (DATA.goals.length === GOAL_DAY.length ? GOAL_DAY[i] : [goalLabel(i), '']);
 // عنوان الهدف بلا الرقم، إلا إن ترك الحذف عنوانين متطابقين (القرار 5: «زيادة خفيفة (+250)» و«زيادة (+500)»). القيمة المحفوظة رقم الترتيب كما هي
 function goalLabel(i) {
   const G = DATA.goals || [], strip = (g) => String(g || '').replace(/[−+]\d+/, '').trim(), t = strip(G[i]), num = (String(G[i] || '').match(/[−+]\d+/) || [''])[0];
@@ -829,7 +836,7 @@ function goalLabel(i) {
 }
 function stepOk(st) {
   return vq(st).every((q) => {
-    if (q.b) { if (q.id === 'mfoods') return tlMeals().every(tlMealOk); if (q.id === 'sex') return !!S.p.sex; if (q.id === 'name' || q.id === 'phone') return !!String(S.p[q.id] || '').trim(); if (q.id === 'age' || q.id === 'weight' || q.id === 'height') return +S.p[q.id] > 0; return true; }
+    if (q.b) { if (q.id === 'mfoods') return tlMeals().every(tlMealOk); if (q.id === 'safe') return !!S.p.dmed && (S.p.sex !== 'أنثى' || !!S.p.preg); if (q.id === 'sex') return !!S.p.sex; if (q.id === 'name' || q.id === 'phone') return !!String(S.p[q.id] || '').trim(); if (q.id === 'age' || q.id === 'weight' || q.id === 'height') return +S.p[q.id] > 0; return true; }
     return !q.req || HForms.answered(q, (S.p.cq || {})[q.id]);
   });
 }
@@ -840,7 +847,7 @@ function scrWizard() {
   const mq = vq(st).some((q) => q.id === 'mfoods') ? tlSeq() : null, sub = mq && S.tls < mq.length - 1;      // اختيار الأكلات: شاشات فرعية قبل الخطوة التالية
   return '<div class="scr qz">' + (mq && S.tls > 0 ? head(esc(st.t), 'tls', S.tls - 1, 'الخطوة ' + s + ' من ' + N + ' • ' + (S.tls + 1) + '/' + mq.length) : head(esc(st.t), 'step', s - 1, 'الخطوة ' + s + ' من ' + N + (mq ? ' • 1/' + mq.length : '')))
     + '<div class="prog"><i style="width:' + Math.round(s / N * 100) + '%"></i></div>'
-    + '<div class="scroll"><div class="stack">' + (() => { const w = [...new Set(vq(st).filter((q) => q.b && WHY[q.id]).map((q) => WHY[q.id]))]; return w.length ? '<p class="why" role="note">' + I('lock') + ' لماذا نسأل؟ ' + w.join(' • ') + '</p>' : ''; })() + (s === 1 && S.req === 'changes' && S.reqMsg ? '<div class="banner warn">' + I('msg') + '<span><b>' + esc(S.dname) + ':</b> ' + esc(S.reqMsg) + '</span></div>' : '') + body + '</div></div>'
+    + '<div class="scroll"><div class="stack">' + (() => { const w = [...new Set(vq(st).filter((q) => q.b && WHY[q.id]).map((q) => WHY[q.id]))]; return w.length ? '<p class="why" role="note">' + I('lock') + ' لماذا نسأل؟ ' + w.join(' • ') + '</p>' : ''; })() + (s === 1 && S.pre ? '<div class="banner ok">' + I('check') + '<span>عبّأ أخصائيك بعض بياناتك مسبقاً. راجعها وعدّل إن لزم.</span></div>' : '') + (s === 1 && S.req === 'changes' && S.reqMsg ? '<div class="banner warn">' + I('msg') + '<span><b>' + esc(S.dname) + ':</b> ' + esc(S.reqMsg) + '</span></div>' : '') + body + '</div></div>'
     + '<div class="foot">' + (sub ? '<button class="btn full" data-act="tls" data-v="' + (S.tls + 1) + '" ' + (tlSubOk(mq[S.tls]) ? '' : 'disabled') + '>' + (S.tls ? 'التالي' : 'لنبدأ') + '</button>' : '<button class="btn full" data-act="step" data-v="' + (s + 1) + '" ' + (stepOk(st) ? '' : 'disabled') + '>' + (s === N ? 'مراجعة' : 'التالي') + '</button>') + '</div></div>';
 }
 function foodGrid(catKey, qKey) {
@@ -855,7 +862,8 @@ function bqText(q) {                               // نص الإجابة الأ
   const p = S.p, lk = foodsOf('love'), no = foodsOf('no');
   switch (q.id) {
     case 'weight': return p.weight ? p.weight + ' كجم (مؤشر الكتلة ' + bmi() + ')' : ''; case 'height': return p.height ? p.height + ' سم' : ''; case 'age': return p.age ? p.age + ' سنة' : '';
-    case 'bf': return p.bf ? p.bf + '%' : ''; case 'act': return DATA.activity[p.act] || ''; case 'goal': return goalLabel(p.goal);
+    case 'bf': return p.bf ? p.bf + '%' : ''; case 'act': return actDay(p.act, DATA.activity[p.act] || ''); case 'goal': return goalDay(p.goal) ? goalDay(p.goal)[0] : goalLabel(p.goal);
+    case 'safe': return (p.sex === 'أنثى' ? 'حامل أو مرضع: ' + (p.preg === 'y' ? 'نعم' : 'لا') + ' • ' : '') + 'أدوية سكر: ' + (p.dmed === 'y' ? 'نعم' : 'لا');
     case 'cond': return p.cond.join('، ') || 'لا'; case 'allg': return p.allg.join('، ') || 'لا';
     case 'meals': { const ml = MEALS.reduce((a, m) => a + p.like[m[0]].length, 0), mn = MEALS.reduce((a, m) => a + p.nope[m[0]].length, 0); return ml + ' وجبة تحبها • ' + mn + ' لا تريدها'; }
     case 'foods': return 'تحب: ' + (lk.slice(0, 6).join('، ') || '—') + (lk.length > 6 ? ' و' + (lk.length - 6) + ' غيرها' : '') + ' • لا تحب: ' + (no.slice(0, 6).join('، ') || '—');
@@ -2504,6 +2512,7 @@ function scrInst() {
 async function boot() {
   if (DEMO) { S = Object.assign(fresh(), JSON.parse(JSON.stringify(DEMO.state))); S.chat = false; S.day = TODAY; S.screen = 'app'; S.cid = 'demo'; mkData(); V.screen = onbSeen() ? '' : 'onb'; V.onb = { i: 0 }; return render(); }
   const m = /#t=([A-Za-z0-9_-]{16,40})\.([A-Za-z0-9_-]{11})\b/.exec(location.hash);
+  try { if (/[?&]tr=1\b/.test(location.search)) sessionStorage.setItem('hissati_tr', '1'); } catch (e) { }      // 1.16 رابط التجربة السريعة للأخصائي
   if (m) { try { sessionStorage.setItem(TKEY, m[1] + '.' + m[2]); } catch (e) { } history.replaceState(null, '', location.pathname); }
   const khL = /^#khams\b/.test(location.hash); if (khL) { history.replaceState(null, '', location.pathname); V.khWant = 1; }       // 0.58: رابط التحدي
   try { const q = new URLSearchParams(location.search); if (q.get('i') === '1') { V.inst = { u: String(q.get('u') || '').replace(/[^A-Za-z0-9._-]/g, '').slice(0, 30) }; history.replaceState(null, '', location.pathname + location.hash); } } catch (e) { }
@@ -2520,6 +2529,9 @@ async function boot() {
     if (!r.ok) throw new Error(j.code === 'used' ? 'استُعمل هذا الرابط من قبل. إن كنت أنت من سجّل فافتح «زنها» من نفس الجوال والمتصفح، وإلا فاطلب رابطاً جديداً من أخصائيك.' : j.code === 'expired' ? 'انتهت صلاحية هذا الرابط. اطلب رابطاً جديداً من أخصائيك.' : r.status >= 500 ? 'المحطة غير متاحة الآن. حاول بعد قليل.' : 'الرابط غير صحيح. افتحه كاملاً من رسالة أخصائيك.');
     if (await HXC.fpOf(j.encPub) !== fp) throw new Error('تعذّر التحقق من هوية الأخصائي في هذا الرابط. لا تكمل، واطلب رابطاً جديداً.');
     S = fresh(); Object.assign(S, { tok, fp, did: j.did, dEnc: j.encPub, dname: j.dname || 'أخصائي التغذية', cat: j.cat || {}, ui: { today2: true } }); S.p.name = j.label || ''; mkData();
+    if (j.cat && j.cat.pre) { try { const pr = await HXC.gOpen(HXC.b64u(await HXC.sha256('pre.' + tok)), j.cat.pre); if (pr.sex === 'أنثى' || pr.sex === 'ذكر') S.p.sex = pr.sex; ['age', 'height', 'weight'].forEach((k) => { if (+pr[k] > 0 && +pr[k] < 500) S.p[k] = String(+pr[k]); }); S.pre = 1; } catch (e) { } }      // 1.16 تعبئة مسبقة مشفّرة من الأخصائي
+    let trial = false; try { trial = sessionStorage.getItem('hissati_tr') === '1'; } catch (e) { }
+    if (trial) { try { localStorage.setItem(ONB_KEY, '1'); localStorage.setItem(INTRO_KEY, '1'); if (!localStorage.getItem(INTRO_CC)) localStorage.setItem(INTRO_CC, 'eg'); } catch (e) { } Object.assign(S.p, { phone: S.p.phone || '0500000000', sex: S.p.sex || 'أنثى', age: S.p.age || '30', weight: S.p.weight || '72', height: S.p.height || '165' }); S.trial = 1; }
     V.screen = onbSeen() ? '' : 'onb'; V.onb = { i: 0 }; render();
   } catch (e) { V.err = e.message; V.retry = !!e.retry; V.screen = 'bad'; render(); }
 }
