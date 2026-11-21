@@ -847,7 +847,7 @@ function scrWizard() {
   const mq = vq(st).some((q) => q.id === 'mfoods') ? tlSeq() : null, sub = mq && S.tls < mq.length - 1;      // اختيار الأكلات: شاشات فرعية قبل الخطوة التالية
   return '<div class="scr qz">' + (mq && S.tls > 0 ? head(esc(st.t), 'tls', S.tls - 1, 'الخطوة ' + s + ' من ' + N + ' • ' + (S.tls + 1) + '/' + mq.length) : head(esc(st.t), 'step', s - 1, 'الخطوة ' + s + ' من ' + N + (mq ? ' • 1/' + mq.length : '')))
     + '<div class="prog"><i style="width:' + Math.round(s / N * 100) + '%"></i></div>'
-    + '<div class="scroll"><div class="stack">' + (() => { const w = [...new Set(vq(st).filter((q) => q.b && WHY[q.id]).map((q) => WHY[q.id]))]; return w.length ? '<p class="why" role="note">' + I('lock') + ' لماذا نسأل؟ ' + w.join(' • ') + '</p>' : ''; })() + (s === 1 && S.pre ? '<div class="banner ok">' + I('check') + '<span>عبّأ أخصائيك بعض بياناتك مسبقاً. راجعها وعدّل إن لزم.</span></div>' : '') + (s === 1 && S.req === 'changes' && S.reqMsg ? '<div class="banner warn">' + I('msg') + '<span><b>' + esc(S.dname) + ':</b> ' + esc(S.reqMsg) + '</span></div>' : '') + body + '</div></div>'
+    + '<div class="scroll"><div class="stack">' + (ZZ_ON() ? '<div class="zzrow"><span class="zzmini">' + Zizo.svg(s === 1 ? { wave: 1 } : s === N ? { eyes: 'happy', mouth: 'laugh' } : { mouth: 'smile', prop: 'paper' }) + '</span><span class="zzs">' + (s === 1 ? 'أهلاً! أنا زيزو 🦊 خطوات قصيرة ونبدأ' : s === N ? 'آخر خطوة! بعدها يجهّز أخصائيك خطتك' : ['ممتاز، كمّل 👏', 'ماشي حلو!', 'قرّبنا 💪'][s % 3]) + '</span></div>' : '') + (() => { const w = [...new Set(vq(st).filter((q) => q.b && WHY[q.id]).map((q) => WHY[q.id]))]; return w.length ? '<p class="why" role="note">' + I('lock') + ' لماذا نسأل؟ ' + w.join(' • ') + '</p>' : ''; })() + (s === 1 && S.pre ? '<div class="banner ok">' + I('check') + '<span>عبّأ أخصائيك بعض بياناتك مسبقاً. راجعها وعدّل إن لزم.</span></div>' : '') + (s === 1 && S.req === 'changes' && S.reqMsg ? '<div class="banner warn">' + I('msg') + '<span><b>' + esc(S.dname) + ':</b> ' + esc(S.reqMsg) + '</span></div>' : '') + body + '</div></div>'
     + '<div class="foot">' + (sub ? '<button class="btn full" data-act="tls" data-v="' + (S.tls + 1) + '" ' + (tlSubOk(mq[S.tls]) ? '' : 'disabled') + '>' + (S.tls ? 'التالي' : 'لنبدأ') + '</button>' : '<button class="btn full" data-act="step" data-v="' + (s + 1) + '" ' + (stepOk(st) ? '' : 'disabled') + '>' + (s === N ? 'مراجعة' : 'التالي') + '</button>') + '</div></div>';
 }
 function foodGrid(catKey, qKey) {
@@ -935,7 +935,7 @@ function scrSent() {
   if (st === 'rejected' || S.removed) return '<div class="scr"><div class="scroll"><div class="stack" style="padding-top:26px"><div class="empty"><div class="ei" style="color:var(--coral)">' + I('alert') + '</div><h1>توقف الربط مع أخصائيك</h1><p class="mut">لا يمكن إرسال بيانات جديدة من هذا الحساب. تواصل مع أخصائيك إن كان ذلك خطأ، وسيرسل لك رابطاً جديداً.</p></div><button class="btn sec full" data-act="wipe">حذف بياناتي من هذا الجوال</button></div></div></div>';
   const step = (cls, t, d) => '<div><i class="' + cls + '">' + (cls === 'ok' ? I('check') : '') + '</i><div><b>' + t + '</b><div class="dim">' + d + '</div></div></div>';
   return '<div class="scr"><div class="scroll"><div class="stack" style="padding-top:26px">'
-    + '<div class="empty"><div class="ei" style="background:rgba(111,227,169,.15);color:var(--mint)">' + I(ch ? 'msg' : ok ? 'check' : 'send') + '</div><h1>' + (ch ? 'أخصائيك طلب تعديلاً' : ok ? 'اعتمدك أخصائيك' : 'وصل طلبك إلى أخصائيك') + '</h1><p class="mut">' + (ch ? 'اقرأ الملاحظة ثم عدّل بياناتك وأعد الإرسال.' : ok ? 'يجهّز خطتك الآن، وتصلك هنا فور إرسالها.' : 'سيراجع بياناتك ويجهّز خطتك. ستصلك هنا مع إشعار.') + '</p></div>'
+    + '<div class="empty">' + (ZZ_ON() ? zzArt(ch ? { prop: 'paper', mouth: 'calm' } : ok ? { wave: 1, eyes: 'happy', mouth: 'laugh', anim: 'jump' } : { wave: 1, mouth: 'smile' }) : '<div class="ei" style="background:rgba(111,227,169,.15);color:var(--mint)">' + I(ch ? 'msg' : ok ? 'check' : 'send') + '</div>') + '<h1>' + (ch ? 'أخصائيك طلب تعديلاً' : ok ? 'اعتمدك أخصائيك' : 'وصل طلبك إلى أخصائيك') + '</h1><p class="mut">' + (ch ? 'اقرأ الملاحظة ثم عدّل بياناتك وأعد الإرسال.' : ok ? 'يجهّز خطتك الآن، وتصلك هنا فور إرسالها.' : 'سيراجع بياناتك ويجهّز خطتك. ستصلك هنا مع إشعار.') + '</p></div>'
     + (ch ? '<div class="banner warn">' + I('msg') + '<span><b>' + esc(S.dname) + ':</b> ' + esc(S.reqMsg) + '</span></div><button class="btn full" data-act="step" data-v="1">تعديل بياناتي</button>' : '')
     + '<div class="card tl">' + step('ok', 'أُرسلت بياناتك', 'مشفّرة إلى ' + esc(S.dname))
     + step(ok ? 'ok' : 'now', ok ? 'اعتمدك أخصائيك' : 'قيد المراجعة', ok ? 'رقم ملفك ' + esc(S.code) : 'عادة خلال يوم عمل')
@@ -1032,7 +1032,7 @@ function sndCard() { if (!sndAvail()) return ''; return '<section class="card st
 function sceneHeader(first, d) {
   const tod = todOf(new Date().getHours()), egy = window.HxTheme && HxTheme.get() === 'firoz', st = dayStreak();
   return '<section class="scn" data-tod="' + tod + '">' + sceneSvg(tod, egy) + '<div class="hello"><div class="av sm">' + esc(first.charAt(0) || '؟') + '</div><div style="flex:1;min-width:0"><div class="dim">' + esc(DATA.dayNames[d] || '') + '</div><h2>' + TOD[tod].g + ' ' + esc(first) + '</h2></div>'
-    + (st ? '<span class="stk" aria-label="' + st + (st === 1 ? ' يوم متتالٍ' : ' أيام متتالية') + '">' + I('flame') + '<b>' + st + '</b></span>' : '') + sndBtn() + chatBtn() + '</div></section>';
+    + (st ? '<span class="stk" aria-label="' + st + (st === 1 ? ' يوم متتالٍ' : ' أيام متتالية') + '">' + I('flame') + '<b>' + st + '</b></span>' : '') + sndBtn() + chatBtn() + '</div>' + zzMini().replace('class="zzmini"', 'class="zzmini zzscn"') + '</section>';
 }
 
 // ---- 0.65: اختصارات أيقونة التطبيق (?a=meal|water|chat|wheel)، رقم الوجبات المتبقية على الأيقونة، والعدّ التنازلي للوجبة القادمة
@@ -1068,8 +1068,22 @@ function missionCard(d) {                                  // أول وجبة ل
   return '<section class="card msn done"><div class="mis"><span class="mic">' + I('check') + '</span><div style="flex:1;min-width:0"><small>مهمتك الآن</small><h3>أحسنت، أنجزت مهام اليوم</h3><p class="dim">وجباتك وماؤك كاملة. استرح، وغداً نكمل.</p></div></div></section>';
 }
 
+// ---------- 1.34 «زيزو» شخصية زنها (الاجتماع 10، م1): تحية الرأس، الانتظار، الاستبيان، الحالات الفارغة، الاحتفالات، تسجيل الوجبة والماء. يُخفى من «أنا»
+// لا يظهر في محتوى العبادة ولا داخل جدول الخطة ولا يرد في المحادثة. نصوصه تحيات وتشجيع فقط
+const ZZ_ON = () => !!(window.Zizo && S && !S.zzOff);
+const zzTod = () => { const h = new Date().getHours(); return h < 5 ? 'n' : h < 12 ? 'm' : h < 17 ? 'a' : h < 22 ? 'e' : 'n'; };
+function zzMini() { if (!ZZ_ON()) return ''; const t = zzTod(), o = t === 'm' ? { wave: 1, hat: 'sun' } : t === 'n' ? { eyes: 'sleep', mouth: 'calm', zzz: 1, anim: 'sleep' } : t === 'e' ? { mouth: 'calm' } : { mouth: 'smile' }; return '<button class="zzmini" data-act="zzTap" aria-label="زيزو">' + Zizo.svg(o) + '</button>'; }
+function zzArt(o) { return '<div class="zzart">' + Zizo.svg(o) + '</div>'; }
+function zzAfterCk(si) {
+  if (!ZZ_ON()) return; const d = TODAY, L = dl(d), sl = dayPlan(d).slots, [done, n] = itemsOfDay(d), k = dkey(new Date());
+  if (n && done === n && S.zzDay !== k) { S.zzDay = k; save(); setTimeout(() => Zizo.say({ prop: 'trophy', eyes: 'happy', mouth: 'laugh', anim: 'dance', sparkle: 1 }, 'يوم كامل! 🎉 فخور بيك', 5200), 60); return; }
+  const s = sl[si]; if (s && s.lines.length && s.lines.every((l, li) => L.ck[si + '_' + li])) setTimeout(() => Zizo.say({ prop: 'plate', mouth: 'smile', anim: 'nod' }, 'أحسنت! ' + s.name + ' ✓'), 60);
+}
+const ZZ_LAUGH = ['هههه! بتزغزغني 😆', 'أنا سامعك بودان كبيرة 👂', 'يلا نكمّل يومنا سوا 💚', 'أنا هنا لو احتجت تشجيع 🦊'];
+function zzCard() { return '<section class="card stack"><div class="zzrow"><span class="zzmini">' + (window.Zizo ? Zizo.svg({ wave: 1 }) : '') + '</span><div style="flex:1;min-width:0"><h3>زيزو رفيقك</h3><p class="dim">يحيّيك ويحتفل معك بإنجازاتك. تقدر تخفيه متى شئت.</p></div><input type="checkbox" class="sw" data-act="zzTog" aria-label="أظهر زيزو"' + (S.zzOff ? '' : ' checked') + '></div></section>'; }
 // ---------- 0.59: رسوم الحالات الفارغة (تتبع ألوان الثيم) وأيقونات الوجبات
 function emptyArt(k) {
+  if (ZZ_ON()) { const P = { weight: { prop: 'scale' }, news: { prop: 'paper' }, chat: { prop: 'phone' }, ach: { prop: 'trophy', eyes: 'happy', mouth: 'laugh' } }[k]; if (P) return '<div class="ea">' + zzArt(P) + '</div>'; }
   const A = {
     weight: '<rect x="30" y="20" width="60" height="52" rx="14" fill="var(--mint)" fill-opacity=".16" stroke="var(--mint)" stroke-width="2"/><path d="M44 44a16 16 0 0 1 32 0" fill="none" stroke="var(--mint)" stroke-width="2.4" stroke-linecap="round"/><path d="M60 44l6-9" stroke="var(--amber)" stroke-width="2.4" stroke-linecap="round"/><path d="M8 80c20 0 24-10 44-10s28 8 60 0" fill="none" stroke="var(--line2)" stroke-width="2" stroke-dasharray="4 5"/><circle cx="112" cy="72" r="4" fill="var(--amber)"/>',
     news: '<rect x="26" y="18" width="62" height="58" rx="6" fill="var(--sky)" fill-opacity=".14" stroke="var(--sky)" stroke-width="2"/><path d="M88 28v44a8 8 0 0 0 16 0V34" fill="none" stroke="var(--sky)" stroke-width="2.2" stroke-linecap="round"/><path d="M36 32h30M36 42h40M36 52h26" stroke="var(--mut)" stroke-width="2.4" stroke-linecap="round"/><path d="M72 64c2-3 4-3 6 0-2 3-4 3-6 0z" fill="var(--amber)"/>',
@@ -1395,7 +1409,7 @@ function t2Card() {
 }
 function helloHd(d) {                                   // الرأس في الشكلين: التحية، ثم المحادثة بشارة غير المقروء، ثم زر «أنا»
   const first = (S.p.name || '').trim().split(/\s+/)[0] || '';
-  return '<div class="hello"><div style="flex:1;min-width:0"><div class="dim">' + esc(DATA.dayNames[d] || '') + '</div><h2>أهلاً ' + esc(first) + '</h2></div>' + chatBtn()
+  return '<div class="hello"><div style="flex:1;min-width:0"><div class="dim">' + esc(DATA.dayNames[d] || '') + '</div><h2>أهلاً ' + esc(first) + '</h2></div>' + zzMini() + chatBtn()
     + '<button class="av sm mebtn" data-act="tab" data-v="me" aria-label="أنا — الإعدادات">' + esc(first.charAt(0) || '؟') + '</button></div>';
 }
 function waterRow() {                                   // 0.60 أ8: مدخل الماء الوحيد في «اليوم» (نفس الحقل اليومي L.water)
@@ -1480,7 +1494,7 @@ function healthCard() {
 }
 function tabMe() {
   return '<div class="row mehd"><h2>الإعدادات</h2></div>'
-    + '<h3 class="mesec">العرض</h3>' + themeCard() + fsCard()
+    + '<h3 class="mesec">العرض</h3>' + themeCard() + zzCard() + fsCard()
     + '<h3 class="mesec">التذكيرات</h3>' + remCard() + whCard()
     + '<h3 class="mesec">الإشعارات والتثبيت</h3><section class="card stack">' + notifCard(false) + installCard('acct') + '</section>'
     + '<h3 class="mesec">المساعدة</h3><section class="card stack"><h3>جولة تعريفية</h3><p class="dim">شرح سريع لأجزاء التطبيق.</p><button class="btn sec" data-act="tourGo">' + I('compass') + ' أعد الجولة</button></section>'
@@ -2154,7 +2168,7 @@ function celebrate(id) {
   const c = CHEER[id]; if (!c) return; const old = document.getElementById('cel'); if (old) old.remove();
   const el = document.createElement('div'); el.id = 'cel'; el.className = 'cel cel-' + id; const st = HB(id) ? hStreak(id) : 0;
   el.innerHTML = '<div class="fx">' + Array.from({ length: 18 }, (_, i) => '<i style="--y:' + ((i * 53) % 90) + ';left:' + ((i * 37) % 100) + '%;animation-delay:' + ((i % 6) * 0.18).toFixed(2) + 's;font-size:' + (18 + (i * 7) % 18) + 'px">' + c.fx + '</i>').join('') + '</div>'
-    + '<div class="celc">' + (id === 'adhkar' || id === 'adhkarPm' ? '<div class="adheart pulse">' + heartSvg(1, 1, id === 'adhkarPm') + '</div>' : '<div class="celi">' + (HB(id) ? HB(id).ic : c.fx) + '</div>') + '<h2>' + c.t + '</h2><p>' + c.m + '</p>' + (st > 1 ? '<span class="hbs">🔥 ' + st + ' أيام متتالية</span>' : '') + '<small>المس للمتابعة</small></div>';
+    + '<div class="celc">' + (id === 'adhkar' || id === 'adhkarPm' ? '<div class="adheart pulse">' + heartSvg(1, 1, id === 'adhkarPm') + '</div>' : ZZ_ON() ? '<div class="celi zzart">' + Zizo.svg({ prop: id === 'water' ? 'water' : 'trophy', eyes: 'happy', mouth: 'laugh', anim: 'dance', sparkle: 1 }) + '</div>' : '<div class="celi">' + (HB(id) ? HB(id).ic : c.fx) + '</div>') + '<h2>' + c.t + '</h2><p>' + c.m + '</p>' + (st > 1 ? '<span class="hbs">🔥 ' + st + ' أيام متتالية</span>' : '') + '<small>المس للمتابعة</small></div>';
   el.onclick = () => el.remove(); document.body.appendChild(el); if (navigator.vibrate) try { navigator.vibrate([30, 60, 30]); } catch (x) { } setTimeout(() => el.remove(), 6000);
 }
 // ---------- التحديات الأسبوعية من أخصائيك وشهادات التقدير («إنجازاتي»)
@@ -2785,7 +2799,7 @@ document.addEventListener('click', (e) => {
     case 'remG': { const O = V.remOpen || (V.remOpen = {}); O[v] = !O[v]; break; }
 
     case 'day': S.day = +v; break;
-    case 'ck': { const L = dl(TODAY); L.ck[v] = !L.ck[v]; if (!L.ck[v]) delete L.ck[v]; queueLog(dkey(new Date())); break; }
+    case 'ck': { const L = dl(TODAY); L.ck[v] = !L.ck[v]; if (!L.ck[v]) delete L.ck[v]; queueLog(dkey(new Date())); if (L.ck[v]) zzAfterCk(+String(v).split('_')[0]); break; }
     case 'mtOpen': V.mtE = {}; sheet = { t: 'mt' }; break;
     case 'mtSave': { const r = mtRead(), base = {}; mtNames().forEach(([n, t0]) => { base[n] = t0; }); S.mt = {}; Object.keys(r).forEach((n) => { if (r[n] !== base[n]) S.mt[n] = r[n]; }); S.rem = Object.assign({ water: false, meals: false }, S.rem, { meals: true }); sheet = null; save(); remSync(true); toast('✓ حُفظت مواعيد وجباتك، وسيصلك التذكير في موعد كل وجبة'); break; }
     case 'mtReset': S.mt = {}; sheet = null; save(); remSync(true); toast('رجعت لمواعيد أخصائيك'); break;
@@ -2799,9 +2813,11 @@ document.addEventListener('click', (e) => {
     case 'plGo': if (v === 'habits') sheet = { t: 'hb' }; else if (v === 'move') sheet = { t: 'daylog' }; else { S.pt = 'meals'; S.day = TODAY; if (v === 'water') setTimeout(() => { const w = document.getElementById('wrow'); if (w) w.scrollIntoView({ block: 'center' }); }, 60); } break;
     case 'wpre': { const L = dl(TODAY), si = +v; L.wp = L.wp || {}; if (L.wp[si]) { delete L.wp[si]; L.water = Math.max(0, (L.water || 0) - 2); } else { L.wp[si] = 1; L.water = Math.min(24, (L.water || 0) + 2); } queueLog(dkey(new Date())); break; }
     case 'adhOpen': S.tab = 'plan'; S.day = TODAY; break;
-    case 'whole': { const L = dl(TODAY), s = dayPlan(TODAY).slots[+v], all = s.lines.every((l, li) => L.ck[v + '_' + li]); s.lines.forEach((l, li) => { if (all) delete L.ck[v + '_' + li]; else L.ck[v + '_' + li] = 1; }); delete L.skip[v]; queueLog(dkey(new Date())); break; }
+    case 'whole': { const L = dl(TODAY), s = dayPlan(TODAY).slots[+v], all = s.lines.every((l, li) => L.ck[v + '_' + li]); s.lines.forEach((l, li) => { if (all) delete L.ck[v + '_' + li]; else L.ck[v + '_' + li] = 1; }); delete L.skip[v]; queueLog(dkey(new Date())); if (!all) zzAfterCk(+v); break; }
     case 'skip': { const L = dl(TODAY); L.skip[v] = !L.skip[v]; if (L.skip[v]) dayPlan(TODAY).slots[+v].lines.forEach((l, li) => delete L.ck[v + '_' + li]); else delete L.skip[v]; queueLog(dkey(new Date())); break; }
-    case 'water': { const was = hOkDay('water'), L = dl(TODAY); L.water = L.water === +v ? +v - 1 : +v; queueLog(dkey(new Date())); if (!was && hOkDay('water') && hList().indexOf('water') >= 0) setTimeout(() => celebrate('water'), 50); break; }
+    case 'water': { const was = hOkDay('water'), L = dl(TODAY); L.water = L.water === +v ? +v - 1 : +v; queueLog(dkey(new Date())); if (!was && hOkDay('water') && hList().indexOf('water') >= 0) setTimeout(() => celebrate('water'), 50); else if (ZZ_ON() && L.water === +v) setTimeout(() => Zizo.say({ prop: 'water', mouth: 'smile', anim: 'jump' }, 'كوب ' + L.water + ' من ' + hWaterGoal() + ' 💧', 2600), 60); break; }
+    case 'zzTap': { if (!window.Zizo) break; V.zzN = (V.zzN || 0) + 1; if (V.zzN > 3) { V.zzN = 0; Zizo.say({ eyes: 'sleep', mouth: 'calm', zzz: 1, anim: 'sleep' }, 'هششش… زيزو نايم شوية 😴', 2600); } else Zizo.say({ eyes: 'happy', mouth: 'laugh', anim: 'laugh' }, ZZ_LAUGH[Math.floor(Math.random() * ZZ_LAUGH.length)], 3000); return; }
+    case 'zzTog': { S.zzOff = !el.checked; if (S.zzOff && window.Zizo) Zizo.hide(); break; }
     case 'swap': sheet = { t: 'swap', k: v }; break;
     case 'doswap': { const L = dl(TODAY); if (v) { L.sw[sheet.k] = v; L.ck[sheet.k] = 1; toast('تم التبديل، وسيعرف أخصائيك.'); } else delete L.sw[sheet.k]; sheet = null; queueLog(dkey(new Date())); break; }
     case 'note': sheet = { t: 'note', si: +v }; break;

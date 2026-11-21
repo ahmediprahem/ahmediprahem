@@ -173,6 +173,7 @@ function genPlanStep(c, g) {
   if (g.path === 'eqv' && T) man = genEqv(c, g, T);
   if (!po.has && man) return man;      // 1.29: لا بطاقة «خطة يدوية» قبل التوليد (حُذف المسار اليدوي)
   return man + '<div class="ucard genplan gen-' + (ck ? 'st-' + ck.st : 'none') + '" data-st="' + (ck ? ck.st : '') + '"><h3>' + (g.path === 'ready' ? 'خطة جاهزة' : 'الخطة') + '</h3>'
+    + (po.has && ck && genZz() ? '<div class="zzrow zzproline"><span class="zzmini">' + genZz(ck.st === 'ok' ? { prop: 'board', mouth: 'smile', anim: 'nod' } : { prop: 'magnifier', mouth: 'calm', brow: 1 }) + '</span><span class="zzs">' + (ck.st === 'ok' ? 'تمام يا دكتور: ' + ck.ok + ' من ' + (ck.ok + ck.warn + ck.block) + ' أيام مطابقة ✓' : 'لحظة… في ' + (ck.warn + ck.block) + (ck.warn + ck.block > 1 ? ' أيام تحتاج' : ' يوم يحتاج') + ' نظرك قبل الإرسال') + '</span></div>' : '')
     + (po.has ? genBento(c, ck, T, po) : '<p class="small">لا خطة بعد.</p>')
     + (ck ? '<p class="genst">' + { ok: '✔ مطابقة', warn: '⚠ تحتاج نظرك', block: '⛔ غير مطابقة' }[ck.st] + ': ' + ck.ok + ' أيام مطابقة، ' + ck.warn + ' تنبيه، ' + ck.block + ' مانع</p>' : '')
     + '<p>' + (man ? '' : '<button data-a="genBuild">' + (po.has ? '↻ أعد التوليد' : '⚙ ولّد الخطة') + '</button> ') + (po.has ? '<button class="sec" data-a="tab" data-v="plan">افتح الخطة للتعديل</button> ' : '') + '<button class="sec" data-a="genStep" data-v="5">التالي: المراجعة والإرسال ›</button></p></div>' ;
@@ -223,11 +224,13 @@ function genNarrow() { return typeof window !== 'undefined' && window.innerWidth
 function genRM() { try { return window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } }
 function genVT(fn) { if (document.startViewTransition && !genRM()) { try { var vt = document.startViewTransition(fn), no = function () { }; ['ready', 'finished', 'updateCallbackDone'].forEach(function (k) { if (vt[k] && vt[k].catch) vt[k].catch(no); }); return; } catch (e) { } } fn(); }      // الحالة تتغير فوراً، والرسم وحده داخل الانتقال      // انتقال ناعم بين الخطوات حيث يدعمه المتصفح، ويُلغى مع «تقليل الحركة»
 function genStp(k, idx, val) { return '<span class="gstp"><button type="button" class="sec gsb" data-a="genStp" data-v="' + k + '|' + idx + '|-1" aria-label="أنقص">−</button><input type="number" class="n" min="0" step="1" data-' + k + '="' + idx + '" value="' + val + '"><button type="button" class="sec gsb" data-a="genStp" data-v="' + k + '|' + idx + '|1" aria-label="زد">＋</button></span>'; }
+// 1.34 «زيزو» بالبالطو الأبيض في «زنها Pro» (قرار المالك): في بطاقة العميل وبعد التوليد بحسب حالة الخطة
+function genZz(o) { return window.Zizo && !(S.settings && S.settings.zzOff) ? Zizo.svg(Object.assign({ coat: 1 }, o || {})) : ''; }
 function genBmi(c) { var h = +c.height / 100, w = +c.weight; return h > 0 && w > 0 ? Math.round(w / h / h * 10) / 10 : 0; }
 function genHero(c, mini) {
   var b = genBmi(c), tile = function (l, v, u) { return '<div class="ght"><small>' + l + '</small><b>' + (v ? esc(v) : '—') + '</b>' + (v && u ? '<i>' + u + '</i>' : '') + '</div>'; };
   return '<div class="genhero' + (mini ? ' mini' : '') + '"><span class="ghav">' + esc(initial(c.name || '؟')) + '</span><div class="ghn"><b>' + esc(c.name || 'عميل جديد') + '</b><small>' + esc(c.code) + ' • ' + (c.kind === 'athlete' ? 'نظام الجرامات' : 'نظام الحصص') + (c.sex ? ' • ' + esc(c.sex) : '') + '</small></div>'
-    + '<div class="ghts">' + tile('العمر', c.age, 'سنة') + tile('الوزن', c.weight, 'كجم') + tile('الطول', c.height, 'سم') + tile('مؤشر الكتلة', b, '') + '</div></div>';
+    + '<div class="ghts">' + tile('العمر', c.age, 'سنة') + tile('الوزن', c.weight, 'كجم') + tile('الطول', c.height, 'سم') + tile('مؤشر الكتلة', b, '') + '</div>' + (genZz() ? '<span class="zzpro" aria-hidden="true">' + genZz(mini ? { mouth: 'smile' } : { wave: 1, mouth: 'smile' }) + '</span>' : '') + '</div>';
 }
 function genClient(c, g) {
   var ath = c.kind === 'athlete';
