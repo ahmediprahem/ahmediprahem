@@ -9618,20 +9618,7 @@ function genHud(v, T) {
 // ---- 1.21 المرحلة 6: محرر اليوم — كمية كل صنف (تحدّث الوجبة واليوم والمتبقي)، والبدائل بأنواعها بفرق السعرات وسبب الترشيح، ووجبة من البنك بالمطابقة المرنة
 var GENX = { subs: null, meals: null };
 function genDv(x) { var r = function (v) { return (v > 0 ? '+' : '') + Math.round(v); }; return '<span class="gdv">' + r(x.dk != null ? x.dk : x.k) + ' سعرة • ك ' + r(x.dc != null ? x.dc : x.c) + ' • ب ' + r(x.dp != null ? x.dp : x.p) + ' • د ' + r(x.df != null ? x.df : x.f) + '</span>'; }
-function genEditor(c, g, T) {
-  var p = c.plan; if (!p || !p.days || !p.days.length || c.kind === 'athlete') return ''; var di = Math.min(g.day || 0, p.days.length - 1), d = p.days[di], n = d.nominal || [0, 0, 0];
-  return '<div class="ucard genedit"><h3>محرر ' + esc(dayName(p, di)) + '</h3>' + genHud({ c: n[0], p: n[1], f: n[2], k: n[0] * 4 + n[1] * 4 + n[2] * 9 }, T)
-    + d.slots.map(function (s, si) {
-      var mv = GENX.meals === si ? E.mealMatch(ec(c), E.slotReq(s), s.type, D, 8) : null;
-      return '<div class="gslot"><h4>' + esc(mealNm(p, s)) + (s.meal ? ' <small>' + esc(s.meal) + '</small>' : '') + (s.flex ? ' <span class="gxk">' + E.MATCH_AR[s.flex] + '</span>' : '') + '</h4>'
-        + (mv ? '<ul class="gml">' + (mv.length ? mv.map(function (m, k) { return '<li class="lv-' + m.lvl + '"><b>' + esc(m.n) + '</b> <span class="gxk">' + m.lvl + ' ' + E.MATCH_AR[m.lvl] + '</span> ' + genDv(m.dv) + (m.lvl !== 'D' ? ' <button class="sm" data-a="genMealPick" data-v="' + si + ',' + k + '">اختر</button>' : '') + '</li>'; }).join('') : '<li class="small">لا وجبات في البنك تناسب هذه الوجبة.</li>') + '</ul>' : '')
-        + '<ul class="glines">' + s.lines.map(function (l, li) {
-          if (l.missing) return '<li class="small warn">' + esc(l.text || '') + '</li>'; var key = si + ',' + li, sb = GENX.subs === key ? E.subs(l, s.type, p, D, 12) : null;
-          return '<li><span class="gln">' + esc(l.text) + '</span> <input type="number" class="n" min="0" step="0.5" value="' + l.e + '" data-ge="' + key + '" aria-label="حصص ' + esc(l.name) + '"> <button class="link" data-a="genSubs" data-v="' + key + '">بدائل</button>'
-            + (sb ? '<ul class="gsubs">' + (sb.length ? sb.map(function (x, k) { return '<li><span class="gxk">' + x.type + ' ' + E.SUBT_AR[x.type] + '</span> <b>' + esc(x.text) + '</b> ' + genDv(x) + ' <small>' + esc(x.why) + '</small> <button class="sm" data-a="genSubPick" data-v="' + key + ',' + k + '">اختر</button></li>'; }).join('') : '<li class="small">لا بدائل مناسبة.</li>') + '</ul>' : '') + '</li>';
-        }).join('') + '</ul></div>';
-    }).join('') + '</div>';
-}
+// 1.32: حُذف «محرر اليوم» من خطوة الخطة (قرار المالك: لا يضيف معنى)؛ التعديل من «الخطة» نفسها
 // ---- 1.22 المرحلة 7: المسار الجاهز — مراجعة خريطة النص إلى الأصناف (تُحفظ للجميع)، والتحويل إلى خطة بصيغة المحرك مع استبدال المستبعد تلقائياً
 function genTmap() { return S.settings.tmap || (S.settings.tmap = {}); }
 function genReady(c, g) {
@@ -9726,7 +9713,7 @@ function genPlanStep(c, g) {
   return man + '<div class="ucard genplan gen-' + (ck ? 'st-' + ck.st : 'none') + '" data-st="' + (ck ? ck.st : '') + '"><h3>' + (g.path === 'ready' ? 'خطة جاهزة' : 'الخطة') + '</h3>'
     + (po.has ? genBento(c, ck, T, po) : '<p class="small">لا خطة بعد.</p>')
     + (ck ? '<p class="genst">' + { ok: '✔ مطابقة', warn: '⚠ تحتاج نظرك', block: '⛔ غير مطابقة' }[ck.st] + ': ' + ck.ok + ' أيام مطابقة، ' + ck.warn + ' تنبيه، ' + ck.block + ' مانع</p>' : '')
-    + '<p>' + (man ? '' : '<button data-a="genBuild">' + (po.has ? '↻ أعد التوليد' : '⚙ ولّد الخطة') + '</button> ') + (po.has ? '<button class="sec" data-a="tab" data-v="plan">افتح الخطة للتعديل</button> ' : '') + '<button class="sec" data-a="genStep" data-v="5">التالي: المراجعة والإرسال ›</button></p></div>' + '' + (T && po.src === 'engine' ? genEditor(c, g, T) : '');
+    + '<p>' + (man ? '' : '<button data-a="genBuild">' + (po.has ? '↻ أعد التوليد' : '⚙ ولّد الخطة') + '</button> ') + (po.has ? '<button class="sec" data-a="tab" data-v="plan">افتح الخطة للتعديل</button> ' : '') + '<button class="sec" data-a="genStep" data-v="5">التالي: المراجعة والإرسال ›</button></p></div>' ;
 }
 function genSend(c, g) {
   var po = planOf(c), ck = null, T = null; try { T = c.kind === 'athlete' ? null : E.targets(ec(c), D); if (po.src === 'engine' && c.plan && c.plan.days && c.kind !== 'athlete') ck = E.checkPlan(c.plan, D); } catch (e) { }
