@@ -110,3 +110,4 @@ html:not([data-tone="light"]){--g-ink:#e8ecff;--g-mut:#9aa6c8;--g-card:rgba(255,
 .eqbki .lv-A,.eqbki .lv-B{background:rgba(16,185,129,.14);color:#047857}.eqbki .lv-C{background:rgba(245,158,11,.16);color:#92400e}.eqbki .lv-D{background:rgba(239,68,68,.12);color:#b91c1c}
 /* وجبات البنك تُختار من خطوة التوزيع فقط: لا خيارات تلقائية في بيانات العميل */
 div:has(> #f-favMeals),label.chk:has(> input[data-nb]){display:none!important}
+.eqbka{display:inline-flex;flex-wrap:wrap;gap:2px 6px}.eqbke .eqdr>span:not(.gstp){font-size:13.5px}.eqbke .eqdr small{color:var(--g-mut)}
