@@ -540,6 +540,10 @@ function adhBack(back) { const dt = new Date(now() - back * 86400000), L = S.log
 const drInit = () => String(S.dname || 'أ').replace(/^(د\.?|دكتور[ة]?|أ\.)\s*/, '').trim().charAt(0) || 'أ';
 
 // ---------- الشاشات قبل الحساب
+// ---------- 1.35 واجهة الدخول الجديدة (تصميم المالك): بداية كحلية بالنجوم وزيزو على الكثبان، ترحيب «غيّر أسلوب حياتك»، دخول على ورقة بيضاء، ورمز الدخول بنفس الهوية
+const ZS_SKY = '<svg class="zs-sky" viewBox="0 0 390 300" preserveAspectRatio="xMidYMin slice" aria-hidden="true"><g fill="#8fe3bd"><path d="M70 60 l4 11 l11 4 l-11 4 l-4 11 l-4 -11 l-11 -4 l11 -4 Z"/><path d="M330 150 l3 8 l8 3 l-8 3 l-3 8 l-3 -8 l-8 -3 l8 -3 Z"/><path d="M40 190 l3 8 l8 3 l-8 3 l-3 8 l-3 -8 l-8 -3 l8 -3 Z"/></g><g fill="#fff"><path d="M300 40 l2.5 7 l7 2.5 l-7 2.5 l-2.5 7 l-2.5 -7 l-7 -2.5 l7 -2.5 Z"/><path d="M200 22 l2 5 l5 2 l-5 2 l-2 5 l-2 -5 l-5 -2 l5 -2 Z"/><path d="M360 230 l2 5 l5 2 l-5 2 l-2 5 l-2 -5 l-5 -2 l5 -2 Z"/><circle cx="130" cy="110" r="2"/><circle cx="250" cy="90" r="1.6"/><circle cx="20" cy="120" r="1.6"/></g><g fill="#d9f6e9"><ellipse cx="150" cy="70" rx="38" ry="12"/><ellipse cx="170" cy="60" rx="24" ry="14"/><ellipse cx="300" cy="105" rx="44" ry="13"/><ellipse cx="322" cy="94" rx="26" ry="15"/><ellipse cx="40" cy="250" rx="36" ry="11"/><ellipse cx="58" cy="241" rx="20" ry="12"/></g></svg>';
+const ZS_LEAVES = '<svg class="zs-leaves" viewBox="0 0 390 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g fill="#3fae6a" opacity=".9"><path d="M40 60 q22 -18 40 0 q-22 18 -40 0 Z" transform="rotate(-30 60 60)"/><path d="M320 40 q18 -14 34 0 q-18 14 -34 0 Z" transform="rotate(25 337 40)"/><path d="M300 200 q20 -16 38 0 q-20 16 -38 0 Z" transform="rotate(-15 319 200)"/><path d="M60 220 q16 -12 30 0 q-16 12 -30 0 Z" transform="rotate(35 75 220)"/></g><g fill="#2c7f52"><path d="M20 290 q30 -70 60 0 Z"/><path d="M50 300 q20 -50 40 0 Z"/><path d="M320 300 q25 -60 50 0 Z"/><path d="M290 300 q18 -40 36 0 Z"/></g></svg>';
+const zsZz = (o) => window.Zizo ? Zizo.svg(o) : '';
 function scrBoot() { return '<div class="scr"><div class="boot"><div><div class="logo">' + LOGO + '</div><div class="spin"></div><p>جارٍ فتح دعوتك…</p></div></div></div>'; }
 function scrBad() {
   const has = !!localStorage.getItem(KEY);
@@ -600,7 +604,7 @@ function introEnd(all) { clearTimeout(introT); try { localStorage.setItem(INTRO_
 function scrOnb() {
   const o = V.onb || (V.onb = { i: 0 }), i = o.i;
   if (introOn()) return scrIntro(o);
-  if (i === 0) return '<div class="scr onb onb-splash" data-act="onbNext" role="button" aria-label="متابعة"><div class="onb-mesh"><i></i><i></i><i></i></div>' + onbPhoto(0) + '<div class="onb-logo" role="img" aria-label="زنها">' + LOGO + '</div><p class="onb-tag">مع أخصائيك… خطوة بخطوة</p><button class="onb-skip" data-act="onbSkip">تخطّي</button></div>';
+  if (i === 0) return '<div class="scr onb onb-splash zs-splash" data-act="onbNext" role="button" aria-label="متابعة">' + ZS_SKY + '<div class="onb-logo" role="img" aria-label="زنها">' + LOGO + '</div><div class="zs-zz">' + zsZz({ wave: 1, mouth: 'laugh', eyes: 'open', anim: 'jump' }) + '</div><div class="zs-dune"></div><div class="zs-name"><h1>زِنها <span>Zenha</span></h1><p class="onb-tag">صحتك، رشاقتك، وأسلوب حياتك</p></div><button class="onb-skip" data-act="onbSkip">تخطّي</button></div>';
   if (i <= 3) {
     const T = [['خطتك من أخصائيك', 'وجباتك بكمياتها، بدّل ما لا يناسبك بلمسة، وتبقى خطتك متوازنة.'], ['يومك بلمسة', 'الماء والعادات والأذكار… المس وشاهد تقدّمك يمتلئ أمامك.'], ['لست وحدك', 'أخصائيك يتابعك ويراسلك، وتحديات أسبوعية وشهادات تقدير تشجّعك.']][i - 1];
     let art = '';
@@ -634,13 +638,17 @@ let onbT = 0; function onbSplashTimer() { if (V.screen === 'onb' && V.onb && V.o
 function firstWinCard() {
   return '<section class="card firstwin"><div class="fw-cup" aria-hidden="true">' + I('glass') + '</div><div><h2>ابدأ يومك: اشرب أول كوب ماء</h2><p class="dim">خطوة صغيرة تبدأ بها سلسلتك. المس الزر بعد أن تشرب.</p></div><button class="btn full" data-act="firstWin">' + I('drop') + ' شربت أول كوب</button></section>';
 }
-function scrStart() {                               // بلا حساب ولا رابط (مثل فتح التطبيق المثبّت أول مرة): رمز الدعوة أو رمز النقل
-  return '<div class="scr"><div class="scroll"><div class="stack" style="padding-top:22px"><div class="logo" style="width:180px;margin:0 auto;color:#fff">' + LOGO + '</div>'
-    + '<section class="card stack"><h3>لديّ رابط دعوة من أخصائيي</h3><p class="dim">ألصق الرابط أو رمز الدعوة كما وصلك على واتساب.</p><input class="inp" id="invIn" dir="ltr" autocomplete="off" placeholder="https://… أو رمز الدعوة"><button class="btn" data-act="useInv">متابعة</button></section>'
-    + '<section class="card stack"><h3>تحدي الخمس — بلا اشتراك</h3><p class="dim">30 يوماً: الصلاة في وقتها، ختمة بالآيات، الماء، الأذكار، و30 دقيقة حركة يومياً.</p><button class="btn sec" data-act="khgStartG">تعرّف على التحدي</button></section>'
-    + '<section class="card stack"><h3>لديّ اسم مستخدم وكلمة سر</h3><p class="dim">من أخصائيك بدل الرابط: اكتبهما كما وصلاك.</p><input class="inp" id="crU" dir="ltr" value="' + esc(V.inst && V.inst.u || '') + '" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="اسم المستخدم"><input class="inp" id="crP" dir="ltr" type="password" autocomplete="current-password" placeholder="كلمة السر"><button class="btn" data-act="useCred"' + (V.busy ? ' disabled' : '') + '>' + (V.busy ? 'جارٍ التحقق…' : 'دخول') + '</button></section>'
-    + '<section class="card stack"><h3>لديّ حساب في متصفح أو جوال آخر</h3><p class="dim">من التطبيق القديم: «أنا» (أو «تقدّمي» في النسخ السابقة) ← «نقل حسابي» ← انسخ الرمز وألصقه هنا.</p><input class="inp" id="xferIn" dir="ltr" autocomplete="off" placeholder="HX1-…"><button class="btn sec" data-act="useXfer"' + (V.busy ? ' disabled' : '') + '>' + (V.busy ? 'جارٍ النقل…' : 'نقل حسابي إلى هنا') + '</button></section>'
-    + (V.err ? '<p class="err">' + esc(V.err) + '</p>' : '') + '</div></div></div>';
+function scrStart() {                               // بلا حساب ولا رابط (مثل فتح التطبيق المثبّت أول مرة): الترحيب ثم الدخول برمز الدعوة أو اسم المستخدم أو رمز النقل
+  return '<div class="scr zstart"><div class="scroll">'
+    + '<section class="zs-hero">' + ZS_LEAVES + '<div class="zs-walk">' + zsZz({ prop: ['apple', 'water'], mouth: 'smile', anim: 'walk' }) + '</div></section>'
+    + '<section class="zs-sheet"><h1>غيّر أسلوب حياتك</h1><p>تابع تغذيتك ونشاطك وصحتك اليومية بسهولة ومرح مع زِنها.</p><button class="btn full zs-go" data-act="zsGo">ابدأ الآن</button></section>'
+    + '<section class="zs-login" id="zsLogin"><div class="zs-brand" role="img" aria-label="زنها">' + LOGO + '</div><h2>تسجيل الدخول</h2><p class="zs-sub">' + I('lock') + ' بياناتك مشفّرة، لا يقرؤها إلا أخصائيك</p>'
+    + '<label class="zs-l" for="invIn">رابط الدعوة أو رمزها</label><input class="inp zs-in" id="invIn" dir="ltr" autocomplete="off" placeholder="ألصق الرابط كما وصلك"><button class="btn full" data-act="useInv">متابعة</button><p class="zs-hint">أرسله لك أخصائيك على واتساب</p>'
+    + '<div class="zs-or"><span>أو</span></div>'
+    + '<div class="zs-alt"><b>' + I('user') + ' اسم المستخدم وكلمة السر</b><input class="inp zs-in" id="crU" dir="ltr" value="' + esc(V.inst && V.inst.u || '') + '" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="اسم المستخدم"><input class="inp zs-in" id="crP" dir="ltr" type="password" autocomplete="current-password" placeholder="كلمة السر"><button class="btn sec full" data-act="useCred"' + (V.busy ? ' disabled' : '') + '>دخول</button></div>'
+    + '<div class="zs-alt"><b>' + I('phone') + ' لديّ حساب على جوال آخر</b><span class="dim">من التطبيق القديم: «أنا» ← «نقل حسابي» ← انسخ الرمز وألصقه هنا.</span><input class="inp zs-in" id="xferIn" dir="ltr" autocomplete="off" placeholder="HX1-…"><button class="btn sec full" data-act="useXfer"' + (V.busy ? ' disabled' : '') + '>نقل حسابي</button></div>'
+    + '<div class="zs-alt"><b>🌙 تحدي الخمس، بلا اشتراك</b><span class="dim">30 يوماً: الصلاة في وقتها، ختمة بالآيات، الماء، الأذكار، و30 دقيقة حركة يومياً.</span><button class="btn sec full" data-act="khgStartG">تعرّف على التحدي</button></div>'
+    + (V.err ? '<p class="err">' + esc(V.err) + '</p>' : '') + '</section></div></div>';
 }
 function scrMoved() { return '<div class="scr"><div class="boot"><div class="stack" style="max-width:320px"><div class="empty"><div class="ei" style="background:rgba(111,227,169,.15);color:var(--mint)">' + I('check') + '</div><h1>انتقل حسابك ✓</h1><p class="mut">صار «زنها» يعمل من التطبيق المثبّت أو الجوال الجديد، ومُسح من هنا. افتح «زنها» من أيقونته.</p></div></div></div></div>'; }
 // ---- 0.61: أول تسجيل: الديانة ثم التذكيرات التي يريدها العميل (لئلا يبحث عنها في الإعدادات)
@@ -688,16 +696,17 @@ function pad(cur) {
 }
 function scrPin() {
   const conf = !!V.pin1;
-  return '<div class="scr">' + head(conf ? 'أعد كتابة الرمز' : V.xfer ? 'رمز الدخول لهذا الجهاز' : 'أنشئ رمز الدخول', 'pinBack', '') + '<div class="scroll"><div class="stack" style="text-align:center;padding-top:20px;gap:22px">'
+  return '<div class="scr zpin"><div class="zp-top">' + ZS_SKY + '<button class="back zp-back" data-act="pinBack" data-v="" aria-label="رجوع">' + I('back') + '</button><div class="zp-zz">' + zsZz({ prop: 'lock', mouth: conf ? 'smile' : 'calm', eyes: 'open' }) + '</div></div>'
+    + '<div class="zp-sheet"><h2>' + (conf ? 'أعد كتابة الرمز' : V.xfer ? 'رمز الدخول لهذا الجهاز' : 'أنشئ رمز الدخول') + '</h2>'
     + '<p class="mut">' + (conf ? 'للتأكيد، اكتب الرمز نفسه مرة ثانية.' : 'رمز من 4 أرقام تفتح به «زنها» على هذا الجوال. بلا بريد ولا كلمة سر طويلة.') + '</p>'
-    + pad(V.pin) + (V.err ? '<p class="err">' + esc(V.err) + '</p>' : '') + (V.busy ? '<div class="spin"></div><p class="dim">جارٍ إنشاء حسابك المشفّر…</p>' : '<p class="dim">' + (V.guest || (S && S.guest) ? 'الرمز يحمي تقدّمك في التحدي على هذا الجوال. احفظه، فلا يمكن استرجاعه.' : 'إن غيّرت جوالك يرسل لك أخصائيك رابطاً جديداً.') + '</p>') + '</div></div></div>';
+    + pad(V.pin) + (V.err ? '<p class="err">' + esc(V.err) + '</p>' : '') + (V.busy ? '<div class="spin"></div><p class="dim">جارٍ إنشاء حسابك المشفّر…</p>' : '<p class="dim">' + (V.guest || (S && S.guest) ? 'الرمز يحمي تقدّمك في التحدي على هذا الجوال. احفظه، فلا يمكن استرجاعه.' : 'إن غيّرت جوالك يرسل لك أخصائيك رابطاً جديداً.') + '</p>') + '</div></div>';
 }
 function scrLock() {
   const r = (() => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } })(), wait = V.until > now() ? Math.ceil((V.until - now()) / 1000) : 0;
-  return '<div class="scr"><div class="scroll"><div class="stack" style="text-align:center;padding-top:34px;gap:22px"><div class="logo" style="width:170px;margin:0 auto;color:#fff">' + LOGO + '</div>'
-    + '<p class="mut">اكتب رمز الدخول' + (r.dn ? ' — خطتك مع ' + esc(r.dn) : '') + '</p>' + pad(V.pin)
+  return '<div class="scr zpin zlock"><div class="zp-top">' + ZS_SKY + '<div class="zp-zz">' + zsZz({ wave: 1, mouth: V.err ? 'calm' : 'smile' }) + '</div></div>'
+    + '<div class="zp-sheet"><h2>أهلاً من جديد 👋</h2><p class="mut">اكتب رمز الدخول' + (r.dn ? ': خطتك مع ' + esc(r.dn) : '') + '</p>' + pad(V.pin)
     + (wait ? '<p class="err">محاولات كثيرة. انتظر ' + wait + ' ثانية.</p>' : V.err ? '<p class="err">' + esc(V.err) + '</p>' : '') + (V.busy ? '<div class="spin"></div>' : '')
-    + '<button class="link" data-act="forgot">نسيت الرمز؟</button></div></div></div>';
+    + '<button class="link" data-act="forgot">نسيت الرمز؟</button></div></div>';
 }
 function head(t, act, v, sub) { return '<div class="hd"><button class="back" data-act="' + act + '" data-v="' + v + '" aria-label="رجوع">' + I('back') + '</button><div class="t">' + (sub ? '<div class="stepk">' + sub + '</div>' : '') + '<h2>' + t + '</h2></div></div>'; }
 // ---------- الاستبيان: يُعرض كما أعدّه الأخصائي (يصل مع الدعوة؛ HForms يكمّل ما ينقصه). نظامان: الحصص (ex) والجرامات (g)
@@ -2584,6 +2593,7 @@ document.addEventListener('click', (e) => {
     case 'tourGo': tourStart(true); return;
     case 'copyInv': copyText(S.tok + '.' + S.fp, 'نُسخ رمز الدعوة — ألصقه في «زنها» بعد فتحه من الشاشة الرئيسية'); return;
     case 'copyLink': copyText(V.screen === 'inst' ? API + '/?i=1' + (V.inst && V.inst.u ? '&u=' + encodeURIComponent(V.inst.u) : '') : API + '/#t=' + S.tok + '.' + S.fp, 'نُسخ الرابط — افتحه في Chrome أو Safari'); return;
+    case 'zsGo': { const t = document.getElementById('zsLogin'); if (t) t.scrollIntoView({ behavior: RM ? 'auto' : 'smooth', block: 'start' }); setTimeout(() => { const x = document.getElementById('invIn'); if (x) x.focus({ preventScroll: true }); }, RM ? 0 : 450); return; }
     case 'useInv': {
       const v = ($('#invIn') || {}).value || '', m = /(?:#t=)?([A-Za-z0-9_-]{16,40})\.([A-Za-z0-9_-]{11})(?![A-Za-z0-9_-])/.exec(v.trim());
       if (!m) { V.err = 'الرابط أو الرمز غير صحيح. انسخه كاملاً من رسالة أخصائيك.'; break; }

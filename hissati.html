@@ -1119,6 +1119,62 @@ html:has(.scr.qz),body:has(.scr.qz){background:#fff!important}body:has(.scr.qz):
 .skp .sknew{display:grid;place-items:center;align-content:center;gap:2px;font-size:28px;color:var(--mint);border:1.5px dashed var(--line2)!important;min-height:78px}.skp .sknew small{font-size:11px;color:var(--mut)}
 .skm{position:relative;display:block}.skm>button:first-child{width:100%}.skx{position:absolute;top:-4px;inset-inline-start:-4px;width:22px;height:22px;border-radius:50%;background:var(--coral);color:#fff;font-size:11px;display:grid;place-items:center;padding:0!important}
 .sksave{display:block;font-size:12px;margin-top:2px}
+/* ===== 1.35 واجهة الدخول الجديدة (تصميم المالك): كحلي ليلي بنجوم وغيوم نعناعية، زيزو على الكثبان، وورقة بيضاء للدخول ورمز الدخول ===== */
+.zs-splash,.zstart,.zpin{--zn:#101a4a;--zn2:#16235e;--zm:#6fe0a8;--zm2:#3fcf8e;--zink:#1b2446;--zmut:#5d6687;--zsand:#f3d7a0;--zsand2:#e9c27f}
+.zs-splash{background:var(--zn)!important;overflow:hidden;justify-content:flex-start!important;padding-top:calc(70px + env(safe-area-inset-top,0px))}
+.zs-sky{position:absolute;inset:0 0 auto;width:100%;height:62%;pointer-events:none}
+.zs-splash .onb-logo{position:relative;z-index:2;width:min(46%,190px)!important;color:#fff}
+.zs-splash .zs-zz{position:relative;z-index:2;width:min(52%,210px);margin-top:28px}
+.zs-splash .zs-zz svg{width:100%;height:auto}
+.zs-dune{position:absolute;inset:auto -20% 0;height:42%;background:radial-gradient(120% 70% at 30% 20%,var(--zsand),var(--zsand2) 70%);border-radius:50% 50% 0 0/36% 36% 0 0;z-index:1}
+.zs-dune::before{content:'';position:absolute;inset:auto 0 0;height:50%;background:linear-gradient(180deg,transparent,rgba(16,26,74,.92))}
+.zs-name{position:absolute;z-index:3;inset:auto 0 calc(36px + env(safe-area-inset-bottom,0px));text-align:center;color:#fff}
+.zs-name h1{margin:0;font-size:calc(34px*var(--fs));color:#fff;letter-spacing:.5px}.zs-name h1 span{font-weight:700;opacity:.95;margin-inline-start:6px}
+.zs-name .onb-tag{color:var(--zm)!important;font-weight:700}
+.zs-splash .onb-skip{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.25)}
+/* الترحيب والدخول */
+.zstart{background:var(--zn)}
+.zstart .scroll{padding:0!important}
+.zs-hero{position:relative;height:min(52vh,420px);display:grid;place-items:end center;overflow:hidden;background:radial-gradient(70% 60% at 50% 40%,#1d2c72,var(--zn))}
+.zs-leaves{position:absolute;inset:0;width:100%;height:100%}
+.zs-walk{position:relative;width:min(62%,240px);margin-bottom:34px}.zs-walk svg{width:100%;height:auto}
+.zs-sheet,.zs-login{position:relative;background:#fff;color:var(--zink);margin:-28px 0 0;border-radius:28px 28px 0 0;padding:26px 22px 22px;text-align:center;box-shadow:0 -10px 30px rgba(0,0,0,.18)}
+.zs-sheet h1{margin:0 0 8px;font-size:calc(28px*var(--fs));color:var(--zink)}.zs-sheet p{margin:0 0 18px;color:var(--zmut);font-size:calc(16px*var(--fs))}
+.zstart .btn,.zpin .btn{background:var(--zm)!important;color:#0b2a1c!important;border:0!important;border-radius:999px!important;min-height:52px;font-weight:800;box-shadow:0 10px 24px rgba(63,207,142,.28)!important}
+.zstart .btn.sec{background:#fff!important;color:var(--zink)!important;border:1.5px solid #e3e7f1!important;box-shadow:none!important;min-height:48px}
+.zs-login{margin:0;border-radius:0;padding-top:30px;text-align:start;display:grid;gap:10px;box-shadow:none;border-top:1px solid #eef0f6;padding-bottom:calc(40px + env(safe-area-inset-bottom,0px))}
+.zs-login{overflow:hidden}.zs-login::before{content:'';position:absolute;top:-70px;right:-60px;width:170px;height:120px;border-radius:50%;background:var(--zm);opacity:.9;pointer-events:none}
+.zs-brand{width:112px;color:var(--zn);margin:0 auto 4px}.zs-brand svg{width:100%;height:auto;display:block}
+.zs-login h2{margin:0;text-align:center;font-size:calc(26px*var(--fs));color:var(--zink)}
+.zs-sub{margin:0 0 8px;text-align:center;color:var(--zmut);font-size:calc(13.5px*var(--fs))}.zs-sub svg{width:14px;height:14px;vertical-align:-2px}
+.zs-l{font-weight:700;font-size:calc(14.5px*var(--fs));color:var(--zink)}
+.zs-in{background:#f1f3f8!important;color:var(--zink)!important;border:1.5px solid #e3e7f1!important;border-radius:999px!important;min-height:50px;padding:0 18px!important;box-shadow:none!important}
+.zs-in::placeholder{color:#99a0b8}.zs-in:focus{border-color:var(--zm2)!important;outline:3px solid rgba(63,207,142,.25)!important}
+.zs-hint{margin:-2px 0 0;text-align:center;color:var(--zmut);font-size:calc(13px*var(--fs))}
+.zs-or{display:flex;align-items:center;gap:10px;color:var(--zmut);margin:8px 0}.zs-or::before,.zs-or::after{content:'';flex:1;height:1px;background:#e6e9f2}
+.zs-alt{display:grid;gap:8px;padding:14px;border-radius:20px;border:1.5px solid #e9ecf4;background:#fbfcfe}
+.zs-alt b{display:flex;align-items:center;gap:8px;color:var(--zink);font-size:calc(15px*var(--fs))}.zs-alt b svg{width:18px;height:18px}.zs-alt .dim{color:var(--zmut)!important;font-size:calc(13px*var(--fs))}
+.zs-login .err{text-align:center}
+/* رمز الدخول */
+.zpin{background:var(--zn)}
+.zp-top{position:relative;height:min(36vh,300px);display:grid;place-items:end center;overflow:hidden;padding-top:env(safe-area-inset-top,0px)}
+.zp-top .zs-sky{height:100%}
+.zp-back{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));inset-inline-start:12px;z-index:3;background:rgba(255,255,255,.12)!important;color:#fff!important;border-radius:50%}
+.zp-logo{position:absolute;top:calc(22px + env(safe-area-inset-top,0px));inset-inline:0;margin:auto;width:120px;color:#fff;z-index:2}.zp-logo svg{width:100%;height:auto}
+.zp-zz{position:relative;z-index:2;width:min(40%,160px);margin-bottom:-6px}.zp-zz svg{width:100%;height:auto}
+.zp-sheet{flex:1;background:#fff;color:var(--zink);border-radius:28px 28px 0 0;padding:24px 20px calc(24px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;box-shadow:0 -10px 30px rgba(0,0,0,.2);position:relative;z-index:3}
+.zp-sheet h2{margin:0;color:var(--zink);font-size:calc(24px*var(--fs))}.zp-sheet .mut,.zp-sheet .dim{color:var(--zmut)!important;margin:0}
+.zpin .pin{display:flex;gap:14px;justify-content:center;direction:ltr}
+.zpin .pin span{width:18px;height:18px;border-radius:50%;border:2px solid #cfd5e6;background:#fff;color:transparent;font-size:0;transition:transform .15s,background .15s}
+.zpin .pin span.f{background:var(--zm2);border-color:var(--zm2);transform:scale(1.15)}
+.zpin .pad{max-width:300px;gap:12px}
+.zpin .pad button{height:62px;border-radius:999px;background:#f1f3f8;border:0;color:var(--zink);font-size:calc(24px*var(--fs));font-weight:700;box-shadow:none;transition:transform .1s,background .15s}
+.zpin .pad button:active{background:#d9f6e9;transform:scale(.94)}
+.zpin .link{color:#0f9f73!important;font-weight:700}
+.zpin .err{color:#c62f35!important}
+@media (prefers-reduced-motion:reduce){.zpin .pin span,.zpin .pad button{transition:none}}
+.zpin{overflow-y:auto}.zp-top{flex:0 0 auto;height:min(32vh,260px)}.zp-zz{width:min(36%,150px);margin-bottom:6px}.zp-sheet{flex:1 0 auto}
+.zp-top{height:min(25vh,210px)}.zp-zz{width:min(30%,124px)}.zp-sheet{gap:12px;padding-top:20px}.zpin .pad{gap:10px}.zpin .pad button{height:56px}
 
 /* ==========================================================================
    «حصتي» — themes.css  •  ثيم «وردة» (data-theme="rose") وثيم «نبض» (data-theme="pulse")
@@ -3368,7 +3424,7 @@ window.HX_WHEEL = {
   var CSS = '.zz{overflow:visible}.zz .all{transform-origin:110px 240px;animation:zzbob 2.8s ease-in-out infinite}.zz .tail{transform-origin:82px 200px;animation:zzwag 1.6s ease-in-out infinite}'
     + '.zz .earL,.zz .earR{transform-origin:84px 84px;animation:zztw 5s ease-in-out infinite}.zz .earR{animation-delay:.6s}.zz .eyes{transform-origin:110px 108px;animation:zzbl 4.2s infinite}'
     + '.zz.jump .all{animation:zzjump .7s cubic-bezier(.3,1.6,.5,1) 2}.zz.laugh .all{animation:zzshake .25s ease-in-out 6}.zz.dance .all{animation:zzdance .9s ease-in-out 3}.zz.sleep .all{animation:zzbr 3.6s ease-in-out infinite}.zz.sleep .tail{animation:none}'
-    + '.zz.nod .head{transform-origin:110px 140px;animation:zznod .6s ease-in-out 2}.zz .wave{transform-origin:136px 184px;animation:zzwave .5s ease-in-out infinite alternate}.zz .zzz{animation:zzz 2.4s ease-in-out infinite}.zz .spark{animation:zzsp 1.2s ease-in-out infinite}'
+    + '.zz.walk .all{animation:zzwalk .9s ease-in-out infinite}.zz.walk .tail{animation-duration:.9s}@keyframes zzwalk{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-6px) rotate(2deg)}}.zz.nod .head{transform-origin:110px 140px;animation:zznod .6s ease-in-out 2}.zz .wave{transform-origin:136px 184px;animation:zzwave .5s ease-in-out infinite alternate}.zz .zzz{animation:zzz 2.4s ease-in-out infinite}.zz .spark{animation:zzsp 1.2s ease-in-out infinite}'
     + '@keyframes zzbob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}@keyframes zzbr{0%,100%{transform:scale(1)}50%{transform:scale(1.025,.98)}}@keyframes zzwag{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(12deg)}}'
     + '@keyframes zztw{0%,88%,100%{transform:rotate(0)}92%{transform:rotate(-9deg)}96%{transform:rotate(3deg)}}@keyframes zzbl{0%,94%,100%{transform:scaleY(1)}96%{transform:scaleY(.1)}}'
     + '@keyframes zzjump{0%{transform:translateY(0) scale(1)}30%{transform:scale(1.08,.9)}60%{transform:translateY(-30px) scale(.95,1.06)}100%{transform:translateY(0)}}@keyframes zzshake{0%,100%{transform:rotate(0)}25%{transform:rotate(-3deg)}75%{transform:rotate(3deg)}}'
@@ -3399,8 +3455,9 @@ window.HX_WHEEL = {
       phone: '<rect x="130" y="186" width="18" height="30" rx="4" fill="#2c3134"/><rect x="133" y="190" width="12" height="20" rx="2" fill="#8fe3bd"/>',
       paper: '<rect x="128" y="186" width="26" height="32" rx="3" fill="#fff" stroke="' + OL + '" stroke-width="2"/><path d="M133 196 h16 M133 203 h16 M133 210 h10" stroke="#9aa09d" stroke-width="2"/>',
       board: '<rect x="128" y="182" width="30" height="38" rx="4" fill="#fff" stroke="' + OL + '" stroke-width="2"/><rect x="137" y="178" width="12" height="7" rx="2" fill="#3b4a52"/><circle cx="143" cy="200" r="9" fill="none" stroke="#f59e0b" stroke-width="4" stroke-dasharray="25 60"/><circle cx="143" cy="200" r="9" fill="none" stroke="#0ea5e9" stroke-width="4" stroke-dasharray="14 60" stroke-dashoffset="-25"/><circle cx="143" cy="200" r="9" fill="none" stroke="#a855f7" stroke-width="4" stroke-dasharray="17 60" stroke-dashoffset="-39"/>',
+      lock: '<rect x="128" y="196" width="26" height="21" rx="5" fill="#f5b335" stroke="#9a6a12" stroke-width="2"/><path d="M134 196 v-7 a7 7 0 0 1 14 0 v7" fill="none" stroke="#9a6a12" stroke-width="3"/><circle cx="141" cy="206" r="2.6" fill="#9a6a12"/>',
       magnifier: '<circle cx="146" cy="186" r="11" fill="#e8f6ff" stroke="#3b4a52" stroke-width="3"/><path d="M138 195 l-10 12" stroke="#3b4a52" stroke-width="4" stroke-linecap="round"/>'
-    }[p] || '';
+    }; props = [].concat(p || []).map(function (k) { return props[k] || ''; }).join('');
     var hats = { sun: '<g class="spark"><path d="M150 44 l3 8 l8 3 l-8 3 l-3 8 l-3 -8 l-8 -3 l8 -3 Z" fill="#f5b335"/></g>', moon: '<path d="M150 40 a16 16 0 1 0 12 26 a12 12 0 1 1 -12 -26 Z" fill="#f7c948"/>', party: '<path d="M110 48 L96 80 L124 80 Z" fill="#a855f7" stroke="' + OL + '" stroke-width="2"/><circle cx="110" cy="46" r="5" fill="#f5b335"/>', crown: '<path d="M90 78 L94 56 L104 68 L110 52 L116 68 L126 56 L130 78 Z" fill="#f5b335" stroke="#9a6a12" stroke-width="2"/>' }[hat] || '';
     var coatS = coat ? '<path d="M76 172 Q110 160 144 172 L148 230 L72 230 Z" fill="#fff" stroke="' + OL + '" stroke-width="2.4" stroke-linejoin="round"/><path d="M110 168 L97 204 M110 168 L123 204" stroke="#cfd8d3" stroke-width="2.4"/><rect x="124" y="208" width="14" height="11" rx="2" fill="none" stroke="#cfd8d3" stroke-width="2"/><rect x="128" y="200" width="3" height="12" rx="1" fill="#00a36c"/><path d="M92 160 C86 186 98 200 104 196" stroke="#3b4a52" stroke-width="2.6" fill="none"/><circle cx="104" cy="196" r="4.5" fill="#cfd8d3" stroke="#3b4a52" stroke-width="2"/>' : '';
     var scarf = coat ? '' : '<path d="M74 152 Q110 170 146 152 L146 166 Q110 184 74 166 Z" fill="' + sc1 + '" stroke="' + OL + '" stroke-width="2.2" stroke-linejoin="round"/><path d="M128 166 L156 206 L144 212 L120 172 Z" fill="' + sc1 + '" stroke="' + OL + '" stroke-width="2.2" stroke-linejoin="round"/><path d="M146 208 l3 7 M151 205 l4 6" stroke="' + sc2 + '" stroke-width="2"/>';
@@ -4419,6 +4476,10 @@ function adhBack(back) { const dt = new Date(now() - back * 86400000), L = S.log
 const drInit = () => String(S.dname || 'أ').replace(/^(د\.?|دكتور[ة]?|أ\.)\s*/, '').trim().charAt(0) || 'أ';
 
 // ---------- الشاشات قبل الحساب
+// ---------- 1.35 واجهة الدخول الجديدة (تصميم المالك): بداية كحلية بالنجوم وزيزو على الكثبان، ترحيب «غيّر أسلوب حياتك»، دخول على ورقة بيضاء، ورمز الدخول بنفس الهوية
+const ZS_SKY = '<svg class="zs-sky" viewBox="0 0 390 300" preserveAspectRatio="xMidYMin slice" aria-hidden="true"><g fill="#8fe3bd"><path d="M70 60 l4 11 l11 4 l-11 4 l-4 11 l-4 -11 l-11 -4 l11 -4 Z"/><path d="M330 150 l3 8 l8 3 l-8 3 l-3 8 l-3 -8 l-8 -3 l8 -3 Z"/><path d="M40 190 l3 8 l8 3 l-8 3 l-3 8 l-3 -8 l-8 -3 l8 -3 Z"/></g><g fill="#fff"><path d="M300 40 l2.5 7 l7 2.5 l-7 2.5 l-2.5 7 l-2.5 -7 l-7 -2.5 l7 -2.5 Z"/><path d="M200 22 l2 5 l5 2 l-5 2 l-2 5 l-2 -5 l-5 -2 l5 -2 Z"/><path d="M360 230 l2 5 l5 2 l-5 2 l-2 5 l-2 -5 l-5 -2 l5 -2 Z"/><circle cx="130" cy="110" r="2"/><circle cx="250" cy="90" r="1.6"/><circle cx="20" cy="120" r="1.6"/></g><g fill="#d9f6e9"><ellipse cx="150" cy="70" rx="38" ry="12"/><ellipse cx="170" cy="60" rx="24" ry="14"/><ellipse cx="300" cy="105" rx="44" ry="13"/><ellipse cx="322" cy="94" rx="26" ry="15"/><ellipse cx="40" cy="250" rx="36" ry="11"/><ellipse cx="58" cy="241" rx="20" ry="12"/></g></svg>';
+const ZS_LEAVES = '<svg class="zs-leaves" viewBox="0 0 390 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g fill="#3fae6a" opacity=".9"><path d="M40 60 q22 -18 40 0 q-22 18 -40 0 Z" transform="rotate(-30 60 60)"/><path d="M320 40 q18 -14 34 0 q-18 14 -34 0 Z" transform="rotate(25 337 40)"/><path d="M300 200 q20 -16 38 0 q-20 16 -38 0 Z" transform="rotate(-15 319 200)"/><path d="M60 220 q16 -12 30 0 q-16 12 -30 0 Z" transform="rotate(35 75 220)"/></g><g fill="#2c7f52"><path d="M20 290 q30 -70 60 0 Z"/><path d="M50 300 q20 -50 40 0 Z"/><path d="M320 300 q25 -60 50 0 Z"/><path d="M290 300 q18 -40 36 0 Z"/></g></svg>';
+const zsZz = (o) => window.Zizo ? Zizo.svg(o) : '';
 function scrBoot() { return '<div class="scr"><div class="boot"><div><div class="logo">' + LOGO + '</div><div class="spin"></div><p>جارٍ فتح دعوتك…</p></div></div></div>'; }
 function scrBad() {
   const has = !!localStorage.getItem(KEY);
@@ -4479,7 +4540,7 @@ function introEnd(all) { clearTimeout(introT); try { localStorage.setItem(INTRO_
 function scrOnb() {
   const o = V.onb || (V.onb = { i: 0 }), i = o.i;
   if (introOn()) return scrIntro(o);
-  if (i === 0) return '<div class="scr onb onb-splash" data-act="onbNext" role="button" aria-label="متابعة"><div class="onb-mesh"><i></i><i></i><i></i></div>' + onbPhoto(0) + '<div class="onb-logo" role="img" aria-label="زنها">' + LOGO + '</div><p class="onb-tag">مع أخصائيك… خطوة بخطوة</p><button class="onb-skip" data-act="onbSkip">تخطّي</button></div>';
+  if (i === 0) return '<div class="scr onb onb-splash zs-splash" data-act="onbNext" role="button" aria-label="متابعة">' + ZS_SKY + '<div class="onb-logo" role="img" aria-label="زنها">' + LOGO + '</div><div class="zs-zz">' + zsZz({ wave: 1, mouth: 'laugh', eyes: 'open', anim: 'jump' }) + '</div><div class="zs-dune"></div><div class="zs-name"><h1>زِنها <span>Zenha</span></h1><p class="onb-tag">صحتك، رشاقتك، وأسلوب حياتك</p></div><button class="onb-skip" data-act="onbSkip">تخطّي</button></div>';
   if (i <= 3) {
     const T = [['خطتك من أخصائيك', 'وجباتك بكمياتها، بدّل ما لا يناسبك بلمسة، وتبقى خطتك متوازنة.'], ['يومك بلمسة', 'الماء والعادات والأذكار… المس وشاهد تقدّمك يمتلئ أمامك.'], ['لست وحدك', 'أخصائيك يتابعك ويراسلك، وتحديات أسبوعية وشهادات تقدير تشجّعك.']][i - 1];
     let art = '';
@@ -4513,13 +4574,17 @@ let onbT = 0; function onbSplashTimer() { if (V.screen === 'onb' && V.onb && V.o
 function firstWinCard() {
   return '<section class="card firstwin"><div class="fw-cup" aria-hidden="true">' + I('glass') + '</div><div><h2>ابدأ يومك: اشرب أول كوب ماء</h2><p class="dim">خطوة صغيرة تبدأ بها سلسلتك. المس الزر بعد أن تشرب.</p></div><button class="btn full" data-act="firstWin">' + I('drop') + ' شربت أول كوب</button></section>';
 }
-function scrStart() {                               // بلا حساب ولا رابط (مثل فتح التطبيق المثبّت أول مرة): رمز الدعوة أو رمز النقل
-  return '<div class="scr"><div class="scroll"><div class="stack" style="padding-top:22px"><div class="logo" style="width:180px;margin:0 auto;color:#fff">' + LOGO + '</div>'
-    + '<section class="card stack"><h3>لديّ رابط دعوة من أخصائيي</h3><p class="dim">ألصق الرابط أو رمز الدعوة كما وصلك على واتساب.</p><input class="inp" id="invIn" dir="ltr" autocomplete="off" placeholder="https://… أو رمز الدعوة"><button class="btn" data-act="useInv">متابعة</button></section>'
-    + '<section class="card stack"><h3>تحدي الخمس — بلا اشتراك</h3><p class="dim">30 يوماً: الصلاة في وقتها، ختمة بالآيات، الماء، الأذكار، و30 دقيقة حركة يومياً.</p><button class="btn sec" data-act="khgStartG">تعرّف على التحدي</button></section>'
-    + '<section class="card stack"><h3>لديّ اسم مستخدم وكلمة سر</h3><p class="dim">من أخصائيك بدل الرابط: اكتبهما كما وصلاك.</p><input class="inp" id="crU" dir="ltr" value="' + esc(V.inst && V.inst.u || '') + '" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="اسم المستخدم"><input class="inp" id="crP" dir="ltr" type="password" autocomplete="current-password" placeholder="كلمة السر"><button class="btn" data-act="useCred"' + (V.busy ? ' disabled' : '') + '>' + (V.busy ? 'جارٍ التحقق…' : 'دخول') + '</button></section>'
-    + '<section class="card stack"><h3>لديّ حساب في متصفح أو جوال آخر</h3><p class="dim">من التطبيق القديم: «أنا» (أو «تقدّمي» في النسخ السابقة) ← «نقل حسابي» ← انسخ الرمز وألصقه هنا.</p><input class="inp" id="xferIn" dir="ltr" autocomplete="off" placeholder="HX1-…"><button class="btn sec" data-act="useXfer"' + (V.busy ? ' disabled' : '') + '>' + (V.busy ? 'جارٍ النقل…' : 'نقل حسابي إلى هنا') + '</button></section>'
-    + (V.err ? '<p class="err">' + esc(V.err) + '</p>' : '') + '</div></div></div>';
+function scrStart() {                               // بلا حساب ولا رابط (مثل فتح التطبيق المثبّت أول مرة): الترحيب ثم الدخول برمز الدعوة أو اسم المستخدم أو رمز النقل
+  return '<div class="scr zstart"><div class="scroll">'
+    + '<section class="zs-hero">' + ZS_LEAVES + '<div class="zs-walk">' + zsZz({ prop: ['apple', 'water'], mouth: 'smile', anim: 'walk' }) + '</div></section>'
+    + '<section class="zs-sheet"><h1>غيّر أسلوب حياتك</h1><p>تابع تغذيتك ونشاطك وصحتك اليومية بسهولة ومرح مع زِنها.</p><button class="btn full zs-go" data-act="zsGo">ابدأ الآن</button></section>'
+    + '<section class="zs-login" id="zsLogin"><div class="zs-brand" role="img" aria-label="زنها">' + LOGO + '</div><h2>تسجيل الدخول</h2><p class="zs-sub">' + I('lock') + ' بياناتك مشفّرة، لا يقرؤها إلا أخصائيك</p>'
+    + '<label class="zs-l" for="invIn">رابط الدعوة أو رمزها</label><input class="inp zs-in" id="invIn" dir="ltr" autocomplete="off" placeholder="ألصق الرابط كما وصلك"><button class="btn full" data-act="useInv">متابعة</button><p class="zs-hint">أرسله لك أخصائيك على واتساب</p>'
+    + '<div class="zs-or"><span>أو</span></div>'
+    + '<div class="zs-alt"><b>' + I('user') + ' اسم المستخدم وكلمة السر</b><input class="inp zs-in" id="crU" dir="ltr" value="' + esc(V.inst && V.inst.u || '') + '" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="اسم المستخدم"><input class="inp zs-in" id="crP" dir="ltr" type="password" autocomplete="current-password" placeholder="كلمة السر"><button class="btn sec full" data-act="useCred"' + (V.busy ? ' disabled' : '') + '>دخول</button></div>'
+    + '<div class="zs-alt"><b>' + I('phone') + ' لديّ حساب على جوال آخر</b><span class="dim">من التطبيق القديم: «أنا» ← «نقل حسابي» ← انسخ الرمز وألصقه هنا.</span><input class="inp zs-in" id="xferIn" dir="ltr" autocomplete="off" placeholder="HX1-…"><button class="btn sec full" data-act="useXfer"' + (V.busy ? ' disabled' : '') + '>نقل حسابي</button></div>'
+    + '<div class="zs-alt"><b>🌙 تحدي الخمس، بلا اشتراك</b><span class="dim">30 يوماً: الصلاة في وقتها، ختمة بالآيات، الماء، الأذكار، و30 دقيقة حركة يومياً.</span><button class="btn sec full" data-act="khgStartG">تعرّف على التحدي</button></div>'
+    + (V.err ? '<p class="err">' + esc(V.err) + '</p>' : '') + '</section></div></div>';
 }
 function scrMoved() { return '<div class="scr"><div class="boot"><div class="stack" style="max-width:320px"><div class="empty"><div class="ei" style="background:rgba(111,227,169,.15);color:var(--mint)">' + I('check') + '</div><h1>انتقل حسابك ✓</h1><p class="mut">صار «زنها» يعمل من التطبيق المثبّت أو الجوال الجديد، ومُسح من هنا. افتح «زنها» من أيقونته.</p></div></div></div></div>'; }
 // ---- 0.61: أول تسجيل: الديانة ثم التذكيرات التي يريدها العميل (لئلا يبحث عنها في الإعدادات)
@@ -4567,16 +4632,17 @@ function pad(cur) {
 }
 function scrPin() {
   const conf = !!V.pin1;
-  return '<div class="scr">' + head(conf ? 'أعد كتابة الرمز' : V.xfer ? 'رمز الدخول لهذا الجهاز' : 'أنشئ رمز الدخول', 'pinBack', '') + '<div class="scroll"><div class="stack" style="text-align:center;padding-top:20px;gap:22px">'
+  return '<div class="scr zpin"><div class="zp-top">' + ZS_SKY + '<button class="back zp-back" data-act="pinBack" data-v="" aria-label="رجوع">' + I('back') + '</button><div class="zp-zz">' + zsZz({ prop: 'lock', mouth: conf ? 'smile' : 'calm', eyes: 'open' }) + '</div></div>'
+    + '<div class="zp-sheet"><h2>' + (conf ? 'أعد كتابة الرمز' : V.xfer ? 'رمز الدخول لهذا الجهاز' : 'أنشئ رمز الدخول') + '</h2>'
     + '<p class="mut">' + (conf ? 'للتأكيد، اكتب الرمز نفسه مرة ثانية.' : 'رمز من 4 أرقام تفتح به «زنها» على هذا الجوال. بلا بريد ولا كلمة سر طويلة.') + '</p>'
-    + pad(V.pin) + (V.err ? '<p class="err">' + esc(V.err) + '</p>' : '') + (V.busy ? '<div class="spin"></div><p class="dim">جارٍ إنشاء حسابك المشفّر…</p>' : '<p class="dim">' + (V.guest || (S && S.guest) ? 'الرمز يحمي تقدّمك في التحدي على هذا الجوال. احفظه، فلا يمكن استرجاعه.' : 'إن غيّرت جوالك يرسل لك أخصائيك رابطاً جديداً.') + '</p>') + '</div></div></div>';
+    + pad(V.pin) + (V.err ? '<p class="err">' + esc(V.err) + '</p>' : '') + (V.busy ? '<div class="spin"></div><p class="dim">جارٍ إنشاء حسابك المشفّر…</p>' : '<p class="dim">' + (V.guest || (S && S.guest) ? 'الرمز يحمي تقدّمك في التحدي على هذا الجوال. احفظه، فلا يمكن استرجاعه.' : 'إن غيّرت جوالك يرسل لك أخصائيك رابطاً جديداً.') + '</p>') + '</div></div>';
 }
 function scrLock() {
   const r = (() => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } })(), wait = V.until > now() ? Math.ceil((V.until - now()) / 1000) : 0;
-  return '<div class="scr"><div class="scroll"><div class="stack" style="text-align:center;padding-top:34px;gap:22px"><div class="logo" style="width:170px;margin:0 auto;color:#fff">' + LOGO + '</div>'
-    + '<p class="mut">اكتب رمز الدخول' + (r.dn ? ' — خطتك مع ' + esc(r.dn) : '') + '</p>' + pad(V.pin)
+  return '<div class="scr zpin zlock"><div class="zp-top">' + ZS_SKY + '<div class="zp-zz">' + zsZz({ wave: 1, mouth: V.err ? 'calm' : 'smile' }) + '</div></div>'
+    + '<div class="zp-sheet"><h2>أهلاً من جديد 👋</h2><p class="mut">اكتب رمز الدخول' + (r.dn ? ': خطتك مع ' + esc(r.dn) : '') + '</p>' + pad(V.pin)
     + (wait ? '<p class="err">محاولات كثيرة. انتظر ' + wait + ' ثانية.</p>' : V.err ? '<p class="err">' + esc(V.err) + '</p>' : '') + (V.busy ? '<div class="spin"></div>' : '')
-    + '<button class="link" data-act="forgot">نسيت الرمز؟</button></div></div></div>';
+    + '<button class="link" data-act="forgot">نسيت الرمز؟</button></div></div>';
 }
 function head(t, act, v, sub) { return '<div class="hd"><button class="back" data-act="' + act + '" data-v="' + v + '" aria-label="رجوع">' + I('back') + '</button><div class="t">' + (sub ? '<div class="stepk">' + sub + '</div>' : '') + '<h2>' + t + '</h2></div></div>'; }
 // ---------- الاستبيان: يُعرض كما أعدّه الأخصائي (يصل مع الدعوة؛ HForms يكمّل ما ينقصه). نظامان: الحصص (ex) والجرامات (g)
@@ -6463,6 +6529,7 @@ document.addEventListener('click', (e) => {
     case 'tourGo': tourStart(true); return;
     case 'copyInv': copyText(S.tok + '.' + S.fp, 'نُسخ رمز الدعوة — ألصقه في «زنها» بعد فتحه من الشاشة الرئيسية'); return;
     case 'copyLink': copyText(V.screen === 'inst' ? API + '/?i=1' + (V.inst && V.inst.u ? '&u=' + encodeURIComponent(V.inst.u) : '') : API + '/#t=' + S.tok + '.' + S.fp, 'نُسخ الرابط — افتحه في Chrome أو Safari'); return;
+    case 'zsGo': { const t = document.getElementById('zsLogin'); if (t) t.scrollIntoView({ behavior: RM ? 'auto' : 'smooth', block: 'start' }); setTimeout(() => { const x = document.getElementById('invIn'); if (x) x.focus({ preventScroll: true }); }, RM ? 0 : 450); return; }
     case 'useInv': {
       const v = ($('#invIn') || {}).value || '', m = /(?:#t=)?([A-Za-z0-9_-]{16,40})\.([A-Za-z0-9_-]{11})(?![A-Za-z0-9_-])/.exec(v.trim());
       if (!m) { V.err = 'الرابط أو الرمز غير صحيح. انسخه كاملاً من رسالة أخصائيك.'; break; }

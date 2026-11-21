@@ -1112,3 +1112,59 @@ html:has(.scr.qz),body:has(.scr.qz){background:#fff!important}body:has(.scr.qz):
 .skp .sknew{display:grid;place-items:center;align-content:center;gap:2px;font-size:28px;color:var(--mint);border:1.5px dashed var(--line2)!important;min-height:78px}.skp .sknew small{font-size:11px;color:var(--mut)}
 .skm{position:relative;display:block}.skm>button:first-child{width:100%}.skx{position:absolute;top:-4px;inset-inline-start:-4px;width:22px;height:22px;border-radius:50%;background:var(--coral);color:#fff;font-size:11px;display:grid;place-items:center;padding:0!important}
 .sksave{display:block;font-size:12px;margin-top:2px}
+/* ===== 1.35 واجهة الدخول الجديدة (تصميم المالك): كحلي ليلي بنجوم وغيوم نعناعية، زيزو على الكثبان، وورقة بيضاء للدخول ورمز الدخول ===== */
+.zs-splash,.zstart,.zpin{--zn:#101a4a;--zn2:#16235e;--zm:#6fe0a8;--zm2:#3fcf8e;--zink:#1b2446;--zmut:#5d6687;--zsand:#f3d7a0;--zsand2:#e9c27f}
+.zs-splash{background:var(--zn)!important;overflow:hidden;justify-content:flex-start!important;padding-top:calc(70px + env(safe-area-inset-top,0px))}
+.zs-sky{position:absolute;inset:0 0 auto;width:100%;height:62%;pointer-events:none}
+.zs-splash .onb-logo{position:relative;z-index:2;width:min(46%,190px)!important;color:#fff}
+.zs-splash .zs-zz{position:relative;z-index:2;width:min(52%,210px);margin-top:28px}
+.zs-splash .zs-zz svg{width:100%;height:auto}
+.zs-dune{position:absolute;inset:auto -20% 0;height:42%;background:radial-gradient(120% 70% at 30% 20%,var(--zsand),var(--zsand2) 70%);border-radius:50% 50% 0 0/36% 36% 0 0;z-index:1}
+.zs-dune::before{content:'';position:absolute;inset:auto 0 0;height:50%;background:linear-gradient(180deg,transparent,rgba(16,26,74,.92))}
+.zs-name{position:absolute;z-index:3;inset:auto 0 calc(36px + env(safe-area-inset-bottom,0px));text-align:center;color:#fff}
+.zs-name h1{margin:0;font-size:calc(34px*var(--fs));color:#fff;letter-spacing:.5px}.zs-name h1 span{font-weight:700;opacity:.95;margin-inline-start:6px}
+.zs-name .onb-tag{color:var(--zm)!important;font-weight:700}
+.zs-splash .onb-skip{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.25)}
+/* الترحيب والدخول */
+.zstart{background:var(--zn)}
+.zstart .scroll{padding:0!important}
+.zs-hero{position:relative;height:min(52vh,420px);display:grid;place-items:end center;overflow:hidden;background:radial-gradient(70% 60% at 50% 40%,#1d2c72,var(--zn))}
+.zs-leaves{position:absolute;inset:0;width:100%;height:100%}
+.zs-walk{position:relative;width:min(62%,240px);margin-bottom:34px}.zs-walk svg{width:100%;height:auto}
+.zs-sheet,.zs-login{position:relative;background:#fff;color:var(--zink);margin:-28px 0 0;border-radius:28px 28px 0 0;padding:26px 22px 22px;text-align:center;box-shadow:0 -10px 30px rgba(0,0,0,.18)}
+.zs-sheet h1{margin:0 0 8px;font-size:calc(28px*var(--fs));color:var(--zink)}.zs-sheet p{margin:0 0 18px;color:var(--zmut);font-size:calc(16px*var(--fs))}
+.zstart .btn,.zpin .btn{background:var(--zm)!important;color:#0b2a1c!important;border:0!important;border-radius:999px!important;min-height:52px;font-weight:800;box-shadow:0 10px 24px rgba(63,207,142,.28)!important}
+.zstart .btn.sec{background:#fff!important;color:var(--zink)!important;border:1.5px solid #e3e7f1!important;box-shadow:none!important;min-height:48px}
+.zs-login{margin:0;border-radius:0;padding-top:30px;text-align:start;display:grid;gap:10px;box-shadow:none;border-top:1px solid #eef0f6;padding-bottom:calc(40px + env(safe-area-inset-bottom,0px))}
+.zs-login{overflow:hidden}.zs-login::before{content:'';position:absolute;top:-70px;right:-60px;width:170px;height:120px;border-radius:50%;background:var(--zm);opacity:.9;pointer-events:none}
+.zs-brand{width:112px;color:var(--zn);margin:0 auto 4px}.zs-brand svg{width:100%;height:auto;display:block}
+.zs-login h2{margin:0;text-align:center;font-size:calc(26px*var(--fs));color:var(--zink)}
+.zs-sub{margin:0 0 8px;text-align:center;color:var(--zmut);font-size:calc(13.5px*var(--fs))}.zs-sub svg{width:14px;height:14px;vertical-align:-2px}
+.zs-l{font-weight:700;font-size:calc(14.5px*var(--fs));color:var(--zink)}
+.zs-in{background:#f1f3f8!important;color:var(--zink)!important;border:1.5px solid #e3e7f1!important;border-radius:999px!important;min-height:50px;padding:0 18px!important;box-shadow:none!important}
+.zs-in::placeholder{color:#99a0b8}.zs-in:focus{border-color:var(--zm2)!important;outline:3px solid rgba(63,207,142,.25)!important}
+.zs-hint{margin:-2px 0 0;text-align:center;color:var(--zmut);font-size:calc(13px*var(--fs))}
+.zs-or{display:flex;align-items:center;gap:10px;color:var(--zmut);margin:8px 0}.zs-or::before,.zs-or::after{content:'';flex:1;height:1px;background:#e6e9f2}
+.zs-alt{display:grid;gap:8px;padding:14px;border-radius:20px;border:1.5px solid #e9ecf4;background:#fbfcfe}
+.zs-alt b{display:flex;align-items:center;gap:8px;color:var(--zink);font-size:calc(15px*var(--fs))}.zs-alt b svg{width:18px;height:18px}.zs-alt .dim{color:var(--zmut)!important;font-size:calc(13px*var(--fs))}
+.zs-login .err{text-align:center}
+/* رمز الدخول */
+.zpin{background:var(--zn)}
+.zp-top{position:relative;height:min(36vh,300px);display:grid;place-items:end center;overflow:hidden;padding-top:env(safe-area-inset-top,0px)}
+.zp-top .zs-sky{height:100%}
+.zp-back{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));inset-inline-start:12px;z-index:3;background:rgba(255,255,255,.12)!important;color:#fff!important;border-radius:50%}
+.zp-logo{position:absolute;top:calc(22px + env(safe-area-inset-top,0px));inset-inline:0;margin:auto;width:120px;color:#fff;z-index:2}.zp-logo svg{width:100%;height:auto}
+.zp-zz{position:relative;z-index:2;width:min(40%,160px);margin-bottom:-6px}.zp-zz svg{width:100%;height:auto}
+.zp-sheet{flex:1;background:#fff;color:var(--zink);border-radius:28px 28px 0 0;padding:24px 20px calc(24px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;box-shadow:0 -10px 30px rgba(0,0,0,.2);position:relative;z-index:3}
+.zp-sheet h2{margin:0;color:var(--zink);font-size:calc(24px*var(--fs))}.zp-sheet .mut,.zp-sheet .dim{color:var(--zmut)!important;margin:0}
+.zpin .pin{display:flex;gap:14px;justify-content:center;direction:ltr}
+.zpin .pin span{width:18px;height:18px;border-radius:50%;border:2px solid #cfd5e6;background:#fff;color:transparent;font-size:0;transition:transform .15s,background .15s}
+.zpin .pin span.f{background:var(--zm2);border-color:var(--zm2);transform:scale(1.15)}
+.zpin .pad{max-width:300px;gap:12px}
+.zpin .pad button{height:62px;border-radius:999px;background:#f1f3f8;border:0;color:var(--zink);font-size:calc(24px*var(--fs));font-weight:700;box-shadow:none;transition:transform .1s,background .15s}
+.zpin .pad button:active{background:#d9f6e9;transform:scale(.94)}
+.zpin .link{color:#0f9f73!important;font-weight:700}
+.zpin .err{color:#c62f35!important}
+@media (prefers-reduced-motion:reduce){.zpin .pin span,.zpin .pad button{transition:none}}
+.zpin{overflow-y:auto}.zp-top{flex:0 0 auto;height:min(32vh,260px)}.zp-zz{width:min(36%,150px);margin-bottom:6px}.zp-sheet{flex:1 0 auto}
+.zp-top{height:min(25vh,210px)}.zp-zz{width:min(30%,124px)}.zp-sheet{gap:12px;padding-top:20px}.zpin .pad{gap:10px}.zpin .pad button{height:56px}
