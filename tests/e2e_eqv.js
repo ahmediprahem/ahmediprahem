@@ -11,14 +11,16 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   Object.keys(ref).forEach((k) => assert(Math.abs(E.bmrOf(Object.assign({ bmrF: k }, c0)).v - ref[k]) < 1e-6, k));
   assert.strictEqual(E.BMRF.length, 8); assert(E.BMRF.every((x) => x[2] && x[3])); assert(/18/.test(E.bmrOf(Object.assign({ bmrF: 'schofield' }, c0, { age: 70 })).note));
   ok('8 معادلات بمعاملاتها المرجعية، ولكل منها تعليق «متى تُستعمل» ومرجع؛ Schofield خارج 18–60 ترجع إلى Mifflin بملاحظة');
+  { const hard = {}; for (const sex of ['ذكر', 'أنثى']) for (const w of [55, 95, 130]) for (const gi of [0, 1, 2, 3]) for (const meals of [3, 5, 6]) for (const v2 of [true, false]) { const c = { sex, age: 35, weight: w, height: 165, activity: D.settings.activity[1][0], goal: D.settings.goals[gi][0], meals, v2 }; E.eqvPlan(c, D, {}).days.forEach((d) => d.slots.forEach((s) => E.slotIssues(s, D, c).filter((x) => x.h).forEach((x) => { hard[x.code] = (hard[x.code] || 0) + 1; }))); }
+    assert(!hard.MAX && !hard.STARCH2 && !hard.CHEESE2 && !hard.PROT3, JSON.stringify(hard)); ok('لا كميات فوق المعقول ولا نشويان من النوع نفسه ولا ثلاثة بروتينات في وجبة (' + JSON.stringify(hard) + ')'); }
   assert(/أقل من 18/.test(E.bmrOf(Object.assign({}, c0, { age: 15 })).note)); ok('تنبيه: المعادلات للبالغين (العمر أقل من 18)');
   const cl = Object.assign({}, c0, { activity: D.settings.activity[1][0], goal: D.settings.goals[2][0] }), t0 = E.targets(cl, D), t1 = E.targets(Object.assign({}, cl, { eta: true }), D);
   assert(Math.abs(t1.tdee / t0.tdee - 1.1) < 1e-9); ok('تأثير الهضم 10% اختياري (معطّل افتراضياً)');
   assert.deepStrictEqual([E.adequacy(95, 100).st, E.adequacy(105, 100).st, E.adequacy(108, 100).st, E.adequacy(120, 100).st], ['ok', 'ok', 'warn', 'block']); ok('نسبة الملاءمة: أخضر 95–105% (قرار المالك)، كهرماني 90–110%، أحمر خارجها');
   const cx = Object.assign({}, cl, { meals: 5, conditions: [], allergens: ['حساسية البيض'], love: [], avoid: [], favMeals: [], excludedMeals: [], noBank: {}, baseCounts: [7, 0, 3, 5, 0, 0, 0, 2, 0, 3, 2, 5, 0] });
   cx.mealDist = E.suggestDist(cx.baseCounts, 5, D); cx.mealDist[0][0] += 1; cx.mealDist[2][0] -= 1; assert(E.mealDistOk(cx, 5, D));
-  const p = E.eqvPlan(cx, D, {}); let bad = 0; p.days.forEach((d) => d.slots.forEach((s) => { const r = E.slotReq(s); for (let g = 0; g < 13; g++) if (Math.abs(r[g] - cx.mealDist[s.si][g]) > 0.01) bad++; }));
-  assert.strictEqual(bad, 0); assert.strictEqual(p.method, 'eqv'); assert.strictEqual(p.days.length, 7); ok('خطة الأسبوع مطابقة لجدول التوزيع حرفياً في كل وجبة من الأيام السبعة');
+  const p = E.eqvPlan(cx, D, {}); let bad = 0; p.days.forEach((d) => d.slots.forEach((s) => { const r = E.slotReq(s), md = cx.mealDist[s.si], pool = (a) => a[2] + a[3] + a[4] + a[5]; for (let g = 0; g < 13; g++) if ((g < 2 || g > 5) && Math.abs(r[g] - md[g]) > 0.01) bad++; if (Math.abs(pool(r) - pool(md)) > 0.01) bad++; }));
+  assert.strictEqual(bad, 0); assert.strictEqual(p.method, 'eqv'); assert.strictEqual(p.days.length, 7); ok('خطة الأسبوع مطابقة لجدول التوزيع في كل وجبة من الأيام السبعة (اللحوم بصنف بروتين واحد في الوجبة)');
   const ctx = E.ctx(cx, D), names = p.days.flatMap((d) => d.slots.flatMap((s) => s.lines.filter((l) => l.name).map((l) => l.name)));
   assert(names.every((nm) => ctx.ok(D.foods.find((f) => f.n === nm)))); assert(new Set(p.days.map((d) => d.slots[0].lines.map((l) => l.name).join())).size > 1); ok('الأصناف من أطعمة «زنها» بلا محظور (حساسية البيض)، وتتنوّع بين الأيام');
   assert(['ok', 'warn', 'block'].includes(E.checkPlan(p, D).st) && p.phr && p.base); ok('الخطة بصيغة المحرك نفسها: تُفحص وتُطبع وتُرسل');
