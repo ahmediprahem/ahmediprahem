@@ -31,3 +31,7 @@ html[data-tone="light"] .gkind.on{border-color:var(--zw-green)!important;box-sha
 html[data-tone="light"] .gbt.gbk{background:linear-gradient(135deg,var(--zw-tint),#ffffff)!important}
 html[data-tone="light"] :is(.gg,.gbt,.eqli,.eqdm,.gkind,.ght){border-radius:var(--zw-r)!important}
 }
+@media screen{html[data-tone="light"][data-theme="glass"] button.link{background:none!important;box-shadow:none!important;border:0!important;color:#00a36c!important;min-height:44px;padding:4px 8px!important;font-weight:700;text-decoration:underline;text-underline-offset:3px}}
+@media screen{html[data-tone="light"][data-theme="glass"] .eqbkp .eqbkl li button.sec.eqbki{border-radius:16px!important;align-items:start}
+html[data-tone="light"] .eqbki .gxk{align-self:start;padding:2px 10px;border-radius:999px;font-size:12px;white-space:nowrap;height:auto}
+html[data-tone="light"] .eqbk.on{border-radius:16px!important;padding:4px 10px}html[data-tone="light"] .eqbk.on button.link{min-height:36px}}

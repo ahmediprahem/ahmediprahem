@@ -85,7 +85,7 @@ function genEditor(c, g, T) {
   return '<div class="ucard genedit"><h3>محرر ' + esc(dayName(p, di)) + '</h3>' + genHud({ c: n[0], p: n[1], f: n[2], k: n[0] * 4 + n[1] * 4 + n[2] * 9 }, T)
     + d.slots.map(function (s, si) {
       var mv = GENX.meals === si ? E.mealMatch(ec(c), E.slotReq(s), s.type, D, 8) : null;
-      return '<div class="gslot"><h4>' + esc(mealNm(p, s)) + (s.meal ? ' <small>' + esc(s.meal) + '</small>' : '') + (s.flex ? ' <span class="gxk">' + E.MATCH_AR[s.flex] + '</span>' : '') + ' <button class="link" data-a="genMeals" data-v="' + si + '">وجبة من البنك</button></h4>'
+      return '<div class="gslot"><h4>' + esc(mealNm(p, s)) + (s.meal ? ' <small>' + esc(s.meal) + '</small>' : '') + (s.flex ? ' <span class="gxk">' + E.MATCH_AR[s.flex] + '</span>' : '') + '</h4>'
         + (mv ? '<ul class="gml">' + (mv.length ? mv.map(function (m, k) { return '<li class="lv-' + m.lvl + '"><b>' + esc(m.n) + '</b> <span class="gxk">' + m.lvl + ' ' + E.MATCH_AR[m.lvl] + '</span> ' + genDv(m.dv) + (m.lvl !== 'D' ? ' <button class="sm" data-a="genMealPick" data-v="' + si + ',' + k + '">اختر</button>' : '') + '</li>'; }).join('') : '<li class="small">لا وجبات في البنك تناسب هذه الوجبة.</li>') + '</ul>' : '')
         + '<ul class="glines">' + s.lines.map(function (l, li) {
           if (l.missing) return '<li class="small warn">' + esc(l.text || '') + '</li>'; var key = si + ',' + li, sb = GENX.subs === key ? E.subs(l, s.type, p, D, 12) : null;
@@ -115,8 +115,8 @@ var EQ_STEPS = ['الطاقة', 'الماكروز', 'الجدول التركيب
 function genAdq(v, t) { var a = E.adequacy(v, t); return '<span class="ad st-' + a.st + '">' + Math.round(a.pct) + '%</span>'; }
 function genDist(c) { var meals = +c.meals || 5, cn = genCounts(c).cn, md = c.mealDist, n = E.slots(meals, D).length; if (!md || md.length !== n || md.some(function (r) { return !r || r.length !== 13; })) return E.suggestDist(cn, meals, D); return md.map(function (r) { return r.map(Number); }); }      // الجدول كما عدّله الأخصائي، ويُتحقق من تطابقه عند البناء
 // 1.27: أيام متعددة — c.eqvDays[i] = {n, cn, md, picks}؛ اليوم النشط نسخته العاملة في baseCounts/mealDist/eqvPicks
-function eqStore(c) { var g = genOf(c); if (!c.eqvDays || !c.eqvDays.length) c.eqvDays = [{ n: 'اليوم 1' }]; var k = Math.min(g.ed || 0, c.eqvDays.length - 1), x = c.eqvDays[k]; x.cn = genCounts(c).cn.slice(); x.md = genDist(c).map(function (r) { return r.slice(); }); x.picks = Object.assign({}, c.eqvPicks || {}); }
-function eqLoad(c, k) { var x = c.eqvDays[k]; genOf(c).ed = k; c.baseCounts = x.cn.slice(); c.mealDist = x.md.map(function (r) { return r.slice(); }); c.eqvPicks = Object.assign({}, x.picks || {}); }
+function eqStore(c) { var g = genOf(c); if (!c.eqvDays || !c.eqvDays.length) c.eqvDays = [{ n: 'اليوم 1' }]; var k = Math.min(g.ed || 0, c.eqvDays.length - 1), x = c.eqvDays[k]; x.cn = genCounts(c).cn.slice(); x.md = genDist(c).map(function (r) { return r.slice(); }); x.picks = Object.assign({}, c.eqvPicks || {}); x.bank = JSON.parse(JSON.stringify(c.eqvBank || {})); }
+function eqLoad(c, k) { var x = c.eqvDays[k]; genOf(c).ed = k; c.baseCounts = x.cn.slice(); c.mealDist = x.md.map(function (r) { return r.slice(); }); c.eqvPicks = Object.assign({}, x.picks || {}); c.eqvBank = JSON.parse(JSON.stringify(x.bank || {})); }
 function eqDayBar(c, g) {
   var ds = c.eqvDays || [{ n: 'اليوم 1' }], k = Math.min(g.ed || 0, ds.length - 1);
   return '<div class="eqdays"><span class="small">الأيام:</span>' + ds.map(function (x, i) { return '<button class="sec sm' + (i === k ? ' on' : '') + '" data-a="genEd" data-v="' + i + '">' + esc(x.n || 'اليوم ' + (i + 1)) + '</button>'; }).join('')
@@ -158,9 +158,10 @@ function genEqv(c, g, T) {
   } else if (es === 4) {
     h += eqDayBar(c, g);
     var cn4 = genCounts(c).cn, md = genDist(c), act = sl.filter(function (q) { return q.active; });
-    h += '<h3>4. توزيع الحصص على الوجبات <button class="sec sm" data-a="genEqDist">↻ وزّع تلقائياً</button></h3>' + (genNarrow() ? genDistCards(c, cn4, md, act) : '<table class="st gentbl eqdist"><tr><th>المجموعة</th>' + act.map(function (q) { return '<th>' + esc(q.name) + '</th>'; }).join('') + '<th>المجموع</th><th>اليومي</th></tr>'
-      + D.groups.map(function (gn, gi) { if (!cn4[gi]) return ''; var t = 0; return '<tr><td>' + genGi(gi) + esc(gn) + '</td>' + act.map(function (q) { t += md[q.i][gi]; return '<td><input type="number" class="n" min="0" step="1" data-gd="' + q.i + ',' + gi + '" value="' + md[q.i][gi] + '"></td>'; }).join('') + '<td><b>' + t + '</b></td><td>' + (t === cn4[gi] ? '<span class="ad st-ok">✓ ' + cn4[gi] + '</span>' : '<span class="ad st-block">' + cn4[gi] + '</span>') + '</td></tr>'; }).join('')
-      + '<tr class="eqsum"><td>سعرات الوجبة</td>' + act.map(function (q) { return '<td>' + Math.round(E.countsVals(md[q.i], D).k) + '</td>'; }).join('') + '<td>' + Math.round(E.countsVals(cn4, D).k) + '</td><td></td></tr></table>');
+    var over4 = D.groups.map(function (gn, gi) { var t = act.reduce(function (a, q) { return a + ((c.eqvBank || {})[q.i] ? md[q.i][gi] : 0); }, 0); return t > cn4[gi] ? gn + ' (' + t + ' من ' + cn4[gi] + ')' : ''; }).filter(Boolean);
+    h += '<h3>4. توزيع الحصص على الوجبات <button class="sec sm" data-a="genEqDist">↻ وزّع تلقائياً</button></h3>' + (over4.length ? '<p class="err small eqbkover">⛔ وجبات البنك تأخذ أكثر من حصص اليوم في: ' + esc(over4.join('، ')) + '. عدّل الجدول التركيبي أو اختر وجبة أخرى.</p>' : '') + (genNarrow() ? genDistCards(c, cn4, md, act) : '<table class="st gentbl eqdist"><tr><th>المجموعة</th>' + act.map(function (q) { return '<th>' + genBkHead(c, q) + esc(q.name) + '</th>'; }).join('') + '<th>المجموع</th><th>اليومي</th></tr>'
+      + D.groups.map(function (gn, gi) { if (!cn4[gi] && !act.some(function (q) { return md[q.i][gi] > 0; })) return ''; var t = 0; return '<tr><td>' + genGi(gi) + esc(gn) + '</td>' + act.map(function (q) { t += md[q.i][gi]; return (c.eqvBank || {})[q.i] ? '<td class="eqbkc"><b>' + md[q.i][gi] + '</b></td>' : '<td><input type="number" class="n" min="0" step="0.5" data-gd="' + q.i + ',' + gi + '" value="' + md[q.i][gi] + '"></td>'; }).join('') + '<td><b>' + t + '</b></td><td>' + (t === cn4[gi] ? '<span class="ad st-ok">✓ ' + cn4[gi] + '</span>' : '<span class="ad st-block">' + cn4[gi] + '</span>') + '</td></tr>'; }).join('')
+      + '<tr class="eqsum"><td>سعرات الوجبة</td>' + act.map(function (q) { return '<td>' + Math.round(E.countsVals(md[q.i], D).k) + '</td>'; }).join('') + '<td>' + Math.round(E.countsVals(cn4, D).k) + '</td><td></td></tr></table>' + (GENX.bk != null && act.some(function (q) { return q.i === GENX.bk; }) ? genBkPanel(c, act.filter(function (q) { return q.i === GENX.bk; })[0], md) : ''));
   } else {
     h += eqDayBar(c, g);
     var md5 = genDist(c), act5 = sl.filter(function (q) { return q.active && md5[q.i].some(function (v0) { return v0 > 0; }); }), mi = Math.min(g.em || 0, act5.length - 1), q5 = act5[mi], picks = c.eqvPicks || {}, cx = E.ctx(ec(c), D);
@@ -264,10 +265,10 @@ function genGauges(v, T) {
 }
 function genDistCards(c, cn, md, act) {
   return '<div class="eqdc">' + act.map(function (q) {
-    var k = Math.round(E.countsVals(md[q.i], D).k); var row = function (gn, gi) { return '<div class="eqdr">' + genGi(gi) + '<span>' + esc(gn) + '</span>' + genStp('gd', q.i + ',' + gi, md[q.i][gi]) + '</div>'; }, on = '', off = '';
-    D.groups.forEach(function (gn, gi) { if (!cn[gi]) return; if (md[q.i][gi] > 0) on += row(gn, gi); else off += row(gn, gi); });
-    return '<div class="eqdm"><h4>' + esc(q.name) + ' <small>' + k + ' سعرة</small></h4>' + on + (off ? '<details class="eqdmore"><summary>＋ مجموعات أخرى</summary>' + off + '</details>' : '') + '</div>';
-  }).join('') + '<div class="eqdm eqdt"><h4>المجموع اليومي</h4>' + D.groups.map(function (gn, gi) { if (!cn[gi]) return ''; var t = act.reduce(function (a, q) { return a + md[q.i][gi]; }, 0); return '<div class="eqdr">' + genGi(gi) + '<span>' + esc(gn) + '</span>' + (t === cn[gi] ? '<span class="ad st-ok">✓ ' + cn[gi] + '</span>' : '<span class="ad st-block">' + t + ' من ' + cn[gi] + '</span>') + '</div>'; }).join('') + '</div></div>';
+    var k = Math.round(E.countsVals(md[q.i], D).k), bk = (c.eqvBank || {})[q.i]; var row = function (gn, gi) { return '<div class="eqdr">' + genGi(gi) + '<span>' + esc(gn) + '</span>' + (bk ? '<b class="eqbkv">' + md[q.i][gi] + '</b>' : genStp('gd', q.i + ',' + gi, md[q.i][gi])) + '</div>'; }, on = '', off = '';
+    D.groups.forEach(function (gn, gi) { if (!cn[gi] && !(md[q.i][gi] > 0)) return; if (md[q.i][gi] > 0) on += row(gn, gi); else if (!bk) off += row(gn, gi); });
+    return '<div class="eqdm' + (bk ? ' hasbk' : '') + '" data-si="' + q.i + '">' + genBkHead(c, q) + '<h4>' + esc(q.name) + ' <small>' + k + ' سعرة</small></h4>' + on + (off ? '<details class="eqdmore"><summary>＋ مجموعات أخرى</summary>' + off + '</details>' : '') + (GENX.bk === q.i ? genBkPanel(c, q, md) : '') + '</div>';
+  }).join('') + '<div class="eqdm eqdt"><h4>المجموع اليومي</h4>' + D.groups.map(function (gn, gi) { if (!cn[gi] && !act.some(function (q) { return md[q.i][gi] > 0; })) return ''; var t = act.reduce(function (a, q) { return a + md[q.i][gi]; }, 0); return '<div class="eqdr">' + genGi(gi) + '<span>' + esc(gn) + '</span>' + (t === cn[gi] ? '<span class="ad st-ok">✓ ' + cn[gi] + '</span>' : '<span class="ad st-block">' + t + ' من ' + cn[gi] + '</span>') + '</div>'; }).join('') + '</div></div>';
 }
 function genBento(c, ck, T, po) {
   var d0 = c.plan && c.plan.days && c.plan.days[0], n = d0 && d0.nominal, k = n ? n[0] * 4 + n[1] * 4 + n[2] * 9 : po.kcal || 0;
@@ -284,6 +285,23 @@ function genBento(c, ck, T, po) {
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
   document.addEventListener('input', function (e) { var t = e.target; if (!t.classList || !t.classList.contains('gsl')) return; var k = t.dataset.gm, n = t.parentNode.querySelector('input.n[data-gm="' + k + '"]'); if (n) n.value = t.value; var r = document.querySelector('.gring-d'); if (r) r.style.setProperty({ choPct: '--c', proPct: '--p', fatPct: '--f' }[k], t.value); });
 })();
+// ---- 1.31 وجبات البنك في خطوة التوزيع فقط (قرار المالك): زر فوق اسم الوجبة ← اختيار وجبة البنك وأيامها ← حصص الوجبة تمتلئ بمجموعاتها تلقائياً، ويكمل الأخصائي توزيع باقي اليوم
+// c.eqvBank[si] = { n, ings:[{n,g,e}], prof:[13] } لليوم النشط، وc.eqvDays[k].bank لكل يوم. لا تدخل وجبات البنك الخطة من أي مكان آخر
+function genBkHead(c, q) {
+  var bk = (c.eqvBank || {})[q.i];
+  return bk ? '<span class="eqbk on">🍲 <b>' + esc(bk.n) + '</b> <button class="link" data-a="genBkDel" data-v="' + q.i + '" aria-label="أزل وجبة البنك">✕ إزالة</button></span>' : '<button class="sec sm eqbk" data-a="genBk" data-v="' + q.i + '">🍲 ＋ وجبة من البنك</button>';
+}
+function genBkList(c, q, md) { var tp = E.slots(+c.meals || 5, D).filter(function (x) { return x.i === q.i; })[0]; return E.mealMatch(ec(c), md[q.i], tp ? tp.type : null, D, 60); }
+function genBkPanel(c, q, md) {
+  var L = genBkList(c, q, md), fav = {}, ds = c.eqvDays && c.eqvDays.length ? c.eqvDays : [{ n: 'اليوم 1' }], ed = Math.min(genOf(c).ed || 0, ds.length - 1), wk = c.eqvWeek || [];
+  (c.favMeals || []).forEach(function (n) { fav[n] = 1; }); L.sort(function (a, b) { return (fav[b.n] ? 1 : 0) - (fav[a.n] ? 1 : 0); }); GENX.bkList = L;
+  var wd = function (k) { return D.days.filter(function (_, d) { return (wk[d] != null && ds[wk[d]] ? wk[d] : d % ds.length) === k; }).join('، '); };
+  return '<div class="eqbkp" role="dialog" aria-label="وجبة من البنك لـ' + esc(q.name) + '"><div class="eqbkh"><b>🍲 وجبة من البنك لـ«' + esc(q.name) + '»</b><button class="link" data-a="genBk" data-v="' + q.i + '">إغلاق</button></div>'
+    + '<div class="eqbkd"><span class="small">أضفها في:</span>' + ds.map(function (x, k) { return '<label class="chk"><input type="checkbox" data-bkd="' + k + '"' + (k === ed ? ' checked' : '') + '> ' + esc(x.n || 'اليوم ' + (k + 1)) + (ds.length > 1 || wk.length ? ' <small>(' + esc(wd(k)) + ')</small>' : ' <small>(كل أيام الأسبوع)</small>') + '</label>'; }).join('') + '</div>'
+    + '<input id="gen_bkq" class="eqbkq" placeholder="ابحث باسم الوجبة" aria-label="ابحث في وجبات البنك">'
+    + (L.length ? '<ul class="eqbkl">' + L.map(function (m, k) { return '<li data-bkn="' + esc(m.n) + '"><button class="sec eqbki" data-a="genBkPick" data-v="' + k + '"><span><b>' + (fav[m.n] ? '⭐ ' : '') + esc(m.n) + '</b><small>' + m.ings.map(function (x) { return esc(x.n); }).join('، ') + '</small></span><span class="gxk lv-' + m.lvl + '">' + E.MATCH_AR[m.lvl] + '</span>' + genDv(m.dv) + '</button></li>'; }).join('') + '</ul>' : '<p class="small">لا وجبات في البنك تناسب هذه الوجبة والعميل (بلا المستبعد والحساسية).</p>')
+    + '<p class="small">تمتلئ حصص الوجبة بمجموعات وجبة البنك تلقائياً، ثم أكمل أنت توزيع باقي اليوم حتى تصبح المجاميع ✓. ⭐ = اختارها العميل في استبيان «زنها».</p></div>';
+}
 function genTab(c) {
   var g = genOf(c), ath = c.kind === 'athlete', body = g.step <= 1 ? genClient(c, g) : g.step === 2 ? (ath ? genAthSetup : genSetup)(c, g) : g.step === 3 ? (ath ? genAthRev : genRev)(c, g) : g.step === 4 ? (ath ? genAthPlan : genPlanStep)(c, g) : (ath ? genAthSend : genSend)(c, g);
   var sent = c.hx && c.hx.planV ? '<div class="chkb st-ok gensent">📤 أُرسلت الخطة إلى «زنها» (v' + c.hx.planV + '). عدّلها في أي وقت ثم أرسلها إصداراً جديداً v' + (c.hx.planV + 1) + '؛ علامات «أكلت/بدّلت» عند العميل تبقى مع أصنافها. ' + (g.step < 4 ? '<button class="sm" data-a="genStep" data-v="4">عدّل الخطة المرسلة</button>' : '') + '</div>' : '';
@@ -306,11 +324,12 @@ function genPage() {
 (function (f) { main0 = function () { if (S.view === 'gen') { $('main').innerHTML = genPage(); return; } return f.apply(this, arguments); }; })(main0);
 document.addEventListener('change', function (e) {
   var t = e.target, c = cur(); if (!c || !t.dataset) return;
+  if (t.dataset.bkd != null) return;
   if ((t.dataset.f || t.dataset.bf) && t.closest && t.closest('.geneqv')) { setTimeout(main, 0); return; }
   if (t.dataset.f && t.closest && t.closest('.genclient')) { setTimeout(function () { var h = document.querySelector('.gentab > .genhero'), c2 = cur(); if (h && c2) h.outerHTML = genHero(c2); }, 0); return; }      // بطاقة العميل تتحدث مع الكتابة دون إعادة رسم النموذج      
   if (t.dataset.gfp != null) { var gq = genOf(c), pp = gq.fastPat === 2 ? 2 : 1, arr = genFastPct(gq).slice(); arr[+t.dataset.gfp] = Math.max(0, Math.min(100, +t.value || 0)) / 100; gq.fastPct = gq.fastPct || {}; gq.fastPct[pp] = arr; save(); main(); return; }
   if (t.dataset.gm) { c[t.dataset.gm] = Math.max(0, Math.min(100, Math.round(+t.value || 0))) / 100; c.macroMode = 'manual'; save(); main(); return; }
-  if (t.dataset.gd) { var q7 = t.dataset.gd.split(',').map(Number), md7 = genDist(c); md7[q7[0]][q7[1]] = Math.max(0, Math.round(+t.value || 0)); c.mealDist = md7; save(); main(); return; }
+  if (t.dataset.gd) { var q7 = t.dataset.gd.split(',').map(Number), md7 = genDist(c); md7[q7[0]][q7[1]] = Math.max(0, Math.round((+t.value || 0) * 2) / 2); c.mealDist = md7; save(); main(); return; }
   if (t.dataset.gw != null) { c.eqvWeek = c.eqvWeek || D.days.map(function (_, d) { return d % (c.eqvDays || [1]).length; }); c.eqvWeek[+t.dataset.gw] = +t.value; save(); main(); return; }
   if (t.dataset.gp) { c.eqvPicks = c.eqvPicks || {}; if (t.value) c.eqvPicks[t.dataset.gp] = t.value; else delete c.eqvPicks[t.dataset.gp]; save(); main(); return; }
   if (t.dataset.tm != null) { var tm = genTmap(), v0 = t.value.trim(); if (v0 && !D.foods.some(function (f) { return f.n === v0; })) { toast('اختر صنفاً من القائمة'); return; } if (v0) tm[t.dataset.tm] = v0; else delete tm[t.dataset.tm]; saveSettings(); main(); toast('حُفظ الربط'); return; }
@@ -325,6 +344,13 @@ Object.assign(A, {
   genGo: function () { var c = cur(); if (!c) return; if (!c.name || !c.sex) { toast('اكتب الاسم وحدّد الجنس أولاً'); return; } S.genBack = null; S.tab = 'gen'; save(); render(); window.scrollTo(0, 0); },
   genStep: function (v) { var c = cur(); if (!c) return; var g = genOf(c), to = Math.max(1, Math.min(5, +v)); if (to > 1 && g.step === 1 && !genBodyOk(c)) { genOf(c).miss = 1; main(); toast('أكمل بيانات العميل المطلوبة أولاً'); return; } g.step = to; g.miss = 0; save(); genVT(main); window.scrollTo(0, 0); },
   genStp: function (v) { var c = cur(); if (!c) return; var q = String(v).split('|'), d = +q[2]; if (q[0] === 'gc') { var cn = genCounts(c).cn.slice(), i = +q[1]; cn[i] = Math.max(0, cn[i] + d); c.baseCounts = cn; } else if (q[0] === 'gd') { var ij = q[1].split(',').map(Number), md = genDist(c); md[ij[0]][ij[1]] = Math.max(0, md[ij[0]][ij[1]] + d); c.mealDist = md; } save(); main(); },
+  genBk: function (v) { var c = cur(); if (!c) return; GENX.bk = GENX.bk === +v ? null : +v; main(); setTimeout(function () { var el = document.querySelector('.eqbkp'); if (el && el.scrollIntoView) el.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }, 30); },
+  genBkPick: function (v) { var c = cur(); if (!c || GENX.bk == null) return; var m = (GENX.bkList || [])[+v]; if (!m) return; var si = GENX.bk, g = genOf(c), ed = g.ed || 0, ks = [].slice.call(document.querySelectorAll('[data-bkd]:checked')).map(function (x) { return +x.dataset.bkd; }); if (!ks.length) ks = [ed];
+    var obj = { n: m.n, ings: m.ings, prof: m.prof.map(function (x) { return Math.round(x * 2) / 2; }) };
+    eqStore(c);
+    ks.forEach(function (k) { var x = c.eqvDays[k]; if (!x) return; x.bank = x.bank || {}; x.bank[si] = obj; var md0 = (x.md || genDist(c)).map(function (r) { return r.slice(); }); md0[si] = obj.prof.slice(); x.md = md0; });
+    eqLoad(c, Math.min(ed, c.eqvDays.length - 1)); GENX.bk = null; save(); main(); toast('أُضيفت «' + m.n + '» (' + ks.length + (ks.length > 1 ? ' أيام' : ' يوم') + '): أكمل توزيع باقي اليوم حتى تصبح المجاميع ✓'); },
+  genBkDel: function (v) { var c = cur(); if (!c) return; var si = +v, md = genDist(c); delete (c.eqvBank || {})[si]; md[si] = md[si].map(function () { return 0; }); c.mealDist = md; eqStore(c); save(); main(); toast('أُزيلت وجبة البنك: وزّع حصص هذه الوجبة من جديد أو «وزّع تلقائياً»'); },
   genKind: function (v) { var c = cur(); if (!c) return; var ath = v === 'ath'; if (ath === (c.kind === 'athlete')) return; if (c.plan) { toast('للعميل خطة محفوظة: لتغيير النظام أنشئ عميلاً جديداً أو احذف الخطة أولاً'); return; }
     if (ath) { var keep = { sex: c.sex || 'ذكر', age: c.age, weight: c.weight, height: c.height, bf: c.bf }; Object.assign(c, Ath.newAthlete(AD), keep, { activity: c.activity || D.settings.activity[2][0], goal: c.goal || D.settings.goals[2][0] }); } else { delete c.kind; if (!c.meals) c.meals = 5; }
     save(); main(); toast(ath ? 'نظام الجرامات (الرياضيين)' : 'نظام الحصص بالبدائل'); },
@@ -335,7 +361,7 @@ Object.assign(A, {
   genConv: function () { var c = cur(); if (!c || !c.plib || !c.plib.doc) return; c.plan = E.fromDoc(Object.assign({ id: c.plib.id }, c.plib.doc), ec(c), D, genTmap()); c.planSrc = ''; genWeek(c); save(); main(); toast('حُوّلت الخطة' + (c.plan.replaced.length ? '، واستُبدل ' + c.plan.replaced.length + ' صنفاً لا يناسب العميل' : '')); },
   genEs: function (v) { var c = cur(); if (!c) return; var g = genOf(c); if (+v === 2 && c.macroMode !== 'manual') { var T0 = E.targets(ec(c), D); c.macroMode = 'manual'; c.choPct = Math.round(T0.cho * 4 / T0.kcal * 100) / 100; c.proPct = Math.round(T0.pro * 4 / T0.kcal * 100) / 100; c.fatPct = Math.round((1 - c.choPct - c.proPct) * 100) / 100; } if (+v >= 4 && !c.baseCounts) c.baseCounts = genCounts(c).cn; if (+v >= 4 && !c.mealDist) c.mealDist = genDist(c); g.es = Math.max(1, Math.min(5, +v)); save(); genVT(main); },
   genEd: function (v) { var c = cur(); if (!c) return; eqStore(c); eqLoad(c, Math.min(+v, c.eqvDays.length - 1)); save(); main(); },
-  genEdAdd: function () { var c = cur(); if (!c) return; eqStore(c); var src = c.eqvDays[genOf(c).ed || 0]; c.eqvDays.push({ n: 'اليوم ' + (c.eqvDays.length + 1), cn: src.cn.slice(), md: src.md.map(function (r) { return r.slice(); }), picks: {} }); delete c.eqvWeek; eqLoad(c, c.eqvDays.length - 1); save(); main(); toast('أُضيف يوم جديد (نسخة من اليوم الحالي بأصناف تلقائية): عدّل حصصه أو توزيعه أو أصنافه'); },
+  genEdAdd: function () { var c = cur(); if (!c) return; eqStore(c); var src = c.eqvDays[genOf(c).ed || 0]; c.eqvDays.push({ n: 'اليوم ' + (c.eqvDays.length + 1), cn: src.cn.slice(), md: src.md.map(function (r) { return r.slice(); }), picks: {}, bank: JSON.parse(JSON.stringify(src.bank || {})) }); delete c.eqvWeek; eqLoad(c, c.eqvDays.length - 1); save(); main(); toast('أُضيف يوم جديد (نسخة من اليوم الحالي بأصناف تلقائية): عدّل حصصه أو توزيعه أو أصنافه'); },
   genEdDel: function () { var c = cur(); if (!c || !c.eqvDays || c.eqvDays.length < 2) return; var k = genOf(c).ed || 0; c.eqvDays.splice(k, 1); delete c.eqvWeek; eqLoad(c, Math.max(0, k - 1)); save(); main(); toast('حُذف اليوم'); },
   genAutoMeal: function () { var c = cur(); if (!c) return; var g = genOf(c), md = genDist(c), sl = E.slots(+c.meals || 5, D).filter(function (q) { return q.active && md[q.i].some(function (v) { return v > 0; }); }), q = sl[Math.min(g.em || 0, sl.length - 1)]; if (!q) return; g.salt = (g.salt || 0) + 1; c.eqvPicks = Object.assign({}, c.eqvPicks || {}, E.eqvAutoMeal(ec(c), D, q.i, md[q.i], q.type, g.salt)); save(); main(); toast('وُلّدت ' + q.name + ' تلقائياً'); },
   genAutoAll: function () { var c = cur(); if (!c) return; var g = genOf(c), md = genDist(c), used = {}, p = {}; g.salt = (g.salt || 0) + 1; E.slots(+c.meals || 5, D).forEach(function (q) { if (q.active && md[q.i].some(function (v) { return v > 0; })) Object.assign(p, E.eqvAutoMeal(ec(c), D, q.i, md[q.i], q.type, g.salt, used)); }); c.eqvPicks = p; save(); main(); toast('وُلّدت وجبات اليوم كلها تلقائياً'); },
@@ -344,7 +370,10 @@ Object.assign(A, {
   genReqImp: function (v) { if (typeof hxApprove !== 'function') return; hxApprove(v).then(function () { var c = S.clients.filter(function (q) { return q.hx && q.hx.cid === v; })[0]; if (c) { A.genPick(c.code); toast('استُورد طلب «زنها»: ابدأ التوليد'); } }); },
   genEm: function (v) { var c = cur(); if (!c) return; genOf(c).em = +v; main(); },
   genEqSug: function () { var c = cur(); if (!c) return; delete c.baseCounts; c.baseCounts = genCounts(c).cn; delete c.mealDist; save(); main(); toast('اقترح النظام الحصص من الأهداف'); },
-  genEqDist: function () { var c = cur(); if (!c) return; c.mealDist = E.suggestDist(genCounts(c).cn, +c.meals || 5, D); save(); main(); toast('وُزّعت الحصص على الوجبات'); },
+  genEqDist: function () { var c = cur(); if (!c) return; var bk = c.eqvBank || {}, ks = Object.keys(bk), cn = genCounts(c).cn.slice(); ks.forEach(function (si) { bk[si].prof.forEach(function (v, gi) { cn[gi] = Math.max(0, cn[gi] - v); }); });
+    var md = E.suggestDist(cn.map(function (x) { return Math.round(x * 2) / 2; }), +c.meals || 5, D), sl = E.slots(+c.meals || 5, D).filter(function (q) { return q.active && !bk[q.i]; });      // وجبات البنك ثابتة؛ يُوزَّع الباقي على غيرها
+    ks.forEach(function (si) { md[si].forEach(function (v, gi) { if (!(v > 0)) return; var t = sl.slice().sort(function (a, b) { return (md[b.i][gi] || 0) - (md[a.i][gi] || 0) || b.pct - a.pct; })[0]; if (t) md[t.i][gi] += v; }); md[si] = bk[si].prof.slice(); });
+    c.mealDist = md; save(); main(); toast(ks.length ? 'وُزّع باقي اليوم حول وجبات البنك' : 'وُزّعت الحصص على الوجبات'); },
   genEqBuild: function () { var c = cur(); if (!c) return; if (!c.name || !c.sex) { toast('اكتب الاسم وحدّد الجنس أولاً'); return; } c.baseCounts = genCounts(c).cn; c.mealDist = genDist(c); eqStore(c); if (!E.mealDistOk(c, +c.meals || 5, D)) { genOf(c).es = 4; main(); toast('⛔ جدول التوزيع لا يطابق الجدول التركيبي: صحّح الخانات الحمراء أو «وزّع تلقائياً»'); return; } c.plan = E.eqvPlan(ec(c), D, { seed: (c.gen && c.gen.seed) || 0 }); c.planSrc = ''; genWeek(c); save(); main(); toast('وُلّدت خطة الأسبوع بالبدائل'); },
   genSubs: function (v) { GENX.subs = GENX.subs === v ? null : v; GENX.meals = null; main(); },
   genMeals: function (v) { GENX.meals = GENX.meals === +v ? null : +v; GENX.subs = null; main(); },
@@ -354,3 +383,4 @@ Object.assign(A, {
   genMove: function () { var c = cur(); if (!c || !c.plan) return; var g = genOf(c), gi = +$('#gen_mg').value, f = +$('#gen_mf').value, t = +$('#gen_mt').value; if (f === t) { toast('اختر وجبتين مختلفتين'); return; } if (!E.moveEx(c.plan, g.day || 0, gi, f, t, D)) { toast('لا توجد حصة من هذه المجموعة في الوجبة المختارة'); return; } save(); main(); toast('نُقلت حصة'); },
   genBuild: function () { var c = cur(); if (!c) return; var g = genOf(c); if (g.path === 'ready' && c.kind !== 'athlete') { S.tab = 'pw'; render(); return; } A.gen(); if (c.plan && c.kind !== 'athlete') genWeek(c); S.tab = 'gen'; g.step = 4; save(); render(); }
 });
+document.addEventListener('input', function (e) { var t = e.target; if (t.id !== 'gen_bkq') return; var q = t.value.trim(); document.querySelectorAll('.eqbkl li').forEach(function (li) { li.hidden = !!q && (li.getAttribute('data-bkn') || '').indexOf(q) < 0; }); });      // 1.31: بحث في وجبات البنك

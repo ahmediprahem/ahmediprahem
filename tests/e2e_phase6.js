@@ -23,8 +23,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   const k0 = await p.textContent('.genedit .genhud .ghc'); const inp = p.locator('.genedit input[data-ge]').first(), e0 = +(await inp.inputValue()); await inp.fill(String(e0 + 2)); await inp.press('Tab');
   await p.waitForFunction((k) => document.querySelector('.genedit .genhud .ghc').textContent !== k, k0); ok('تعديل كمية صنف يحدّث الوجبة واليوم والمتبقي فوراً (الأرز)');
   await p.locator('.genedit [data-a="genSubs"]').first().click(); await p.waitForSelector('.gsubs li'); assert(/سعرة/.test(await p.textContent('.gsubs'))); await p.locator('.gsubs [data-a="genSubPick"]').first().click(); await p.waitForSelector('.toast:has-text("استُبدل")'); ok('«بدائل» في المحرر بفرق السعرات والسبب، و«اختر» يستبدل');
-  await p.locator('.genedit [data-a="genMeals"]').nth(2).click(); await p.waitForSelector('.gml li'); assert(/مطابقة|قريبة|قابلة للتعويض|غير مناسبة|لا وجبات/.test(await p.textContent('.gml'))); ok('«وجبة من البنك» تعرض الوجبات بمستوى المطابقة والفرق');
-  const pick = p.locator('.gml [data-a="genMealPick"]').first(); if (await pick.count()) { await pick.click(); await p.waitForSelector('.toast:has-text("«")'); ok('اختيار وجبة مرنة يضعها ويعوّض الفرق في باقي اليوم'); }
+  assert.strictEqual(await p.locator('.genedit [data-a="genMeals"]').count(), 0); ok('1.31: لا «وجبة من البنك» في محرر اليوم (وجبات البنك من خطوة التوزيع فقط — قرار المالك)');
   await p.evaluate(() => { const c = DPApp.S.clients.find((x) => x.code === DPApp.S.cur), names = c.plan.days[0].slots.flatMap((s) => s.lines.map((l) => l.name)); c.avoid = [names[0]]; DPApp.A.genStep(5); });
   await p.waitForSelector('.gensend .genpref'); assert.strictEqual(await p.getAttribute('.gensend', 'data-st') !== 'ok', true); ok('قبل الإرسال: تنبيه بالأصناف التي لا تناسب تفضيلات العميل');
   assert.deepStrictEqual(errs, []); await br.close(); console.log('\nنجح ' + n + ' اختبارات المرحلة 6');

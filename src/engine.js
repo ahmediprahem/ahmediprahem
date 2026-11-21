@@ -1125,8 +1125,8 @@ E.ctx = function (client, D) {
   };
   E.eqvPlan = function (client, D, opt) {
     opt = opt || {}; var meals = +client.meals || 5, T = E.targets(client, D), cx = E.ctx(client, D), sl = E.slots(meals, D), al = client.alias;
-    var bc = client.baseCounts && client.baseCounts.length === 13 && client.baseCounts.some(function (x) { return +x > 0; }), cn0 = bc ? client.baseCounts.map(Number) : E.baseSuggestion(client, D).counts.slice(), defs = (client.eqvDays && client.eqvDays.length ? client.eqvDays : [{ cn: cn0, md: client.mealDist, picks: client.eqvPicks }]).map(function (x) {      // 1.27: أيام متعددة، لكل يوم جدوله وتوزيعه واختياراته
-      var c2 = (x.cn || cn0).map(Number), md2 = E.mealDistOk({ baseCounts: c2, mealDist: x.md }, meals, D) || E.suggestDist(c2, meals, D); return { cn: c2, md: md2, picks: x.picks || {} }; });
+    var bc = client.baseCounts && client.baseCounts.length === 13 && client.baseCounts.some(function (x) { return +x > 0; }), cn0 = bc ? client.baseCounts.map(Number) : E.baseSuggestion(client, D).counts.slice(), defs = (client.eqvDays && client.eqvDays.length ? client.eqvDays : [{ cn: cn0, md: client.mealDist, picks: client.eqvPicks, bank: client.eqvBank }]).map(function (x) {      // 1.27: أيام متعددة، لكل يوم جدوله وتوزيعه واختياراته
+      var c2 = (x.cn || cn0).map(Number), md2 = E.mealDistOk({ baseCounts: c2, mealDist: x.md }, meals, D) || E.suggestDist(c2, meals, D); return { cn: c2, md: md2, picks: x.picks || {}, bank: x.bank || {} }; });
     var week = client.eqvWeek || [], days = [], seed = opt.seed || 0;
     var sched = client.v2 && E.weekSchedule ? E.weekSchedule(client, D, cx) : null;      // التفصيل على المقاس: بروتين الغداء لكل يوم (دجاج/لحم/سمك) بلا تكرار متتالٍ وبسقف اللحم الأحمر
     for (var d = 0; d < 7; d++) {
@@ -1136,6 +1136,10 @@ E.ctx = function (client, D) {
       var usedDay = {}, slots = [], carryF = 0;
       sl.forEach(function (s, si) {
         var row = dist[si]; if (!s.active || !row || !row.some(function (x) { return x > 0; })) return; var lines = [];
+        var bk = defs[k0].bank && defs[k0].bank[s.i];
+        if (bk && bk.ings && bk.ings.length) {      // 1.31: وجبة بنك اختارها الأخصائي في خطوة التوزيع لهذا اليوم: تُوضع كما هي بمكوناتها وكمياتها
+          lines = bk.ings.map(function (q) { var f0 = cx.byName[q.n]; usedDay[q.n] = 1; return { g: q.g, name: q.n, e: q.e, text: f0 ? E.lineText(f0, q.e, al) : q.n, tier: f0 ? cx.tierOf(q.n) : 0, bank: true }; });
+          slots.push({ si: s.i, name: s.name, type: s.type, pct: s.pct, kcal: Math.round(T.kcal * s.pct), target: row.slice(), meal: bk.n, bank: true, lines: lines, time: D.times ? D.times[s.i] : '' }); return; }
         var mt = 0, gm = -1; [2, 3, 4, 5].forEach(function (q) { var v = +row[q] || 0; mt += v; if (v > 0 && (gm < 0 || v > (+row[gm] || 0))) gm = q; });      // بروتين حيواني واحد في الوجبة: حصص اللحوم كلها لصنف واحد من النوع الغالب
         E.EQV_ORDER.forEach(function (g) {
           var e = +row[g] || 0; if (g >= 2 && g <= 5) { if (g !== gm) return; e = mt; } if (!(e > 0)) return; var cands = E.eqvCands(client, g, s.type, D, cx, e), key = si + '_' + g;
