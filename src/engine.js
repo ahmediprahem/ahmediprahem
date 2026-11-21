@@ -1133,7 +1133,7 @@ E.ctx = function (client, D) {
       var k0 = week[d] != null && defs[week[d]] ? week[d] : d % defs.length, cn = defs[k0].cn, dist = defs[k0].md, picks = defs[k0].picks;
       var dco = !client.eqvDays && client.dayCounts && client.dayCounts[d] && client.dayCounts[d].length === 13 && client.dayCounts[d].some(function (x) { return +x > 0; }) ? client.dayCounts[d].map(Number) : null;      // توزيع خاص بيوم (جدول «تقسيم الحصص على الأيام») يبقى مدعوماً
       if (dco) { cn = dco; dist = E.suggestDist(dco, meals, D); }
-      var usedDay = {}, slots = [];
+      var usedDay = {}, slots = [], carryF = 0;
       sl.forEach(function (s, si) {
         var row = dist[si]; if (!s.active || !row || !row.some(function (x) { return x > 0; })) return; var lines = [];
         var mt = 0, gm = -1; [2, 3, 4, 5].forEach(function (q) { var v = +row[q] || 0; mt += v; if (v > 0 && (gm < 0 || v > (+row[gm] || 0))) gm = q; });      // بروتين حيواني واحد في الوجبة: حصص اللحوم كلها لصنف واحد من النوع الغالب
@@ -1158,6 +1158,8 @@ E.ctx = function (client, D) {
             best0.l.e += add0; best0.l.text = E.lineText(best0.f, best0.l.e, al); left -= add0;
           }
         });
+        var lostF = [2, 3, 4, 5].reduce(function (a, q) { return a + (+row[q] || 0) * D.EX[q][2]; }, 0) - lines.reduce(function (a, l) { return a + (!l.missing && l.g >= 2 && l.g <= 5 ? l.e * D.EX[l.g][2] : 0); }, 0), addF = Math.round(lostF / D.EX[11][2]);      // 1.29: جمع اللحوم في صنف واحد يُنقص دهون اللحوم الأدسم؛ يُعوَّض بحصص دهون في الوجبة نفسها فيبقى اليوم مطابقاً للجدول التركيبي
+        if (addF >= 1) { var fl = lines.filter(function (l) { return l.g === 11 && !l.missing; })[0]; if (fl) { fl.e += addF; fl.text = E.lineText(cx.byName[fl.name], fl.e, al); } else if (lines.length >= E.maxItems(client, s.type)) carryF += addF; else { var fc = E.eqvCands(client, 11, s.type, D, cx, addF).filter(function (x) { return !usedDay[x.n]; })[0] || E.eqvCands(client, 11, s.type, D, cx, addF)[0]; if (fc) { lines.push({ g: 11, name: fc.n, e: addF, text: E.lineText(fc, addF, al), tier: cx.tierOf(fc.n), bank: false, eqv: 1 }); usedDay[fc.n] = 1; } } }
         var hcM = function (x) { return Math.max(0.5, Math.floor(E.fmeta(x).mx * 1.5 / x.upe * 2 + 1e-9) / 2); }, mxI = E.maxItems(client, s.type), merge = function () {      // وجبة أطول من حدها: يُدمج صنفا المجموعة نفسها في الصنف الأوسع سقفاً، ما دام المجموع ضمن 1.5× سقفه
           var groups = {}; lines.forEach(function (l) { if (!l.missing && cx.byName[l.name]) { var k2 = l.g >= 2 && l.g <= 5 ? 'm' : String(l.g); (groups[k2] = groups[k2] || []).push(l); } });
           var best = null; Object.keys(groups).forEach(function (k2) { var L = groups[k2]; if (L.length < 2) return; L.sort(function (a, b) { return E.lim(cx.byName[b.name], s.type, D).max - E.lim(cx.byName[a.name], s.type, D).max; }); var a = L[0], b = L[L.length - 1], mxa = E.lim(cx.byName[a.name], s.type, D).max; if (a.e + b.e <= mxa * 1.5 + 1e-9 && a.e + b.e <= hcM(cx.byName[a.name]) + 1e-9 && (!best || a.e + b.e - mxa < best.over)) best = { a: a, b: b, over: a.e + b.e - mxa }; });
@@ -1165,6 +1167,7 @@ E.ctx = function (client, D) {
         while (lines.length > mxI && merge()) { }
         slots.push({ si: s.i, name: s.name, type: s.type, pct: s.pct, kcal: Math.round(T.kcal * s.pct), target: row.slice(), meal: '', lines: lines, time: D.times ? D.times[s.i] : '' });
       });
+      if (carryF > 0) { var fls = []; slots.forEach(function (s2) { s2.lines.forEach(function (l) { if (l.g === 11 && !l.missing && cx.byName[l.name]) fls.push(l); }); }); fls.sort(function (x, y) { return y.e - x.e; }); if (fls[0]) { fls[0].e += carryF; fls[0].text = E.lineText(cx.byName[fls[0].name], fls[0].e, al); } }      // وجبة ممتلئة: تعويض الدهون في سطر دهون بوجبة أخرى
       var dy = { day: d, name: D.days[d], solver: { counts: cn.slice(), manual: true }, counts: cn.slice(), short: [], slots: slots, eqv: true, eqvDay: k0 };
       E.syncCounts(dy); days.push(E.dayStats(dy, T, D));
     }

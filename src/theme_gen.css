@@ -1,0 +1,96 @@
+/* ===== 1.29 «توليد الخطة» بواجهة حيوية (اقتراح الفريق وموافقة المالك): بطاقة العميل، بطاقتا النظام، حلقة الماكروز، مقاييس الملاءمة، أيقونات المجموعات، ملخص الخطة، وحركة هادفة تتوقف مع «تقليل الحركة» */
+:root{--g-cb:#f59e0b;--g-pr:#0ea5e9;--g-ft:#a855f7;--g-ok:#10b981;--g-warn:#f59e0b;--g-bad:#ef4444;--g-ink:#0b1440;--g-mut:#64748b;--g-card:#fff;--g-soft:#f1f5f9;--g-line:rgba(11,20,64,.10);--g-acc:#0f9f73}
+html:not([data-tone="light"]){--g-ink:#e8ecff;--g-mut:#9aa6c8;--g-card:rgba(255,255,255,.06);--g-soft:rgba(255,255,255,.08);--g-line:rgba(255,255,255,.14)}
+@keyframes gUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes gPop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+@keyframes gGrow{from{width:0}}
+@keyframes gRing{from{transform:rotate(-120deg) scale(.85);opacity:0}to{transform:none;opacity:1}}
+/* بطاقة العميل */
+.genhero{display:grid;grid-template-columns:auto 1fr;gap:10px 14px;align-items:center;padding:16px;margin:0 0 12px;border-radius:20px;background:linear-gradient(135deg,rgba(48,208,160,.16),rgba(14,165,233,.10) 60%,rgba(168,85,247,.08));border:1px solid var(--g-line);animation:gUp .35s ease both}
+.genhero .ghav{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;font-size:24px;font-weight:800;color:#fff;background:linear-gradient(135deg,#30d0a0,#0ea5e9);box-shadow:0 6px 18px rgba(14,165,233,.3)}
+.genhero .ghn b{display:block;font-size:19px;color:var(--g-ink)}.genhero .ghn small{color:var(--g-mut)}
+.genhero .ghts{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.genhero .ght{background:var(--g-card);border:1px solid var(--g-line);border-radius:14px;padding:8px 6px;text-align:center}
+.genhero .ght small{display:block;font-size:11.5px;color:var(--g-mut)}.genhero .ght b{font-size:20px;color:var(--g-ink)}.genhero .ght i{font-style:normal;font-size:11px;color:var(--g-mut);margin-inline-start:3px}
+.genhero.mini{padding:10px 12px;border-radius:16px;margin:-2px 0 12px}.genhero.mini .ghav{width:40px;height:40px;font-size:18px}.genhero.mini .ght b{font-size:16px}.genhero.mini .ght{padding:5px 4px}
+.genclient.miss .need{animation:gUp .3s ease}.genclient.miss .need input,.genclient.miss .need select{border-color:var(--g-bad)!important;box-shadow:0 0 0 3px rgba(239,68,68,.15)}
+/* بطاقتا النظام */
+.gkinds{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:6px 0 14px}
+.gkind{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:start;padding:14px;border-radius:18px;border:1.5px solid var(--g-line)!important;background:var(--g-card)!important;color:var(--g-ink)!important;min-height:120px;transition:transform .18s ease,box-shadow .18s ease,border-color .18s}
+.gkind:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(11,20,64,.10)}
+.gkind.on{border-color:var(--g-acc)!important;box-shadow:0 0 0 3px rgba(15,159,115,.18),0 10px 24px rgba(15,159,115,.12)}
+.gkind .gki{font-size:30px;line-height:1}.gkind b{font-size:16px}.gkind small{font-size:12.5px;color:var(--g-mut);font-weight:400;white-space:normal}
+/* خطوات البدائل بشريط تقدم */
+.eqsteps{position:relative;padding-bottom:10px}
+.eqsteps::after{content:'';position:absolute;inset-inline-start:0;bottom:2px;height:4px;width:calc(var(--p,0)*100%);border-radius:4px;background:linear-gradient(90deg,#30d0a0,#0ea5e9);transition:width .45s ease}
+.eqsteps::before{content:'';position:absolute;inset-inline:0;bottom:2px;height:4px;border-radius:4px;background:var(--g-soft)}
+.eqfrom{display:flex;flex-wrap:wrap;align-items:center;gap:6px}.eqfrom label{width:100%}
+.gchip{display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border-radius:999px;background:var(--g-soft);border:1px solid var(--g-line);font-size:13px;color:var(--g-ink)}
+.eqbig{animation:gUp .4s ease both}.eqbig b{font-size:46px;letter-spacing:-1px;background:linear-gradient(135deg,#0f9f73,#0ea5e9);-webkit-background-clip:text;background-clip:text;color:transparent!important}
+.eqbig small{color:var(--g-mut)}
+/* حلقة الماكروز */
+.gring{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin:8px 0 14px}
+.gring-d{--c:45;--p:25;--f:30;width:150px;height:150px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--g-cb) 0 calc(var(--c)*1%),var(--g-pr) 0 calc((var(--c) + var(--p))*1%),var(--g-ft) 0 calc((var(--c) + var(--p) + var(--f))*1%),var(--g-soft) 0);animation:gRing .6s cubic-bezier(.2,.8,.2,1) both;box-shadow:0 8px 24px rgba(11,20,64,.10)}
+.gring-d>span{width:104px;height:104px;border-radius:50%;background:var(--lpanel,#fff);display:grid;place-items:center;align-content:center;text-align:center}
+.gring-d b{font-size:24px;color:var(--g-ink)}.gring-d small{display:block;font-size:11px;color:var(--g-mut)}
+.gring-l{list-style:none;margin:0;padding:0;display:grid;gap:8px}.gring-l li{display:flex;align-items:center;gap:8px;font-size:14px}
+.gring-l i{width:12px;height:12px;border-radius:4px;display:inline-block}.gring-l .cb i{background:var(--g-cb)}.gring-l .pr i{background:var(--g-pr)}.gring-l .ft i{background:var(--g-ft)}
+.gsl{width:120px;vertical-align:middle;margin-inline-end:8px;accent-color:var(--g-acc)}.gsl-choPct{accent-color:var(--g-cb)}.gsl-proPct{accent-color:var(--g-pr)}.gsl-fatPct{accent-color:var(--g-ft)}
+/* مقاييس الملاءمة */
+.ggs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:8px 0 12px}
+.gg{padding:10px;border-radius:16px;background:var(--g-card);border:1px solid var(--g-line);animation:gUp .35s ease both}
+.gg:nth-child(2){animation-delay:.05s}.gg:nth-child(3){animation-delay:.1s}.gg:nth-child(4){animation-delay:.15s}
+.gg small{display:block;color:var(--g-mut);font-size:12px}.gg b{font-size:24px}.gg em{display:block;font-style:normal;font-size:11.5px;color:var(--g-mut)}
+.ggb{display:block;position:relative;height:8px;border-radius:8px;margin:6px 0 4px;background:linear-gradient(90deg,transparent 79.2%,rgba(16,185,129,.22) 79.2% 87.5%,transparent 87.5%),var(--g-soft);overflow:hidden}
+.ggb i{display:block;height:100%;border-radius:8px;animation:gGrow .7s cubic-bezier(.2,.8,.2,1) both;transition:width .4s ease}
+.gg.st-ok b{color:var(--g-ok)}.gg.st-ok .ggb i{background:var(--g-ok)}.gg.st-warn b{color:#d97706}.gg.st-warn .ggb i{background:var(--g-warn)}.gg.st-block b{color:var(--g-bad)}.gg.st-block .ggb i{background:var(--g-bad)}
+/* أيقونات المجموعات والمعدّل */
+.ggi{font-style:normal;display:inline-grid;place-items:center;width:28px;height:28px;border-radius:9px;margin-inline-end:6px;font-size:15px;vertical-align:middle;background:var(--g-soft)}
+.ggi-st{background:#fef3c7}.ggi-le{background:#ede9fe}.ggi-m1,.ggi-m2,.ggi-m3,.ggi-m4{background:#fee2e2}.ggi-d1,.ggi-d2,.ggi-d3{background:#e0f2fe}.ggi-ve{background:#dcfce7}.ggi-fr{background:#ffe4e6}.ggi-fa{background:#ecfccb}.ggi-su{background:#fef9c3}
+.gstp{display:inline-flex;align-items:center;gap:4px}.gstp .n{width:52px;text-align:center}
+.gsb{min-width:34px!important;min-height:34px;padding:0!important;border-radius:10px!important;font-size:18px;line-height:1;transition:transform .12s}
+.gsb:active{transform:scale(.88)}
+/* بطاقات التوزيع (الجوال) */
+.eqdc{display:grid;gap:10px}.eqdm{padding:12px;border-radius:16px;background:var(--g-card);border:1px solid var(--g-line);animation:gUp .3s ease both}
+.eqdm h4{display:flex;justify-content:space-between;margin:0 0 8px}.eqdm h4 small{color:var(--g-mut);font-weight:400}
+.eqdr{display:flex;align-items:center;gap:6px;padding:5px 0;border-top:1px dashed var(--g-line)}.eqdr:first-of-type{border-top:0}.eqdr>span:not(.gstp):not(.ad){flex:1;font-size:13.5px}
+.eqdt{background:var(--g-soft)}
+/* قائمة الطعام كبطاقات */
+.eqlines{display:grid;gap:8px}
+.eqli{display:grid;grid-template-columns:auto 1fr minmax(120px,38%);align-items:center;gap:10px;padding:10px;border-radius:14px;background:var(--g-card);border:1px solid var(--g-line);animation:gUp .3s ease both;transition:box-shadow .2s}
+.eqli:hover{box-shadow:0 6px 18px rgba(11,20,64,.08)}
+.eqlt b{display:block;font-size:15px}.eqlt small{color:var(--g-mut)}.eqli select{width:100%;min-width:0}
+/* ملخص الخطة (bento) */
+.gbento{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:8px 0 12px}
+.gbt{padding:12px;border-radius:16px;background:var(--g-card);border:1px solid var(--g-line);animation:gUp .35s ease both}
+.gbt small{display:block;color:var(--g-mut);font-size:12px}.gbt b{font-size:22px;color:var(--g-ink)}.gbt i{display:block;font-style:normal;font-size:12px;color:var(--g-mut)}
+.gbt.gbk{grid-column:span 2;grid-row:span 2;background:linear-gradient(135deg,rgba(48,208,160,.18),rgba(14,165,233,.12))}.gbt.gbk b{font-size:42px}
+.gbt.cb{border-top:4px solid var(--g-cb)}.gbt.pr{border-top:4px solid var(--g-pr)}.gbt.ft{border-top:4px solid var(--g-ft)}
+.gbt.gbs.st-ok{background:rgba(16,185,129,.10)}.gbt.gbs.st-warn{background:rgba(245,158,11,.12)}.gbt.gbs.st-block{background:rgba(239,68,68,.10)}
+.eqexp{animation:gUp .4s ease both}.eqexp>b::before{content:'';}
+.eqexp>b{display:inline-flex;align-items:center;gap:6px}
+.genplan h3{animation:gPop .45s ease both}
+/* انتقال بين الخطوات */
+::view-transition-old(root),::view-transition-new(root){animation-duration:.28s}
+.gentab .ucard{animation:gUp .3s ease both}
+/* الجوال */
+@media (max-width:760px){
+  .genhero .ghts{gap:6px}.genhero .ght b{font-size:17px}
+  .gkinds{grid-template-columns:1fr}.gkind{min-height:0;flex-direction:row;flex-wrap:wrap;align-items:center}.gkind small{width:100%}
+  .eqsteps{flex-wrap:nowrap!important;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;margin-inline:-4px;padding-inline:4px}.eqsteps::-webkit-scrollbar{display:none}
+  .eqsteps button{flex:0 0 auto;white-space:nowrap}
+  .ggs,.gbento{grid-template-columns:1fr 1fr}.gbt.gbk{grid-row:auto}
+  .gring{justify-content:center}.gsl{width:100%;display:block;margin:4px 0}
+  .eqli{grid-template-columns:auto 1fr}.eqli select{grid-column:1/-1}
+  .eqtbl td,.eqtbl th{padding:6px 4px;font-size:13px}.eqtbl th:nth-child(n+3),.eqtbl td:nth-child(n+3){display:none}.eqtbl tr:nth-last-child(-n+2){display:none}
+  .geneqv .gentbl:not(.eqtbl):not(.eqdist) th:nth-child(3),.geneqv .gentbl:not(.eqtbl):not(.eqdist) td:nth-child(3),.geneqv .gentbl:not(.eqtbl):not(.eqdist) th:nth-child(5),.geneqv .gentbl:not(.eqtbl):not(.eqdist) td:nth-child(5){display:none}
+  .geneqv .gentbl{display:block;max-width:100%;overflow-x:auto}
+  .genfoot.eqfoot{display:flex;gap:8px}.genfoot.eqfoot button{width:auto;flex:1}.genfoot.eqfoot button.sec{flex:0 0 52px}
+  .gentab .genfoot{position:static!important;box-shadow:none!important;background:transparent!important;padding:0!important;margin-top:16px!important}      /* لا شريط عائم يغطي المحتوى (شكوى المالك) */
+  .gentab{padding-bottom:24px}
+}
+@media (prefers-reduced-motion:reduce){
+  .genhero,.gkind,.eqbig,.gring-d,.gg,.ggb i,.eqdm,.eqli,.gbt,.eqexp,.genplan h3,.gentab .ucard{animation:none!important;transition:none!important}
+  .eqsteps::after{transition:none}
+}
+.eqdmore summary{cursor:pointer;color:var(--g-acc);font-size:13px;padding:6px 0;min-height:44px;display:flex;align-items:center}
