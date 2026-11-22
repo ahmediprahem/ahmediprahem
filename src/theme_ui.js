@@ -2,7 +2,7 @@
 // كل ثيم طبقة تنسيق إضافية فقط (وسم style ثانٍ مقيَّد بـ html[data-theme])؛ لا يحذف ولا يعطّل أي مكوّن قديم. الزجاجي = قواعد Linear + theme_glass.css فوقها، ومعه تخطيط القائمة الجديد (شريط تنقل + عمود العملاء + شريط سفلي للجوال).
 // الإعداد: admin → S.settings.ui {theme, lock} (يُصدَّر مع نسخة المستخدمين)؛ المستخدم → S.settings.ui.theme ما لم يقفله المدير. الدمج في E.mergeSettings.
 (function () {                                                   // تطبيق مبكر (قبل الدخول): آخر مظهر مخزَّن، وإلا افتراضي المدير في ملف المستخدم
-  try { var t = localStorage.getItem('hissa_theme'); if (!t && window.BASE_SETTINGS && window.BASE_SETTINGS.ui) t = window.BASE_SETTINGS.ui.theme; var t2 = themeOk(t); document.documentElement.dataset.theme = t2 === 'zenha' ? 'glass' : t2; document.documentElement.dataset.tone = t2 === 'zenha' ? 'light' : ''; } catch (e) { document.documentElement.dataset.theme = 'glass'; }
+  try { var t = localStorage.getItem('hissa_theme'); if (!t && window.BASE_SETTINGS && window.BASE_SETTINGS.ui) t = window.BASE_SETTINGS.ui.theme; var t2 = themeOk(t); document.documentElement.dataset.theme = t2 === 'zenha' ? 'glass' : t2; document.documentElement.dataset.tone = t2 === 'zenha' ? 'light' : ''; document.documentElement.dataset.dw = t2 === 'zenha' && localStorage.getItem('hissa_dw') === 'dark' ? 'dark' : 'light'; } catch (e) { document.documentElement.dataset.theme = 'glass'; }
 })();
 var THEMES = [['zenha', 'فاتح بهوية زنها', 'الافتراضي: خلفية فاتحة بألوان شعار «زنها» (كحلي ونعناعي)، ولون مميز واحد للأفعال، وألوان حالة واضحة'], ['glass', 'زجاجي', 'الافتراضي: زجاج شفاف بأسلوب آيفون، أيقونات خطية، قائمة تنقل واضحة وشريط سفلي على الجوال'], ['linear', 'Linear داكن', 'داكن نظيف: زجاج خفيف وحواف رفيعة ولمعان أخضر زمردي'], ['legacy', 'كلاسيكي', 'المظهر الفاتح القديم كما هو']];
 function themeOk(t) { return t === 'linear' || t === 'legacy' || t === 'glass' ? t : 'zenha'; }      // 1.17: الافتراضي الفاتح بهوية زنها (قرار المالك)، والزجاجي الداكن اختيار
@@ -12,7 +12,17 @@ function isGlass() { return themeCur() === 'glass' || themeCur() === 'zenha'; } 
 function applyTheme() {
   var t = themeCur(); document.documentElement.dataset.theme = t === 'zenha' ? 'glass' : t; document.documentElement.dataset.tone = t === 'zenha' ? 'light' : ''; try { localStorage.setItem('hissa_theme', t); } catch (e) { }
   var m1 = document.querySelector('meta[name=color-scheme]'), m2 = document.querySelector('meta[name=theme-color]'); if (m1) m1.setAttribute('content', t === 'legacy' || t === 'zenha' ? 'light' : 'dark'); if (m2) m2.setAttribute('content', t === 'zenha' ? '#ffffff' : t === 'linear' ? '#0b1329' : t === 'glass' ? '#121c45' : '#092061');
+  dwApply();
 }
+// 1.38 النهاري/الليلي (قرار المالك): النهاري أساسي، والليلي خيار يحدده الأخصائي من الترويسة؛ يُحفظ على الجهاز ويُطبَّق على مظهر «زنها» الفاتح فقط
+function dwCur() { try { return localStorage.getItem('hissa_dw') === 'dark' ? 'dark' : 'light'; } catch (e) { return 'light'; } }
+function dwApply() {
+  var on = themeCur() === 'zenha' && dwCur() === 'dark', r = document.documentElement; r.dataset.dw = on ? 'dark' : 'light';
+  var m1 = document.querySelector('meta[name=color-scheme]'), m2 = document.querySelector('meta[name=theme-color]'); if (themeCur() === 'zenha') { if (m1) m1.setAttribute('content', on ? 'dark' : 'light'); if (m2) m2.setAttribute('content', on ? '#0E1C2B' : '#ffffff'); }
+  var i = document.querySelector('#hd img.hlogo'); if (i && window.ASSETS) i.src = on || r.dataset.tone !== 'light' ? window.ASSETS.dark : window.ASSETS.light;
+  var b = document.querySelector('#hd .dwbtn'); if (b) { b.setAttribute('aria-pressed', on); b.textContent = on ? '☀' : '☾'; b.title = b.ariaLabel = on ? 'الوضع النهاري' : 'الوضع الليلي'; b.setAttribute('aria-label', b.title); }
+}
+function dwBtn() { if (themeCur() !== 'zenha') return ''; var on = dwCur() === 'dark'; return '<button class="sec sm dwbtn" data-a="dwToggle" aria-pressed="' + on + '" title="' + (on ? 'الوضع النهاري' : 'الوضع الليلي') + '" aria-label="' + (on ? 'الوضع النهاري' : 'الوضع الليلي') + '">' + (on ? '☀' : '☾') + '</button>'; }
 function themeBtn() {                                            // زر تبديل سريع في الترويسة للمستخدم فقط (ما لم يقفله المدير)
   return S.mode !== 'admin' && !((eff().ui || {}).lock) ? '<button class="sec sm" data-a="themeToggle" title="تبديل المظهر (' + themeName(themeCur()) + ')" aria-label="تبديل المظهر">◐</button>' : '';
 }
@@ -27,6 +37,7 @@ function themePage() {
 var SBG; try { SBG = JSON.parse(localStorage.getItem('hissa_sbg') || '{"tools":1,"bak":1}'); } catch (e) { SBG = { tools: 1, bak: 1 }; }
 function sbc(k) { return SBG[k] === 0 ? ' closed' : ''; }
 Object.assign(A, {
+  dwToggle: function () { try { localStorage.setItem('hissa_dw', dwCur() === 'dark' ? 'light' : 'dark'); } catch (e) { } dwApply(); toast(dwCur() === 'dark' ? 'الوضع الليلي' : 'الوضع النهاري'); },
   themeToggle: function () { S.settings.ui = S.settings.ui || {}; var o = ['zenha', 'glass', 'linear', 'legacy']; S.settings.ui.theme = o[(o.indexOf(themeCur()) + 1) % 4]; saveSettings(); applyTheme(); header(); render(); toast('المظهر: ' + themeName(themeCur())); },
   sbg: function (k) { SBG[k] = SBG[k] === 0 ? 1 : 0; try { localStorage.setItem('hissa_sbg', JSON.stringify(SBG)); } catch (e) { } var g = document.querySelector('.sbg[data-g="' + k + '"]'); if (g) { g.classList.toggle('closed', SBG[k] === 0); g.querySelector('.sbh').setAttribute('aria-expanded', SBG[k] === 0 ? 'false' : 'true'); } },
   mx: function (v, el) { var r = el && el.closest ? el.closest('.mxrow') : document.querySelector('.mxrow'); if (!r) return; var o = r.classList.toggle('mxopen'); var b = r.querySelector('.mxb'); if (b) b.setAttribute('aria-expanded', o ? 'true' : 'false'); }

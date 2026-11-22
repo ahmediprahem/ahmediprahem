@@ -1,0 +1,90 @@
+/* ===== 1.38 زنها Pro — نظام ألوان Digital Wellness (قرار المالك: النهاري أساسي، والليلي خيار يحدده الأخصائي من أعلى الصفحة). ألوان فقط: لا خطوط ولا تخطيط ولا زوايا.
+   النهاري: html[data-dw="light"]، والليلي: html[data-dw="dark"] (يُطبَّقان على مظهر «زنها» الفاتح فقط). الرموز الدلالية --c-* هي المرجع، ورموز الطبقات القديمة (--zw/--zh/--g) تُربط بها ===== */
+@media screen{
+
+:root{
+  --dw-navy:#172D43;--dw-teal:#287E91;--dw-teal-600:#246F80;--dw-teal-700:#1F6474;--dw-mint:#57C9B3;--dw-mint-300:#6FD6C2;--dw-soft:#DCECEB;--dw-ice:#F4F7FA;--dw-white:#FFFFFF;
+  --c-primary:#287E91;--c-primary-hover:#1F6474;--c-secondary:#172D43;--c-accent:#57C9B3;--c-accent-soft:#DCECEB;
+  --c-bg:#F4F7FA;--c-surface:#FFFFFF;--c-surface-elev:#FFFFFF;--c-surface-muted:#EEF3F6;
+  --c-text:#172D43;--c-text-2:#4F6072;--c-text-muted:#5B6B7A;--c-text-inv:#FFFFFF;--c-link:#246F80;
+  --c-border:#DCE4EA;--c-border-strong:#7A8B9C;--c-divider:#E5EDF2;
+  --c-success:#1A7A50;--c-warning:#9A5B00;--c-danger:#B83A34;--c-info:#2A6FBA;
+  --c-success-bg:#E3F3EC;--c-warning-bg:#FBF0DD;--c-danger-bg:#FBE8E7;--c-info-bg:#E6EFF9;
+  --c-ch1:#172D43;--c-ch2:#287E91;--c-ch3:#2F9C8A;--c-ch4:#C47F12;--c-ch5:#7B68B5;--c-ch6:#4F86A8;--c-up:#1A7A50;--c-down:#B83A34;--c-flat:#5B6B7A;
+  --c-focus:#287E91}
+html[data-dw="dark"][data-tone][data-theme]:not(#dwdark){
+  --c-primary:#57C9B3;--c-primary-hover:#6FD6C2;--c-secondary:#287E91;--c-accent:#57C9B3;--c-accent-soft:rgba(87,201,179,.14);
+  --c-bg:#0E1C2B;--c-surface:#172D43;--c-surface-elev:#1F3A54;--c-surface-muted:#13263A;
+  --c-text:#EAF1F5;--c-text-2:#B6C6D2;--c-text-muted:#94A9B9;--c-text-inv:#0E1C2B;--c-link:#6FD6C2;
+  --c-border:#2C4A68;--c-border-strong:#7F8FA0;--c-divider:#24425F;
+  --c-success:#4DD4A6;--c-warning:#F2B05E;--c-danger:#F07C7C;--c-info:#64B5F6;
+  --c-success-bg:rgba(77,212,166,.14);--c-warning-bg:rgba(242,176,94,.14);--c-danger-bg:rgba(240,124,124,.14);--c-info-bg:rgba(100,181,246,.14);
+  --c-ch1:#EAF1F5;--c-ch2:#57C9B3;--c-ch3:#3E9DB3;--c-ch4:#F2B05E;--c-ch5:#A99BDB;--c-ch6:#7AA5BE;--c-up:#4DD4A6;--c-down:#F07C7C;--c-flat:#94A9B9;--c-focus:#57C9B3}
+/* --- رموز الطبقات الحالية تُربط بالرموز الدلالية (فاتح وداكن) --- */
+html[data-dw][data-tone="light"]{--zw-green:var(--c-primary);--zw-green2:var(--c-primary-hover);--zw-deep:var(--c-link);--zw-light:var(--c-accent);--zw-tint:var(--c-accent-soft);--zw-ink:var(--c-text);--zw-gray:var(--c-text-muted);
+  --g-acc:var(--c-link);--g-ink:var(--c-text);--g-mut:var(--c-text-muted);--g-line:var(--c-border);--g-soft:var(--c-surface-muted);--g-card:var(--c-surface-elev);--g-ok:var(--c-success);--g-warn:var(--c-ch4);--g-bad:var(--c-danger);--g-cb:var(--c-ch4);--g-pr:var(--c-ch2);--g-ft:var(--c-ch5);
+  --zh-mint:var(--c-primary);--zh-mint2:var(--c-primary-hover);--zh-mintd:var(--c-link);--zh-navy:var(--c-secondary);--zh-bg:var(--c-bg);--zh-card:var(--c-surface-elev);--zh-tint:var(--c-accent-soft);--zh-ink:var(--c-text);--zh-mut:var(--c-text-muted);--zh-line:var(--c-border);
+  --zh-warnT:var(--c-warning-bg);--zh-warnD:var(--c-warning);--zh-badT:var(--c-danger-bg);--zh-badD:var(--c-danger);--zh-ok:var(--c-success);--zh-skyT:var(--c-info-bg);--zh-sky:var(--c-info)}
+/* الأزرار الأساسية: نص أبيض على Teal (4.68:1) في الفاتح، ونص كحلي على Mint (6.97:1) في الداكن */
+html[data-dw][data-tone="light"][data-theme="glass"] button:not(.sec):not(.link):not(.gsb):not(.gkind):not(.r):not(.o):not([role="tab"]):not(.cl):not(#tabbar *):not(nav *):not(.tabs *):not(.cfseg *):not(.cftabs *):not(.pnav *):not(.day-tabs *):not(.pwt):not(.cfb):not(.ghome *),
+html[data-dw][data-tone][data-theme]:not(#dwp) summary.newb,html[data-dw][data-tone][data-theme]:not(#dwp) #dtfab{color:var(--c-text-inv)!important;background:var(--c-primary)!important}
+html[data-dw][data-tone="light"][data-theme="glass"] button:not(.sec):not(.link):not(.gsb):not(.gkind):not(.r):not(.o):not([role="tab"]):not(.cl):not(#tabbar *):not(nav *):not(.tabs *):not(.cfseg *):not(.cftabs *):not(.pnav *):not(.day-tabs *):not(.pwt):not(.cfb):not(.ghome *):hover{background:var(--c-primary-hover)!important}
+html[data-dw] button:disabled,html[data-dw] button[aria-disabled="true"]{opacity:1!important;background:var(--c-surface-muted)!important;color:var(--c-text-muted)!important;border-color:var(--c-border)!important}
+html[data-dw] :is(button,a,summary,input,select,textarea,[tabindex]):focus-visible{outline:3px solid var(--c-focus)!important;outline-offset:2px!important}
+html[data-dw][data-tone="light"] :is(input,select,textarea):focus{border-color:var(--c-primary)!important;outline:3px solid color-mix(in srgb,var(--c-focus) 30%,transparent)!important}
+html[data-dw] :is(.cav,.ghav){background:var(--c-accent-soft)!important;background-image:none!important;color:var(--c-link)!important;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c-primary) 35%,transparent)!important}
+html[data-dw] .eqbig b{background:linear-gradient(135deg,var(--c-primary),var(--c-accent))!important;-webkit-background-clip:text!important;background-clip:text!important}
+/* ================= الداكن ================= */
+html[data-dw="dark"][data-tone][data-theme]:not(#dwdark){color-scheme:dark}
+html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) body{background:var(--c-bg)!important;color:var(--c-text)!important}
+html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) :is(#hd,aside:not(.zhctx),nav.rail){background:var(--c-surface-muted)!important;border-color:var(--c-border)!important;color:var(--c-text)!important}
+html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) main{background:var(--c-surface)!important;border-color:var(--c-border)!important}
+html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) :is(.ucard,.tdk,.wkit,.cl,.gq,.gg,.gbt,.gkind,.genflowh,.genhero,.ght,.eqdm,.galt,.genfav,.gcsum,.hxinv,.rdopt,.zhrow,.zhap,.cfhead,.eqdish,.eqli,.wkop,.gq,.gstp){background:var(--c-surface-elev)!important;border-color:var(--c-border)!important;color:var(--c-text)!important}
+html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) :is(.genqual,.geneqv,.gensetup,.genrev,.gensend,.genclient,.genplan,.gencl){background:var(--c-surface)!important;border-color:var(--c-border)!important}
+html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) :is(.genqual .gq,.geneqv .gg){background:var(--c-surface-elev)!important}
+html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) :is(button.sec,.sidebtn,summary.sec,.gchip,.gqpct,.eqdays,.eqsteps button){background:transparent!important;border-color:var(--c-border)!important;color:var(--c-text)!important}
+html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) .sidebtn.on,html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) .sidebtn[aria-current]{background:var(--c-accent-soft)!important;color:var(--c-accent)!important;border-color:color-mix(in srgb,var(--c-accent) 45%,transparent)!important}
+html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) :is(input,select,textarea){background:var(--c-surface-muted)!important;border-color:var(--c-border-strong)!important;color:var(--c-text)!important}
+html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) :is(h1,h2,h3,h4,b,strong,label,td,th,summary,p,li,span){color:inherit}
+html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) :is(small,.small,.gq i,.gq small,.ght small,.tdk small,.zhrow small){color:var(--c-text-2)!important}
+html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) table.st :is(th){background:var(--c-surface-muted)!important;color:var(--c-text-2)!important;border-color:var(--c-border)!important}
+html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) table.st :is(td,tr){background:transparent!important;border-color:var(--c-divider)!important}
+html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) table.st tr.eqsum td{background:var(--c-surface-muted)!important}
+html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) :is(.gq.st-ok,.gg.st-ok){border-color:color-mix(in srgb,var(--c-success) 55%,transparent)!important}
+html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) :is(.gq.st-warn,.gg.st-warn){border-color:color-mix(in srgb,var(--c-warning) 60%,transparent)!important}
+html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) .ok{color:var(--c-success)!important} html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) .warn{color:var(--c-warning)!important} html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) .err{color:var(--c-danger)!important}
+html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) .ad.st-ok{background:var(--c-success-bg)!important;color:var(--c-success)!important} html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) .ad.st-warn{background:var(--c-warning-bg)!important;color:var(--c-warning)!important} html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) .ad.st-block{background:var(--c-danger-bg)!important;color:var(--c-danger)!important}
+html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) .gqchk .gqy{color:var(--c-success)!important} html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) a,html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) .link{color:var(--c-link)!important}
+html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) img.dtav{background:var(--c-surface-elev)!important}
+
+/* الليلي: نصوص الأقسام والعناوين */
+html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) :is(h1,h2,h3,h4,.cfname,.zhrow b,.tdk b,.gq b,.ght b,.cl b,#hd b,#hd .unm){color:var(--c-text)!important}
+html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) .tdh *,html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) .tdh{background-image:none}
+/* الليلي: تفاصيل المكونات */
+html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) :is(details.newm,details.tbm.newm,.zhctx,.zhcols,.zhmain){background:transparent!important;border-color:var(--c-border)!important}
+html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) .wkit :is(b,strong,.wkt){color:var(--c-text)!important}
+html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) .wkit :is(.wkic){background:var(--c-surface-muted)!important}
+
+html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) .tdh{background:transparent!important;border-color:transparent!important}
+/* الليلي: تفاصيل المكونات */
+html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) .tdh :is(p,small,span,.zhsub,.tdsub,div):not(button *):not(summary *){color:var(--c-text-2)!important}
+html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) .tdh :is(h1,h2,b,strong){color:var(--c-text)!important}
+html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) .tdh :is(.zhd,b.zhd,.tddate){color:var(--c-accent)!important}
+html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) .gring-d span{background:var(--c-surface)!important;color:var(--c-text)!important}
+html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) .gring-d span :is(b,small){color:inherit!important;-webkit-text-fill-color:currentColor!important}
+html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) :is(table.st,table.st td,table.st td b,table.st td span){color:var(--c-text)!important}
+html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) :is(details.fold,.fold,.genqual details){background:transparent!important;border-color:var(--c-border)!important;color:var(--c-text)!important}
+html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) :is(.gring-l li,.gring-l b){color:var(--c-text)!important}
+html[data-dw][data-tone][data-theme]:not(#dwp) summary.newb *{color:inherit!important}
+/* الجوال: شريط الخطوات المضغوط والشريط السفلي */
+html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) :is(.genstepm,#tabbar,.tabbar){background:var(--c-surface-elev)!important;border-color:var(--c-border)!important;color:var(--c-text)!important}
+html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) :is(.genstepm button,#tabbar button){background:transparent!important;color:var(--c-text-2)!important;border-color:var(--c-border)!important}
+html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) #tabbar button.on,html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) #tabbar [aria-current]{background:var(--c-accent-soft)!important;color:var(--c-accent)!important}
+
+/* زر النهاري/الليلي في الترويسة */
+html[data-dw] .dwbtn{min-width:40px;font-size:16px;line-height:1}
+html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) .dwbtn{color:var(--c-accent)!important;border-color:color-mix(in srgb,var(--c-accent) 45%,transparent)!important}
+
+@media (max-width:380px){html[data-dw] #hd .hlogo{max-width:92px;height:auto;object-fit:contain}html[data-dw] #hd .dwbtn{min-width:36px}}      /* أضيق الشاشات: يتسع زر الليلي دون تمرير أفقي */
+@media (max-width:480px){html[data-dw] #hd .hdast .hdl{display:none}}      /* الجوال: «المساعد» أيقونة فقط (زره العائم أسفل الشاشة) ليتسع زر الليلي */
+}

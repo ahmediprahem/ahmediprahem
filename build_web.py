@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """يجمع المحرك والواجهة والبيانات والشعار في ملفين: admin.html (واجهة الإدارة) و index.html (قالب المستخدمين — يُفعَّل من ملف يصدّره المدير): py build_web.py"""
-import os, json, base64
+import os, json, base64, re
 H = os.path.dirname(os.path.abspath(__file__)); R = lambda p: open(os.path.join(H, 'src', p), encoding='utf-8').read() + ('\n' + open(os.path.join(H, 'src', 'grp_core.js'), encoding='utf-8').read() + '\n' + open(os.path.join(H, 'src', 'hx_voice.js'), encoding='utf-8').read() + '\n' + open(os.path.join(H, 'src', 'hx_sticker.js'), encoding='utf-8').read() if p == 'hx_crypto.js' else '')
 # خط الثيم الزجاجي (IBM Plex Sans Arabic — رخصة OFL في assets/fonts) مضمَّن data: بلا اتصال خارجي
 RANGES = {'arabic': 'U+0600-06FF,U+0750-077F,U+08A0-08FF,U+200C-200E,U+2010-2011,U+FB50-FDFF,U+FE70-FEFC', 'latin': 'U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD'}
@@ -28,12 +28,22 @@ def wala_fonts():
             fn = os.path.join(H, 'assets', 'fonts', f % sub)
             if os.path.exists(fn): out += "@font-face{font-family:'%s';font-style:normal;font-display:swap;font-weight:%s;src:url(data:font/woff2;base64,%s) format('woff2');unicode-range:%s}\n" % (fam, w, base64.b64encode(open(fn, 'rb').read()).decode(), rng)
     return out
+# 1.38 نظام ألوان Digital Wellness (قرار المالك): خريطة من الهوية السابقة إلى اللوحة المعتمدة، تُطبَّق على ملفي «زنها Pro» فقط (لا تطبيق العميل)
+DW = (('#102D3B', '#172D43'), ('rgba(16,45,59', 'rgba(23,45,67'), ('rgba(16, 45, 59', 'rgba(23, 45, 67'), ('#24C99A', '#287E91'), ('rgba(36,201,154', 'rgba(40,126,145'), ('rgba(0,206,139', 'rgba(87,201,179'),
+      ('#1FB88C', '#1F6474'), ('#0F8A66', '#246F80'), ('#7FE3C4', '#57C9B3'), ('#E7F7F1', '#DCECEB'), ('#F4F7F6', '#F4F7FA'), ('#E6EBE9', '#DCE4EA'), ('#DCE3E0', '#D3DDE5'), ('#69767B', '#5B6B7A'),
+      ('#24A879', '#1A7A50'), ('#E7A34B', '#E9A23B'), ('#E66B70', '#C2413B'), ('#8A5A12', '#9A5B00'), ('#B5454A', '#B83A34'), ('#3D7FB0', '#2A6FBA'),
+      ('#0F9F73', '#246F80'), ('#00A36C', '#246F80'), ('#0E9F86', '#246F80'), ('#3FBF93', '#57C9B3'), ('#6FE3A9', '#6FD6C2'), ('#5FD49B', '#57C9B3'), ('#7FE7B4', '#6FD6C2'),
+      ('#1F9D55', '#1A7A50'), ('#2E9E5E', '#1A7A50'), ('#1E8C4E', '#1A7A50'), ('#1F7A45', '#1A7A50'), ('#C62F35', '#B83A34'), ('#B3261E', '#B83A34'), ('#C0392B', '#B83A34'), ('#B25E00', '#9A5B00'), ('#D08A00', '#9A5B00'),
+      ('--g-cb:#f59e0b', '--g-cb:#C47F12'), ('--g-pr:#0ea5e9', '--g-pr:#287E91'), ('--g-ft:#a855f7', '--g-ft:#7B68B5'), ('--g-ok:#10b981', '--g-ok:#1A7A50'), ('--g-warn:#f59e0b', '--g-warn:#E9A23B'), ('--g-bad:#ef4444', '--g-bad:#C2413B'))
+def dw(t):
+    for a, b in DW: t = re.sub(re.escape(a), b, t, flags=re.I)
+    return t
 def build(mode, tpl):
-    t = R('template.html').replace('/*MODE*/', json.dumps(mode)).replace('/*TPL*/', tpl).replace('/*CSS*/', R('style.css')).replace('/*THEMECSS*/', R('theme_linear.css') + font_css() + R('theme_glass.css') + R('theme_cfile.css') + wala(R('theme_zenha_auto.css') + R('theme_zenha.css') + R('theme_mobile.css') + R('theme_gen.css')) + wala_fonts() + R('theme_wala.css') + R('theme_home.css')).replace('/*ASSETS*/', R('assets.js')).replace('/*DATA*/', R('data.json')).replace('/*ATHLETE*/', R('athlete.json'))
+    t = R('template.html').replace('/*MODE*/', json.dumps(mode)).replace('/*TPL*/', tpl).replace('/*CSS*/', R('style.css')).replace('/*THEMECSS*/', R('theme_linear.css') + font_css() + R('theme_glass.css') + R('theme_cfile.css') + wala(R('theme_zenha_auto.css') + R('theme_zenha.css') + R('theme_mobile.css') + R('theme_gen.css')) + wala_fonts() + R('theme_wala.css') + R('theme_home.css') + R('theme_dw.css')).replace('/*ASSETS*/', R('assets.js')).replace('/*DATA*/', R('data.json')).replace('/*ATHLETE*/', R('athlete.json'))
     for k, f in (('ICONS', 'icons.js'), ('DIGITS', 'digits.js'), ('ENGINE', 'engine.js'), ('ASSIST', 'assistant.js'), ('RECIPE', 'recipe.js'), ('DTICON', 'dt_icon.js'), ('NATIVE', 'native.js'), ('XLSXR', 'xlsx_read.js'), ('ATHIMP', 'athimport.js'), ('ATHENG', 'athlete.js'), ('DIETS', 'diets.js'), ('DOCX', 'docx.js'), ('SEC', 'sec.js'), ('HXC', 'hx_crypto.js'), ('FORMS', 'forms.js'), ('ZIZO', 'zizo.js'), ('APP', 'app.js'), ('AUTH', 'auth.js')): t = t.replace('/*%s*/' % k, R(f).replace('/*ATHUI*/', R('athlete_ui.js')).replace('/*ASSISTUI*/', R('assistant_ui.js')).replace('/*HUDUI*/', R('hud_ui.js')).replace('/*BANKUI*/', R('bank_ui.js')).replace('/*DAYSUI*/', R('daydist_ui.js')).replace('/*THEMEUI*/', R('theme_ui.js')).replace('/*SHELLUI*/', R('shell_ui.js')).replace('/*HXUI*/', R('hissati_ui.js')).replace('/*FORMSUI*/', R('forms_ui.js')).replace('/*VAULTUI*/', R('vault_ui.js')).replace('/*MEDUI*/', R('med_ui.js')).replace('/*FEEDUI*/', R('feed_ui.js')).replace('/*WORKUI*/', R('work_ui.js')).replace('/*SUBUI*/', R('sub_ui.js')).replace('/*CHATUI*/', R('chat_ui.js')).replace('/*GRPUI*/', R('grp_ui.js')).replace('/*RICHUI*/', R('rich_ui.js')).replace('/*CHALUI*/', R('chal_ui.js')).replace('/*DIETSUI*/', R('diets_ui.js')).replace('/*READYUI*/', R('ready_ui.js')).replace('/*PLIBUI*/', R('plib_ui.js')).replace('/*CHECKUI*/', R('checkin_ui.js')).replace('/*GYMUI*/', R('gym_ui.js')).replace('/*CFILEUI*/', R('cfile_ui.js')).replace('/*GENUI*/', R('gen_ui.js')) if k == 'APP' else R(f))
     t = t.replace('/*READYIDX*/null', R('readylib/index.json')).replace('/*READYGZ*/', base64.b64encode(open(os.path.join(H, 'src', 'readylib', 'plans.json.gz'), 'rb').read()).decode()).replace('/*READYLIB*/', R('readylib.js')).replace('/*PLIBIDX*/null', R('plib/index.json')).replace('/*PLIBGZ*/', base64.b64encode(open(os.path.join(H, 'src', 'plib', 'plans.json.gz'), 'rb').read()).decode()).replace('/*PLIB*/', R('plib.js'))
     t = t.replace('<script>/*ADMIN*/</script>', '<script>' + R('admin.js').replace("/*PRO_ICONS*/{}", json.dumps({k: base64.b64encode(open(os.path.join(H, 'assets', 'zenhapro', k + '.png'), 'rb').read()).decode() for k in ('icon-192', 'icon-512', 'maskable-512', 'apple-180')})).replace("/*HISSA_SW*/''", json.dumps(R('hissa_sw.js'), ensure_ascii=False).replace('</', '<\\/')) + '</script>' if mode == 'admin' else '')
-    return t
+    return dw(t)
 user = build('user', 'null'); admin = build('admin', json.dumps(user).replace('</', '<\\/'))
 open(os.path.join(H, 'index.html'), 'w', encoding='utf-8').write(user); open(os.path.join(H, 'admin.html'), 'w', encoding='utf-8').write(admin)
 
