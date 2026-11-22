@@ -737,7 +737,7 @@ E.ctx = function (client, D) {
 
   // ================================================ 0.99 «التفصيل على المقاس» (v2): توافق وتعارض الوجبة، حدود الكميات بحسب الدور والوجبة، وجدولة بروتين الغداء أسبوعياً.
   // كله خلف client.v2: بدونه يبقى المحرك كما كان حرفياً. بياناته في D.limits (مسودة بمراجعها بانتظار اعتماد المالك)
-  var POULTRY = /دجاج|ديك رومي|حبش|بط|أوز|سمان/, SHELL = /روبيان|جمبري|محار|قشريات|كابوريا|سرطان/, FLESH = { red: 1, poultry: 1, fish: 1, shell: 1 };
+  var POULTRY = /دجاج|ديك رومي|حبش|بط|أوز|سمان/, SHELL = /روبيان|جمبري|محار|قشريات|كابوريا|سرطان|سلطعون|بلح البحر|أخطبوط|حبار|كاليماري/, FLESH = { red: 1, poultry: 1, fish: 1, shell: 1 };
   var nmD = null, nm = null, byN = function (D) { if (nmD !== D) { nmD = D; nm = {}; D.foods.forEach(function (f) { nm[f.n] = f; }); } return nm; };
   E.protClass = function (f) { var r = f.r || E.inferRole(f); if (r === 'meat') return POULTRY.test(f.n) ? 'poultry' : 'red'; if (r === 'fish') return SHELL.test(f.n) ? 'shell' : 'fish'; return r; };
   E.cultOf = function (client, D) { var c = client.cult, l = D.limits && D.limits.culture; return { fishDairy: c && c.fishDairy != null ? !!c.fishDairy : !!(l && l.fishDairy) }; };

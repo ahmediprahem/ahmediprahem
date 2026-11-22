@@ -109,12 +109,23 @@ for (const [n, g, us, up, upe, gpe, m, t] of NEW) {
   if (have.has(n)) continue; const X = EX[g];
   D.foods.push(Object.assign({ n, g, us, up, upe, gpe, units: upe, exv: 1, mac: [X[0], X[1], X[2], X[3]], cooked: '', m, veg: g >= 2 && g <= 5 && !/جبن|بيض/.test(n) ? 0 : 1, vegan: g === 0 || g === 1 || g >= 9 && n !== 'سمن بلدي' ? 1 : 0, on: 1, gi: null, o: o++, nw: 1 }, t)); added++;
 }
+// ---------------------------------------------------------------- 1.46 أصناف مستوردة (src/foods_import.json): من نظام الجرامات وUSDA FoodData Central SR Legacy،
+// الحصة بالعنصر المحدِّد للمجموعة ثم مقرّبة لأقرب مقياس منزلي (قرار المالك)، والماكروز الفعلية للكمية المقرّبة (mac لكل units)
+const IMP = JSON.parse(fs.readFileSync(path.join(__dirname, 'src', 'foods_import.json'), 'utf8')), IMPT = {}; let imported = 0;
+for (const it of IMP) {
+  IMPT[it.n] = { r: it.r, cz: it.cz, x: it.x }; if (it.r === 'veg' && it.us === 'كوب') IMPT[it.n].mx = 1.5;      // الخضار حتى كوب ونصف في السطر if (have.has(it.n)) continue; have.add(it.n);
+  const f = {}; ['n', 'g', 'us', 'up', 'upe', 'gpe', 'units', 'exv', 'mac', 'cooked', 'm', 'veg', 'vegan', 'on', 'gi', 'nw', 'src', 'na', 'fi'].forEach((k) => { f[k] = it[k]; }); f.o = o++; D.foods.push(f); imported++;
+}
+// كلمات الحساسية للأصناف المستوردة (أسماك وقشريات ورخويات لا يحمل اسمها «سمك»)
+for (const [lab, kws] of [['حساسية السمك', ['أنشوجة']], ['حساسية الحليب (بروتين الحليب)', ['كفير']], ['حساسية القشريات والمحار', ['بلح البحر', 'أخطبوط', 'حبار', 'كاليماري']]]) {
+  const al = D.allergens.find((x) => x.label === lab); if (al) kws.forEach((k) => { if (!al.kw.includes(k)) al.kw.push(k); });
+}
 // ---------------------------------------------------------------- الوسم
-const NEWT = {}; NEW.forEach((x) => { NEWT[x[0]] = x[7]; });
+const NEWT = {}; NEW.forEach((x) => { NEWT[x[0]] = x[7]; }); Object.assign(NEWT, IMPT);
 for (const f of D.foods) {
-  const r = role(f), t = NEWT[f.n] || {};
+  const t = NEWT[f.n] || {}, r = t.r || role(f);
   f.r = r; f.cz = t.cz || (SA.test(f.n) ? 'sa' : EG.test(f.n) ? 'eg' : X_NAMES.test(f.n) ? 'intl' : 'both'); f.cost = t.cost || cost(f); f.prep = t.prep != null ? t.prep : prep(f, r);
-  f.mx = t.mx || mxOf(f, r); f.st = t.st || stepOf(f, r); if (X_NAMES.test(f.n) || r === 'tofu') f.x = 1; else delete f.x;
+  f.mx = t.mx || mxOf(f, r); f.st = t.st || stepOf(f, r); if (X_NAMES.test(f.n) || r === 'tofu' || t.x) f.x = 1; else delete f.x;
 }
 // ---------------------------------------------------------------- وجبات بنك مصرية وسعودية (مكوّنات من القاعدة؛ e = عدد الحصص)
 const K = 'كربوهيدرات رئيسي', PRO = 'بروتين رئيسي', V = 'خضار', F = 'دهون', O = 'اختياري';
@@ -143,4 +154,4 @@ const MSA = /كبسة|مندي|جريش|مرقوق|قرصان|تميس|حنين�
 D.bank.forEach((b) => { if (!b.cz) b.cz = MSA.test(b.n) ? 'sa' : MEG.test(b.n) ? 'eg' : 'both'; });
 fs.writeFileSync(P, JSON.stringify(D));
 const cnt = {}; D.foods.forEach((f) => { cnt[f.r] = (cnt[f.r] || 0) + 1; });
-console.log('أصناف:', D.foods.length, '| مضافة الآن:', added, '| وجبات بنك مضافة:', addedM, '| غير شائعة مخفية:', D.foods.filter((f) => f.x).length, '| الأدوار:', JSON.stringify(cnt));
+console.log('أصناف:', D.foods.length, '| مضافة الآن:', added, '| مستوردة:', imported, '| وجبات بنك مضافة:', addedM, '| غير شائعة مخفية:', D.foods.filter((f) => f.x).length, '| الأدوار:', JSON.stringify(cnt));
