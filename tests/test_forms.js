@@ -20,4 +20,13 @@ t('الأقسام الظاهرة تتجاهل المخفي والفارغ؛ ون
   assert.strictEqual(F.answerText({ type: 'many' }, ['أ', 'ب']), 'أ، ب'); assert.strictEqual(F.answerText({ type: 'num', unit: 'ساعة' }, '7'), '7 ساعة'); assert.strictEqual(F.answerText({ type: 'scale' }, '4'), '4 من 5'); assert.strictEqual(F.answerText({ type: 'yn' }, 'n'), 'لا');
   assert(!F.answered({}, '') && !F.answered({}, []) && F.answered({}, 'x'));
 });
+t('1.45 الاستبيان الموحّد قابل للتعديل: نقل القديم، النص والإخفاء والخيارات، وأسئلة في أي قسم، والأساسي جداً ثابت', () => {
+  const old = F.defaults('ex'); old.steps.push({ id: 's_1', custom: 1, t: 'قسمي', q: [{ id: 'q_1', type: 'yn', label: 'تدخن؟' }] });
+  const v = F.exSpec(old); assert.strictEqual(v.tv, 2); assert.deepStrictEqual(v.steps.map((s) => s.id), ['basic', 'goal', 'health', 'day', 'mfoods', 'custom_x']);
+  const act = v.steps[1].q.find((q) => q.id === 'act'); act.ol = { 0: 'مكتبي' }; act.oh = ['4']; v.steps[2].q.find((q) => q.id === 'safe').hide = 1; v.steps[0].q[0].hide = 1; v.steps[2].q.push({ id: 'q_2', type: 'num', label: 'ساعات النوم' });
+  const n2 = F.exSpec(v); const a2 = n2.steps[1].q.find((q) => q.id === 'act');
+  assert.strictEqual(F.optLabel(a2, 0, 'x'), 'مكتبي'); assert(!F.optOn(a2, 4) && F.optOn(a2, 3)); assert(n2.steps[2].q.find((q) => q.id === 'safe').hide); assert(!n2.steps[0].q[0].hide, 'الاسم لا يُخفى'); assert(n2.steps[2].q.some((q) => q.id === 'q_2'));
+  const legacy = F.normalize({ tailor: 1, steps: v.steps }, 'ex'); assert(!legacy.steps[1].q.find((q) => q.id === 'act').ol, 'دعوة قديمة بلا tv: السلوك القديم');
+  assert.deepStrictEqual(F.optList('nmeals').map((o) => o[0]), ['3', '4', '5', '6']); assert.strictEqual(F.optList('cond', { conditions: ['سكري'] })[0][0], 'سكري');
+});
 console.log('\nنجح', n, 'اختبارات الاستبيانات');

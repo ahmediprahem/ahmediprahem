@@ -225,6 +225,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padd
 .fmq{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start;padding:6px 0;border-top:1px solid var(--line)}
 .fmq.off{opacity:.55}
 .fmql{flex:1;min-width:220px;display:flex;flex-direction:column;gap:4px}
+.fmopts{margin-top:4px}.fmopts summary{cursor:pointer;font-size:13px;color:var(--brand,#0f766e);font-weight:600}.fmo{display:flex;gap:8px;align-items:center;margin-top:4px}.fmo input:not([type]){flex:1}.fmo.off input:not([type]){opacity:.55;text-decoration:line-through}
 .fmqa{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
 .fmb{font-size:11px;padding:2px 8px;border-radius:9px;background:#e8ebf3;color:#445}
 .fmb.c{background:#e3f4ea;color:#245}
@@ -6405,6 +6406,9 @@ E.ctx = function (client, D) {
     }
   };
   var clone = function (o) { return JSON.parse(JSON.stringify(o)); };
+  // 1.45 الأسئلة الأساسية ذات الخيارات (يعدّل الأخصائي تسميتها أو يخفيها؛ القيمة الحسابية ثابتة). القوائم الطويلة (الحالات والحساسية) تأتي من البيانات
+  var OPT = { act: ['أغلب يومي جالس: مكتب أو بيت أو سيارة', 'أمشي قليلاً، أو رياضة خفيفة من يوم إلى 3 أيام في الأسبوع', 'أتحرك كثيراً في شغلي، أو أتمرن من 3 إلى 5 أيام', 'شغلي فيه مجهود، أو أتمرن من 6 إلى 7 أيام', 'مجهود بدني شاق كل يوم، أو تمرين مرتين في اليوم'],
+    goal: ['أنزل وزني بهدوء', 'أنزل وزني بوتيرة أسرع', 'أحافظ على وزني', 'أزيد وزني بهدوء', 'أزيد وزني بوتيرة أسرع'], nmeals: ['3', '4', '5', '6'], cond: 1, allg: 1, safe: [['preg', 'هل أنتِ حامل أو ترضعين؟'], ['dmed', 'هل تأخذ إنسولين أو أدوية لخفض السكر؟']] };
   // يكمّل استبياناً محفوظاً بما أُضيف للافتراضي لاحقاً، ويحذف الأساسي المجهول، ويمنع إخفاء الأساسي جداً
   function normalize(spec, sys) {
     if (spec && spec.tailor) {                                           // 1.04 الاستبيان الموحّد: أسئلة التفصيل ثابتة، وأسئلة الأخصائي المضافة في قسم أخير
@@ -6412,9 +6416,17 @@ E.ctx = function (client, D) {
       (spec.steps || []).forEach(function (s) { if (!s || s.hide) return; (s.q || []).forEach(function (q) { if (!q || q.b || q.hide || !q.id || seenX[q.id]) return; var t = TYPES.some(function (x) { return x[0] === q.type; }) ? q.type : 'text', c = { id: String(q.id).slice(0, 24), type: t, label: String(q.label || '').slice(0, 160) || 'سؤال', req: q.req ? 1 : 0 };
         if (q.help) c.help = String(q.help).slice(0, 200); if (t === 'num' && q.unit) c.unit = String(q.unit).slice(0, 20); if (t === 'one' || t === 'many') { c.opts = (q.opts || []).map(function (o) { return String(o).trim().slice(0, 80); }).filter(Boolean).slice(0, 20); if (!c.opts.length) c.opts = ['نعم', 'لا']; } seenX[c.id] = 1; extra.push(c); }); });
       if (extra.length) T.steps.push({ id: 'custom_x', t: String(spec.xt || 'أسئلة أخصائيك').slice(0, 60), custom: 1, q: extra });
-      return T;
+      if (spec.tv !== 2) return T;
+      var V2 = merge(DEF.tailor(), spec, 'ex'); V2.tailor = 1; V2.tv = 2; return V2;           // 1.45: الاستبيان الموحّد قابل للتعديل (نص، إخفاء، ترتيب، خيارات، أسئلة في أي قسم)
     }
     sys = sys === 'g' ? 'g' : 'ex'; var d = DEF[sys](); if (!spec || !spec.steps) return d;
+    return merge(d, spec, sys);
+  }
+  function optsOv(b, q) {                                               // 1.45 خيارات السؤال الأساسي: تسمية (ol) وإخفاء (oh)، والقيمة المحفوظة لا تتغير
+    if (q.ol && typeof q.ol === 'object') { var ol = {}, k = 0; for (var v in q.ol) { if (k++ >= 40) break; var x = String(q.ol[v] == null ? '' : q.ol[v]).trim().slice(0, 80); if (x) ol[String(v).slice(0, 80)] = x; } if (Object.keys(ol).length) b.ol = ol; }
+    if (Array.isArray(q.oh)) { var oh = q.oh.map(function (x) { return String(x).slice(0, 80); }).slice(0, 40); if (oh.length) b.oh = oh; }
+  }
+  function merge(d, spec, sys) {
     var dq = {}, dstep = {}; d.steps.forEach(function (s) { s.q.forEach(function (q) { dq[q.id] = q; dstep[q.id] = s.id; }); });
     var out = { sys: sys, steps: [] }, seen = {};
     spec.steps.forEach(function (s) {
@@ -6422,7 +6434,7 @@ E.ctx = function (client, D) {
       var st = { id: s.id, t: String(s.t || (ds && ds.t) || 'قسم').slice(0, 60), q: [] }; if (s.custom) st.custom = 1; if (s.hide && s.id !== 'basic') st.hide = 1;
       (s.q || []).forEach(function (q) {
         if (!q || !q.id || seen[q.id]) return;
-        if (q.b) { if (!dq[q.id]) return; var b = clone(dq[q.id]); b.label = String(q.label || b.label).slice(0, 160); if (q.hide && !b.lock) b.hide = 1; seen[q.id] = 1; st.q.push(b); return; }
+        if (q.b) { if (!dq[q.id]) return; var b = clone(dq[q.id]); b.label = String(q.label || b.label).slice(0, 160); if (q.hide && !b.lock) b.hide = 1; if (OPT[q.id]) optsOv(b, q); seen[q.id] = 1; st.q.push(b); return; }
         var t = TYPES.some(function (x) { return x[0] === q.type; }) ? q.type : 'text', c = { id: String(q.id).slice(0, 24), type: t, label: String(q.label || '').slice(0, 160) || 'سؤال', req: q.req ? 1 : 0 };
         if (q.help) c.help = String(q.help).slice(0, 200); if (t === 'num' && q.unit) c.unit = String(q.unit).slice(0, 20);
         if (t === 'one' || t === 'many') { c.opts = (q.opts || []).map(function (o) { return String(o).trim().slice(0, 80); }).filter(Boolean).slice(0, 20); if (!c.opts.length) c.opts = ['نعم', 'لا']; }
@@ -6445,7 +6457,18 @@ E.ctx = function (client, D) {
     if (q.type === 'num') return v + (q.unit ? ' ' + q.unit : ''); return String(v);
   }
   function answered(q, v) { return !(v == null || v === '' || (Array.isArray(v) && !v.length)); }
-  return { TYPES: TYPES, defaults: function (sys) { return DEF[sys === 'g' ? 'g' : sys === 'tailor' ? 'tailor' : 'ex'](); }, normalize: normalize, visibleSteps: visibleSteps, uid: uid, answerText: answerText, answered: answered };
+  // استبيان نظام الحصص بصيغة 1.45 (من أي صيغة محفوظة قديمة: تُنقل أسئلة الأخصائي المضافة فقط)
+  function exSpec(spec) { if (spec && spec.tailor && spec.tv === 2) return normalize(spec, 'ex'); var t = normalize({ tailor: 1, xt: spec && spec.xt, steps: (spec && spec.steps) || [] }, 'ex'); t.tv = 2; return normalize(t, 'ex'); }
+  function optList(id, ctx) {                                          // [[القيمة، النص الافتراضي]]
+    ctx = ctx || {}; var o = OPT[id]; if (!o) return [];
+    if (id === 'cond' || id === 'allg') return ((id === 'cond' ? ctx.conditions : ctx.allergens) || []).map(function (x) { return [String(x), String(x)]; });
+    if (id === 'safe') return o.map(function (x) { return x.slice(); });
+    if (id === 'nmeals') return o.map(function (x) { return [x, x + ' وجبات']; });
+    var base = (id === 'act' ? ctx.activity : ctx.goals) || o; return base.map(function (x, i) { return [String(i), o[i] || String(x)]; }).filter(function (x, i) { return id !== 'goal' || i < o.length; });
+  }
+  function optLabel(q, v, def) { return (q && q.ol && q.ol[String(v)]) || def; }
+  function optOn(q, v) { return !(q && q.oh && q.oh.indexOf(String(v)) >= 0); }
+  return { OPT: OPT, exSpec: exSpec, optList: optList, optLabel: optLabel, optOn: optOn, TYPES: TYPES, defaults: function (sys) { return DEF[sys === 'g' ? 'g' : sys === 'tailor' ? 'tailor' : 'ex'](); }, normalize: normalize, visibleSteps: visibleSteps, uid: uid, answerText: answerText, answered: answered };
 });
 </script><script>// ================= زيزو — شخصية «زنها» (اعتمدها المالك 2026-11-21): ثعلب فنك بوشاح أخضر. وحدة مشتركة بين «زنها» و«زنها Pro» (ES5)
 // Zizo.svg(o): رسم متجهي بالحالة (mouth/eyes/prop/hat/coat/anim…). Zizo.say(o, text): ظهور عائم مؤقت بفقاعة. الحركة تتوقف مع «تقليل الحركة».
@@ -7762,7 +7785,7 @@ function hxCat(sys, path) {
   }
   var tl = path === 'tailor';
   return {
-    v: 1, sys: 'ex', path: tl ? 'tailor' : 'custom', form: HForms.normalize(Object.assign({ tailor: 1 }, { steps: hxForm('ex').steps }), 'ex'), dname: HX.st.name, clinic: b.clinic || '', groups: D.groups, days: D.days,      // 1.04: الاستبيان الموحّد للجميع (+ أسئلة الأخصائي المضافة)
+    v: 1, sys: 'ex', path: tl ? 'tailor' : 'custom', form: HForms.exSpec((eff().forms || {}).ex), dname: HX.st.name, clinic: b.clinic || '', groups: D.groups, days: D.days,      // 1.04: الاستبيان الموحّد للجميع (+ أسئلة الأخصائي المضافة)
     bank: D.bank.filter(function (x) { return x.on; }).map(function (x) { return [x.n, x.m, ((x.ing || [])[0] || {}).n || '']; }),
     foods: D.foods.filter(function (f) { return f.on !== 0; }).map(function (f) { var m = E.fmeta(f); return [f.n, f.g, (f.m || []).join(''), m.r, m.cz, m.x ? 1 : 0, f.dn || '']; }),      // التفصيل: وجبات الصنف ودوره ومطبخه لاختيار أكلات كل وجبة
     conditions: D.conditions.slice(), allergens: D.allergens.map(function (a) { return a.label; }),      // كل الحالات (قواعدها الجديدة تعمل مع v2)
@@ -8234,13 +8257,19 @@ document.addEventListener('change', function (e) {
 // وأسئلة وأقسام مخصّصة بأنواع مختلفة. يُحفظ في S.settings.forms (ويصل المستخدمين مع التصدير)، ويُرسل مع كل دعوة جديدة.
 var FMT = {}; HForms.TYPES.forEach(function (t) { FMT[t[0]] = t[1]; });
 function fmSys() { return S.fsys === 'g' ? 'g' : 'ex'; }
-function fmSpec() { var sys = fmSys(); return HForms.normalize(((S.settings.forms || {})[sys]) || ((eff().forms || {})[sys]), sys); }
-function fmSave(spec) { var sys = fmSys(); S.settings.forms = S.settings.forms || {}; S.settings.forms[sys] = HForms.normalize(spec, sys); saveSettings(); }
+function fmSpec() { var sys = fmSys(), sp = ((S.settings.forms || {})[sys]) || ((eff().forms || {})[sys]); return sys === 'ex' ? HForms.exSpec(sp) : HForms.normalize(sp, sys); }   // 1.45: الحصص = الاستبيان الموحّد الذي يراه العميل
+function fmSave(spec) { var sys = fmSys(); S.settings.forms = S.settings.forms || {}; S.settings.forms[sys] = sys === 'ex' ? HForms.exSpec(Object.assign({}, spec, { tailor: 1, tv: 2 })) : HForms.normalize(spec, sys); saveSettings(); }
+function fmCtx() { return { conditions: D.conditions, allergens: D.allergens.map(function (a) { return a.label; }), activity: D.settings.activity.map(function (a) { return a[0]; }), goals: D.settings.goals.map(function (g) { return g[0]; }) }; }
+function fmOpts(q, si, qi) {                                    // 1.45 خيارات السؤال الأساسي: تسمية وإظهار (القيمة الحسابية ثابتة)
+  var L = HForms.optList(q.id, fmCtx()); if (!L.length) return ''; var off = L.filter(function (o) { return !HForms.optOn(q, o[0]); }).length;
+  return '<details class="fmopts"><summary>الخيارات (' + L.length + (off ? '، مخفي ' + off : '') + ')</summary><small class="small">غيّر النص كما يراه العميل أو أخفِ الخيار؛ معناه في الحساب لا يتغير.</small>' + L.map(function (o, k) { var on = HForms.optOn(q, o[0]);
+    return '<div class="fmo' + (on ? '' : ' off') + '"><input data-fm="q,' + si + ',' + qi + ',ol,' + k + '" value="' + esc((q.ol || {})[o[0]] || '') + '" placeholder="' + esc(o[1]) + '" aria-label="نص الخيار"><label class="chk"><input type="checkbox" data-fm="q,' + si + ',' + qi + ',oh,' + k + '"' + (on ? ' checked' : '') + '> ظاهر</label></div>'; }).join('') + '</details>';
+}
 function fmQRow(q, si, qi, n) {
   var mv = '<button class="sec sm" data-a="fmQMv" data-v="' + si + ',' + qi + ',-1"' + (qi ? '' : ' disabled') + ' title="لأعلى">↑</button><button class="sec sm" data-a="fmQMv" data-v="' + si + ',' + qi + ',1"' + (qi < n - 1 ? '' : ' disabled') + ' title="لأسفل">↓</button>';
   var kind = q.b ? '<span class="fmb">أساسي' + (q.lock ? ' 🔒' : '') + '</span>' : '<span class="fmb c">' + esc(FMT[q.type] || q.type) + '</span>';
-  var extra = q.b ? '' : (q.type === 'one' || q.type === 'many' ? '<textarea data-fm="q,' + si + ',' + qi + ',opts" rows="2" placeholder="خيار في كل سطر">' + esc((q.opts || []).join('\n')) + '</textarea>' : q.type === 'num' ? '<input data-fm="q,' + si + ',' + qi + ',unit" value="' + esc(q.unit || '') + '" placeholder="الوحدة (اختياري)">' : '');
-  var tog = q.b ? (q.lock ? '<small class="small">لا يُخفى</small>' : '<label class="chk"><input type="checkbox" data-fm="q,' + si + ',' + qi + ',show"' + (q.hide ? '' : ' checked') + '> ظاهر</label>') : '<label class="chk"><input type="checkbox" data-fm="q,' + si + ',' + qi + ',req"' + (q.req ? ' checked' : '') + '> إلزامي</label>';
+  var extra = q.b ? fmOpts(q, si, qi) : (q.type === 'one' || q.type === 'many' ? '<textarea data-fm="q,' + si + ',' + qi + ',opts" rows="2" placeholder="خيار في كل سطر">' + esc((q.opts || []).join('\n')) + '</textarea>' : q.type === 'num' ? '<input data-fm="q,' + si + ',' + qi + ',unit" value="' + esc(q.unit || '') + '" placeholder="الوحدة (اختياري)">' : '');
+  var tog = q.b ? (q.lock ? '<small class="small">لا يُخفى</small>' : '<label class="chk"><input type="checkbox" data-fm="q,' + si + ',' + qi + ',show"' + (q.hide ? '' : ' checked') + '> ظاهر للعميل</label>') : '<label class="chk"><input type="checkbox" data-fm="q,' + si + ',' + qi + ',req"' + (q.req ? ' checked' : '') + '> إلزامي</label>';
   return '<div class="fmq' + (q.hide ? ' off' : '') + '"><div class="fmql"><input data-fm="q,' + si + ',' + qi + ',label" value="' + esc(q.label) + '" aria-label="نص السؤال">' + extra + '</div><div class="fmqa">' + kind + tog + mv + (q.b ? '' : '<button class="r sm" data-a="fmQDel" data-v="' + si + ',' + qi + '" title="حذف السؤال">×</button>') + '</div></div>';
 }
 function fmAddForm(si) {
@@ -8250,7 +8279,7 @@ function fmAddForm(si) {
 }
 function formsPage() {
   var sys = fmSys(), spec = fmSpec(), n = spec.steps.length;
-  return '<div class="ok small">1.04: استبيان العميل موحّد للجميع في نظام الحصص (أسئلة التفصيل: الهدف، الصحة، اليوم، أكلات كل وجبة، الغداء، الكميات). الأسئلة التي تضيفها هنا تظهر للعميل في قسم أخير «أسئلة أخصائيك»، وتعديل نصوص الأسئلة الأساسية لم يعد يظهر له. استبيان الجرامات كما هو.</div><h3>📝 استبيانات «زنها»</h3><p class="small">ما يملؤه العميل في «زنها» عند التسجيل. لكل نظام استبيانه: غيّر نص أي سؤال، أخفِ ما لا تحتاجه، رتّب الأقسام والأسئلة، وأضف أسئلة بأنواع مختلفة أو أقساماً جديدة. يُرسل الاستبيان مع كل دعوة جديدة، وتصلك الإجابات في طلب العميل وفي ملاحظاته.</p>'
+  return '<div class="ok small">هذا هو الاستبيان الذي يراه العميل في «زنها» عند الدخول. غيّر نص أي سؤال أو قسم، أو أخفِ سؤالاً أو خياراً، أو أضف أسئلة في أي قسم ورتّبها. الاسم والجوال والجنس والعمر والوزن والطول ثابتة لأن الحساب يعتمد عليها. التعديل يصل الدعوات الجديدة فقط.</div><h3>📝 استبيانات «زنها»</h3><p class="small">ما يملؤه العميل في «زنها» عند التسجيل. لكل نظام استبيانه: غيّر نص أي سؤال، أخفِ ما لا تحتاجه، رتّب الأقسام والأسئلة، وأضف أسئلة بأنواع مختلفة أو أقساماً جديدة. يُرسل الاستبيان مع كل دعوة جديدة، وتصلك الإجابات في طلب العميل وفي ملاحظاته.</p>'
     + '<div class="tabs"><button class="' + (sys === 'ex' ? 'on' : '') + '" data-a="fmSys" data-v="ex">نظام الحصص</button><button class="' + (sys === 'g' ? 'on' : '') + '" data-a="fmSys" data-v="g">نظام الجرامات</button></div>'
     + '<p class="two"><button data-a="fmStepAdd">+ قسم جديد</button><button class="sec" data-a="fmPrint">🖨 نسخة ورقية للطباعة</button><button class="sec" data-a="fmReset">استعادة الاستبيان الافتراضي</button></p>'
     + spec.steps.map(function (st, si) {
@@ -8275,7 +8304,7 @@ function fmPrintHtml() {                                             // نسخة
 }
 Object.assign(A, {
   fmSys: function (v) { S.fsys = v; S.fadd = null; main(); },
-  fmReset: function () { if (!confirm('استعادة الاستبيان الافتراضي لنظام ' + (fmSys() === 'g' ? 'الجرامات' : 'الحصص') + '؟ تُحذف أسئلتك المخصّصة فيه.')) return; S.settings.forms = S.settings.forms || {}; S.settings.forms[fmSys()] = HForms.defaults(fmSys()); saveSettings(); main(); toast('عاد الاستبيان الافتراضي'); },
+  fmReset: function () { if (!confirm('استعادة الاستبيان الافتراضي لنظام ' + (fmSys() === 'g' ? 'الجرامات' : 'الحصص') + '؟ تُحذف أسئلتك المخصّصة فيه.')) return; S.settings.forms = S.settings.forms || {}; S.settings.forms[fmSys()] = fmSys() === 'ex' ? HForms.exSpec(null) : HForms.defaults(fmSys()); saveSettings(); main(); toast('عاد الاستبيان الافتراضي'); },
   fmStepAdd: function () { var sp = fmSpec(); sp.steps.push({ id: HForms.uid('s_'), t: 'قسم جديد', custom: 1, q: [] }); fmSave(sp); S.fadd = sp.steps[sp.steps.length - 1].id; main(); },
   fmStepDel: function (v) { var sp = fmSpec(), st = sp.steps[+v]; if (!st || !st.custom || !confirm('حذف القسم «' + st.t + '» وأسئلته؟')) return; sp.steps.splice(+v, 1); fmSave(sp); main(); },
   fmStepMv: function (v) { var a = v.split(',').map(Number), sp = fmSpec(), j = a[0] + a[1]; if (j < 1 || j >= sp.steps.length) return; var t = sp.steps[a[0]]; sp.steps[a[0]] = sp.steps[j]; sp.steps[j] = t; fmSave(sp); main(); },
@@ -8295,7 +8324,9 @@ document.addEventListener('change', function (e) {
   var t = e.target; if (!t.dataset || !t.dataset.fm) return; var a = t.dataset.fm.split(','), sp = fmSpec(), st = sp.steps[+a[1]]; if (!st) return;
   if (a[0] === 'st') { if (a[2] === 't') st.t = t.value.trim() || st.t; else if (a[2] === 'show') st.hide = t.checked ? 0 : 1; }
   else { var q = st.q[+a[2]]; if (!q) return; var k = a[3];
-    if (k === 'label') q.label = t.value.trim() || q.label; else if (k === 'show') q.hide = t.checked ? 0 : 1; else if (k === 'req') q.req = t.checked ? 1 : 0; else if (k === 'unit') q.unit = t.value.trim();
+    if (k === 'ol' || k === 'oh') { var o = HForms.optList(q.id, fmCtx())[+a[4]]; if (!o) return; if (k === 'ol') { q.ol = q.ol || {}; if (t.value.trim()) q.ol[o[0]] = t.value.trim(); else delete q.ol[o[0]]; } else { q.oh = (q.oh || []).filter(function (x) { return x !== o[0]; }); if (!t.checked) q.oh.push(o[0]); } }
+    else if (k === 'show' && q.id === 'safe' && !t.checked && !confirm('أسئلة السلامة (الحمل/الرضاعة وأدوية السكر) تنبّهك لحالات تحتاج حذراً. إخفاؤها يعني أن تسأل العميل عنها بنفسك. متابعة؟')) { t.checked = true; return; }
+    else if (k === 'label') q.label = t.value.trim() || q.label; else if (k === 'show') q.hide = t.checked ? 0 : 1; else if (k === 'req') q.req = t.checked ? 1 : 0; else if (k === 'unit') q.unit = t.value.trim();
     else if (k === 'opts') { var o = t.value.split('\n').map(function (x) { return x.trim(); }).filter(Boolean); if (o.length >= 2) q.opts = o; else toast('خياران على الأقل'); } }
   fmSave(sp); main();
 });

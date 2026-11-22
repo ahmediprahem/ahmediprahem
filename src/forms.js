@@ -39,6 +39,9 @@
     }
   };
   var clone = function (o) { return JSON.parse(JSON.stringify(o)); };
+  // 1.45 الأسئلة الأساسية ذات الخيارات (يعدّل الأخصائي تسميتها أو يخفيها؛ القيمة الحسابية ثابتة). القوائم الطويلة (الحالات والحساسية) تأتي من البيانات
+  var OPT = { act: ['أغلب يومي جالس: مكتب أو بيت أو سيارة', 'أمشي قليلاً، أو رياضة خفيفة من يوم إلى 3 أيام في الأسبوع', 'أتحرك كثيراً في شغلي، أو أتمرن من 3 إلى 5 أيام', 'شغلي فيه مجهود، أو أتمرن من 6 إلى 7 أيام', 'مجهود بدني شاق كل يوم، أو تمرين مرتين في اليوم'],
+    goal: ['أنزل وزني بهدوء', 'أنزل وزني بوتيرة أسرع', 'أحافظ على وزني', 'أزيد وزني بهدوء', 'أزيد وزني بوتيرة أسرع'], nmeals: ['3', '4', '5', '6'], cond: 1, allg: 1, safe: [['preg', 'هل أنتِ حامل أو ترضعين؟'], ['dmed', 'هل تأخذ إنسولين أو أدوية لخفض السكر؟']] };
   // يكمّل استبياناً محفوظاً بما أُضيف للافتراضي لاحقاً، ويحذف الأساسي المجهول، ويمنع إخفاء الأساسي جداً
   function normalize(spec, sys) {
     if (spec && spec.tailor) {                                           // 1.04 الاستبيان الموحّد: أسئلة التفصيل ثابتة، وأسئلة الأخصائي المضافة في قسم أخير
@@ -46,9 +49,17 @@
       (spec.steps || []).forEach(function (s) { if (!s || s.hide) return; (s.q || []).forEach(function (q) { if (!q || q.b || q.hide || !q.id || seenX[q.id]) return; var t = TYPES.some(function (x) { return x[0] === q.type; }) ? q.type : 'text', c = { id: String(q.id).slice(0, 24), type: t, label: String(q.label || '').slice(0, 160) || 'سؤال', req: q.req ? 1 : 0 };
         if (q.help) c.help = String(q.help).slice(0, 200); if (t === 'num' && q.unit) c.unit = String(q.unit).slice(0, 20); if (t === 'one' || t === 'many') { c.opts = (q.opts || []).map(function (o) { return String(o).trim().slice(0, 80); }).filter(Boolean).slice(0, 20); if (!c.opts.length) c.opts = ['نعم', 'لا']; } seenX[c.id] = 1; extra.push(c); }); });
       if (extra.length) T.steps.push({ id: 'custom_x', t: String(spec.xt || 'أسئلة أخصائيك').slice(0, 60), custom: 1, q: extra });
-      return T;
+      if (spec.tv !== 2) return T;
+      var V2 = merge(DEF.tailor(), spec, 'ex'); V2.tailor = 1; V2.tv = 2; return V2;           // 1.45: الاستبيان الموحّد قابل للتعديل (نص، إخفاء، ترتيب، خيارات، أسئلة في أي قسم)
     }
     sys = sys === 'g' ? 'g' : 'ex'; var d = DEF[sys](); if (!spec || !spec.steps) return d;
+    return merge(d, spec, sys);
+  }
+  function optsOv(b, q) {                                               // 1.45 خيارات السؤال الأساسي: تسمية (ol) وإخفاء (oh)، والقيمة المحفوظة لا تتغير
+    if (q.ol && typeof q.ol === 'object') { var ol = {}, k = 0; for (var v in q.ol) { if (k++ >= 40) break; var x = String(q.ol[v] == null ? '' : q.ol[v]).trim().slice(0, 80); if (x) ol[String(v).slice(0, 80)] = x; } if (Object.keys(ol).length) b.ol = ol; }
+    if (Array.isArray(q.oh)) { var oh = q.oh.map(function (x) { return String(x).slice(0, 80); }).slice(0, 40); if (oh.length) b.oh = oh; }
+  }
+  function merge(d, spec, sys) {
     var dq = {}, dstep = {}; d.steps.forEach(function (s) { s.q.forEach(function (q) { dq[q.id] = q; dstep[q.id] = s.id; }); });
     var out = { sys: sys, steps: [] }, seen = {};
     spec.steps.forEach(function (s) {
@@ -56,7 +67,7 @@
       var st = { id: s.id, t: String(s.t || (ds && ds.t) || 'قسم').slice(0, 60), q: [] }; if (s.custom) st.custom = 1; if (s.hide && s.id !== 'basic') st.hide = 1;
       (s.q || []).forEach(function (q) {
         if (!q || !q.id || seen[q.id]) return;
-        if (q.b) { if (!dq[q.id]) return; var b = clone(dq[q.id]); b.label = String(q.label || b.label).slice(0, 160); if (q.hide && !b.lock) b.hide = 1; seen[q.id] = 1; st.q.push(b); return; }
+        if (q.b) { if (!dq[q.id]) return; var b = clone(dq[q.id]); b.label = String(q.label || b.label).slice(0, 160); if (q.hide && !b.lock) b.hide = 1; if (OPT[q.id]) optsOv(b, q); seen[q.id] = 1; st.q.push(b); return; }
         var t = TYPES.some(function (x) { return x[0] === q.type; }) ? q.type : 'text', c = { id: String(q.id).slice(0, 24), type: t, label: String(q.label || '').slice(0, 160) || 'سؤال', req: q.req ? 1 : 0 };
         if (q.help) c.help = String(q.help).slice(0, 200); if (t === 'num' && q.unit) c.unit = String(q.unit).slice(0, 20);
         if (t === 'one' || t === 'many') { c.opts = (q.opts || []).map(function (o) { return String(o).trim().slice(0, 80); }).filter(Boolean).slice(0, 20); if (!c.opts.length) c.opts = ['نعم', 'لا']; }
@@ -79,5 +90,16 @@
     if (q.type === 'num') return v + (q.unit ? ' ' + q.unit : ''); return String(v);
   }
   function answered(q, v) { return !(v == null || v === '' || (Array.isArray(v) && !v.length)); }
-  return { TYPES: TYPES, defaults: function (sys) { return DEF[sys === 'g' ? 'g' : sys === 'tailor' ? 'tailor' : 'ex'](); }, normalize: normalize, visibleSteps: visibleSteps, uid: uid, answerText: answerText, answered: answered };
+  // استبيان نظام الحصص بصيغة 1.45 (من أي صيغة محفوظة قديمة: تُنقل أسئلة الأخصائي المضافة فقط)
+  function exSpec(spec) { if (spec && spec.tailor && spec.tv === 2) return normalize(spec, 'ex'); var t = normalize({ tailor: 1, xt: spec && spec.xt, steps: (spec && spec.steps) || [] }, 'ex'); t.tv = 2; return normalize(t, 'ex'); }
+  function optList(id, ctx) {                                          // [[القيمة، النص الافتراضي]]
+    ctx = ctx || {}; var o = OPT[id]; if (!o) return [];
+    if (id === 'cond' || id === 'allg') return ((id === 'cond' ? ctx.conditions : ctx.allergens) || []).map(function (x) { return [String(x), String(x)]; });
+    if (id === 'safe') return o.map(function (x) { return x.slice(); });
+    if (id === 'nmeals') return o.map(function (x) { return [x, x + ' وجبات']; });
+    var base = (id === 'act' ? ctx.activity : ctx.goals) || o; return base.map(function (x, i) { return [String(i), o[i] || String(x)]; }).filter(function (x, i) { return id !== 'goal' || i < o.length; });
+  }
+  function optLabel(q, v, def) { return (q && q.ol && q.ol[String(v)]) || def; }
+  function optOn(q, v) { return !(q && q.oh && q.oh.indexOf(String(v)) >= 0); }
+  return { OPT: OPT, exSpec: exSpec, optList: optList, optLabel: optLabel, optOn: optOn, TYPES: TYPES, defaults: function (sys) { return DEF[sys === 'g' ? 'g' : sys === 'tailor' ? 'tailor' : 'ex'](); }, normalize: normalize, visibleSteps: visibleSteps, uid: uid, answerText: answerText, answered: answered };
 });

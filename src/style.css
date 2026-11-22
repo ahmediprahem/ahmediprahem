@@ -225,6 +225,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padd
 .fmq{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start;padding:6px 0;border-top:1px solid var(--line)}
 .fmq.off{opacity:.55}
 .fmql{flex:1;min-width:220px;display:flex;flex-direction:column;gap:4px}
+.fmopts{margin-top:4px}.fmopts summary{cursor:pointer;font-size:13px;color:var(--brand,#0f766e);font-weight:600}.fmo{display:flex;gap:8px;align-items:center;margin-top:4px}.fmo input:not([type]){flex:1}.fmo.off input:not([type]){opacity:.55;text-decoration:line-through}
 .fmqa{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
 .fmb{font-size:11px;padding:2px 8px;border-radius:9px;background:#e8ebf3;color:#445}
 .fmb.c{background:#e3f4ea;color:#245}

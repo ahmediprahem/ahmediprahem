@@ -718,7 +718,8 @@ function mkForm() { const f0 = S.cat && S.cat.form, sy = f0 && f0.sys || (S.cat 
 const vq = (st) => st.q.filter((q) => !q.hide);
 const lab = (q, forId) => (forId ? '<label for="' + forId + '">' : '<span class="lbl">') + esc(q.label) + (q.req ? ' <span class="req">*</span>' : '') + (forId ? '</label>' : '</span>') + (q.help ? '<div class="dim">' + esc(q.help) + '</div>' : '');
 function inp(k, label, type, extra) { const nm = type === 'number', ph = type === 'tel'; return '<div class="field"><label for="f_' + k + '">' + label + '</label><input class="inp" id="f_' + k + '" data-bind="' + k + '" type="' + (nm ? 'text' : type || 'text') + '"' + (nm ? ' data-numf="1" autocomplete="off"' : ph ? ' data-tel="1"' : '') + ' value="' + esc(S.p[k]) + '" ' + (extra || '') + '></div>'; }
-function toggles(key, list, sel) { sel = sel || S.p[key]; return '<div class="chips">' + list.map((x) => '<button class="chip' + (sel.includes(x) ? ' on' : '') + '" data-act="tog" data-k="' + key + '" data-v="' + esc(x) + '">' + (sel.includes(x) ? I('check') : '') + esc(x) + '</button>').join('') + '</div>'; }
+const oL = (q, v, d) => HForms.optLabel ? HForms.optLabel(q, v, d) : d, oOn = (q, v) => !HForms.optOn || HForms.optOn(q, v);   // 1.45 خيارات الأسئلة الأساسية كما عدّلها الأخصائي (القيمة لا تتغير)
+function toggles(key, list, sel, q) { sel = sel || S.p[key]; return '<div class="chips">' + list.filter((x) => !q || oOn(q, x) || sel.includes(x)).map((x) => '<button class="chip' + (sel.includes(x) ? ' on' : '') + '" data-act="tog" data-k="' + key + '" data-v="' + esc(x) + '">' + (sel.includes(x) ? I('check') : '') + esc(q ? oL(q, x, x) : x) + '</button>').join('') + '</div>'; }
 const seg = (k, vals, cur, labels) => '<div class="segc">' + vals.map((x, i) => '<button class="' + (String(cur) === String(x) ? 'on' : '') + '" data-act="set" data-k="' + k + '" data-v="' + esc(x) + '">' + esc(labels ? labels[i] : x) + '</button>').join('') + '</div>';
 const dayTypes = () => (S.cat && S.cat.dayTypes) || ['راحة', 'تدريب خفيف', 'تدريب متوسط', 'تدريب ثقيل'];
 function sched() { if (!Array.isArray(S.p.sched) || S.p.sched.length !== 7) S.p.sched = Array.from({ length: 7 }, () => ({ type: dayTypes()[0], min: 0, time: '' })); return S.p.sched; }
@@ -793,13 +794,13 @@ const BQ = {                                       // الأسئلة الأسا�
   height: (q) => inp('height', esc(q.label), 'number', 'inputmode="numeric"'),
   bf: (q) => inp('bf', esc(q.label), 'number', 'inputmode="decimal" placeholder="اختياري"'),
   sport: (q) => inp('sport', esc(q.label), 'text', 'placeholder="مثال: كمال أجسام، كرة قدم، جري"'),
-  act: (q) => '<div class="field">' + lab(q) + '<div class="acts">' + DATA.activity.map((a, i) => '<button class="act' + (S.p.act === i ? ' on' : '') + '" data-act="set" data-k="act" data-v="' + i + '"><span class="bars">' + [0, 1, 2, 3, 4].map((j) => '<i class="' + (j <= i ? 'f' : '') + '" style="height:' + (6 + j * 4) + 'px"></i>').join('') + '</span><span>' + esc(actDay(i, a)) + '</span></button>').join('') + '</div></div>',
-  goal: (q) => '<div class="field">' + lab(q) + '<div class="opts">' + DATA.goals.map((g, i) => goalDay(i) === null ? '' : '<button class="opt' + (S.p.goal === i ? ' on' : '') + '" data-act="set" data-k="goal" data-v="' + i + '"><b>' + esc(goalDay(i)[0]) + '</b>' + (goalDay(i)[1] ? '<span class="d">' + esc(goalDay(i)[1]) + '</span>' : '') + '</button>').join('') + '</div></div>',
+  act: (q) => '<div class="field">' + lab(q) + '<div class="acts">' + DATA.activity.map((a, i) => !oOn(q, i) && S.p.act !== i ? '' : '<button class="act' + (S.p.act === i ? ' on' : '') + '" data-act="set" data-k="act" data-v="' + i + '"><span class="bars">' + [0, 1, 2, 3, 4].map((j) => '<i class="' + (j <= i ? 'f' : '') + '" style="height:' + (6 + j * 4) + 'px"></i>').join('') + '</span><span>' + esc(oL(q, i, actDay(i, a))) + '</span></button>').join('') + '</div></div>',
+  goal: (q) => '<div class="field">' + lab(q) + '<div class="opts">' + DATA.goals.map((g, i) => goalDay(i) === null || (!oOn(q, i) && S.p.goal !== i) ? '' : '<button class="opt' + (S.p.goal === i ? ' on' : '') + '" data-act="set" data-k="goal" data-v="' + i + '"><b>' + esc(oL(q, i, goalDay(i)[0])) + '</b>' + (goalDay(i)[1] && !(q.ol && q.ol[i]) ? '<span class="d">' + esc(goalDay(i)[1]) + '</span>' : '') + '</button>').join('') + '</div></div>',
   safe: (q) => { const f = S.p.sex === 'أنثى', yn = (k, t) => '<div class="field"><span class="lbl">' + t + '</span>' + seg(k, ['n', 'y'], S.p[k] || '', ['لا', 'نعم']) + '</div>';      // 1.16 أسئلة السلامة (قرار المالك)
-    return '<div class="banner warn">' + I('heart') + '<span>' + esc(q.label) + ': تساعد أخصائيك على خطة آمنة لك.</span></div>' + (f ? yn('preg', 'هل أنتِ حامل أو ترضعين؟') : '') + yn('dmed', 'هل تأخذ إنسولين أو أدوية لخفض السكر؟'); },
+    return '<div class="banner warn">' + I('heart') + '<span>' + esc(q.label) + ': تساعد أخصائيك على خطة آمنة لك.</span></div>' + (f && oOn(q, 'preg') ? yn('preg', oL(q, 'preg', 'هل أنتِ حامل أو ترضعين؟')) : '') + (oOn(q, 'dmed') ? yn('dmed', oL(q, 'dmed', 'هل تأخذ إنسولين أو أدوية لخفض السكر؟')) : ''); },
   gphase: (q) => '<div class="field">' + lab(q) + '<div class="chips">' + ((S.cat && S.cat.phases) || []).map((g) => '<button class="chip' + (S.p.gphase === g ? ' on' : '') + '" data-act="set" data-k="gphase" data-v="' + esc(g) + '">' + esc(g) + '</button>').join('') + '</div></div>',
-  cond: (q) => '<div class="banner info">' + I('lock') + '<span>بياناتك الصحية تُشفَّر على جوالك ولا يقرؤها إلا أخصائيك.</span></div><div class="field">' + lab(q) + toggles('cond', DATA.conditions) + '</div>',
-  allg: (q) => '<div class="field">' + lab(q) + toggles('allg', DATA.allergens) + '</div>',
+  cond: (q) => '<div class="banner info">' + I('lock') + '<span>بياناتك الصحية تُشفَّر على جوالك ولا يقرؤها إلا أخصائيك.</span></div><div class="field">' + lab(q) + toggles('cond', DATA.conditions, null, q) + '</div>',
+  allg: (q) => '<div class="field">' + lab(q) + toggles('allg', DATA.allergens, null, q) + '</div>',
   meds: (q) => '<div class="field">' + lab(q, 'f_meds') + '<textarea class="inp" id="f_meds" data-bind="meds" placeholder="مثال: ميتفورمين 500 ملغ مرتين يومياً">' + esc(S.p.meds) + '</textarea></div>',
   supp: (q) => '<div class="field">' + lab(q, 'f_supp') + '<textarea class="inp" id="f_supp" data-bind="supp" placeholder="مثال: واي بروتين بعد التمرين، كرياتين 5 جم">' + esc(S.p.supp) + '</textarea></div>',
   notes: (q) => '<div class="field">' + lab(q, 'f_notes') + '<textarea class="inp" id="f_notes" data-bind="notes" placeholder="مثال: أعمل بنظام مناوبات ليلية">' + esc(S.p.notes) + '</textarea></div>',
@@ -815,7 +816,7 @@ const BQ = {                                       // الأسئلة الأسا�
     + '<div class="legend"><span><i class="dot" style="background:var(--mint)"></i>أحب ' + foodsOf('love').length + '</span><span><i class="dot" style="background:var(--coral)"></i>لا أحب ' + foodsOf('no').length + '</span></div>' + foodGrid('foodCat', 'foodQ'),
   wake: (q) => '<div class="field">' + lab(q, 'f_wake') + '<input class="inp" id="f_wake" type="time" data-bind="wake" value="' + esc(S.p.wake) + '"></div>',
   sleep: (q) => '<div class="field">' + lab(q, 'f_sleep') + '<input class="inp" id="f_sleep" type="time" data-bind="sleep" value="' + esc(S.p.sleep) + '"></div>',
-  nmeals: (q) => '<div class="field">' + lab(q) + seg('nmeals', SYS === 'g' ? [3, 4, 5, 6, 7] : [3, 4, 5, 6], S.p.nmeals) + '</div>',
+  nmeals: (q) => '<div class="field">' + lab(q) + (() => { const vs = (SYS === 'g' ? [3, 4, 5, 6, 7] : [3, 4, 5, 6]).filter((n) => oOn(q, n) || +S.p.nmeals === n); return seg('nmeals', vs, S.p.nmeals, vs.map((n) => oL(q, n, String(n)))); })() + '</div>',
   wdays: (q) => '<div class="field">' + lab(q) + '<div class="chips">' + DATA.dayNames.map((d, i) => '<button class="chip' + (S.p.wdays.includes(i) ? ' on' : '') + '" data-act="wday" data-v="' + i + '">' + esc(d) + '</button>').join('') + '</div></div>',
   train: (q) => '<p class="mut">' + esc(q.label) + '</p><div class="trows">' + sched().map((x, i) => {
     const rest = x.type === dayTypes()[0];
@@ -848,7 +849,7 @@ function goalLabel(i) {
 }
 function stepOk(st) {
   return vq(st).every((q) => {
-    if (q.b) { if (q.id === 'mfoods') return tlMeals().every(tlMealOk); if (q.id === 'safe') return !!S.p.dmed && (S.p.sex !== 'أنثى' || !!S.p.preg); if (q.id === 'sex') return !!S.p.sex; if (q.id === 'name' || q.id === 'phone') return !!String(S.p[q.id] || '').trim(); if (q.id === 'age' || q.id === 'weight' || q.id === 'height') return +S.p[q.id] > 0; return true; }
+    if (q.b) { if (q.id === 'mfoods') return tlMeals().every(tlMealOk); if (q.id === 'safe') return (!oOn(q, 'dmed') || !!S.p.dmed) && (S.p.sex !== 'أنثى' || !oOn(q, 'preg') || !!S.p.preg); if (q.id === 'sex') return !!S.p.sex; if (q.id === 'name' || q.id === 'phone') return !!String(S.p[q.id] || '').trim(); if (q.id === 'age' || q.id === 'weight' || q.id === 'height') return +S.p[q.id] > 0; return true; }
     return !q.req || HForms.answered(q, (S.p.cq || {})[q.id]);
   });
 }
@@ -874,7 +875,7 @@ function bqText(q) {                               // نص الإجابة الأ
   const p = S.p, lk = foodsOf('love'), no = foodsOf('no');
   switch (q.id) {
     case 'weight': return p.weight ? p.weight + ' كجم (مؤشر الكتلة ' + bmi() + ')' : ''; case 'height': return p.height ? p.height + ' سم' : ''; case 'age': return p.age ? p.age + ' سنة' : '';
-    case 'bf': return p.bf ? p.bf + '%' : ''; case 'act': return actDay(p.act, DATA.activity[p.act] || ''); case 'goal': return goalDay(p.goal) ? goalDay(p.goal)[0] : goalLabel(p.goal);
+    case 'bf': return p.bf ? p.bf + '%' : ''; case 'act': return oL(q, p.act, actDay(p.act, DATA.activity[p.act] || '')); case 'goal': return oL(q, p.goal, goalDay(p.goal) ? goalDay(p.goal)[0] : goalLabel(p.goal));
     case 'safe': return (p.sex === 'أنثى' ? 'حامل أو مرضع: ' + (p.preg === 'y' ? 'نعم' : 'لا') + ' • ' : '') + 'أدوية سكر: ' + (p.dmed === 'y' ? 'نعم' : 'لا');
     case 'cond': return p.cond.join('، ') || 'لا'; case 'allg': return p.allg.join('، ') || 'لا';
     case 'meals': { const ml = MEALS.reduce((a, m) => a + p.like[m[0]].length, 0), mn = MEALS.reduce((a, m) => a + p.nope[m[0]].length, 0); return ml + ' وجبة تحبها • ' + mn + ' لا تريدها'; }

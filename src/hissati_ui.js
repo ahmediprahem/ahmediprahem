@@ -77,7 +77,7 @@ function hxCat(sys, path) {
   }
   var tl = path === 'tailor';
   return {
-    v: 1, sys: 'ex', path: tl ? 'tailor' : 'custom', form: HForms.normalize(Object.assign({ tailor: 1 }, { steps: hxForm('ex').steps }), 'ex'), dname: HX.st.name, clinic: b.clinic || '', groups: D.groups, days: D.days,      // 1.04: الاستبيان الموحّد للجميع (+ أسئلة الأخصائي المضافة)
+    v: 1, sys: 'ex', path: tl ? 'tailor' : 'custom', form: HForms.exSpec((eff().forms || {}).ex), dname: HX.st.name, clinic: b.clinic || '', groups: D.groups, days: D.days,      // 1.04: الاستبيان الموحّد للجميع (+ أسئلة الأخصائي المضافة)
     bank: D.bank.filter(function (x) { return x.on; }).map(function (x) { return [x.n, x.m, ((x.ing || [])[0] || {}).n || '']; }),
     foods: D.foods.filter(function (f) { return f.on !== 0; }).map(function (f) { var m = E.fmeta(f); return [f.n, f.g, (f.m || []).join(''), m.r, m.cz, m.x ? 1 : 0, f.dn || '']; }),      // التفصيل: وجبات الصنف ودوره ومطبخه لاختيار أكلات كل وجبة
     conditions: D.conditions.slice(), allergens: D.allergens.map(function (a) { return a.label; }),      // كل الحالات (قواعدها الجديدة تعمل مع v2)
