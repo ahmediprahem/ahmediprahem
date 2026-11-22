@@ -33,12 +33,12 @@ const audit = (p) => p.evaluate(() => {
   // ٢ الحاسوب 1440: ثلاثة أعمدة و«نظرة عامة» افتراضية
   await seed(p);
   let s = await p.evaluate(() => ({ tab: DPApp.S.tab, list: !!document.querySelector('main .cfwb > .cflist') && getComputedStyle(document.querySelector('main .cflist')).display !== 'none', side: !!document.querySelector('main .cfside .cfhead .cfname'), heads: document.querySelectorAll('main .cfhead').length, cards: [...document.querySelectorAll('main .mxgrid .mxc:not(.mxadd)')].map((e) => [e.dataset.v, e.className.match(/lv-(\w+)/)[1]]), rows: document.querySelectorAll('main .cflr').length, over: document.documentElement.scrollWidth > innerWidth + 1 }));
-  assert.strictEqual(s.tab, 'ov'); assert(s.list && s.side); assert.strictEqual(await p.locator('main .mxshort .mxsc').count(), 6, 'الاختصارات'); assert.strictEqual(await p.locator('main .mxgrid .mxc').count(), 6, 'ست بطاقات فقط');
+  assert.strictEqual(s.tab, 'ov'); assert(s.list && s.side); assert.strictEqual(await p.locator('main .mxshort .mxsc').count(), 6, 'الاختصارات'); assert.strictEqual(await p.locator('main .mxgrid .mxc').count(), 9, 'تسع بطاقات (3 أساسية + آخر 5 + أضف)');
   assert.deepStrictEqual(await p.evaluate(() => [...document.querySelectorAll('main .cftabs > button')].map((b) => b.dataset.g)), ['file', 'medical', 'plan', 'follow', 'appt', 'sub'], 'الملف الطبي مجموعة مستقلة');
   assert.strictEqual(await p.locator('main .cfseg [data-v="med"]').count(), 0, 'الملف الطبي خارج الملف العام'); assert.strictEqual(s.heads, 1); assert.strictEqual(s.rows, 2); assert(!s.over);
   const lv = Object.fromEntries(s.cards); assert.strictEqual(lv.ldl, 'hi'); assert.strictEqual(lv.bmi, 'hi'); assert.strictEqual(lv.waist, 'hi'); assert.strictEqual(lv.bp, 'mid'); assert.strictEqual(await p.evaluate(() => { const c = DPApp.S.clients.find((x) => x.code === DPApp.S.cur), h = DPApp.MX.series(c, 'homa'); return h.length + ':' + h[0].v; }), '1:2.27');
-  assert.strictEqual(s.cards.findIndex((x) => x[0] === 'ldl'), 4, 'الخارج عن المرجع أولاً بعد القياسات الجسدية');
-  ok('1680: قائمة العملاء | المحتوى | عمود المعلومات، و6 اختصارات و6 بطاقات، و«الملف الطبي» تبويب مستقل عن الملف العام (رأس الملف نفسه مرة واحدة)، و«نظرة عامة» تفتح أولاً، والبطاقات: LDL وBMI والخصر بالأحمر، والضغط برتقالي، وHOMA-IR يُحسب من السكر والأنسولين (2.27)');
+  assert(s.cards.findIndex((x) => x[0] === 'ldl') >= 3, 'LDL ضمن آخر القياسات');
+  ok('1680: قائمة العملاء | المحتوى | عمود المعلومات، و6 اختصارات و9 بطاقات، و«الملف الطبي» تبويب مستقل عن الملف العام (رأس الملف نفسه مرة واحدة)، و«نظرة عامة» تفتح أولاً، والبطاقات: LDL وBMI والخصر بالأحمر، والضغط برتقالي، وHOMA-IR يُحسب من السكر والأنسولين (2.27)');
   const todo = await p.evaluate(() => [...document.querySelectorAll('main .mxtd')].map((b) => [b.querySelector('span').textContent, b.classList.contains('done')]));
   assert(todo.some((t) => /الوزن الأسبوعي/.test(t[0]) && t[1])); assert(todo.some((t) => /تحليل خارج المرجع/.test(t[0]) && !t[1]));
   await p.click('main .mxtd:has-text("خارج المرجع")'); assert.strictEqual(await p.evaluate(() => DPApp.S.tab), 'med'); await p.click('main .cftabs [data-g="file"]'); assert.strictEqual(await p.evaluate(() => DPApp.S.tab), 'ov');
@@ -57,6 +57,11 @@ const audit = (p) => p.evaluate(() => {
   await p.click('main .mxopt:not([hidden]) button'); assert(await p.isVisible('#mx_v'), 'الإضافة من القائمة تفتح النموذج مباشرة'); await p.fill('#mx_v', '12'); await p.click('main [data-a="mxSave"]');
   s = await p.evaluate(() => { const c = DPApp.S.clients.find((x) => x.code === DPApp.S.cur); return { lab: c.med.labs.some((l) => l.v.ferritin === 12), chip: document.querySelector('main .mxhero .mxst').textContent }; });
   assert(s.lab); assert.strictEqual(s.chip, 'منخفض'); await p.click('main [data-a="mxBack"]'); assert(/2 خارج المرجع/.test(await p.textContent('main .mxgh .link')), await p.textContent('main .mxgh .link'));
+  assert.strictEqual(await p.locator('main .mxgrid .mxc[data-v="ferritin"]').count(), 1, 'التحليل الجديد لا يظهر في «نظرة عامة»');
+  await p.evaluate(() => DPApp.A.mxOpen('hip')); await p.click('main .mxplus'); await p.fill('#mx_v', '104'); await p.click('main [data-a="mxSave"]'); await p.click('main [data-a="mxBack"]');
+  await p.evaluate(() => DPApp.A.mxOpen('vitd', { dataset: { add: '1' } })); await p.fill('#mx_v', '35'); await p.click('main [data-a="mxSave"]'); await p.click('main [data-a="mxBack"]');
+  const g = await p.evaluate(() => [...document.querySelectorAll('main .mxgrid .mxc:not(.mxadd)')].map((e) => e.dataset.v)); assert.deepStrictEqual(g.slice(0, 5), ['w', 'bmi', 'bp', 'vitd', 'hip'], JSON.stringify(g));
+  ok('كل قياس جديد يظهر في «نظرة عامة» (آخر ما أُضيف أولاً): فيتامين د ضمن المرجع، ومحيط الورك، والفيريتين');
   await p.evaluate(() => DPApp.A.tab('med')); assert(/الفيريتين/.test(await p.textContent('main .cfbody')));
   ok('«أضف قياساً»: بحث بالاسم، والتحليل يُحفظ في تحاليل «الملف الطبي» نفسها، ويُحسب في «خارج المرجع» في «نظرة عامة»');
   assert.deepStrictEqual(await (await p.evaluate(() => DPApp.A.tab('ov')), audit(p)), []);

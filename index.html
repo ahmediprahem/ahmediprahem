@@ -10581,6 +10581,15 @@ function mxRecorded(c) {                                            // التح�
   return ks.sort(function (a, b) { return rank(a) - rank(b); });
 }
 function mxDelta(s) { var d = Math.round((s[s.length - 1].v - s[0].v) * 10) / 10; return '<bdi>' + (d > 0 ? '+' : '') + d + '</bdi>'; }
+// آخر ما أُضيف أولاً (بوقت الإضافة من معرّف السجل، لا بتاريخ القياس)، ثم الخارج عن المرجع — كي يظهر كل قياس جديد في «نظرة عامة»
+function mxAt(id) { var n = parseInt(String(id || '').slice(1), 36); return isFinite(n) ? n : 0; }
+function mxRecent(c) {
+  var m = medOf(c), T = {}, put = function (k, t) { if (k !== 'w' && (T[k] == null || t > T[k])) T[k] = t; };
+  m.labs.forEach(function (p) { Object.keys(p.v || {}).forEach(function (k) { if (LABK[k] && p.v[k] != null) put(k, mxAt(p.id)); }); if (p.v && p.v.fbg != null && p.v.ins != null) put('homa', mxAt(p.id) - 1); });
+  m.visits.forEach(function (v) { ['waist', 'hip', 'bf', 'mm'].forEach(function (k) { if (v[k] != null) put(k, mxAt(v.id)); }); });
+  var lv = function (k) { var x = mxSeries(c, k), f = mxFlag(c, k, x[x.length - 1]); return f && !f[2] ? f[0] : 0; };
+  return Object.keys(T).sort(function (a, b) { return (T[b] - T[a]) || (lv(b) - lv(a)); });
+}
 // ---------- بطاقة قياس (مثل «Body Temperature» في Wellbeing)
 function mxCard(c, k) {
   var s = mxSeries(c, k), p = s[s.length - 1], f = mxFlag(c, k, p), lv = mxLvl(f);
@@ -10590,7 +10599,7 @@ function mxCard(c, k) {
     + (k === 'w' && s.length > 1 && s[0].src !== 'file' ? '<i class="mxs">' + mxDelta(s) + ' كجم منذ البداية</i>' : f ? '<i class="mxs">' + esc(f[1]) + '</i>' : '<i class="mxs">لم يُسجَّل بعد</i>') + '</span></button>';
 }
 function mxGrid(c) {
-  var R = mxRecorded(c), ks = ['w', 'bmi', 'bp', 'waist'].concat(R.slice(0, 1)), hi = R.filter(function (k) { var x = mxSeries(c, k), f = mxFlag(c, k, x[x.length - 1]); return f && f[0] === 2 && !f[2]; }).length;
+  var R = mxRecorded(c), ks = ['w', 'bmi', 'bp'].concat(mxRecent(c).slice(0, 5)), hi = R.filter(function (k) { var x = mxSeries(c, k), f = mxFlag(c, k, x[x.length - 1]); return f && f[0] === 2 && !f[2]; }).length;
   return '<div class="mxgh"><h3>القياسات والتحاليل</h3>' + (R.length ? '<button class="link" data-a="tab" data-v="med">كل التحاليل (' + R.length + ')' + (hi ? ' • ' + hi + ' خارج المرجع' : '') + '</button>' : '') + '</div><div class="mxgrid">' + ks.map(function (k) { return mxCard(c, k); }).join('') + '<button class="sec mxc mxadd" data-a="mxPick">' + IC('plus') + '<span>أضف قياساً</span></button></div>';
 }
 // ---------- «الحالة العامة» (مثل Functional Status): أشرطة من بيانات موجودة فقط
