@@ -35,7 +35,7 @@ function cfHead(c) {
     + '<div class="cfid"><b class="cfname">' + esc(c.name || 'عميل بلا اسم') + '</b><small>' + esc(c.code) + ' • ' + (c.kind === 'athlete' ? 'نظام الجرامات' : 'نظام الحصص') + '</small></div>'
     + '<div class="cfbadges"><button class="cfb cfsub ' + st[2] + '" data-a="tab" data-v="sub" title="الاشتراك">' + IC('card') + '<span>' + esc(st[1]) + '</span></button>'
     + '<button class="cfb cfzen ' + (x ? 'ok' : 'n') + '" data-a="tab" data-v="link" title="إدارة ربط «زنها»">' + IC('phone') + '<span>زنها: ' + zen + '</span>' + (x && x.health ? '<em class="hxnb">!</em>' : '') + '</button></div>'
-    + '<div class="cfact">' + (x ? '<button class="sec cfchk" data-a="hxCheck" title="تحقق من «زنها» الآن" aria-label="تحقق من زنها الآن">' + IC('repeat') + '</button>' : '') + (x && hxHasPlan(c) ? '<button class="cfsend" data-a="hxSendPlan">' + IC('send') + '<span>أرسل الخطة إلى زنها</span></button>' : '')
+    + '<div class="cfact">' + (x ? '<button class="sec cfchk" data-a="hxCheck" title="تحقق من «زنها» الآن" aria-label="تحقق من زنها الآن">' + IC('repeat') + '</button>' : '') + ''
     + (x ? '<button class="sec cfchat" data-a="cfChat" title="افتح محادثة العميل في «شات زنها»">' + IC('message') + '<span>افتح المحادثة</span>' + (un ? '<em class="hxnb">' + un + '</em>' : '') + '</button>' : '')
     + '<details class="tbm cmore"><summary class="sec sm" aria-label="المزيد من إجراءات العميل" title="المزيد">' + IC('more') + '</summary><div class="tbp">'
     + '<button data-a="tab" data-v="link">' + IC('phone') + ' إدارة ربط «زنها»</button><button class="r" data-a="del">' + IC('trash') + ' حذف العميل</button></div></details></div></div>';
@@ -44,7 +44,7 @@ function cfMob() { try { return matchMedia('(max-width:900px)').matches && isGla
 // 1.25 الجوال (الاجتماع 04): طبقة تنقل واحدة — شريط أفقي قابل للتمرير يجمع المجموعات وأقسامها، والحالي في المنتصف
 function cfFlat(c) {
   return '<div class="tabs ctabs cftabs cfflat" role="tablist" aria-label="أقسام ملف العميل">' + CF_G.map(function (g, gi) {
-    return g[3].filter(function (k) { return k !== 'pw' || S.tab === 'pw'; }).map(function (k, i) { var on = S.tab === k, lbl = g[3].length < 2 ? g[1] : CF_L[k]; return '<button role="tab" aria-selected="' + on + '" class="' + (on ? 'on' : '') + (i === 0 && gi ? ' gsep' : '') + '" data-a="tab" data-v="' + k + '" data-g="' + g[0] + '">' + (i === 0 ? IC(g[2]) : '') + '<span>' + lbl + '</span>' + cfNb(cfBadge(c, k)) + '</button>'; }).join('');
+    return g[3].filter(function (k) { return k !== 'gen' && (k !== 'pw' || S.tab === 'pw'); }).map(function (k, i) { var on = S.tab === k, lbl = g[3].length < 2 ? g[1] : CF_L[k]; return '<button role="tab" aria-selected="' + on + '" class="' + (on ? 'on' : '') + (i === 0 && gi ? ' gsep' : '') + '" data-a="tab" data-v="' + k + '" data-g="' + g[0] + '">' + (i === 0 ? IC(g[2]) : '') + '<span>' + lbl + '</span>' + cfNb(cfBadge(c, k)) + '</button>'; }).join('');
   }).join('') + '</div>';
 }
 function cfTabs(c) {
@@ -57,7 +57,7 @@ function cfTabs(c) {
 function cfSeg(c) {
   if (cfMob()) return '';
   var g = cfGroup(S.tab); if (g[3].length < 2) return '';
-  return '<div class="cfseg" role="tablist" aria-label="أقسام ' + g[1] + '">' + g[3].filter(function (k) { return k !== 'pw' || S.tab === 'pw'; }).map(function (k) {      // 1.23: «نافذة الأخصائي» دُمجت في «توليد الخطة» فلا تظهر إلا حين تُفتح منه
+  return '<div class="cfseg" role="tablist" aria-label="أقسام ' + g[1] + '">' + g[3].filter(function (k) { return k !== 'gen' && (k !== 'pw' || S.tab === 'pw'); }).map(function (k) {      // 1.23: «نافذة الأخصائي» دُمجت في «توليد الخطة» فلا تظهر إلا حين تُفتح منه
     var on = S.tab === k; return '<button role="tab" aria-selected="' + on + '" class="' + (on ? 'on' : '') + '" data-a="tab" data-v="' + k + '">' + CF_L[k] + (k === 'ver' ? ' (' + S.versions.length + ')' : '') + cfNb(cfBadge(c, k)) + '</button>';
   }).join('') + '</div>';
 }
@@ -81,6 +81,7 @@ function cfBody(c) {
 function cfPage(c) {
   S.tab = cfNorm(S.tab, c);
   if (S.tab === 'ph' && c.hx && c.hx.phNew) { c.hx.phNew = 0; persist(c); setTimeout(function () { if (typeof hxRail === 'function') hxRail(); }, 0); }   // فُتح قسم الصور: لا جديد بعد الآن
+  if (S.tab === 'gen') return genFlowHead(c) + '<div class="cfbody" data-tab="' + S.tab + '">' + cfBody(c) + '</div>';      // 1.37: مسار الإنشاء صفحة مستقلة بلا رأس الملف وتبويباته (لا تكرار للاسم والبيانات)
   return cfHead(c) + cfTabs(c) + cfSeg(c) + hxHealthWarn(c) + '<div class="cfbody" data-tab="' + S.tab + '">' + cfBody(c) + '</div>';
 }
 function cfCenter() {                                               // التبويب المفعّل في منتصف الشريط الأفقي (الجوال)

@@ -21,7 +21,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   await d.evaluate(() => DPApp.A.tab('client')); await d.waitForSelector('.panbox'); await d.click('.panbox summary'); const pb = await d.textContent('.panbox');
   assert(/الفطور \(4\)/.test(pb) && /◐/.test(pb) && /لا يريد سناك/.test(pb) && /يُستعمل في التوليد/.test(pb), pb);
   const before = c.meals; await d.click('[data-a="panNoSnack"]'); c = await C(); assert(before > 3 && c.meals === 3);
-  await d.evaluate(() => { document.activeElement && document.activeElement.blur(); }); await d.click('main [data-a="gen"]'); await d.waitForSelector('.pnav'); c = await C();
+  await d.evaluate(() => { document.activeElement && document.activeElement.blur(); }); await d.evaluate(() => DPApp.A.gen()); await d.waitForSelector('.pnav'); c = await C();
   const bNames = Object.keys(c.pantry.B), hit = c.plan.days.filter((dd) => dd.slots.some((s) => s.type === 'B' && s.lines.some((l) => bNames.includes(l.name)))).length;
   assert(hit >= 5, 'أيام فطور من المتوفر: ' + hit); assert(!c.plan.days.some((dd) => dd.slots.some((s) => s.type === 'S')), 'بلا سناك');
   ok('«حصة»: القائمة تصل مشفّرة وتظهر في صفحة العميل («🛒 المتوفر عند العميل»)، «اجعل الوجبات 3» لمن لا يريد سناك، والمحرك يبني الفطور من المتوفر عنده');

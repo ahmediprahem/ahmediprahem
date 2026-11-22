@@ -31,7 +31,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   ok('«سجّل الحضور»: يغلق موعد اليوم، ويحفظ وزن الزيارة والخصر في الملف الطبي ويحدّث الوزن');
   await p.click('[data-a="ciNew"]'); await p.waitForSelector('main .ciflash'); assert.strictEqual(await p.getAttribute('main .tabs [data-v="client"]', 'class'), 'on');
   ok('«＋ نظام غذائي جديد» ينقل مباشرة إلى زرّي «اختر خطة جاهزة / ولّد خطة جديدة»');
-  await p.click('main [data-a="gen"]'); await p.waitForSelector('.pnav'); await p.click('.pnav button[data-v="0"]'); await p.waitForSelector('#hud');
+  await p.evaluate(() => DPApp.A.gen()); await p.waitForSelector('.pnav'); await p.click('.pnav button[data-v="0"]'); await p.waitForSelector('#hud');
   await p.evaluate(() => { if (document.querySelector('#hud.hf-min')) document.querySelector('#hud [data-a="hudToggle"]').click(); }); await p.waitForSelector('#hud .hudhl'); assert(/سكري النوع الثاني/.test(await p.textContent('#hud .hudhl')));
   ok('المؤشر الجانبي في صفحة الخطة يعرض الحالة الصحية والحساسية بجانب الحصص');
   assert.deepStrictEqual(errs, [], errs.join('\n')); await b.close(); console.log('\nنجح', n, 'اختبارات الحضور والفرز');

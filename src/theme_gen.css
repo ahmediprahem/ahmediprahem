@@ -115,3 +115,41 @@ div:has(> #f-favMeals),label.chk:has(> input[data-nb]){display:none!important}
 .genhero{position:relative}.genhero .zzpro{position:absolute;top:6px;inset-inline-end:10px;width:64px;height:72px;pointer-events:none}.genhero.mini .zzpro{width:50px;height:56px}
 .genhero .ghn{padding-inline-end:64px}
 .zzproline{margin:4px 0 8px}.zzproline .zzs{background:var(--g-soft);border:1px solid var(--g-line);color:var(--g-ink)}
+/* ===== 1.37 المسار الموحد: رأس المسار، اختيار العميل الجديد، ملخص البيانات، لوحة الجودة، المفضلات، جدول البدائل، التصدير */
+.genflowh{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 14px;margin:0 0 12px;border-radius:16px;background:var(--g-card);border:1px solid var(--g-line)}
+.genflowh .gfhn{display:grid;gap:2px;min-width:0}
+.genflowh .gfhn b{font-size:18px;color:var(--g-ink)}
+.genflowh .gfhn small{color:var(--g-mut);font-size:13px;overflow-wrap:anywhere}
+.gennew .gkinds{margin-bottom:12px}
+.gennew .gkind[aria-disabled="true"]{opacity:.6}
+.gcsum .gcchips{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 8px}
+.genqual{border:1px solid var(--g-line)}
+.genqual .gqh{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.genqual .gqh h3{margin:0}
+.gqpct{padding:4px 12px;border-radius:999px;background:var(--g-soft);border:1px solid var(--g-line);color:var(--g-ink);font-size:13px}
+.gqpct b{font-size:16px}
+.gqs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0}
+.gq{padding:10px 12px;border-radius:14px;background:var(--g-soft);border:1px solid var(--g-line);min-width:0}
+.gq small{display:block;color:var(--g-mut);font-size:12px}
+.gq b{display:block;font-size:20px;color:var(--g-ink);font-variant-numeric:tabular-nums}
+.gq i{display:block;font-style:normal;color:var(--g-mut);font-size:12px}
+.gq.st-ok{border-color:rgba(16,185,129,.45)}
+.gq.st-warn{border-color:rgba(245,158,11,.6)}
+.gq.st-block{border-color:rgba(239,68,68,.6)}
+.gqchk{display:flex;flex-wrap:wrap;gap:6px 14px;list-style:none;padding:0;margin:0 0 6px;font-size:13px}
+.gqchk .gqy{color:var(--g-acc)}
+.gqchk .gqn{color:var(--g-mut)}
+.genathf .gafs{padding:8px 0;border-top:1px solid var(--g-line)}
+.genathf .gafs h4{margin:0 0 4px;display:flex;align-items:center;gap:8px}
+.genathf .gafs h4 i{font-style:normal;width:24px;height:24px;border-radius:50%;display:inline-grid;place-items:center;background:var(--g-soft);font-size:12px}
+.genfav{margin:12px 0;padding:12px;border-radius:14px;background:var(--g-soft);border:1px solid var(--g-line)}
+.genfav h4{margin:0 0 6px}
+.genfav ul{margin:0 0 8px;padding-inline-start:18px}
+.galts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.galt{padding:10px 12px;border-radius:14px;background:var(--g-card);border:1px solid var(--g-line);min-width:0}
+.galt h4{margin:0 0 6px}
+.galt ul{margin:0;padding-inline-start:18px;font-size:14px}
+.galt li.fav{font-weight:600}
+.genout{margin-top:12px;padding-top:10px;border-top:1px solid var(--g-line)}
+.genout h4{margin:0 0 6px}
+@media (max-width:760px){.gqs{grid-template-columns:repeat(2,minmax(0,1fr))}.galts{grid-template-columns:1fr}}

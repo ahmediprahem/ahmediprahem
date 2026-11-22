@@ -70,7 +70,7 @@ function athPgDay(c, p, di, edit) {
 }
 function athAll(c, p, edit) { return athPgSum(c, p) + p.days.map(function (_, i) { return athPgDay(c, p, i, edit); }).join(''); }
 function athPlanTab(c) {
-  var p = c.plan; if (!p || p.kind !== 'athlete') return '<p>لم تُولَّد خطة بعد.</p><p><button class="o" data-a="gen">ولّد الخطة</button></p>';
+  var p = c.plan; if (!p || p.kind !== 'athlete') return '<p>لم تُولَّد خطة بعد.</p><p><button class="o" data-a="genOpen" data-v="1">✦ أنشئ الخطة</button></p>';
   var pg = S.page === 'grp' ? 'sum' : S.page, nav = '<div class="pnav noprint"><button class="' + (pg === 'sum' ? 'on' : '') + '" data-a="page" data-v="sum">الملخص</button>' + AD.days.map(function (n, i) { return '<button class="' + (pg === i ? 'on' : '') + '" data-a="page" data-v="' + i + '">' + esc(dayName(p, i)) + '</button>'; }).join('') + '<button class="' + (pg === 'all' ? 'on' : '') + '" data-a="page" data-v="all">كل الصفحات</button></div>';
   var body = pg === 'sum' ? athPgSum(c, p) : pg === 'all' ? athAll(c, p, false) : athPgDay(c, p, pg, true);
   return planBar(c) + nav + body;

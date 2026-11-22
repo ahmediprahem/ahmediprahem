@@ -269,7 +269,7 @@ function hxApprove(cid) {
   S.clients.push(c);
   return persist(c).then(function () { return hxSend(c, { t: 'status', st: 'approved', code: c.code, dname: HX.st.name }); }).then(function () {
     delete HX.st.reqs[cid]; delete HX.st.inv[req.h]; return hxSave();
-  }).then(function () { S.view = 'client'; S.cur = c.code; S.tab = auto ? 'pw' : 'client'; if (auto) S.page = 'sum'; S.versions = []; render(); toast(auto ? '✓ اعتُمد «' + c.name + '» — نافذة الأخصائي: تعرّف عليه ثم اختر النظام أو أبقِ خطة التفصيل وأرسلها' : '✓ اعتُمد «' + c.name + '» عميلاً جديداً (' + c.code + ') — راجع بياناته ثم ولّد الخطة وأرسلها إلى «زنها»'); });
+  }).then(function () { S.view = 'client'; S.cur = c.code; S.tab = auto ? 'pw' : 'gen'; if (auto) S.page = 'sum'; else { c.gen = { step: 2, v: 2 }; save(); } S.versions = []; render(); toast(auto ? '✓ اعتُمد «' + c.name + '» — نافذة الأخصائي: تعرّف عليه ثم اختر النظام أو أبقِ خطة التفصيل وأرسلها' : '✓ اعتُمد «' + c.name + '» عميلاً جديداً (' + c.code + ') — راجع بياناته ثم ولّد الخطة وأرسلها إلى «زنها»'); });
 }
 // ---------- لقطة الخطة لتطبيق العميل (نفس شكل نموذج «زنها»: [مجموعة، صنف، نص، بدائل[[صنف، نص]]])
 function hxSnap(c) {

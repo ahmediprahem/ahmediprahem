@@ -136,8 +136,8 @@ function rdQuizNote(c) {                                                // ما 
   return '<div class="ok rdqn">📲 أجاب العميل على أسئلة الاختيار في «زنها»' + (pk ? ' واختار: <b>' + esc(RL.label(pk)) + '</b>' : ' وترك الاختيار لك') + (c.planSrc === 'ready' && c.ready && pk && c.ready.id === q.pick ? ' — مطبَّقة ✓' : ' — افتح «📗 اختر خطة جاهزة» لترى اختياره مع الخيارات الأنسب') + '</div>';
 }
 function rdGenBtns(c) {                                                 // أسفل «بيانات العميل»: من البنك أو جديدة بالمحرك
-  if (!window.RL || !RL.idx) return '<button class="o" data-a="gen">ولّد خطة جديدة ←</button>';
-  return rdQuizNote(c) + '<span class="rdgen"><button class="o" data-a="gen">⚙ ولّد خطة جديدة</button> <button class="sec" data-a="genBank">📗 اختر خطة جاهزة</button></span>';
+  if (!window.RL || !RL.idx) return '<button class="o" data-a="genOpen" data-v="2">✦ أنشئ الخطة</button>';
+  return rdQuizNote(c) + '<span class="rdgen"><button class="o" data-a="genOpen" data-v="2">✦ أنشئ الخطة</button></span>';
 }
 function rdMany(q, a, P) {                                              // اختيار متعدد في قائمة منسدلة مضغوطة
   var v = a[q.id] || [], opts = RL.optsOf(q, a, P), n = v.length;
@@ -249,7 +249,7 @@ function rdPlanTab(c) {                                                 // يس�
   if (!window.RL || !RL.idx || !c) return '';
   if (RDS.bank[c.code]) return rdBankPanel(c);
   if (c.planSrc === 'ready' && c.ready && c.readyDoc) return rdPlanView(c);
-  if (!c.plan) return '<p>لم تُولَّد خطة بعد.</p>' + rdQuizNote(c) + '<p class="rdgen"><button class="o" data-a="gen">⚙ ولّد خطة جديدة</button> <button class="sec" data-a="genBank">📗 اختر خطة جاهزة</button></p>';
+  if (!c.plan) return '<p>لم تُولَّد خطة بعد.</p>' + rdQuizNote(c) + '<p class="rdgen"><button class="o" data-a="genOpen" data-v="1">✦ أنشئ الخطة</button></p>';
   return '';
 }
 Object.assign(A, {

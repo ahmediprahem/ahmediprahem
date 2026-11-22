@@ -24,7 +24,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   await m.click('[data-act="tab"][data-v="today"]'); await m.click('[data-act="tab"][data-v="plan"]'); await m.click('.daychips button.today'); assert(await m.isVisible('#daylog'), 'بعد ساعة الفتح يُفتح تلقائياً');
   ok('إن نسي العميل، يُفتح جدول اليوم تلقائياً بعد الساعة المحددة فلا يبقى بلا جدول');
   await d.evaluate(() => DPApp.A.tab('plan')); const pwm = await d.textContent('.pg .pwm'); assert(/خاصة بـ منى علي • C\d+/.test(pwm), pwm);
-  const [dl] = await Promise.all([d.waitForEvent('download'), d.evaluate(() => document.querySelectorAll('details.tbm').forEach((x) => { x.open = true; })).then(() => d.click('.pbar [data-a="docx"]'))]); const fp = path.join(TMP, 'dayonly.docx'); await dl.saveAs(fp);
+  const [dl] = await Promise.all([d.waitForEvent('download'), d.evaluate(() => DPApp.A.docx())]); const fp = path.join(TMP, 'dayonly.docx'); await dl.saveAs(fp);
   const xml = execFileSync('python3', ['-I', '-c', 'import sys,zipfile;print(zipfile.ZipFile(sys.argv[1]).read("word/document.xml").decode().count("خاصة بـ منى علي"))', fp]).toString();
   assert(+xml.trim() >= 9, 'العلامة على كل صفحة في Word: ' + xml);
   ok('صفحات الخطة (الطباعة وPDF) وكل صفحات Word تحمل «خاصة بـ اسم العميل • كوده»');

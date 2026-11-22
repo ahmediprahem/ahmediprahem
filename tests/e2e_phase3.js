@@ -31,7 +31,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   await p.fill('[data-f="kcalManual"]', '1100'); await p.press('[data-f="kcalManual"]', 'Tab'); await p.waitForSelector('#tg .chkb.st-block'); await p.click('[data-a="kcalLowOk"]'); await p.waitForSelector('#tg .chkb.st-warn');
   assert(await p.evaluate(() => DPApp.S.clients.find((x) => x.code === DPApp.S.cur).kcalLowOk === true)); await p.fill('[data-f="kcalManual"]', '1050'); await p.press('[data-f="kcalManual"]', 'Tab'); await p.waitForSelector('#tg .chkb.st-block');
   ok('تحت الحد الآمن: حافة حمراء وزر «أؤكد»؛ بعد التأكيد كهرماني، وتغيير الرقم يلغي التأكيد');
-  await p.fill('[data-f="kcalManual"]', ''); await p.press('[data-f="kcalManual"]', 'Tab'); await p.click('button:has-text("ولّد خطة جديدة")'); await p.waitForSelector('.pnav button'); await p.click('.pnav button[data-v="0"]'); await p.waitForSelector('.pchk[data-st]');
+  await p.fill('[data-f="kcalManual"]', ''); await p.press('[data-f="kcalManual"]', 'Tab'); await p.evaluate(() => DPApp.A.gen()); await p.waitForSelector('.pnav button'); await p.click('.pnav button[data-v="0"]'); await p.waitForSelector('.pchk[data-st]');
   const st = await p.getAttribute('.pchk', 'data-st'), txt = await p.textContent('.pchk'); assert(['ok', 'warn', 'block'].includes(st)); assert(/الهدف/.test(txt) && /±5%/.test(txt)); assert(await p.locator('.pchk .srcb').count() >= 1);
   const col = await p.evaluate(() => getComputedStyle(document.querySelector('.pchk')).borderTopColor); assert(col !== 'rgba(0, 0, 0, 0)');
   ok('صفحة اليوم: سطر الفحص بحالة «' + st + '» وحافة ملوّنة وشارات مصدر القيم (لا يُطبع)');

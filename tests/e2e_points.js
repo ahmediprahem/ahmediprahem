@@ -42,7 +42,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
     await d.evaluate((nm) => { const el = [...document.querySelectorAll('.bkr')].find((r) => r.querySelector('.bkn b').textContent === nm); el.querySelector('[data-a="rcEdit"]').click(); }, meal); await d.waitForSelector('#rc_yt');
     await d.fill('#rc_steps', 'خطوة'); await d.fill('#rc_yt', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=10'); await d.click('[data-a="rcSave"]'); await d.waitForSelector('.toast:has-text("حُفظت الوصفة")');
     assert.strictEqual(await d.evaluate((nm) => { const r = DPApp.S.settings.recipes; const k = Object.keys(r).find((x) => r[x] && r[x].yt); return k && r[k].yt; }, meal), 'dQw4w9WgXcQ');
-    await d.evaluate(() => DPApp.A.pick(DPApp.S.clients[0].code)); await d.waitForSelector('main .tabs [data-v="hx"]'); await d.evaluate(() => DPApp.A.tab('hx')); await d.click('main [data-a="hxSendPlan"]'); await d.waitForFunction(() => DPApp.S.clients[0].hx.planV >= 2, null, { timeout: 15000 }); await cPoll();
+    await d.evaluate(() => DPApp.A.pick(DPApp.S.clients[0].code)); await d.waitForSelector('main .tabs [data-v="hx"]'); await d.evaluate(() => DPApp.A.genOpen(5)); await d.click('main .gensend [data-a="hxSendPlan"]'); await d.waitForFunction(() => DPApp.S.clients[0].hx.planV >= 2, null, { timeout: 15000 }); await cPoll();
     await m.click('[data-act="tab"][data-v="today"]'); await m.click('[data-act="rcp"] >> nth=0'); await m.waitForSelector('.rcpyt iframe'); assert(/youtube-nocookie\.com\/embed\/dQw4w9WgXcQ/.test(await m.getAttribute('.rcpyt iframe', 'src')));
     ok('فيديو التحضير: رابط يوتيوب في وصفة الوجبة (بنك الوجبات) يصل مع الخطة ويعمل داخل «زنها» (youtube-nocookie)');
   }

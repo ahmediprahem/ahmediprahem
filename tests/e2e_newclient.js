@@ -18,9 +18,9 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   ok('عميل حصص جديد: العمر والوزن والطول فارغة بمثال توضيحي وشارة «مطلوب»، ولا TDEE ولا BMR ولا سعرات — بل «أكمل العمر والوزن والطول»');
   // ---- 2) «ولّد» و«اختر خطة جاهزة» يرفضان
   await p.fill('[data-f="name"]', 'هالة'); await p.selectOption('[data-f="sex"]', 'ذكر').catch(() => { }); await p.press('[data-f="name"]', 'Tab'); await p.selectOption('[data-f="goal"]', { index: 2 }); await p.selectOption('[data-f="activity"]', { index: 3 }); await p.waitForTimeout(150);
-  await p.click('main [data-a="gen"]'); await toastHas('أكمل العمر والوزن والطول أولاً'); let c = await C(); assert(!c.plan, 'وُلّدت خطة من بيانات ناقصة');
+  await p.evaluate(() => DPApp.A.gen()); await toastHas('أكمل العمر والوزن والطول أولاً'); let c = await C(); assert(!c.plan, 'وُلّدت خطة من بيانات ناقصة');
   assert.strictEqual(await p.evaluate(() => document.activeElement && document.activeElement.dataset.f), 'age', 'التركيز على أول حقل ناقص');
-  await p.click('main [data-a="genBank"]'); await toastHas('أكمل العمر والوزن والطول أولاً'); assert.strictEqual(await p.locator('.rdbank').count(), 0, 'فُتح منتقي البنك');
+  await p.evaluate(() => DPApp.A.genBank()); await toastHas('أكمل العمر والوزن والطول أولاً'); assert.strictEqual(await p.locator('.rdbank').count(), 0, 'فُتح منتقي البنك');
   ok('«ولّد خطة» و«اختر خطة جاهزة» يرفضان بإشعار «أكمل العمر والوزن والطول أولاً» ويضعان المؤشر على الحقل الناقص');
   // ---- 3) بعد الإكمال: الأرقام تظهر والشارات تزول، والتحقق من الهدف والنشاط باقٍ
   await p.fill('[data-f="age"]', '30'); await p.fill('[data-f="weight"]', '80'); await p.fill('[data-f="height"]', '170'); await p.press('[data-f="height"]', 'Tab'); await p.waitForTimeout(200);
@@ -28,15 +28,15 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   tg = await p.textContent('#tg'); assert(/TDEE/.test(tg) && /السعرات/.test(tg), tg);
   const T = await p.evaluate(() => { const c = DPApp.S.clients.find((x) => x.code === DPApp.S.cur); return Math.round(DPEngine.targets(Object.assign({}, c, { keywords: [] }), DATA).tdee); });
   assert(tg.includes(String(T)), 'TDEE المعروض ليس من المعادلة نفسها: ' + T);
-  await p.click('main [data-a="gen"]'); await p.waitForSelector('.pnav'); c = await C(); assert(c.plan && c.plan.targets.kcal > 0);
+  await p.evaluate(() => DPApp.A.gen()); await p.waitForSelector('.pnav'); c = await C(); assert(c.plan && c.plan.targets.kcal > 0);
   ok('بعد إدخال 30/80/170 تظهر الأرقام من المعادلة نفسها (TDEE ' + T + ') وتزول الشارات، ويولّد الخطة');
   await p.evaluate(() => DPApp.A.new('ex')); await p.fill('[data-f="name"]', 'بلا هدف'); await p.selectOption('[data-f="sex"]', 'ذكر').catch(() => { }); await p.fill('[data-f="age"]', '40'); await p.fill('[data-f="weight"]', '70'); await p.fill('[data-f="height"]', '165'); await p.press('[data-f="height"]', 'Tab'); await p.waitForTimeout(150);
-  await p.click('main [data-a="gen"]'); await toastHas('حدّد'); c = await C(); assert(!c.plan, 'التحقق من الهدف والنشاط اختفى');
+  await p.evaluate(() => DPApp.A.gen()); await toastHas('حدّد'); c = await C(); assert(!c.plan, 'التحقق من الهدف والنشاط اختفى');
   ok('التحقق الحالي للهدف والنشاط باقٍ بعد إكمال الجسم');
   // ---- 4) نظام الجرامات
   await p.evaluate(() => DPApp.A.new('ath')); await p.waitForSelector('#atg'); assert(/أكمل العمر والوزن والطول/.test(await p.textContent('#atg')));
   assert.deepStrictEqual(await p.evaluate(() => ['age', 'weight', 'height'].map((k) => document.querySelector('main [data-f="' + k + '"]').value)), ['', '', '']);
-  await p.fill('[data-f="name"]', 'لاعب'); await p.selectOption('[data-f="sex"]', 'ذكر').catch(() => { }); await p.press('[data-f="name"]', 'Tab'); await p.click('main [data-a="gen"]'); await toastHas('أكمل العمر والوزن والطول أولاً'); assert(!(await C()).plan);
+  await p.fill('[data-f="name"]', 'لاعب'); await p.selectOption('[data-f="sex"]', 'ذكر').catch(() => { }); await p.press('[data-f="name"]', 'Tab'); await p.evaluate(() => DPApp.A.gen()); await toastHas('أكمل العمر والوزن والطول أولاً'); assert(!(await C()).plan);
   await p.fill('[data-f="age"]', '25'); await p.fill('[data-f="weight"]', '75'); await p.fill('[data-f="height"]', '178'); await p.press('[data-f="height"]', 'Tab'); await p.waitForTimeout(200); assert(/BMR/.test(await p.textContent('#atg')));
   ok('نظام الجرامات: نفس القاعدة (لا 28/80/178 مسبقة، ولا أهداف ولا توليد قبل الإكمال)');
   // ---- 5) لا عملاء فارغون

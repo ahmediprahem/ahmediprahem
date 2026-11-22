@@ -12,7 +12,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   await p.click('.rail [data-a="ready"]'); await p.waitForSelector('.rdl'); assert(/الخطط الجاهزة/.test(await p.textContent('.rdl h2'))); await p.click('[data-a="rdTab"][data-v="lib"]'); await p.waitForSelector('.dxc'); assert.strictEqual(await p.locator('.dxc').count(), 10);
   ok('التنقل: «بنك الوجبات» و«الخطط الجاهزة» (بداخلها «مكتبة الأخصائي» تبويباً) بدل ثلاثة أقسام متشابهة الأسماء');
   await p.evaluate(() => DPApp.A.new('ex')); await p.fill('[data-f="name"]', 'ريم'); await p.selectOption('[data-f="sex"]', 'ذكر').catch(() => { }); await p.press('[data-f="name"]', 'Tab'); await p.waitForTimeout(150);
-  assert(/اختر خطة جاهزة/.test(await p.textContent('main [data-a="genBank"]'))); assert(/من بنك الوجبات/.test(await p.textContent('main')));
+  assert(/أنشئ الخطة/.test(await p.textContent('main [data-a="genOpen"]'))); assert(/من بنك الوجبات/.test(await p.textContent('main')));
   await p.click('.rail [data-a="home"]'); await p.waitForSelector('.today'); assert(/ريم/.test(await p.textContent('.today')), 'العميل الجديد يظهر في «اليوم» بعد إضافته');
   ok('بيانات العميل: «📗 اختر خطة جاهزة» و«من بنك الوجبات»، وعمود العملاء يظهر بعد أول عميل');
   await p.click('.rail [data-a="settings"]'); await p.waitForSelector('.stgs'); assert.strictEqual(await p.locator('.stg').count(), 4); assert.strictEqual(await p.locator('.stg [data-a="setTab"]').count(), 12);

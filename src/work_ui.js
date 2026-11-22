@@ -23,7 +23,7 @@ function wkBar(c) {
   if (typeof RDS !== 'undefined' && RDS.bank[c.code]) return '';            // منتقي البنك مفتوح: لا قوالب
   // 0.60: مع وجود خطة (محرك أو بنك) صارت أزرار القوالب داخل الشريط الموحّد (planBar)، ويبقى هنا زر «ابدأ من قالب» قبل أول خطة ولوحة الاختيار
   var kind = wkKind(c), tp = wkTpls().filter(function (t) { return t.kind === kind; }), others = S.clients.filter(function (x) { return x !== c && wkHas(x) && wkKind(x) === kind; });
-  var bar = wkHas(c) ? '' : '<div class="noprint wkbar"><button class="sec sm" data-a="wkPick">📋 ابدأ من قالب أو عميل آخر' + (tp.length ? ' (' + tp.length + ' قالب)' : '') + '</button></div>';
+  var bar = '<div class="noprint wkbar"><button class="sec sm" data-a="wkPick">📋 ' + (wkHas(c) ? 'استبدل بقالب أو خطة عميل آخر' : 'ابدأ من قالب أو عميل آخر') + (tp.length ? ' (' + tp.length + ' قالب)' : '') + '</button></div>';
   if (!WK.pick) return bar;
   var row = function (src, label, sub, del) { return '<div class="wkrow"><div><b>' + label + '</b><small>' + sub + '</small></div><p class="two"><button class="sm" data-a="wkApply" data-v="' + src + '" data-m="asis" title="نفس السعرات ونفس الأصناف">كما هي</button><button class="o sm" data-a="wkApply" data-v="' + src + '" data-m="fit" title="إعدادات القالب (عدد الوجبات والوجبات المفضلة والماكروز) ثم توليد على بيانات هذا العميل">بسعرات هذا العميل</button>' + (del ? '<button class="sec sm" data-a="wkDelTpl" data-v="' + del + '" aria-label="حذف القالب">🗑</button>' : '') + '</p></div>'; };
   return bar + '<div class="ucard wkpick noprint"><div class="hxtop"><h3>📋 ابدأ من قالب أو انسخ خطة عميل</h3><button class="sec sm" data-a="wkPick">إغلاق</button></div>'
