@@ -43,3 +43,6 @@ html:not(.l-off) .eqdays{padding:var(--sp-3) var(--sp-4)!important;gap:var(--sp-
   html:not(.l-off) .gqs,html:not(.l-off) .ggs{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:var(--sp-2)!important}
   html:not(.l-off) .gentab table.st tr > :first-child{position:sticky;inset-inline-start:0;z-index:1;background:var(--c-surface-elev,#fff)}
 }
+
+/* 1.41 إصلاح انحدار 1.40: الإبقاء على المساحة المحجوزة لمؤشر الحصص العائم (كان يغطي جدول يوم الخطة ويمنع النقر) */
+@media (min-width:1100px){html:not(.l-off)[data-theme="glass"] body:has(>#hud:not(.hf-min):not([style*="none"])) #app{padding-left:262px!important}}
