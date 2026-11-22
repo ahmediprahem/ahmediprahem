@@ -77,7 +77,7 @@
   A.candidates = function (AD, c, type, role) {            // role: p | c | f | v
     var k = KEY[type] || KEY.S1, foods = AD.foods.filter(function (f) { return f.on !== 0 && !A.excluded(c, f) && !(f.draft && !(c && c.diet)); });      // الأصناف المحلية المسودة (draft) لا تدخل إلا مع نظام غذائي
     if (role === 'v') return foods.filter(function (f) { return (f.g === 'خضروات' || f.role === 'v') && !(c && c.diet && A.dietAllow && A.dietAllow(c.diet, f) === false); });
-    var dt = c && c.diet && A.dietTags ? A.dietTags(c.diet) : null, tk = k[role === 'p' ? 0 : role === 'c' ? 1 : 2], list = (dt && dt[tk]) || TAGS[tk]; return foods.filter(function (f) { if (f.role) return f.role === role && f.meals && f.meals.indexOf(type) >= 0 && !(c && c.diet && A.dietAllow && A.dietAllow(c.diet, f) === false); return match(f, list); });   // المستورد: بالدور والوجبات المحفوظة؛ الأساسي: بقوائم الأسماء
+    var dt = c && c.diet && A.dietTags ? A.dietTags(c.diet) : null, tk = k[role === 'p' ? 0 : role === 'c' ? 1 : 2], list = (dt && dt[tk]) || TAGS[tk]; return foods.filter(function (f) { if (f.role) return f.role === role && f.meals && f.meals.indexOf(type) >= 0 && !(c && c.diet && A.dietAllow && A.dietAllow(c.diet, f) === false); return match(f, list) && !(c && c.diet && A.dietAllow && A.dietAllow(c.diet, f) === false); });   // 1.43: فلتر النظام على كل الأصناف. المستورد: بالدور والوجبات المحفوظة؛ الأساسي: بقوائم الأسماء
   };
   A.perG = function (f) { return { p: f.p / 100, c: f.c / 100, f: f.f / 100, k: f.k / 100 }; };
   // ---------------------------------------------------------------- حل الجرامات: أقل مربعات موزونة غير سالبة لمصادر ≤ 3

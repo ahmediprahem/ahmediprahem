@@ -47,6 +47,20 @@ const counts = (p) => p.evaluate(() => { DPApp.A.genEs(3); return [...document.q
   const dis = await p.evaluate(() => [...document.querySelectorAll('#gdx_sel option')].filter((o) => o.disabled).map((o) => o.value)); assert(dis.includes('keto') && dis.includes('if'), dis);
   ok('الموانع: لعميلة أقل من 18 تظهر الأنظمة معطّلة في القائمة «(غير مناسب)» ولا يمكن اختيارها');
   await client(p, 'عادية'); await p.selectOption('#gdx_sel', 'dash'); assert.strictEqual((await C(p)).diet.id, 'dash'); await p.selectOption('#gdx_sel', ''); assert.strictEqual((await C(p)).diet, undefined); ok('«بدون نظام خاص» يزيل النظام ويعود للتوزيع المتوازن');
+  // المرحلة الثانية: نظام الجرامات
+  const ath = async (nm) => { await p.evaluate(() => DPApp.A.new('ath')); await p.waitForSelector('#atg'); await p.fill('[data-f="name"]', nm); await p.selectOption('[data-f="sex"]', 'ذكر').catch(() => { }); await p.fill('[data-f="age"]', '28'); await p.fill('[data-f="height"]', '178'); await p.press('[data-f="height"]', 'Tab'); await p.fill('[data-f="weight"]', '80'); await p.press('[data-f="weight"]', 'Tab'); await p.waitForTimeout(150); await p.evaluate(() => { DPApp.A.tab('gen'); DPApp.A.genStep(3); DPApp.A.genRevOk(); }); await p.waitForSelector('.genathf #gdx_sel'); };
+  const tiles = () => p.evaluate(() => [...document.querySelectorAll('.genqual .gq')].map((t) => t.querySelector('small').textContent + '=' + t.querySelector('b').textContent).join(' | '));
+  await ath('رياضي كيتو'); const ao = await p.evaluate(() => [...document.querySelectorAll('#gdx_sel option')].map((o) => o.value)); for (const id of ['keto', 'cycle', 'dash', 'med', 'veg', 'gf', 'highpro']) assert(ao.includes(id), 'الجرامات بلا ' + id); assert(!ao.includes('vegan'), 'النباتي الصرف في الجرامات');
+  const e0 = await p.evaluate(() => { const c = DPApp.S.clients.find((x) => x.code === DPApp.S.cur); return [c.kcalMode, c.kcalTrain, c.kcalRest]; });
+  await p.selectOption('#gdx_sel', 'keto'); await p.waitForSelector('.dxscf'); for (const lb of await p.$$('.dxscf label')) await lb.click(); await p.click('.dxscf [data-a="genDietOk"]');
+  c = await C(p); assert.strictEqual(c.diet.id, 'keto'); assert.deepStrictEqual([c.kcalMode, c.kcalTrain, c.kcalRest], e0, 'تغيّرت طاقة الرياضي');
+  await p.evaluate(() => { DPApp.A.gen(); DPApp.A.tab('gen'); DPApp.A.genStep(4); }); await p.waitForSelector('.genqual');
+  let aq = await tiles(); assert(/الكارب \(متوسط اليوم\)=\d+ جم من 40/.test(aq) && /أصناف مخالفة للنظام=لا شيء/.test(aq), aq); c = await C(p); assert(c.plan.days.every((d) => d.got.c <= 55), 'كارب الكيتو بالجرامات');
+  await ath('رياضي داش'); await p.selectOption('#gdx_sel', 'dash'); await p.evaluate(() => { DPApp.A.gen(); DPApp.A.tab('gen'); DPApp.A.genStep(4); }); await p.waitForSelector('.genqual');
+  aq = await tiles(); assert(/الصوديوم \(متوسط اليوم\)=\d+ ملغ/.test(aq), aq); c = await C(p); assert(c.plan.days.every((d) => d.got.na <= 2300), 'صوديوم DASH');
+  await ath('رياضي نباتي'); await p.selectOption('#gdx_sel', 'veg'); await p.evaluate(() => DPApp.A.gen()); c = await C(p);
+  const meat = c.plan.days.flatMap((d) => d.meals.flatMap((m2) => m2.items.map((i) => i.n))).filter((n2) => /دجاج|لحم|سمك|سلمون|تونة|بلطي|روبيان|سردين|كفتة|ديك رومي|بوري/.test(n2)); assert.deepStrictEqual(meat, [], 'لحوم في نباتي الجرامات');
+  ok('الجرامات (المرحلة الثانية): القائمة بعد الطاقة ومعها تدوير الكارب، والكيتو يبقي طاقة الرياضي ويحقق الكارب ≤ 40 بلا أصناف مخالفة، وDASH يعرض الصوديوم الفعلي ≤ 2300 ملغ، والنباتي بلا لحوم ولا أسماك');
   const m = await (await br.newContext({ ...devices['iPhone 13'], reducedMotion: 'reduce' })).newPage(); m.on('pageerror', (e) => errs.push(String(e))); m.on('dialog', (d) => d.accept()); await m.goto(URL); await login(m); await client(m, 'جوال');
   await m.selectOption('#gdx_sel', 'med'); await m.click('.dxsq summary'); const r = await m.evaluate(() => { const b = document.querySelector('.dxsq .mxqp').getBoundingClientRect(); return [b.left >= 0 && b.right <= innerWidth, document.documentElement.scrollWidth <= innerWidth + 1]; });
   assert.deepStrictEqual(r, [true, true]); ok('الجوال: القائمة ونافذة «؟» داخل الشاشة بلا تمرير أفقي');

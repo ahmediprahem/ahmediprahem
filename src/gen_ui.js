@@ -433,7 +433,7 @@ function genQual(c) {      // لوحة ملخص جودة الخطة: كل رقم
     + tile(fav && fav.src !== 'none' ? (fav.pct >= fav.want ? 'st-ok' : 'st-warn') : '', 'المفضلات', fav ? (fav.src === 'none' ? 'لا مفضلات' : fav.pct + '%') : ath ? 'لا ينطبق' : '—', fav && fav.src !== 'none' ? 'المطلوب ' + fav.want + '%' : '')
     + tile(fav && fav.repeated ? 'st-warn' : '', 'وجبات مكررة', fav ? fav.repeated : '—', fav ? 'حد التكرار ' + fav.rep + ' أسبوعياً' : '')
     + tile('', 'مكمّلة من البنك', fav ? fav.bank : '—', fav ? 'من ' + fav.total + ' وجبة' : '')
-    + (function () { if (ath || !c.diet || !has || !E.dietCheck) return ''; try { return E.dietCheck(c.diet, p, D).map(function (r) { return tile(r[2] === 'ok' ? 'st-ok' : 'st-warn', r[0], esc(r[1]), ''); }).join(''); } catch (e) { return ''; } })()
+    + (function () { if (!c.diet || !has || !E.dietCheck) return ''; try { return E.dietCheck(c.diet, p, D, typeof AD !== 'undefined' ? AD : null).map(function (r) { return tile(r[2] === 'ok' ? 'st-ok' : 'st-warn', r[0], esc(r[1]), ''); }).join(''); } catch (e) { return ''; } })()
     + tile(alerts || pf.length ? 'st-warn' : has ? 'st-ok' : '', 'تنبيهات غذائية', has ? alerts + pf.length : '—', has ? (alerts ? alerts + ' أيام تحتاج نظرك' : '') + (pf.length ? (alerts ? ' • ' : '') + pf.length + ' تفضيل' : '') : '') + '</div>'
     + '<ul class="gqchk">' + chk.map(function (x) { return '<li class="' + (x[1] ? 'gqy' : 'gqn') + '">' + (x[1] ? '✓' : '○') + ' ' + x[0] + '</li>'; }).join('') + '</ul>'
     + (stale ? '<p class="warn small gqstale">⚠ عدّلت الجدول التركيبي أو التوزيع بعد آخر توليد: أعد «ولّد خطة الأسبوع» لتتطابق الخطة.</p>' : '')
@@ -445,6 +445,7 @@ function genAthFrame(c) {      // إطار البناء الموحد لنظام 
   var sec = function (n, t, b) { return '<div class="gafs"><h4><i>' + n + '</i> ' + t + '</h4>' + b + '</div>'; };
   return '<div class="ucard genathf"><h3>البناء: نظام الجرامات</h3>'
     + sec(1, 'الطاقة', T ? '<p class="small">الحرق الأساسي ' + Math.round(T.bmr) + ' سعرة (' + esc(T.method) + ')؛ أيام الأسبوع: ' + T.days.map(function (d) { return esc(d.name) + ' ' + Math.round(d.kcal); }).join(' • ') + '</p>' : '<p class="small">أكمل بيانات العميل.</p>')
+    + (typeof genDietBox === 'function' ? '<div class="gafs">' + genDietBox(c) + '</div>' : '')      // 1.43 المرحلة الثانية: نوع النظام بعد الطاقة
     + sec(2, 'الماكروز', d0 ? '<p class="small">' + T.days.map(function (d) { return esc(d.name) + ': ب ' + Math.round(d.p) + ' • ك ' + Math.round(d.c) + ' • د ' + Math.round(d.f) + ' جم'; }).join('<br>') + '</p>' : '')
     + sec(3, 'توزيع الوجبات', '<p class="small">' + (ms.length ? ms.length + ' وجبات: ' + ms.map(function (m) { return esc(m.n || m.name || ''); }).filter(Boolean).join('، ') : '—') + ' <button class="link" data-a="tab" data-v="client">تعديل من البيانات</button></p>')
     + sec(4, 'بناء الوجبات بالجرامات', '<p class="small">' + (has ? 'الخطة مولّدة؛ عدّل الكميات بالجرام من «افتح الخطة للتعديل».' : 'ولّد الخطة من الزر أدناه.') + '</p>')

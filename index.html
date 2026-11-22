@@ -4752,7 +4752,7 @@ E.ctx = function (client, D) {
   A.candidates = function (AD, c, type, role) {            // role: p | c | f | v
     var k = KEY[type] || KEY.S1, foods = AD.foods.filter(function (f) { return f.on !== 0 && !A.excluded(c, f) && !(f.draft && !(c && c.diet)); });      // الأصناف المحلية المسودة (draft) لا تدخل إلا مع نظام غذائي
     if (role === 'v') return foods.filter(function (f) { return (f.g === 'خضروات' || f.role === 'v') && !(c && c.diet && A.dietAllow && A.dietAllow(c.diet, f) === false); });
-    var dt = c && c.diet && A.dietTags ? A.dietTags(c.diet) : null, tk = k[role === 'p' ? 0 : role === 'c' ? 1 : 2], list = (dt && dt[tk]) || TAGS[tk]; return foods.filter(function (f) { if (f.role) return f.role === role && f.meals && f.meals.indexOf(type) >= 0 && !(c && c.diet && A.dietAllow && A.dietAllow(c.diet, f) === false); return match(f, list); });   // المستورد: بالدور والوجبات المحفوظة؛ الأساسي: بقوائم الأسماء
+    var dt = c && c.diet && A.dietTags ? A.dietTags(c.diet) : null, tk = k[role === 'p' ? 0 : role === 'c' ? 1 : 2], list = (dt && dt[tk]) || TAGS[tk]; return foods.filter(function (f) { if (f.role) return f.role === role && f.meals && f.meals.indexOf(type) >= 0 && !(c && c.diet && A.dietAllow && A.dietAllow(c.diet, f) === false); return match(f, list) && !(c && c.diet && A.dietAllow && A.dietAllow(c.diet, f) === false); });   // 1.43: فلتر النظام على كل الأصناف. المستورد: بالدور والوجبات المحفوظة؛ الأساسي: بقوائم الأسماء
   };
   A.perG = function (f) { return { p: f.p / 100, c: f.c / 100, f: f.f / 100, k: f.k / 100 }; };
   // ---------------------------------------------------------------- حل الجرامات: أقل مربعات موزونة غير سالبة لمصادر ≤ 3
@@ -4928,7 +4928,7 @@ E.ctx = function (client, D) {
   // ----------------------------------------------------------------------------- الأنظمة
   var P_DEF = { k: 'deficit', l: 'العجز اليومي (سعرة)', min: 250, max: 750, step: 50, def: 500 };
   DX.LIST = [
-    { id: 'balanced', n: 'عجز سعري متوازن', sys: 'ex', grade: 'strong', refs: ['johnston', 'mena'],
+    { id: 'balanced', n: 'عجز سعري متوازن', sys: 'both', grade: 'strong', refs: ['johnston', 'mena'],
       sum: 'عجز سعري معتدل بتوزيع ماكروز متوازن وأطعمة عادية. هو الأساس الذي تقاس عليه بقية الأنظمة: الحميات المسماة تعطي نزولاً متقارباً، والمهم أن يلتزم العميل.',
       when: ['أغلب العملاء، وهو الخيار الافتراضي حين لا يوجد سبب لغيره', 'من يريد نظاماً مألوفاً بلا قواعد خاصة', 'عند عدم وضوح تفضيل العميل'],
       notFor: ['من لديه حالة تتطلب نمطاً خاصاً (ضغط، سكري يحتاج ضبط كارب...)'],
@@ -4942,14 +4942,14 @@ E.ctx = function (client, D) {
       pros: ['شبع أعلى', 'حفظ أفضل للعضلات', 'سهل مع الأطعمة المحلية (بيض، قريش، دجاج، سمك، بقول)'], cons: ['تكلفة أعلى', 'يحتاج تنويعاً حتى لا يتكرر الصنف'],
       eg: 'فول بالبيض، قريش، فراخ مشوية، سمك بلطي، عدس.', sa: 'لبنة قليلة الدسم، دجاج مشوي، سمك، فول، حمص.',
       par: [P_DEF, { k: 'pro', l: 'بروتين (جم/كجم)', min: 1.2, max: 2, step: 0.1, def: 1.6 }, { k: 'fat', l: 'دهون % من السعرات', min: 20, max: 35, step: 1, def: 30 }] },
-    { id: 'med', n: 'متوسطي', sys: 'ex', grade: 'mid', refs: ['med', 'mena'],
+    { id: 'med', n: 'متوسطي', sys: 'both', grade: 'mid', refs: ['med', 'mena'],
       sum: 'زيت الزيتون دهناً رئيسياً، خضار وبقول وحبوب كاملة ومكسرات وسمك مرتين أسبوعياً على الأقل، ولحم أحمر قليل. أثره القلبي قوي، والوزن مماثل لغيره.',
       when: ['عميل لديه خطر قلبي (دهون، ضغط، سكري)', 'من يحب الطبخ البيتي والخضار والسمك', 'تثبيت الوزن على المدى الطويل'],
       notFor: ['حساسية المكسرات أو السمك (يُعدَّل بالبدائل)', 'من لا يتحمل ارتفاع التكلفة'],
       pros: ['مقبول ثقافياً في المنطقة', 'مفيد للقلب', 'مرن ومستدام'], cons: ['السمك والزيتون أغلى', 'السعرات تزيد بسهولة بالزيت إن لم يُقيَّس'],
       eg: 'فول وعدس وحمص، سلطات بزيت الزيتون، سمك مشوي، خبز بلدي بنصف رغيف.', sa: 'سلطات، حمص، سمك مشوي، تمر 1–3 حبات، خبز أسمر.',
       par: [P_DEF, { k: 'pro', l: 'بروتين (جم/كجم)', min: 1, max: 1.6, step: 0.1, def: 1.2 }, { k: 'fat', l: 'دهون % من السعرات', min: 28, max: 40, step: 1, def: 35 }] },
-    { id: 'mideast', n: 'شرق أوسطي (مصري/سعودي)', sys: 'ex', grade: 'weak', refs: ['mena', 'egOecd', 'shis', 'sa23', 'sa_moh'],
+    { id: 'mideast', n: 'شرق أوسطي (مصري/سعودي)', sys: 'both', grade: 'weak', refs: ['mena', 'egOecd', 'shis', 'sa23', 'sa_moh'],
       sum: 'مبادئ المتوسطي بأطعمة المنطقة: بقوليات وخضار مطبوخة وسمك مشوي وخبز بلدي بالأرباع وأرز مقيّس، مع تقليل القلي والسكر. لا توجد تجارب مباشرة عليه؛ سندُه التشابه مع المتوسطي والتجارب الإقليمية.',
       when: ['أغلب عملاء مصر والخليج الذين يريدون أكلاً مألوفاً', 'من يرفض تغيير نمطه الغذائي جذرياً', 'حين تكون الأولوية للالتزام والتحمل الاجتماعي'],
       notFor: ['من لديه موانع كارب شديدة (يُفضَّل منخفض الكارب)'],
@@ -4985,14 +4985,14 @@ E.ctx = function (client, D) {
       pros: ['شبع جيد', 'أقل صعوبة اجتماعية من الكيتو', 'يحسّن سكر الدم عند كثيرين'], cons: ['يحتاج بدائل للأرز والخبز', 'إمساك إن قلّت الألياف'],
       eg: 'نصف رغيف بدل رغيف، أرز ملعقتان، فول بيض وسلطة، خضار مطبوخ بوفرة.', sa: 'ربع كوب أرز أو بدائل القرنبيط، لحم أو دجاج، سلطة، لبن.',
       par: [P_DEF, { k: 'cho', l: 'كارب % من السعرات', min: 26, max: 40, step: 1, def: 35 }, { k: 'pro', l: 'بروتين (جم/كجم)', min: 1.2, max: 2, step: 0.1, def: 1.4 }] },
-    { id: 'dash', n: 'DASH (الضغط)', sys: 'ex', grade: 'strong', refs: ['dash'],
+    { id: 'dash', n: 'DASH (الضغط)', sys: 'both', grade: 'strong', refs: ['dash'],
       sum: 'خضار وفاكهة وألبان قليلة الدسم وحبوب كاملة، مع تقليل الصوديوم (المخللات، الأجبان المالحة، المصنّع). الأقوى في خفض الضغط؛ والوزن متواضع.',
       when: ['ارتفاع ضغط الدم أو خطره', 'استهلاك مرتفع للمخلل والجبن المالح والمصنّع (شائع في مصر والسعودية)', 'عائلة فيها قلب أو سكتة'],
       notFor: ['قصور الكلى (البوتاسيوم) إلا بإشراف الطبيب'],
       pros: ['خفض ضغط موثّق', 'اقتصادي', 'متنوع'], cons: ['قد يبدو الطعام بلا طعم أول أسبوعين', 'ألبان قليلة الدسم قد لا تُفضَّل'],
       eg: 'جبنة قريش بدل الدمياطي، خضار طازج، ليمون وبهارات بدل الملح، تقليل المخلل.', sa: 'تقليل الأجبان المالحة والمخللات والمعجنات، لبن، فواكه وخضار.',
       par: [P_DEF, { k: 'pro', l: 'بروتين (جم/كجم)', min: 1, max: 1.6, step: 0.1, def: 1.2 }, { k: 'fat', l: 'دهون % من السعرات', min: 22, max: 32, step: 1, def: 27 }, { k: 'na', l: 'سقف الصوديوم (ملجم)', min: 1500, max: 2300, step: 100, def: 2300 }] },
-    { id: 'lowfat', n: 'قليل الدهن / منخفض كثافة الطاقة', sys: 'ex', grade: 'mid', refs: ['johnston', 'mena'],
+    { id: 'lowfat', n: 'قليل الدهن / منخفض كثافة الطاقة', sys: 'both', grade: 'mid', refs: ['johnston', 'mena'],
       sum: 'دهون 20–25% من السعرات مع أطعمة حجمية (شوربة، خضار، فاكهة، بقول) تُشبع بسعرات أقل، وتحديد الزيوت والقلي. نزوله مماثل لغيره في 12 شهراً.',
       when: ['دهون مرتفعة في النظام الحالي (قلي، سمن، زبدة)', 'من يشبع بالحجم الكبير', 'عائلة تحب الطبخ الخفيف'],
       notFor: ['من يعاني جوعاً مع الكارب العالي', 'من يحتاج دهوناً أعلى لأسباب طبية'],
@@ -5212,11 +5212,23 @@ E.ctx = function (client, D) {
     carbMain: ['عدس مسلوق', 'حمص مسلوق', 'فاصوليا', 'فول (حب)', 'لوبيا', 'كينوا', 'برغل مطبوخ', 'بطاطا حلوة'],
     carbB: ['شوفان جاف', 'شوفان مطبوخ', 'فول (حب)', 'خبز قمح كامل', 'تفاح', 'توت أزرق', 'فراولة', 'كيوي'], carbS1: ['تفاح', 'توت أزرق', 'فراولة', 'كمثرى', 'برتقال', 'كيوي'], carbS2: ['تفاح', 'توت أزرق', 'فراولة', 'كمثرى', 'برتقال', 'كيوي'], carbN: ['تفاح', 'فراولة']
   };
-  DX.dietTags = function (dd) { var id = dd && dd.id === 'if' ? (dd.P && dd.P.base) || 'balanced' : dd && dd.id; return id === 'keto' ? T_KETO : id === 'lowcarb' ? T_LOWCARB : null; };
+  // 1.43 المرحلة الثانية (الجرامات): قوائم أصناف لكل نظام، وفلترة بالصوديوم (DASH) والجلوتين والدهون والمصدر الحيواني
+  var T_VEG = { protMain: ['بيض كامل مسلوق', 'عدس مسلوق', 'حمص مسلوق', 'فول (حب)', 'فاصوليا', 'لوبيا', 'طعمية مشوية', 'جبنة قريش', 'زبادي يوناني'], protB: ['بيض كامل مسلوق', 'بياض بيض', 'زبادي يوناني', 'جبنة قريش', 'بروتين مصل', 'لبنة', 'جبنة بيضاء قليلة الملح'], protS1: ['زبادي يوناني', 'جبنة قريش', 'بروتين مصل', 'حليب خالي', 'لبن رائب'], protS2: ['بروتين مصل', 'زبادي يوناني', 'بيض كامل مسلوق', 'حليب خالي'], protN: ['جبنة قريش', 'زبادي يوناني', 'حليب خالي', 'بروتين مصل'] };
+  var T_MED = { protMain: ['سلمون', 'بلطي', 'سمك قد', 'سمك بوري', 'سردين', 'تونة معلبة بالماء', 'صدر دجاج', 'عدس مسلوق', 'حمص مسلوق', 'فول (حب)', 'صدر ديك رومي'], fatB: ['زيت زيتون', 'لوز', 'جوز', 'أفوكادو', 'طحينة', 'زيتون'], fatMain: ['زيت زيتون', 'أفوكادو', 'طحينة', 'لوز', 'جوز'], fatS: ['لوز', 'جوز', 'فستق', 'أفوكادو'], fatN: ['لوز', 'جوز'] };
+  var T_MIDEAST = { protMain: ['فول (حب)', 'عدس مسلوق', 'حمص مسلوق', 'بلطي', 'سمك بوري', 'صدر دجاج', 'فخذ دجاج', 'لحم غنم', 'كفتة مشوية', 'بيض كامل مسلوق'], carbMain: ['أرز أبيض مطبوخ', 'أرز كبسة', 'خبز بلدي', 'برغل مطبوخ', 'فريك مطبوخ', 'جريش مطبوخ', 'بطاطس مسلوقة', 'عدس مسلوق', 'حمص مسلوق', 'فول (حب)'] };
+  var T_FLEX = { protMain: ['عدس مسلوق', 'حمص مسلوق', 'فول (حب)', 'فاصوليا', 'بيض كامل مسلوق', 'سلمون', 'بلطي', 'صدر دجاج', 'طعمية مشوية', 'جبنة قريش'] };
+  var tagsMerge = function (t) { return t; };
+  DX.dietTags = function (dd) { var id = dd && dd.id === 'if' ? (dd.P && dd.P.base) || 'balanced' : dd && dd.id; return id === 'keto' ? T_KETO : id === 'lowcarb' ? T_LOWCARB : id === 'veg' ? T_VEG : id === 'med' || id === 'mind' ? T_MED : id === 'mideast' ? T_MIDEAST : id === 'flex' ? T_FLEX : null; };
   DX.dietAllow = function (dd, f) {
     var id = dd && dd.id === 'if' ? (dd.P && dd.P.base) || 'balanced' : dd && dd.id, n = f.n || '';
-    if (id === 'keto') { if (f.g === 'خضروات' || f.role === 'v') return (f.c || 0) <= 5.5; return f.role === 'p' || f.role === 'f'; }
+    if (id === 'keto') { if (f.g === 'خضروات' || f.role === 'v') return (f.c || 0) <= 5.5; if (!f.role) return true; return f.role === 'p' || f.role === 'f'; }      // الأصناف الأساسية تُختار بقوائم الكيتو؛ الموسومة بالدور كما كانت
     if (id === 'lowcarb') return !/كشري|أرز كبسة|جريش|شوربة عدس/.test(n);
+    if (id === 'veg') return !(f.g === 'بروتين' && !/بيض|بياض|بروتين مصل/.test(n));
+    if (id === 'gf') return !(GLU.test(n) && !/أرز|ذرة|كينوا/.test(n)) && !/كشري|رقائق الذرة/.test(n);
+    if (id === 'dash') return !((+f.na || 0) > 400);      // DASH: لا أصناف عالية الصوديوم (> 400 ملغ لكل 100 جم)
+    if (id === 'lowfat') return !/زبدة \(مملحة\)|سمن|كريمة|زيت جوز الهند|شيدر|80\/20|بالجلد|كفتة/.test(n);
+    if (id === 'med') return !/زبدة \(مملحة\)|سمن|كريمة|زيت جوز الهند|80\/20|كفتة|مشروب طاقة/.test(n);
+    if (id === 'mind') return !/زبدة \(مملحة\)|سمن|كريمة|زيت جوز الهند|شيدر|موزاريلا|80\/20|كفتة|فلافل|مشروب طاقة|مشروب رياضي/.test(n);
     return true;
   };
   // ----------------------------------------------------------------------------- مشاكل الأخصائي العشر
@@ -5276,7 +5288,7 @@ E.ctx = function (client, D) {
   DX.SRC.feinman = 'Feinman وآخرون، Nutrition 2015: كيتو 20–50 جم (≤10%)، منخفض أقل من 130 جم (<26%)، معتدل 26–45%';
   var P_PRO = { k: 'pro', l: 'بروتين (جم/كجم)', min: 1, max: 1.6, step: 0.1, def: 1.2 }, P_FAT = { k: 'fat', l: 'دهون % من السعرات', min: 20, max: 35, step: 1, def: 28 };
   DX.LIST.push(
-    { id: 'veg', n: 'نباتي', sys: 'ex', grade: 'strong', refs: ['and16', 'ada19'], kind: 'food',
+    { id: 'veg', n: 'نباتي', sys: 'both', grade: 'strong', refs: ['and16', 'ada19'], kind: 'food',
       sum: 'بلا لحوم ودواجن وأسماك، مع البيض والألبان. نصف حصص اللحوم تتحول إلى بقوليات، والباقي بيض وجبن وتوفو، مع إبقاء البروتين المستهدف.',
       when: ['من لا يأكل اللحوم لسبب ديني أو صحي أو أخلاقي', 'ارتفاع الكوليسترول مع رغبة في نمط نباتي'], notFor: ['—'],
       pros: ['يحسّن الوزن وLDL', 'ألياف عالية'], cons: ['يحتاج متابعة الحديد وB12', 'البقوليات ترفع الكارب قليلاً'],
@@ -5286,17 +5298,17 @@ E.ctx = function (client, D) {
       when: ['النباتي الصرف بقناعته'], notFor: ['من لا يستطيع تأمين B12 مدعّم أو مكمل'],
       pros: ['ألياف عالية', 'دهون مشبعة منخفضة'], cons: ['B12 والحديد والكالسيوم وفيتامين د تحتاج متابعة', 'تنوع البروتين محدود في بيانات الأصناف الحالية'],
       eg: 'فول وعدس وحمص وتوفو وحليب صويا ومكسرات.', sa: 'عدس وحمص وفلافل مشوية وحليب صويا.', par: [P_DEF, P_PRO, P_FAT] },
-    { id: 'flex', n: 'المرن (نباتي غالباً)', sys: 'ex', grade: 'mid', refs: ['usn25'], kind: 'food',
+    { id: 'flex', n: 'المرن (نباتي غالباً)', sys: 'both', grade: 'mid', refs: ['usn25'], kind: 'food',
       sum: 'نباتي في أغلب الوجبات مع لحم أو سمك أحياناً. ربع حصص اللحوم يتحول إلى بقوليات، وتُفضَّل الأصناف النباتية للبروتين.',
       when: ['من يريد تقليل اللحوم دون تركها', 'ارتفاع الكوليسترول أو حمض اليوريك'], notFor: ['—'],
       pros: ['سهل اجتماعياً', 'الثالث في US News 2025'], cons: ['لا رقم موحد لعدد وجبات اللحم'],
       eg: 'فول وعدس معظم الأيام، وسمك أو دجاج مرتين أو ثلاثاً.', sa: 'عدس وحمص، وكبسة دجاج مرة أو مرتين.', par: [P_DEF, P_PRO, P_FAT] },
-    { id: 'mind', n: 'مايند لصحة الدماغ', sys: 'ex', grade: 'mid', refs: ['mind', 'usn25'], kind: 'food',
+    { id: 'mind', n: 'مايند لصحة الدماغ', sys: 'both', grade: 'mid', refs: ['mind', 'usn25'], kind: 'food',
       sum: 'دمج المتوسطي وDASH لصحة الدماغ: ورقيات ومكسرات وتوت وبقوليات وسمك وزيت زيتون وحبوب كاملة، مع تجنّب المقليات والحلويات والجبن واللحم الدسم.',
       when: ['كبار السن أو تاريخ عائلي لضعف الذاكرة', 'من يريد نمطاً صحياً عاماً'], notFor: ['—'],
       pros: ['الأعلى لصحة الدماغ في US News 2025'], cons: ['الدليل من دراسات المتابعة أقوى منه في التجارب'],
       eg: 'سبانخ وجرجير، لوز وجوز، فراولة، عدس، سردين، زيت زيتون، شوفان.', sa: 'سلطة جرجير، سمك هامور مشوي، لوز، زيت زيتون.', par: [P_DEF, P_PRO, P_FAT] },
-    { id: 'gf', n: 'خالٍ من الجلوتين', sys: 'ex', grade: 'strong', refs: ['acg23'], kind: 'food',
+    { id: 'gf', n: 'خالٍ من الجلوتين', sys: 'both', grade: 'strong', refs: ['acg23'], kind: 'food',
       sum: 'استبعاد القمح والشعير ومشتقاتهما. النشويات من الأرز والبطاطس والذرة والكينوا. في السيلياك يجب أن يكون الاستبعاد صارماً.',
       when: ['الداء البطني (السيلياك) المشخّص', 'حساسية القمح'], notFor: ['من لا يحتاجه طبياً (لا فائدة مثبتة لإنقاص الوزن)'],
       pros: ['ضروري لمرضى السيلياك'], cons: ['يحتاج قراءة الملصقات والتلوث العرضي'],
@@ -5345,8 +5357,19 @@ E.ctx = function (client, D) {
     return Object.assign({}, sol, { counts: cn });
   };
   // مؤشرات الالتزام للوحة الجودة (من الخطة الفعلية): [النص، القيمة، الحالة ok|warn]
-  DX.check = function (dd, plan, D) {
-    var id = eff(dd); if (!plan || !plan.days || !plan.days.length) return []; var out = [], days = plan.days, n = days.length, byN = {}; D.foods.forEach(function (f) { byN[f.n] = f; });
+  DX.check = function (dd, plan, D, AD) {
+    var id = eff(dd); if (!plan || !plan.days || !plan.days.length) return [];
+    if (plan.days[0].got && plan.days[0].meals) {      // الجرامات: من مجاميع الأيام الفعلية (الكارب والصوديوم والألياف) ومن الأصناف
+      var nd = plan.days.length, av = function (k) { return plan.days.reduce(function (a, d) { return a + (+(d.got || {})[k] || 0); }, 0) / nd; }, o = [], bad = 0, by = {};
+      ((AD && AD.foods) || []).forEach(function (f) { by[f.id] = f; });
+      plan.days.forEach(function (d) { (d.meals || []).forEach(function (m) { (m.items || []).forEach(function (i) { var f = by[i.id] || i; if (DX.dietAllow(dd, f) === false) bad++; }); }); });
+      if (id === 'keto') o.push(['الكارب (متوسط اليوم)', Math.round(av('c')) + ' جم من ' + num(dd.P && dd.P.carb, 50), av('c') <= num(dd.P && dd.P.carb, 50) + 5 ? 'ok' : 'warn']);
+      if (id === 'lowcarb') o.push(['الكارب (متوسط اليوم)', Math.round(av('c')) + ' جم', av('c') < 130 ? 'ok' : 'warn']);
+      if (id === 'dash') o.push(['الصوديوم (متوسط اليوم)', Math.round(av('na')) + ' ملغ', av('na') <= 2300 ? 'ok' : 'warn']);
+      if (id === 'med' || id === 'mind' || id === 'veg' || id === 'flex' || id === 'lowcarb' || id === 'keto') o.push(['الألياف (متوسط اليوم)', Math.round(av('fi')) + ' جم', av('fi') >= 25 ? 'ok' : 'warn']);
+      if (id !== 'balanced' && id !== 'highpro' && id !== 'cycle' && id !== 'if') o.push(['أصناف مخالفة للنظام', bad ? bad + ' صنف' : 'لا شيء', bad ? 'warn' : 'ok']);
+      return o;
+    } var out = [], days = plan.days, n = days.length, byN = {}; D.foods.forEach(function (f) { byN[f.n] = f; });
     var lines = function (dy) { var a = []; (dy.slots || []).forEach(function (s) { (s.lines || []).forEach(function (l) { a.push(l); }); }); return a; };
     var avgCarb = days.reduce(function (s0, dy) { return s0 + lines(dy).reduce(function (a, l) { return a + (+l.e || 0) * ((D.EX[l.g] || [0])[0]); }, 0); }, 0) / n;
     var viol = 0; days.forEach(function (dy) { lines(dy).forEach(function (l) { var f = byN[l.name]; if (f && DX.foodRule(id, f) === 'avoid') viol++; }); });
@@ -9743,10 +9766,10 @@ document.addEventListener('change', function (e) {
 var GDX = { dp: {}, ok: {}, pend: '' };
 var GDX_K = { q: ['بالحصص', 'kq'], f: ['بالأكلات', 'kf'], t: ['بالتوقيت', 'kt'] };
 function gdxKinds(id) { return String(DX.KIND[id] || 'q').split('').map(function (k) { var x = GDX_K[k]; return x ? '<span class="dxsk ' + x[1] + '">' + x[0] + '</span>' : ''; }).join(''); }
-function gdxList(c) { var ath = c.kind === 'athlete'; return DX.LIST.filter(function (d) { return d.id !== 'cycle' && (ath ? d.sys !== 'ex' : d.sys !== 'ath'); }); }
+function gdxList(c) { var ath = c.kind === 'athlete'; return DX.LIST.filter(function (d) { return ath ? d.sys !== 'ex' : d.sys !== 'ath' && d.id !== 'cycle'; }); }      // الجرامات (المرحلة الثانية): ومعها تدوير الكارب
 function genDietBox(c) {      // 1.43ب (طلب المالك): قائمة منسدلة مختصرة بعد حساب الطاقة، والمعلومات عند «؟»
   if (typeof DX === 'undefined') return '';
-  if (c.kind === 'athlete') return '';
+  gdxFor(c);
   var x = ec(c), cur0 = c.diet && c.diet.id, sel = GDX.pend || cur0 || '', L = gdxList(c);
   var opts = '<option value="">بدون نظام خاص (متوازن)</option>' + L.map(function (d) { var sc = DX.screen(d.id, x, D), stop = sc.stop.length; return '<option value="' + d.id + '"' + (sel === d.id ? ' selected' : '') + (stop ? ' disabled' : '') + '>' + esc(d.n) + ' — ' + esc(d.en || '') + (stop ? ' (غير مناسب)' : '') + '</option>'; }).join('');
   var d = sel ? DX.get(sel) : null, info = '', more = '';
@@ -9763,14 +9786,17 @@ function genDietBox(c) {      // 1.43ب (طلب المالك): قائمة منس
   }
   return '<div class="dxsx"><div class="dxsrow"><label for="gdx_sel">نوع النظام الغذائي</label><select id="gdx_sel" data-gdsel="1" aria-label="نوع النظام الغذائي">' + opts + '</select>' + info + '</div>' + more + '</div>';
 }
+function gdxFor(c) { if (GDX.cc !== c.code) { GDX.cc = c.code; GDX.ok = {}; GDX.pend = ''; GDX.dp = {}; } }      // تأكيد الموانع والمعاملات خاصة بكل عميل
 function gdxApply(c, id) {
-  var x = ec(c), T = E.targets(x, D), prevK = c.kcalManual, P = DX.pnorm(id, GDX.dp[id] || (c.diet && c.diet.id === id ? c.diet.P : {}));
-  try { var en = DX.energy(x, D, null, P.deficit, E, null); P.deficit = Math.round((en.tdee - T.kcal) / 50) * 50; } catch (e) { }
-  var res = DX.apply(id, x, P, D, null, E, null);
+  gdxFor(c);
+  var ath = c.kind === 'athlete', x = ec(c), prevK = c.kcalManual, P = DX.pnorm(id, GDX.dp[id] || (c.diet && c.diet.id === id ? c.diet.P : {})), en0 = ath ? { kcalMode: c.kcalMode, kcalTrain: c.kcalTrain, kcalRest: c.kcalRest, phase: c.phase, schedule: c.schedule } : null;
+  if (!ath) { var T = E.targets(x, D); try { var en = DX.energy(x, D, null, P.deficit, E, null); P.deficit = Math.round((en.tdee - T.kcal) / 50) * 50; } catch (e) { } }
+  var res = ath ? DX.apply(id, x, P, D, AD, E, Ath) : DX.apply(id, x, P, D, null, E, null);
   if (!res.ok) { toast((res.blocks && res.blocks[0]) || 'تعذّر التطبيق'); return false; }
   if (res.confirm && res.confirm.length && !res.confirm.every(function (t, i) { return (GDX.ok[id] || [])[i]; })) { GDX.pend = id; main(); return false; }
   DX.commit(c, res);
-  if (!(id === 'if' && res.P.pat === '52')) { if (prevK === undefined) delete c.kcalManual; else c.kcalManual = prevK; }      // السعرات من خطوة «الطاقة» كما هي (النظام لا يغيّرها إلا في 5:2)
+  if (ath) { if (id !== 'cycle' && !(id === 'if' && res.P.pat === '52')) Object.keys(en0).forEach(function (k) { if (k === 'schedule') return; if (en0[k] === undefined) delete c[k]; else c[k] = en0[k]; }); }      // الجرامات: الطاقة من «الطاقة» كما هي (إلا التدوير و5:2)
+  else if (!(id === 'if' && res.P.pat === '52')) { if (prevK === undefined) delete c.kcalManual; else c.kcalManual = prevK; }      // السعرات من خطوة «الطاقة» كما هي (النظام لا يغيّرها إلا في 5:2)
   if (c.choPct != null && c.proPct != null) { c.choPct = Math.round(c.choPct * 100) / 100; c.proPct = Math.round(c.proPct * 100) / 100; c.fatPct = Math.round((1 - c.choPct - c.proPct) * 100) / 100; }      // نسب صحيحة مجموعها 100% بالضبط
   c.diet.notes = res.notes || []; c.diet.warns = res.warns || []; GDX.pend = ''; delete c.mealDist; persist(c); main(); toast('✓ النظام: «' + DX.get(id).n + '» — اقترح الجدول التركيبي الحصص حسبه'); return true;
 }
@@ -11472,7 +11498,7 @@ function genQual(c) {      // لوحة ملخص جودة الخطة: كل رقم
     + tile(fav && fav.src !== 'none' ? (fav.pct >= fav.want ? 'st-ok' : 'st-warn') : '', 'المفضلات', fav ? (fav.src === 'none' ? 'لا مفضلات' : fav.pct + '%') : ath ? 'لا ينطبق' : '—', fav && fav.src !== 'none' ? 'المطلوب ' + fav.want + '%' : '')
     + tile(fav && fav.repeated ? 'st-warn' : '', 'وجبات مكررة', fav ? fav.repeated : '—', fav ? 'حد التكرار ' + fav.rep + ' أسبوعياً' : '')
     + tile('', 'مكمّلة من البنك', fav ? fav.bank : '—', fav ? 'من ' + fav.total + ' وجبة' : '')
-    + (function () { if (ath || !c.diet || !has || !E.dietCheck) return ''; try { return E.dietCheck(c.diet, p, D).map(function (r) { return tile(r[2] === 'ok' ? 'st-ok' : 'st-warn', r[0], esc(r[1]), ''); }).join(''); } catch (e) { return ''; } })()
+    + (function () { if (!c.diet || !has || !E.dietCheck) return ''; try { return E.dietCheck(c.diet, p, D, typeof AD !== 'undefined' ? AD : null).map(function (r) { return tile(r[2] === 'ok' ? 'st-ok' : 'st-warn', r[0], esc(r[1]), ''); }).join(''); } catch (e) { return ''; } })()
     + tile(alerts || pf.length ? 'st-warn' : has ? 'st-ok' : '', 'تنبيهات غذائية', has ? alerts + pf.length : '—', has ? (alerts ? alerts + ' أيام تحتاج نظرك' : '') + (pf.length ? (alerts ? ' • ' : '') + pf.length + ' تفضيل' : '') : '') + '</div>'
     + '<ul class="gqchk">' + chk.map(function (x) { return '<li class="' + (x[1] ? 'gqy' : 'gqn') + '">' + (x[1] ? '✓' : '○') + ' ' + x[0] + '</li>'; }).join('') + '</ul>'
     + (stale ? '<p class="warn small gqstale">⚠ عدّلت الجدول التركيبي أو التوزيع بعد آخر توليد: أعد «ولّد خطة الأسبوع» لتتطابق الخطة.</p>' : '')
@@ -11484,6 +11510,7 @@ function genAthFrame(c) {      // إطار البناء الموحد لنظام 
   var sec = function (n, t, b) { return '<div class="gafs"><h4><i>' + n + '</i> ' + t + '</h4>' + b + '</div>'; };
   return '<div class="ucard genathf"><h3>البناء: نظام الجرامات</h3>'
     + sec(1, 'الطاقة', T ? '<p class="small">الحرق الأساسي ' + Math.round(T.bmr) + ' سعرة (' + esc(T.method) + ')؛ أيام الأسبوع: ' + T.days.map(function (d) { return esc(d.name) + ' ' + Math.round(d.kcal); }).join(' • ') + '</p>' : '<p class="small">أكمل بيانات العميل.</p>')
+    + (typeof genDietBox === 'function' ? '<div class="gafs">' + genDietBox(c) + '</div>' : '')      // 1.43 المرحلة الثانية: نوع النظام بعد الطاقة
     + sec(2, 'الماكروز', d0 ? '<p class="small">' + T.days.map(function (d) { return esc(d.name) + ': ب ' + Math.round(d.p) + ' • ك ' + Math.round(d.c) + ' • د ' + Math.round(d.f) + ' جم'; }).join('<br>') + '</p>' : '')
     + sec(3, 'توزيع الوجبات', '<p class="small">' + (ms.length ? ms.length + ' وجبات: ' + ms.map(function (m) { return esc(m.n || m.name || ''); }).filter(Boolean).join('، ') : '—') + ' <button class="link" data-a="tab" data-v="client">تعديل من البيانات</button></p>')
     + sec(4, 'بناء الوجبات بالجرامات', '<p class="small">' + (has ? 'الخطة مولّدة؛ عدّل الكميات بالجرام من «افتح الخطة للتعديل».' : 'ولّد الخطة من الزر أدناه.') + '</p>')
