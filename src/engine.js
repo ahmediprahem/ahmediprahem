@@ -75,7 +75,7 @@
   };
   // ================================================ الوجبات النشطة وتوزيع السعرات
   E.slots = function (meals, D) { var p = D.settings.pct[String(meals)] || D.settings.pct['5']; return p.map(function (x, i) { return { i: i, pct: x, active: x > 0, type: D.settings.types[i], name: D.settings.slotNames[i] }; }); };
-  E.capScale = function (kcal, T) { var r = kcal / 2300; if (T && T.obese) r = Math.max(r, T.cho / 267, T.fat / 77); return Math.max(1, Math.round(r * 100) / 100); };   // للسمنة: السقوف تتسع لما يتطلبه الكارب/الدهون بعد خفض البروتين          // سقوف الوجبات مضبوطة لنحو 2200-2300 سعرة؛ تكبر بنسبة السعرات
+  E.capScale = function (kcal, T) { var r = kcal / 2300; if (T) r = Math.max(r, T.cho / 267, T.fat / 77); return Math.max(1, Math.round(r * 100) / 100); };      // 1.43ج (بلاغ المالك): السقوف تتسع لما يتطلبه الكارب/الدهون للجميع (كانت للسمنة فقط) فيطابق التوزيع التلقائي الهدف   // للسمنة: السقوف تتسع لما يتطلبه الكارب/الدهون بعد خفض البروتين          // سقوف الوجبات مضبوطة لنحو 2200-2300 سعرة؛ تكبر بنسبة السعرات
   E.capTotals = function (day, meals, D, scale) {
     var sl = E.slots(meals, D), comp = D.comp[day], cap = []; scale = scale || 1;
     for (var g = 0; g < 13; g++) { var t = 0; sl.forEach(function (s) { if (s.active) t += Math.ceil(comp[g][s.i][1] * scale - 1e-9); }); cap.push(t); }
@@ -548,10 +548,27 @@ E.ctx = function (client, D) {
         lines.sort(function (p, q) { return FOOD_CAT[p.g] - FOOD_CAT[q.g] || p.g - q.g; });
     return { si: sl.i, name: sl.name, type: sl.type, pct: sl.pct, kcal: Math.round(T.kcal * sl.pct), target: tg, meal: mealName, lines: lines, time: D.times ? D.times[sl.i] : '' };
   };
+  // 1.43ج (بلاغ المالك: «عند التوزيع لا تكون النسب متطابقة»): بعد الحل، ما بقي من الهدف خارج التفاوت يُكمَّل بحصص من المجموعة المناسبة
+  // (البروتين ثم الكارب ثم الدهون)، مع احترام حدود النظام: لا نشويات حيث حدّها صفر (الكيتو)، وبروتين نباتي حين تكون اللحوم صفراً (النباتي الصرف)
+  E.fillGap = function (sol, T, D, cap) {
+    if (!sol || !sol.counts || !T) return sol; var cn = sol.counts.slice(), X = D.EX, tol = D.settings.tol || [10, 5, 5], v = function () { return E.countsVals(cn, D); }, n = 0;
+    var plant = cap && cap[2] === 0 && cap[3] === 0 || (cn[2] + cn[3] === 0 && cn[1] > 0);
+    var pg = plant ? (cap && cap[1] === 0 ? 4 : 1) : 3, cg = cap && cap[0] === 0 ? -1 : 0;
+    var room = function (g) { return !cap || cn[g] < Math.ceil(cap[g] * 1.3); };      // حد واقعي: 30% فوق سقوف الوجبات (لا كميات غير معقولة في الوجبة)
+    while (n++ < 30 && T.pro - v().p > tol[1]) { var g0 = plant ? (T.cho - v().c > X[1][0] / 2 && !(cap && cap[1] === 0) ? 1 : 4) : pg; if (!room(g0)) break; cn[g0]++; }
+    while (cg >= 0 && n++ < 60 && room(cg) && T.cho - v().c > Math.max(tol[0], X[cg][0] / 2)) cn[cg]++;
+    var trimP = function () { [3, 2, 4, 5].forEach(function (g) { while (n++ < 140 && cn[g] > 0 && v().p - T.pro > Math.max(tol[1], X[g][1] / 2) && !(plant && g >= 2 && g <= 5 && g !== 4)) cn[g]--; }); };
+    trimP();
+    while (n++ < 170 && cn[0] > 0 && v().c - T.cho > Math.max(tol[0], X[0][0] / 2)) cn[0]--;
+    while (n++ < 200 && T.fat - v().f > Math.max(tol[2], X[11][2] / 2) && cn[11] < 40 && room(11)) cn[11]++;
+    while (n++ < 230 && cn[11] > 0 && v().f - T.fat > Math.max(tol[2], X[11][2] / 2)) cn[11]--;
+    var a = v(); return Object.assign({}, sol, { counts: cn, err: [a.c - T.cho, a.p - T.pro, a.f - T.fat], kcal: a.k, filled: true });
+  };
   E.baseSuggestion = function (client, D) {
     var st = E.state(client, D, {}), sc = E.capScale(st.T.kcal, st.T), cap = E.capTotals(0, st.meals, D, sc); if (client.diet && E.dietCaps) cap = E.dietCaps(client.diet, cap);      // 1.43: حدود مجموعات النظام وتشكيله
     var sol = E.solveDay(st.T, { cap: cap, sweets: Math.min(st.sweets, cap[12]), share: E.PREF.share, base: client.diet && E.dietBase ? E.dietBase(client.diet) : undefined }, D);
-    return client.diet && E.dietAll ? E.dietAll(client.diet, sol) || sol : sol;
+    if (client.diet && E.dietAll) sol = E.dietAll(client.diet, sol, client) || sol;
+    return E.fillGap(sol, st.T, D, cap);
   };
   E.planWeek = function (client, D, opt) {
     opt = opt || {}; var st = E.state(client, D, opt), T = st.T, meals = st.meals, days = [], manual = client.baseCounts && client.baseCounts.length === 13 && client.baseCounts.some(function (x) { return +x > 0; });
@@ -562,7 +579,7 @@ E.ctx = function (client, D) {
       if (dco) { sol = mk(dco); sol.day = true; } else if (manual) sol = mk(client.baseCounts.map(Number));
       if (!dco && !manual && client.v2) st.sweets = st.sweets0 && E.SWEET_DAYS.indexOf(d) >= 0 ? 1 : 0;      // م5 (قرار المالك): الحلويات 3 أيام أسبوعياً، وصفر للسكري ودهون الكبد
       if (!dco && !manual) sol = E.solveDay(T, { cap: cap, sweets: st.sweets, share: E.PREF.share, base: client.diet && E.dietBase ? E.dietBase(client.diet) : undefined }, D);
-      if (!dco && !manual && client.diet && E.dietAll) sol = E.dietAll(client.diet, sol) || sol;
+      if (!dco && !manual && client.diet && E.dietAll) sol = E.dietAll(client.diet, sol, client) || sol;
       if (!dco && !manual && client.diet && E.dietShape) sol = E.dietShape(client.diet, d, sol, D) || sol;
       st.keepGroups = !!(dco || manual); var al = E.allocateDay(sol.counts, d, meals, D, sc, client.v2); if (client.v2 && !st.keepGroups && st.sched && st.sched[d] === 'leg') E.legDay(al, st); if (client.v2 && !st.keepGroups && st.cx.diab) E.spreadFruit(al, (D.limits && D.limits.diabFruitMax) || 1); var slots = E.buildDay(st, d, al), dy = { day: d, name: D.days[d], solver: sol, counts: sol.counts, short: al.short, slots: slots };
       if (!st.keepGroups) E.syncCounts(dy); st.keepGroups = false;

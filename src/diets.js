@@ -427,8 +427,16 @@
   };
   // تشكيل كل الأيام بعد الحل (الحصص): تحويل حصص اللحوم إلى بقوليات (الحصة البقولية ≈ نشويات + لحم قليل الدهن، فتُخصم حصة نشويات مقابل كل واحدة)
   var toLeg = function (cn, k) { var m = Math.min(k, cn[0]); cn[1] += k; cn[0] -= m; return cn; };
-  DX.dietAll = function (dd, sol) {
+  // 1.43ج (بلاغ المالك): الكيتو عند السعرات العالية لم يبلغ هدف الدهون (سقف حصص الدهون). البروتين يُنقل إلى لحوم أعلى دهوناً ثم تُكمَّل حصص الدهون، والعالية الدهون ممنوعة مع أمراض القلب/الكوليسترول
+  var EXF = [0, 3, 1, 3, 5, 8, 0, 3, 5, 0, 0, 5, 0];
+  var ketoFat = function (cn, gap, heart) {
+    var mv = function (a, b) { var d = EXF[b] - EXF[a]; while (gap > d / 2 && cn[a] > 0) { cn[a]--; cn[b]++; gap -= d; } };
+    mv(2, 4); mv(3, 4); if (!heart) { var lim = 4; while (gap > 1.5 && cn[4] > 0 && cn[5] < lim) { cn[4]--; cn[5]++; gap -= 3; } }
+    var add = Math.max(0, Math.round(gap / 5)); cn[11] += Math.min(add, Math.max(0, 40 - cn[11])); return cn;
+  };
+  DX.dietAll = function (dd, sol, client) {
     var id = eff(dd); if (!sol || !sol.counts) return null; var cn = sol.counts.slice(), k;
+    if (id === 'keto' && sol.err) { var heart = ((client && client.conditions) || []).some(function (q) { return q === 'أمراض القلب' || q === 'ارتفاع الكوليسترول والدهون'; }); ketoFat(cn, -sol.err[2], heart); return Object.assign({}, sol, { counts: cn }); }
     if (id === 'vegan') { k = cn[2] + cn[3] + cn[5] + Math.max(0, cn[4] - 2); cn[2] = cn[3] = cn[5] = 0; cn[4] = Math.min(cn[4], 2); toLeg(cn, k); cn[7] += cn[8]; cn[8] = 0; }
     else if (id === 'veg') { var mt = cn[2] + cn[3] + cn[5]; k = Math.floor(mt / 2); for (var q = 0, gs = [3, 2, 5]; q < gs.length && k > 0; q++) { var t = Math.min(cn[gs[q]], k); cn[gs[q]] -= t; k -= t; toLeg(cn, t); } }
     else if (id === 'flex') { k = Math.floor((cn[2] + cn[3]) / 4); var t2 = Math.min(cn[3], k); cn[3] -= t2; toLeg(cn, t2); }
