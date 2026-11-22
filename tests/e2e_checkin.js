@@ -29,7 +29,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   const c = await p.evaluate(() => JSON.parse(JSON.stringify(DPApp.S.clients.find((x) => x.code === DPApp.S.cur))));
   assert.strictEqual(c.appts[0].st, 'done'); assert.strictEqual(c.weight, 86.9); const v = c.med.visits.pop(); assert.strictEqual(v.w, 86.9); assert.strictEqual(v.waist, 96); assert.strictEqual(c.att.length, 1);
   ok('«سجّل الحضور»: يغلق موعد اليوم، ويحفظ وزن الزيارة والخصر في الملف الطبي ويحدّث الوزن');
-  await p.click('[data-a="ciNew"]'); await p.waitForSelector('main .ciflash'); assert.strictEqual(await p.getAttribute('main .tabs [data-v="client"]', 'class'), 'on');
+  await p.click('[data-a="ciNew"]'); await p.waitForSelector('main .ciflash'); assert.strictEqual(await p.getAttribute('main .tabs [data-g="file"]', 'class'), 'on');
   ok('«＋ نظام غذائي جديد» ينقل مباشرة إلى زرّي «اختر خطة جاهزة / ولّد خطة جديدة»');
   await p.evaluate(() => DPApp.A.gen()); await p.waitForSelector('.pnav'); await p.click('.pnav button[data-v="0"]'); await p.waitForSelector('#hud');
   await p.evaluate(() => { if (document.querySelector('#hud.hf-min')) document.querySelector('#hud [data-a="hudToggle"]').click(); }); await p.waitForSelector('#hud .hudhl'); assert(/سكري النوع الثاني/.test(await p.textContent('#hud .hudhl')));

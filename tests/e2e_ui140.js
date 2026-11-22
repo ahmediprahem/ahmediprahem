@@ -12,8 +12,8 @@ const gen = async (p) => { await p.evaluate(() => DPApp.A.genNew()); await p.fil
   const br = await chromium.launch(), p = await (await br.newContext({ viewport: { width: 1280, height: 860 }, reducedMotion: 'reduce' })).newPage(); p.on('pageerror', (e) => errs.push(String(e))); p.on('dialog', (d) => d.accept());
   await p.goto(URL); await login(p);
   const ic = await p.evaluate(() => ({ n: Object.keys(window.ZICO || {}).length, users: document.querySelector('aside .sidebtn .ico-users') && document.querySelector('aside .sidebtn .ico-users').innerHTML, want: (() => { const d = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); d.innerHTML = window.ZICO.users; return d.innerHTML; })(), png: document.querySelectorAll('aside img[src$=".png"]').length }));
-  assert.strictEqual(ic.n, 63); assert.strictEqual(ic.users, ic.want, 'أيقونة العملاء ليست من Lucide'); assert.strictEqual(ic.png, 0);
-  ok('أيقونات Lucide (63) محلية من الحزمة الرسمية مع ترخيص ISC، وأيقونات الشريط الجانبي منها، بلا روابط خارجية ولا PNG');
+  assert.strictEqual(ic.n, 83); assert.strictEqual(ic.users, ic.want, 'أيقونة العملاء ليست من Lucide'); assert.strictEqual(ic.png, 0);
+  ok('أيقونات Lucide (83) محلية من الحزمة الرسمية مع ترخيص ISC، وأيقونات الشريط الجانبي منها، بلا روابط خارجية ولا PNG');
   // ٢ التخطيط: 1280 بشريط كامل، والترويسة 64، والحشوة على شبكة 4
   let L = await p.evaluate(() => ({ aside: document.querySelector('aside').getBoundingClientRect().width, label: getComputedStyle(document.querySelector('aside .sidebtn span')).display, hd: document.querySelector('#hd').getBoundingClientRect().height, pad: getComputedStyle(document.querySelector('main')).paddingTop }));
   assert(L.aside >= 240 && L.label !== 'none', JSON.stringify(L)); assert.strictEqual(L.hd, 64); assert.strictEqual(L.pad, '24px');

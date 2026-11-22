@@ -18,7 +18,7 @@ const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html')), PW = 'نسخ-آ
   const openSet = async (p) => { if (!(await p.isVisible('[data-a="setTab"][data-v="vault"]'))) await p.click('.rail [data-a="settings"]'); };
   const connect = async (p) => { await openSet(p); await p.click('[data-a="setTab"][data-v="hx"]'); await p.fill('#hx_relay', RELAY); await p.fill('#hx_key', 'k'); await p.fill('#hx_name', 'د. أحمد'); await p.click('[data-a="hxReg"]'); await p.waitForSelector('main .ok'); };
   const newClient = async (p, name) => { await p.evaluate(() => DPApp.A.new('ex')); await p.fill('[data-f="name"]', name); await p.press('[data-f="name"]', 'Tab'); await p.waitForTimeout(400); };
-  const pick = async (p, name) => { if (!(await p.isVisible('#lst'))) await p.click('.rail [data-a="clients"]'); await p.click(`#lst .cl:has-text("${name}")`); await p.waitForSelector('[data-f="name"]'); };
+  const pick = async (p, name) => { if (!(await p.isVisible('#lst'))) await p.click('.rail [data-a="clients"]'); await p.click(`#lst .cl:has-text("${name}")`); await p.evaluate(() => DPApp.A.tab('client')); await p.waitForSelector('[data-f="name"]'); };
   const vault = async (p) => { await openSet(p); await p.click('[data-a="setTab"][data-v="vault"]'); };
   const enable = async (p, devName) => { await vault(p); await p.fill('#vt_i', 'clinic-hamed'); await p.fill('#vt_d', devName); await p.fill('#vt_p', PW); await p.fill('#vt_p2', PW); await p.click('[data-a="vtOn"]'); await p.waitForSelector('main .ok:has-text("النسخ التلقائي مفعّل")', { timeout: 20000 }); };
   const names = (p) => p.evaluate(() => DPApp.S.clients.map((c) => c.name).sort());

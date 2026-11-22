@@ -1,0 +1,207 @@
+/* ================= 1.42 ملف العميل بنمط Wellbeing — أنماط محصورة بملف العميل (.cfwb و.mx*) ولا تمس شاشة أخرى.
+   الأبعاد من Wellbeing: قائمة العملاء 228 | المحتوى | عمود المعلومات 264، فجوات 16، بطاقات بزوايا 12 وحدود 1px، بلاطات أيقونات 44.
+   الألوان من رموز «زنها» الدلالية (--c-*)، والمستوى: الأحمر خارج المرجع، والبرتقالي حدّي. */
+:root{--mx-rt:#9C2C27;--mx-acc:var(--c-primary,#287E91);--mx-y:#B58A00;--mx-r:var(--c-danger,#B83A34);--mx-o:var(--c-warning,#9A5B00)}
+html[data-dw="dark"]{--mx-y:#F2C94C;--mx-rt:#F79A9A}
+/* ---------- الأعمدة */
+html:not(#mxz):not(#mxy) .cfwb{display:grid;grid-template-columns:minmax(0,1fr) 264px;gap:16px;align-items:start}
+@media (min-width:1400px){html:not(#mxz):not(#mxy) .cfwb{grid-template-columns:228px minmax(0,1fr) 264px}}
+html:not(#mxz):not(#mxy) .cfwb>.cflist{display:none}
+@media (min-width:1400px){html:not(#mxz):not(#mxy) .cfwb>.cflist{display:flex}}
+html:not(#mxz):not(#mxy) .cfwb>.cfmain{position:relative;z-index:2;min-width:0;display:flex;flex-direction:column;gap:12px}
+html:not(#mxz):not(#mxy) .cfwb>.cfmain>.cftabs{margin:0}
+html:not(#mxz):not(#mxy) .cflist,html:not(#mxz):not(#mxy) .cfside{position:sticky;top:calc(var(--hh,64px) + 16px);max-height:calc(100vh - var(--hh,64px) - 32px);overflow:auto;background:var(--c-surface);border:1px solid var(--c-border);border-radius:12px;padding:14px;flex-direction:column;gap:10px;scrollbar-width:thin}
+html:not(#mxz):not(#mxy) .cfside{display:flex}
+html:not(#mxz):not(#mxy) .cflist .mxhd h3,html:not(#mxz):not(#mxy) .mxcard .mxhd h3{margin:0;font-size:16px;font-weight:700;color:var(--c-text)}
+html:not(#mxz):not(#mxy) .cflist .mxhd em,html:not(#mxz):not(#mxy) .mxacc summary em{font-style:normal;color:var(--c-text-muted);font-weight:500}
+html:not(#mxz):not(#mxy) .cflrows{display:flex;flex-direction:column;gap:8px}
+html:not(#mxz):not(#mxy) main button.sec.cflr{display:flex!important;align-items:center;gap:10px;width:100%;text-align:right;padding:9px 10px!important;border:1px solid var(--c-border)!important;border-radius:10px!important;background:var(--c-surface)!important;color:var(--c-text)!important;box-shadow:none!important;min-height:52px;font-weight:400}
+html:not(#mxz):not(#mxy) main button.sec.cflr:hover{border-color:var(--c-border-strong)!important}
+html:not(#mxz):not(#mxy) main button.sec.cflr.on{border:1.5px solid var(--c-text)!important}
+html:not(#mxz):not(#mxy) .cflr .cav{width:32px;height:32px;flex:0 0 32px;border-radius:50%;display:grid;place-items:center;background:var(--c-accent-soft);color:var(--c-link);font-weight:700;font-size:14px}
+html:not(#mxz):not(#mxy) .cfln{display:flex;flex-direction:column;min-width:0;flex:1}
+html:not(#mxz):not(#mxy) .cfln b{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html:not(#mxz):not(#mxy) .cfln small{font-size:12px;color:var(--c-text-muted)}
+html:not(#mxz):not(#mxy) .cflr .ico,html:not(#mxz):not(#mxy) .mxacc summary .ico{width:16px;height:16px;color:var(--c-text-muted);transform:rotate(90deg)}
+/* ---------- عمود المعلومات: رأس الملف نفسه مرتّباً عمودياً */
+html:not(#mxz):not(#mxy) .cfside .cfhead{display:flex;flex-direction:column;align-items:stretch;gap:10px;margin:0;padding:0 0 12px;border:0;border-bottom:1px solid var(--c-divider);border-radius:0;background:none;box-shadow:none;position:static}
+html:not(#mxz):not(#mxy) .cfside .cfhead>.cav{width:56px;height:56px;font-size:22px}
+html:not(#mxz):not(#mxy) .cfside .cfid b{font-size:18px}
+html:not(#mxz):not(#mxy) .cfside .cfbadges,html:not(#mxz):not(#mxy) .cfside .cfact{display:flex;flex-wrap:wrap;gap:6px;margin:0}
+html:not(#mxz):not(#mxy) .cfside .cfact{position:absolute;inset-inline-end:14px;top:14px}
+html:not(#mxz):not(#mxy) .cfside{position:sticky}
+html:not(#mxz):not(#mxy) .cfside .cfact .cfchat span{display:none}
+html:not(#mxz):not(#mxy) .mxedit{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;font-size:13px;padding:0}
+html:not(#mxz):not(#mxy) .mxedit .ico{width:14px;height:14px}
+html:not(#mxz):not(#mxy) .mxacc{border-radius:8px;background:var(--c-surface-muted)}
+html:not(#mxz):not(#mxy) .mxacc summary{list-style:none;display:flex;justify-content:space-between;align-items:center;padding:9px 10px;cursor:pointer;font-size:13px;font-weight:600;color:var(--c-text)}
+html:not(#mxz):not(#mxy) .mxacc summary::-webkit-details-marker{display:none}
+html:not(#mxz):not(#mxy) .mxacc summary .ico{transition:transform .15s}
+html:not(#mxz):not(#mxy) .mxacc[open] summary .ico{transform:none}
+html:not(#mxz):not(#mxy) .mxaccb{display:flex;flex-direction:column;gap:8px;padding:2px 10px 12px;background:var(--c-surface);border-radius:0 0 8px 8px}
+html:not(#mxz):not(#mxy) .mxkv{display:flex;flex-direction:column;gap:1px}
+html:not(#mxz):not(#mxy) .mxkv small{font-size:12px;color:var(--c-text-muted)}
+html:not(#mxz):not(#mxy) .mxkv b{font-size:13px;font-weight:500;color:var(--c-text)}
+html:not(#mxz):not(#mxy) .mxtags{display:flex;flex-wrap:wrap;gap:6px}
+html:not(#mxz):not(#mxy) .mxtags span{font-size:12px;padding:2px 8px;border-radius:999px;background:var(--c-accent-soft);color:var(--c-text)}
+html:not(#mxz):not(#mxy) .mxtags.al span{background:var(--c-danger-bg);color:var(--mx-r);font-weight:600}
+html:not(#mxz):not(#mxy) .mxmut{margin:0;font-size:12px;color:var(--c-text-muted)}
+html:not(#mxz):not(#mxy) .mxaccb .link{align-self:flex-start;font-size:12px;padding:0}
+/* ---------- التنقل داخل المحتوى */
+html:not(#mxz):not(#mxy) .mxcrumb{font-size:13px;color:var(--c-text-muted);display:flex;gap:6px;align-items:center}
+html:not(#mxz):not(#mxy) .mxcrumb span:last-child{color:var(--c-text);font-weight:600}
+html:not(#mxz):not(#mxy) .mxcrumb .link{padding:0;font-size:13px}
+html:not(#mxz):not(#mxy) .mxov,html:not(#mxz):not(#mxy) .mxpage{display:flex;flex-direction:column;gap:16px}
+/* ---------- بطاقات القياسات (مثل Body Temperature) */
+html:not(#mxz):not(#mxy) .mxgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:1250px){html:not(#mxz):not(#mxy) .mxgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+html:not(#mxz):not(#mxy) main button.sec.mxc{display:flex!important;align-items:center;gap:12px;min-height:84px;padding:14px!important;text-align:right;border:1px solid var(--c-border)!important;border-radius:12px!important;background:var(--c-surface)!important;color:var(--c-text)!important;box-shadow:none!important;font-weight:400;width:100%;transition:border-color .15s,box-shadow .15s}
+html:not(#mxz):not(#mxy) main button.sec.mxc:hover{border-color:var(--c-border-strong)!important;box-shadow:0 2px 8px rgba(23,45,67,.06)!important;transform:none}
+html:not(#mxz):not(#mxy) .mxi{width:44px;height:44px;flex:0 0 44px;border-radius:10px;display:grid;place-items:center}
+html:not(#mxz):not(#mxy) .mxi .ico{width:22px;height:22px}
+html:not(#mxz):not(#mxy) .t-b{background:color-mix(in srgb,var(--c-info) 14%,transparent);color:var(--c-info)}
+html:not(#mxz):not(#mxy) .t-v{background:color-mix(in srgb,var(--c-ch5) 16%,transparent);color:var(--c-ch5)}
+html:not(#mxz):not(#mxy) .t-r{background:color-mix(in srgb,var(--mx-r) 12%,transparent);color:var(--mx-r)}
+html:not(#mxz):not(#mxy) .t-g{background:color-mix(in srgb,var(--c-success) 14%,transparent);color:var(--c-success)}
+html:not(#mxz):not(#mxy) .t-o{background:color-mix(in srgb,var(--c-ch4) 16%,transparent);color:var(--mx-o)}
+html:not(#mxz):not(#mxy) .t-y{background:color-mix(in srgb,var(--mx-y) 16%,transparent);color:var(--mx-y)}
+html:not(#mxz):not(#mxy) .t-t{background:var(--c-accent-soft);color:var(--c-link)}
+html:not(#mxz):not(#mxy) .mxb{display:flex;flex-direction:column;min-width:0;gap:2px}
+html:not(#mxz):not(#mxy) .mxb small{font-size:13px;line-height:1.35;color:var(--c-text-2);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+html:not(#mxz):not(#mxy) .mxb b{font-size:22px;font-weight:700;line-height:1.2;font-variant-numeric:tabular-nums;color:var(--c-text)}
+html:not(#mxz):not(#mxy) .mxb b em{font-size:13px;font-style:normal;font-weight:500;color:var(--c-text-muted)}
+html:not(#mxz):not(#mxy) .mxs{font-style:normal;font-size:12px;color:var(--c-text-muted)}
+html:not(#mxz):not(#mxy) main button.sec.mxc.lv-hi{border-color:color-mix(in srgb,var(--mx-r) 55%,transparent)!important;background:color-mix(in srgb,var(--c-danger-bg) 55%,var(--c-surface))!important}
+html:not(#mxz):not(#mxy) .mxc.lv-hi .mxb b,html:not(#mxz):not(#mxy) .mxc.lv-hi .mxs{color:var(--mx-rt)}
+html:not(#mxz):not(#mxy) .mxc.lv-hi .mxs{font-weight:600}
+html:not(#mxz):not(#mxy) main button.sec.mxc.lv-mid{border-color:color-mix(in srgb,var(--c-ch4) 60%,transparent)!important}
+html:not(#mxz):not(#mxy) .mxc.lv-mid .mxs{color:var(--mx-o);font-weight:600}
+html:not(#mxz):not(#mxy) .mxc.lv-ok .mxs{color:var(--c-success)}
+html:not(#mxz):not(#mxy) main button.sec.mxc.mxadd{justify-content:center;border:1.5px dashed var(--mx-acc)!important;color:var(--c-link)!important;font-weight:600;background:transparent!important}
+html:not(#mxz):not(#mxy) .mxadd .ico{width:18px;height:18px}
+/* ---------- البطاقات العامة */
+html:not(#mxz):not(#mxy) .mxcard{background:var(--c-surface);border:1px solid var(--c-border);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+html:not(#mxz):not(#mxy) .mxcard .mxhd{display:flex;justify-content:space-between;align-items:center;gap:8px}
+html:not(#mxz):not(#mxy) .mxcard .mxhd small{font-size:12px;color:var(--c-text-muted);background:var(--c-surface-muted);padding:2px 8px;border-radius:999px;font-variant-numeric:tabular-nums}
+html:not(#mxz):not(#mxy) .mxduo{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:1250px){html:not(#mxz):not(#mxy) .mxduo{grid-template-columns:1fr}}
+/* الحالة العامة (Functional Status) */
+html:not(#mxz):not(#mxy) .mxbar{display:flex;flex-direction:column;gap:6px}
+html:not(#mxz):not(#mxy) .mxbl{display:flex;justify-content:space-between;font-size:13px;color:var(--c-text-2)}
+html:not(#mxz):not(#mxy) .mxbl b{color:var(--c-text);font-variant-numeric:tabular-nums}
+html:not(#mxz):not(#mxy) .mxtrk{height:6px;border-radius:999px;background:var(--c-surface-muted);overflow:hidden}
+html:not(#mxz):not(#mxy) .mxtrk i{display:block;height:100%;border-radius:999px;min-width:4px}
+html:not(#mxz):not(#mxy) .mxtrk i.t-g{background:var(--c-success)}html:not(#mxz):not(#mxy) .mxtrk i.t-t{background:var(--c-ch3)}html:not(#mxz):not(#mxy) .mxtrk i.t-y{background:var(--mx-y)}html:not(#mxz):not(#mxy) .mxtrk i.t-o{background:var(--c-ch4)}
+/* قائمة المهام (To-do) */
+html:not(#mxz):not(#mxy) main button.sec.mxtd{display:flex!important;justify-content:space-between;align-items:center;gap:8px;width:100%;padding:10px 12px!important;border:1px solid var(--c-border)!important;border-radius:8px!important;background:var(--c-surface)!important;color:var(--c-text)!important;box-shadow:none!important;font-size:13px;font-weight:500;text-align:right;min-height:42px}
+html:not(#mxz):not(#mxy) main button.sec.mxtd:hover{border-color:var(--c-border-strong)!important;transform:none}
+html:not(#mxz):not(#mxy) .mxtd i{display:grid;place-items:center;width:20px;height:20px;color:var(--c-text-muted)}
+html:not(#mxz):not(#mxy) .mxtd i .ico{width:18px;height:18px}
+html:not(#mxz):not(#mxy) .mxtd:not(.done) i .ico{transform:rotate(90deg)}
+html:not(#mxz):not(#mxy) .mxtd.done i{color:var(--c-success)}
+html:not(#mxz):not(#mxy) .mxtd.done span{color:var(--c-text-muted)}
+/* الرسوم */
+html:not(#mxz):not(#mxy) .mxsvg{width:100%;height:auto;display:block;overflow:visible;direction:ltr}
+html:not(#mxz):not(#mxy) .mxgl{stroke:var(--c-divider);stroke-width:1}
+html:not(#mxz):not(#mxy) .mxax{fill:var(--c-text-muted);font-size:11px;font-variant-numeric:tabular-nums}
+html:not(#mxz):not(#mxy) .mxbase{stroke:var(--c-text-muted);stroke-dasharray:4 4;stroke-width:1}
+html:not(#mxz):not(#mxy) .mxbr{fill:var(--c-surface-muted);stroke:var(--c-border);stroke-width:1}
+html:not(#mxz):not(#mxy) .mxbr.on{fill:var(--mx-acc);stroke:none}
+html:not(#mxz):not(#mxy) .mxlv{fill:var(--c-text);font-size:12px;font-weight:700}
+html:not(#mxz):not(#mxy) .mxband{fill:color-mix(in srgb,var(--c-success) 12%,transparent)}
+html:not(#mxz):not(#mxy) .mxar{fill:color-mix(in srgb,var(--mx-acc) 10%,transparent)}
+html:not(#mxz):not(#mxy) .mxln{fill:none;stroke:var(--mx-acc);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
+html:not(#mxz):not(#mxy) .mxln.l2{stroke:var(--c-ch5);stroke-dasharray:5 4}
+html:not(#mxz):not(#mxy) .mxpt{fill:var(--c-surface);stroke:var(--mx-acc);stroke-width:2}
+html:not(#mxz):not(#mxy) .mxpt.on{fill:var(--mx-acc)}
+html:not(#mxz):not(#mxy) .mxpt.lv-hi{stroke:var(--mx-r)}html:not(#mxz):not(#mxy) .mxpt.lv-hi.on{fill:var(--mx-r)}
+html:not(#mxz):not(#mxy) .mxpt.lv-mid{stroke:var(--c-ch4)}html:not(#mxz):not(#mxy) .mxpt.lv-mid.on{fill:var(--c-ch4)}
+html:not(#mxz):not(#mxy) .mxleg{margin:0;font-size:12px;color:var(--c-text-muted);display:flex;align-items:center;gap:6px}
+html:not(#mxz):not(#mxy) .mxband-k{display:inline-block;width:14px;height:10px;border-radius:2px;background:color-mix(in srgb,var(--c-success) 22%,transparent)}
+html:not(#mxz):not(#mxy) .mxsum{margin:0;font-size:13px;color:var(--c-text-2)}
+html:not(#mxz):not(#mxy) .mxsum b{color:var(--c-text);font-size:15px}
+html:not(#mxz):not(#mxy) .mxsum span{color:var(--c-text-muted);font-size:12px}
+html:not(#mxz):not(#mxy) main button.sec.mxchip{font-size:12px;padding:3px 10px!important;min-height:0;border-radius:6px!important;border:1px solid var(--c-border)!important;background:var(--c-surface)!important;color:var(--c-text-2)!important;box-shadow:none!important}
+html:not(#mxz):not(#mxy) .mxempty{margin:0;font-size:13px;color:var(--c-text-muted)}
+/* ---------- صفحة القياس */
+html:not(#mxz):not(#mxy) .mxhero{flex-direction:row;align-items:flex-start;gap:14px;position:relative}
+html:not(#mxz):not(#mxy) .mxhero .mxi{width:56px;height:56px;flex-basis:56px;border-radius:12px}
+html:not(#mxz):not(#mxy) .mxhero .mxi .ico{width:28px;height:28px}
+html:not(#mxz):not(#mxy) .mxht{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}
+html:not(#mxz):not(#mxy) .mxtt{display:flex;align-items:center;gap:8px}
+html:not(#mxz):not(#mxy) .mxtt h2{margin:0;font-size:18px;font-weight:700}
+html:not(#mxz):not(#mxy) .mxbig{margin:0;display:flex;flex-wrap:wrap;align-items:baseline;gap:8px}
+html:not(#mxz):not(#mxy) .mxbig b{font-size:32px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.15}
+html:not(#mxz):not(#mxy) .mxbig em{font-style:normal;font-size:14px;color:var(--c-text-muted)}
+html:not(#mxz):not(#mxy) .mxhero.lv-hi .mxbig b{color:var(--mx-rt)}
+html:not(#mxz):not(#mxy) .mxhero.lv-hi{border-color:color-mix(in srgb,var(--mx-r) 55%,transparent)}
+html:not(#mxz):not(#mxy) .mxdv{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--c-text-muted)}
+html:not(#mxz):not(#mxy) .mxdv .ico{width:14px;height:14px}
+html:not(#mxz):not(#mxy) .mxref{margin:0;font-size:13px;color:var(--c-text-2)}
+html:not(#mxz):not(#mxy) .mxst{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--c-surface-muted);color:var(--c-text-2);white-space:nowrap}
+html:not(#mxz):not(#mxy) .mxst.lv-hi{background:var(--c-danger-bg);color:var(--mx-rt)}
+html:not(#mxz):not(#mxy) .mxst.lv-mid{background:var(--c-warning-bg);color:var(--mx-o)}
+html:not(#mxz):not(#mxy) .mxst.lv-ok{background:var(--c-success-bg);color:var(--c-success)}
+html:not(#mxz):not(#mxy) main button.mxplus{width:44px;height:44px;min-height:44px;padding:0!important;border-radius:50%!important;display:grid!important;place-items:center;flex:0 0 44px}
+html:not(#mxz):not(#mxy) .mxplus .ico{width:22px;height:22px}
+html:not(#mxz):not(#mxy) .mxform{display:none;background:var(--c-surface);border:1.5px solid var(--mx-acc);border-radius:12px;padding:14px 16px;flex-direction:column;gap:10px}
+html:not(#mxz):not(#mxy) .mxform.on{display:flex}
+html:not(#mxz):not(#mxy) .mxform h4{margin:0;font-size:14px}
+html:not(#mxz):not(#mxy) .mxrow{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+html:not(#mxz):not(#mxy) .mxrow label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--c-text-2);flex:1 1 160px}
+html:not(#mxz):not(#mxy) .mxnote{margin:0;font-size:13px;color:var(--c-text-muted)}
+html:not(#mxz):not(#mxy) .mxtbl{width:100%;border-collapse:collapse;font-size:13px}
+html:not(#mxz):not(#mxy) .mxtbl th{font-weight:600;color:var(--c-text-muted);text-align:right;padding:8px;border-bottom:1px solid var(--c-divider);font-size:12px}
+html:not(#mxz):not(#mxy) .mxtbl td{padding:8px;border-bottom:1px solid var(--c-divider);font-variant-numeric:tabular-nums;vertical-align:middle}
+html:not(#mxz):not(#mxy) .mxtbl td.mxv{font-weight:700;font-size:14px}
+html:not(#mxz):not(#mxy) .mxtbl td.mxv.lv-hi{color:var(--mx-rt)}
+html:not(#mxz):not(#mxy) .mxfoot{margin:0;font-size:12px;color:var(--c-text-muted)}
+/* علامة ؟ للأهمية */
+html:not(#mxz):not(#mxy) .mxq{position:relative;display:inline-block}
+html:not(#mxz):not(#mxy) .mxq summary{list-style:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:700;cursor:pointer;border:1px solid var(--c-border-strong);color:var(--c-text-2);background:var(--c-surface)}
+html:not(#mxz):not(#mxy) .mxq summary::-webkit-details-marker{display:none}
+html:not(#mxz):not(#mxy) .mxq[open] summary,html:not(#mxz):not(#mxy) .mxq summary:hover{background:var(--mx-acc);border-color:var(--mx-acc);color:var(--c-text-inv)}
+html:not(#mxz):not(#mxy) .mxqp{position:absolute;z-index:30;top:28px;inset-inline-start:0;width:min(320px,78vw);background:var(--c-surface-elev);color:var(--c-text);border:1px solid var(--c-border);border-radius:10px;padding:12px;box-shadow:0 8px 24px rgba(23,45,67,.16);font-size:13px;line-height:1.7}
+html:not(#mxz):not(#mxy) .mxqp b{display:block;margin-bottom:4px}
+html:not(#mxz):not(#mxy) .mxqp p{margin:0 0 6px}
+html:not(#mxz):not(#mxy) .mxqp small{color:var(--c-text-muted)}
+/* قائمة الإضافة */
+html:not(#mxz):not(#mxy) .mxsrch{display:flex;align-items:center;gap:8px;border:1px solid var(--c-border);border-radius:10px;padding:0 10px;background:var(--c-surface)}
+html:not(#mxz):not(#mxy) .mxsrch .ico{width:16px;height:16px;color:var(--c-text-muted);flex:0 0 16px}
+html:not(#mxz):not(#mxy) .mxsrch input{border:0!important;background:transparent!important;box-shadow:none!important;padding:10px 0!important;flex:1;min-width:0}
+html:not(#mxz):not(#mxy) .mxsrch.sm input{padding:7px 0!important;font-size:13px}
+html:not(#mxz):not(#mxy) .mxgrp h4{display:flex;align-items:center;gap:6px;margin:6px 0 8px;font-size:14px;color:var(--c-text)}
+html:not(#mxz):not(#mxy) .mxgrp h4 .ico{width:16px;height:16px;color:var(--c-link)}
+html:not(#mxz):not(#mxy) .mxopts{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+html:not(#mxz):not(#mxy) .mxopt{display:flex;align-items:flex-start;gap:6px;position:relative}
+html:not(#mxz):not(#mxy) .mxopt>button.sec{flex:1;display:flex!important;flex-direction:column;align-items:flex-start;gap:2px;text-align:right;padding:9px 11px!important;border:1px solid var(--c-border)!important;border-radius:8px!important;background:var(--c-surface)!important;color:var(--c-text)!important;box-shadow:none!important;font-weight:600;font-size:13px;min-width:0}
+html:not(#mxz):not(#mxy) .mxopt>button.sec:hover{border-color:var(--mx-acc)!important;transform:none}
+html:not(#mxz):not(#mxy) .mxopt>button small{font-weight:400;font-size:11px;color:var(--c-text-muted);line-height:1.5}
+html:not(#mxz):not(#mxy) .mxopt>button em{font-style:normal;font-size:11px;color:var(--c-success);font-weight:600}
+html:not(#mxz):not(#mxy) .mxopt .mxq{margin-top:9px}
+/* ---------- الجوال والأعرض الضيقة: بلا أعمدة، والبطاقات عمودان */
+@media (max-width:1099px){html:not(#mxz):not(#mxy) .mxgrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}html:not(#mxz):not(#mxy) main button.sec.mxc{min-height:76px;padding:12px!important;gap:10px}html:not(#mxz):not(#mxy) .mxi{width:38px;height:38px;flex-basis:38px}html:not(#mxz):not(#mxy) .mxb b{font-size:19px}}
+@media (max-width:420px){html:not(#mxz):not(#mxy) .mxgrid{grid-template-columns:1fr 1fr}html:not(#mxz):not(#mxy) .mxb small{white-space:normal}}
+@media (prefers-reduced-motion:reduce){html:not(#mxz):not(#mxy) .mxacc summary .ico{transition:none}}
+/* التبويبات داخل العمود الأوسط: مضغوطة كي تتسع الخمسة (مثل شريط Overview في Wellbeing) */
+html:not(#mxz):not(#mxy) .cfwb .cftabs{flex-wrap:wrap;gap:4px;padding:4px}
+html:not(#mxz):not(#mxy) .cfwb .cftabs>button{padding:7px 12px!important;font-size:14px;min-height:38px}
+html:not(#mxz):not(#mxy) .mxgh{display:flex;justify-content:space-between;align-items:center}
+html:not(#mxz):not(#mxy) .mxgh h3{margin:0;font-size:16px}
+html:not(#mxz):not(#mxy) .mxgh .link{font-size:13px;padding:0}
+/* ألوان صريحة (الليلي يجعل النصوص ترث لون الأب) */
+html:not(#mxz):not(#mxy) .cfwb,html:not(#mxz):not(#mxy) .mxov,html:not(#mxz):not(#mxy) .mxpage,html:not(#mxz):not(#mxy) .mxcard,html:not(#mxz):not(#mxy) .cfside,html:not(#mxz):not(#mxy) .cflist,html:not(#mxz):not(#mxy) .mxacc summary,html:not(#mxz):not(#mxy) .mxgh h3,html:not(#mxz):not(#mxy) .mxtt h2,html:not(#mxz):not(#mxy) .mxbig b,html:not(#mxz):not(#mxy) .mxtbl td,html:not(#mxz):not(#mxy) .mxform h4,html:not(#mxz):not(#mxy) .mxgrp h4,html:not(#mxz):not(#mxy) .mxtd span,html:not(#mxz):not(#mxy) .mxopt>button span{color:var(--c-text)}
+html:not(#mxz):not(#mxy) .mxtbl th{background:transparent;color:var(--c-text-muted)}
+html:not(#mxz):not(#mxy) .mxsum,html:not(#mxz):not(#mxy) .mxref,html:not(#mxz):not(#mxy) .mxbl span,html:not(#mxz):not(#mxy) .mxrow label{color:var(--c-text-2)}
+html:not(#mxz):not(#mxy) .mxcrumb span,html:not(#mxz):not(#mxy) .mxleg,html:not(#mxz):not(#mxy) .mxfoot,html:not(#mxz):not(#mxy) .mxnote,html:not(#mxz):not(#mxy) .mxempty{color:var(--c-text-muted)}
+html:not(#mxz):not(#mxy) .mxcrumb span:last-child{color:var(--c-text)}
+html:not(#mxz):not(#mxy) .mxqp p,html:not(#mxz):not(#mxy) .mxqp b{color:var(--c-text)}
+html:not(#mxz):not(#mxy) .cfside .cmore summary{background:var(--c-surface-muted)!important;color:var(--c-text)!important;border:1px solid var(--c-border)!important}
+html:not(#mxz):not(#mxy) .cfwb .cftabs{background:transparent!important;box-shadow:none!important}
+html[data-dw="dark"]:not(#mxz):not(#mxy) main .cftabs{background:var(--c-surface)!important}
+html:not(#mxz):not(#mxy) main details.mxq,html:not(#mxz):not(#mxy) main details.cmore{background:transparent!important;border:0!important;box-shadow:none!important}
+html:not(#mxz):not(#mxy) .cfside .cfhead{background:none!important;box-shadow:none!important;border-width:0 0 1px!important;border-radius:0!important}
+@media (max-width:700px){html:not(#mxz):not(#mxy) .mxqp{position:fixed;inset:auto 16px calc(96px + env(safe-area-inset-bottom,0px)) 16px;width:auto;max-height:50vh;overflow:auto;z-index:60}html:not(#mxz):not(#mxy) .mxtt h2{font-size:17px}html:not(#mxz):not(#mxy) .mxbig b{font-size:28px}}
+/* الجوال: البلاطة فوق النص في البطاقة كي لا يلتف الاسم والقيمة */
+@media (max-width:480px){html:not(#mxz):not(#mxy) main button.sec.mxc{flex-direction:column;align-items:flex-start;gap:8px;min-height:0}html:not(#mxz):not(#mxy) .mxgrid .mxi{width:32px;height:32px;flex-basis:32px;border-radius:8px}html:not(#mxz):not(#mxy) .mxgrid .mxi .ico{width:18px;height:18px}html:not(#mxz):not(#mxy) main button.sec.mxc.mxadd{flex-direction:row;align-items:center;min-height:64px}}
+html:not(#mxz):not(#mxy) .mxb b em,html:not(#mxz):not(#mxy) .mxbig em{white-space:nowrap}
