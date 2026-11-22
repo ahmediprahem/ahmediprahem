@@ -1,3 +1,4 @@
+// 1.40: المحتوى من Lucide (src/icons_lucide.js) عند توفره، وهذه الرسوم احتياط للمفاتيح غير الموجودة فيه.
 // ================= أيقونات «زنها Pro» الخطية (SVG مضمّن، بلا إنترنت) — شبكة 24، خط 1.75، نهايات دائرية، لونها currentColor
 // HIcon.svg('home') للاستعمال المباشر. ومحوِّل تلقائي يستبدل رموز الإيموجي في واجهة الشاشة بأيقونة خطية مع إبقاء الرمز الأصلي
 // مخفياً بصرياً داخل النص (فيبقى textContent كما هو للبحث والاختبارات). لا يلمس صفحات الخطة (.pg) ولا الحقول ولا الملفات المصدَّرة (تُبنى من نصوص لا من الصفحة).
@@ -63,7 +64,7 @@
     chevron: '<path d="m6 9 6 6 6-6"/>',
     heart: '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>'
   };
-  function svg(n, cls) { return '<svg class="ico ico-' + n + (cls ? ' ' + cls : '') + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + (P[n] || P.dot) + '</svg>'; }
+  function svg(n, cls) { return '<svg class="ico ico-' + n + (cls ? ' ' + cls : '') + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + ((window.ZICO && window.ZICO[n]) || P[n] || P.dot) + '</svg>'; }
   // الرموز التي تُستبدل (الصورية فقط). الأسهم ←→ وعلامات الحالة ✔✓✘✕ ▾ تبقى نصاً لأنها جزء من الجمل والحالات.
   var MAP = {
     '🏠': 'home', '👥': 'users', '👤': 'user', '📦': 'package', '🌐': 'globe', '📖': 'book', '⚙': 'settings', '💾': 'save', '🔒': 'lock', '🛠': 'tool', '🔍': 'search', '🔎': 'search',

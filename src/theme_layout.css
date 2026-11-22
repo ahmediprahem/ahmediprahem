@@ -1,0 +1,45 @@
+/* ===== 1.40 نظام التخطيط والمسافات — الدفعة الأولى (قرار المالك، المرحلة 04): الرموز، وهيكل التطبيق، وشاشة «البناء». لا ألوان ولا خطوط ولا زوايا ولا ظلال.
+   تُطبَّق على المظهر الزجاجي/«زنها» فقط. الشاشات الأخرى في دفعات لاحقة ===== */
+/* سلّم المسافات (4px) والرموز الدلالية */
+html:not(.l-off){--sp-1:4px;--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:20px;--sp-6:24px;--sp-8:32px;--sp-10:40px;--sp-12:48px;--sp-16:64px;
+  --l-page-x:32px;--l-page-y:24px;--l-shell-gap:24px;--l-section:24px;--l-card-pad:24px;--l-card-gap:16px;--l-stack:12px;--l-inline:8px;--l-sidebar:240px;--l-rail:72px;--l-max:1680px}
+html:not(.l-off)[data-theme]{--hh:64px!important}
+@media (max-width:1199px){html:not(.l-off){--l-page-x:24px;--l-shell-gap:16px;--l-card-pad:20px;--l-section:20px}}
+@media (max-width:899px){html:not(.l-off){--l-page-x:16px;--l-page-y:16px;--l-section:16px;--l-card-pad:16px;--l-card-gap:12px}html:not(.l-off)[data-theme]{--hh:56px!important}}
+/* الهيكل: هوامش الصفحة، والمسافة بين الشريط والمحتوى، وحشوة اللوحة الرئيسية، وحد أقصى للعرض */
+@media (min-width:900px){html:not(.l-off)[data-theme="glass"] #hd{padding-inline:var(--l-page-x)!important;gap:var(--sp-3)!important}}
+@media (min-width:900px){
+  html:not(.l-off)[data-theme="glass"] #app{padding:var(--l-page-y) var(--l-page-x) var(--sp-8)!important;gap:var(--l-shell-gap)!important;max-width:var(--l-max)!important}
+  html:not(.l-off)[data-theme="glass"] aside{top:calc(var(--hh) + var(--l-page-y))!important;height:calc(100vh - var(--hh) - 2 * var(--l-page-y))!important}
+  html:not(.l-off)[data-theme="glass"] main{padding:var(--l-card-pad)!important;min-height:calc(100vh - var(--hh) - 2 * var(--l-page-y))!important}
+}
+@media (max-width:899px){html:not(.l-off)[data-theme="glass"] #hd{padding-inline:var(--sp-3)!important}html:not(.l-off)[data-theme="glass"] #app{padding-inline:var(--l-page-x)!important;padding-top:var(--sp-3)!important}html:not(.l-off)[data-theme="glass"] main{padding:var(--l-card-pad)!important}}
+/* الشريط الجانبي: كامل (240) من 1200px، وشريط أيقونات (72) بين 900 و1199 — بدل الانطواء حتى 1280 */
+@media (min-width:1200px) and (max-width:1280px){
+  html:not(.l-off)[data-theme="glass"] #app{grid-template-columns:var(--l-sidebar) minmax(0,1fr)!important}
+  html:not(.l-off)[data-theme="glass"] aside{grid-template-columns:var(--l-sidebar) minmax(0,1fr)!important}
+  html:not(.l-off)[data-theme="glass"] .rail{padding:var(--sp-3)!important;align-items:normal!important}
+  html:not(.l-off)[data-theme="glass"] .rail .sidebtn{width:auto!important;height:46px!important;padding:0 14px!important;justify-content:normal!important}
+  html:not(.l-off)[data-theme="glass"] .rail .sidebtn span,html:not(.l-off)[data-theme="glass"] .rail .sbh,html:not(.l-off)[data-theme="glass"] .rail .small{display:block!important}
+  html:not(.l-off)[data-theme="glass"] .rail .cltog em{display:inline!important}
+  html:not(.l-off)[data-theme="glass"] .hsrch{flex-basis:380px!important}
+}
+@media (min-width:900px) and (max-width:1199px){html:not(.l-off)[data-theme="glass"] aside{grid-template-columns:var(--l-rail) minmax(0,1fr)!important}}
+/* شاشة «البناء»: إيقاع عمودي واحد بين الأقسام، وحشوة موحدة للبطاقات، وفجوات شبكة من السلّم */
+html:not(.l-off) .gentab{display:grid;gap:var(--l-section)}
+html:not(.l-off) .gentab > *{margin-block:0!important}
+html:not(.l-off) .genflowh{margin-bottom:var(--l-section)!important;padding:var(--sp-4) var(--l-card-pad)!important;gap:var(--sp-4)!important}
+html:not(.l-off) .gentab > .ucard,html:not(.l-off) .gentab .genqual,html:not(.l-off) .gentab .geneqv{padding:var(--l-card-pad)!important}
+html:not(.l-off) .gensteps{gap:var(--sp-2)!important;margin:0!important}
+html:not(.l-off) .gqs{gap:var(--sp-3)!important;margin:var(--sp-4) 0!important}
+html:not(.l-off) .gq{padding:var(--sp-3) var(--sp-4)!important}
+html:not(.l-off) .gqchk{gap:var(--sp-2) var(--sp-4)!important}
+html:not(.l-off) .eqsteps{gap:var(--sp-2)!important;margin-bottom:var(--sp-4)!important}
+html:not(.l-off) .ggs{gap:var(--sp-3)!important;margin-block:var(--sp-4)!important}
+html:not(.l-off) .geneqv h3{margin-block:var(--sp-6) var(--sp-4)!important}
+html:not(.l-off) .eqdays{padding:var(--sp-3) var(--sp-4)!important;gap:var(--sp-2)!important}
+/* الجوال: بطاقات المؤشرات بعمودين، والجداول تمرّر داخل حاويتها مع تثبيت عمود المجموعة (يمين في RTL) */
+@media (max-width:599px){
+  html:not(.l-off) .gqs,html:not(.l-off) .ggs{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:var(--sp-2)!important}
+  html:not(.l-off) .gentab table.st tr > :first-child{position:sticky;inset-inline-start:0;z-index:1;background:var(--c-surface-elev,#fff)}
+}
