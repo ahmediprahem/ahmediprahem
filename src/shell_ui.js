@@ -51,19 +51,45 @@ function newMenu() {
   return '<details class="tbm newm"><summary class="newb">' + IC('plus') + '<span>عميل جديد</span></summary><div class="tbp"><p class="small">اختر نظام الخطة لهذا العميل</p>'
     + '<button data-a="new" data-v="ex"><b>نظام الحصص</b><small>خطة بالحصص والبدائل</small></button><button class="o" data-a="new" data-v="ath"><b>نظام الجرامات</b><small>خطة بالجرام والماكروز</small></button></div></details>';
 }
-// ---- «اليوم»: ما يحتاج الأخصائي فعله الآن أولاً؛ الترحيب سطر واحد، ولا بلاطات تكرر التنقل
-function tdStat(a, icon, n, label) { return '<button class="tdk' + (n ? ' has' : '') + '" data-a="' + a + '">' + IC(icon) + '<b>' + n + '</b><small>' + label + '</small></button>'; }
+// ---- 1.36 «اليوم» بهوية زنها الموحدة (الاجتماع 11، قرارات المالك): ترحيب، 8 مؤشرات، أولويات اليوم، آخر العملاء، ومنطقة سياق (مواعيد اليوم، طلبات «زنها»، النسخ الاحتياطي).
+// عرض فقط: نفس البيانات ونفس الإجراءات (data-a) ونفس الأسماء التي تعتمد عليها الاختبارات (.tdh .tdks .tdk .wktodo .wkit .recent .cl .bakrem). التخطيط بحسب عرض الصفحة نفسها (container queries في theme_home.css)
+function tdStat(a, icon, n, label, tone, info) { return '<button class="tdk zhs' + (info ? ' zinfo' + (n ? '' : ' zero') : n ? ' has' : ' zero') + (tone ? ' t-' + tone : '') + '" data-a="' + a + '" title="' + label + '"><span class="zhk">' + IC(icon) + '<small>' + label + '</small></span><b>' + n + '</b></button>'; }
+function zhName() { var n = (typeof HX !== 'undefined' && HX && HX.st && HX.st.name) || firstName(); return String(n || '').trim(); }      // الاسم الذي يراه العملاء في «زنها»، وإلا اسم الحساب
+function zhActivePlans() { return S.clients.filter(function (c) { return planOf(c).has; }).length; }      // «الخطط النشطة» = كل عميل له خطة حالية بحسب planOf، بغض النظر عن الاشتراك (قرار المالك)
+function zhFollowToday() { var t = wkDay(), n = 0; S.clients.forEach(function (c) { (c.appts || []).forEach(function (a) { if (a.d === t && !a.st && (a.type || 'متابعة') === 'متابعة') n++; }); }); return n; }      // «متابعات اليوم» = مواعيد اليوم من نوع «متابعة» (بلا نوع = متابعة كالسلوك الحالي) ولم تُحسم بعد
+function zhTodayAppts() { var t = wkDay(), out = []; S.clients.forEach(function (c) { (c.appts || []).forEach(function (a) { if (a.d === t && !a.st) out.push({ c: c, a: a }); }); }); return out.sort(function (x, y) { return String(x.a.t || '').localeCompare(String(y.a.t || '')); }); }
+function zhLast(c) {                                                // آخر نشاط من بيانات موجودة: الموعد القادم، وإلا آخر تسجيل في «زنها»
+  var up = (c.appts || []).filter(function (a) { return !a.st && a.d >= wkDay(); }).sort(function (a, b) { return (a.d + (a.t || '')).localeCompare(b.d + (b.t || '')); })[0];
+  if (up) return 'موعد ' + (up.d === wkDay() ? 'اليوم' : wkDate(up.d)) + (up.t ? ' ' + up.t : '');
+  var ks = c.hx ? Object.keys(c.hx.logs || {}).sort() : []; if (ks.length) { var k = ks[ks.length - 1], d = Math.round((new Date(wkDay() + 'T12:00') - new Date(k + 'T12:00')) / 864e5); return d <= 0 ? 'سجّل اليوم في «زنها»' : 'آخر تسجيل قبل ' + d + (d === 1 ? ' يوم' : ' أيام'); }
+  return '';
+}
+function zhPlanChip(c) { var po = planOf(c); return !po.has ? '<span class="zchip zc-no">بلا خطة</span>' : c.hx && c.hx.planV ? '<span class="zchip zc-sent">أُرسلت لزنها</span>' : '<span class="zchip zc-ok">له خطة</span>'; }
+function zhBackup() {                                               // التحذير كما هو حين يستحق (bakCard)، وإلا سطر حالة صغير
+  var w = bakCard(); if (w) return w; if (!S.clients.length) return ''; var d = bakAge(), vt = typeof VT !== 'undefined' && VT.st && VT.st.on;
+  return '<div class="zhbk ok" role="status"><span class="zhbi">' + IC('save') + '</span><div><b>' + (vt ? 'النسخ الاحتياطي التلقائي مفعّل' : d >= 0 ? 'آخر نسخة احتياطية منذ ' + (d ? d + (d === 1 ? ' يوم' : ' أيام') : 'اليوم') : 'النسخ الاحتياطي') + '</b><small>بيانات ' + S.clients.length + ' عميل</small></div><button class="sec sm" data-a="export">نسخة احتياطية الآن</button></div>';
+}
+function zhWarm(n, fu) { var a = n.appt, m = n.chat; return a || m ? 'عندك ' + (a ? a + (a === 1 ? ' موعد' : ' مواعيد') : '') + (a && m ? ' و' : '') + (m ? m + (m === 1 ? ' رسالة' : ' رسائل') : '') + ' اليوم. يوم موفق 🌿' : 'يوم هادئ… فرصة لمراجعة خطط عملائك 🌿'; }
 function homeGlass() {
-  var cs = S.clients.slice().sort(function (a, b) { return (b.updated || b.created) - (a.updated || a.created); }), withPlan = cs.filter(function (c) { return planOf(c).has; }).length, ath = cs.filter(function (c) { return c.kind === 'athlete'; }).length;
-  var n = navCounts(), fol = wkItems().filter(function (i) { return /:follow$/.test(i.key); }).length;
-  var recent = cs.slice(0, 6).map(function (c) { return '<div class="cl" data-a="pick" data-v="' + c.code + '"><span class="cav">' + esc(initial(c.name)) + '</span><b>' + esc(c.name || '(بلا اسم)') + '</b><small>' + c.code + (c.phone ? ' • ' + esc(c.phone) : '') + (planOf(c).has ? ' • له خطة' : '') + '</small></div>'; }).join('');
-  return '<div class="home ghome today">'
-    + '<div class="tdh"><h2>اليوم</h2><p class="tdhi">أهلاً' + (firstName() ? '، ' + esc(firstName()) : '') + ' • ' + esc(wkDate(wkDay())) + '</p></div>'
-    + bakCard()
-    + (cs.length || n.req ? '<div class="tdks" role="group" aria-label="ملخص اليوم">' + tdStat('appts', 'calendar', n.appt, 'مواعيد اليوم') + tdStat('hxv', 'inbox', n.req, 'طلبات تسجيل جديدة') + tdStat('zchat', 'message', n.chat, 'رسائل غير مقروءة') + tdStat('subs', 'card', n.subs, 'اشتراكات للتجديد') + tdStat('tdFollow', 'repeat', fol, 'متابعات مستحقة') + '</div>' : '')
-    + wkToday()
-    + (recent ? '<div class="hxtop tdrh"><h3>آخر العملاء</h3><button class="sec sm" data-a="clients">كل العملاء (' + cs.length + ')</button></div><div class="recent">' + recent + '</div><p class="small tdsum">' + cs.length + ' عميل • ' + withPlan + ' له خطة • ' + ath + ' بنظام الجرامات</p>'
-      : '<div class="ucard tdempty"><h3>ابدأ بأول عميل</h3><p class="small">أضف عميلاً لتبني خطته، وستظهر هنا مواعيده ورسائله ومتابعاته.</p>' + newMenu() + '</div>')
+  var cs = S.clients.slice().sort(function (a, b) { return (b.updated || b.created) - (a.updated || a.created); }), withPlan = zhActivePlans(), ath = cs.filter(function (c) { return c.kind === 'athlete'; }).length;
+  var n = navCounts(), fol = wkItems().filter(function (i) { return /:follow$/.test(i.key); }).length, fu = zhFollowToday(), name = zhName();
+  var dt = new Date().toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long' });
+  var zz = window.Zizo && !(S.settings && S.settings.zzOff) ? '<span class="zhzz" aria-hidden="true">' + Zizo.svg({ coat: 1, wave: 1, mouth: 'smile' }) + '</span>' : '';
+  var recent = cs.slice(0, 6).map(function (c) { var last = zhLast(c); return '<div class="cl zhrow" data-a="pick" data-v="' + c.code + '" role="button" tabindex="0"><span class="cav">' + esc(initial(c.name)) + '</span><span class="zhrt"><b>' + esc(c.name || '(بلا اسم)') + '</b><small>' + c.code + (c.phone ? ' • ' + esc(c.phone) : '') + (last ? ' • ' + esc(last) : '') + '</small></span>' + zhPlanChip(c) + '</div>'; }).join('');
+  var ap = zhTodayAppts(), rq = (typeof HX !== 'undefined' && HX.st && HX.st.reqs) ? Object.keys(HX.st.reqs).map(function (k) { return HX.st.reqs[k]; }).filter(function (q) { return q.st === 'new'; }) : [];
+  var ctx = '<aside class="zhctx" aria-label="سياق اليوم">'
+    + '<section class="zhcard"><div class="zhh"><h3>' + IC('calendar') + ' مواعيد اليوم</h3><button class="link" data-a="appts">كل المواعيد</button></div>'
+    + (ap.length ? '<ul class="zhap">' + ap.slice(0, 6).map(function (x) { return '<li><button data-a="wkOpen" data-v="' + x.c.code + '"><time>' + esc(x.a.t || '—') + '</time><span><b>' + esc(x.c.name || x.c.code) + '</b><small>' + esc(x.a.type || 'متابعة') + '</small></span></button></li>'; }).join('') + '</ul>' : '<p class="small zhnone">لا مواعيد اليوم.</p>') + '</section>'
+    + (rq.length ? '<section class="zhcard"><div class="zhh"><h3>' + IC('inbox') + ' طلبات «زنها» الجديدة <em class="hxnb">' + rq.length + '</em></h3><button class="link" data-a="hxv">راجع الطلبات</button></div><ul class="zhap">' + rq.slice(0, 4).map(function (q) { var it = q.intake || {}; return '<li><button data-a="hxv"><time>جديد</time><span><b>' + esc(it.name || q.label || 'طلب تسجيل') + '</b><small>تسجيل جديد من رابط الدعوة</small></span></button></li>'; }).join('') + '</ul></section>' : '')
+    + zhBackup() + '</aside>';
+  return '<div class="home ghome today zh">'
+    + '<div class="tdh zhw"><div class="zhwt"><h2>أهلاً' + (name ? '، ' + esc(name) : '') + '</h2><p class="tdhi"><span class="zhd">' + esc(dt) + '</span> • ' + zhWarm(n, fu) + '</p></div>'
+    + '<div class="zhqa">' + newMenu() + '<button class="sec" data-a="genTab">' + IC('sparkles') + '<span>توليد خطة</span></button><button class="sec" data-a="appts">' + IC('calendar') + '<span>موعد</span></button></div>' + zz + '</div>'
+    + (cs.length || n.req ? '<div class="tdks zhst" role="group" aria-label="ملخص العمل">' + tdStat('clients', 'users', cs.length, 'إجمالي العملاء', '', 1) + tdStat('appts', 'repeat', fu, 'متابعات اليوم', '', 1) + tdStat('clients', 'file', withPlan, 'الخطط النشطة', '', 1) + tdStat('zchat', 'message', n.chat, 'رسائل غير مقروءة', 'r')
+      + tdStat('hxv', 'inbox', n.req, 'طلبات تسجيل جديدة', 'a') + tdStat('appts', 'calendar', n.appt, 'مواعيد اليوم') + tdStat('subs', 'card', n.subs, 'اشتراكات للتجديد', 'a') + tdStat('tdFollow', 'repeat', fol, 'متابعات مستحقة') + '</div>' : '')
+    + (cs.length ? '<div class="zhcols"><div class="zhmain">' + wkToday()
+      + '<section class="zhcard zhrec"><div class="hxtop tdrh zhh"><h3>' + IC('users') + ' آخر العملاء</h3><button class="link" data-a="clients">كل العملاء (' + cs.length + ')</button></div><div class="recent">' + recent + '</div><p class="small tdsum">' + cs.length + ' عميل • ' + withPlan + ' له خطة • ' + ath + ' بنظام الجرامات</p></section></div>' + ctx + '</div>'
+      : wkToday() + '<div class="ucard tdempty zhcard"><h3>ابدأ بأول عميل</h3><p class="small">أضف عميلاً لتبني خطته، وستظهر هنا مواعيده ورسائله ومتابعاته.</p>' + newMenu() + '</div>' + zhBackup())
     + vtHomeCard() + proInstCard() + appCard() + '</div>';
 }
 // ---- «العملاء»: القائمة والبحث وزر واحد «عميل جديد» (على الويب البحث في الترويسة، وعلى الجوال حقل الصفحة نفسه)

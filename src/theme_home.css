@@ -1,0 +1,132 @@
+/* ===== 1.36 «اليوم» بهوية زنها الموحدة (الاجتماع 11، قرارات المالك) =====
+   رموز مركزية --zh-*؛ والتخطيط بحسب عرض صفحة «اليوم» نفسها (container queries) دون تغيير نقطة التنقل العامة 900px:
+   جوال (< 560)، تابلت رأسي (560–839)، تابلت أفقي (840–1009)، ويب (1010+: عمود سياق)، وحد أقصى للعرض على الشاشات الكبيرة.
+   الإشارة المرجعية: Linear (القوائم والتسلسل)، Vercel (المؤشرات الهادئة)، Stripe (الأزرار والحالات)، Headspace (الترحيب والحالات الفارغة) */
+:root{--zh-mint:#24C99A;--zh-mint2:#1FB88C;--zh-mintd:#0F8A66;--zh-navy:#102D3B;--zh-bg:#F4F7F6;--zh-card:#FFFFFF;--zh-tint:#E7F7F1;--zh-ink:#102D3B;--zh-mut:#69767B;--zh-line:#E6EBE9;
+  --zh-warn:#E7A34B;--zh-warnT:#FBF0E1;--zh-warnD:#8A5A12;--zh-bad:#E66B70;--zh-badT:#FCE9EA;--zh-badD:#B5454A;--zh-ok:#24A879;--zh-sky:#3D7FB0;--zh-skyT:#E8F1F8;
+  --zh-r:16px;--zh-r2:12px;--zh-sh:0 1px 2px rgba(16,45,59,.04);--zh-fs-page:24px;--zh-fs-sec:16.5px;--zh-fs-body:15px;--zh-fs-meta:12.5px;--zh-fs-num:24px}
+html:not([data-tone="light"]){--zh-bg:#0C171D;--zh-card:rgba(255,255,255,.05);--zh-tint:rgba(36,201,154,.14);--zh-ink:#E6F0EE;--zh-mut:#9DB0AC;--zh-line:rgba(255,255,255,.12);--zh-warnT:rgba(231,163,75,.16);--zh-warnD:#F0C27E;--zh-badT:rgba(230,107,112,.16);--zh-badD:#F3A5A9;--zh-skyT:rgba(61,127,176,.2);--zh-mintd:#5FE0BA}
+.ghome.zh{container-type:inline-size;display:flex!important;flex-direction:column;gap:16px;max-width:1440px;width:100%;margin-inline:auto;padding:4px 0 24px;color:var(--zh-ink);font-family:'Hissa Plex','IBM Plex Sans Arabic',system-ui,sans-serif}
+.ghome.zh :is(h2,h3){color:var(--zh-ink)!important}
+.ghome.zh svg.ico{width:19px;height:19px}
+/* الترحيب */
+.ghome .zhw{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;padding:2px 2px 0;position:relative}
+.ghome .zhwt{flex:1 1 240px;min-width:0}
+.ghome .zhw h2{font-size:var(--zh-fs-page)!important;margin:0!important;line-height:1.3}
+.ghome .zhw .tdhi{margin:2px 0 0;color:var(--zh-mut);font-size:13.5px}
+.ghome .zhd{color:var(--zh-mintd);font-weight:600}
+.ghome .zhqa{display:none;gap:8px;align-items:center}
+.ghome .zhzz{display:none;width:58px;height:64px;flex:0 0 auto}.ghome .zhzz svg{width:100%;height:100%}
+.ghome .zhqa > .sec,.ghome .zhqa .newb{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 14px;border-radius:var(--zh-r2)!important;font-weight:600;font-size:14px;cursor:pointer}
+.ghome .zhqa > .sec{background:var(--zh-card)!important;border:1px solid var(--zh-line)!important;color:var(--zh-ink)!important;box-shadow:none!important}
+.ghome .zhqa > .sec:hover{border-color:var(--zh-mint)!important}
+.ghome .zhqa .newb{background:var(--zh-mint)!important;color:var(--zh-navy)!important;border:0!important;list-style:none}
+.ghome .zhqa .newb::-webkit-details-marker{display:none}
+.ghome .zhqa .newm{position:relative}
+/* المؤشرات (Vercel: رقم هادئ وتسمية صغيرة، والصفر خافت) */
+.ghome .tdks.zhst{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:2px;margin:0!important}
+.ghome .tdks.zhst::-webkit-scrollbar{display:none}
+.ghome .tdk.zhs{all:unset;box-sizing:border-box;scroll-snap-align:start;display:grid;gap:4px;padding:12px 14px;min-height:84px;border-radius:var(--zh-r)!important;background:var(--zh-card)!important;border:1px solid var(--zh-line)!important;box-shadow:var(--zh-sh)!important;cursor:pointer;text-align:start;color:var(--zh-ink)!important;transition:border-color .15s,transform .15s}
+.ghome .tdk.zhs:hover{border-color:var(--zh-mint)!important;transform:translateY(-1px)}
+.ghome .tdk.zhs:focus-visible{outline:2.5px solid var(--zh-mint);outline-offset:2px}
+.ghome .zhk{display:flex;align-items:center;justify-content:space-between;gap:6px;color:var(--zh-mut)}
+.ghome .zhk small{font-size:var(--zh-fs-meta);color:var(--zh-mut)!important;line-height:1.35}
+.ghome .zhk svg{color:var(--zh-mintd);flex:0 0 auto}
+.ghome .tdk.t-r.has .zhk svg{color:var(--zh-bad)}.ghome .tdk.t-a.has .zhk svg{color:var(--zh-warn)}
+.ghome .tdk.zhs b{font-size:var(--zh-fs-num);font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1;color:var(--zh-ink)!important}
+.ghome .tdk.zhs.zero b{color:var(--zh-mut)!important;opacity:.7}
+/* البطاقات */
+.ghome .zhcard,.ghome .wktodo{background:var(--zh-card)!important;border:1px solid var(--zh-line)!important;border-radius:var(--zh-r)!important;box-shadow:var(--zh-sh)!important;padding:4px 6px 8px!important;margin:0!important;min-width:0}
+.ghome .zhh{display:flex!important;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:10px 8px 6px;margin:0!important}
+.ghome .zhh h3{display:flex;align-items:center;gap:8px;margin:0!important;font-size:var(--zh-fs-sec)!important;flex:1 1 auto}
+.ghome .zhh h3 svg{color:var(--zh-mintd)}
+.ghome .zhh .hxnb{font-style:normal;background:var(--zh-navy)!important;color:#fff!important;border-radius:999px;font-size:12px;padding:0 8px;line-height:20px;min-width:0}
+.ghome .zhfol{display:flex;align-items:center;gap:6px;color:var(--zh-mut)!important;margin:0}
+.ghome .zhfol select{min-height:34px;padding:2px 8px;border-radius:10px!important;border:1px solid var(--zh-line)!important;background:var(--zh-card)!important;color:var(--zh-ink)!important}
+.ghome button.link{background:none!important;border:0!important;color:var(--zh-mintd)!important;font-weight:600;padding:6px 4px;min-height:36px;cursor:pointer;text-decoration:none!important}
+.ghome button.link:hover{text-decoration:underline!important}
+/* الأولويات (Linear: صف من سطرين، وحالة بشارة ونقطة لون) */
+.ghome .wkl{display:grid}
+.ghome .wkit{display:grid!important;grid-template-columns:auto minmax(0,1fr) auto auto auto;align-items:center;gap:10px;padding:9px 8px!important;margin:0!important;border:0!important;border-radius:var(--zh-r2);background:none!important}
+.ghome .wkit+.wkit{border-top:1px solid var(--zh-line)!important;border-radius:0}
+.ghome .wkit:hover{background:var(--zh-bg)!important}
+.ghome .wkic{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;font-size:0;background:var(--zh-tint);color:var(--zh-mintd)}
+.ghome .zt-r .wkic{background:var(--zh-badT);color:var(--zh-bad)}.ghome .zt-a .wkic{background:var(--zh-warnT);color:#B7741C}.ghome .zt-s .wkic{background:var(--zh-skyT);color:var(--zh-sky)}
+.ghome .wkgo{all:unset;box-sizing:border-box;display:grid;gap:1px;min-width:0;cursor:pointer;text-align:start;padding:2px 0}
+.ghome .wkgo b{font-weight:600;font-size:14.5px;color:var(--zh-ink)}
+.ghome .wkgo small{font-size:13px;color:var(--zh-mut);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.ghome .wkgo:focus-visible{outline:2.5px solid var(--zh-mint);outline-offset:2px;border-radius:8px}
+.ghome .zbdg{font-size:11.5px;font-weight:700;border-radius:999px;padding:2px 9px;white-space:nowrap;background:var(--zh-tint);color:var(--zh-mintd)}
+.ghome .zt-r .zbdg{background:var(--zh-badT);color:var(--zh-badD)}.ghome .zt-a .zbdg{background:var(--zh-warnT);color:var(--zh-warnD)}.ghome .zt-s .zbdg{background:var(--zh-skyT);color:var(--zh-sky)}
+.ghome .wkop,.ghome .wkx{min-width:36px!important;width:36px;height:36px;min-height:36px!important;padding:0!important;display:grid;place-items:center;border-radius:10px!important;background:var(--zh-card)!important;border:1px solid var(--zh-line)!important;color:var(--zh-mut)!important;box-shadow:none!important;font-size:14px}
+.ghome .wkop{color:var(--zh-mintd)!important}.ghome .wkop svg{width:17px;height:17px}
+.ghome .wkop:hover,.ghome .wkx:hover{border-color:var(--zh-mint)!important}
+.ghome .zhmore{margin:4px 8px 0;text-align:center}
+.ghome .zhempty{display:flex;align-items:center;gap:10px;padding:6px 8px}.ghome .zhempty .zhzz.sm{display:block;width:48px;height:54px}
+/* آخر العملاء */
+.ghome .zhrec .recent{display:grid!important;grid-template-columns:1fr!important;gap:0!important;margin:0!important}
+.ghome .zhrow{display:grid!important;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;padding:9px 8px!important;margin:0!important;border:0!important;border-radius:var(--zh-r2)!important;background:none!important;box-shadow:none!important;cursor:pointer;min-height:56px}
+.ghome .zhrow+.zhrow{border-top:1px solid var(--zh-line)!important;border-radius:0!important}
+.ghome .zhrow:hover{background:var(--zh-bg)!important}
+.ghome .zhrow:focus-visible{outline:2.5px solid var(--zh-mint);outline-offset:-2px}
+.ghome .zhrow .cav{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:var(--zh-tint)!important;color:var(--zh-mintd)!important;font-weight:700}
+.ghome .zhrt{display:grid;min-width:0}.ghome .zhrt b{font-weight:600}
+.ghome .zhrt small{font-size:12.5px;color:var(--zh-mut);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ghome .zchip{font-size:11.5px;font-weight:700;border-radius:999px;padding:2px 9px;white-space:nowrap}
+.ghome .zchip.zc-ok{background:var(--zh-tint);color:var(--zh-mintd)}.ghome .zchip.zc-sent{background:var(--zh-skyT);color:var(--zh-sky)}.ghome .zchip.zc-no{background:var(--zh-bg);color:var(--zh-mut);border:1px solid var(--zh-line)}
+.ghome .tdsum{margin:4px 8px 4px!important;color:var(--zh-mut)!important}
+/* السياق والنسخ الاحتياطي (Stripe: حالة بشريط جانبي ونص صريح) */
+.ghome .zhctx{display:grid;gap:16px;align-content:start;min-width:0}
+.ghome .zhap{list-style:none;margin:0;padding:0 4px 4px;display:grid}
+.ghome .zhap li+li{border-top:1px solid var(--zh-line)}
+.ghome .zhap button{all:unset;box-sizing:border-box;display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:center;width:100%;padding:8px 4px;cursor:pointer;border-radius:10px}
+.ghome .zhap button:hover{background:var(--zh-bg)}
+.ghome .zhap button:focus-visible{outline:2.5px solid var(--zh-mint)}
+.ghome .zhap time{font-weight:700;font-size:13px;background:var(--zh-bg);border:1px solid var(--zh-line);border-radius:10px;padding:4px 8px;font-variant-numeric:tabular-nums;min-width:54px;text-align:center}
+.ghome .zhap b{display:block;font-weight:600}.ghome .zhap small{color:var(--zh-mut);font-size:12.5px}
+.ghome .zhnone{padding:0 8px 6px;margin:0;color:var(--zh-mut)}
+.ghome .bakrem,.ghome .zhbk{margin:0!important;border-radius:var(--zh-r)!important;background:var(--zh-card)!important;border:1px solid var(--zh-line)!important;border-inline-start:4px solid var(--zh-warn)!important;box-shadow:var(--zh-sh)!important;padding:12px 14px!important}
+.ghome .bakrem b{color:var(--zh-ink)!important}.ghome .bakrem .small{color:var(--zh-mut)!important;margin:4px 0 8px}
+.ghome .bakrem button{border-radius:10px!important;min-height:38px;padding:0 14px;font-weight:600;box-shadow:none!important}
+.ghome .bakrem button:not(.sec){background:var(--zh-mint)!important;color:var(--zh-navy)!important;border:0!important}
+.ghome .bakrem button.sec{background:var(--zh-card)!important;color:var(--zh-ink)!important;border:1px solid var(--zh-line)!important}
+.ghome .zhbk.ok{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;border-inline-start-color:var(--zh-ok)!important}
+.ghome .zhbk .zhbi{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:var(--zh-tint);color:var(--zh-mintd)}
+.ghome .zhbk b{display:block;font-weight:600;font-size:14px}.ghome .zhbk small{color:var(--zh-mut);font-size:12.5px}
+.ghome .zhbk .sec{min-height:36px;border-radius:10px!important;background:var(--zh-card)!important;border:1px solid var(--zh-line)!important;color:var(--zh-ink)!important;box-shadow:none!important;font-weight:600;padding:0 12px}
+.ghome .zhcols,.ghome .zhmain{display:grid;gap:16px;min-width:0}
+/* الجوال الصغير (الصفحة أقل من 300 ≈ شاشة 320): الشارة تحت السبب بدل عمود مستقل */
+@container (max-width:300px){ .ghome .wkit{grid-template-columns:auto minmax(0,1fr) auto auto} .ghome .wkit .zbdg{grid-column:2;grid-row:2;justify-self:start} .ghome .tdk.zhs{padding:10px 12px} }
+/* التابلت الرأسي (560–859): المؤشرات 4×2، وآخر العملاء عمودان، وتظهر الإجراءات السريعة */
+@container (min-width:560px){
+  .ghome .tdks.zhst{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .ghome .zhrec .recent{grid-template-columns:1fr 1fr!important;column-gap:12px!important}
+  .ghome .zhrec .zhrow+.zhrow{border-top:0!important}.ghome .zhrec .zhrow{border-bottom:1px solid var(--zh-line)!important;border-radius:0!important}
+  .ghome .zhqa{display:flex}.ghome .zhw h2{font-size:26px!important}
+  .ghome .zhctx{grid-template-columns:1fr 1fr}.ghome .zhctx .bakrem,.ghome .zhctx .zhbk{grid-column:1/-1}
+}
+/* التابلت الأفقي (840–1009: شاشة 1024–1180): الأولويات بجانب آخر العملاء، والسياق تحتهما في صف */
+@container (min-width:840px){
+  .ghome .zhmain{grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);align-items:start}
+  .ghome .zhrec .recent{grid-template-columns:1fr!important}.ghome .zhrec .zhrow{border-bottom:0!important}.ghome .zhrec .zhrow+.zhrow{border-top:1px solid var(--zh-line)!important}
+  .ghome .zhctx{grid-template-columns:repeat(3,minmax(0,1fr))}.ghome .zhctx .bakrem,.ghome .zhctx .zhbk{grid-column:auto}
+  .ghome .zhzz{display:block}
+}
+/* الويب (1010+: شاشة 1280 فأكثر): ثلاث مناطق — الأولويات، آخر العملاء، وعمود السياق */
+@container (min-width:1010px){
+  .ghome .tdks.zhst{grid-template-columns:repeat(8,minmax(0,1fr))}
+  .ghome .tdk.zhs b{font-size:22px}
+  .ghome .zhcols{grid-template-columns:minmax(0,1fr) 300px;align-items:start}
+  .ghome .zhctx{grid-template-columns:1fr}
+}
+@container (min-width:1240px){ .ghome .zhcols{grid-template-columns:minmax(0,1fr) 340px} }
+/* الجوال: مسافة أمان فوق الشريط السفلي */
+@media (max-width:900px){ .ghome.zh{padding-bottom:96px} }
+@media (prefers-reduced-motion:reduce){ .ghome .tdk.zhs{transition:none} .ghome .tdk.zhs:hover{transform:none} }
+/* إصلاحات المعاينة: صف العميل سطر واحد (كان الحرف يمتد صفين)، وأزرار المواعيد بلا إطار، والشارة تحت السبب على الجوال، والسياق عمودان على التابلت الأفقي */
+.ghome .zhrow .cav{grid-row:auto!important;grid-column:1}.ghome .zhrow .zhrt{grid-column:2}.ghome .zhrow .zchip{grid-column:3;grid-row:1;justify-self:end;width:auto}
+.ghome .zhrow .zchip::before,.ghome .zhrow .zchip::after{content:none!important}
+.ghome .zhap button{border:0!important;background:none!important;box-shadow:none!important;min-height:52px;color:var(--zh-ink)!important}
+.ghome .zhap button:hover{background:var(--zh-bg)!important}
+@container (max-width:420px){ .ghome .wkit{grid-template-columns:auto minmax(0,1fr) auto auto} .ghome .wkit .zbdg{grid-column:2;grid-row:2;justify-self:start;margin-top:-2px} .ghome .wkit .wkic{grid-row:1/3} .ghome .wkit .wkop,.ghome .wkit .wkx{grid-row:1/3} }
+@container (min-width:840px) and (max-width:1009px){ .ghome .zhctx{grid-template-columns:1fr 1fr!important} .ghome .zhctx > *{grid-column:auto!important} }
