@@ -240,7 +240,7 @@ function notify(t, b) { toast(t); try { if (document.hidden && 'Notification' in
 function handle(p) {
   if (p.t === 'grp' || p.t === 'grpx') return zcIn(p);
   if (p.t === 'status') {
-    if (p.st === 'approved') { S.req = 'approved'; S.code = String(p.code || ''); if (p.dname) S.dname = p.dname; notify('اعتمدك ' + S.dname, 'خطتك قيد الإعداد'); }
+    if (p.st === 'approved') { S.req = 'approved'; S.code = String(p.code || ''); if (p.dname) S.dname = p.dname; if (p.dph !== undefined) S.dph = okPh(p.dph); notify('اعتمدك ' + S.dname, 'خطتك قيد الإعداد'); }
     else if (p.st === 'changes') { S.req = 'changes'; S.reqMsg = String(p.msg || ''); notify(S.dname + ' طلب تعديلاً', S.reqMsg); }
     else if (p.st === 'rejected') { S.req = 'rejected'; }
     return true;
@@ -276,6 +276,7 @@ function handle(p) {
     if (cert) { const c = { id: 'r' + now().toString(36), pid: 'pts', w: 98, title: 'جمع ' + (+p.p || 0) + ' نقطة التزام ' + (p.per === 'm' ? 'هذا الشهر' : 'هذا الأسبوع'), lines: [], at: now(), name: String(S.p.name || '').trim(), sex: S.p.sex, dname: S.dname, clinic: '', phrase: PHRASES[now() % PHRASES.length] }; S.ach = (S.ach || []).concat([c]); setTimeout(() => celebrateAch(c), 80); }
     notify('🏅 مكافأة جديدة من أخصائيك', n); return true; }
   if (p.t === 'supp' && Array.isArray(p.list)) { S.supps = p.list.slice(0, 20).map((x) => ({ n: String(x.n || '').slice(0, 60), k: x.k === 'h' ? 'h' : 's', dose: String(x.dose || '').slice(0, 120), note: String(x.note || '').slice(0, 120), warn: String(x.warn || '').slice(0, 160) })); notify('💊 رشّح لك أخصائيك مكملات', S.supps.map((x) => x.n).join('، ')); return true; }
+  if (p.t === 'prof') { if (p.dname) S.dname = String(p.dname).slice(0, 60); S.dph = okPh(p.dph); return true; }      // صورة الأخصائي (زنها Pro 1.42)
   if (p.t === 'gate') { setGate(p.on ? { on: 1, hour: p.hour } : null); return true; }
   if (p.t === 'read') { S.msgs.forEach((m) => { if (m.from === 'c' && m.ts <= p.upTo) m.read = true; }); return true; }
   if (p.t === 'msgdel') { const m = S.msgs.find((x) => x.from === 'd' && x.ts === p.ts); if (m) { m.del = 1; m.t = ''; delete m.vo; } return true; }   // 1.09 حذف الأخصائي لرسالته
@@ -537,6 +538,8 @@ const dl = (dow) => { const k = dateFor(dow); return (S.log[k] = S.log[k] || { c
 const lineT = (l) => l[2];
 function itemsOfDay(d) { let n = 0, done = 0; const L = S.log[dateFor(d)] || { ck: {} }; dayPlan(d).slots.forEach((s, si) => s.lines.forEach((l, li) => { n++; if (L.ck[si + '_' + li]) done++; })); return [done, n]; }
 function adhBack(back) { const dt = new Date(now() - back * 86400000), L = S.log[dkey(dt)]; if (!L || !S.plan) return null; let n = 0, done = 0; dayPlan(dt.getDay()).slots.forEach((s, si) => s.lines.forEach((l, li) => { n++; if (L.ck[si + '_' + li]) done++; })); return n ? done / n : null; }
+const okPh = (v) => typeof v === 'string' && v.length < 60000 && /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(v) ? v : '';
+const drAv = () => S.dph ? '<img src="' + S.dph + '" alt="' + esc(S.dname || 'الأخصائي') + '" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block">' : esc(drInit());
 const drInit = () => String(S.dname || 'أ').replace(/^(د\.?|دكتور[ة]?|أ\.)\s*/, '').trim().charAt(0) || 'أ';
 
 // ---------- الشاشات قبل الحساب
@@ -678,7 +681,7 @@ function scrInvite() {
   const c = S.cat || {};
   return '<div class="scr"><div class="scroll"><div class="invite">'
     + '<div class="logo">' + LOGO + '</div>'
-    + '<div class="card dr"><div class="av">' + esc(drInit()) + '</div><div><b>' + esc(S.dname) + '</b>' + (c.clinic ? '<div class="dim">' + esc(c.clinic) + '</div>' : '') + '<div class="mut" style="font-size:14px;margin-top:4px">يدعوك لبدء خطتك الغذائية على «زنها»</div></div></div>' + (['ios', 'inapp'].indexOf(installState()) >= 0 ? installCard('invite') : '')
+    + '<div class="card dr"><div class="av"' + (S.dph ? ' style="padding:0;overflow:hidden"' : '') + '>' + drAv() + '</div><div><b>' + esc(S.dname) + '</b>' + (c.clinic ? '<div class="dim">' + esc(c.clinic) + '</div>' : '') + '<div class="mut" style="font-size:14px;margin-top:4px">يدعوك لبدء خطتك الغذائية على «زنها»</div></div></div>' + (['ios', 'inapp'].indexOf(installState()) >= 0 ? installCard('invite') : '')
     + '<div class="feats">'
     + feat('user', 'سجّل بياناتك مرة واحدة', 'خمس خطوات قصيرة، ويُحفظ ما تكتبه تلقائياً.')
     + feat('heart', 'اختر ما تحب وما لا تحب', 'ما لا تحبه لا يظهر في خطتك.')
@@ -2364,7 +2367,7 @@ function skPanel() {
 function sendSki(img) { V.skp = 0; const m = { from: 'c', t: 'ملصق', ts: now(), ski: img }; S.msgs.push(m); S.msgs = S.msgs.slice(-300); return send({ t: 'msg', text: m.t, ski: img, ts: m.ts }).then(render); }
 function scrChat() {
   const empty = S.msgs.length ? '' : '<div class="empty" style="padding:20px 6px">' + emptyArt('chat') + '<h3>ابدأ الحديث</h3><p class="mut">اكتب لأخصائيك أي سؤال عن خطتك أو يومك. يصله إشعار.</p></div>';
-  return '<div class="scr"><div class="chat"><div class="who"><button class="back" data-act="chatClose" aria-label="رجوع" style="width:40px;height:40px;border-radius:13px;display:grid;place-items:center;background:var(--glass);border:1px solid var(--line)">' + I('back') + '</button><div class="av sm">' + esc(drInit()) + '</div><div style="flex:1;min-width:0"><b>' + esc(S.dname) + '</b><div class="dim">يرد عادة خلال ساعات العمل</div></div></div>'
+  return '<div class="scr"><div class="chat"><div class="who"><button class="back" data-act="chatClose" aria-label="رجوع" style="width:40px;height:40px;border-radius:13px;display:grid;place-items:center;background:var(--glass);border:1px solid var(--line)">' + I('back') + '</button><div class="av sm"' + (S.dph ? ' style="padding:0;overflow:hidden"' : '') + '>' + drAv() + '</div><div style="flex:1;min-width:0"><b>' + esc(S.dname) + '</b><div class="dim">يرد عادة خلال ساعات العمل</div></div></div>'
     + (S.replyAt ? '<div class="replyb">' + I('clock') + ' يرد أخصائيك على الرسائل يومياً الساعة ' + esc(hm12(S.replyAt)) + ' — اكتب متى شئت.</div>' : '') + '<div class="thread" id="thread">' + empty + bubbles() + '</div>'
     + (S.msgs.length ? '' : '<div class="qr">' + CLIENT_Q.map((q) => '<button data-act="qmsg" data-v="' + esc(q) + '">' + esc(q) + '</button>').join('') + '</div>')
     + (S.ctx ? '<div class="ctxbar">' + I('utensils') + '<span>بخصوص: ' + esc(S.ctx) + '</span><button class="link" data-act="ctxClear" aria-label="إزالة">' + I('x') + '</button></div>' : '')

@@ -241,7 +241,7 @@ function hxMapG(q) {                                                // استب�
 function hxApproveLinked(cid, req, c) {                            // دعوة مربوطة بعميل موجود (مثل عميل مستورد بخطته): يُربط ولا يُنشأ عميل ثانٍ، وتُرسَل خطته فور الاعتماد
   var it = req.intake || {}, hl = [].concat(it.cond || [], it.allg || []).filter(Boolean); if (hl.length) c.notes = (c.notes ? c.notes + '\n' : '') + 'من تسجيل العميل في «زنها»: ' + hl.join('، ');
   c.hx = { cid: cid, enc: req.encPub, tok: HX.st.inv[req.h].tok, label: req.label, msgs: req.msgs || [], unread: req.unread || 0, logs: {}, weights: [[Date.now(), +it.weight || c.weight]], prefLog: [], prefs: { food: it.food || {}, like: it.like || {}, nope: it.nope || {} }, intake: it, planV: 0, since: Date.now(), quiz: req.quiz || null };
-  return persist(c).then(function () { return hxSend(c, { t: 'status', st: 'approved', code: c.code, dname: HX.st.name }); }).then(function () { delete HX.st.reqs[cid]; delete HX.st.inv[req.h]; return hxSave(); }).then(function () {
+  return persist(c).then(function () { return hxSend(c, { t: 'status', st: 'approved', code: c.code, dname: HX.st.name, dph: typeof meThumb === 'function' ? meThumb() : '' }); }).then(function () { delete HX.st.reqs[cid]; delete HX.st.inv[req.h]; return hxSave(); }).then(function () {
     S.view = 'client'; S.cur = c.code; S.tab = 'client'; S.versions = []; render(); toast('✓ رُبط «' + c.name + '» بـ«زنها»' + (c.plan || c.rawSnap ? ' — جارٍ إرسال خطته وبرنامجه…' : ''));
     if (planOf(c).has) setTimeout(function () { A.hxSendPlan(); }, 200);
   });
@@ -267,7 +267,7 @@ function hxApprove(cid) {
     try { c.plan = E.planWeek(ec(c), D); auto = true; } catch (e) { c.plan = null; }
   }
   S.clients.push(c);
-  return persist(c).then(function () { return hxSend(c, { t: 'status', st: 'approved', code: c.code, dname: HX.st.name }); }).then(function () {
+  return persist(c).then(function () { return hxSend(c, { t: 'status', st: 'approved', code: c.code, dname: HX.st.name, dph: typeof meThumb === 'function' ? meThumb() : '' }); }).then(function () {
     delete HX.st.reqs[cid]; delete HX.st.inv[req.h]; return hxSave();
   }).then(function () { S.view = 'client'; S.cur = c.code; S.tab = auto ? 'pw' : 'gen'; if (auto) S.page = 'sum'; else { c.gen = { step: 2, v: 2 }; save(); } S.versions = []; render(); toast(auto ? '✓ اعتُمد «' + c.name + '» — نافذة الأخصائي: تعرّف عليه ثم اختر النظام أو أبقِ خطة التفصيل وأرسلها' : '✓ اعتُمد «' + c.name + '» عميلاً جديداً (' + c.code + ') — راجع بياناته ثم ولّد الخطة وأرسلها إلى «زنها»'); });
 }

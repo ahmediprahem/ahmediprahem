@@ -203,9 +203,16 @@ function meSet(file) {
   var r = new FileReader(); r.onload = function () { var im = new Image(); im.onload = function () {
     var N = 256, c = document.createElement('canvas'), s = Math.min(im.width, im.height); c.width = c.height = N;
     c.getContext('2d').drawImage(im, (im.width - s) / 2, (im.height - s) / 2, s, s, 0, 0, N, N);
-    S.settings.me = Object.assign({}, S.settings.me, { photo: c.toDataURL('image/jpeg', 0.85) }); saveSettings(); header(); if (S.view === 'settings') main(); toast('✓ حُفظت صورتك');
+    var t = document.createElement('canvas'); t.width = t.height = 128; t.getContext('2d').drawImage(c, 0, 0, 128, 128);
+    S.settings.me = Object.assign({}, S.settings.me, { photo: c.toDataURL('image/jpeg', 0.85), thumb: t.toDataURL('image/jpeg', 0.8) }); saveSettings(); header(); if (S.view === 'settings') main(); meShare(); toast('✓ حُفظت صورتك');
   }; im.onerror = function () { toast('تعذّر قراءة الصورة'); }; im.src = r.result; }; r.readAsDataURL(file);
 }
-A.meDel = function () { if (!confirm('إزالة صورة الملف الشخصي؟')) return; S.settings.me = Object.assign({}, S.settings.me); delete S.settings.me.photo; saveSettings(); header(); if (S.view === 'settings') main(); toast('أُزيلت الصورة'); };
+A.meDel = function () { if (!confirm('إزالة صورة الملف الشخصي؟')) return; S.settings.me = Object.assign({}, S.settings.me); delete S.settings.me.photo; delete S.settings.me.thumb; saveSettings(); header(); if (S.view === 'settings') main(); meShare(); toast('أُزيلت الصورة'); };
 document.addEventListener('change', function (e) { var t = e.target; if (t && t.classList && t.classList.contains('mefile')) { meSet(t.files && t.files[0]); t.value = ''; } });
 themePage = (function (f) { return function () { return meCard() + f.apply(this, arguments); }; })(themePage);
+// إظهار الصورة للعميل في «زنها» (موافقة المالك 2026-11-22): رسالة مشفّرة «prof» بصورة مصغّرة 128px لكل عميل مرتبط؛ والإصدارات القديمة من «زنها» تتجاهلها
+function meThumb() { return (S.settings.me || {}).thumb || ''; }
+function meShare() {
+  if (typeof hxOn !== 'function' || !hxOn()) return; var L = S.clients.filter(function (c) { return c.hx && c.hx.cid && !c.hx.gone; });
+  L.reduce(function (q, c) { return q.then(function () { return hxSend(c, { t: 'prof', dname: HX.st.name || '', dph: meThumb() }).catch(function () { }); }); }, Promise.resolve());
+}
