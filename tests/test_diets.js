@@ -11,8 +11,8 @@ const variants = (d) => d.id === 'if' ? [{ pat: 'tre' }, { pat: '52' }] : [{}];
 const run = (id, kind, prof, over) => { const c = mk(...prof, kind), res = DX.apply(id, c, Object.assign(DX.defaults(id), over || {}), D, AD, E, A); if (!res.ok) return { res, c }; DX.commit(c, res); const plan = DX.generate(c, D, AD, E, A); return { res, c, plan, chk: DX.check(plan, c, D, AD, E, A) }; };
 const ALL = []; for (const d of DX.LIST) for (const kind of ['ex', 'ath']) { if (d.sys === 'ath' && kind === 'ex') continue; for (const v of variants(d)) for (const pr of PROF) { const r = run(d.id, kind, pr, v); r.d = d; r.kind = kind; r.v = v; r.pr = pr; ALL.push(r); } }
 
-t('عشرة أنظمة معرّفة بمراجعها ودرجة دليلها ومتى/موانع/مميزات/عيوب، وعشر مشاكل بخطوات وحل', () => {
-  assert.strictEqual(DX.LIST.length, 10); assert.strictEqual(DX.PROBLEMS.length, 10);
+t('خمسة عشر نظاماً معرّفة بمراجعها ودرجة دليلها ومتى/موانع/مميزات/عيوب، وعشر مشاكل بخطوات وحل', () => {
+  assert.strictEqual(DX.LIST.length, 15); assert.strictEqual(DX.PROBLEMS.length, 10); assert(DX.LIST.every((d) => d.en), 'اسم إنجليزي لكل نظام');      // 1.43: +5 أنظمة (نباتي، نباتي صرف، مرن، MIND، خالٍ من الجلوتين)
   DX.LIST.forEach((d) => { assert(d.n && d.sum && d.when.length && d.notFor.length && d.pros.length && d.cons.length && d.refs.length && DX.GRADE[d.grade] && d.eg && d.sa && d.par.length, d.id); d.refs.forEach((r) => assert(DX.SRC[r] || d.id === 'med' && r === 'med', 'مرجع مفقود ' + r + ' في ' + d.id)); });
   DX.PROBLEMS.forEach((p) => { assert(p.n && p.ask.length && p.steps.length && p.why && p.rec.length && typeof p.fix === 'function', p.id); p.rec.forEach((r) => assert(DX.get(r), r)); });
 });
@@ -29,14 +29,16 @@ t('انحراف السعرات اليومي (تحذيرات) ≤ 6% من أيا�
 t('السعرات: لا أقل من الحد الآمن (1200/1500)، والعجز لا يتجاوز 25%، والبروتين ≥ 1.0 جم/كجم', () => {
   ALL.forEach((r) => { if (!r.res.ok) return; const en = r.res.energy, fl = r.pr[0] === 'ذكر' ? 1500 : 1200; assert(en.kcal >= fl, r.d.id + ' ' + en.kcal); assert(en.deficit <= en.tdee * 0.251 + 1 || en.kcal === fl, r.d.id + ' عجز ' + en.deficit + '/' + Math.round(en.tdee)); });
 });
-t('الموانع: BMI<18.5 وأقل من 18 سنة تُمنع كل الأنظمة، والكيتو/الصيام يطلبان تأكيد الموانع، وكيتو/تدوير لا يُنفَّذان بنظام الحصص', () => {
+t('الموانع: BMI<18.5 وأقل من 18 سنة تُمنع كل الأنظمة، والكيتو/الصيام يطلبان تأكيد الموانع، والتدوير لا يُنفَّذ بنظام الحصص (الكيتو متاح منذ 1.43 بكارب ≤ 12%)', () => {
   DX.LIST.forEach((d) => { assert.strictEqual(DX.apply(d.id, mk('أنثى', 45, 168, 30, d.sys === 'ath' ? 'ath' : 'ex'), DX.defaults(d.id), D, AD, E, A).ok, false, d.id + ' نحيل'); assert.strictEqual(DX.apply(d.id, mk('أنثى', 70, 165, 16, d.sys === 'ath' ? 'ath' : 'ex'), DX.defaults(d.id), D, AD, E, A).ok, false, d.id + ' قاصر'); });
   ['keto', 'if'].forEach((id) => assert(DX.screen(id, mk('أنثى', 80, 165, 35, 'ex'), D).confirm.length >= 4, id));
-  ['keto', 'cycle'].forEach((id) => { const r = DX.apply(id, mk('أنثى', 80, 165, 35, 'ex'), DX.defaults(id), D, AD, E, A); assert.strictEqual(r.ok, false); assert(/الجرامات/.test(r.blocks[0])); });
+  ['cycle'].forEach((id) => { const r = DX.apply(id, mk('أنثى', 80, 165, 35, 'ex'), DX.defaults(id), D, AD, E, A); assert.strictEqual(r.ok, false); assert(/الجرامات/.test(r.blocks[0])); });      // 1.43: الكيتو صار متاحاً في الحصص
+  { const r = DX.apply('keto', mk('أنثى', 80, 165, 35, 'ex'), DX.defaults('keto'), D, AD, E, A); assert.strictEqual(r.ok, true); assert(r.patch.choPct <= 0.12, r.patch.choPct); }
   assert(DX.screen('keto', mk('أنثى', 80, 165, 35, 'ath', { conditions: ['سكري النوع الثاني'] }), D).warn.some((w) => /سكري/.test(w)));
 });
 t('كيتو: كارب ≤ الحد، بروتين معتدل، والدهون الغالبة، والخضار منخفضة الكارب فقط', () => {
-  ALL.filter((r) => r.d.id === 'keto').forEach((r) => { const pc = r.d.id; r.plan.days.forEach((dy) => { assert(dy.got.c <= 40 * 1.25 + 5, r.pr.join(',') + ' كارب ' + Math.round(dy.got.c)); assert(dy.got.f * 9 / dy.got.k >= 0.5, 'دهون ' + Math.round(dy.got.f * 9 / dy.got.k * 100) + '%'); dy.meals.forEach((m) => m.items.filter((i) => i.role === 'v').forEach((i) => assert(i.c / i.g <= 0.056, 'خضار عالية الكارب ' + i.n))); }); });
+  ALL.filter((r) => r.d.id === 'keto' && r.kind === 'ex').forEach((r) => r.plan.days.forEach((dy) => { const v = E.countsVals(dy.counts || [], D); assert(v.c <= 50 + 15, r.pr.join(',') + ' كارب الحصص ' + v.c); assert(!(dy.counts[0] || dy.counts[1] || dy.counts[12]), 'نشويات/بقوليات/حلويات في كيتو الحصص'); }));      // 1.43: كيتو الحصص
+  ALL.filter((r) => r.d.id === 'keto' && r.kind === 'ath').forEach((r) => { const pc = r.d.id; r.plan.days.forEach((dy) => { assert(dy.got.c <= 40 * 1.25 + 5, r.pr.join(',') + ' كارب ' + Math.round(dy.got.c)); assert(dy.got.f * 9 / dy.got.k >= 0.5, 'دهون ' + Math.round(dy.got.f * 9 / dy.got.k * 100) + '%'); dy.meals.forEach((m) => m.items.filter((i) => i.role === 'v').forEach((i) => assert(i.c / i.g <= 0.056, 'خضار عالية الكارب ' + i.n))); }); });
 });
 t('تدوير الكارب: متوسط السعرات الأسبوعي = المستهدف ±3%، وأيام الكارب المرتفع أعلى كارباً وسعراتٍ من المنخفض', () => {
   ALL.filter((r) => r.d.id === 'cycle').forEach((r) => { const ds = r.plan.days, avg = ds.reduce((s, d) => s + d.t.kcal, 0) / 7, k = r.c.diet.kcal; assert(Math.abs(avg - k) / k <= 0.03, avg + ' vs ' + k); const hi = ds.filter((d) => /مرتفع/.test(d.type)), lo = ds.filter((d) => /منخفض/.test(d.type)); assert(hi.length === 3 && lo.length === 4); assert(hi[0].t.c > lo[0].t.c * 1.2 && hi[0].t.kcal > lo[0].t.kcal, 'الفرق صغير'); assert((hi[0].t.kcal - lo[0].t.kcal) / lo[0].t.kcal <= 0.25 + 1e-9); });

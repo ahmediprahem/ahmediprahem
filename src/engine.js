@@ -549,17 +549,20 @@ E.ctx = function (client, D) {
     return { si: sl.i, name: sl.name, type: sl.type, pct: sl.pct, kcal: Math.round(T.kcal * sl.pct), target: tg, meal: mealName, lines: lines, time: D.times ? D.times[sl.i] : '' };
   };
   E.baseSuggestion = function (client, D) {
-    var st = E.state(client, D, {}), sc = E.capScale(st.T.kcal, st.T), cap = E.capTotals(0, st.meals, D, sc); return E.solveDay(st.T, { cap: cap, sweets: st.sweets, share: E.PREF.share, base: client.diet && E.dietBase ? E.dietBase(client.diet) : undefined }, D);
+    var st = E.state(client, D, {}), sc = E.capScale(st.T.kcal, st.T), cap = E.capTotals(0, st.meals, D, sc); if (client.diet && E.dietCaps) cap = E.dietCaps(client.diet, cap);      // 1.43: حدود مجموعات النظام وتشكيله
+    var sol = E.solveDay(st.T, { cap: cap, sweets: Math.min(st.sweets, cap[12]), share: E.PREF.share, base: client.diet && E.dietBase ? E.dietBase(client.diet) : undefined }, D);
+    return client.diet && E.dietAll ? E.dietAll(client.diet, sol) || sol : sol;
   };
   E.planWeek = function (client, D, opt) {
     opt = opt || {}; var st = E.state(client, D, opt), T = st.T, meals = st.meals, days = [], manual = client.baseCounts && client.baseCounts.length === 13 && client.baseCounts.some(function (x) { return +x > 0; });
     for (var d = 0; d < 7; d++) {
-      var sc = E.capScale(T.kcal, T), cap = E.capTotals(d, meals, D, sc), sol;
+      var sc = E.capScale(T.kcal, T), cap = E.capTotals(d, meals, D, sc), sol; if (client.diet && E.dietCaps) cap = E.dietCaps(client.diet, cap);
       var mk = function (cn) { var ach = [0, 0, 0]; for (var g = 0; g < 13; g++) for (var k = 0; k < 3; k++) ach[k] += cn[g] * D.EX[g][k]; return { counts: cn, err: [ach[0] - T.cho, ach[1] - T.pro, ach[2] - T.fat], ok: null, score: 0, kcal: ach[0] * 4 + ach[1] * 4 + ach[2] * 9, manual: true }; },
         dco = client.dayCounts && client.dayCounts[d] && client.dayCounts[d].length === 13 && client.dayCounts[d].some(function (x) { return +x > 0; }) ? client.dayCounts[d].map(Number) : null;      // توزيع خاص بهذا اليوم (يتقدّم على الأساسي)
       if (dco) { sol = mk(dco); sol.day = true; } else if (manual) sol = mk(client.baseCounts.map(Number));
       if (!dco && !manual && client.v2) st.sweets = st.sweets0 && E.SWEET_DAYS.indexOf(d) >= 0 ? 1 : 0;      // م5 (قرار المالك): الحلويات 3 أيام أسبوعياً، وصفر للسكري ودهون الكبد
       if (!dco && !manual) sol = E.solveDay(T, { cap: cap, sweets: st.sweets, share: E.PREF.share, base: client.diet && E.dietBase ? E.dietBase(client.diet) : undefined }, D);
+      if (!dco && !manual && client.diet && E.dietAll) sol = E.dietAll(client.diet, sol) || sol;
       if (!dco && !manual && client.diet && E.dietShape) sol = E.dietShape(client.diet, d, sol, D) || sol;
       st.keepGroups = !!(dco || manual); var al = E.allocateDay(sol.counts, d, meals, D, sc, client.v2); if (client.v2 && !st.keepGroups && st.sched && st.sched[d] === 'leg') E.legDay(al, st); if (client.v2 && !st.keepGroups && st.cx.diab) E.spreadFruit(al, (D.limits && D.limits.diabFruitMax) || 1); var slots = E.buildDay(st, d, al), dy = { day: d, name: D.days[d], solver: sol, counts: sol.counts, short: al.short, slots: slots };
       if (!st.keepGroups) E.syncCounts(dy); st.keepGroups = false;

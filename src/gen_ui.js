@@ -98,7 +98,7 @@ function genReady(c, g) {
     + (conv ? '<p class="small ok">✔ الخطة الآن بصيغة المحرك: تُعدَّل كمياتها وبدائلها وتُفحص مثل اليدوية. «وجبة من البنك» تعطي بديل الوجبة الكاملة (النوع 4).</p>' : '') + '</div>';
 }
 // ---- 1.26 طريقة الحمية بالبدائل (قرار المالك): 5 خطوات فرعية — الطاقة، الماكروز، الجدول التركيبي، التوزيع على الوجبات، قائمة الطعام
-var EQ_STEPS = ['الطاقة', 'الماكروز', 'الجدول التركيبي', 'التوزيع وبنك الوجبات', 'قائمة الطعام', 'جدول البدائل'];      // 1.37: جدول البدائل خطوة فرعية أخيرة
+var EQ_STEPS = ['الطاقة', 'النظام والماكروز', 'الجدول التركيبي', 'التوزيع وبنك الوجبات', 'قائمة الطعام', 'جدول البدائل'];      // 1.37: جدول البدائل خطوة فرعية أخيرة
 function genAdq(v, t) { var a = E.adequacy(v, t); return '<span class="ad st-' + a.st + '">' + Math.round(a.pct) + '%</span>'; }
 function genDist(c) { var meals = +c.meals || 5, cn = genCounts(c).cn, md = c.mealDist, n = E.slots(meals, D).length; if (!md || md.length !== n || md.some(function (r) { return !r || r.length !== 13; })) return E.suggestDist(cn, meals, D); return md.map(function (r) { return r.map(Number); }); }      // الجدول كما عدّله الأخصائي، ويُتحقق من تطابقه عند البناء
 // 1.27: أيام متعددة — c.eqvDays[i] = {n, cn, md, picks}؛ اليوم النشط نسخته العاملة في baseCounts/mealDist/eqvPicks
@@ -130,7 +130,7 @@ function genEqv(c, g, T) {
   } else if (es === 2) {
     var pc = function (k, d0) { return Math.round((c[k] == null ? d0 : +c[k]) * 100); }, cp = pc('choPct', 0.45), pp = pc('proPct', 0.25), fp = pc('fatPct', 0.3);
     var row = function (k, l, p, div) { return '<tr><td><b>' + l + '</b></td><td><input type="range" class="gsl gsl-' + k + '" min="0" max="80" step="1" data-gm="' + k + '" value="' + p + '" aria-label="' + l + ' %"><input type="number" class="n" min="0" max="100" step="1" data-gm="' + k + '" value="' + p + '"> %</td><td>' + Math.round(T.kcal * p / 100) + '</td><td><b>' + Math.round(T.kcal * p / 100 / div) + '</b> جم</td><td>' + (c.weight ? (T.kcal * p / 100 / div / c.weight).toFixed(1) : '—') + '</td></tr>'; };
-    h += '<h3>2. توزيع الماكروز <small>(' + Math.round(T.kcal) + ' سعرة)</small></h3>' + genRing(cp, pp, fp, T.kcal) + '<table class="st gentbl"><tr><th>الماكرو</th><th>النسبة</th><th>سعرات</th><th>جرامات</th><th>جم/كجم</th></tr>' + row('choPct', '● الكربوهيدرات', cp, 4) + row('proPct', '◆ البروتين', pp, 4) + row('fatPct', '✦ الدهون', fp, 9)
+    h += (typeof genDietBox === 'function' ? genDietBox(c) : '') + '<h3>2. توزيع الماكروز <small>(' + Math.round(T.kcal) + ' سعرة)</small></h3>' + genRing(cp, pp, fp, T.kcal) + '<table class="st gentbl"><tr><th>الماكرو</th><th>النسبة</th><th>سعرات</th><th>جرامات</th><th>جم/كجم</th></tr>' + row('choPct', '● الكربوهيدرات', cp, 4) + row('proPct', '◆ البروتين', pp, 4) + row('fatPct', '✦ الدهون', fp, 9)
       + '<tr><td>المجموع</td><td colspan="4">' + (cp + pp + fp === 100 ? '<span class="ad st-ok">✓ 100%</span>' : '<span class="ad st-block">' + (cp + pp + fp) + '%: يجب أن يكون 100%</span>') + '</td></tr></table>';
   } else if (es === 3) {
     h += eqDayBar(c, g);
@@ -433,6 +433,7 @@ function genQual(c) {      // لوحة ملخص جودة الخطة: كل رقم
     + tile(fav && fav.src !== 'none' ? (fav.pct >= fav.want ? 'st-ok' : 'st-warn') : '', 'المفضلات', fav ? (fav.src === 'none' ? 'لا مفضلات' : fav.pct + '%') : ath ? 'لا ينطبق' : '—', fav && fav.src !== 'none' ? 'المطلوب ' + fav.want + '%' : '')
     + tile(fav && fav.repeated ? 'st-warn' : '', 'وجبات مكررة', fav ? fav.repeated : '—', fav ? 'حد التكرار ' + fav.rep + ' أسبوعياً' : '')
     + tile('', 'مكمّلة من البنك', fav ? fav.bank : '—', fav ? 'من ' + fav.total + ' وجبة' : '')
+    + (function () { if (ath || !c.diet || !has || !E.dietCheck) return ''; try { return E.dietCheck(c.diet, p, D).map(function (r) { return tile(r[2] === 'ok' ? 'st-ok' : 'st-warn', r[0], esc(r[1]), ''); }).join(''); } catch (e) { return ''; } })()
     + tile(alerts || pf.length ? 'st-warn' : has ? 'st-ok' : '', 'تنبيهات غذائية', has ? alerts + pf.length : '—', has ? (alerts ? alerts + ' أيام تحتاج نظرك' : '') + (pf.length ? (alerts ? ' • ' : '') + pf.length + ' تفضيل' : '') : '') + '</div>'
     + '<ul class="gqchk">' + chk.map(function (x) { return '<li class="' + (x[1] ? 'gqy' : 'gqn') + '">' + (x[1] ? '✓' : '○') + ' ' + x[0] + '</li>'; }).join('') + '</ul>'
     + (stale ? '<p class="warn small gqstale">⚠ عدّلت الجدول التركيبي أو التوزيع بعد آخر توليد: أعد «ولّد خطة الأسبوع» لتتطابق الخطة.</p>' : '')

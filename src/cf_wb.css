@@ -282,3 +282,34 @@ html[data-dw="dark"]:not(#mxz):not(#mxy) #navfab button:hover:not(:disabled){bac
   #navfab:not(:hover):not(:focus-within){opacity:.3}
 }
 @media (hover:hover) and (pointer:fine) and (prefers-reduced-motion:reduce){#hud.hud,#navfab{transition:none}}
+/* 1.43 «نوع النظام الغذائي» في خطوة «النظام والماكروز» */
+html:not(#mxz):not(#mxy) .dxsx{display:flex;flex-direction:column;gap:10px;margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--c-divider)}
+html:not(#mxz):not(#mxy) .dxsx h4{margin:0;font-size:16px;color:var(--c-text)}
+html:not(#mxz):not(#mxy) .dxsx h4 small{font-weight:500;color:var(--c-text-muted)}
+html:not(#mxz):not(#mxy) .dxscs{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px}
+html:not(#mxz):not(#mxy) main button.sec.dxsc{display:flex!important;flex-direction:column;align-items:flex-start;gap:3px;text-align:right;padding:10px 12px!important;border:1px solid var(--c-border)!important;border-radius:10px!important;background:var(--c-surface)!important;color:var(--c-text)!important;box-shadow:none!important;min-height:92px;font-weight:400}
+html:not(#mxz):not(#mxy) main button.sec.dxsc:hover{border-color:var(--c-primary)!important;transform:none}
+html:not(#mxz):not(#mxy) main button.sec.dxsc.on{border:2px solid var(--c-primary)!important;background:var(--c-accent-soft)!important}
+html:not(#mxz):not(#mxy) main button.sec.dxsc.off{opacity:.55}
+html:not(#mxz):not(#mxy) .dxsc b{font-size:14px;color:var(--c-text)}
+html:not(#mxz):not(#mxy) .dxsc small,html:not(#mxz):not(#mxy) .dxsd small{font-size:11.5px;color:var(--c-text-muted);direction:ltr;unicode-bidi:isolate}
+html:not(#mxz):not(#mxy) .dxsc i{font-style:normal;font-size:12px;line-height:1.5;color:var(--c-text-2)}
+html:not(#mxz):not(#mxy) .dxsks{display:flex;gap:4px;flex-wrap:wrap}
+html:not(#mxz):not(#mxy) .dxsk{font-size:11px;font-weight:600;padding:1px 7px;border-radius:999px;white-space:nowrap}
+html:not(#mxz):not(#mxy) .dxsk.kq{background:var(--c-info-bg);color:var(--c-info)}
+html:not(#mxz):not(#mxy) .dxsk.kf{background:color-mix(in srgb,var(--c-ch5) 16%,transparent);color:var(--c-ch5)}
+html:not(#mxz):not(#mxy) .dxsk.kt{background:var(--c-warning-bg);color:var(--c-warning)}
+html:not(#mxz):not(#mxy) .dxsd{border:1px solid var(--c-border);border-radius:12px;padding:12px 14px;background:var(--c-surface-muted);display:flex;flex-direction:column;gap:8px}
+html:not(#mxz):not(#mxy) .dxsdh{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+html:not(#mxz):not(#mxy) .dxsd p{margin:0}
+html:not(#mxz):not(#mxy) .dxsg{font-size:12px;color:var(--c-text-muted)}
+html:not(#mxz):not(#mxy) .dxsps{display:flex;flex-wrap:wrap;gap:10px}
+html:not(#mxz):not(#mxy) .dxsp{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--c-text-2);min-width:150px}
+html:not(#mxz):not(#mxy) .dxsw,html:not(#mxz):not(#mxy) .dxsn{margin:0;padding-inline-start:18px;font-size:13px}
+html:not(#mxz):not(#mxy) .dxsw{color:var(--c-warning)}
+html:not(#mxz):not(#mxy) .dxscf{display:flex;flex-direction:column;gap:6px;padding:10px;border:1.5px solid var(--c-warning);border-radius:10px;background:var(--c-surface)}
+html:not(#mxz):not(#mxy) .dxscf label{font-size:13px;display:flex;gap:6px;align-items:center}
+html:not(#mxz):not(#mxy) .dxscf button{align-self:flex-start}
+@media (max-width:480px){html:not(#mxz):not(#mxy) .dxscs{grid-template-columns:1fr 1fr}html:not(#mxz):not(#mxy) main button.sec.dxsc{min-height:84px}}
+html:not(#mxz):not(#mxy) main details.dxsr{background:transparent!important;border:0!important}
+html:not(#mxz):not(#mxy) main details.dxsr>summary{background:transparent!important;color:var(--c-link)!important;font-size:13px;cursor:pointer;padding:2px 0!important;border:0!important}

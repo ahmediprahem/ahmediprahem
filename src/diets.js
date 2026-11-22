@@ -70,7 +70,7 @@
       pros: ['مرونة', 'طاقة أعلى في أيام التمرين', 'يخفف الشعور بالحرمان'], cons: ['دليل ضعيف', 'أكثر تعقيداً', 'قد يتحول يوم الكارب العالي إلى إفراط'],
       eg: 'بلح وأرز وبطاطس مشوية في الأيام العالية؛ بقوليات وخضار في المنخفضة.', sa: 'كبسة أو مرقوق في اليوم العالي بكمية مقيّسة، وجبات بروتين وخضار في المنخفض.',
       par: [P_DEF, { k: 'pro', l: 'بروتين (جم/كجم)', min: 1.2, max: 2, step: 0.1, def: 1.6 }, { k: 'fat', l: 'دهون (جم/كجم)', min: 0.6, max: 1.2, step: 0.1, def: 0.8 }, { k: 'hi', l: 'سعرات اليوم المرتفع % (يُقصّ ليبقى الفرق ≤ 25%)', min: 105, max: 120, step: 1, def: 110 }, { k: 'hiDays', l: 'عدد الأيام المرتفعة', min: 1, max: 3, step: 1, def: 3 }] },
-    { id: 'keto', n: 'كيتو (كارب منخفض جداً)', sys: 'ath', grade: 'mid', refs: ['keto', 'johnston'],
+    { id: 'keto', n: 'كيتو (كارب منخفض جداً)', sys: 'both', grade: 'mid', refs: ['keto', 'johnston'],
       sum: 'كارب كلي 20–50 جم يومياً مع بروتين معتدل والباقي دهون، لمدة محددة (افتراضياً حتى 12 أسبوعاً) ثم إعادة تقييم. نزول سريع على المدى القصير، ولا ميزة مثبتة طويلاً، ويحتاج متابعة.',
       when: ['سمنة شديدة أو مقاومة إنسولين مع رغبة العميل واستعداده', 'من نجح مع الكارب المنخفض سابقاً', 'مدة قصيرة بإشراف'],
       notFor: ['الحمل والرضاعة', 'السكري من النوع الأول', 'سكري على أدوية دون تعديل الجرعات', 'قصور الكلى أو الكبد، التهاب البنكرياس، أمراض المرارة', 'اضطرابات الأكل', 'أقل من 18 سنة', 'من يستعمل مثبطات SGLT2'],
@@ -175,6 +175,7 @@
     if (out.sys === 'ex') {
       // نسب يدوية (manual) كي لا يعيد تعديل السمنة في المحرك توزيع الماكروز ضد النظام؛ البروتين على الوزن المعدّل للسمنة وبسقف 30%
       var proG = Math.min(pro * adjW, K * 0.3 / 4), proP = proG * 4 / K, fatP = d.id === 'lowcarb' ? Math.max(0.18, 1 - cho / 100 - proP) : fat / 100, choP = d.id === 'lowcarb' ? cho / 100 : 1 - proP - fatP;
+      if (d.id === 'keto') { choP = Math.min(0.12, num(P.carb, 40) * 4 / K); fatP = 1 - choP - proP; out.notes.push('الكارب ' + num(P.carb, 40) + ' جم يومياً (' + Math.round(choP * 100) + '% من السعرات): بلا نشويات وبقوليات وحلويات، وفاكهة وحليب حصة واحدة على الأكثر، والباقي دهون. مدة أولية حتى ' + num(P.weeks, 12) + ' أسبوعاً ثم إعادة تقييم'); }
       choP = Math.round(choP * 1000) / 1000; proP = Math.round(proP * 1000) / 1000; fatP = Math.round((1 - choP - proP) * 1000) / 1000;
       patch = { kcalManual: K, macroMode: 'manual', choPct: choP, proPct: proP, fatPct: fatP, proGkg: pro, proGkgOb: pro, dayCounts: null, baseCounts: null };
       if (id === 'if') { patch.meals = P.pat === 'tre' ? 3 : 4; } else if (!c.meals || +c.meals < 3) patch.meals = 4;
@@ -363,6 +364,92 @@
   DX.problem = function (id) { return DX.PROBLEMS.filter(function (x) { return x.id === id; })[0] || null; };
   DX.solve = function (pid, c, D, AD, E, A) { var p = DX.problem(pid); if (!p) return null; var f = p.fix(c, D, AD, E, A), d = DX.get(f.dietId); if (d && d.sys === 'ath' && c.kind !== 'athlete') { var alt = DX.get(p.rec.filter(function (r) { return DX.get(r).sys === 'ex'; })[0] || 'balanced'); f = Object.assign({}, f, { dietId: alt.id, P: Object.assign({ deficit: f.P.deficit, pro: f.P.pro }, {}), extra: (f.extra || []).concat(['حُوِّل إلى «' + alt.n + '» لأن العميل بنظام الحصص']) }); }
     return f; };
-  var hook = function (E, A) { if (E) { E.dietRule = DX.foodRule; E.dietBase = DX.dietBase; E.dietBoost = DX.dietBoost; E.dietShape = DX.dietShape; } if (A) { A.dietTags = DX.dietTags; A.dietAllow = DX.dietAllow; } };
+
+  // ----------------------------------------------------------------------------- 1.43 (قرار المالك): نوع النظام قبل توزيع الحصص — المرحلة الأولى (الحصص)
+  // خمسة أنظمة جديدة «بالأكلات»، والأسماء الإنجليزية، وحدود المجموعات والتشكيل. الأرقام المعلّمة «مقترح» مسودة حتى اعتماد المالك (docs: سيناريوهات الأنظمة).
+  DX.SRC.and16 = 'Academy of Nutrition and Dietetics، J Acad Nutr Diet 2016: النباتي والنباتي الصرف المخطط جيداً صحي وكافٍ في كل المراحل؛ مصدر موثوق لفيتامين B12 إلزامي للنباتي الصرف';
+  DX.SRC.mind = 'Harvard Nutrition Source وRush (Morris وآخرون): 15 بنداً — حبوب كاملة 3+ يومياً، ورقيات 6+ أسبوعياً، مكسرات 5+، لحم أحمر أقل من 4، حلويات أقل من 5، جبن ومقليات أقل من 1';
+  DX.SRC.usn25 = 'US News Best Diets 2025: المتوسطي 4.8، DASH 4.6، المرن 4.5، MIND 4.4';
+  DX.SRC.ada19 = 'Evert وآخرون، ADA Consensus Report، Diabetes Care 2019: أنماط متعددة مقبولة، وخفض الكارب أقوى دليلاً لضبط السكر';
+  DX.SRC.acg23 = 'Rubio-Tapia وآخرون، ACG Clinical Guideline: Celiac Disease، Am J Gastroenterol 2023: حمية خالية من الجلوتين صارمة مدى الحياة هي علاج الداء البطني، بمتابعة أخصائي تغذية';
+  DX.SRC.feinman = 'Feinman وآخرون، Nutrition 2015: كيتو 20–50 جم (≤10%)، منخفض أقل من 130 جم (<26%)، معتدل 26–45%';
+  var P_PRO = { k: 'pro', l: 'بروتين (جم/كجم)', min: 1, max: 1.6, step: 0.1, def: 1.2 }, P_FAT = { k: 'fat', l: 'دهون % من السعرات', min: 20, max: 35, step: 1, def: 28 };
+  DX.LIST.push(
+    { id: 'veg', n: 'نباتي', sys: 'ex', grade: 'strong', refs: ['and16', 'ada19'], kind: 'food',
+      sum: 'بلا لحوم ودواجن وأسماك، مع البيض والألبان. نصف حصص اللحوم تتحول إلى بقوليات، والباقي بيض وجبن وتوفو، مع إبقاء البروتين المستهدف.',
+      when: ['من لا يأكل اللحوم لسبب ديني أو صحي أو أخلاقي', 'ارتفاع الكوليسترول مع رغبة في نمط نباتي'], notFor: ['—'],
+      pros: ['يحسّن الوزن وLDL', 'ألياف عالية'], cons: ['يحتاج متابعة الحديد وB12', 'البقوليات ترفع الكارب قليلاً'],
+      eg: 'فول وعدس وحمص وبيض وجبن قريش وزبادي.', sa: 'عدس وحمص ولبنة وبيض وفلافل مشوية.', par: [P_DEF, P_PRO, P_FAT] },
+    { id: 'vegan', n: 'نباتي صرف', sys: 'ex', grade: 'strong', refs: ['and16'], kind: 'food',
+      sum: 'بلا أي منتج حيواني. حصص اللحوم تتحول إلى بقوليات (وتوفو حتى حصتين)، والحليب إلى حليب الصويا. مصدر موثوق لفيتامين B12 إلزامي.',
+      when: ['النباتي الصرف بقناعته'], notFor: ['من لا يستطيع تأمين B12 مدعّم أو مكمل'],
+      pros: ['ألياف عالية', 'دهون مشبعة منخفضة'], cons: ['B12 والحديد والكالسيوم وفيتامين د تحتاج متابعة', 'تنوع البروتين محدود في بيانات الأصناف الحالية'],
+      eg: 'فول وعدس وحمص وتوفو وحليب صويا ومكسرات.', sa: 'عدس وحمص وفلافل مشوية وحليب صويا.', par: [P_DEF, P_PRO, P_FAT] },
+    { id: 'flex', n: 'المرن (نباتي غالباً)', sys: 'ex', grade: 'mid', refs: ['usn25'], kind: 'food',
+      sum: 'نباتي في أغلب الوجبات مع لحم أو سمك أحياناً. ربع حصص اللحوم يتحول إلى بقوليات، وتُفضَّل الأصناف النباتية للبروتين.',
+      when: ['من يريد تقليل اللحوم دون تركها', 'ارتفاع الكوليسترول أو حمض اليوريك'], notFor: ['—'],
+      pros: ['سهل اجتماعياً', 'الثالث في US News 2025'], cons: ['لا رقم موحد لعدد وجبات اللحم'],
+      eg: 'فول وعدس معظم الأيام، وسمك أو دجاج مرتين أو ثلاثاً.', sa: 'عدس وحمص، وكبسة دجاج مرة أو مرتين.', par: [P_DEF, P_PRO, P_FAT] },
+    { id: 'mind', n: 'مايند لصحة الدماغ', sys: 'ex', grade: 'mid', refs: ['mind', 'usn25'], kind: 'food',
+      sum: 'دمج المتوسطي وDASH لصحة الدماغ: ورقيات ومكسرات وتوت وبقوليات وسمك وزيت زيتون وحبوب كاملة، مع تجنّب المقليات والحلويات والجبن واللحم الدسم.',
+      when: ['كبار السن أو تاريخ عائلي لضعف الذاكرة', 'من يريد نمطاً صحياً عاماً'], notFor: ['—'],
+      pros: ['الأعلى لصحة الدماغ في US News 2025'], cons: ['الدليل من دراسات المتابعة أقوى منه في التجارب'],
+      eg: 'سبانخ وجرجير، لوز وجوز، فراولة، عدس، سردين، زيت زيتون، شوفان.', sa: 'سلطة جرجير، سمك هامور مشوي، لوز، زيت زيتون.', par: [P_DEF, P_PRO, P_FAT] },
+    { id: 'gf', n: 'خالٍ من الجلوتين', sys: 'ex', grade: 'strong', refs: ['acg23'], kind: 'food',
+      sum: 'استبعاد القمح والشعير ومشتقاتهما. النشويات من الأرز والبطاطس والذرة والكينوا. في السيلياك يجب أن يكون الاستبعاد صارماً.',
+      when: ['الداء البطني (السيلياك) المشخّص', 'حساسية القمح'], notFor: ['من لا يحتاجه طبياً (لا فائدة مثبتة لإنقاص الوزن)'],
+      pros: ['ضروري لمرضى السيلياك'], cons: ['يحتاج قراءة الملصقات والتلوث العرضي'],
+      eg: 'أرز، بطاطس، ذرة، فول، عدس.', sa: 'أرز، بطاطس، تمر، لبن.', par: [P_DEF, P_PRO, P_FAT] }
+  );
+  DX.EN = { balanced: 'Balanced calorie deficit', highpro: 'High-protein', med: 'Mediterranean', mideast: 'Middle Eastern', 'if': 'Intermittent fasting', cycle: 'Carb cycling', keto: 'Ketogenic', lowcarb: 'Low-carbohydrate', dash: 'DASH', lowfat: 'Low-fat', veg: 'Vegetarian', vegan: 'Vegan', flex: 'Flexitarian', mind: 'MIND', gf: 'Gluten-free' };
+  DX.KIND = { balanced: 'q', highpro: 'q', keto: 'qf', lowcarb: 'qf', dash: 'qf', lowfat: 'qf', med: 'f', mideast: 'f', veg: 'fq', vegan: 'fq', flex: 'f', mind: 'f', gf: 'f', 'if': 't', cycle: 'qt' };      // q بالحصص، f بالأكلات، t بالتوقيت
+  DX.LIST.forEach(function (d) { d.en = DX.EN[d.id] || ''; });
+  var GLU = /قمح|خبز|معكرونة|برغل|كسكس|جريش|مفتول|شعير|شوفان|مافن|كيك|بسكو|كراكرز|وافل|بانكيك|تورتيلا|توست|نودلز|فريك|بيجل|كروتون|حبوب الإفطار|موسلي|جرانولا|دونات|براونيز|طحين|تاكو|شاورما|مناقيش|بذور الحنطة|شريدد/,
+    MINDLOVE = /سبانخ|جرجير|خس|ملوخية|كرنب|بقدونس|ورق|لوز|جوز|فستق|كاجو|توت|فراولة|عدس|حمص|فول|سمك|سلمون|سردين|تونة|زيت زيتون|شوفان|أرز بني|برغل|كينوا|نخالة/,
+    KETOAVOID = /عصير|سكر|عسل|مربى|حلوى|شوكولاتة|كيك|بسكو|مشروب غازي|ببسي|كولا|تمر/;
+  var rule0 = DX.foodRule;
+  DX.foodRule = function (id, f) {
+    var n = f.n || '', g = f.g;
+    if (id === 'veg') return f.veg === 0 ? 'avoid' : null;
+    if (id === 'vegan') return f.vegan === 0 ? 'avoid' : null;
+    if (id === 'gf') return GLU.test(n) && !/أرز|ذرة|كينوا/.test(n) ? 'avoid' : null;
+    if (id === 'flex') return g === 1 || /توفو|عدس|حمص|فول/.test(n) ? 'love' : null;
+    if (id === 'mind') { if (RX.friedSweet.test(n) || g === 5 || /جبن|جبنة|زبدة|سمن/.test(n)) return 'avoid'; return MINDLOVE.test(n) ? 'love' : null; }
+    if (id === 'keto') return KETOAVOID.test(n) ? 'avoid' : null;
+    return rule0(id, f);
+  };
+  // حدود المجموعات (الحصص) قبل الحل: الكيتو بلا نشويات وبقوليات وحلويات، وفاكهة وحليب حصة على الأكثر؛ الكارب المنخفض بلا حلويات
+  DX.dietCaps = function (dd, cap) {
+    var id = eff(dd); if (!cap) return cap; cap = cap.slice();
+    if (id === 'keto') { cap[0] = 0; cap[1] = 0; cap[12] = 0; cap[10] = Math.min(cap[10], 1); cap[7] = Math.min(cap[7], 1); cap[6] = Math.min(cap[6], 1); cap[8] = Math.min(cap[8], 1); cap[11] = Math.max(cap[11], 26); cap[4] = Math.max(cap[4], 6); }      // الطاقة في الكيتو من الدهون: سقف أعلى لحصص الدهون واللحوم متوسطة الدهون
+    if (id === 'lowcarb') cap[12] = 0;
+    return cap;
+  };
+  // تشكيل كل الأيام بعد الحل (الحصص): تحويل حصص اللحوم إلى بقوليات (الحصة البقولية ≈ نشويات + لحم قليل الدهن، فتُخصم حصة نشويات مقابل كل واحدة)
+  var toLeg = function (cn, k) { var m = Math.min(k, cn[0]); cn[1] += k; cn[0] -= m; return cn; };
+  DX.dietAll = function (dd, sol) {
+    var id = eff(dd); if (!sol || !sol.counts) return null; var cn = sol.counts.slice(), k;
+    if (id === 'vegan') { k = cn[2] + cn[3] + cn[5] + Math.max(0, cn[4] - 2); cn[2] = cn[3] = cn[5] = 0; cn[4] = Math.min(cn[4], 2); toLeg(cn, k); cn[7] += cn[8]; cn[8] = 0; }
+    else if (id === 'veg') { var mt = cn[2] + cn[3] + cn[5]; k = Math.floor(mt / 2); for (var q = 0, gs = [3, 2, 5]; q < gs.length && k > 0; q++) { var t = Math.min(cn[gs[q]], k); cn[gs[q]] -= t; k -= t; toLeg(cn, t); } }
+    else if (id === 'flex') { k = Math.floor((cn[2] + cn[3]) / 4); var t2 = Math.min(cn[3], k); cn[3] -= t2; toLeg(cn, t2); }
+    else return null;
+    return Object.assign({}, sol, { counts: cn });
+  };
+  // مؤشرات الالتزام للوحة الجودة (من الخطة الفعلية): [النص، القيمة، الحالة ok|warn]
+  DX.check = function (dd, plan, D) {
+    var id = eff(dd); if (!plan || !plan.days || !plan.days.length) return []; var out = [], days = plan.days, n = days.length, byN = {}; D.foods.forEach(function (f) { byN[f.n] = f; });
+    var lines = function (dy) { var a = []; (dy.slots || []).forEach(function (s) { (s.lines || []).forEach(function (l) { a.push(l); }); }); return a; };
+    var avgCarb = days.reduce(function (s0, dy) { return s0 + lines(dy).reduce(function (a, l) { return a + (+l.e || 0) * ((D.EX[l.g] || [0])[0]); }, 0); }, 0) / n;
+    var viol = 0; days.forEach(function (dy) { lines(dy).forEach(function (l) { var f = byN[l.name]; if (f && DX.foodRule(id, f) === 'avoid') viol++; }); });
+    var dayHas = function (re) { return days.filter(function (dy) { return lines(dy).some(function (l) { return re.test(l.name || ''); }); }).length; };
+    if (id === 'keto') out.push(['الكارب (متوسط اليوم)', Math.round(avgCarb) + ' جم من ' + num(dd.P && dd.P.carb, 50), avgCarb <= num(dd.P && dd.P.carb, 50) + 5 ? 'ok' : 'warn']);
+    if (id === 'lowcarb') out.push(['الكارب (متوسط اليوم)', Math.round(avgCarb) + ' جم', avgCarb < 130 ? 'ok' : 'warn']);
+    if (id === 'med' || id === 'mideast' || id === 'mind') { var fd = dayHas(/سمك|سلمون|سردين|تونة|بلطي|بوري|هامور|كنعد/); out.push(['أيام فيها سمك', fd + ' في الأسبوع', fd >= 2 ? 'ok' : 'warn']); var ld = days.filter(function (dy) { return lines(dy).some(function (l) { return l.g === 1; }); }).length; out.push(['أيام فيها بقوليات', ld + ' في الأسبوع', ld >= 3 ? 'ok' : 'warn']); }
+    if (id === 'dash') { var c0 = days[0].counts || []; out.push(['خضار + فاكهة (اليوم الأول)', ((+c0[9] || 0) + (+c0[10] || 0)) + ' حصة', (+c0[9] || 0) + (+c0[10] || 0) >= 7 ? 'ok' : 'warn']); }
+    if (['veg', 'vegan', 'gf', 'mind', 'keto', 'dash', 'med', 'lowfat'].indexOf(id) >= 0) out.push(['أصناف مخالفة للنظام', viol ? viol + ' صنف' : 'لا شيء', viol ? 'warn' : 'ok']);
+    if (id === 'vegan') out.push(['فيتامين B12', 'مصدر مدعّم أو مكمل إلزامي', 'warn']);
+    return out;
+  };
+  var hook = function (E, A) { if (E) { E.dietRule = DX.foodRule; E.dietBase = DX.dietBase; E.dietBoost = DX.dietBoost; E.dietShape = DX.dietShape; E.dietCaps = DX.dietCaps; E.dietAll = DX.dietAll; E.dietCheck = DX.check; } if (A) { A.dietTags = DX.dietTags; A.dietAllow = DX.dietAllow; } };
   if (typeof module !== 'undefined' && module.exports) { module.exports = DX; try { hook(require('./engine.js'), require('./athlete.js')); } catch (e) {} } else { root.DX = DX; hook(root.DPEngine, root.Ath); }
 })(typeof window !== 'undefined' ? window : globalThis);
