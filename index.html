@@ -2428,6 +2428,18 @@ html:not(#mxz):not(#mxy) .dxscf button{align-self:flex-start}
 @media (max-width:480px){html:not(#mxz):not(#mxy) .dxscs{grid-template-columns:1fr 1fr}html:not(#mxz):not(#mxy) main button.sec.dxsc{min-height:84px}}
 html:not(#mxz):not(#mxy) main details.dxsr{background:transparent!important;border:0!important}
 html:not(#mxz):not(#mxy) main details.dxsr>summary{background:transparent!important;color:var(--c-link)!important;font-size:13px;cursor:pointer;padding:2px 0!important;border:0!important}
+/* 1.43ب: نوع النظام قائمة منسدلة مختصرة */
+html:not(#mxz):not(#mxy) .dxsx{gap:8px;margin:14px 0 0;padding:12px 0 0;border-top:1px solid var(--c-divider);border-bottom:0}
+html:not(#mxz):not(#mxy) .dxsrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+html:not(#mxz):not(#mxy) .dxsrow>label{font-weight:700;font-size:14px;color:var(--c-text)}
+html:not(#mxz):not(#mxy) .dxsrow select{flex:1 1 260px;max-width:420px;min-width:0}
+html:not(#mxz):not(#mxy) .dxsq .mxqp{width:min(380px,84vw)}
+html:not(#mxz):not(#mxy) .dxsq .mxqp small{display:block;margin-top:4px;color:var(--c-text-2)}
+html:not(#mxz):not(#mxy) .dxsq .mxqp b small{display:inline;direction:ltr;unicode-bidi:isolate;color:var(--c-text-muted)}
+html:not(#mxz):not(#mxy) .dxsq .dxsks{display:flex;gap:4px;margin:4px 0}
+html:not(#mxz):not(#mxy) .dxsw{margin:0;font-size:12.5px;color:var(--c-warning)}
+html:not(#mxz):not(#mxy) .dxsn{margin:0;color:var(--c-text-2)}
+html:not(#mxz):not(#mxy) .dxsp{min-width:130px}
 </style></head>
 <body class="gating"><header id="hd"></header><div id="gate" style="display:flex"><div class="gcard" style="text-align:center"><div style="font-weight:700;color:#253464">حصة — جارٍ التحميل…</div></div></div><div id="app" style="display:none"><aside></aside><main></main></div>
 <noscript><div style="position:fixed;inset:0;background:#092061;color:#fff;padding:24px;text-align:center;font:16px Tahoma,Arial">هذا الملف يحتاج تفعيل JavaScript. افتحه مباشرة في Chrome أو Edge أو Safari (وليس من معاينة واتساب أو البريد).</div></noscript>
@@ -9707,27 +9719,24 @@ var GDX = { dp: {}, ok: {}, pend: '' };
 var GDX_K = { q: ['بالحصص', 'kq'], f: ['بالأكلات', 'kf'], t: ['بالتوقيت', 'kt'] };
 function gdxKinds(id) { return String(DX.KIND[id] || 'q').split('').map(function (k) { var x = GDX_K[k]; return x ? '<span class="dxsk ' + x[1] + '">' + x[0] + '</span>' : ''; }).join(''); }
 function gdxList(c) { var ath = c.kind === 'athlete'; return DX.LIST.filter(function (d) { return d.id !== 'cycle' && (ath ? d.sys !== 'ex' : d.sys !== 'ath'); }); }
-function genDietBox(c) {
+function genDietBox(c) {      // 1.43ب (طلب المالك): قائمة منسدلة مختصرة بعد حساب الطاقة، والمعلومات عند «؟»
   if (typeof DX === 'undefined') return '';
-  if (c.kind === 'athlete') return '<div class="dxsx"><h4>نوع النظام الغذائي</h4><p class="small">نظام الجرامات: المرحلة الثانية من «نوع النظام». استعمل «المكتبة» حالياً.</p></div>';
-  var x = ec(c), cur0 = c.diet && c.diet.id, sel = GDX.pend || cur0 || '';
-  var cards = '<button class="sec dxsc' + (!cur0 && !GDX.pend ? ' on' : '') + '" data-a="genDiet" data-v="" aria-pressed="' + !cur0 + '"><b>بدون نظام خاص</b><small>Standard</small><span class="dxsks"><span class="dxsk kq">بالحصص</span></span><i>التوزيع المتوازن الحالي</i></button>'
-    + gdxList(c).map(function (d) { var sc = DX.screen(d.id, x, D), stop = sc.stop.length, on = sel === d.id;
-      return '<button class="sec dxsc' + (on ? ' on' : '') + (stop ? ' off' : '') + '" data-a="genDiet" data-v="' + d.id + '" aria-pressed="' + on + '"' + (stop ? ' aria-disabled="true" title="' + esc(sc.stop[0]) + '"' : '') + '><b>' + esc(d.n) + '</b><small>' + esc(d.en || '') + '</small><span class="dxsks">' + gdxKinds(d.id) + '</span><i>' + esc(stop ? '⛔ ' + sc.stop[0] : (d.sum || '').split('.')[0]) + '</i></button>'; }).join('');
-  var det = '';
-  if (sel) {
-    var d = DX.get(sel), P = DX.pnorm(sel, GDX.dp[sel] || (c.diet && c.diet.id === sel ? c.diet.P : {})), sc = DX.screen(sel, x, D), conf = sc.confirm || [], ok = GDX.ok[sel] || [];
-    var pars = d.par.filter(function (p) { return p.k !== 'deficit' && p.type !== 'sel' && p.type !== 'time'; }).map(function (p) { return '<label class="dxsp">' + esc(p.l) + '<input type="number" data-gdp="' + p.k + '" min="' + p.min + '" max="' + p.max + '" step="' + p.step + '" value="' + P[p.k] + '"></label>'; }).join('')
-      + d.par.filter(function (p) { return p.type === 'sel'; }).map(function (p) { return '<label class="dxsp">' + esc(p.l) + '<select data-gdp="' + p.k + '">' + p.opts.map(function (o) { return '<option value="' + o[0] + '"' + (P[p.k] === o[0] ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select></label>'; }).join('');
-    det = '<div class="dxsd"><div class="dxsdh"><b>' + esc(d.n) + '</b> <small>' + esc(d.en || '') + '</small> ' + gdxKinds(sel) + ' <span class="dxsg">الدليل: ' + esc(DX.GRADE[d.grade] || '') + '</span></div><p class="small">' + esc(d.sum) + '</p>'
-      + (pars ? '<div class="dxsps">' + pars + '</div>' : '')
-      + (sc.warn.length ? '<ul class="dxsw">' + sc.warn.map(function (w) { return '<li>⚠ ' + esc(w) + '</li>'; }).join('') + '</ul>' : '')
+  if (c.kind === 'athlete') return '';
+  var x = ec(c), cur0 = c.diet && c.diet.id, sel = GDX.pend || cur0 || '', L = gdxList(c);
+  var opts = '<option value="">بدون نظام خاص (متوازن)</option>' + L.map(function (d) { var sc = DX.screen(d.id, x, D), stop = sc.stop.length; return '<option value="' + d.id + '"' + (sel === d.id ? ' selected' : '') + (stop ? ' disabled' : '') + '>' + esc(d.n) + ' — ' + esc(d.en || '') + (stop ? ' (غير مناسب)' : '') + '</option>'; }).join('');
+  var d = sel ? DX.get(sel) : null, info = '', more = '';
+  if (d) {
+    var P = DX.pnorm(sel, GDX.dp[sel] || (c.diet && c.diet.id === sel ? c.diet.P : {})), sc = DX.screen(sel, x, D), conf = sc.confirm || [], ok = GDX.ok[sel] || [];
+    info = '<details class="mxq dxsq"><summary aria-label="معلومات ' + esc(d.n) + '" title="معلومات النظام">؟</summary><div class="mxqp" role="note"><b>' + esc(d.n) + ' <small>' + esc(d.en || '') + '</small></b><span class="dxsks">' + gdxKinds(sel) + '</span><p>' + esc(d.sum) + '</p>'
+      + (d.when && d.when.length ? '<small><b>يناسب:</b> ' + esc(d.when.join('، ')) + '</small>' : '') + (d.notFor && d.notFor.length && d.notFor[0] !== '—' ? '<small><b>لا يناسب:</b> ' + esc(d.notFor.join('، ')) + '</small>' : '')
+      + '<small><b>الدليل:</b> ' + esc(DX.GRADE[d.grade] || '') + (d.refs && d.refs.length ? ' — ' + esc(d.refs.map(function (r) { return DX.SRC[r] || r; }).join(' • ')) : '') + '</small></div></details>';
+    var pars = d.par.filter(function (p) { return p.k !== 'deficit' && p.type !== 'time'; }).map(function (p) { return p.type === 'sel' ? '<label class="dxsp">' + esc(p.l) + '<select data-gdp="' + p.k + '">' + p.opts.map(function (o) { return '<option value="' + o[0] + '"' + (P[p.k] === o[0] ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select></label>' : '<label class="dxsp">' + esc(p.l) + '<input type="number" data-gdp="' + p.k + '" min="' + p.min + '" max="' + p.max + '" step="' + p.step + '" value="' + P[p.k] + '"></label>'; }).join('');
+    more = (pars ? '<div class="dxsps">' + pars + '</div>' : '')
+      + (sc.warn.length ? '<p class="dxsw">⚠ ' + sc.warn.map(esc).join(' • ') + '</p>' : '')
       + (conf.length && GDX.pend === sel ? '<div class="dxscf"><b>أكّد قبل التطبيق:</b>' + conf.map(function (t, i) { return '<label><input type="checkbox" data-gdok="' + i + '"' + (ok[i] ? ' checked' : '') + '> ' + esc(t) + '</label>'; }).join('') + '<button data-a="genDietOk">طبّق «' + esc(d.n) + '»</button></div>' : '')
-      + (cur0 === sel && c.diet.notes && c.diet.notes.length ? '<ul class="dxsn">' + c.diet.notes.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>' : '')
-      + (d.refs && d.refs.length ? '<details class="dxsr"><summary>المراجع</summary><ul class="small">' + d.refs.map(function (r) { return '<li>' + esc(DX.SRC[r] || r) + '</li>'; }).join('') + '</ul></details>' : '')
-      + '<p class="dxsnote small">الأرقام مسودة بمراجعها حتى يعتمدها المالك، وكلها قابلة للتعديل. ثم «التالي: الجدول التركيبي» يقترح الحصص حسب النظام.</p></div>';
+      + (cur0 === sel && c.diet.notes && c.diet.notes.length ? '<p class="dxsn small">' + c.diet.notes.map(esc).join(' • ') + '</p>' : '');
   }
-  return '<div class="dxsx"><h4>نوع النظام الغذائي <small>Diet type</small></h4><p class="small">يحدد كيف يوزّع الجدول الحصص (بالحصص)، أو ما يختاره من الأكلات (بالأكلات)، أو مواعيد الوجبات (بالتوقيت).</p><div class="dxscs">' + cards + '</div>' + det + '</div>';
+  return '<div class="dxsx"><div class="dxsrow"><label for="gdx_sel">نوع النظام الغذائي</label><select id="gdx_sel" data-gdsel="1" aria-label="نوع النظام الغذائي">' + opts + '</select>' + info + '</div>' + more + '</div>';
 }
 function gdxApply(c, id) {
   var x = ec(c), T = E.targets(x, D), prevK = c.kcalManual, P = DX.pnorm(id, GDX.dp[id] || (c.diet && c.diet.id === id ? c.diet.P : {}));
@@ -9750,8 +9759,10 @@ Object.assign(A, {
   genDietOk: function () { var c = cur(); if (!c || !GDX.pend) return; var id = GDX.pend, sc = DX.screen(id, ec(c), D), ok = GDX.ok[id] || []; if (!sc.confirm.every(function (t, i) { return ok[i]; })) { toast('أكّد كل البنود أولاً'); return; } gdxApply(c, id); }
 });
 document.addEventListener('change', function (e) {
-  var t = e.target; if (!t || !t.dataset) return; var c = cur(); if (!c) return; var id = GDX.pend || (c.diet && c.diet.id); if (!id) return;
-  if (t.dataset.dxsp) { GDX.dp[id] = Object.assign({}, GDX.dp[id] || (c.diet && c.diet.P) || {}); GDX.dp[id][t.dataset.dxsp] = t.tagName === 'SELECT' ? t.value : parseFloat(t.value); if (!GDX.pend) gdxApply(c, id); }
+  var t = e.target; if (!t || !t.dataset) return; var c = cur(); if (!c) return;
+  if (t.dataset.gdsel) { A.genDiet(t.value, null); return; }      // 1.43ب: القائمة المنسدلة
+  var id = GDX.pend || (c.diet && c.diet.id); if (!id) return;
+  if (t.dataset.gdp) { GDX.dp[id] = Object.assign({}, GDX.dp[id] || (c.diet && c.diet.P) || {}); GDX.dp[id][t.dataset.gdp] = t.tagName === 'SELECT' ? t.value : parseFloat(t.value); if (!GDX.pend) gdxApply(c, id); }
   if (t.dataset.gdok != null) { GDX.ok[id] = GDX.ok[id] || []; GDX.ok[id][+t.dataset.gdok] = t.checked; }
 });
 setTimeout(function () { A.genEqBuild = (function (f) { return function () { var r = f.apply(this, arguments); var c = cur(); try { if (c && c.plan && c.diet && typeof DX !== 'undefined') { DX.post(c.plan, c); c.plan.diet.en = DX.EN[c.diet.id] || ''; persist(c); } } catch (e) { } return r; }; })(A.genEqBuild); }, 0);      // اسم النظام ونافذة الصيام في الخطة المولّدة (بعد تحميل gen_ui الذي يعرّف genEqBuild)
@@ -11101,7 +11112,7 @@ function genReady(c, g) {
     + (conv ? '<p class="small ok">✔ الخطة الآن بصيغة المحرك: تُعدَّل كمياتها وبدائلها وتُفحص مثل اليدوية. «وجبة من البنك» تعطي بديل الوجبة الكاملة (النوع 4).</p>' : '') + '</div>';
 }
 // ---- 1.26 طريقة الحمية بالبدائل (قرار المالك): 5 خطوات فرعية — الطاقة، الماكروز، الجدول التركيبي، التوزيع على الوجبات، قائمة الطعام
-var EQ_STEPS = ['الطاقة', 'النظام والماكروز', 'الجدول التركيبي', 'التوزيع وبنك الوجبات', 'قائمة الطعام', 'جدول البدائل'];      // 1.37: جدول البدائل خطوة فرعية أخيرة
+var EQ_STEPS = ['الطاقة', 'الماكروز', 'الجدول التركيبي', 'التوزيع وبنك الوجبات', 'قائمة الطعام', 'جدول البدائل'];      // 1.37: جدول البدائل خطوة فرعية أخيرة
 function genAdq(v, t) { var a = E.adequacy(v, t); return '<span class="ad st-' + a.st + '">' + Math.round(a.pct) + '%</span>'; }
 function genDist(c) { var meals = +c.meals || 5, cn = genCounts(c).cn, md = c.mealDist, n = E.slots(meals, D).length; if (!md || md.length !== n || md.some(function (r) { return !r || r.length !== 13; })) return E.suggestDist(cn, meals, D); return md.map(function (r) { return r.map(Number); }); }      // الجدول كما عدّله الأخصائي، ويُتحقق من تطابقه عند البناء
 // 1.27: أيام متعددة — c.eqvDays[i] = {n, cn, md, picks}؛ اليوم النشط نسخته العاملة في baseCounts/mealDist/eqvPicks
@@ -11129,11 +11140,11 @@ function genEqv(c, g, T) {
     h += '<h3>1. الطاقة</h3>' + genImportBtn(c) + '<div class="row"><div><label for="geq_f">المعادلة</label><select id="geq_f" data-f="bmrF">' + E.BMRF.map(function (q) { return '<option value="' + q[0] + '"' + ((c.bmrF || 'mifflin') === q[0] ? ' selected' : '') + '>' + q[1] + '</option>'; }).join('') + '</select><small class="eqwhen">' + esc(cur0[2]) + ' <i>(' + esc(cur0[3]) + ')</i></small></div>'
       + '<div class="eqfrom"><label>من بيانات العميل</label><span class="gchip">🏃 ' + esc(c.activity || '—') + '</span><span class="gchip">🎯 ' + esc(c.goal || '—') + '</span> <button class="link" data-a="genStep" data-v="1">✎ تعديل</button></div>'
       + '<div><label><input type="checkbox" data-bf="eta"' + (c.eta ? ' checked' : '') + '> تأثير الهضم 10%</label><small class="eqwhen">معطّل افتراضياً: معاملات النشاط تشمله، فلا يُحسب مرتين.</small></div></div>'
-      + (BM.note ? '<p class="warn small">⚠ ' + esc(BM.note) + '</p>' : '') + '<p class="eqbig"><b class="cnt" data-to="' + Math.round(T.kcal) + '">' + Math.round(T.kcal) + '</b> سعرة <small>يومياً</small></p><div class="tgx small">ℹ ' + esc(E.explain(T, c)) + (c.eta ? ' (مع تأثير الهضم 10%)' : '') + '</div>';
+      + (BM.note ? '<p class="warn small">⚠ ' + esc(BM.note) + '</p>' : '') + '<p class="eqbig"><b class="cnt" data-to="' + Math.round(T.kcal) + '">' + Math.round(T.kcal) + '</b> سعرة <small>يومياً</small></p><div class="tgx small">ℹ ' + esc(E.explain(T, c)) + (c.eta ? ' (مع تأثير الهضم 10%)' : '') + '</div>' + (typeof genDietBox === 'function' ? genDietBox(c) : '');      // 1.43ب: نوع النظام بعد حساب الطاقة
   } else if (es === 2) {
     var pc = function (k, d0) { return Math.round((c[k] == null ? d0 : +c[k]) * 100); }, cp = pc('choPct', 0.45), pp = pc('proPct', 0.25), fp = pc('fatPct', 0.3);
     var row = function (k, l, p, div) { return '<tr><td><b>' + l + '</b></td><td><input type="range" class="gsl gsl-' + k + '" min="0" max="80" step="1" data-gm="' + k + '" value="' + p + '" aria-label="' + l + ' %"><input type="number" class="n" min="0" max="100" step="1" data-gm="' + k + '" value="' + p + '"> %</td><td>' + Math.round(T.kcal * p / 100) + '</td><td><b>' + Math.round(T.kcal * p / 100 / div) + '</b> جم</td><td>' + (c.weight ? (T.kcal * p / 100 / div / c.weight).toFixed(1) : '—') + '</td></tr>'; };
-    h += (typeof genDietBox === 'function' ? genDietBox(c) : '') + '<h3>2. توزيع الماكروز <small>(' + Math.round(T.kcal) + ' سعرة)</small></h3>' + genRing(cp, pp, fp, T.kcal) + '<table class="st gentbl"><tr><th>الماكرو</th><th>النسبة</th><th>سعرات</th><th>جرامات</th><th>جم/كجم</th></tr>' + row('choPct', '● الكربوهيدرات', cp, 4) + row('proPct', '◆ البروتين', pp, 4) + row('fatPct', '✦ الدهون', fp, 9)
+    h += '<h3>2. توزيع الماكروز <small>(' + Math.round(T.kcal) + ' سعرة)</small></h3>' + genRing(cp, pp, fp, T.kcal) + '<table class="st gentbl"><tr><th>الماكرو</th><th>النسبة</th><th>سعرات</th><th>جرامات</th><th>جم/كجم</th></tr>' + row('choPct', '● الكربوهيدرات', cp, 4) + row('proPct', '◆ البروتين', pp, 4) + row('fatPct', '✦ الدهون', fp, 9)
       + '<tr><td>المجموع</td><td colspan="4">' + (cp + pp + fp === 100 ? '<span class="ad st-ok">✓ 100%</span>' : '<span class="ad st-block">' + (cp + pp + fp) + '%: يجب أن يكون 100%</span>') + '</td></tr></table>';
   } else if (es === 3) {
     h += eqDayBar(c, g);

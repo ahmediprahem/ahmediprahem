@@ -1,5 +1,5 @@
 // 1.43 (قرار المالك): «نوع النظام الغذائي» قبل توزيع الحصص — المرحلة الأولى (نظام الحصص).
-// الاختيار في «النظام والماكروز»، ثم الجدول التركيبي يقترح الحصص حسب النظام، والأصناف تُرشَّح، ولوحة الجودة تقيس الالتزام.
+// 1.43ب: قائمة منسدلة مختصرة بعد حساب الطاقة، والمعلومات عند «؟». الجدول التركيبي يقترح الحصص حسب النظام، والأصناف تُرشَّح، ولوحة الجودة تقيس الالتزام.
 const { fileUrl } = require('./_tmp.js');
 const { chromium, devices } = require('playwright'); const assert = require('assert'), path = require('path'), login = require('./auth_helper');
 let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
@@ -8,7 +8,7 @@ const client = async (p, nm, extra) => {
   await p.evaluate(() => DPApp.A.genNew()); await p.fill('[data-f="name"]', nm); await p.selectOption('[data-f="sex"]', 'أنثى'); await p.fill('[data-f="age"]', '34'); await p.fill('[data-f="weight"]', '82'); await p.fill('[data-f="height"]', '163'); await p.press('[data-f="height"]', 'Tab');
   await p.selectOption('[data-f="goal"]', { index: 2 }); await p.selectOption('[data-f="activity"]', { index: 2 }); await p.waitForTimeout(100);
   if (extra) await p.evaluate(extra);
-  await p.evaluate(() => { DPApp.A.genStep(3); DPApp.A.genRevOk(); DPApp.A.genOpen(4); DPApp.A.genEs(2); }); await p.waitForSelector('.dxsx');
+  await p.evaluate(() => { DPApp.A.genStep(3); DPApp.A.genRevOk(); DPApp.A.genOpen(4); DPApp.A.genEs(1); }); await p.waitForSelector('#gdx_sel');
 };
 const C = (p) => p.evaluate(() => JSON.parse(JSON.stringify(DPApp.S.clients.find((x) => x.code === DPApp.S.cur))));
 const counts = (p) => p.evaluate(() => { DPApp.A.genEs(3); return [...document.querySelectorAll('.eqtbl tr[data-g]')].map((r) => +(r.querySelector('input') || {}).value || 0); });
@@ -16,39 +16,39 @@ const counts = (p) => p.evaluate(() => { DPApp.A.genEs(3); return [...document.q
   const br = await chromium.launch(), p = await (await br.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' })).newPage(); p.on('pageerror', (e) => errs.push(String(e))); p.on('dialog', (d) => d.accept());
   await p.goto(URL); await login(p);
   await client(p, 'منى أحمد');
-  const cards = await p.evaluate(() => [...document.querySelectorAll('.dxsc')].map((b) => [b.dataset.v, b.querySelector('small').textContent]));
-  assert(cards.length >= 15, cards.length); for (const id of ['keto', 'dash', 'med', 'mind', 'veg', 'vegan', 'flex', 'gf', 'if', 'lowcarb', 'highpro']) assert(cards.some((c) => c[0] === id), id);
-  assert.deepStrictEqual(cards.find((c) => c[0] === 'mind')[1], 'MIND'); assert.deepStrictEqual(cards.find((c) => c[0] === 'vegan')[1], 'Vegan');
-  assert(/الماكروز/.test(await p.textContent('.eqsteps')) && /النظام/.test(await p.textContent('.eqsteps')));
-  ok('خطوة «النظام والماكروز»: ' + cards.length + ' بطاقة بالاسمين العربي والإنجليزي، ومنها الجديدة (MIND، النباتي، النباتي الصرف، المرن، الخالي من الجلوتين) والكيتو في نظام الحصص');
-  // الكيتو: تأكيد الموانع ثم الجدول بلا نشويات
+  const sel = await p.evaluate(() => { const s = document.querySelector('#gdx_sel'), box = s.closest('.geneqv'), big = box.querySelector('.eqbig'); return { opts: [...s.options].map((o) => [o.value, o.textContent]), after: !!(big.compareDocumentPosition(s) & Node.DOCUMENT_POSITION_FOLLOWING), cards: document.querySelectorAll('.dxsc').length }; });
+  assert(sel.opts.length >= 15, sel.opts.length); assert(sel.after, 'القائمة ليست بعد حساب الطاقة'); assert.strictEqual(sel.cards, 0, 'بطاقات بدل القائمة');
+  for (const id of ['keto', 'dash', 'med', 'mind', 'veg', 'vegan', 'flex', 'gf', 'if', 'lowcarb', 'highpro']) assert(sel.opts.some((o) => o[0] === id), id);
+  assert(/MIND/.test(sel.opts.find((o) => o[0] === 'mind')[1]) && /Vegan/.test(sel.opts.find((o) => o[0] === 'vegan')[1]));
+  ok('قائمة منسدلة واحدة بعد حساب الطاقة في خطوة «الطاقة»: ' + sel.opts.length + ' خياراً بالاسمين العربي والإنجليزي، بلا بطاقات');
   const k0 = (await C(p)).kcalManual;
-  await p.click('.dxsc[data-v="keto"]'); await p.waitForSelector('.dxscf'); assert.strictEqual((await C(p)).diet, undefined, 'طُبّق قبل التأكيد');
+  await p.selectOption('#gdx_sel', 'keto'); await p.waitForSelector('.dxscf'); assert.strictEqual((await C(p)).diet, undefined, 'طُبّق قبل التأكيد');
+  await p.click('.dxsq summary'); const info = await p.textContent('.dxsq .mxqp'); assert(/كارب كلي 20–50/.test(info) && /Ketogenic/.test(info) && /الدليل/.test(info), info);
+  ok('«؟» بجانب الاسم يُظهر وصف النظام وطريقته ومن يناسبه ومراجعه');
+  await p.click('.dxsq summary');
   await p.click('.dxscf [data-a="genDietOk"]'); assert.strictEqual((await C(p)).diet, undefined);
   for (const lb of await p.$$('.dxscf label')) await lb.click(); await p.click('.dxscf [data-a="genDietOk"]');
-  let c = await C(p); assert.strictEqual(c.diet.id, 'keto'); assert.strictEqual(c.kcalManual, k0, 'النظام غيّر السعرات ' + k0 + ' → ' + c.kcalManual); assert(c.choPct <= 0.12, c.choPct);
+  let c = await C(p); assert.strictEqual(c.diet.id, 'keto'); assert.strictEqual(c.kcalManual, k0, 'النظام غيّر السعرات'); assert(c.choPct <= 0.12, c.choPct); assert.strictEqual(Math.round((c.choPct + c.proPct + c.fatPct) * 100), 100);
+  await p.fill('.dxsps [data-gdp="carb"]', '30'); await p.press('.dxsps [data-gdp="carb"]', 'Tab'); await p.waitForTimeout(150); c = await C(p); assert.strictEqual(c.diet.P.carb, 30, 'تعديل المعامل لا يعمل');
   let cn = await counts(p); assert.deepStrictEqual([cn[0], cn[1], cn[12]], [0, 0, 0], 'نشويات/بقوليات/حلويات في الكيتو ' + cn); assert(cn[10] <= 1 && cn[7] <= 1, cn);
-  ok('الكيتو: لا يُطبَّق قبل تأكيد الموانع الأربعة، ثم كارب ≤ 12% والسعرات من خطوة الطاقة كما هي، والجدول بلا نشويات ولا بقوليات ولا حلويات وفاكهة وحليب حصة على الأكثر');
+  ok('الكيتو: لا يُطبَّق قبل تأكيد الموانع، والسعرات من «الطاقة» كما هي، والنسب مجموعها 100%، وتعديل الكارب إلى 30 يُطبَّق، والجدول بلا نشويات ولا بقوليات ولا حلويات');
   await p.evaluate(() => { DPApp.A.genEqBuild(); DPApp.A.genEs(3); }); await p.waitForSelector('.genqual');
   const q = await p.evaluate(() => [...document.querySelectorAll('.genqual .gq')].map((t) => t.querySelector('small').textContent + '=' + t.querySelector('b').textContent));
-  assert(q.some((t) => /الكارب \(متوسط اليوم\)=\d+ جم من 40/.test(t)), q.join(' | ')); assert(q.some((t) => /أصناف مخالفة للنظام=لا شيء/.test(t)), q.join(' | '));
+  assert(q.some((t) => /الكارب \(متوسط اليوم\)=\d+ جم من 30/.test(t)), q.join(' | ')); assert(q.some((t) => /أصناف مخالفة للنظام=لا شيء/.test(t)), q.join(' | '));
   c = await C(p); assert.strictEqual(c.plan.diet.id, 'keto'); assert.strictEqual(c.plan.diet.en, 'Ketogenic');
-  ok('بعد التوليد: لوحة الجودة تعرض «الكارب (متوسط اليوم) … من 40» و«أصناف مخالفة للنظام: لا شيء»، واسم النظام محفوظ في الخطة');
-  // النباتي الصرف: حصص اللحوم إلى بقوليات، والأصناف بلا منتج حيواني
-  await client(p, 'سارة نباتية'); await p.click('.dxsc[data-v="vegan"]'); c = await C(p); assert.strictEqual(c.diet.id, 'vegan');
+  ok('بعد التوليد: لوحة الجودة تعرض «الكارب (متوسط اليوم) … من 30» و«أصناف مخالفة للنظام: لا شيء»، واسم النظام محفوظ في الخطة');
+  await client(p, 'سارة نباتية'); await p.selectOption('#gdx_sel', 'vegan'); c = await C(p); assert.strictEqual(c.diet.id, 'vegan');
   cn = await counts(p); assert.deepStrictEqual([cn[2], cn[3], cn[5], cn[8]], [0, 0, 0, 0], 'لحوم في النباتي الصرف ' + cn); assert(cn[1] >= 2, cn);
   await p.evaluate(() => { DPApp.A.genEqBuild(); DPApp.A.genEs(3); }); await p.waitForSelector('.genqual');
-  const bad = (await p.evaluate(() => [...document.querySelectorAll('.genqual .gq')].map((t) => t.querySelector('small').textContent + '=' + t.querySelector('b').textContent).join(' | ')));
+  const bad = await p.evaluate(() => [...document.querySelectorAll('.genqual .gq')].map((t) => t.querySelector('small').textContent + '=' + t.querySelector('b').textContent).join(' | '));
   assert(/أصناف مخالفة للنظام=لا شيء/.test(bad), bad); assert(/فيتامين B12/.test(bad), bad);
   ok('النباتي الصرف: حصص اللحوم والحليب كامل الدسم صفر وتحولت إلى بقوليات، وبلا أصناف مخالفة، وتنبيه B12 في لوحة الجودة');
-  // المحظور بالحالة: العمر أقل من 18
   await client(p, 'مراهقة', () => { const c = DPApp.S.clients.find((x) => x.code === DPApp.S.cur); c.age = 16; });
-  const off = await p.evaluate(() => [...document.querySelectorAll('.dxsc.off')].map((b) => b.dataset.v)); assert(off.includes('keto'), off);
-  await p.click('.dxsc[data-v="keto"]', { force: true }); assert.strictEqual((await C(p)).diet, undefined); ok('الموانع: لعميلة أقل من 18 تظهر الأنظمة معطّلة بالسبب ولا تُطبَّق');
-  // بلا نظام: يعود المتوازن
-  await client(p, 'عادية'); await p.click('.dxsc[data-v="dash"]'); assert.strictEqual((await C(p)).diet.id, 'dash'); await p.click('.dxsc[data-v=""]'); assert.strictEqual((await C(p)).diet, undefined); ok('«بدون نظام خاص» يزيل النظام ويعود للتوزيع المتوازن');
-  // الجوال
+  const dis = await p.evaluate(() => [...document.querySelectorAll('#gdx_sel option')].filter((o) => o.disabled).map((o) => o.value)); assert(dis.includes('keto') && dis.includes('if'), dis);
+  ok('الموانع: لعميلة أقل من 18 تظهر الأنظمة معطّلة في القائمة «(غير مناسب)» ولا يمكن اختيارها');
+  await client(p, 'عادية'); await p.selectOption('#gdx_sel', 'dash'); assert.strictEqual((await C(p)).diet.id, 'dash'); await p.selectOption('#gdx_sel', ''); assert.strictEqual((await C(p)).diet, undefined); ok('«بدون نظام خاص» يزيل النظام ويعود للتوزيع المتوازن');
   const m = await (await br.newContext({ ...devices['iPhone 13'], reducedMotion: 'reduce' })).newPage(); m.on('pageerror', (e) => errs.push(String(e))); m.on('dialog', (d) => d.accept()); await m.goto(URL); await login(m); await client(m, 'جوال');
-  assert.strictEqual(await m.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true); ok('الجوال: البطاقات عمودان بلا تمرير أفقي');
+  await m.selectOption('#gdx_sel', 'med'); await m.click('.dxsq summary'); const r = await m.evaluate(() => { const b = document.querySelector('.dxsq .mxqp').getBoundingClientRect(); return [b.left >= 0 && b.right <= innerWidth, document.documentElement.scrollWidth <= innerWidth + 1]; });
+  assert.deepStrictEqual(r, [true, true]); ok('الجوال: القائمة ونافذة «؟» داخل الشاشة بلا تمرير أفقي');
   assert.deepStrictEqual(errs, [], errs.join('\n')); await br.close(); console.log('\nنجح ' + n + ' اختبارات نوع النظام الغذائي 1.43');
 })().catch((e) => { console.log('✘', e.message.slice(0, 1500)); console.log(errs.join('\n')); process.exit(1); });

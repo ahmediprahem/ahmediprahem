@@ -113,27 +113,24 @@ var GDX = { dp: {}, ok: {}, pend: '' };
 var GDX_K = { q: ['بالحصص', 'kq'], f: ['بالأكلات', 'kf'], t: ['بالتوقيت', 'kt'] };
 function gdxKinds(id) { return String(DX.KIND[id] || 'q').split('').map(function (k) { var x = GDX_K[k]; return x ? '<span class="dxsk ' + x[1] + '">' + x[0] + '</span>' : ''; }).join(''); }
 function gdxList(c) { var ath = c.kind === 'athlete'; return DX.LIST.filter(function (d) { return d.id !== 'cycle' && (ath ? d.sys !== 'ex' : d.sys !== 'ath'); }); }
-function genDietBox(c) {
+function genDietBox(c) {      // 1.43ب (طلب المالك): قائمة منسدلة مختصرة بعد حساب الطاقة، والمعلومات عند «؟»
   if (typeof DX === 'undefined') return '';
-  if (c.kind === 'athlete') return '<div class="dxsx"><h4>نوع النظام الغذائي</h4><p class="small">نظام الجرامات: المرحلة الثانية من «نوع النظام». استعمل «المكتبة» حالياً.</p></div>';
-  var x = ec(c), cur0 = c.diet && c.diet.id, sel = GDX.pend || cur0 || '';
-  var cards = '<button class="sec dxsc' + (!cur0 && !GDX.pend ? ' on' : '') + '" data-a="genDiet" data-v="" aria-pressed="' + !cur0 + '"><b>بدون نظام خاص</b><small>Standard</small><span class="dxsks"><span class="dxsk kq">بالحصص</span></span><i>التوزيع المتوازن الحالي</i></button>'
-    + gdxList(c).map(function (d) { var sc = DX.screen(d.id, x, D), stop = sc.stop.length, on = sel === d.id;
-      return '<button class="sec dxsc' + (on ? ' on' : '') + (stop ? ' off' : '') + '" data-a="genDiet" data-v="' + d.id + '" aria-pressed="' + on + '"' + (stop ? ' aria-disabled="true" title="' + esc(sc.stop[0]) + '"' : '') + '><b>' + esc(d.n) + '</b><small>' + esc(d.en || '') + '</small><span class="dxsks">' + gdxKinds(d.id) + '</span><i>' + esc(stop ? '⛔ ' + sc.stop[0] : (d.sum || '').split('.')[0]) + '</i></button>'; }).join('');
-  var det = '';
-  if (sel) {
-    var d = DX.get(sel), P = DX.pnorm(sel, GDX.dp[sel] || (c.diet && c.diet.id === sel ? c.diet.P : {})), sc = DX.screen(sel, x, D), conf = sc.confirm || [], ok = GDX.ok[sel] || [];
-    var pars = d.par.filter(function (p) { return p.k !== 'deficit' && p.type !== 'sel' && p.type !== 'time'; }).map(function (p) { return '<label class="dxsp">' + esc(p.l) + '<input type="number" data-gdp="' + p.k + '" min="' + p.min + '" max="' + p.max + '" step="' + p.step + '" value="' + P[p.k] + '"></label>'; }).join('')
-      + d.par.filter(function (p) { return p.type === 'sel'; }).map(function (p) { return '<label class="dxsp">' + esc(p.l) + '<select data-gdp="' + p.k + '">' + p.opts.map(function (o) { return '<option value="' + o[0] + '"' + (P[p.k] === o[0] ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select></label>'; }).join('');
-    det = '<div class="dxsd"><div class="dxsdh"><b>' + esc(d.n) + '</b> <small>' + esc(d.en || '') + '</small> ' + gdxKinds(sel) + ' <span class="dxsg">الدليل: ' + esc(DX.GRADE[d.grade] || '') + '</span></div><p class="small">' + esc(d.sum) + '</p>'
-      + (pars ? '<div class="dxsps">' + pars + '</div>' : '')
-      + (sc.warn.length ? '<ul class="dxsw">' + sc.warn.map(function (w) { return '<li>⚠ ' + esc(w) + '</li>'; }).join('') + '</ul>' : '')
+  if (c.kind === 'athlete') return '';
+  var x = ec(c), cur0 = c.diet && c.diet.id, sel = GDX.pend || cur0 || '', L = gdxList(c);
+  var opts = '<option value="">بدون نظام خاص (متوازن)</option>' + L.map(function (d) { var sc = DX.screen(d.id, x, D), stop = sc.stop.length; return '<option value="' + d.id + '"' + (sel === d.id ? ' selected' : '') + (stop ? ' disabled' : '') + '>' + esc(d.n) + ' — ' + esc(d.en || '') + (stop ? ' (غير مناسب)' : '') + '</option>'; }).join('');
+  var d = sel ? DX.get(sel) : null, info = '', more = '';
+  if (d) {
+    var P = DX.pnorm(sel, GDX.dp[sel] || (c.diet && c.diet.id === sel ? c.diet.P : {})), sc = DX.screen(sel, x, D), conf = sc.confirm || [], ok = GDX.ok[sel] || [];
+    info = '<details class="mxq dxsq"><summary aria-label="معلومات ' + esc(d.n) + '" title="معلومات النظام">؟</summary><div class="mxqp" role="note"><b>' + esc(d.n) + ' <small>' + esc(d.en || '') + '</small></b><span class="dxsks">' + gdxKinds(sel) + '</span><p>' + esc(d.sum) + '</p>'
+      + (d.when && d.when.length ? '<small><b>يناسب:</b> ' + esc(d.when.join('، ')) + '</small>' : '') + (d.notFor && d.notFor.length && d.notFor[0] !== '—' ? '<small><b>لا يناسب:</b> ' + esc(d.notFor.join('، ')) + '</small>' : '')
+      + '<small><b>الدليل:</b> ' + esc(DX.GRADE[d.grade] || '') + (d.refs && d.refs.length ? ' — ' + esc(d.refs.map(function (r) { return DX.SRC[r] || r; }).join(' • ')) : '') + '</small></div></details>';
+    var pars = d.par.filter(function (p) { return p.k !== 'deficit' && p.type !== 'time'; }).map(function (p) { return p.type === 'sel' ? '<label class="dxsp">' + esc(p.l) + '<select data-gdp="' + p.k + '">' + p.opts.map(function (o) { return '<option value="' + o[0] + '"' + (P[p.k] === o[0] ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select></label>' : '<label class="dxsp">' + esc(p.l) + '<input type="number" data-gdp="' + p.k + '" min="' + p.min + '" max="' + p.max + '" step="' + p.step + '" value="' + P[p.k] + '"></label>'; }).join('');
+    more = (pars ? '<div class="dxsps">' + pars + '</div>' : '')
+      + (sc.warn.length ? '<p class="dxsw">⚠ ' + sc.warn.map(esc).join(' • ') + '</p>' : '')
       + (conf.length && GDX.pend === sel ? '<div class="dxscf"><b>أكّد قبل التطبيق:</b>' + conf.map(function (t, i) { return '<label><input type="checkbox" data-gdok="' + i + '"' + (ok[i] ? ' checked' : '') + '> ' + esc(t) + '</label>'; }).join('') + '<button data-a="genDietOk">طبّق «' + esc(d.n) + '»</button></div>' : '')
-      + (cur0 === sel && c.diet.notes && c.diet.notes.length ? '<ul class="dxsn">' + c.diet.notes.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>' : '')
-      + (d.refs && d.refs.length ? '<details class="dxsr"><summary>المراجع</summary><ul class="small">' + d.refs.map(function (r) { return '<li>' + esc(DX.SRC[r] || r) + '</li>'; }).join('') + '</ul></details>' : '')
-      + '<p class="dxsnote small">الأرقام مسودة بمراجعها حتى يعتمدها المالك، وكلها قابلة للتعديل. ثم «التالي: الجدول التركيبي» يقترح الحصص حسب النظام.</p></div>';
+      + (cur0 === sel && c.diet.notes && c.diet.notes.length ? '<p class="dxsn small">' + c.diet.notes.map(esc).join(' • ') + '</p>' : '');
   }
-  return '<div class="dxsx"><h4>نوع النظام الغذائي <small>Diet type</small></h4><p class="small">يحدد كيف يوزّع الجدول الحصص (بالحصص)، أو ما يختاره من الأكلات (بالأكلات)، أو مواعيد الوجبات (بالتوقيت).</p><div class="dxscs">' + cards + '</div>' + det + '</div>';
+  return '<div class="dxsx"><div class="dxsrow"><label for="gdx_sel">نوع النظام الغذائي</label><select id="gdx_sel" data-gdsel="1" aria-label="نوع النظام الغذائي">' + opts + '</select>' + info + '</div>' + more + '</div>';
 }
 function gdxApply(c, id) {
   var x = ec(c), T = E.targets(x, D), prevK = c.kcalManual, P = DX.pnorm(id, GDX.dp[id] || (c.diet && c.diet.id === id ? c.diet.P : {}));
@@ -156,8 +153,10 @@ Object.assign(A, {
   genDietOk: function () { var c = cur(); if (!c || !GDX.pend) return; var id = GDX.pend, sc = DX.screen(id, ec(c), D), ok = GDX.ok[id] || []; if (!sc.confirm.every(function (t, i) { return ok[i]; })) { toast('أكّد كل البنود أولاً'); return; } gdxApply(c, id); }
 });
 document.addEventListener('change', function (e) {
-  var t = e.target; if (!t || !t.dataset) return; var c = cur(); if (!c) return; var id = GDX.pend || (c.diet && c.diet.id); if (!id) return;
-  if (t.dataset.dxsp) { GDX.dp[id] = Object.assign({}, GDX.dp[id] || (c.diet && c.diet.P) || {}); GDX.dp[id][t.dataset.dxsp] = t.tagName === 'SELECT' ? t.value : parseFloat(t.value); if (!GDX.pend) gdxApply(c, id); }
+  var t = e.target; if (!t || !t.dataset) return; var c = cur(); if (!c) return;
+  if (t.dataset.gdsel) { A.genDiet(t.value, null); return; }      // 1.43ب: القائمة المنسدلة
+  var id = GDX.pend || (c.diet && c.diet.id); if (!id) return;
+  if (t.dataset.gdp) { GDX.dp[id] = Object.assign({}, GDX.dp[id] || (c.diet && c.diet.P) || {}); GDX.dp[id][t.dataset.gdp] = t.tagName === 'SELECT' ? t.value : parseFloat(t.value); if (!GDX.pend) gdxApply(c, id); }
   if (t.dataset.gdok != null) { GDX.ok[id] = GDX.ok[id] || []; GDX.ok[id][+t.dataset.gdok] = t.checked; }
 });
 setTimeout(function () { A.genEqBuild = (function (f) { return function () { var r = f.apply(this, arguments); var c = cur(); try { if (c && c.plan && c.diet && typeof DX !== 'undefined') { DX.post(c.plan, c); c.plan.diet.en = DX.EN[c.diet.id] || ''; persist(c); } } catch (e) { } return r; }; })(A.genEqBuild); }, 0);      // اسم النظام ونافذة الصيام في الخطة المولّدة (بعد تحميل gen_ui الذي يعرّف genEqBuild)
