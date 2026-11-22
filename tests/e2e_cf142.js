@@ -53,7 +53,7 @@ const audit = (p) => p.evaluate(() => {
   await p.click('main .mxtbl tbody tr:first-child [data-a="mxDel"]'); assert.strictEqual(await p.evaluate(() => DPApp.S.clients.find((x) => x.code === DPApp.S.cur).med.visits.filter((v) => v.w != null).length), 2); ok('حذف قراءة من السجل');
   // ٤ الإضافة من القائمة: بحث ثم تحليل جديد يظهر بالأحمر وفي «الملف الطبي»
   await p.click('main [data-a="mxBack"]'); await p.click('main .mxadd'); await p.waitForSelector('main .mxpick'); await p.fill('#mx_q', 'فيريتين');
-  const vis = await p.evaluate(() => [...document.querySelectorAll('main .mxopt')].filter((o) => !o.hidden).map((o) => o.querySelector('span').textContent)); assert.deepStrictEqual(vis, ['الفيريتين']);
+  const vis = await p.evaluate(() => [...document.querySelectorAll('main .mxopt')].filter((o) => o.getClientRects().length).map((o) => o.querySelector('span').textContent)); assert.deepStrictEqual(vis, ['الفيريتين']);
   await p.click('main .mxopt:not([hidden]) button'); assert(await p.isVisible('#mx_v'), 'الإضافة من القائمة تفتح النموذج مباشرة'); await p.fill('#mx_v', '12'); await p.click('main [data-a="mxSave"]');
   s = await p.evaluate(() => { const c = DPApp.S.clients.find((x) => x.code === DPApp.S.cur); return { lab: c.med.labs.some((l) => l.v.ferritin === 12), chip: document.querySelector('main .mxhero .mxst').textContent }; });
   assert(s.lab); assert.strictEqual(s.chip, 'منخفض'); await p.click('main [data-a="mxBack"]'); assert(/2 خارج المرجع/.test(await p.textContent('main .mxgh .link')), await p.textContent('main .mxgh .link'));
@@ -66,8 +66,11 @@ const audit = (p) => p.evaluate(() => {
   ok('النهاري والليلي: نصوص «نظرة عامة» وصفحة القياس وعمود المعلومات ≥ 4.5:1');
   // ٦ 1280: بلا قائمة العملاء، وعمود المعلومات باقٍ
   await p.setViewportSize({ width: 1280, height: 860 }); await p.evaluate(() => DPApp.A.tab('ov')); await p.waitForTimeout(100);
-  s = await p.evaluate(() => ({ list: getComputedStyle(document.querySelector('main .cflist')).display, side: !!document.querySelector('main .cfside .mxfs'), over: document.documentElement.scrollWidth > innerWidth + 1, h: document.documentElement.scrollHeight })); assert.deepStrictEqual([s.list, s.side, s.over], ['none', true, false]); assert(s.h < 1100, 'الصفحة طويلة ' + s.h);
-  ok('1280: بلا قائمة العملاء، و«الحالة العامة» في عمود المعلومات، والصفحة بطول شاشة تقريباً (' + s.h + ')، وبلا تمرير أفقي');
+  s = await p.evaluate(() => ({ list: getComputedStyle(document.querySelector('main .cflist')).display, side: !!document.querySelector('main .cfside .mxfs'), over: document.documentElement.scrollWidth > innerWidth + 1, h: document.documentElement.scrollHeight })); assert.deepStrictEqual([s.list, s.side, s.over], ['flex', true, false]); assert(s.h < 1300, 'الصفحة طويلة ' + s.h);
+  const lr = await p.evaluate(() => [document.querySelector('main .cflist').getBoundingClientRect().left < document.querySelector('main .cfmain').getBoundingClientRect().left, document.querySelector('main .cfside').getBoundingClientRect().left > document.querySelector('main .cfmain').getBoundingClientRect().left]); assert.deepStrictEqual(lr, [true, true], 'القائمة يساراً والمعلومات يميناً');
+  assert.strictEqual(await p.isVisible('#mx_lq'), false); await p.click('main .mxlsb'); assert(await p.isVisible('#mx_lq')); await p.fill('#mx_lq', 'سارة'); assert.deepStrictEqual(await p.evaluate(() => [...document.querySelectorAll('main .cflr')].filter((b) => b.getClientRects().length).map((b) => b.querySelector('b').textContent)), ['سارة خالد']);
+  await p.click('main .cflr:not([hidden])'); assert.strictEqual(await p.evaluate(() => DPApp.S.cur), 'C0777'); assert.strictEqual(await p.evaluate(() => DPApp.S.tab), 'ov');
+  ok('1280: قائمة العملاء على اليسار وعمود المعلومات على اليمين، وزر البحث يفتح خانة تصفّي القائمة، والنقر ينقل إلى «نظرة عامة» للعميل الآخر، وبلا تمرير أفقي (' + s.h + ')');
   // ٧ الجوال
   for (const W of [390, 360]) {
     const m = await (await br.newContext({ ...devices['iPhone 13'], viewport: { width: W, height: 844 }, reducedMotion: 'reduce' })).newPage(); m.on('pageerror', (e) => errs.push(String(e))); m.on('dialog', (d) => d.accept()); await m.goto(URL); await login(m); await seed(m);

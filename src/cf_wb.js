@@ -188,7 +188,7 @@ function mxSide(c) {
 }
 function mxList(c) {
   var q = (S.mxLq || '').trim(), L = S.clients.filter(function (x) { return !q || String(x.name || '').indexOf(q) >= 0 || String(x.code).indexOf(q) >= 0 || String(x.phone || '').indexOf(q) >= 0; });
-  return '<aside class="cflist" aria-label="قائمة العملاء"><div class="mxhd"><h3>قائمة العملاء <em>(' + S.clients.length + ')</em></h3></div><label class="mxsrch sm">' + IC('search') + '<input id="mx_lq" placeholder="ابحث" value="' + esc(q) + '" autocomplete="off"></label><div class="cflrows">'
+  return '<aside class="cflist" aria-label="قائمة العملاء"><div class="mxhd"><h3>قائمة العملاء <em>(' + S.clients.length + ')</em></h3><button class="sec mxlsb' + (S.mxLs || q ? ' on' : '') + '" data-a="mxLs" aria-label="ابحث في العملاء" aria-expanded="' + !!(S.mxLs || q) + '" title="بحث">' + IC('search') + '</button></div><label class="mxsrch sm"' + (S.mxLs || q ? '' : ' hidden') + '>' + IC('search') + '<input id="mx_lq" placeholder="ابحث بالاسم أو الكود أو الجوال" value="' + esc(q) + '" autocomplete="off"></label><div class="cflrows">'
     + L.slice(0, 60).map(function (x) { var on = x.code === c.code; return '<button class="sec cflr' + (on ? ' on' : '') + '" data-a="pick" data-v="' + esc(x.code) + '"' + (on ? ' aria-current="true"' : '') + '><span class="cav">' + esc(initial(x.name)) + '</span><span class="cfln"><b>' + esc(x.name || 'عميل بلا اسم') + '</b><small>' + esc(x.code) + (+x.weight ? ' • ' + x.weight + ' كجم' : '') + '</small></span>' + IC('chevron') + '</button>'; }).join('')
     + (L.length ? '' : '<p class="mxmut">لا نتائج</p>') + '</div></aside>';
 }
@@ -212,11 +212,12 @@ cfPage = (function (f) {
     if (MX_FULL.indexOf(S.tab) >= 0 || !mxWide()) return f(c);      // البيانات والخطة بعرض كامل (نماذج وجداول عريضة)
     var h = f(c), i = h.indexOf('<div class="cfhead">'), j = h.indexOf('<div class="tabs ctabs cftabs');      // نفس المحتوى، والرأس ينتقل إلى عمود المعلومات
     var mid = i >= 0 && j > i ? h.slice(0, i) + h.slice(j) : h;
-    return '<div class="cfwb">' + mxList(c) + '<div class="cfmain">' + mid + '</div>' + mxSide(c) + '</div>';
+    return '<div class="cfwb">' + mxSide(c) + '<div class="cfmain">' + mid + '</div>' + mxList(c) + '</div>';      // يميناً: المعلومات، يساراً: قائمة العملاء (كما في Wellbeing)
   };
 })(cfPage);
 Object.assign(A, {
   mxOpen: function (v, el) { S.tab = 'ov'; S.mxPick = false; S.mx = v; S.mxAdd = !!(el && el.dataset && el.dataset.add); main(); window.scrollTo(0, 0); if (S.mxAdd) setTimeout(function () { var i = $('#mx_v'); if (i) i.focus(); }, 30); },
+  mxLs: function () { S.mxLs = !S.mxLs; var l = $('main .cflist .mxsrch'), b = $('main .mxlsb'); if (l) l.hidden = !S.mxLs; if (b) { b.classList.toggle('on', S.mxLs); b.setAttribute('aria-expanded', S.mxLs); } if (S.mxLs) { var i = $('#mx_lq'); if (i) i.focus(); } else { S.mxLq = ''; var j = $('#mx_lq'); if (j) j.value = ''; [].forEach.call(document.querySelectorAll('main .cflr'), function (x) { x.hidden = false; }); } },
   mxBack: function () { S.mx = null; S.mxPick = false; S.mxAdd = false; main(); },
   mxPick: function () { S.tab = 'ov'; S.mx = null; S.mxPick = true; S.mxQ = ''; main(); window.scrollTo(0, 0); setTimeout(function () { var i = $('#mx_q'); if (i) i.focus(); }, 30); },
   mxAdd: function () { S.mxAdd = !S.mxAdd; var f = $('#mxform'); if (f) f.classList.toggle('on', S.mxAdd); if (S.mxAdd) setTimeout(function () { var i = $('#mx_v'); if (i) i.focus(); }, 30); },

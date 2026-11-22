@@ -2343,6 +2343,34 @@ html:not(#mxz):not(#mxy) label.meav.lg{width:72px!important;height:72px!importan
 html:not(#mxz):not(#mxy) .merow{display:flex;gap:16px;align-items:center}
 html:not(#mxz):not(#mxy) .merow2{display:flex;gap:8px;flex-wrap:wrap}
 html:not(#mxz):not(#mxy) .mebtn{display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+/* 1.42ج: قائمة العملاء على اليسار من 1200px (طلب المالك، كما في Wellbeing)، وعمود المعلومات على اليمين */
+html:not(#mxz):not(#mxy) .cfwb{grid-template-columns:264px minmax(0,1fr)}
+@media (min-width:1200px){html:not(#mxz):not(#mxy) .cfwb{grid-template-columns:248px minmax(0,1fr) 216px}html:not(#mxz):not(#mxy) .cfwb>.cflist{display:flex}}
+@media (min-width:1600px){html:not(#mxz):not(#mxy) .cfwb{grid-template-columns:264px minmax(0,1fr) 240px}}
+html:not(#mxz):not(#mxy) .cflist .mxhd{display:flex;justify-content:space-between;align-items:center;gap:6px}
+html:not(#mxz):not(#mxy) .cflist .mxhd h3{font-size:15px}
+html:not(#mxz):not(#mxy) main button.sec.mxlsb{width:34px;height:34px;min-height:34px;padding:0!important;display:grid!important;place-items:center;border-radius:50%!important;border:1px solid var(--c-border)!important;background:var(--c-surface)!important;color:var(--c-text-2)!important;box-shadow:none!important;flex:0 0 34px}
+html:not(#mxz):not(#mxy) main button.sec.mxlsb.on,html:not(#mxz):not(#mxy) main button.sec.mxlsb:hover{border-color:var(--mx-acc)!important;color:var(--c-link)!important;transform:none}
+html:not(#mxz):not(#mxy) .mxlsb .ico{width:16px;height:16px}
+html:not(#mxz):not(#mxy) .cflist .mxsrch[hidden]{display:none}
+html:not(#mxz):not(#mxy) main button.sec.cflr{padding:8px!important;gap:8px;min-height:50px}
+html:not(#mxz):not(#mxy) .cflr .ico{transform:rotate(-90deg)}
+/* 1.42ج: إبقاء الصفحة قصيرة مع ثلاثة أعمدة — تبويبات واختصارات في سطر واحد، والمهام بجانب المنحنى */
+html:not(#mxz):not(#mxy) .cfwb .cftabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+html:not(#mxz):not(#mxy) .cfwb .cftabs::-webkit-scrollbar{display:none}
+html:not(#mxz):not(#mxy) .cfwb .cftabs>button{padding:6px 10px!important;font-size:13px;min-height:34px;flex:0 0 auto;gap:4px}
+html:not(#mxz):not(#mxy) .cfwb .cftabs>button .ico{width:15px;height:15px}
+html:not(#mxz):not(#mxy) .cfwb .mxshort{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding:2px}
+html:not(#mxz):not(#mxy) .cfwb .mxshort::-webkit-scrollbar{display:none}
+html:not(#mxz):not(#mxy) .cfwb main button.sec.mxsc,html:not(#mxz):not(#mxy) main .cfwb button.sec.mxsc{flex:0 0 auto;padding:6px 10px!important;font-size:12px;min-height:32px}
+html:not(#mxz):not(#mxy) .cfwb .mxduo{grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr))!important}
+html:not(#mxz):not(#mxy) .cfwb .mxgrid{gap:10px}
+html:not(#mxz):not(#mxy) .cfwb main button.sec.mxc,html:not(#mxz):not(#mxy) main .cfwb button.sec.mxc{min-height:76px;padding:12px!important;gap:10px}
+html:not(#mxz):not(#mxy) .cfwb .mxi{width:38px;height:38px;flex-basis:38px}
+html:not(#mxz):not(#mxy) .cfwb .mxb b{font-size:19px}
+html:not(#mxz):not(#mxy) main button.sec.cflr[hidden],html:not(#mxz):not(#mxy) main .mxopt[hidden],html:not(#mxz):not(#mxy) main .mxgrp[hidden]{display:none!important}
+html:not(#mxz):not(#mxy) .cflist .mxsrch input,html:not(#mxz):not(#mxy) .mxpick .mxsrch input{outline:none!important;border:0!important;box-shadow:none!important;background:transparent!important}
+html:not(#mxz):not(#mxy) .mxsrch:focus-within{border-color:var(--mx-acc);box-shadow:0 0 0 2px color-mix(in srgb,var(--mx-acc) 25%,transparent)}
 </style></head>
 <body class="gating"><header id="hd"></header><div id="gate" style="display:flex"><div class="gcard" style="text-align:center"><div style="font-weight:700;color:#253464">حصة — جارٍ التحميل…</div></div></div><div id="app" style="display:none"><aside></aside><main></main></div>
 <noscript><div style="position:fixed;inset:0;background:#092061;color:#fff;padding:24px;text-align:center;font:16px Tahoma,Arial">هذا الملف يحتاج تفعيل JavaScript. افتحه مباشرة في Chrome أو Edge أو Safari (وليس من معاينة واتساب أو البريد).</div></noscript>
@@ -10676,7 +10704,7 @@ function mxSide(c) {
 }
 function mxList(c) {
   var q = (S.mxLq || '').trim(), L = S.clients.filter(function (x) { return !q || String(x.name || '').indexOf(q) >= 0 || String(x.code).indexOf(q) >= 0 || String(x.phone || '').indexOf(q) >= 0; });
-  return '<aside class="cflist" aria-label="قائمة العملاء"><div class="mxhd"><h3>قائمة العملاء <em>(' + S.clients.length + ')</em></h3></div><label class="mxsrch sm">' + IC('search') + '<input id="mx_lq" placeholder="ابحث" value="' + esc(q) + '" autocomplete="off"></label><div class="cflrows">'
+  return '<aside class="cflist" aria-label="قائمة العملاء"><div class="mxhd"><h3>قائمة العملاء <em>(' + S.clients.length + ')</em></h3><button class="sec mxlsb' + (S.mxLs || q ? ' on' : '') + '" data-a="mxLs" aria-label="ابحث في العملاء" aria-expanded="' + !!(S.mxLs || q) + '" title="بحث">' + IC('search') + '</button></div><label class="mxsrch sm"' + (S.mxLs || q ? '' : ' hidden') + '>' + IC('search') + '<input id="mx_lq" placeholder="ابحث بالاسم أو الكود أو الجوال" value="' + esc(q) + '" autocomplete="off"></label><div class="cflrows">'
     + L.slice(0, 60).map(function (x) { var on = x.code === c.code; return '<button class="sec cflr' + (on ? ' on' : '') + '" data-a="pick" data-v="' + esc(x.code) + '"' + (on ? ' aria-current="true"' : '') + '><span class="cav">' + esc(initial(x.name)) + '</span><span class="cfln"><b>' + esc(x.name || 'عميل بلا اسم') + '</b><small>' + esc(x.code) + (+x.weight ? ' • ' + x.weight + ' كجم' : '') + '</small></span>' + IC('chevron') + '</button>'; }).join('')
     + (L.length ? '' : '<p class="mxmut">لا نتائج</p>') + '</div></aside>';
 }
@@ -10700,11 +10728,12 @@ cfPage = (function (f) {
     if (MX_FULL.indexOf(S.tab) >= 0 || !mxWide()) return f(c);      // البيانات والخطة بعرض كامل (نماذج وجداول عريضة)
     var h = f(c), i = h.indexOf('<div class="cfhead">'), j = h.indexOf('<div class="tabs ctabs cftabs');      // نفس المحتوى، والرأس ينتقل إلى عمود المعلومات
     var mid = i >= 0 && j > i ? h.slice(0, i) + h.slice(j) : h;
-    return '<div class="cfwb">' + mxList(c) + '<div class="cfmain">' + mid + '</div>' + mxSide(c) + '</div>';
+    return '<div class="cfwb">' + mxSide(c) + '<div class="cfmain">' + mid + '</div>' + mxList(c) + '</div>';      // يميناً: المعلومات، يساراً: قائمة العملاء (كما في Wellbeing)
   };
 })(cfPage);
 Object.assign(A, {
   mxOpen: function (v, el) { S.tab = 'ov'; S.mxPick = false; S.mx = v; S.mxAdd = !!(el && el.dataset && el.dataset.add); main(); window.scrollTo(0, 0); if (S.mxAdd) setTimeout(function () { var i = $('#mx_v'); if (i) i.focus(); }, 30); },
+  mxLs: function () { S.mxLs = !S.mxLs; var l = $('main .cflist .mxsrch'), b = $('main .mxlsb'); if (l) l.hidden = !S.mxLs; if (b) { b.classList.toggle('on', S.mxLs); b.setAttribute('aria-expanded', S.mxLs); } if (S.mxLs) { var i = $('#mx_lq'); if (i) i.focus(); } else { S.mxLq = ''; var j = $('#mx_lq'); if (j) j.value = ''; [].forEach.call(document.querySelectorAll('main .cflr'), function (x) { x.hidden = false; }); } },
   mxBack: function () { S.mx = null; S.mxPick = false; S.mxAdd = false; main(); },
   mxPick: function () { S.tab = 'ov'; S.mx = null; S.mxPick = true; S.mxQ = ''; main(); window.scrollTo(0, 0); setTimeout(function () { var i = $('#mx_q'); if (i) i.focus(); }, 30); },
   mxAdd: function () { S.mxAdd = !S.mxAdd; var f = $('#mxform'); if (f) f.classList.toggle('on', S.mxAdd); if (S.mxAdd) setTimeout(function () { var i = $('#mx_v'); if (i) i.focus(); }, 30); },

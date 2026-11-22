@@ -228,3 +228,31 @@ html:not(#mxz):not(#mxy) label.meav.lg{width:72px!important;height:72px!importan
 html:not(#mxz):not(#mxy) .merow{display:flex;gap:16px;align-items:center}
 html:not(#mxz):not(#mxy) .merow2{display:flex;gap:8px;flex-wrap:wrap}
 html:not(#mxz):not(#mxy) .mebtn{display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+/* 1.42ج: قائمة العملاء على اليسار من 1200px (طلب المالك، كما في Wellbeing)، وعمود المعلومات على اليمين */
+html:not(#mxz):not(#mxy) .cfwb{grid-template-columns:264px minmax(0,1fr)}
+@media (min-width:1200px){html:not(#mxz):not(#mxy) .cfwb{grid-template-columns:248px minmax(0,1fr) 216px}html:not(#mxz):not(#mxy) .cfwb>.cflist{display:flex}}
+@media (min-width:1600px){html:not(#mxz):not(#mxy) .cfwb{grid-template-columns:264px minmax(0,1fr) 240px}}
+html:not(#mxz):not(#mxy) .cflist .mxhd{display:flex;justify-content:space-between;align-items:center;gap:6px}
+html:not(#mxz):not(#mxy) .cflist .mxhd h3{font-size:15px}
+html:not(#mxz):not(#mxy) main button.sec.mxlsb{width:34px;height:34px;min-height:34px;padding:0!important;display:grid!important;place-items:center;border-radius:50%!important;border:1px solid var(--c-border)!important;background:var(--c-surface)!important;color:var(--c-text-2)!important;box-shadow:none!important;flex:0 0 34px}
+html:not(#mxz):not(#mxy) main button.sec.mxlsb.on,html:not(#mxz):not(#mxy) main button.sec.mxlsb:hover{border-color:var(--mx-acc)!important;color:var(--c-link)!important;transform:none}
+html:not(#mxz):not(#mxy) .mxlsb .ico{width:16px;height:16px}
+html:not(#mxz):not(#mxy) .cflist .mxsrch[hidden]{display:none}
+html:not(#mxz):not(#mxy) main button.sec.cflr{padding:8px!important;gap:8px;min-height:50px}
+html:not(#mxz):not(#mxy) .cflr .ico{transform:rotate(-90deg)}
+/* 1.42ج: إبقاء الصفحة قصيرة مع ثلاثة أعمدة — تبويبات واختصارات في سطر واحد، والمهام بجانب المنحنى */
+html:not(#mxz):not(#mxy) .cfwb .cftabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+html:not(#mxz):not(#mxy) .cfwb .cftabs::-webkit-scrollbar{display:none}
+html:not(#mxz):not(#mxy) .cfwb .cftabs>button{padding:6px 10px!important;font-size:13px;min-height:34px;flex:0 0 auto;gap:4px}
+html:not(#mxz):not(#mxy) .cfwb .cftabs>button .ico{width:15px;height:15px}
+html:not(#mxz):not(#mxy) .cfwb .mxshort{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding:2px}
+html:not(#mxz):not(#mxy) .cfwb .mxshort::-webkit-scrollbar{display:none}
+html:not(#mxz):not(#mxy) .cfwb main button.sec.mxsc,html:not(#mxz):not(#mxy) main .cfwb button.sec.mxsc{flex:0 0 auto;padding:6px 10px!important;font-size:12px;min-height:32px}
+html:not(#mxz):not(#mxy) .cfwb .mxduo{grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr))!important}
+html:not(#mxz):not(#mxy) .cfwb .mxgrid{gap:10px}
+html:not(#mxz):not(#mxy) .cfwb main button.sec.mxc,html:not(#mxz):not(#mxy) main .cfwb button.sec.mxc{min-height:76px;padding:12px!important;gap:10px}
+html:not(#mxz):not(#mxy) .cfwb .mxi{width:38px;height:38px;flex-basis:38px}
+html:not(#mxz):not(#mxy) .cfwb .mxb b{font-size:19px}
+html:not(#mxz):not(#mxy) main button.sec.cflr[hidden],html:not(#mxz):not(#mxy) main .mxopt[hidden],html:not(#mxz):not(#mxy) main .mxgrp[hidden]{display:none!important}
+html:not(#mxz):not(#mxy) .cflist .mxsrch input,html:not(#mxz):not(#mxy) .mxpick .mxsrch input{outline:none!important;border:0!important;box-shadow:none!important;background:transparent!important}
+html:not(#mxz):not(#mxy) .mxsrch:focus-within{border-color:var(--mx-acc);box-shadow:0 0 0 2px color-mix(in srgb,var(--mx-acc) 25%,transparent)}
