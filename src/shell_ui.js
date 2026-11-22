@@ -216,3 +216,31 @@ function meShare() {
   if (typeof hxOn !== 'function' || !hxOn()) return; var L = S.clients.filter(function (c) { return c.hx && c.hx.cid && !c.hx.gone; });
   L.reduce(function (q, c) { return q.then(function () { return hxSend(c, { t: 'prof', dname: HX.st.name || '', dph: meThumb() }).catch(function () { }); }); }, Promise.resolve());
 }
+// ================= 1.42 أزرار تنقّل عائمة شفافة (طلب المالك): السابق | أعلى الصفحة | التالي
+// سجلّ داخلي لكل شاشة تُعرض (الصفحة، العميل، التبويب، صفحة القياس، تبويب الإعدادات)؛ لا يمس البيانات ولا رابط المتصفح.
+var NAVX = { h: [], i: -1, skip: false };
+function navSnap() { return { v: S.view || '', c: S.cur || '', t: S.tab || '', m: S.mx || '', p: S.mxPick ? 1 : 0, s: S.setTab || '', g: S.page || '' }; }
+function navOk(n) { return !n.c || S.clients.some(function (x) { return x.code === n.c; }) || (S.draft && S.draft.code === n.c); }
+function navFab() {
+  var f = document.getElementById('navfab');
+  if (!f) { if (!document.querySelector('#app main, main')) return; f = document.createElement('nav'); f.id = 'navfab'; f.className = 'noprint'; f.setAttribute('aria-label', 'التنقل');
+    f.innerHTML = '<button type="button" data-nav="-1" aria-label="الصفحة السابقة" title="السابق">' + IC('chevron') + '<span>السابق</span></button><button type="button" data-nav="0" aria-label="أعلى الصفحة" title="أعلى الصفحة">' + IC('chevron') + '</button><button type="button" data-nav="1" aria-label="الصفحة التالية" title="التالي"><span>التالي</span>' + IC('chevron') + '</button>';
+    document.body.appendChild(f); }
+  f.querySelector('[data-nav="-1"]').disabled = NAVX.i <= 0; f.querySelector('[data-nav="1"]').disabled = NAVX.i >= NAVX.h.length - 1;
+}
+function navPush() {
+  if (NAVX.skip) { NAVX.skip = false; navFab(); return; }
+  var n = navSnap(), k = JSON.stringify(n), last = NAVX.h[NAVX.i];
+  if (!last || JSON.stringify(last) !== k) { NAVX.h = NAVX.h.slice(0, NAVX.i + 1); NAVX.h.push(n); if (NAVX.h.length > 60) NAVX.h.shift(); NAVX.i = NAVX.h.length - 1; }
+  navFab();
+}
+function navGo(d) {
+  if (d === 0) { try { window.scrollTo({ top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); } catch (e) { window.scrollTo(0, 0); } return; }
+  var j = NAVX.i + d; while (j >= 0 && j < NAVX.h.length && !navOk(NAVX.h[j])) j += d; if (j < 0 || j >= NAVX.h.length) return;
+  var n = NAVX.h[j]; NAVX.i = j; NAVX.skip = true;
+  S.view = n.v; S.cur = n.c || null; S.tab = n.t; S.mx = n.m || null; S.mxPick = !!n.p; S.mxAdd = false; S.setTab = n.s || S.setTab; S.page = n.g || S.page;
+  document.body.classList.remove('menu'); render(); window.scrollTo(0, 0);
+}
+main0 = (function (f) { return function () { var r = f.apply(this, arguments); try { navPush(); } catch (e) { } return r; }; })(main0);
+document.addEventListener('click', function (e) { var b = e.target.closest && e.target.closest('#navfab [data-nav]'); if (b && !b.disabled) navGo(+b.dataset.nav); });
+document.addEventListener('keydown', function (e) { if (e.altKey && (e.key === 'ArrowRight' || e.key === 'ArrowLeft') && !/INPUT|TEXTAREA|SELECT/.test((e.target || {}).tagName || '')) { e.preventDefault(); navGo(e.key === 'ArrowRight' ? -1 : 1); } });      // RTL: السهم الأيمن = السابق

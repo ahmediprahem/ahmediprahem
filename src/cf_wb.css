@@ -256,3 +256,22 @@ html:not(#mxz):not(#mxy) .cfwb .mxb b{font-size:19px}
 html:not(#mxz):not(#mxy) main button.sec.cflr[hidden],html:not(#mxz):not(#mxy) main .mxopt[hidden],html:not(#mxz):not(#mxy) main .mxgrp[hidden]{display:none!important}
 html:not(#mxz):not(#mxy) .cflist .mxsrch input,html:not(#mxz):not(#mxy) .mxpick .mxsrch input{outline:none!important;border:0!important;box-shadow:none!important;background:transparent!important}
 html:not(#mxz):not(#mxy) .mxsrch:focus-within{border-color:var(--mx-acc);box-shadow:0 0 0 2px color-mix(in srgb,var(--mx-acc) 25%,transparent)}
+/* أزرار التنقل العائمة الشفافة */
+#navfab{position:fixed;z-index:85;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:4px;padding:5px;border-radius:999px;background:color-mix(in srgb,var(--c-surface,#fff) 55%,transparent);border:1px solid color-mix(in srgb,var(--c-border,#DCE4EA) 80%,transparent);box-shadow:0 6px 24px rgba(23,45,67,.12);-webkit-backdrop-filter:blur(14px) saturate(1.4);backdrop-filter:blur(14px) saturate(1.4)}
+html:not(#mxz):not(#mxy) #navfab button{display:inline-flex!important;align-items:center;gap:4px;min-height:38px;height:38px;padding:0 14px!important;border:0!important;border-radius:999px!important;background:transparent!important;color:var(--c-text,#172D43)!important;box-shadow:none!important;font-size:13px;font-weight:600;cursor:pointer}
+html:not(#mxz):not(#mxy) #navfab button:hover:not(:disabled){background:color-mix(in srgb,var(--c-primary,#287E91) 14%,transparent)!important;transform:none}
+html:not(#mxz):not(#mxy) #navfab button:disabled{opacity:.35;cursor:default}
+html:not(#mxz):not(#mxy) #navfab button:focus-visible{outline:2px solid var(--c-focus,#287E91);outline-offset:1px}
+#navfab .ico{width:18px;height:18px}
+#navfab [data-nav="-1"] .ico{transform:rotate(-90deg)}
+#navfab [data-nav="1"] .ico{transform:rotate(90deg)}
+#navfab [data-nav="0"]{width:38px;padding:0!important;justify-content:center}
+#navfab [data-nav="0"] .ico{transform:rotate(180deg)}
+@media (max-width:900px){#navfab{bottom:calc(88px + env(safe-area-inset-bottom,0px))}#navfab span{display:none}html:not(#mxz):not(#mxy) #navfab button{padding:0 12px!important}}
+@media print{#navfab{display:none!important}}
+html:not(#mxz):not(#mxy) #navfab button span,html:not(#mxz):not(#mxy) #navfab button .ico{color:inherit!important}
+html:not(#mxz):not(#mxy) #navfab{background:color-mix(in srgb,var(--c-surface,#fff) 72%,transparent)!important}
+html:not(#mxz):not(#mxy) #navfab{background:rgba(255,255,255,.72)!important;border-color:rgba(220,228,234,.85)}
+html[data-dw="dark"]:not(#mxz):not(#mxy) #navfab{background:rgba(23,45,67,.72)!important;border-color:rgba(44,74,104,.85)}
+html:not(#mxz):not(#mxy) #navfab button:hover:not(:disabled){background:rgba(40,126,145,.14)!important}
+html[data-dw="dark"]:not(#mxz):not(#mxy) #navfab button:hover:not(:disabled){background:rgba(87,201,179,.16)!important}
