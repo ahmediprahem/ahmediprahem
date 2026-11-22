@@ -26,9 +26,9 @@ html[data-dw][data-tone="light"]{--zw-green:var(--c-primary);--zw-green2:var(--c
   --zh-mint:var(--c-primary);--zh-mint2:var(--c-primary-hover);--zh-mintd:var(--c-link);--zh-navy:var(--c-secondary);--zh-bg:var(--c-bg);--zh-card:var(--c-surface-elev);--zh-tint:var(--c-accent-soft);--zh-ink:var(--c-text);--zh-mut:var(--c-text-muted);--zh-line:var(--c-border);
   --zh-warnT:var(--c-warning-bg);--zh-warnD:var(--c-warning);--zh-badT:var(--c-danger-bg);--zh-badD:var(--c-danger);--zh-ok:var(--c-success);--zh-skyT:var(--c-info-bg);--zh-sky:var(--c-info)}
 /* الأزرار الأساسية: نص أبيض على Teal (4.68:1) في الفاتح، ونص كحلي على Mint (6.97:1) في الداكن */
-html[data-dw][data-tone="light"][data-theme="glass"] button:not(.sec):not(.link):not(.gsb):not(.gkind):not(.r):not(.o):not([role="tab"]):not(.cl):not(#tabbar *):not(nav *):not(.tabs *):not(.cfseg *):not(.cftabs *):not(.pnav *):not(.day-tabs *):not(.pwt):not(.cfb):not(.ghome *),
+html[data-dw][data-tone="light"][data-theme="glass"] button:not(.sec):not(.link):not(.gsb):not(.gkind):not(.r):not(.o):not([role="tab"]):not(.cl):not(#tabbar *):not(nav *):not(.tabs *):not(.cfseg *):not(.cftabs *):not(.pnav *):not(.day-tabs *):not(.pwt):not(.cfb):not(.ghome *):not(.chrow),
 html[data-dw][data-tone][data-theme]:not(#dwp) summary.newb,html[data-dw][data-tone][data-theme]:not(#dwp) #dtfab{color:var(--c-text-inv)!important;background:var(--c-primary)!important}
-html[data-dw][data-tone="light"][data-theme="glass"] button:not(.sec):not(.link):not(.gsb):not(.gkind):not(.r):not(.o):not([role="tab"]):not(.cl):not(#tabbar *):not(nav *):not(.tabs *):not(.cfseg *):not(.cftabs *):not(.pnav *):not(.day-tabs *):not(.pwt):not(.cfb):not(.ghome *):hover{background:var(--c-primary-hover)!important}
+html[data-dw][data-tone="light"][data-theme="glass"] button:not(.sec):not(.link):not(.gsb):not(.gkind):not(.r):not(.o):not([role="tab"]):not(.cl):not(#tabbar *):not(nav *):not(.tabs *):not(.cfseg *):not(.cftabs *):not(.pnav *):not(.day-tabs *):not(.pwt):not(.cfb):not(.ghome *):not(.chrow):hover{background:var(--c-primary-hover)!important}
 html[data-dw] button:disabled,html[data-dw] button[aria-disabled="true"]{opacity:1!important;background:var(--c-surface-muted)!important;color:var(--c-text-muted)!important;border-color:var(--c-border)!important}
 html[data-dw] :is(button,a,summary,input,select,textarea,[tabindex]):focus-visible{outline:3px solid var(--c-focus)!important;outline-offset:2px!important}
 html[data-dw][data-tone="light"] :is(input,select,textarea):focus{border-color:var(--c-primary)!important;outline:3px solid color-mix(in srgb,var(--c-focus) 30%,transparent)!important}
@@ -87,4 +87,28 @@ html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) .dwbtn{color:var(--c-ac
 
 @media (max-width:380px){html[data-dw] #hd .hlogo{max-width:92px;height:auto;object-fit:contain}html[data-dw] #hd .dwbtn{min-width:36px}}      /* أضيق الشاشات: يتسع زر الليلي دون تمرير أفقي */
 @media (max-width:480px){html[data-dw] #hd .hdast .hdl{display:none}}      /* الجوال: «المساعد» أيقونة فقط (زره العائم أسفل الشاشة) ليتسع زر الليلي */
+
+/* 1.39 شات زنها بالرموز الدلالية (نهاري وليلي): كان مصمماً بخلفيات داكنة ثابتة من الزجاجي، وصفوفه تأخذ لون الزر الأساسي */
+html[data-dw][data-tone][data-theme]:not(#dwp) .chwrap{background:var(--c-bg)!important;color:var(--c-text)!important}
+html[data-dw][data-tone][data-theme]:not(#dwp) :is(.chwrap .chgrid,.chl){background:var(--c-surface)!important;border-color:var(--c-border)!important}
+html[data-dw][data-tone][data-theme]:not(#dwp) :is(.chlbar,.chh){background:var(--c-surface)!important;border-color:var(--c-border)!important;color:var(--c-text)!important}
+html[data-dw][data-tone][data-theme]:not(#dwp) :is(.chlbar b,.chh b,.cht2 b){color:var(--c-text)!important}
+html[data-dw][data-tone][data-theme]:not(#dwp) :is(.chh small,.cht2 small,.chmeta small){color:var(--c-text-2)!important;opacity:1!important}
+html[data-dw][data-tone][data-theme]:not(#dwp) .chmeta small.un{color:var(--c-link)!important;font-weight:700}
+html[data-dw][data-tone][data-theme]:not(#dwp) .chrow{background:transparent!important;background-image:none!important;color:var(--c-text)!important;border:0!important;border-bottom:1px solid var(--c-divider)!important;border-radius:0!important;box-shadow:none!important}
+html[data-dw][data-tone][data-theme]:not(#dwp) .chrow:hover{background:var(--c-surface-muted)!important}
+html[data-dw][data-tone][data-theme]:not(#dwp) .chrow.on{background:var(--c-accent-soft)!important}
+html[data-dw][data-tone][data-theme]:not(#dwp) :is(.chm,.chwrap.open .chm){background:var(--c-bg)!important;background-image:none!important}
+html[data-dw][data-tone][data-theme]:not(#dwp) .chsep span{background:var(--c-surface-muted)!important;color:var(--c-text-2)!important}
+html[data-dw][data-tone][data-theme]:not(#dwp) .chb{background:var(--c-surface)!important;border:1px solid var(--c-border)!important;color:var(--c-text)!important}
+html[data-dw][data-tone][data-theme]:not(#dwp) .chb.me{background:var(--c-accent-soft)!important;border-color:color-mix(in srgb,var(--c-primary) 35%,transparent)!important}
+html[data-dw][data-tone][data-theme]:not(#dwp) .chb :is(.cht3,.chcx,span,b){color:inherit!important}
+html[data-dw][data-tone][data-theme]:not(#dwp) .chtm{color:var(--c-text-muted)!important;opacity:1!important}
+html[data-dw][data-tone][data-theme]:not(#dwp) .chtm i.rd{color:var(--c-info)!important}
+html[data-dw][data-tone][data-theme]:not(#dwp) :is(.chcomp,.chquick){background:var(--c-surface)!important;border-color:var(--c-border)!important}
+html[data-dw][data-tone][data-theme]:not(#dwp) .chcomp textarea{background:var(--c-surface-muted)!important;color:var(--c-text)!important;border:1px solid var(--c-border-strong)!important}
+html[data-dw][data-tone][data-theme]:not(#dwp) .chwrap :is(.empty,.chempty,.chnone){color:var(--c-text-2)!important}
+html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) :is(.tabs,.hxtabs,.ctabs):not(.cftabs){background:transparent!important;border-color:var(--c-border)!important}
+html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) :is(.tabs,.hxtabs) > button{background:var(--c-surface)!important;border-color:var(--c-border)!important;color:var(--c-text-2)!important}
+html[data-dw="dark"][data-tone][data-theme]:not(#dwdark) :is(.tabs,.hxtabs) > button:is(.on,[aria-selected="true"]){background:var(--c-accent-soft)!important;color:var(--c-accent)!important;border-color:color-mix(in srgb,var(--c-accent) 45%,transparent)!important}
 }
