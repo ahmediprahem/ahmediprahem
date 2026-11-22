@@ -20,7 +20,7 @@ const audit = (p) => p.evaluate(() => {
 (async () => {
   const br = await chromium.launch();
   // ١ دليل التحاليل
-  let p = await (await br.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' })).newPage(); p.on('pageerror', (e) => errs.push(String(e))); p.on('dialog', (d) => d.accept());
+  let p = await (await br.newContext({ viewport: { width: 1680, height: 900 }, reducedMotion: 'reduce' })).newPage(); p.on('pageerror', (e) => errs.push(String(e))); p.on('dialog', (d) => d.accept());
   await p.goto(URL); await login(p);
   const L = await p.evaluate(() => {
     const X = DPApp.MX, LAB = X.LAB, LAB_CAT = X.LAB_CAT, c0 = { sex: 'أنثى' }, m0 = { sex: 'ذكر' }, ath = { sex: 'أنثى', kind: 'athlete' }, f = (c, k, v) => X.flag(c, k, v);
@@ -33,10 +33,12 @@ const audit = (p) => p.evaluate(() => {
   // ٢ الحاسوب 1440: ثلاثة أعمدة و«نظرة عامة» افتراضية
   await seed(p);
   let s = await p.evaluate(() => ({ tab: DPApp.S.tab, list: !!document.querySelector('main .cfwb > .cflist') && getComputedStyle(document.querySelector('main .cflist')).display !== 'none', side: !!document.querySelector('main .cfside .cfhead .cfname'), heads: document.querySelectorAll('main .cfhead').length, cards: [...document.querySelectorAll('main .mxgrid .mxc:not(.mxadd)')].map((e) => [e.dataset.v, e.className.match(/lv-(\w+)/)[1]]), rows: document.querySelectorAll('main .cflr').length, over: document.documentElement.scrollWidth > innerWidth + 1 }));
-  assert.strictEqual(s.tab, 'ov'); assert(s.list && s.side); assert.strictEqual(s.heads, 1); assert.strictEqual(s.rows, 2); assert(!s.over);
-  const lv = Object.fromEntries(s.cards); assert.strictEqual(lv.ldl, 'hi'); assert.strictEqual(lv.bmi, 'hi'); assert.strictEqual(lv.waist, 'hi'); assert.strictEqual(lv.bp, 'mid'); assert.strictEqual(lv.hdl, 'ok'); assert.strictEqual(await p.evaluate(() => { const c = DPApp.S.clients.find((x) => x.code === DPApp.S.cur), h = DPApp.MX.series(c, 'homa'); return h.length + ':' + h[0].v; }), '1:2.27');
+  assert.strictEqual(s.tab, 'ov'); assert(s.list && s.side); assert.strictEqual(await p.locator('main .mxshort .mxsc').count(), 6, 'الاختصارات'); assert.strictEqual(await p.locator('main .mxgrid .mxc').count(), 6, 'ست بطاقات فقط');
+  assert.deepStrictEqual(await p.evaluate(() => [...document.querySelectorAll('main .cftabs > button')].map((b) => b.dataset.g)), ['file', 'medical', 'plan', 'follow', 'appt', 'sub'], 'الملف الطبي مجموعة مستقلة');
+  assert.strictEqual(await p.locator('main .cfseg [data-v="med"]').count(), 0, 'الملف الطبي خارج الملف العام'); assert.strictEqual(s.heads, 1); assert.strictEqual(s.rows, 2); assert(!s.over);
+  const lv = Object.fromEntries(s.cards); assert.strictEqual(lv.ldl, 'hi'); assert.strictEqual(lv.bmi, 'hi'); assert.strictEqual(lv.waist, 'hi'); assert.strictEqual(lv.bp, 'mid'); assert.strictEqual(await p.evaluate(() => { const c = DPApp.S.clients.find((x) => x.code === DPApp.S.cur), h = DPApp.MX.series(c, 'homa'); return h.length + ':' + h[0].v; }), '1:2.27');
   assert.strictEqual(s.cards.findIndex((x) => x[0] === 'ldl'), 4, 'الخارج عن المرجع أولاً بعد القياسات الجسدية');
-  ok('1440: قائمة العملاء | المحتوى | عمود المعلومات (رأس الملف نفسه مرة واحدة)، و«نظرة عامة» تفتح أولاً، والبطاقات: LDL وBMI والخصر بالأحمر، والضغط برتقالي، وHOMA-IR يُحسب من السكر والأنسولين (2.27)');
+  ok('1680: قائمة العملاء | المحتوى | عمود المعلومات، و6 اختصارات و6 بطاقات، و«الملف الطبي» تبويب مستقل عن الملف العام (رأس الملف نفسه مرة واحدة)، و«نظرة عامة» تفتح أولاً، والبطاقات: LDL وBMI والخصر بالأحمر، والضغط برتقالي، وHOMA-IR يُحسب من السكر والأنسولين (2.27)');
   const todo = await p.evaluate(() => [...document.querySelectorAll('main .mxtd')].map((b) => [b.querySelector('span').textContent, b.classList.contains('done')]));
   assert(todo.some((t) => /الوزن الأسبوعي/.test(t[0]) && t[1])); assert(todo.some((t) => /تحليل خارج المرجع/.test(t[0]) && !t[1]));
   await p.click('main .mxtd:has-text("خارج المرجع")'); assert.strictEqual(await p.evaluate(() => DPApp.S.tab), 'med'); await p.click('main .cftabs [data-g="file"]'); assert.strictEqual(await p.evaluate(() => DPApp.S.tab), 'ov');
@@ -54,9 +56,9 @@ const audit = (p) => p.evaluate(() => {
   const vis = await p.evaluate(() => [...document.querySelectorAll('main .mxopt')].filter((o) => !o.hidden).map((o) => o.querySelector('span').textContent)); assert.deepStrictEqual(vis, ['الفيريتين']);
   await p.click('main .mxopt:not([hidden]) button'); assert(await p.isVisible('#mx_v'), 'الإضافة من القائمة تفتح النموذج مباشرة'); await p.fill('#mx_v', '12'); await p.click('main [data-a="mxSave"]');
   s = await p.evaluate(() => { const c = DPApp.S.clients.find((x) => x.code === DPApp.S.cur); return { lab: c.med.labs.some((l) => l.v.ferritin === 12), chip: document.querySelector('main .mxhero .mxst').textContent }; });
-  assert(s.lab); assert.strictEqual(s.chip, 'منخفض'); await p.click('main [data-a="mxBack"]'); assert.strictEqual(await p.getAttribute('main .mxc[data-v="ferritin"]', 'class').then((c) => /lv-hi/.test(c)), true);
+  assert(s.lab); assert.strictEqual(s.chip, 'منخفض'); await p.click('main [data-a="mxBack"]'); assert(/2 خارج المرجع/.test(await p.textContent('main .mxgh .link')), await p.textContent('main .mxgh .link'));
   await p.evaluate(() => DPApp.A.tab('med')); assert(/الفيريتين/.test(await p.textContent('main .cfbody')));
-  ok('«أضف قياساً»: بحث بالاسم، والتحليل يُحفظ في تحاليل «الملف الطبي» نفسها، ويظهر بالأحمر في «نظرة عامة»');
+  ok('«أضف قياساً»: بحث بالاسم، والتحليل يُحفظ في تحاليل «الملف الطبي» نفسها، ويُحسب في «خارج المرجع» في «نظرة عامة»');
   assert.deepStrictEqual(await (await p.evaluate(() => DPApp.A.tab('ov')), audit(p)), []);
   // ٥ الليلي
   await p.click('#hd .dwbtn'); await p.waitForFunction(() => document.documentElement.dataset.dw === 'dark'); await p.evaluate(() => DPApp.A.tab('ov')); let low = await audit(p); assert.deepStrictEqual(low, [], JSON.stringify(low));
@@ -64,8 +66,8 @@ const audit = (p) => p.evaluate(() => {
   ok('النهاري والليلي: نصوص «نظرة عامة» وصفحة القياس وعمود المعلومات ≥ 4.5:1');
   // ٦ 1280: بلا قائمة العملاء، وعمود المعلومات باقٍ
   await p.setViewportSize({ width: 1280, height: 860 }); await p.evaluate(() => DPApp.A.tab('ov')); await p.waitForTimeout(100);
-  s = await p.evaluate(() => ({ list: getComputedStyle(document.querySelector('main .cflist')).display, side: !!document.querySelector('main .cfside'), over: document.documentElement.scrollWidth > innerWidth + 1 })); assert.deepStrictEqual(s, { list: 'none', side: true, over: false });
-  ok('1280: بلا قائمة العملاء، وعمود المعلومات باقٍ، وبلا تمرير أفقي');
+  s = await p.evaluate(() => ({ list: getComputedStyle(document.querySelector('main .cflist')).display, side: !!document.querySelector('main .cfside .mxfs'), over: document.documentElement.scrollWidth > innerWidth + 1, h: document.documentElement.scrollHeight })); assert.deepStrictEqual([s.list, s.side, s.over], ['none', true, false]); assert(s.h < 1100, 'الصفحة طويلة ' + s.h);
+  ok('1280: بلا قائمة العملاء، و«الحالة العامة» في عمود المعلومات، والصفحة بطول شاشة تقريباً (' + s.h + ')، وبلا تمرير أفقي');
   // ٧ الجوال
   for (const W of [390, 360]) {
     const m = await (await br.newContext({ ...devices['iPhone 13'], viewport: { width: W, height: 844 }, reducedMotion: 'reduce' })).newPage(); m.on('pageerror', (e) => errs.push(String(e))); m.on('dialog', (d) => d.accept()); await m.goto(URL); await login(m); await seed(m);

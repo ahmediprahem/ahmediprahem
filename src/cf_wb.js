@@ -4,6 +4,8 @@
 // صفحة القياس (S.mx): القيمة الحالية والنطاق المرجعي وعلامة ؟ للأهمية، و«+» لإضافة قراءة، ومنحنى التقدم، وتحته سجل القراءات بتاريخها.
 // لا مخزن جديد: القياسات الجسدية في c.med.visits والتحاليل في c.med.labs (نفس «الملف الطبي»)، فتدخل التقرير والتنبيهات والنسخ الاحتياطية.
 CF_G[0][3].unshift('ov'); CF_L.ov = 'نظرة عامة';
+// فصل «الملف الطبي» عن الملف العام: مجموعة مستقلة بعد «الملف» (طلب المالك)
+CF_G[0][3] = CF_G[0][3].filter(function (k) { return k !== 'med'; }); CF_G.splice(1, 0, ['medical', 'الملف الطبي', 'steth', ['med']]);
 var MXB = {                                                          // القياسات الجسدية: [الاسم، الوحدة، الأيقونة، لون البلاطة]
   w: ['الوزن', 'كجم', 'scale', 'b'], bmi: ['مؤشر كتلة الجسم', 'كغ/م²', 'gauge', 'v'], bp: ['ضغط الدم', 'ملم زئبق', 'pulse', 'r'], waist: ['محيط الخصر', 'سم', 'ruler', 'g'],
   hip: ['محيط الورك', 'سم', 'ruler', 'g'], bf: ['نسبة الدهون', '%', 'flame', 'o'], mm: ['الكتلة العضلية', 'كجم', 'bicep', 't']
@@ -72,8 +74,8 @@ function mxCard(c, k) {
     + (k === 'w' && s.length > 1 && s[0].src !== 'file' ? '<i class="mxs">' + mxDelta(s) + ' كجم منذ البداية</i>' : f ? '<i class="mxs">' + esc(f[1]) + '</i>' : '<i class="mxs">لم يُسجَّل بعد</i>') + '</span></button>';
 }
 function mxGrid(c) {
-  var R = mxRecorded(c), ks = ['w', 'bmi', 'bp', 'waist'].concat(R.slice(0, 4));
-  return '<div class="mxgh"><h3>القياسات والتحاليل</h3>' + (R.length ? '<button class="link" data-a="tab" data-v="med">كل التحاليل (' + R.length + ')</button>' : '') + '</div><div class="mxgrid">' + ks.map(function (k) { return mxCard(c, k); }).join('') + '<button class="sec mxc mxadd" data-a="mxPick">' + IC('plus') + '<span>أضف قياساً</span></button></div>';
+  var R = mxRecorded(c), ks = ['w', 'bmi', 'bp', 'waist'].concat(R.slice(0, 1)), hi = R.filter(function (k) { var x = mxSeries(c, k), f = mxFlag(c, k, x[x.length - 1]); return f && f[0] === 2 && !f[2]; }).length;
+  return '<div class="mxgh"><h3>القياسات والتحاليل</h3>' + (R.length ? '<button class="link" data-a="tab" data-v="med">كل التحاليل (' + R.length + ')' + (hi ? ' • ' + hi + ' خارج المرجع' : '') + '</button>' : '') + '</div><div class="mxgrid">' + ks.map(function (k) { return mxCard(c, k); }).join('') + '<button class="sec mxc mxadd" data-a="mxPick">' + IC('plus') + '<span>أضف قياساً</span></button></div>';
 }
 // ---------- «الحالة العامة» (مثل Functional Status): أشرطة من بيانات موجودة فقط
 function mxStatus(c) {
@@ -100,14 +102,15 @@ function mxTodo(c) {
   var hi = mxRecorded(c).filter(function (k) { var s = mxSeries(c, k), f = mxFlag(c, k, s[s.length - 1]); return f && f[0] === 2 && !f[2]; });
   if (hi.length) it.push([false, 'مراجعة ' + hi.length + ' ' + (hi.length > 2 && hi.length < 11 ? 'تحاليل' : 'تحليل') + ' خارج المرجع', 'tab', 'med']);
   var st = sbState(c)[0]; if (st === 'soon' || st === 'last' || st === 'expired') it.push([false, 'تجديد الاشتراك', 'tab', 'sub']);
-  return '<section class="mxcard mxtodo"><div class="mxhd"><h3>قائمة المهام</h3><small>' + it.filter(function (i) { return i[0]; }).length + '/' + it.length + '</small></div>' + it.map(function (i) {
+  it.sort(function (a, b) { return a[0] - b[0]; }); var nd = it.filter(function (i) { return i[0]; }).length, tot = it.length; it = it.slice(0, 4);
+  return '<section class="mxcard mxtodo"><div class="mxhd"><h3>قائمة المهام</h3><small>' + nd + '/' + tot + '</small></div>' + it.map(function (i) {
     return '<button class="sec mxtd' + (i[0] ? ' done' : '') + '" data-a="' + i[2] + '" data-v="' + i[3] + '"><span>' + esc(i[1]) + '</span><i aria-hidden="true">' + IC(i[0] ? 'checkCircle' : 'chevron') + '</i></button>';
   }).join('') + '</section>';
 }
 // ---------- الرسوم (SVG بلا مكتبات)
 function mxBars(c) {                                                  // مثل «Average Sleeping Time»: أعمدة آخر 8 أوزان والأخير مميّز
   var s = mxSeries(c, 'w').slice(-8); if (s.length < 2) return '<section class="mxcard mxch"><div class="mxhd"><h3>تقدّم الوزن</h3></div><p class="mxempty">سجّل وزنين على الأقل ليظهر التقدّم هنا.</p><button class="sec sm" data-a="mxOpen" data-v="w">' + IC('plus') + ' أضف وزناً</button></section>';
-  var W = 560, H = 200, L = 40, R = 8, T = 12, B = 28, ys = s.map(function (p) { return p.v; }), mn = Math.floor(Math.min.apply(null, ys) - 2), mx = Math.ceil(Math.max.apply(null, ys) + 1), bw = (W - L - R) / s.length;
+  var W = 420, H = 170, L = 34, R = 6, T = 14, B = 26, ys = s.map(function (p) { return p.v; }), mn = Math.floor(Math.min.apply(null, ys) - 2), mx = Math.ceil(Math.max.apply(null, ys) + 1), bw = (W - L - R) / s.length;
   var Y = function (v) { return T + (mx - v) / (mx - mn) * (H - T - B); };
   var tk = [mn, Math.round((mn + mx) / 2), mx].map(function (v) { return '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(v).toFixed(1) + '" y2="' + Y(v).toFixed(1) + '" class="mxgl"/><text x="' + (L - 6) + '" y="' + (Y(v) + 4).toFixed(1) + '" text-anchor="end" class="mxax">' + v + '</text>'; }).join('');
   var y0 = Y(s[0].v).toFixed(1), base = '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y0 + '" y2="' + y0 + '" class="mxbase"/>';
@@ -174,7 +177,7 @@ function mxSide(c) {
   var acc = function (id, title, n, body, open) { return '<details class="mxacc" data-k="' + id + '"' + (open ? ' open' : '') + '><summary><span>' + title + (n != null ? ' <em>(' + n + ')</em>' : '') + '</span>' + IC('chevron') + '</summary><div class="mxaccb">' + body + '</div></details>'; };
   var kv = function (r) { return '<div class="mxkv"><small>' + esc(r[0]) + '</small><b>' + esc(String(r[1])) + '</b></div>'; };
   var cond = (c.conditions || []), alg = (c.allergens || []);
-  return '<aside class="cfside" aria-label="معلومات العميل">' + cfHead(c) + '<button class="link mxedit" data-a="tab" data-v="client">' + IC('edit') + ' تعديل البيانات</button>'
+  return '<aside class="cfside" aria-label="معلومات العميل">' + cfHead(c) + mxStatus(c) + '<button class="link mxedit" data-a="tab" data-v="client">' + IC('edit') + ' تعديل البيانات</button>'
     + acc('info', 'البيانات الأساسية', info.length, info.map(kv).join(''), true)
     + acc('appt', 'المواعيد', aps.length, (nx ? kv(['القادم', nx.d + (nx.t ? ' • ' + nx.t : '')]) : '') + (lst ? kv(['السابق', lst.d + (lst.st === 'done' ? ' • حضر' : '')]) : '') + (aps.length ? '' : '<p class="mxmut">لا مواعيد</p>') + '<button class="link" data-a="tab" data-v="appt">كل المواعيد</button>', !!nx)
     + acc('cond', 'الحالات الصحية', cond.length, cond.length ? '<div class="mxtags">' + cond.map(function (x) { return '<span>' + esc(x) + '</span>'; }).join('') + '</div>' : '<p class="mxmut">لا حالات مسجّلة</p>', cond.length > 0)
@@ -189,10 +192,16 @@ function mxList(c) {
     + L.slice(0, 60).map(function (x) { var on = x.code === c.code; return '<button class="sec cflr' + (on ? ' on' : '') + '" data-a="pick" data-v="' + esc(x.code) + '"' + (on ? ' aria-current="true"' : '') + '><span class="cav">' + esc(initial(x.name)) + '</span><span class="cfln"><b>' + esc(x.name || 'عميل بلا اسم') + '</b><small>' + esc(x.code) + (+x.weight ? ' • ' + x.weight + ' كجم' : '') + '</small></span>' + IC('chevron') + '</button>'; }).join('')
     + (L.length ? '' : '<p class="mxmut">لا نتائج</p>') + '</div></aside>';
 }
+function mxShort(c) {                                               // اختصارات (مثل أزرار Osmolax): إجراءات موجودة فقط
+  var po = planOf(c), x = c.hx, t = wkDay(), ap = (c.appts || []).filter(function (a) { return a.d === t && !a.st; })[0];
+  var L = [['mxOpen', 'w', 'scale', 'أضف وزناً', 1], ['mxPick', '', 'tube', 'أضف تحليلاً'], [ap ? 'tab' : 'tab', ap ? 'ci' : 'appt', 'calendar', ap ? 'سجّل الحضور' : 'موعد جديد'],
+    po.has ? ['tab', 'plan', 'utensils', 'الخطة'] : ['genOpen', '1', 'sparkles', 'أنشئ الخطة'], x ? ['cfChat', '', 'message', 'المحادثة'] : ['tab', 'link', 'phone', 'اربط بـ«زنها»'], ['tab', 'med', 'steth', 'الملف الطبي']];
+  return '<nav class="mxshort" aria-label="اختصارات">' + L.map(function (b) { return '<button class="sec mxsc" data-a="' + b[0] + '" data-v="' + b[1] + '"' + (b[4] ? ' data-add="1"' : '') + '>' + IC(b[2]) + '<span>' + b[3] + '</span></button>'; }).join('') + '</nav>';
+}
 function mxOv(c) {
   if (S.mxPick) return mxPicker(c);
   if (S.mx) return mxPage(c, S.mx);
-  return '<div class="mxov"><nav class="mxcrumb"><span>العملاء</span> ‹ <span>' + esc(c.name || 'عميل بلا اسم') + '</span></nav>' + mxGrid(c) + '<div class="mxduo">' + mxStatus(c) + mxTodo(c) + '</div>' + mxBars(c) + '</div>';
+  return '<div class="mxov"><nav class="mxcrumb"><span>العملاء</span> ‹ <span>' + esc(c.name || 'عميل بلا اسم') + '</span></nav>' + mxShort(c) + mxGrid(c) + '<div class="mxduo">' + mxTodo(c) + mxBars(c) + '</div>' + (mxWide() ? '' : mxStatus(c)) + '</div>';
 }
 // ---------- الربط بملف العميل
 cfBody = (function (f) { return function (c) { return S.tab === 'ov' ? mxOv(c) : f(c); }; })(cfBody);
