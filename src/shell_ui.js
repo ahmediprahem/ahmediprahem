@@ -188,3 +188,24 @@ document.addEventListener('change', function (e) {
   if (n) n.textContent = i.files && i.files.length ? (i.files.length > 1 ? i.files.length + ' ملفات' : i.files[0].name) : 'لم يُختر ملف';
 }, true);
 A.settings = function () { if (S.setTab === 'tools' && S.view !== 'settings') S.setTab = 'portions'; S.view = 'settings'; render(); window.scrollTo(0, 0); };     // 0.94: دائماً يفتح الإعدادات (لا تبديل)، و«الأدوات» وجهة عابرة
+// ================= 1.42 صورة الملف الشخصي للأخصائي (طلب المالك): تُقص مربعة 256px JPEG وتُحفظ في S.settings.me.photo
+// (إعدادات الأخصائي المشفّرة على جهازه، فتدخل النسخ الاحتياطية والمزامنة الخاصة به، ولا تصل إلى العملاء ولا «زنها»).
+function mePhoto() { return (S.settings.me || {}).photo || ''; }
+function meAv(cls) { var p = mePhoto(); return '<label class="cav meav' + (cls ? ' ' + cls : '') + (p ? ' has' : '') + '" title="' + (p ? 'غيّر صورتك' : 'أضف صورتك') + '">' + (p ? '<img src="' + p + '" alt="صورة ' + esc(firstName()) + '">' : esc(initial(firstName()))) + '<input type="file" accept="image/*" class="mefile" aria-label="صورة الملف الشخصي" hidden></label>'; }
+function meCard() {
+  var p = mePhoto();
+  return '<div class="ucard mecard"><h3>' + IC('user') + ' الملف الشخصي</h3><div class="merow">' + meAv('lg') + '<div><b>' + esc(firstName() || '—') + '</b><p class="small">صورتك تظهر في الترويسة. مربعة 256×256، محفوظة على جهازك ضمن إعداداتك المشفّرة، ولا تُرسل للعملاء.</p>'
+    + '<div class="merow2"><label class="sec sm mebtn">' + IC('upload') + ' ' + (p ? 'غيّر الصورة' : 'ارفع صورة') + '<input type="file" accept="image/*" class="mefile" hidden></label>' + (p ? '<button class="sec sm r" data-a="meDel">' + IC('trash') + ' إزالة الصورة</button>' : '') + '</div></div></div></div>';
+}
+function meSet(file) {
+  if (!file || !/^image\//.test(file.type)) { toast('اختر ملف صورة'); return; }
+  if (file.size > 15 * 1048576) { toast('الصورة أكبر من 15 ميغابايت'); return; }
+  var r = new FileReader(); r.onload = function () { var im = new Image(); im.onload = function () {
+    var N = 256, c = document.createElement('canvas'), s = Math.min(im.width, im.height); c.width = c.height = N;
+    c.getContext('2d').drawImage(im, (im.width - s) / 2, (im.height - s) / 2, s, s, 0, 0, N, N);
+    S.settings.me = Object.assign({}, S.settings.me, { photo: c.toDataURL('image/jpeg', 0.85) }); saveSettings(); header(); if (S.view === 'settings') main(); toast('✓ حُفظت صورتك');
+  }; im.onerror = function () { toast('تعذّر قراءة الصورة'); }; im.src = r.result; }; r.readAsDataURL(file);
+}
+A.meDel = function () { if (!confirm('إزالة صورة الملف الشخصي؟')) return; S.settings.me = Object.assign({}, S.settings.me); delete S.settings.me.photo; saveSettings(); header(); if (S.view === 'settings') main(); toast('أُزيلت الصورة'); };
+document.addEventListener('change', function (e) { var t = e.target; if (t && t.classList && t.classList.contains('mefile')) { meSet(t.files && t.files[0]); t.value = ''; } });
+themePage = (function (f) { return function () { return meCard() + f.apply(this, arguments); }; })(themePage);
