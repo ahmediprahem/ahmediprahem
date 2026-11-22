@@ -275,3 +275,10 @@ html:not(#mxz):not(#mxy) #navfab{background:rgba(255,255,255,.72)!important;bord
 html[data-dw="dark"]:not(#mxz):not(#mxy) #navfab{background:rgba(23,45,67,.72)!important;border-color:rgba(44,74,104,.85)}
 html:not(#mxz):not(#mxy) #navfab button:hover:not(:disabled){background:rgba(40,126,145,.14)!important}
 html[data-dw="dark"]:not(#mxz):not(#mxy) #navfab button:hover:not(:disabled){background:rgba(87,201,179,.16)!important}
+/* 1.42 (طلب المالك): مؤشر الحصص العائم وأزرار التنقل شبه مخفية، وتظهر كاملة عند مرور الفأرة أو التركيز (الفأرة فقط؛ على اللمس تبقى ظاهرة) */
+@media (hover:hover) and (pointer:fine){
+  #hud.hud,#navfab{transition:opacity .2s ease}
+  #hud.hud:not(:hover):not(:focus-within){opacity:.22}
+  #navfab:not(:hover):not(:focus-within){opacity:.3}
+}
+@media (hover:hover) and (pointer:fine) and (prefers-reduced-motion:reduce){#hud.hud,#navfab{transition:none}}
