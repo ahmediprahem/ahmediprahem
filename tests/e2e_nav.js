@@ -9,7 +9,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   ok('اليوم: يفتح مباشرة، والتنقل فيه «بنك الوجبات» و«الخطط الجاهزة» و«المواعيد»');
   const rail = await p.textContent('.rail'); assert(rail.includes('بنك الوجبات') && rail.includes('الخطط الجاهزة')); assert(!/محرر الحصص|مكتبة الأخصائي|مكتبة الأنظمة الجاهزة/.test(rail)); assert.strictEqual(await p.locator('.rail [data-a="lib"]').count(), 0);
   await p.click('.rail [data-a="bank"]'); await p.waitForSelector('.bank h2'); assert(/بنك الوجبات/.test(await p.textContent('.bank h2')));
-  await p.click('.rail [data-a="ready"]'); await p.waitForSelector('.rdl'); assert(/الخطط الجاهزة/.test(await p.textContent('.rdl h2'))); await p.click('[data-a="rdTab"][data-v="lib"]'); await p.waitForSelector('.dxc'); assert.strictEqual(await p.locator('.dxc').count(), 10);
+  await p.click('.rail [data-a="ready"]'); await p.waitForSelector('.rdl'); assert(/الخطط الجاهزة/.test(await p.textContent('.rdl h2'))); await p.click('[data-a="rdTab"][data-v="lib"]'); await p.waitForSelector('.dxc'); assert.strictEqual(await p.locator('.dxc').count(), 15);      // 1.43: 15 نظاماً
   ok('التنقل: «بنك الوجبات» و«الخطط الجاهزة» (بداخلها «مكتبة الأخصائي» تبويباً) بدل ثلاثة أقسام متشابهة الأسماء');
   await p.evaluate(() => DPApp.A.new('ex')); await p.fill('[data-f="name"]', 'ريم'); await p.selectOption('[data-f="sex"]', 'ذكر').catch(() => { }); await p.press('[data-f="name"]', 'Tab'); await p.waitForTimeout(150);
   assert(/أنشئ الخطة/.test(await p.textContent('main [data-a="genOpen"]'))); assert(/من بنك الوجبات/.test(await p.textContent('main')));

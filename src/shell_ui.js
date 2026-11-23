@@ -105,7 +105,7 @@ function homeGlass() {
   var zz = window.Zizo && !(S.settings && S.settings.zzOff) ? '<span class="zhzz" aria-hidden="true">' + Zizo.svg({ coat: 1, wave: 1, mouth: 'smile' }) + '</span>' : '';
   var recent = cs.slice(0, 6).map(function (c) { var last = zhLast(c); return '<div class="cl zhrow" data-a="pick" data-v="' + c.code + '" role="button" tabindex="0"><span class="cav">' + esc(initial(c.name)) + '</span><span class="zhrt"><b>' + esc(c.name || '(بلا اسم)') + '</b><small>' + c.code + (c.phone ? ' • ' + esc(c.phone) : '') + (last ? ' • ' + esc(last) : '') + '</small></span>' + zhPlanChip(c) + '</div>'; }).join('');
   var ap = zhTodayAppts(), rq = (typeof HX !== 'undefined' && HX.st && HX.st.reqs) ? Object.keys(HX.st.reqs).map(function (k) { return HX.st.reqs[k]; }).filter(function (q) { return q.st === 'new'; }) : [];
-  var ctx = '<aside class="zhctx" aria-label="سياق اليوم">'
+  var ctx = '<aside class="zhctx" aria-label="سياق اليوم">' + zsCard()
     + '<section class="zhcard"><div class="zhh"><h3>' + IC('calendar') + ' مواعيد اليوم</h3><button class="link" data-a="appts">كل المواعيد</button></div>'
     + (ap.length ? '<ul class="zhap">' + ap.slice(0, 6).map(function (x) { return '<li><button data-a="wkOpen" data-v="' + x.c.code + '"><time>' + esc(x.a.t || '—') + '</time><span><b>' + esc(x.c.name || x.c.code) + '</b><small>' + esc(x.a.type || 'متابعة') + '</small></span></button></li>'; }).join('') + '</ul>' : '<p class="small zhnone">لا مواعيد اليوم.</p>') + '</section>'
     + (rq.length ? '<section class="zhcard"><div class="zhh"><h3>' + IC('inbox') + ' طلبات «زنها» الجديدة <em class="hxnb">' + rq.length + '</em></h3><button class="link" data-a="hxv">راجع الطلبات</button></div><ul class="zhap">' + rq.slice(0, 4).map(function (q) { var it = q.intake || {}; return '<li><button data-a="hxv"><time>جديد</time><span><b>' + esc(it.name || q.label || 'طلب تسجيل') + '</b><small>تسجيل جديد من رابط الدعوة</small></span></button></li>'; }).join('') + '</ul></section>' : '')
@@ -116,7 +116,8 @@ function homeGlass() {
     + (cs.length || n.req ? zhPulse(cs, withPlan, fol, n, fu) + '<div class="tdks zhst zhchips" role="group" aria-label="ملخص العمل">' + tdStat('clients', 'users', cs.length, 'إجمالي العملاء', '', 1) + tdStat('appts', 'repeat', fu, 'متابعات اليوم', '', 1) + tdStat('clients', 'file', withPlan, 'الخطط النشطة', '', 1) + tdStat('zchat', 'message', n.chat, 'رسائل غير مقروءة', 'r')
       + tdStat('hxv', 'inbox', n.req, 'طلبات تسجيل جديدة', 'a') + tdStat('appts', 'calendar', n.appt, 'مواعيد اليوم') + tdStat('subs', 'card', n.subs, 'اشتراكات للتجديد', 'a') + tdStat('tdFollow', 'repeat', fol, 'متابعات مستحقة') + '</div>' : '')
     + (cs.length ? '<div class="zhcols"><div class="zhmain">' + wkToday()
-      + '<section class="zhcard zhrec"><div class="hxtop tdrh zhh"><h3>' + IC('users') + ' آخر العملاء</h3><button class="link" data-a="clients">كل العملاء (' + cs.length + ')</button></div><div class="recent">' + recent + '</div><p class="small tdsum">' + cs.length + ' عميل • ' + withPlan + ' له خطة • ' + ath + ' بنظام الجرامات</p></section></div>' + ctx + '</div>'
+      + zaCard() + '</div>'      // 1.48: «آخر نشاطات العملاء» بدل «آخر العملاء» (طلب المالك)
+       + ctx + '</div>'
       : wkToday() + '<div class="ucard tdempty zhcard"><h3>ابدأ بأول عميل</h3><p class="small">أضف عميلاً لتبني خطته، وستظهر هنا مواعيده ورسائله ومتابعاته.</p>' + newMenu() + '</div>' + zhBackup())
     + vtHomeCard() + proInstCard() + appCard() + '</div>';
 }
@@ -232,10 +233,10 @@ function meSet(file) {
     var N = 256, c = document.createElement('canvas'), s = Math.min(im.width, im.height); c.width = c.height = N;
     c.getContext('2d').drawImage(im, (im.width - s) / 2, (im.height - s) / 2, s, s, 0, 0, N, N);
     var t = document.createElement('canvas'); t.width = t.height = 128; t.getContext('2d').drawImage(c, 0, 0, 128, 128);
-    S.settings.me = Object.assign({}, S.settings.me, { photo: c.toDataURL('image/jpeg', 0.85), thumb: t.toDataURL('image/jpeg', 0.8) }); saveSettings(); header(); if (S.view === 'settings') main(); meShare(); toast('✓ حُفظت صورتك');
+    S.settings.me = Object.assign({}, S.settings.me, { photo: c.toDataURL('image/jpeg', 0.85), thumb: t.toDataURL('image/jpeg', 0.8) }); saveSettings(); header(); if (S.view === 'settings' || S.view === 'me') main(); meShare(); toast('✓ حُفظت صورتك');
   }; im.onerror = function () { toast('تعذّر قراءة الصورة'); }; im.src = r.result; }; r.readAsDataURL(file);
 }
-A.meDel = function () { if (!confirm('إزالة صورة الملف الشخصي؟')) return; S.settings.me = Object.assign({}, S.settings.me); delete S.settings.me.photo; delete S.settings.me.thumb; saveSettings(); header(); if (S.view === 'settings') main(); meShare(); toast('أُزيلت الصورة'); };
+A.meDel = function () { if (!confirm('إزالة صورة الملف الشخصي؟')) return; S.settings.me = Object.assign({}, S.settings.me); delete S.settings.me.photo; delete S.settings.me.thumb; saveSettings(); header(); if (S.view === 'settings' || S.view === 'me') main(); meShare(); toast('أُزيلت الصورة'); };
 document.addEventListener('change', function (e) { var t = e.target; if (t && t.classList && t.classList.contains('mefile')) { meSet(t.files && t.files[0]); t.value = ''; } });
 themePage = (function (f) { return function () { return meCard() + f.apply(this, arguments); }; })(themePage);
 // إظهار الصورة للعميل في «زنها» (موافقة المالك 2026-11-22): رسالة مشفّرة «prof» بصورة مصغّرة 128px لكل عميل مرتبط؛ والإصدارات القديمة من «زنها» تتجاهلها

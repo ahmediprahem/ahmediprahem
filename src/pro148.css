@@ -1,0 +1,109 @@
+/* ================= 1.48 الاشتراكات، آخر النشاطات، اختصارات الترويسة، صفحة «ملفي» */
+/* ---- بطاقة الاشتراكات */
+.ghome .zscard .zsgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.ghome .zscell{all:unset;box-sizing:border-box;cursor:pointer;display:grid;gap:2px;padding:12px 10px;border-radius:14px;text-align:center;background:var(--zh-bg);border:1px solid var(--zh-line,#E6ECEA);transition:transform .15s,border-color .15s}
+.ghome .zscell:hover{transform:translateY(-1px);border-color:var(--zh-mint)}.ghome .zscell:focus-visible{outline:2.5px solid var(--zh-mint);outline-offset:2px}
+.ghome .zscell b{font-size:26px;line-height:1.1;font-variant-numeric:tabular-nums;color:var(--zh-ink)}
+.ghome .zscell span{font-size:13px;font-weight:700;color:var(--zh-ink)}.ghome .zscell small{font-size:11px;color:var(--zh-mut)}
+.ghome .zscell.t-ok b{color:var(--zh-ok,#24A879)}.ghome .zscell.t-warn b{color:var(--zh-warnD,#8A5A12)}.ghome .zscell.t-bad b{color:var(--zh-badD,#B5454A)}
+.ghome .zscell.t-warn:not(.zero){background:var(--zh-warnT,#FBF0E1);border-color:transparent}.ghome .zscell.t-bad:not(.zero){background:var(--zh-badT,#FCE9EA);border-color:transparent}
+.ghome .zscell.zero b{color:var(--zh-mut);opacity:.7}
+.ghome .zsnone{margin:8px 0 0}
+/* ---- آخر نشاطات العملاء */
+.ghome .zalist{list-style:none;margin:0;padding:0;display:grid}
+.ghome .zalist li+li{border-top:1px solid var(--zh-line,#E6ECEA)}
+.ghome .zalist button{all:unset;box-sizing:border-box;cursor:pointer;width:100%;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;padding:10px 6px;border-radius:12px}
+.ghome .zalist button:hover{background:var(--zh-bg)}.ghome .zalist button:focus-visible{outline:2.5px solid var(--zh-mint);outline-offset:-2px}
+.ghome .zaic{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:var(--zh-tint);color:var(--zh-mintd)}.ghome .zaic svg{width:18px;height:18px}
+.ghome .zaic.t-sky{background:var(--zh-skyT,#E8F1F8);color:var(--zh-sky,#3D7FB0)}.ghome .zaic.t-warn{background:var(--zh-warnT,#FBF0E1);color:var(--zh-warnD,#8A5A12)}.ghome .zaic.t-bad,.ghome .zaic.t-rose{background:var(--zh-badT,#FCE9EA);color:var(--zh-badD,#B5454A)}
+.ghome .zatx{display:grid;min-width:0;font-size:14px;color:var(--zh-ink);line-height:1.45}.ghome .zatx b{font-weight:700}
+.ghome .zatx small{font-size:12.5px;color:var(--zh-mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ghome .zalist time{font-size:12px;color:var(--zh-mut);white-space:nowrap}
+.ghome .zaempty{padding:6px 2px}
+/* ---- اختصارات الترويسة */
+#hd .hqbar{display:inline-flex;align-items:center;gap:8px;margin-inline-end:6px}
+#hd .hqb{all:unset;box-sizing:border-box;cursor:pointer;position:relative;display:grid;place-items:center;width:42px;height:42px;border-radius:50%;background:var(--zh-bg,#F4F7F6);color:var(--zh-ink,#102D3B);transition:background .15s,transform .15s}
+#hd .hqb:hover{background:var(--zh-tint,#E7F7F1)}#hd .hqb:active{transform:scale(.94)}#hd .hqb:focus-visible{outline:2.5px solid var(--zh-mint,#24C99A);outline-offset:2px}
+#hd .hqb svg{width:21px;height:21px}
+#hd .hqb em{position:absolute;top:-4px;inset-inline-start:-4px;min-width:20px;height:20px;padding:0 5px;box-sizing:border-box;border-radius:999px;background:#E0414B;color:#fff;font:700 11.5px/20px system-ui,sans-serif;font-style:normal;text-align:center;border:2px solid var(--zh-card,#fff)}
+#hd .uchip [data-a="meOpen"]{cursor:pointer}
+#hqlayer{position:fixed;inset:0;z-index:60;pointer-events:none}
+#hqlayer.k-search{pointer-events:auto}#hqlayer .hqpop,#hqlayer .hqsearch{pointer-events:auto}
+#hqlayer.k-search{background:rgba(16,45,59,.32);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+#hqlayer .hqpop{position:absolute;top:calc(env(safe-area-inset-top,0px) + 74px);inset-inline-end:max(16px,calc(env(safe-area-inset-left,0px) + 160px));width:min(300px,calc(100vw - 32px));max-height:70vh;overflow:auto;padding:8px;border-radius:16px;background:var(--zh-card,#fff);color:var(--zh-ink,#102D3B);box-shadow:0 18px 50px -12px rgba(16,45,59,.35);border:1px solid var(--zh-line,#E6ECEA)}
+#hqlayer .hqpop.wide{width:min(380px,calc(100vw - 32px))}
+#hqlayer .hqpop>button,#hqlayer .hqit{all:unset;box-sizing:border-box;cursor:pointer;width:100%;display:flex;align-items:center;gap:12px;padding:10px;border-radius:12px;font-size:14px}
+#hqlayer .hqpop>button:hover,#hqlayer .hqit:hover{background:var(--zh-bg,#F4F7F6)}#hqlayer button:focus-visible{outline:2.5px solid var(--zh-mint,#24C99A);outline-offset:-2px}
+#hqlayer .hqpop>button svg{width:20px;height:20px;color:var(--zh-mintd,#0F8A66)}
+#hqlayer .hqph{display:flex;justify-content:space-between;align-items:center;padding:6px 10px 8px}
+#hqlayer .hqit>span:last-child{display:grid;min-width:0}#hqlayer .hqit b{font-size:14px}#hqlayer .hqit small{font-size:12.5px;color:var(--zh-mut,#69767B);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#hqlayer .hqit.urg b{color:var(--zh-badD,#B5454A)}
+#hqlayer .hqe{display:grid;place-items:center;width:36px;height:36px;flex:none;border-radius:50%;background:var(--zh-bg,#F4F7F6);font-size:17px;color:var(--zh-mintd,#0F8A66)}#hqlayer .hqe svg{width:18px;height:18px}
+#hqlayer .hqempty{padding:12px}
+#hqlayer .hqsearch{position:absolute;top:calc(env(safe-area-inset-top,0px) + 70px);left:50%;transform:translateX(-50%);width:min(640px,calc(100vw - 32px));max-height:78vh;overflow:auto;border-radius:18px;background:var(--zh-card,#fff);color:var(--zh-ink,#102D3B);box-shadow:0 30px 80px -20px rgba(16,45,59,.5)}
+#hqlayer .hqsbox{position:sticky;top:0;display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--zh-card,#fff);border-bottom:1px solid var(--zh-line,#E6ECEA)}
+#hqlayer .hqsbox svg{width:20px;height:20px;color:var(--zh-mut,#69767B)}
+#hqlayer .hqsbox input{flex:1;min-width:0;border:0;outline:0;background:transparent;font:inherit;font-size:17px;color:inherit;padding:6px 0}
+#hqres{padding:6px 8px 10px}#hqres .hqg h4{margin:10px 10px 4px;font-size:12px;color:var(--zh-mut,#69767B);letter-spacing:.02em}
+@media (max-width:760px){#hd .hqbar{gap:4px}#hd .hqb{width:36px;height:36px}#hd .hqb svg{width:19px;height:19px}#hd .hqb[data-a="hqNew"]{display:none}#hqlayer .hqpop{inset-inline-end:12px;top:calc(env(safe-area-inset-top,0px) + 64px)}}
+/* ---- «ملفي» بتخطيط صفحة شخصية: غلاف 1250×463، صورة 168 دائرية تتداخل مع الغلاف، اسم 32، شريط تبويبات، عمودان (تعريف | منشورات) */
+.fbp{max-width:1250px;margin:0 auto;display:grid;gap:16px;color:var(--zh-ink,#102D3B)}
+.fbtop{background:var(--zh-card,#fff);border-radius:0 0 18px 18px;box-shadow:0 1px 2px rgba(16,45,59,.08);overflow:hidden}
+.fbcover{position:relative;aspect-ratio:1250/463;max-height:463px;background:linear-gradient(135deg,#0F6F66 0%,#13897A 45%,#2FB295 80%,#8FE3C4 100%);background-size:cover;background-position:center;border-radius:0 0 12px 12px}
+.fbcover:not(.has)::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 18% 30%,rgba(255,255,255,.22),transparent 45%),radial-gradient(circle at 80% 85%,rgba(255,255,255,.14),transparent 40%)}
+.fbcvbtn{position:absolute;bottom:16px;inset-inline-end:16px;z-index:1;display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border-radius:10px;background:rgba(255,255,255,.92);color:#102D3B;font-weight:600;font-size:14px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.fbcvbtn svg{width:18px;height:18px}.fbcvbtn:hover{background:#fff}
+.fbhead{display:flex;align-items:flex-end;gap:20px;flex-wrap:wrap;padding:0 32px 16px;margin-top:-84px;position:relative}
+.fbav{position:relative;width:168px;height:168px;flex:none;border-radius:50%;border:4px solid var(--zh-card,#fff);background:var(--zh-tint,#E7F7F1);overflow:visible;display:grid;place-items:center;box-shadow:0 2px 10px rgba(16,45,59,.12)}
+.fbav img{width:100%;height:100%;border-radius:50%;object-fit:cover}.fbav>span{font-size:64px;font-weight:700;color:var(--zh-mintd,#0F8A66)}
+.fbavbtn{position:absolute;bottom:10px;inset-inline-start:8px;display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:var(--zh-bg,#E4E6EB);color:var(--zh-ink,#102D3B);cursor:pointer;border:2px solid var(--zh-card,#fff)}
+.fbavbtn svg{width:19px;height:19px}
+.fbname{flex:1;min-width:220px;padding-bottom:6px;display:grid;gap:4px}
+.fbname h1{margin:0;font-size:32px;line-height:1.2;font-weight:800;text-wrap:balance}
+.fbcnt{all:unset;cursor:pointer;font-size:15px;color:var(--zh-mut,#65676B);font-weight:600}.fbcnt b{color:var(--zh-ink,#102D3B)}.fbcnt:hover{text-decoration:underline}
+.fbfaces{display:flex;padding-inline-start:8px}.fbfaces .cav{width:32px;height:32px;margin-inline-start:-8px;border:2px solid var(--zh-card,#fff);font-size:13px}
+.fbact{display:flex;gap:8px;flex-wrap:wrap;padding-bottom:8px}
+.fbact button{display:inline-flex;align-items:center;gap:6px}.fbact button svg{width:18px;height:18px}
+.fbtabs{display:flex;gap:4px;padding:0 24px;border-top:1px solid var(--zh-line,#E6ECEA);overflow-x:auto}
+.fbtabs button{all:unset;cursor:pointer;padding:14px 16px;font-weight:600;font-size:15px;color:var(--zh-mut,#65676B);border-bottom:3px solid transparent;white-space:nowrap}
+.fbtabs button:hover{background:var(--zh-bg,#F2F2F2);border-radius:8px 8px 0 0}
+.fbtabs button.on{color:var(--zh-mintd,#0F8A66);border-bottom-color:var(--zh-mint,#24C99A)}
+.fbtabs button small{font-size:12.5px;opacity:.8}
+.fbcols{display:grid;grid-template-columns:minmax(0,360px) minmax(0,680px);justify-content:center;gap:16px;align-items:start}
+.fbcols aside{display:grid;gap:16px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 84px)}
+.fbmain{display:grid;gap:16px;min-width:0}.fbmain .fdpost,.fbmain .fdcomp{margin:0}
+.fbabout{max-width:680px;margin:0 auto;width:100%}
+.fbbox{background:var(--zh-card,#fff);border-radius:14px;padding:16px;box-shadow:0 1px 2px rgba(16,45,59,.08);display:grid;gap:10px}
+.fbbox h3{margin:0;font-size:20px;font-weight:800}
+.fbbh{display:flex;justify-content:space-between;align-items:center}
+.fbbio{margin:0;text-align:center;font-size:15px;line-height:1.7;white-space:pre-wrap}
+.fbwide{width:100%;justify-content:center;display:inline-flex;align-items:center;gap:6px}.fbwide svg{width:17px;height:17px}
+.fbl{display:grid;gap:4px;font-size:13px;font-weight:600}
+.fbfacts{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.fbfacts li{display:flex;align-items:center;gap:10px;font-size:15px}.fbfacts svg{width:20px;height:20px;color:var(--zh-mut,#65676B);flex:none}
+.fbvgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.fbvt{all:unset;cursor:pointer;aspect-ratio:1;border-radius:10px;background:linear-gradient(160deg,#13897A,#0F4F57);color:#fff;display:grid;place-items:center;align-content:center;gap:4px;padding:6px;text-align:center;font-size:11.5px;overflow:hidden}
+.fbvt svg{width:22px;height:22px}.fbvt span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+@media (max-width:900px){.fbcols{grid-template-columns:minmax(0,1fr)}.fbcols aside{position:static}.fbhead{justify-content:center;text-align:center;padding:0 16px 12px;margin-top:-70px}.fbav{width:140px;height:140px}.fbname{min-width:0;flex-basis:100%;justify-items:center}.fbname h1{font-size:26px}.fbact{justify-content:center;width:100%}.fbtabs{padding:0 8px}.fbcvbtn span{display:none}}
+@media (prefers-reduced-motion:reduce){.ghome .zscell,#hd .hqb{transition:none}}
+/* تثبيت الأنماط فوق قواعد الأزرار العامة في الثيمات (نفس أسلوب 1.42) */
+html:not(#mxz):not(#mxy) #hd .hqb{background:var(--zh-bg,#EEF2F1)!important;color:var(--zh-ink,#102D3B)!important;border:0!important;box-shadow:none!important;padding:0!important;min-height:0!important;width:42px!important;height:42px!important;border-radius:50%!important}
+html:not(#mxz):not(#mxy) #hd .hqb:hover{background:var(--zh-tint,#E7F7F1)!important}
+html:not(#mxz):not(#mxy) #hqlayer .hqpop>button,html:not(#mxz):not(#mxy) #hqlayer .hqit{background:transparent!important;color:var(--zh-ink,#102D3B)!important;border:0!important;box-shadow:none!important;min-height:0!important;width:100%!important;justify-content:flex-start!important;font-weight:500!important}
+html:not(#mxz):not(#mxy) #hqlayer .hqpop>button:hover,html:not(#mxz):not(#mxy) #hqlayer .hqit:hover{background:var(--zh-bg,#F4F7F6)!important}
+html:not(#mxz):not(#mxy) .ghome .zalist button{background:transparent!important;border:0!important;box-shadow:none!important;color:var(--zh-ink)!important;min-height:0!important;padding:10px 6px!important;width:100%!important;text-align:start!important;font-weight:400!important}
+html:not(#mxz):not(#mxy) .ghome .zalist button:hover{background:var(--zh-bg)!important}
+html:not(#mxz):not(#mxy) .ghome .zscell{box-shadow:none!important;min-height:0!important;padding:12px 8px!important}
+html:not(#mxz):not(#mxy) .fbtabs button{background:transparent!important;border:0!important;border-bottom:3px solid transparent!important;border-radius:0!important;box-shadow:none!important;color:var(--zh-mut,#65676B)!important;padding:14px 16px!important;min-height:0!important}
+html:not(#mxz):not(#mxy) .fbtabs button.on{color:var(--zh-mintd,#0F8A66)!important;border-bottom-color:var(--zh-mint,#24C99A)!important}
+html:not(#mxz):not(#mxy) .fbtabs button:hover{background:var(--zh-bg,#F2F2F2)!important}
+html:not(#mxz):not(#mxy) .fbcnt{background:transparent!important;border:0!important;box-shadow:none!important;color:var(--zh-mut,#65676B)!important;padding:0!important;min-height:0!important;width:auto!important;font-weight:600!important;justify-content:flex-start!important}
+html:not(#mxz):not(#mxy) .fbvt{border:0!important;box-shadow:none!important;color:#fff!important;padding:6px!important;min-height:0!important}
+.fbhead{margin-top:0;padding-top:12px;align-items:flex-end}
+.fbav{margin-top:-96px}
+@media (max-width:900px){.fbhead{margin-top:0}.fbav{margin-top:-80px}}
+.fbp .fbbox h3{color:var(--zh-ink)}
+@media (max-width:760px){html:not(#mxz):not(#mxy) #hd .hqb[data-a="hqNew"],html:not(#mxz):not(#mxy) #hd .hqb[data-a="hqMsg"]{display:none!important}html:not(#mxz):not(#mxy) #hd .hqb{width:36px!important;height:36px!important}#hd .hqbar{gap:4px;margin:0}}
+html[data-dw="dark"]:not(#mxz) #hd .hqb,html[data-tone="dark"]:not(#mxz) #hd .hqb{background:rgba(255,255,255,.12)!important;color:#fff!important}
+html[data-dw="dark"]:not(#mxz) #hd .hqb:hover,html[data-tone="dark"]:not(#mxz) #hd .hqb:hover{background:rgba(255,255,255,.2)!important}
+@media (max-width:420px){html:not(#mxz):not(#mxy) #hd .hqb[data-a="hqBell"]{display:none!important}}

@@ -1,0 +1,41 @@
+// 1.48 (طلب المالك): أرقام الاشتراكات في الرئيسية، «آخر نشاطات العملاء»، اختصارات الترويسة (إنشاء، بحث شامل، رسائل، إشعارات)، وصفحة «ملفي» للأخصائي.
+const { fileUrl } = require('./_tmp.js');
+const { chromium } = require('playwright'); const assert = require('assert'), path = require('path'), login = require('./auth_helper');
+let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
+(async () => {
+  const b = await chromium.launch(), p = await (await b.newContext({ viewport: { width: 1440, height: 900 } })).newPage(); p.on('pageerror', (e) => errs.push(String(e))); p.on('dialog', (d) => d.accept());
+  await p.goto(fileUrl(path.resolve(__dirname, '../admin.html'))); await login(p);
+  for (const [nm, sx] of [['سارة أحمد', 'أنثى'], ['محمد علي', 'ذكر'], ['ليلى حسن', 'أنثى'], ['أحمد سمير', 'ذكر']]) { await p.evaluate(() => DPApp.A.new('ex')); await p.fill('[data-f="name"]', nm); await p.selectOption('[data-f="sex"]', sx).catch(() => { }); await p.fill('[data-f="weight"]', '80'); await p.press('[data-f="weight"]', 'Tab'); }
+  await p.evaluate(() => { const S = DPApp.S, now = Date.now(), d = (k) => new Date(now - k * 86400000).toISOString().slice(0, 10), C = (nm) => S.clients.find((c) => c.name === nm);
+    Object.assign(C('محمد علي'), { hx: { cid: 'a', logs: { [d(0)]: { sw: { L: 1 }, ts: now - 40 * 60000, done: 3, n: 5 } }, msgs: [{ from: 'c', t: 'سؤال عن الغداء', ts: now - 60000 }], unread: 1 }, sub: { end: d(-20), status: 'active', history: [{ type: 'renew', days: 30, pkg: 'شهري', ts: now - 3600000 }] } });
+    Object.assign(C('سارة أحمد'), { hx: { cid: 'b', logs: {}, weights: [[now - 7200000, 71.4]] }, sub: { end: d(-3), status: 'active', history: [] } });
+    Object.assign(C('ليلى حسن'), { sub: { end: d(4), status: 'active', history: [] } });
+    DPApp.A.home(); });
+  await p.waitForSelector('.zscard');
+  const sub = await p.$$eval('.zscell b', (x) => x.map((e) => +e.textContent)); assert.deepStrictEqual(sub, [2, 1, 1], 'سارية/قاربت/منتهية ' + sub);
+  ok('بطاقة الاشتراكات: سارية 2 (منها 1 قاربت الانتهاء خلال 5 أيام) ومنتهية 1، والضغط يفتح الاشتراكات');
+  const acts = await p.$$eval('.zalist li', (x) => x.map((e) => e.innerText.replace(/\s+/g, ' ')));
+  assert(!(await p.$('.zhrec .recent')), 'آخر العملاء استُبدل'); assert(/محمد علي أرسل إليك رسالة/.test(acts[0]), acts[0]);
+  assert(acts.some((a) => /محمد علي قام بتبديل وجبة/.test(a)) && acts.some((a) => /سارة أحمد سجّلت وزنها/.test(a)) && acts.some((a) => /محمد علي جدّد الاشتراك/.test(a)), acts.join(' | '));
+  ok('«آخر نشاطات العملاء» بدل «آخر العملاء»: رسالة، تبديل وجبة، وزن، تجديد — الأحدث أولاً، والفعل بحسب جنس العميل (سجّلت/جدّد)');
+  const hq = await p.$$eval('#hd .hqbar .hqb', (x) => x.map((e) => e.dataset.a)); assert.deepStrictEqual(hq, ['hqNew', 'hqSearch', 'hqMsg', 'hqBell']);
+  assert(+(await p.textContent('#hd [data-a="hqMsg"] em')) >= 1, 'شارة الرسائل');
+  await p.click('#hd [data-a="hqBell"]'); await p.waitForSelector('#hqlayer .hqpop .hqit'); assert(/اشتراك/.test(await p.textContent('#hqlayer'))); await p.keyboard.press('Escape'); assert(!(await p.$('#hqlayer .hqpop')));
+  await p.click('#hd [data-a="hqNew"]'); await p.waitForSelector('#hqlayer [data-a="meOpen"][data-v="video"]'); await p.keyboard.press('Escape');
+  await p.keyboard.press('Control+k'); await p.waitForSelector('#hqq'); await p.keyboard.type('ليلى'); await p.waitForSelector('#hqres [data-a="pick"]');
+  await p.fill('#hqq', 'الاستبيانات'); await p.waitForSelector('#hqres [data-a="setGo"][data-v="forms"]'); await p.click('#hqres [data-a="setGo"][data-v="forms"]'); await p.waitForSelector('.fmstep'); await p.waitForFunction(() => !document.querySelector('#hqlayer .hqsearch'), null, { timeout: 3000 });
+  ok('اختصارات الترويسة: إنشاء، بحث في كل النظام (Ctrl+K: عملاء وأصناف ووجبات وصفحات)، رسائل بشارة، إشعارات عاجلة؛ Esc يغلق والنتيجة تنقل لوجهتها');
+  await p.click('#hd .uchip [data-a="meOpen"]'); await p.waitForSelector('.fbp .fbcover');
+  const hd = await p.evaluate(() => ({ cnt: document.querySelector('.fbcnt').textContent, av: getComputedStyle(document.querySelector('.fbav')).width, ratio: (() => { const r = document.querySelector('.fbcover').getBoundingClientRect(); return r.width / r.height; })(), tabs: [...document.querySelectorAll('.fbtabs button')].map((x) => x.textContent.trim().split(' ')[0]) }));
+  assert(/3 عميل حالي/.test(hd.cnt), hd.cnt); assert.strictEqual(hd.av, '168px'); assert(Math.abs(hd.ratio - 1250 / 463) < 0.15, hd.ratio); assert.deepStrictEqual(hd.tabs, ['المنشورات', 'حول', 'الفيديوهات']);
+  ok('«ملفي»: غلاف بنسبة 1250×463، صورة 168px، «N عميل حالي» بدل عدد الأصدقاء (العملاء غير المنتهي اشتراكهم)، وتبويبات المنشورات وحول والفيديوهات');
+  await p.click('.fbact [data-a="meEdit"]'); await p.fill('#me_role', 'أخصائي تغذية علاجية'); await p.fill('#me_bio', 'متابعة أسبوعية بلا حرمان.'); await p.click('[data-a="meSave"]');
+  assert(/متابعة أسبوعية بلا حرمان/.test(await p.textContent('.fbbio')) && /أخصائي تغذية علاجية/.test(await p.textContent('.fbfacts')));
+  assert.strictEqual(await p.evaluate(() => DPApp.S.settings.me.bio), 'متابعة أسبوعية بلا حرمان.');
+  ok('تعديل الملف الشخصي: المسمّى والنبذة يُحفظان في إعدادات الأخصائي ويظهران في «نبذة»');
+  await p.click('.fbact [data-a="meOpen"][data-v="post"]'); assert(await p.$('#mecomp'), 'مكان النشر'); await p.click('[data-a="meTab"][data-v="videos"]'); assert(/فيديوهات تدريب/.test(await p.textContent('.fbmain')));
+  await p.setViewportSize({ width: 390, height: 844 }); await p.waitForTimeout(200); assert(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth)); await p.evaluate(() => DPApp.A.home()); await p.waitForTimeout(200); assert(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+  ok('الجوال: «ملفي» والرئيسية بلا تمرير أفقي، والترويسة تُبقي البحث فقط');
+  assert.deepStrictEqual(errs, [], errs.join(' | ')); ok('لا أخطاء في وحدة التحكم');
+  console.log('\nنجح', n, 'اختبارات 1.48'); await b.close();
+})().catch((e) => { console.log('✘', String(e && e.stack || e).slice(0, 1200)); process.exit(1); });
