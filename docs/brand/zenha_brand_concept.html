@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>زنها Pro Brand Concept</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alexandria:wght@500;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Inter:wght@400;600;700&display=swap">
+<style>
+/* التخطيط: صفحة مستند عريضة، شريط عنوان بلون البترولي العميق، ثم أقسام بعمود نص وشبكات للعينات */
+:root{
+  --petrol:#0E3A40; --teal:#13897A; --mint:#24C99A; --sky:#3D7FB0; --sun:#F08A3C;
+  --bg:#F5F8F7; --surface:#FFFFFF; --ink:#102D33; --mut:#5C7072; --line:#DCE6E4; --tint:#E6F5F0;
+  --display:"Alexandria","IBM Plex Sans Arabic",Tahoma,sans-serif; --body:"IBM Plex Sans Arabic",Tahoma,Arial,sans-serif; --latin:"Inter","Segoe UI",Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0B1718;--surface:#122326;--ink:#E4F0EE;--mut:#93ABAB;--line:#24393B;--tint:#15312E;--teal:#3DB7A5;--petrol:#0A2C31;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0B1718;--surface:#122326;--ink:#E4F0EE;--mut:#93ABAB;--line:#24393B;--tint:#15312E;--teal:#3DB7A5;--petrol:#0A2C31;color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.75}
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.hero{margin-top:calc(-1 * env(safe-area-inset-top,0px));padding-top:calc(env(safe-area-inset-top,0px) + 56px);padding-bottom:56px;background:var(--petrol);color:#EAF7F3}
+.hero .wrap{display:block}
+.eyebrow{font-family:var(--latin);font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;color:#8FE3C4;font-weight:600}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(34px,5vw,56px);line-height:1.15;margin:10px 0 14px;text-wrap:balance}
+.hero p{margin:0;max-width:52ch;color:#C9E4DE;font-size:17px}
+.hero .en{font-family:var(--latin);direction:ltr;text-align:right;color:#8FE3C4;font-size:15px;margin-top:10px}
+.markbox{justify-self:center;display:grid;gap:14px;justify-items:center}
+.markbox svg{width:min(240px,60vw);height:auto}
+.markbox small{color:#9FC9C1;font-size:13px}
+main{display:grid;gap:8px;padding-block:24px 64px}
+section{padding-block:36px;border-top:1px solid var(--line)}
+section:first-child{border-top:0}
+h2{font-family:var(--display);font-weight:700;font-size:28px;margin:0 0 6px;text-wrap:balance}
+h2 .en{font-family:var(--latin);font-weight:600;font-size:14px;color:var(--mut);letter-spacing:.06em;margin-inline-start:10px;text-transform:uppercase}
+h3{font-family:var(--display);font-weight:700;font-size:19px;margin:0 0 6px}
+.lead{max-width:70ch;color:var(--mut);margin:0 0 22px}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px;min-width:0}
+.card p{margin:0;color:var(--mut);font-size:15px}
+.big{font-family:var(--display);font-weight:800;font-size:clamp(26px,4vw,40px);line-height:1.3;margin:0;text-wrap:balance}
+.big .en{display:block;font-family:var(--latin);font-weight:600;font-size:clamp(17px,2.4vw,22px);direction:ltr;text-align:right;color:var(--teal);margin-top:6px}
+.statement{background:var(--tint);border-radius:16px;padding:22px 24px;font-size:17px;max-width:78ch}
+.statement b{color:var(--teal)}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:2px 10px;border-radius:999px;background:var(--tint);color:var(--teal);margin-bottom:8px}
+.tag.rec{background:var(--teal);color:#fff}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:15px}
+.tbl{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:14px}
+th,td{padding:12px 14px;text-align:right;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:13px;color:var(--mut);font-weight:600}
+td .en{font-family:var(--latin);direction:ltr;display:inline-block}
+tr.pick td{background:var(--tint)}
+.sw{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.chip{border-radius:14px;overflow:hidden;border:1px solid var(--line);background:var(--surface)}
+.chip i{display:block;height:84px}
+.chip div{padding:10px 12px;font-size:13.5px}.chip b{display:block;font-size:14.5px}.chip code{font-family:var(--latin);color:var(--mut);font-size:12.5px}
+.type{display:grid;gap:12px}
+.type .row{display:grid;grid-template-columns:150px minmax(0,1fr);gap:16px;align-items:baseline;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.type small{color:var(--mut)}
+.do{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.do .card h3{font-size:16px}
+.ok h3{color:#1D8A5B}.no h3{color:#B5454A}
+ul.clean{margin:0;padding-inline-start:18px;color:var(--mut);font-size:15px}
+ul.clean li+li{margin-top:4px}
+.pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;align-items:start}
+.pair .en{font-family:var(--latin);direction:ltr;text-align:left;color:var(--mut)}
+.marks{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.marks .card{display:grid;gap:10px;justify-items:center;text-align:center}
+.marks svg{width:120px;height:120px}
+.steps{display:grid;gap:10px;counter-reset:s}
+.steps .card{display:grid;grid-template-columns:40px minmax(0,1fr);gap:12px;align-items:start}
+.steps .card::before{counter-increment:s;content:counter(s);display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--teal);color:#fff;font-weight:700;font-family:var(--latin)}
+.note{font-size:13.5px;color:var(--mut);margin-top:12px}
+@media (max-width:760px){.hero .wrap{grid-template-columns:minmax(0,1fr)}.type .row{grid-template-columns:minmax(0,1fr)}.pair{grid-template-columns:minmax(0,1fr)}.pair .en{text-align:right}}
+</style>
+</head>
+<body>
+
+<header class="hero"><div class="wrap">
+  <div>
+    <span class="eyebrow">Brand Concept · v1 · 2026</span>
+    <h1>زنها Pro: الخطة الموزونة في دقائق</h1>
+    <p>كونسبت البراند لعائلة «زنها»: نسخة الأخصائي الاحترافية، وتطبيق العميل الدافئ. مبني على إجاباتك: كل الأخصائيين بنفس الأولوية، العالم العربي كله، شخصية «شريك ذكي يوفّر وقتك»، والوعد «خطة في دقائق».</p>
+    <p class="en">Zenha Pro: the right plan, weighed in minutes.</p>
+  </div>
+</div></header>
+
+<main class="wrap">
+
+<section>
+  <h2>الفكرة الكبيرة <span class="en">Brand idea</span></h2>
+  <p class="lead">اسم «زنها» يحمل معنيين، والبراند يبني على الاثنين معاً كما اخترت:</p>
+  <div class="grid">
+    <div class="card"><h3>زِنها بالميزان</h3><p>الحصة الصح، الجرامات الدقيقة، والأكل المتوازن. هذا ما يقدّمه المحرك: خطة محسوبة بالحصص أو الجرامات من أكلنا الحقيقي.</p></div>
+    <div class="card"><h3>زِنها بعقلك</h3><p>قدّرها صح قبل ما تقرر. الأخصائي يأخذ القرار، والنظام يزن له الأرقام ويشرح السبب ويوفّر وقته.</p></div>
+  </div>
+  <p class="big" style="margin-top:22px">زِنها صح، في دقائق.<span class="en">Weighed right. In minutes.</span></p>
+</section>
+
+<section>
+  <h2>التموضع <span class="en">Positioning</span></h2>
+  <div class="statement">لكل <b>أخصائي تغذية ومدرب في العالم العربي</b>، مستقلاً كان أو في عيادة أو جيم، يضيّع ساعات في بناء الخطط على الإكسل والورق ومتابعة العملاء على الواتساب: <b>زنها Pro</b> هو الشريك الذكي الذي <b>يبني خطة دقيقة من أكلنا الحقيقي في دقائق</b>، ويُبقي العميل ملتزماً عبر تطبيق «زنها».
+  على عكس تطبيقات السعرات العامة وتطبيقات الدايت المحلية التي تأخذ العميل بعيداً عن أخصائيه، <b>زنها يضع الأخصائي في المركز</b>.</div>
+  <p class="note">The professional nutrition platform built for Arab food and Arab practitioners: accurate plans in minutes, and clients who stay on track.</p>
+</section>
+
+<section>
+  <h2>لمن نتكلم <span class="en">Audiences</span></h2>
+  <p class="lead">ثلاث فئات بنفس الأولوية. الوعد واحد، والدليل يتغير حسب الفئة.</p>
+  <div class="grid">
+    <div class="card"><span class="tag">أخصائي مستقل</span><h3>«وقتك لعملائك، مش للإكسل»</h3><p>خطة في دقائق، ومتابعة واشتراكات ورسائل في مكان واحد، وصفحة شخصية تبني اسمه.</p></div>
+    <div class="card"><span class="tag">عيادات ومراكز</span><h3>«عيادة واحدة، نظام واحد»</h3><p>جودة ثابتة لكل خطة مهما اختلف الأخصائي، ومتابعة كل العملاء من لوحة واحدة.</p></div>
+    <div class="card"><span class="tag">مدربون ورياضيون</span><h3>«الجرامات بدقة الملعب»</h3><p>نظام الجرامات، وتدوير الكارب حسب أيام التمرين، وفيديوهات تدريب لعملائك.</p></div>
+  </div>
+</section>
+
+<section>
+  <h2>المنافسة وكيف نختلف <span class="en">Competitive frame</span></h2>
+  <div class="tbl"><table>
+    <thead><tr><th>البديل اليوم</th><th>مشكلته للأخصائي</th><th>رسالتنا</th></tr></thead>
+    <tbody>
+      <tr><td>الإكسل والورق</td><td>ساعات لكل خطة، أخطاء حساب، لا متابعة</td><td>«اللي بياخد ساعة على الإكسل، بياخد دقائق على زنها»</td></tr>
+      <tr><td>تطبيقات الدايت المحلية</td><td>تبيع خطة جاهزة للعميل مباشرة وتتخطى الأخصائي</td><td>«زنها لا يستبدلك؛ يكبّر عيادتك»</td></tr>
+      <tr><td>تطبيقات السعرات العامة</td><td>أكل غربي، عدّ سعرات بلا توجيه، العميل وحده</td><td>«أكلنا الحقيقي بقوائم البدائل، والأخصائي معاك»</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <h2>القيم والشخصية <span class="en">Values &amp; personality</span></h2>
+  <p class="lead">الشخصية: <b>شريك ذكي يوفّر وقتك</b>. يتكلم قليلاً ويُنجز كثيراً، واثق بلا مبالغة، ويعرف الأرقام.</p>
+  <div class="grid">
+    <div class="card"><h3>موزون <span class="tag">Precise</span></h3><p>كل رقم محسوب وله مرجع. لا وعود علاجية ولا مبالغة.</p></div>
+    <div class="card"><h3>سريع <span class="tag">Fast</span></h3><p>نختصر الخطوات. كل شاشة تقود لإجراء واحد واضح.</p></div>
+    <div class="card"><h3>من مطبخنا <span class="tag">Rooted</span></h3><p>فول وكبسة وعيش بلدي وتميس قبل الكينوا والأفوكادو.</p></div>
+    <div class="card"><h3>شريك <span class="tag">Partner</span></h3><p>الأخصائي يقرر والنظام يقترح. نحترم خبرته ولا نتكلم بدلاً منه.</p></div>
+  </div>
+</section>
+
+<section>
+  <h2>معمارية العائلة والاسم <span class="en">Brand architecture</span></h2>
+  <p class="lead">عائلة مترابطة كما اخترت: اسم واحد وحرف Z مشترك، وشخصيتان. نسخة الأخصائي أكثر جدية واحترافية، وتطبيق العميل دافئ ومعه «زيزو».</p>
+  <div class="grid" style="margin-bottom:18px">
+    <div class="card"><span class="tag">للأخصائي</span><h3>زنها Pro</h3><p>بترولي عميق، خطوط هندسية، بلا تعليقات أو مسكوت. لغة عربية وإنجليزية مهنية.</p></div>
+    <div class="card"><span class="tag">للعميل · فريميوم</span><h3>زنها</h3><p>أخضر زنها مع لمسة برتقالية دافئة، و«زيزو» للتشجيع والاحتفال. لغة قريبة وبسيطة.</p></div>
+  </div>
+  <h3>مقارنة أسماء نسخة الأخصائي</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>الاسم</th><th>المزايا</th><th>العيوب</th></tr></thead>
+    <tbody>
+      <tr class="pick"><td><span class="tag rec">التوصية</span><br><b>زنها Pro</b> <span class="en">Zenha Pro</span></td><td>قصير، مفهوم عربياً وعالمياً، موجود ومستعمل الآن، يشمل الأخصائي والعيادة والمدرب</td><td>«Pro» شائعة؛ نعوّضها بالواصف تحت الاسم</td></tr>
+      <tr><td><b>زنها نيوتري بيزنس</b> <span class="en">Zenha Nutri Business</span></td><td>يوضح أنه للعمل والمحترفين</td><td>طويل، كلمتان إنجليزيتان بحروف عربية تُقرأ بصعوبة، ولا يصلح أيقونةً أو اسمَ تطبيق</td></tr>
+      <tr><td><b>زنها كلينك</b> <span class="en">Zenha Clinic</span></td><td>مهني جداً وواضح</td><td>يستبعد المدربين والأخصائي أونلاين</td></tr>
+      <tr><td><b>زنها ستوديو</b> <span class="en">Zenha Studio</span></td><td>عصري ويوحي بالإبداع وبناء الخطط</td><td>أقل وضوحاً في المعنى للسوق الطبي</td></tr>
+      <tr><td><b>زنها للأخصائيين</b> <span class="en">Zenha for Practitioners</span></td><td>صريح جداً</td><td>وصف لا اسم؛ يصلح واصفاً لا علامة</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">التوصية: نثبّت «زنها Pro»، ونضيف واصفاً ثابتاً تحته: «منصة أخصائيي التغذية» / <span style="font-family:var(--latin)">Nutrition Practice Platform</span>. يحقق ما أردته من «نيوتري بيزنس» بدون إطالة الاسم. قبل الاعتماد يلزم فحص تسجيل العلامة التجارية في الدول المستهدفة.</p>
+</section>
+
+<section>
+  <h2>النظام البصري <span class="en">Visual system</span></h2>
+  <h3>الألوان: أخضر زنها مع تطوير</h3>
+  <div class="sw">
+    <div class="chip"><i style="background:#0E3A40"></i><div><b>بترولي Pro</b><code>#0E3A40</code><br>خلفيات Pro والعناوين</div></div>
+    <div class="chip"><i style="background:#13897A"></i><div><b>أخضر زنها</b><code>#13897A</code><br>اللون الأساسي للعائلة</div></div>
+    <div class="chip"><i style="background:#24C99A"></i><div><b>نعناع</b><code>#24C99A</code><br>الإجراء والنجاح</div></div>
+    <div class="chip"><i style="background:#3D7FB0"></i><div><b>أزرق البيانات</b><code>#3D7FB0</code><br>الرسوم والقياسات</div></div>
+    <div class="chip"><i style="background:#F08A3C"></i><div><b>برتقالي العميل</b><code>#F08A3C</code><br>دفء تطبيق «زنها» فقط</div></div>
+    <div class="chip"><i style="background:#F5F8F7"></i><div><b>ضباب</b><code>#F5F8F7</code><br>الخلفية المحايدة</div></div>
+  </div>
+  <p class="note">Pro: 70% محايد، 20% بترولي وأخضر، 10% نعناع للإجراءات. العميل: الأخضر أساساً مع لمسات برتقالية. ألوان الحالة (أحمر للخطر، كهرماني للتنبيه) لا تُستعمل للزينة.</p>
+
+  <h3 style="margin-top:26px">الخطوط</h3>
+  <div class="type">
+    <div class="row"><small>العناوين (عربي)</small><span style="font-family:var(--display);font-weight:800;font-size:28px">خطة موزونة في دقائق</span></div>
+    <div class="row"><small>النصوص (عربي)</small><span style="font-family:var(--body);font-size:17px">الحصة = ⅓ كوب أرز مطبوخ (53 جم) • 15 جم كارب</span></div>
+    <div class="row"><small>Latin</small><span style="font-family:var(--latin);font-size:18px;direction:ltr">Zenha Pro — 2,311 kcal · 104 g protein</span></div>
+  </div>
+  <p class="note">Alexandria للعناوين (هندسي عصري يناسب الـZ)، وIBM Plex Sans Arabic للواجهة والأرقام، وInter للإنجليزية. كلها مجانية ومتاحة من Google Fonts.</p>
+
+  <h3 style="margin-top:26px">الصور والأيقونات</h3>
+  <div class="grid">
+    <div class="card"><p><b>الصور:</b> أطباق عربية حقيقية من أعلى بإضاءة طبيعية، وأخصائيون حقيقيون في عملهم. لا صور جاهزة مبتسمة ولا أكل غربي كرمز للصحة.</p></div>
+    <div class="card"><p><b>الأيقونات:</b> خطية بسُمك واحد (المستعملة الآن)، بزوايا مستديرة. الإيموجي داخل تطبيق العميل فقط.</p></div>
+    <div class="card"><p><b>الحركة:</b> هادئة وسريعة (200–300ms). الاحتفال (زيزو والحلقات) في تطبيق العميل فقط.</p></div>
+  </div>
+</section>
+
+<section>
+  <h2>دليل النبرة والنصوص <span class="en">Voice &amp; tone</span></h2>
+  <div class="do">
+    <div class="card ok"><h3>نفعل</h3><ul class="clean"><li>جمل قصيرة تبدأ بالفعل: «ولّد الخطة»</li><li>أرقام حقيقية ومرجع عند الحاجة</li><li>فصحى بسيطة في المنتج، ولهجة البلد في السوشيال</li><li>المصطلح الإنجليزي بين قوسين عند الحاجة: الكارب (Carbs)</li></ul></div>
+    <div class="card no"><h3>نتجنب</h3><ul class="clean"><li>وعود علاجية: «اخسر 10 كيلو في أسبوع»</li><li>مبالغات: «الأفضل في العالم»، «ثورة»</li><li>لوم العميل أو التخويف</li><li>إيموجي في نسخة Pro</li></ul></div>
+  </div>
+  <h3 style="margin-top:22px">أمثلة عربي / English</h3>
+  <div class="grid" style="grid-template-columns:minmax(0,1fr)">
+    <div class="card pair"><div><b>إعلان (أخصائي):</b> الخطة اللي بتاخد ساعة على الإكسل، خلّصها في 3 دقائق. بأكل عملائك الحقيقي.</div><div class="en">The plan that takes an hour in Excel, done in 3 minutes. With your clients' real food.</div></div>
+    <div class="card pair"><div><b>صفحة الهبوط:</b> زِنها صح. خطط حصص وجرامات دقيقة، ومتابعة عملائك، واشتراكاتهم، في مكان واحد.</div><div class="en">Weigh it right. Accurate portion and gram plans, client follow-up and subscriptions, in one place.</div></div>
+    <div class="card pair"><div><b>داخل Pro (نجاح):</b> تم توليد الخطة: 2311 سعرة، 7 أيام، بلا خانات ناقصة.</div><div class="en">Plan ready: 2,311 kcal, 7 days, no gaps.</div></div>
+    <div class="card pair"><div><b>داخل Pro (خطأ):</b> الوزن ناقص. أضفه لنحسب السعرات.</div><div class="en">Weight is missing. Add it to calculate calories.</div></div>
+    <div class="card pair"><div><b>تطبيق العميل (زيزو):</b> يومين ملتزم ورا بعض! كمّل كده 💪</div><div class="en">Two days on track in a row! Keep going 💪</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>التطبيق على المنتج <span class="en">Rollout</span></h2>
+  <p class="lead">بعد موافقتك على الاتجاه، يُنفَّذ على مراحل صغيرة، كل مرحلة بلقطات قبل النشر:</p>
+  <div class="steps">
+    <div class="card"><div><h3>الشعار والأيقونات</h3><p>تصميم الشعار خارجياً (موجّه التصميم مرفق منفصلاً)، ثم أيقونة التطبيق والفافيكون بنسخ Pro والعميل.</p></div></div>
+    <div class="card"><div><h3>ألوان وخطوط «زنها Pro»</h3><p>بترولي أعمق للترويسة والعناوين، وAlexandria للعناوين، بدون تغيير التخطيط أو الوظائف.</p></div></div>
+    <div class="card"><div><h3>نصوص الواجهة</h3><p>مراجعة الأزرار والرسائل الأساسية بدليل النبرة، بالعربية وما يلزم بالإنجليزية.</p></div></div>
+    <div class="card"><div><h3>شاشة الدخول وصفحة الهبوط</h3><p>الشعار والواصف والوعد «زِنها صح، في دقائق».</p></div></div>
+    <div class="card"><div><h3>تطبيق العميل</h3><p>اللمسة البرتقالية وزيزو، مع الحفاظ على ما يعرفه العملاء.</p></div></div>
+  </div>
+  <p class="note">نموذج تسعير Pro لم يتحدد بعد، والكونسبت مرن لأي نموذج. تطبيق العميل يبدأ بفترة تجريبية مجانية ثم فريميوم.</p>
+</section>
+
+<section>
+  <h2>المطلوب منك للمرحلة التالية <span class="en">Decisions</span></h2>
+  <div class="grid">
+    <div class="card"><h3>1. الاسم</h3><p>«زنها Pro» مع الواصف، أم بديل من الجدول؟</p></div>
+        <div class="card"><h3>2. الشعار اللفظي</h3><p>«زِنها صح، في دقائق.» أم صياغة أخرى؟</p></div>
+  </div>
+</section>
+
+</main>
+
+</body>
+</html>
