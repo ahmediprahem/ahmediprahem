@@ -317,6 +317,7 @@ E.ctx = function (client, D) {
       if (bud === 1) s -= (m.cost - 1) * 1.2; else if (bud === 2 && m.cost >= 3) s -= 1.5; else if (bud === 3 && m.cost >= 3) s += 0.3;
       if (life === 'quick') s -= m.prep * 0.8; else if (life === 'travel') s -= m.prep * 1.5; else if (life === 'home' && t === 'L' && m.prep === 2) s += 0.5;
       if (cx.tierOf(f.n) === 2) s -= 1.5;
+      if (f.rot) s -= 4 * E.rotGap(st, f);      // 1.49 مجموعة تدوير أسبوعية: الأقل استعمالاً من المجموعة أولاً
       return s;
     };
     var eggLeft = function () { return (st.eggMax || 1e9) - ((st.eggDay || {})[d] || 0); };
@@ -662,10 +663,10 @@ E.ctx = function (client, D) {
   E.applyFoodSettings = function (D, baseFoods, S) {        // يبني D.foods من الأصل + تعديلات (حذف منطقي، تعديل كمية، أصناف مضافة) — تُطبَّق التعديلات والحذف على المضاف أيضاً
     S = S || {}; var over = S.over || {}, del = S.deleted || [], foods = baseFoods.map(function (f) { var c = Object.assign({}, f); c.mac = f.mac.slice(); c.m = f.m.slice(); return c; });
     (S.custom || []).forEach(function (c, i) {
-      var X = D.EX[c.g]; foods.push({ n: c.n, g: c.g, us: c.us, up: c.up || c.us, upe: +c.upe, gpe: +c.gpe || 0, units: +c.upe, exv: 1, mac: [X[0], X[1], X[2], X[3]], cooked: '', m: c.m.slice(), veg: c.veg ? 1 : 0, vegan: c.vegan ? 1 : 0, on: 1, gi: null, o: 1 + i * 0.001, custom: true });
+      var X = D.EX[c.g]; foods.push({ n: c.n, g: c.g, us: c.us, up: c.up || c.us, upe: +c.upe, gpe: +c.gpe || 0, units: +c.upe, exv: 1, mac: [X[0], X[1], X[2], X[3]], cooked: '', m: c.m.slice(), veg: c.veg ? 1 : 0, vegan: c.vegan ? 1 : 0, on: 1, gi: null, o: 1 + i * 0.001, custom: true, rot: c.rot ? String(c.rot).slice(0, 40) : undefined });
     });
     foods.forEach(function (f) {
-      var o = over[f.n]; if (o) { ['upe', 'us', 'up', 'veg', 'vegan', 'gpe'].forEach(function (k) { if (o[k] !== undefined) f[k] = o[k]; }); if (o.m) f.m = o.m.slice(); if (f.custom && o.upe !== undefined) f.units = +o.upe; f.edited = true; }
+      var o = over[f.n]; if (o) { ['upe', 'us', 'up', 'veg', 'vegan', 'gpe'].forEach(function (k) { if (o[k] !== undefined) f[k] = o[k]; }); if (o.m) f.m = o.m.slice(); if (f.custom && o.upe !== undefined) f.units = +o.upe; if (o.rot) f.rot = String(o.rot).slice(0, 40); if (Object.keys(o).some(function (k) { return k !== 'rot'; })) f.edited = true; }
       if (del.indexOf(f.n) >= 0) { f.on = 0; f.deleted = true; }
     });
     D.foods = foods; D._by = null; return foods;
@@ -1013,6 +1014,45 @@ E.ctx = function (client, D) {
       res.left += Math.abs(need);
     });
     return res;
+  };
+  // ---- 1.49 مجموعات التدوير الأسبوعي (قرار المالك): أصناف يعلّمها الأخصائي باسم مجموعة؛ المحرك يتنقل بينها ولا يكرر صنفاً قبل أن تمر البقية
+  E.rotGap = function (st, f) {
+    var D = st.D, cx = st.cx, R = st._rot; if (!R) { R = st._rot = {}; D.foods.forEach(function (x) { if (x.rot && x.on && cx.ok(x) && !cx.avoid[x.n]) (R[x.rot] = R[x.rot] || []).push(x.n); }); }
+    var L = R[f.rot]; if (!L || L.length < 2) return 0; var mn = 1e9; L.forEach(function (n) { mn = Math.min(mn, st.useCount[n] || 0); }); return Math.max(0, (st.useCount[f.n] || 0) - mn);
+  };
+  // ---- 1.49 تبادل البروتين المرن (قرار المالك): البقول وكل اللحوم والأجبان والبيض مجمع واحد؛ التبديل بين أنواعه حر،
+  // والفرق في الدهون والكربوهيدرات (من جدول البدائل D.EX: كل 5 جم دهون = حصة دهون، كل 15 جم كارب = حصة نشويات) يُعوَّض في الوجبة نفسها ثم باقي اليوم
+  E.FLEXP = [1, 2, 3, 4, 5];
+  E.flexDelta = function (og, ng, e, D) {
+    var X = D.EX, r = function (v) { return Math.round(v * 2) / 2; };
+    return { fat: r((X[ng][2] - X[og][2]) * e / 5), carb: r((X[ng][0] - X[og][0]) * e / 15), kcal: Math.round((X[ng][3] - X[og][3]) * e) };
+  };
+  E.flexNote = function (dl) {
+    var p = []; if (dl.fat > 0) p.push('يُنقص ' + dl.fat + ' حصة دهون'); else if (dl.fat < 0) p.push('يزيد ' + (-dl.fat) + ' حصة دهون');
+    if (dl.carb > 0) p.push('يُنقص ' + dl.carb + ' حصة نشويات'); else if (dl.carb < 0) p.push('يزيد ' + (-dl.carb) + ' حصة نشويات');
+    return p.length ? p.join(' و') : 'بلا تعويض';
+  };
+  E.flexAlts = function (line, slotType, plan, D, n) {
+    if (E.FLEXP.indexOf(line.g) < 0) return []; var cx = E.ctx(plan.client, D), tIdx = { B: 0, L: 1, D: 2, S: 3 }[slotType], same = E.POOLS[line.g] || [line.g], out = [], perG = {};
+    D.foods.filter(function (f) { return E.FLEXP.indexOf(f.g) >= 0 && same.indexOf(f.g) < 0 && f.on && f.m[tIdx] && cx.ok(f) && !cx.avoid[f.n] && f.n !== line.name && !E.fmeta(f).x; })
+      .sort(function (a, b) { return (cx.love[b.n] ? 1 : 0) - (cx.love[a.n] ? 1 : 0) || a.o - b.o; })
+      .forEach(function (f) { if (out.length >= (n || 12) || (perG[f.g] || 0) >= 3) return; perG[f.g] = (perG[f.g] || 0) + 1; var dl = E.flexDelta(line.g, f.g, line.e, D);
+        out.push({ name: f.n, g: f.g, flex: 1, text: E.lineText(f, line.e, plan.client.alias), tier: cx.tierOf(f.n), dl: dl, note: E.flexNote(dl) }); });
+    return out;
+  };
+  E.flexComp = function (plan, d, si, li, dl, D) {            // يعوّض بعد التبديل: الوجبة نفسها أولاً ثم باقي اليوم، بحدود كل وجبة؛ ما لا يُعوَّض يُعاد في left
+    var day = plan.days[d], by = E.byName(D), al = plan.client && plan.client.alias, res = { ch: [], left: { fat: 0, carb: 0 } }, me = day.slots[si].lines[li];
+    var order = [si].concat(day.slots.map(function (x, k) { return k; }).filter(function (k) { return k !== si; }));
+    [['fat', [11]], ['carb', [0, 12, 10]]].forEach(function (pr) {
+      var need = dl[pr[0]]; if (!need) return;
+      pr[1].forEach(function (g) { order.forEach(function (k) { var s = day.slots[k]; s.lines.forEach(function (l, j) {
+        if (Math.abs(need) < 0.5 || l.missing || l.g !== g || l === me || !by[l.name]) return;
+        var ch = need > 0 ? -Math.min(need, l.e) : Math.min(-need, Math.max(0, E.lim(by[l.name], s.type, D).max - l.e)); ch = Math.round(ch * 2) / 2; if (!ch) return;
+        l.e = Math.round((l.e + ch) * 2) / 2; l.manual = true; l.text = E.lineText(by[l.name], l.e, al); need += ch; s.edited = true; res.ch.push({ type: s.type, g: g, name: l.name, ch: ch });
+      }); s.lines = s.lines.filter(function (l) { return l.missing || l.e > 0 || l === me; }); }); });
+      res.left[pr[0]] = need;
+    });
+    E.syncCounts(day); E.dayStats(day, plan.targets, D); return res;
   };
   // البدائل بأنواعها: 1 من المجموعة نفسها بالحصص نفسها • 2 من مجموعة قريبة بكمية تعادل الماكرو الأساسي • 3 بالسعرات نفسها (±10%) — مع فرق السعرات والماكروز وسبب الترشيح
   E.SUBT_AR = { 1: 'المجموعة نفسها', 2: 'مجموعة قريبة', 3: 'السعرات نفسها' };

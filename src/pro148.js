@@ -150,3 +150,39 @@ fdLoad = (function (f) { return function () { return f.apply(this, arguments).th
 main0 = (function (f) { return function () { if (S.view === 'me') { $('main').innerHTML = meProfile(); if (typeof fdHydrate === 'function') fdHydrate(); return; } return f.apply(this, arguments); }; })(main0);
 render = (function (f) { return function () { var r = f.apply(this, arguments); hqBadges(); if (HQ.open) { HQ.open = ''; hqRender(); } return r; }; })(render);      // أي تنقّل يغلق القوائم المنبثقة
 document.documentElement.classList.add('dtoff');      // المساعد مخفي مؤقتاً (طلب المالك 2026-11-23) — احذف هذا السطر لإعادته
+
+// ================= 1.49 تبادل البروتين المرن في جدول الخطة (قرار المالك): قائمة «بديل» تضيف قسم «تبادل بروتين مرن» (بقول ولحوم بكل درجات الدهون والأجبان والبيض)
+// مع معاينة التعويض؛ الاختيار يبدّل الصنف ثم يعوّض الدهون والنشويات في الوجبة نفسها ثم باقي اليوم، مع شريط «تراجع».
+var FLX = { undo: null, t: 0 };
+A.alt = (function (f) { return function (v, el) {
+  f.apply(this, arguments); var c = cur(); if (!c || !c.plan) return; var d = +el.dataset.d, s = +el.dataset.s, l = +el.dataset.l, sl = c.plan.days[d].slots[s], line = sl.lines[l], box = $('#alt_' + d + '_' + s + '_' + l), sel = box && box.querySelector('select');
+  var fx = E.flexAlts(line, sl.type, c.plan, D, 12); if (!sel || !fx.length) return; box._flex = fx;
+  sel.insertAdjacentHTML('beforeend', '<optgroup label="تبادل بروتين مرن (يعوّض باقي اليوم)">' + fx.map(function (a, i) { return '<option value="f' + i + '">' + esc(a.text) + ' — ' + esc(a.note) + '</option>'; }).join('') + '</optgroup>');
+}; })(A.alt);
+function flxBar(msg) {
+  var b = document.getElementById('flxbar'); if (!b) { b = document.createElement('div'); b.id = 'flxbar'; b.setAttribute('role', 'status'); document.body.appendChild(b); }
+  b.innerHTML = '<span>' + esc(msg) + '</span><button class="sec sm" data-a="flexUndo">تراجع</button>'; b.className = 'on'; clearTimeout(FLX.t); FLX.t = setTimeout(function () { b.className = ''; }, 9000);
+}
+document.addEventListener('change', function (e) {
+  var t = e.target; if (!t || !t.dataset || !t.dataset.alt || String(t.value).charAt(0) !== 'f') return; e.stopImmediatePropagation();
+  var c = cur(), q = t.dataset.alt.split(',').map(Number), box = t.parentNode, a = (box._flex || [])[+t.value.slice(1)]; if (!c || !a) return;
+  var day = c.plan.days[q[0]], line = day.slots[q[1]].lines[q[2]], og = line.g; FLX.undo = { code: c.code, d: q[0], day: JSON.stringify(day) };
+  E.swap(line, a, D, c.alias); var r = E.flexComp(c.plan, q[0], q[1], q[2], E.flexDelta(og, a.g, line.e, D), D);
+  var nm = { 11: 'دهون', 0: 'نشويات', 12: 'كربوهيدرات أخرى', 10: 'فاكهة' }, agg = {}; r.ch.forEach(function (x) { var k = nm[x.g]; agg[k] = (agg[k] || 0) + x.ch; });
+  var parts = Object.keys(agg).map(function (k) { return (agg[k] < 0 ? 'قلّلنا ' + (-agg[k]) : 'زدنا ' + agg[k]) + ' حصة ' + k; }), left = r.left.fat || r.left.carb;
+  save(); main(); flxBar('تم التبديل إلى ' + a.name + (parts.length ? '. ' + parts.join('، ') + ' في اليوم' : '') + (left ? '. تعذّر تعويض ' + (r.left.fat ? Math.abs(r.left.fat) + ' حصة دهون ' : '') + (r.left.carb ? Math.abs(r.left.carb) + ' حصة نشويات' : '') + ' (لا حصص كافية)' : '') + '.');
+}, true);
+A.flexUndo = function () { var u = FLX.undo, c = cur(); if (!u || !c || c.code !== u.code) return; c.plan.days[u.d] = JSON.parse(u.day); FLX.undo = null; save(); main(); var b = document.getElementById('flxbar'); if (b) b.className = ''; toast('تراجعنا عن التبديل'); };
+
+// ================= 1.49 مجموعات التدوير الأسبوعي في «الحصص والبدائل»: حقل لكل صنف؛ الأصناف التي تحمل الاسم نفسه يتنقل المحرك بينها خلال الأسبوع
+function rotNames() { var o = {}; D.foods.forEach(function (f) { if (f.rot) o[f.rot] = (o[f.rot] || 0) + 1; }); return o; }
+foodRows = (function (f) { return function (fd) {
+  var h = f.apply(this, arguments), fn = encodeURIComponent(fd.n), inp = '<label class="rotl" title="أصناف تحمل اسم المجموعة نفسه: يتنقل المحرك بينها أسبوعياً ولا يكرر صنفاً قبل أن تمر البقية">🔁 <input data-fe="' + fn + '|rot" list="rotlist" maxlength="40" placeholder="مجموعة تدوير" value="' + esc(fd.rot || '') + '" aria-label="مجموعة تدوير أسبوعي لـ' + esc(fd.n) + '"></label>';
+  return h.replace('</small></td>', '</small>' + inp + '</td>');
+}; })(foodRows);
+portionsPage = (function (f) { return function () {
+  var R = rotNames(), keys = Object.keys(R);
+  return '<div class="ucard rotinfo"><h3>🔁 مجموعات التدوير الأسبوعي</h3><p class="small">اكتب اسم مجموعة (مثل «أسماك» أو «بقول الغداء») في حقل 🔁 لكل صنف تريد التنويع بينه. المحرك يتنقل بين أصناف المجموعة طوال الأسبوع ولا يكرر صنفاً قبل أن تمر بقية المجموعة.</p>'
+    + (keys.length ? '<p class="rotchips">' + keys.map(function (k) { return '<span class="chip">' + esc(k) + ' <b>' + R[k] + '</b></span>'; }).join(' ') + '</p>' : '<p class="small">لا مجموعات بعد.</p>')
+    + '<datalist id="rotlist">' + keys.concat(['أسماك', 'بقول', 'لحوم حمراء', 'دواجن', 'أجبان', 'فواكه', 'خضار ورقية']).filter(function (k, i, a) { return a.indexOf(k) === i; }).map(function (k) { return '<option value="' + esc(k) + '">'; }).join('') + '</datalist></div>' + f.apply(this, arguments);
+}; })(portionsPage);

@@ -111,3 +111,9 @@ html[data-dw="dark"]:not(#mxz) #hd .hqb:hover,html[data-tone="dark"]:not(#mxz) #
 .fbmain{display:flex;flex-direction:column}.fbside .fbbox,.fbmain>*{width:100%;box-sizing:border-box}
 /* المساعد مخفي مؤقتاً بطلب المالك (2026-11-23) حتى تعديله — احذف هذه القاعدة لإعادته */
 html.dtoff #dtfab,html.dtoff #hd .hdast,html.dtoff .dtpanel,html.dtoff #dtp,html.dtoff [data-a="dtToggle"]{display:none!important}
+/* 1.49 شريط نتيجة التبادل المرن */
+#flxbar{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 88px);transform:translate(-50%,20px);opacity:0;pointer-events:none;z-index:70;display:flex;align-items:center;gap:12px;max-width:min(640px,calc(100vw - 32px));padding:12px 14px;border-radius:14px;background:#0E3A40;color:#EAF7F3;font-size:14px;line-height:1.6;box-shadow:0 14px 40px -12px rgba(0,0,0,.45);transition:opacity .2s,transform .2s}
+#flxbar.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+html:not(#mxz):not(#mxy) #flxbar button{background:#fff!important;color:#0E3A40!important;border:0!important;box-shadow:none!important;white-space:nowrap;flex:none}
+.rotl{display:inline-flex;align-items:center;gap:4px;margin-top:4px;font-size:12.5px}.rotl input{width:140px;padding:3px 8px;font-size:12.5px;min-height:0}
+.rotinfo .rotchips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 0}.rotinfo .chip{display:inline-flex;gap:6px;align-items:center;padding:3px 10px;border-radius:999px;background:var(--zh-tint,#E7F7F1);font-size:13px}
