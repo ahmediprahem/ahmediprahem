@@ -70,6 +70,34 @@ function zhBackup() {                                               // التح�
   return '<div class="zhbk ok" role="status"><span class="zhbi">' + IC('save') + '</span><div><b>' + (vt ? 'النسخ الاحتياطي التلقائي مفعّل' : d >= 0 ? 'آخر نسخة احتياطية منذ ' + (d ? d + (d === 1 ? ' يوم' : ' أيام') : 'اليوم') : 'النسخ الاحتياطي') + '</b><small>بيانات ' + S.clients.length + ' عميل</small></div><button class="sec sm" data-a="export">نسخة احتياطية الآن</button></div>';
 }
 function zhWarm(n, fu) { var a = n.appt, m = n.chat; return a || m ? 'عندك ' + (a ? a + (a === 1 ? ' موعد' : ' مواعيد') : '') + (a && m ? ' و' : '') + (m ? m + (m === 1 ? ' رسالة' : ' رسائل') : '') + ' اليوم. يوم موفق 🌿' : 'يوم هادئ… فرصة لمراجعة خطط عملائك 🌿'; }
+// ---- 1.47 «نبض اليوم» (مستوحى من Insights في Apple Health 2026 ولوحة Healthie وحلقات Apple Fitness): جملة واحدة تلخّص اليوم،
+// و«التالي الآن» بإجراء واحد، وحلقتان لصحة العيادة (تغطية الخطط، المتابعات في موعدها) ومواعيد اليوم المنجزة. الأرقام من البيانات نفسها بلا تقدير
+function zhRing(v, label, sub, tone) {
+  var r = 26, C = 2 * Math.PI * r, f = v == null ? 0 : Math.max(0, Math.min(1, v)), pct = v == null ? '—' : Math.round(f * 100) + '٪';
+  return '<div class="zhring t-' + tone + '"><svg viewBox="0 0 64 64" width="64" height="64" aria-hidden="true"><circle class="rb" cx="32" cy="32" r="' + r + '"/>' + (f > 0 ? '<circle class="rf" cx="32" cy="32" r="' + r + '" stroke-dasharray="' + (C * f).toFixed(1) + ' ' + C.toFixed(1) + '" transform="rotate(-90 32 32)"/>' : '') + '</svg>'
+    + '<span class="zrt"><b>' + pct + '</b><small>' + label + '</small><em>' + sub + '</em></span></div>';
+}
+function zhNext(cs, n) {
+  var now = new Date(), hm = ('0' + now.getHours()).slice(-2) + ':' + ('0' + now.getMinutes()).slice(-2), ap = zhTodayAppts(), nx = ap.filter(function (x) { return !x.a.t || x.a.t >= hm; })[0];
+  if (nx) return { k: 'calendar', t: 'التالي: ' + (nx.a.t ? nx.a.t + ' — ' : '') + (nx.a.type || 'متابعة'), d: nx.c.name || nx.c.code, a: 'wkOpen', v: nx.c.code, b: 'افتح الملف' };
+  if (n.req) return { k: 'inbox', t: n.req === 1 ? 'طلب تسجيل جديد من «زنها»' : n.req + ' طلبات تسجيل جديدة', d: 'راجعها واعتمد العميل', a: 'hxv', v: '', b: 'راجع الطلبات' };
+  if (n.chat) return { k: 'chat', t: n.chat === 1 ? 'رسالة لم تُقرأ' : n.chat + ' رسائل لم تُقرأ', d: 'من عملائك في «زنها»', a: 'zchat', v: '', b: 'افتح المحادثات' };
+  var np = cs.filter(function (c) { return !planOf(c).has; })[0];
+  if (np) return { k: 'sparkles', t: 'عميل بلا خطة', d: np.name || np.code, a: 'pick', v: np.code, b: 'ابنِ خطته' };
+  return null;
+}
+function zhPulse(cs, withPlan, fol, n, fu) {
+  var parts = [], t = wkDay(), done = 0, tot = 0;
+  if (n.appt) parts.push(n.appt + (n.appt === 1 ? ' موعد' : ' مواعيد')); if (n.chat) parts.push(n.chat + (n.chat === 1 ? ' رسالة' : ' رسائل') + ' لم تُقرأ'); if (n.req) parts.push(n.req + (n.req === 1 ? ' طلب تسجيل' : ' طلبات تسجيل'));
+  if (fol) parts.push(fol + (fol === 1 ? ' متابعة مستحقة' : ' متابعات مستحقة')); if (n.subs) parts.push(n.subs + (n.subs === 1 ? ' اشتراك للتجديد' : ' اشتراكات للتجديد'));
+  S.clients.forEach(function (c) { (c.appts || []).forEach(function (a) { if (a.d === t) { tot++; if (a.st) done++; } }); });
+  var nx = zhNext(cs, n), N = cs.length || 1;
+  return '<section class="zhpulse" aria-label="نبض اليوم"><div class="zhins"><span class="zhey">ملخص يومك</span><p class="zhsent">' + (parts.length ? 'ينتظرك اليوم: ' + parts.join('، ') + '.' : 'لا شيء ينتظرك الآن؛ وقت مناسب لمراجعة خطط عملائك.') + '</p>'
+    + (nx ? '<button class="zhnext" data-a="' + nx.a + '"' + (nx.v ? ' data-v="' + esc(nx.v) + '"' : '') + '><span class="zni">' + IC(nx.k) + '</span><span class="znt"><b>' + esc(nx.t) + '</b><small>' + esc(nx.d) + '</small></span><span class="znb">' + nx.b + ' ‹</span></button>' : '') + '</div>'
+    + '<div class="zhrings" role="group" aria-label="صحة العيادة">' + zhRing(cs.length ? withPlan / N : null, 'تغطية الخطط', withPlan + ' من ' + cs.length + ' عميل', 'mint')
+    + zhRing(cs.length ? (cs.length - fol) / N : null, 'المتابعات في موعدها', fol ? fol + ' متأخرة' : 'لا متأخرات', 'sky')
+    + zhRing(tot ? done / tot : null, 'مواعيد اليوم', tot ? done + ' من ' + tot + ' أُنجزت' : 'لا مواعيد اليوم', 'warn') + '</div></section>';
+}
 function homeGlass() {
   var cs = S.clients.slice().sort(function (a, b) { return (b.updated || b.created) - (a.updated || a.created); }), withPlan = zhActivePlans(), ath = cs.filter(function (c) { return c.kind === 'athlete'; }).length;
   var n = navCounts(), fol = wkItems().filter(function (i) { return /:follow$/.test(i.key); }).length, fu = zhFollowToday(), name = zhName();
@@ -83,9 +111,9 @@ function homeGlass() {
     + (rq.length ? '<section class="zhcard"><div class="zhh"><h3>' + IC('inbox') + ' طلبات «زنها» الجديدة <em class="hxnb">' + rq.length + '</em></h3><button class="link" data-a="hxv">راجع الطلبات</button></div><ul class="zhap">' + rq.slice(0, 4).map(function (q) { var it = q.intake || {}; return '<li><button data-a="hxv"><time>جديد</time><span><b>' + esc(it.name || q.label || 'طلب تسجيل') + '</b><small>تسجيل جديد من رابط الدعوة</small></span></button></li>'; }).join('') + '</ul></section>' : '')
     + zhBackup() + '</aside>';
   return '<div class="home ghome today zh">'
-    + '<div class="tdh zhw"><div class="zhwt"><h2>أهلاً' + (name ? '، ' + esc(name) : '') + '</h2><p class="tdhi"><span class="zhd">' + esc(dt) + '</span> • ' + zhWarm(n, fu) + '</p></div>'
+    + '<div class="tdh zhw"><div class="zhwt"><h2>أهلاً' + (name ? '، ' + esc(name) : '') + '</h2><p class="tdhi"><span class="zhd">' + esc(dt) + '</span>' + (cs.length || n.req ? '' : ' • ' + zhWarm(n, fu)) + '</p></div>'
     + '<div class="zhqa">' + newMenu() + '<button class="sec" data-a="genTab">' + IC('sparkles') + '<span>توليد خطة</span></button><button class="sec" data-a="appts">' + IC('calendar') + '<span>موعد</span></button></div>' + zz + '</div>'
-    + (cs.length || n.req ? '<div class="tdks zhst" role="group" aria-label="ملخص العمل">' + tdStat('clients', 'users', cs.length, 'إجمالي العملاء', '', 1) + tdStat('appts', 'repeat', fu, 'متابعات اليوم', '', 1) + tdStat('clients', 'file', withPlan, 'الخطط النشطة', '', 1) + tdStat('zchat', 'message', n.chat, 'رسائل غير مقروءة', 'r')
+    + (cs.length || n.req ? zhPulse(cs, withPlan, fol, n, fu) + '<div class="tdks zhst zhchips" role="group" aria-label="ملخص العمل">' + tdStat('clients', 'users', cs.length, 'إجمالي العملاء', '', 1) + tdStat('appts', 'repeat', fu, 'متابعات اليوم', '', 1) + tdStat('clients', 'file', withPlan, 'الخطط النشطة', '', 1) + tdStat('zchat', 'message', n.chat, 'رسائل غير مقروءة', 'r')
       + tdStat('hxv', 'inbox', n.req, 'طلبات تسجيل جديدة', 'a') + tdStat('appts', 'calendar', n.appt, 'مواعيد اليوم') + tdStat('subs', 'card', n.subs, 'اشتراكات للتجديد', 'a') + tdStat('tdFollow', 'repeat', fol, 'متابعات مستحقة') + '</div>' : '')
     + (cs.length ? '<div class="zhcols"><div class="zhmain">' + wkToday()
       + '<section class="zhcard zhrec"><div class="hxtop tdrh zhh"><h3>' + IC('users') + ' آخر العملاء</h3><button class="link" data-a="clients">كل العملاء (' + cs.length + ')</button></div><div class="recent">' + recent + '</div><p class="small tdsum">' + cs.length + ' عميل • ' + withPlan + ' له خطة • ' + ath + ' بنظام الجرامات</p></section></div>' + ctx + '</div>'

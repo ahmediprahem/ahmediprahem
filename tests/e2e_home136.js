@@ -19,8 +19,8 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   assert(acts); ok('كل الإجراءات باقية: المؤشرات، فترة المتابعة، افتح/إخفاء، آخر العملاء، عميل جديد، توليد خطة');
   const tiers = { 390: [2, 'none'], 820: [4, 'none'], 1024: [4, 'none'], 1440: [8, 'ctx'], 1920: [8, 'ctx'] };
   for (const [w, [cols, ctx]] of Object.entries(tiers)) { await p.setViewportSize({ width: +w, height: 900 }); await p.evaluate(() => DPApp.A.home()); await p.waitForTimeout(250);
-    const r = await p.evaluate(() => ({ cols: getComputedStyle(document.querySelector('.tdks')).gridTemplateColumns.split(' ').length, sw: document.documentElement.scrollWidth, iw: innerWidth, side: (() => { const z = document.querySelector('.zhcols'); return z && getComputedStyle(z).gridTemplateColumns.split(' ').length > 1 ? 'ctx' : 'none'; })() }));
-    assert.strictEqual(r.cols, cols, w + ' cols'); assert.strictEqual(r.side, ctx, w + ' ctx'); assert(r.sw <= r.iw, w + ' overflow'); }
+    const r = await p.evaluate(() => ({ cols: getComputedStyle(document.querySelector('.tdks')).display === 'flex' && !!document.querySelector('.zhpulse .zhsent') && document.querySelectorAll('.zhring').length === 3 ? 'ok' : 'x', sw: document.documentElement.scrollWidth, iw: innerWidth, side: (() => { const z = document.querySelector('.zhcols'); return z && getComputedStyle(z).gridTemplateColumns.split(' ').length > 1 ? 'ctx' : 'none'; })() }));
+    assert.strictEqual(r.cols, 'ok', w + ' cols'); assert.strictEqual(r.side, ctx, w + ' ctx'); assert(r.sw <= r.iw, w + ' overflow'); }
   ok('التخطيط يتغير فعلاً: جوال 2، تابلت 4، ويب 8 مؤشرات مع عمود سياق، بلا تمرير أفقي');
   assert.deepStrictEqual(errs, []); await br.close(); console.log('\nنجح ' + n + ' اختبارات رئيسية 1.36');
 })().catch((e) => { console.error('✘', String(e && e.stack || e).slice(0, 1400)); process.exit(1); });

@@ -130,3 +130,30 @@ html:not([data-tone="light"]){--zh-bg:#0C171D;--zh-card:rgba(255,255,255,.05);--
 .ghome .zhap button:hover{background:var(--zh-bg)!important}
 @container (max-width:420px){ .ghome .wkit{grid-template-columns:auto minmax(0,1fr) auto auto} .ghome .wkit .zbdg{grid-column:2;grid-row:2;justify-self:start;margin-top:-2px} .ghome .wkit .wkic{grid-row:1/3} .ghome .wkit .wkop,.ghome .wkit .wkx{grid-row:1/3} }
 @container (min-width:840px) and (max-width:1009px){ .ghome .zhctx{grid-template-columns:1fr 1fr!important} .ghome .zhctx > *{grid-column:auto!important} }
+
+/* ---- 1.47 «نبض اليوم»: ملخص بجملة + «التالي الآن» + حلقات العيادة (زجاج مقتصد: سطح واحد بارز، والباقي مسطّح) */
+.ghome .zhpulse{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:14px;align-items:stretch}
+.ghome .zhins{position:relative;overflow:hidden;display:grid;gap:12px;align-content:start;padding:20px 22px;border-radius:calc(var(--zh-r) + 6px);color:#fff;background:linear-gradient(135deg,#0F6F66 0%,#13897A 55%,#2FB295 100%);box-shadow:0 10px 30px -14px rgba(15,111,102,.55)}
+.ghome .zhins::after{content:"";position:absolute;inset:auto -60px -80px auto;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.22),rgba(255,255,255,0) 70%);pointer-events:none}
+.ghome .zhey{font-size:12.5px;font-weight:600;letter-spacing:.02em;opacity:.85}
+.ghome .zhsent{margin:0;font-size:19px;line-height:1.55;font-weight:600;text-wrap:balance;max-width:52ch;color:#fff}
+.ghome .zhnext{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);-webkit-backdrop-filter:blur(14px) saturate(1.4);backdrop-filter:blur(14px) saturate(1.4);transition:background .2s,transform .2s}
+.ghome .zhnext:hover{background:rgba(255,255,255,.24);transform:translateY(-1px)}.ghome .zhnext:focus-visible{outline:2.5px solid #fff;outline-offset:2px}
+.ghome .zni{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:#fff;color:#0F6F66;flex:none}.ghome .zni svg{width:20px;height:20px}
+.ghome .znt{display:grid;min-width:0;flex:1}.ghome .znt b{font-size:15px;color:#fff}.ghome .znt small{font-size:12.5px;color:rgba(255,255,255,.85);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ghome .znb{font-size:13px;font-weight:700;white-space:nowrap;color:#fff}
+.ghome .zhrings{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:16px 12px;border-radius:calc(var(--zh-r) + 6px);background:var(--zh-card);border:1px solid var(--zh-line,#E6ECEA)}
+.ghome .zhring{display:grid;justify-items:center;text-align:center;gap:6px}
+.ghome .zhring svg{overflow:visible}.ghome .zhring .rb{fill:none;stroke:var(--zh-line,#E6ECEA);stroke-width:7}.ghome .zhring .rf{fill:none;stroke-width:7;stroke-linecap:round;transition:stroke-dasharray .8s cubic-bezier(.2,.8,.2,1)}
+.ghome .zhring.t-mint .rf{stroke:var(--zh-mint)}.ghome .zhring.t-sky .rf{stroke:var(--zh-sky,#3D7FB0)}.ghome .zhring.t-warn .rf{stroke:var(--zh-warn)}
+.ghome .zrt{display:grid;gap:1px}.ghome .zrt b{font-size:18px;font-variant-numeric:tabular-nums;color:var(--zh-ink)}.ghome .zrt small{font-size:12.5px;font-weight:600;color:var(--zh-ink)}.ghome .zrt em{font-style:normal;font-size:11.5px;color:var(--zh-mut)}
+/* الشريط المضغوط: الصفر خافت، وما له قيمة بارز */
+.ghome .tdks.zhst.zhchips{display:flex!important;flex-wrap:wrap;gap:8px}
+.ghome .zhchips .tdk.zhs{display:inline-flex;align-items:center;gap:8px;min-height:0;padding:7px 12px;border-radius:999px!important}
+.ghome .zhchips .tdk.zhs .zhk{display:inline-flex;align-items:center;gap:6px}.ghome .zhchips .tdk.zhs .zhk svg{width:16px;height:16px}
+.ghome .zhchips .tdk.zhs b{font-size:15px!important;order:2}.ghome .zhchips .tdk.zhs.zero{opacity:.62}.ghome .zhchips .tdk.zhs.zero:hover{opacity:1}
+@media (max-width:900px){.ghome .zhpulse{grid-template-columns:minmax(0,1fr)}.ghome .zhsent{font-size:17px}}
+@media (prefers-reduced-motion:reduce){.ghome .zhring .rf,.ghome .zhnext{transition:none}}
+.ghome .zhchips .tdk.zhs{flex:none;width:auto!important;white-space:nowrap}
+@media (max-width:640px){.ghome .tdks.zhst.zhchips{flex-wrap:nowrap;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:4px;margin-inline:-2px}.ghome .zhchips .tdk.zhs{font-size:13px;padding:6px 11px}
+  .ghome .zhrings{padding:12px 6px;gap:4px}.ghome .zhring svg{width:52px;height:52px}.ghome .zrt b{font-size:16px}.ghome .zrt small{font-size:11.5px}.ghome .zrt em{font-size:10.5px}.ghome .zhins{padding:16px}.ghome .zhsent{font-size:16px}}
