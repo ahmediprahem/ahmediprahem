@@ -2540,7 +2540,7 @@ html:not(#mxz):not(#mxy) .dxsp{min-width:130px}
 .fbtabs button.on{color:var(--zh-mintd,#246F80);border-bottom-color:var(--zh-mint,#287E91)}
 .fbtabs button small{font-size:12.5px;opacity:.8}
 .fbcols{display:grid;grid-template-columns:minmax(0,360px) minmax(0,680px);justify-content:center;gap:16px;align-items:start}
-.fbcols aside{display:grid;gap:16px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 84px)}
+.fbcols .fbside{display:flex;flex-direction:column;gap:16px;min-width:0;position:sticky;top:calc(env(safe-area-inset-top,0px) + 84px)}
 .fbmain{display:grid;gap:16px;min-width:0}.fbmain .fdpost,.fbmain .fdcomp{margin:0}
 .fbabout{max-width:680px;margin:0 auto;width:100%}
 .fbbox{background:var(--zh-card,#fff);border-radius:14px;padding:16px;box-shadow:0 1px 2px rgba(23,45,67,.08);display:grid;gap:10px}
@@ -2554,7 +2554,7 @@ html:not(#mxz):not(#mxy) .dxsp{min-width:130px}
 .fbvgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
 .fbvt{all:unset;cursor:pointer;aspect-ratio:1;border-radius:10px;background:linear-gradient(160deg,#13897A,#0F4F57);color:#fff;display:grid;place-items:center;align-content:center;gap:4px;padding:6px;text-align:center;font-size:11.5px;overflow:hidden}
 .fbvt svg{width:22px;height:22px}.fbvt span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-@media (max-width:900px){.fbcols{grid-template-columns:minmax(0,1fr)}.fbcols aside{position:static}.fbhead{justify-content:center;text-align:center;padding:0 16px 12px;margin-top:-70px}.fbav{width:140px;height:140px}.fbname{min-width:0;flex-basis:100%;justify-items:center}.fbname h1{font-size:26px}.fbact{justify-content:center;width:100%}.fbtabs{padding:0 8px}.fbcvbtn span{display:none}}
+@media (max-width:900px){.fbcols{grid-template-columns:minmax(0,1fr)}.fbcols .fbside{position:static}.fbhead{justify-content:center;text-align:center;padding:0 16px 12px;margin-top:-70px}.fbav{width:140px;height:140px}.fbname{min-width:0;flex-basis:100%;justify-items:center}.fbname h1{font-size:26px}.fbact{justify-content:center;width:100%}.fbtabs{padding:0 8px}.fbcvbtn span{display:none}}
 @media (prefers-reduced-motion:reduce){.ghome .zscell,#hd .hqb{transition:none}}
 /* تثبيت الأنماط فوق قواعد الأزرار العامة في الثيمات (نفس أسلوب 1.42) */
 html:not(#mxz):not(#mxy) #hd .hqb{background:var(--zh-bg,#EEF2F1)!important;color:var(--zh-ink,#172D43)!important;border:0!important;box-shadow:none!important;padding:0!important;min-height:0!important;width:42px!important;height:42px!important;border-radius:50%!important}
@@ -2577,6 +2577,10 @@ html:not(#mxz):not(#mxy) .fbvt{border:0!important;box-shadow:none!important;colo
 html[data-dw="dark"]:not(#mxz) #hd .hqb,html[data-tone="dark"]:not(#mxz) #hd .hqb{background:rgba(255,255,255,.12)!important;color:#fff!important}
 html[data-dw="dark"]:not(#mxz) #hd .hqb:hover,html[data-tone="dark"]:not(#mxz) #hd .hqb:hover{background:rgba(255,255,255,.2)!important}
 @media (max-width:420px){html:not(#mxz):not(#mxy) #hd .hqb[data-a="hqBell"]{display:none!important}}
+
+.fbmain{display:flex;flex-direction:column}.fbside .fbbox,.fbmain>*{width:100%;box-sizing:border-box}
+/* المساعد مخفي مؤقتاً بطلب المالك (2026-11-23) حتى تعديله — احذف هذه القاعدة لإعادته */
+html.dtoff #dtfab,html.dtoff #hd .hdast,html.dtoff .dtpanel,html.dtoff #dtp,html.dtoff [data-a="dtToggle"]{display:none!important}
 </style></head>
 <body class="gating"><header id="hd"></header><div id="gate" style="display:flex"><div class="gcard" style="text-align:center"><div style="font-weight:700;color:#253464">حصة — جارٍ التحميل…</div></div></div><div id="app" style="display:none"><aside></aside><main></main></div>
 <noscript><div style="position:fixed;inset:0;background:#092061;color:#fff;padding:24px;text-align:center;font:16px Tahoma,Arial">هذا الملف يحتاج تفعيل JavaScript. افتحه مباشرة في Chrome أو Edge أو Safari (وليس من معاينة واتساب أو البريد).</div></noscript>
@@ -11384,7 +11388,7 @@ function meProfile() {
   var vidBox = '<section class="fbbox"><div class="fbbh"><h3>فيديوهات التدريب</h3><button class="link" data-a="meTab" data-v="videos">عرض الكل</button></div>' + (vids.length ? '<div class="fbvgrid">' + vids.slice(0, 6).map(function (x) { return '<button data-a="meTab" data-v="videos" class="fbvt">' + IC('film') + '<span>' + esc(x.title || 'فيديو') + '</span></button>'; }).join('') + '</div>' : '<p class="small">لا فيديوهات بعد.</p>') + '<button class="sec fbwide" data-a="meOpen" data-v="video">' + IC('plus') + ' فيديو تدريب جديد</button></section>';
   var compose = on ? (typeof fdComposer === 'function' ? fdComposer() : '') : '<div class="ucard fbbox"><h3>انشر لعملائك</h3><p class="small">اربط «زنها Pro» بالمحطة لتنشر منشورات وفيديوهات تدريب تصل عملاءك في «زنها» مع إشعار.</p><button data-a="fdSetup">ربط «زنها»</button></div>';
   var list = MEP.tab === 'videos' ? vids : posts, feed = (FD.err ? '<div class="warn">⚠ ' + esc(FD.err) + '</div>' : '') + (list.length ? list.map(fdCard).join('') : '<div class="ucard fbbox"><p class="small">' + (on && !FD.at ? 'جارٍ تحميل منشوراتك…' : MEP.tab === 'videos' ? 'لم تنشر فيديوهات تدريب بعد.' : 'لم تنشر بعد. منشوراتك السابقة تظهر هنا.') + '</p></div>');
-  var body = MEP.tab === 'about' ? '<div class="fbabout">' + intro + '</div>' : '<div class="fbcols"><aside>' + intro + vidBox + '</aside><div class="fbmain">' + (MEP.tab === 'posts' ? '<div id="mecomp">' + compose + '</div>' : '') + feed + '</div></div>';
+  var body = MEP.tab === 'about' ? '<div class="fbabout">' + intro + '</div>' : '<div class="fbcols"><div class="fbside">' + intro + vidBox + '</div><div class="fbmain">' + (MEP.tab === 'posts' ? '<div id="mecomp">' + compose + '</div>' : '') + feed + '</div></div>';
   return '<div class="fbp"><div class="fbtop"><div class="fbcover' + (me.cover ? ' has' : '') + '"' + (me.cover ? ' style="background-image:url(' + me.cover + ')"' : '') + '><label class="fbcvbtn">' + IC('image') + '<span>' + (me.cover ? 'تعديل صورة الغلاف' : 'إضافة صورة غلاف') + '</span><input type="file" accept="image/*" class="mecover" hidden></label></div>'
     + '<div class="fbhead"><div class="fbav">' + (ph ? '<img src="' + ph + '" alt="صورة ' + esc(name) + '">' : '<span>' + esc(initial(name)) + '</span>') + '<label class="fbavbtn" title="تغيير الصورة" aria-label="تغيير الصورة الشخصية">' + IC('image') + '<input type="file" accept="image/*" class="mefile" hidden></label></div>'
     + '<div class="fbname"><h1>' + esc(name) + '</h1><button class="fbcnt" data-a="clients"><b>' + cur + '</b> عميل حالي</button><div class="fbfaces">' + faces + '</div></div>'
@@ -11410,6 +11414,7 @@ fdRe = (function (f) { return function () { if (S.view === 'me') { main(); retur
 fdLoad = (function (f) { return function () { return f.apply(this, arguments).then(function () { if (S.view === 'me') main(); }); }; })(fdLoad);
 main0 = (function (f) { return function () { if (S.view === 'me') { $('main').innerHTML = meProfile(); if (typeof fdHydrate === 'function') fdHydrate(); return; } return f.apply(this, arguments); }; })(main0);
 render = (function (f) { return function () { var r = f.apply(this, arguments); hqBadges(); if (HQ.open) { HQ.open = ''; hqRender(); } return r; }; })(render);      // أي تنقّل يغلق القوائم المنبثقة
+document.documentElement.classList.add('dtoff');      // المساعد مخفي مؤقتاً (طلب المالك 2026-11-23) — احذف هذا السطر لإعادته
 
 // ================= 1.19 المرحلة 4: تبويب «توليد الخطة» — يُدمج داخل app.js عند /*GENUI*/
 // بند جانبي «توليد الخطة» يفتح قائمة العملاء مع «＋ عميل جديد»، واختيار العميل يفتح ملفه على قسم «توليد» (مجموعة «الخطة»).

@@ -70,7 +70,7 @@
 .fbtabs button.on{color:var(--zh-mintd,#0F8A66);border-bottom-color:var(--zh-mint,#24C99A)}
 .fbtabs button small{font-size:12.5px;opacity:.8}
 .fbcols{display:grid;grid-template-columns:minmax(0,360px) minmax(0,680px);justify-content:center;gap:16px;align-items:start}
-.fbcols aside{display:grid;gap:16px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 84px)}
+.fbcols .fbside{display:flex;flex-direction:column;gap:16px;min-width:0;position:sticky;top:calc(env(safe-area-inset-top,0px) + 84px)}
 .fbmain{display:grid;gap:16px;min-width:0}.fbmain .fdpost,.fbmain .fdcomp{margin:0}
 .fbabout{max-width:680px;margin:0 auto;width:100%}
 .fbbox{background:var(--zh-card,#fff);border-radius:14px;padding:16px;box-shadow:0 1px 2px rgba(16,45,59,.08);display:grid;gap:10px}
@@ -84,7 +84,7 @@
 .fbvgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
 .fbvt{all:unset;cursor:pointer;aspect-ratio:1;border-radius:10px;background:linear-gradient(160deg,#13897A,#0F4F57);color:#fff;display:grid;place-items:center;align-content:center;gap:4px;padding:6px;text-align:center;font-size:11.5px;overflow:hidden}
 .fbvt svg{width:22px;height:22px}.fbvt span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-@media (max-width:900px){.fbcols{grid-template-columns:minmax(0,1fr)}.fbcols aside{position:static}.fbhead{justify-content:center;text-align:center;padding:0 16px 12px;margin-top:-70px}.fbav{width:140px;height:140px}.fbname{min-width:0;flex-basis:100%;justify-items:center}.fbname h1{font-size:26px}.fbact{justify-content:center;width:100%}.fbtabs{padding:0 8px}.fbcvbtn span{display:none}}
+@media (max-width:900px){.fbcols{grid-template-columns:minmax(0,1fr)}.fbcols .fbside{position:static}.fbhead{justify-content:center;text-align:center;padding:0 16px 12px;margin-top:-70px}.fbav{width:140px;height:140px}.fbname{min-width:0;flex-basis:100%;justify-items:center}.fbname h1{font-size:26px}.fbact{justify-content:center;width:100%}.fbtabs{padding:0 8px}.fbcvbtn span{display:none}}
 @media (prefers-reduced-motion:reduce){.ghome .zscell,#hd .hqb{transition:none}}
 /* تثبيت الأنماط فوق قواعد الأزرار العامة في الثيمات (نفس أسلوب 1.42) */
 html:not(#mxz):not(#mxy) #hd .hqb{background:var(--zh-bg,#EEF2F1)!important;color:var(--zh-ink,#102D3B)!important;border:0!important;box-shadow:none!important;padding:0!important;min-height:0!important;width:42px!important;height:42px!important;border-radius:50%!important}
@@ -107,3 +107,7 @@ html:not(#mxz):not(#mxy) .fbvt{border:0!important;box-shadow:none!important;colo
 html[data-dw="dark"]:not(#mxz) #hd .hqb,html[data-tone="dark"]:not(#mxz) #hd .hqb{background:rgba(255,255,255,.12)!important;color:#fff!important}
 html[data-dw="dark"]:not(#mxz) #hd .hqb:hover,html[data-tone="dark"]:not(#mxz) #hd .hqb:hover{background:rgba(255,255,255,.2)!important}
 @media (max-width:420px){html:not(#mxz):not(#mxy) #hd .hqb[data-a="hqBell"]{display:none!important}}
+
+.fbmain{display:flex;flex-direction:column}.fbside .fbbox,.fbmain>*{width:100%;box-sizing:border-box}
+/* المساعد مخفي مؤقتاً بطلب المالك (2026-11-23) حتى تعديله — احذف هذه القاعدة لإعادته */
+html.dtoff #dtfab,html.dtoff #hd .hdast,html.dtoff .dtpanel,html.dtoff #dtp,html.dtoff [data-a="dtToggle"]{display:none!important}
