@@ -225,7 +225,7 @@ function genRM() { try { return window.matchMedia && matchMedia('(prefers-reduce
 function genVT(fn) { if (document.startViewTransition && !genRM()) { try { var vt = document.startViewTransition(fn), no = function () { }; ['ready', 'finished', 'updateCallbackDone'].forEach(function (k) { if (vt[k] && vt[k].catch) vt[k].catch(no); }); return; } catch (e) { } } fn(); }      // الحالة تتغير فوراً، والرسم وحده داخل الانتقال      // انتقال ناعم بين الخطوات حيث يدعمه المتصفح، ويُلغى مع «تقليل الحركة»
 function genStp(k, idx, val) { return '<span class="gstp"><button type="button" class="sec gsb" data-a="genStp" data-v="' + k + '|' + idx + '|-1" aria-label="أنقص">−</button><input type="number" class="n" min="0" step="1" data-' + k + '="' + idx + '" value="' + val + '"><button type="button" class="sec gsb" data-a="genStp" data-v="' + k + '|' + idx + '|1" aria-label="زد">＋</button></span>'; }
 // 1.34 «زيزو» بالبالطو الأبيض في «زنها Pro» (قرار المالك): في بطاقة العميل وبعد التوليد بحسب حالة الخطة
-function genZz(o) { return window.Zizo && !(S.settings && S.settings.zzOff) ? Zizo.svg(Object.assign({ coat: 1 }, o || {})) : ''; }
+function genZz(o) { return window.Zizo && S.settings && S.settings.zzOn ? Zizo.svg(Object.assign({ coat: 1 }, o || {})) : ''; }
 function genBmi(c) { var h = +c.height / 100, w = +c.weight; return h > 0 && w > 0 ? Math.round(w / h / h * 10) / 10 : 0; }
 function genHero(c, mini) {
   var b = genBmi(c), tile = function (l, v, u) { return '<div class="ght"><small>' + l + '</small><b>' + (v ? esc(v) : '—') + '</b>' + (v && u ? '<i>' + u + '</i>' : '') + '</div>'; };

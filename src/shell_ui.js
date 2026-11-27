@@ -102,7 +102,7 @@ function homeGlass() {
   var cs = S.clients.slice().sort(function (a, b) { return (b.updated || b.created) - (a.updated || a.created); }), withPlan = zhActivePlans(), ath = cs.filter(function (c) { return c.kind === 'athlete'; }).length;
   var n = navCounts(), fol = wkItems().filter(function (i) { return /:follow$/.test(i.key); }).length, fu = zhFollowToday(), name = zhName();
   var dt = new Date().toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long' });
-  var zz = window.Zizo && !(S.settings && S.settings.zzOff) ? '<span class="zhzz" aria-hidden="true">' + Zizo.svg({ coat: 1, wave: 1, mouth: 'smile' }) + '</span>' : '';
+  var zz = window.Zizo && S.settings && S.settings.zzOn ? '<span class="zhzz" aria-hidden="true">' + Zizo.svg({ coat: 1, wave: 1, mouth: 'smile' }) + '</span>' : '';
   var recent = cs.slice(0, 6).map(function (c) { var last = zhLast(c); return '<div class="cl zhrow" data-a="pick" data-v="' + c.code + '" role="button" tabindex="0"><span class="cav">' + esc(initial(c.name)) + '</span><span class="zhrt"><b>' + esc(c.name || '(بلا اسم)') + '</b><small>' + c.code + (c.phone ? ' • ' + esc(c.phone) : '') + (last ? ' • ' + esc(last) : '') + '</small></span>' + zhPlanChip(c) + '</div>'; }).join('');
   var ap = zhTodayAppts(), rq = (typeof HX !== 'undefined' && HX.st && HX.st.reqs) ? Object.keys(HX.st.reqs).map(function (k) { return HX.st.reqs[k]; }).filter(function (q) { return q.st === 'new'; }) : [];
   var ctx = '<aside class="zhctx" aria-label="سياق اليوم">' + zsCard()
@@ -112,9 +112,9 @@ function homeGlass() {
     + zhBackup() + '</aside>';
   return '<div class="home ghome today zh">'
     + '<div class="tdh zhw"><div class="zhwt"><h2>أهلاً' + (name ? '، ' + esc(name) : '') + '</h2><p class="tdhi"><span class="zhd">' + esc(dt) + '</span>' + (cs.length || n.req ? '' : ' • ' + zhWarm(n, fu)) + '</p></div>'
-    + '<div class="zhqa">' + newMenu() + '<button class="sec" data-a="genTab">' + IC('sparkles') + '<span>توليد خطة</span></button><button class="sec" data-a="appts">' + IC('calendar') + '<span>موعد</span></button></div>' + zz + '</div>'
-    + (cs.length || n.req ? zhPulse(cs, withPlan, fol, n, fu) + '<div class="tdks zhst zhchips" role="group" aria-label="ملخص العمل">' + tdStat('clients', 'users', cs.length, 'إجمالي العملاء', '', 1) + tdStat('appts', 'repeat', fu, 'متابعات اليوم', '', 1) + tdStat('clients', 'file', withPlan, 'الخطط النشطة', '', 1) + tdStat('zchat', 'message', n.chat, 'رسائل غير مقروءة', 'r')
-      + tdStat('hxv', 'inbox', n.req, 'طلبات تسجيل جديدة', 'a') + tdStat('appts', 'calendar', n.appt, 'مواعيد اليوم') + tdStat('subs', 'card', n.subs, 'اشتراكات للتجديد', 'a') + tdStat('tdFollow', 'repeat', fol, 'متابعات مستحقة') + '</div>' : '')
+    + zz + '</div>'      // 1.50: أُزيلت أزرار «عميل جديد/توليد خطة/موعد» — زر «＋» في الترويسة يفتح نفس القائمة
+    + (cs.length || n.req ? zhPulse(cs, withPlan, fol, n, fu) + '<div class="tdks zhst zhchips" role="group" aria-label="ملخص العمل">' + tdStat('clients', 'users', cs.length, 'إجمالي العملاء', '', 1) + tdStat('appts', 'repeat', fu, 'متابعات اليوم', '', 1) + tdStat('clients', 'file', withPlan, 'الخطط النشطة', '', 1)
+      + tdStat('hxv', 'inbox', n.req, 'طلبات تسجيل جديدة', 'a') + tdStat('tdFollow', 'repeat', fol, 'متابعات مستحقة') + '</div>' : '')      // 1.50: حُذفت «رسائل غير مقروءة» (شارة الجرس وشات زنها)، «مواعيد اليوم» (الحلقة وبطاقة المواعيد)، «اشتراكات للتجديد» (بطاقة الاشتراكات)
     + (cs.length ? '<div class="zhcols"><div class="zhmain">' + wkToday()
       + zaCard() + '</div>'      // 1.48: «آخر نشاطات العملاء» بدل «آخر العملاء» (طلب المالك)
        + ctx + '</div>'

@@ -152,7 +152,7 @@ function wkToday() {
         return '<div class="wkit p' + i.pri + ' zt-' + k.tone + '"><span class="wkic" aria-hidden="true">' + ic(k.ic) + '</span><button class="wkgo" ' + go + '><b>' + nm + '</b><small>' + esc(i.txt) + '</small></button>' + (k.lb ? '<span class="zbdg">' + k.lb + '</span>' : '')
           + '<button class="sec sm wkop" ' + go + ' title="افتح" aria-label="افتح ' + nm + '">' + ic('chevron') + '</button><button class="sec sm wkx" data-a="wkHide" data-v="' + esc(i.key) + '" title="إخفاء حتى الغد" aria-label="إخفاء حتى الغد">✕</button></div>'; }).join('') + '</div>'
         + (n > 8 ? '<p class="zhmore"><button class="link" data-a="wkAll">' + (WK.all ? 'عرض أقل' : 'عرض الكل (' + n + ')') + '</button></p>' : '')
-      : '<div class="zhempty">' + (window.Zizo && !(S.settings && S.settings.zzOff) ? '<span class="zhzz sm" aria-hidden="true">' + Zizo.svg({ coat: 1, eyes: 'happy', mouth: 'laugh' }) + '</span>' : '') + '<p class="small">لا شيء عاجل اليوم 🎉 — المواعيد والرسائل والالتزام المنخفض والمتابعات المستحقة تظهر هنا تلقائياً.</p></div>') + '</section>';
+      : '<div class="zhempty">' + (window.Zizo && S.settings && S.settings.zzOn ? '<span class="zhzz sm" aria-hidden="true">' + Zizo.svg({ coat: 1, eyes: 'happy', mouth: 'laugh' }) + '</span>' : '') + '<p class="small">لا شيء عاجل اليوم 🎉 — المواعيد والرسائل والالتزام المنخفض والمتابعات المستحقة تظهر هنا تلقائياً.</p></div>') + '</section>';
 }
 // ---------- الإجراءات
 function wkFind(code, id) { var c = S.clients.filter(function (x) { return x.code === code; })[0], a = c && (c.appts || []).filter(function (q) { return q.id === id; })[0]; return [c, a]; }
