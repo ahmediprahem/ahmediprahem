@@ -2612,6 +2612,65 @@ html.chmini .chwrap .chcol svg{transform:rotate(90deg)}
 @media (min-width:701px){html.chmini .chwrap .chgrid{grid-template-columns:minmax(0,1fr)!important}html.chmini .chwrap .chl{display:none!important}}
 @media (max-width:700px){html:not(#mxz):not(#mxy) .chwrap .chcol{display:none!important}}
 @media (prefers-reduced-motion:reduce){#hd .ntrcol svg{transition:none}}
+/* ================= 1.51 «البيانات» في ملف العميل: أقسام قابلة للطي + عمود جانبي (نمط صفحة المعلومات المرجعية بهوية زنها) */
+.cf151{--cs-card:#fff;--cs-line:#E3EAEA;--cs-ink:#17303A;--cs-mut:#62747C;--cs-soft:#F4F8F8;--cs-hd:linear-gradient(180deg,#FBFDFD,#F5FAF9)}
+html[data-dw="dark"] .cf151,html[data-theme="glass"]:not([data-tone="light"]) .cf151{--cs-card:rgba(255,255,255,.04);--cs-line:rgba(255,255,255,.12);--cs-ink:#E6F1EF;--cs-mut:#9DB3B0;--cs-soft:rgba(255,255,255,.05);--cs-hd:rgba(255,255,255,.03)}
+.cf151 .cfgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,320px);gap:20px;align-items:start;margin-top:14px}
+.cf151 .cfmain{display:grid;gap:14px;min-width:0}
+.cf151 .cfaside{display:grid;gap:14px;position:sticky;top:84px;min-width:0}
+/* القسم */
+html:not(#mxz) .cf151 .cfsec{background:var(--cs-card)!important;border:1px solid var(--cs-line)!important;border-radius:16px!important;margin:0!important;padding:0!important;overflow:hidden;box-shadow:0 1px 2px rgba(23,45,67,.04)}
+.cf151 .cfsec>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--cs-hd);user-select:none}
+.cf151 .cfsec>summary::-webkit-details-marker{display:none}
+.cf151 .cfsec>summary:focus-visible{outline:2.5px solid var(--cs-ac);outline-offset:-3px;border-radius:16px}
+.cf151 .cfsec[open]>summary{border-bottom:1px solid var(--cs-line)}
+.cf151 .cfsic{display:grid;place-items:center;flex:none;width:40px;height:40px;border-radius:12px;background:var(--cs-tint);color:var(--cs-ac)}
+.cf151 .cfsic svg{width:20px;height:20px}
+.cf151 .cfst{display:grid;flex:1;min-width:0}
+.cf151 .cfst b{font-size:16px;font-weight:700;color:var(--cs-ink)}
+.cf151 .cfst small{font-size:13px;color:var(--cs-mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cf151 .cfsdone{display:inline-flex;align-items:center;gap:4px;flex:none;font-size:12.5px;font-weight:600;padding:3px 10px;border-radius:999px;background:var(--cs-soft);color:var(--cs-mut);font-variant-numeric:tabular-nums}
+.cf151 .cfsdone.full{background:#E2F5EE;color:#0F7A6C}
+.cf151 .cfsdone svg{width:14px;height:14px}
+.cf151 .cfschev{display:grid;place-items:center;flex:none;width:34px;height:34px;border-radius:10px;border:1px solid var(--cs-line);color:var(--cs-mut);background:var(--cs-card)}
+.cf151 .cfschev svg{width:16px;height:16px;transition:transform .2s}
+.cf151 .cfsec[open] .cfschev svg{transform:rotate(180deg)}
+.cf151 .cfsb{padding:16px;display:grid;gap:14px}
+.cf151 .cfsb>.row{margin:0}
+.cf151 .cfsb>.row.cfsg{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 14px}
+@media (min-width:1280px){.cf151 .cfsec[data-cfs="base"] .cfsb>.row.cfsg{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.cf151 .cfsb>.row.cfsg>div{min-width:0}
+.cf151 .cfsb label{font-size:13.5px;font-weight:600;color:var(--cs-ink)}
+.cf151 .cfsb #tg{margin:0}
+/* ألوان الأقسام */
+.cf151 .t-teal{--cs-tint:#DDF3EE;--cs-ac:#13897A}.cf151 .t-blue{--cs-tint:#E3ECFA;--cs-ac:#2F63A8}.cf151 .t-rose{--cs-tint:#FBE4E7;--cs-ac:#B4394B}.cf151 .t-green{--cs-tint:#E5F4DF;--cs-ac:#3E7F2A}.cf151 .t-amber{--cs-tint:#FBEFD6;--cs-ac:#9A6510}
+html[data-dw="dark"] .cf151 .cfsic,html[data-theme="glass"]:not([data-tone="light"]) .cf151 .cfsic{filter:saturate(.85) brightness(.9)}
+/* العمود الجانبي */
+html:not(#mxz) .cf151 .cfside{background:var(--cs-card)!important;border:1px solid var(--cs-line)!important;border-radius:16px!important;padding:14px!important;box-shadow:none!important;margin:0!important;display:grid;gap:10px;min-width:0}
+.cf151 .cfside>h3{display:flex;align-items:center;gap:8px;margin:0;font-size:15px;font-weight:700;color:var(--cs-ink)}
+.cf151 .cfside>h3>span{display:grid;place-items:center;width:28px;height:28px;border-radius:8px;background:var(--cs-soft);color:var(--cs-mut)}
+.cf151 .cfside>h3 svg{width:16px;height:16px}
+html:not(#mxz) .cf151 .cfside.go{background:linear-gradient(160deg,#0F7A6C,#13897A 55%,#1FA58F)!important;border:0!important;color:#fff}
+.cf151 .cfside.go>h3{color:#fff}.cf151 .cfside.go>h3>span{background:rgba(255,255,255,.18);color:#fff}
+.cf151 .cfside .cfgo{margin:0;display:flex;flex-wrap:wrap;gap:8px}
+html:not(#mxz):not(#mxy) .cf151 .cfside.go .cfgo button{flex:1 1 100%;min-height:44px;background:#fff!important;color:#0F7A6C!important;border:0!important;font-weight:700;border-radius:10px!important}
+html:not(#mxz):not(#mxy) .cf151 .cfside.go .cfgo button+button{background:rgba(255,255,255,.16)!important;color:#fff!important}
+.cf151 .cfside .dxbox{margin:0;padding:0;border:0;background:none;display:grid;gap:8px;font-size:14px}
+.cf151 .cfside .dxbox>b{display:none}
+.cf151 .cfside .dxbox .dxb{font-weight:700}
+.cf151 .cfside .tcard{margin:0;padding:0;border:0;background:none;box-shadow:none}
+.cf151 .cfside .tcard #mtailor{display:block;margin:0}
+.cf151 .cfside .tcard #mtailor label{font-size:13px;color:var(--cs-mut)}
+.cf151 .cfside textarea{min-height:110px;resize:vertical;background:var(--cs-soft)}
+.cf151 .cfside .panbox{margin:0;border:0;padding:0;box-shadow:none;background:none}
+.cf151 .sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+@media (max-width:1100px){.cf151 .cfgrid{grid-template-columns:minmax(0,1fr)}.cf151 .cfaside{position:static;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}}
+@media (max-width:640px){.cf151 .cfsb>.row.cfsg{grid-template-columns:minmax(0,1fr)!important}.cf151 .cfsec>summary{padding:12px}.cf151 .cfsb{padding:12px}.cf151 .cfsic{width:36px;height:36px}.cf151 .cfaside{grid-template-columns:minmax(0,1fr)}}
+@media (prefers-reduced-motion:reduce){.cf151 .cfschev svg{transition:none}}
+html:not(#mxz) .cf151 .cfside.go>h3{color:#fff!important}
+.cf151 .cfside.go .cfgo .rdgen{display:contents}
+html:not(#mxz):not(#mxy) .cf151 .cfside.go .cfgo button{width:100%;justify-content:center}
+.cf151 .cfside.go .cfgo{color:rgba(255,255,255,.9);font-size:13px}
 </style></head>
 <body class="gating"><header id="hd"></header><div id="gate" style="display:flex"><div class="gcard" style="text-align:center"><div style="font-weight:700;color:#253464">حصة — جارٍ التحميل…</div></div></div><div id="app" style="display:none"><aside></aside><main></main></div>
 <noscript><div style="position:fixed;inset:0;background:#092061;color:#fff;padding:24px;text-align:center;font:16px Tahoma,Arial">هذا الملف يحتاج تفعيل JavaScript. افتحه مباشرة في Chrome أو Edge أو Safari (وليس من معاينة واتساب أو البريد).</div></noscript>
@@ -11577,6 +11636,77 @@ chPage = (function (f) { return function () {
   return s.replace('<div class="hxtop"><h2>', '<div class="hxtop"><button class="sec sm chcol" data-a="chMini" aria-label="' + l + '" aria-expanded="' + !on + '" title="' + l + '">' + IC('chevron') + '<span>' + (on ? 'المحادثات' : 'اطوِ') + '</span></button><h2>');
 }; })(chPage);
 A.chMini = function () { var on = !ntrOn('zn_chmini'); ntrSet('zn_chmini', on); document.documentElement.classList.toggle('chmini', on); main(); };
+
+// ================= 1.51 (طلب المالك 2026-11-27): ترتيب «البيانات» في ملف العميل بنمط صفحة المعلومات المرجعية (فيديو المالك)
+// أقسام قابلة للطي (أيقونة ملوّنة + عنوان + ملخص سطر + اكتمال) في عمود رئيسي، وعمود جانبي بالإجراء والنظام والمحرك والملاحظات.
+// لا حقول جديدة ولا تغيير في الربط: نفس عناصر clientTab تُنقل كما هي داخل الأقسام (المعرّفات #tg #mcond #mstyle #mtailor باقية).
+// للمظهر الزجاجي/الفاتح فقط، ولغير الرياضيين (صفحة الجرامات لها تخطيطها).
+var CF151 = { k: 'zn_cfsec' };
+function cfsOpen(id) { try { var o = JSON.parse(localStorage.getItem(CF151.k) || '{}'); return o[id] !== 0; } catch (e) { return true; } }
+function cfsSave(id, on) { try { var o = JSON.parse(localStorage.getItem(CF151.k) || '{}'); o[id] = on ? 1 : 0; localStorage.setItem(CF151.k, JSON.stringify(o)); } catch (e) { } }
+function cfsHas(v) { return v !== undefined && v !== null && String(v).trim() !== '' && !(Array.isArray(v) && !v.length); }
+function cfsLine(c, id) {
+  var j = function (a) { return a.filter(cfsHas).join(' • '); }, L = function (a) { return Array.isArray(a) ? a : []; };
+  if (id === 'base') return j([c.sex, c.age ? c.age + ' سنة' : '', c.weight ? c.weight + ' كجم' : '', c.height ? c.height + ' سم' : '']);
+  if (id === 'goal') { var t = c.plan && c.plan.target ? Math.round(c.plan.target.kcal || 0) : 0; return j([c.goal, c.meals ? c.meals + ' وجبات' : '', c.kcalManual ? c.kcalManual + ' سعرة (يدوي)' : '']); }
+  if (id === 'health') { var cd = L(c.conditions).length, al = L(c.allergens).length; return (cd ? cd + ' حالة صحية' : 'بلا حالات صحية') + ' • ' + (al ? al + ' حساسية/استبعاد' : 'بلا حساسية'); }
+  if (id === 'pref') return j([L(c.love).length ? L(c.love).length + ' مفضّل' : '', L(c.avoid).length ? L(c.avoid).length + ' يتجنبه' : '', L(c.favMeals).length ? L(c.favMeals).length + ' وجبة مفضّلة' : '', L(c.excludedMeals).length ? L(c.excludedMeals).length + ' مستبعدة' : '']) || 'لم تُحدد تفضيلات بعد';
+  if (id === 'life') { var w = L(c.wdays).length, cu = { eg: 'مصري', sa: 'سعودي' }[c.cuisine] || 'مطبخ مختلط', lf = { home: 'طبخ في البيت', quick: 'وقت ضيق', travel: 'سفر' }[c.life] || ''; return j([w ? w + ' أيام تمرين' : 'بلا أيام تمرين', cu, lf]); }
+  return '';
+}
+function cfsDone(c, id) {
+  var f = id === 'base' ? ['name', 'phone', 'sex', 'age', 'weight', 'height'] : id === 'goal' ? ['activity', 'goal', 'meals'] : null;
+  if (!f) return ''; var n = f.filter(function (k) { return cfsHas(c[k]); }).length;
+  return '<span class="cfsdone' + (n === f.length ? ' full' : '') + '" title="الحقول المكتملة">' + (n === f.length ? IC('checkCircle') : '') + n + '/' + f.length + '</span>';
+}
+function cfsSec(c, id, ic, tone, title, nodes) {
+  var on = cfsOpen(id), s = document.createElement('details'); s.className = 'cfsec t-' + tone; s.dataset.cfs = id; if (on) s.open = true;
+  s.innerHTML = '<summary><span class="cfsic">' + IC(ic) + '</span><span class="cfst"><b>' + title + '</b><small>' + esc(cfsLine(c, id)) + '</small></span>' + cfsDone(c, id) + '<span class="cfschev" aria-hidden="true">' + IC('chevron') + '</span></summary><div class="cfsb"></div>';
+  var b = s.querySelector('.cfsb'); nodes.forEach(function (n) { if (n) b.appendChild(n); }); return s;
+}
+function cfsSide(ic, title, nodes, cls) {
+  var s = document.createElement('section'); s.className = 'cfside' + (cls ? ' ' + cls : ''); s.innerHTML = '<h3><span>' + IC(ic) + '</span>' + title + '</h3>';
+  nodes.forEach(function (n) { if (n) s.appendChild(n); }); return s;
+}
+function cf151(c, html) {
+  var t = document.createElement('div'); t.innerHTML = html;
+  var q = function (s) { return t.querySelector(s); }, up = function (el, sel) { while (el && el.parentNode !== t) el = el.parentNode; return el; };
+  var nm = q('[data-f="name"]'); if (!nm) return html;
+  var r1 = up(nm), tg = q('#tg'), mx = q('details.fold[data-fold="mxOpen"]'), hl = up(q('#mcond')), pf = up(q('#f-love')), wd = q('.wdbox'), st = q('#mstyle');
+  var nl = q('label[for="f-notes"]'), nt = q('#f-notes'), gb = nt && nt.nextElementSibling && nt.nextElementSibling.tagName === 'P' ? nt.nextElementSibling : null;
+  var dx = q('.dxbox'), tc = q('.tcard'), pan = q('.panbox'), gback = q('.genback'), dl = [].slice.call(t.querySelectorAll('datalist'));
+  if (!r1 || !tg || !hl || !pf || !st || !nt) return html;      // شكل غير متوقع: اعرض الصفحة كما هي
+  // الصف الأول: الأساسية (6 حقول) | الهدف (النشاط، الهدف، السعرات اليدوية، الوجبات)
+  var kids = [].slice.call(r1.children), r1b = r1.cloneNode(false); r1b.className = 'row'; kids.forEach(function (k) { var f = k.querySelector('[data-f]'); if (f && /^(activity|goal|kcalManual|meals)$/.test(f.dataset.f)) r1b.appendChild(k); });
+  r1.classList.add('cfsg'); r1b.classList.add('cfsg');
+  var main = document.createElement('div'); main.className = 'cfmain';
+  main.appendChild(cfsSec(c, 'base', 'user', 'teal', 'البيانات الأساسية', [r1]));
+  main.appendChild(cfsSec(c, 'goal', 'activity', 'blue', 'الهدف والسعرات', [r1b, tg, mx]));
+  main.appendChild(cfsSec(c, 'health', 'heart', 'rose', 'الحالة الصحية والحساسية', [hl]));
+  main.appendChild(cfsSec(c, 'pref', 'apple', 'green', 'التفضيلات الغذائية', [pf]));
+  main.appendChild(cfsSec(c, 'life', 'utensils', 'amber', 'نمط الحياة والمطبخ', [wd, st]));
+  var side = document.createElement('div'); side.className = 'cfaside'; side.setAttribute('role', 'complementary'); side.setAttribute('aria-label', 'إجراءات وملاحظات العميل');
+  if (gb) { gb.className = 'cfgo'; side.appendChild(cfsSide('sparkles', 'الخطة', [gb], 'go')); }
+  if (dx) side.appendChild(cfsSide('layers', 'النظام الغذائي', [dx]));
+  if (tc) side.appendChild(cfsSide('sliders', 'محرك التوليد', [tc]));
+  if (nl) nl.className = 'sr'; nt.rows = 4; nt.setAttribute('placeholder', 'اكتب ملاحظة عن العميل…'); side.appendChild(cfsSide('file', 'ملاحظات', [nl, nt]));
+  if (pan) side.appendChild(cfsSide('package', 'المتوفر عند العميل', [pan]));
+  var grid = document.createElement('div'); grid.className = 'cfgrid'; grid.appendChild(main); grid.appendChild(side);
+  var out = document.createElement('div'); [].slice.call(t.childNodes).forEach(function (n) { if (n.nodeType === 1 && !n.matches('datalist') && n !== gback && !main.contains(n) && !side.contains(n) && n !== r1 && n !== tg && n !== mx && n !== hl && n !== pf && n !== wd && n !== st) out.appendChild(n); });
+  dl.forEach(function (d) { out.appendChild(d); }); out.appendChild(grid); if (gback) out.appendChild(gback);
+  return '<div class="cf151">' + out.innerHTML + '</div>';
+}
+clientTab = (function (f) { return function (c) {
+  var h = f.apply(this, arguments); if (!c || c.kind === 'athlete' || typeof isGlass !== 'function' || !isGlass()) return h;
+  try { return cf151(c, h); } catch (e) { return h; }
+}; })(clientTab);
+document.addEventListener('toggle', function (e) { var d = e.target; if (d && d.dataset && d.dataset.cfs) cfsSave(d.dataset.cfs, d.open); }, true);
+// ملخص القسم واكتماله يتحدثان فور تعديل أي حقل (دون إعادة رسم الصفحة)
+document.addEventListener('change', function (e) {
+  var s = e.target && e.target.closest ? e.target.closest('.cf151 .cfsec') : null; if (!s) return;
+  setTimeout(function () { var c = typeof cur === 'function' ? cur() : null; if (!c) return; var id = s.dataset.cfs, sm = s.querySelector('summary .cfst small'), dn = s.querySelector('summary .cfsdone');
+    if (sm) sm.textContent = cfsLine(c, id); if (dn) dn.outerHTML = cfsDone(c, id); }, 0);
+}, true);
 
 // ================= 1.19 المرحلة 4: تبويب «توليد الخطة» — يُدمج داخل app.js عند /*GENUI*/
 // بند جانبي «توليد الخطة» يفتح قائمة العملاء مع «＋ عميل جديد»، واختيار العميل يفتح ملفه على قسم «توليد» (مجموعة «الخطة»).
