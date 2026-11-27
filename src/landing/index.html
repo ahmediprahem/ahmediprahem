@@ -124,6 +124,30 @@ main,footer{overflow-x:clip}
 .dots button.on{background:var(--teal);width:26px;border-radius:6px}
 @media (max-width:900px){.split{grid-template-columns:1fr;gap:28px}.split.rev .media{order:0}}
 
+/* ===== مميزات تطبيق «زنها» */
+.feats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:40px}
+.fx{display:flex;gap:14px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:0 6px 16px rgba(22,50,74,.05);transition:transform .3s,box-shadow .3s}
+.fx:hover{transform:translateY(-4px);box-shadow:var(--sh2)}
+.fx .ai-ic{flex:none;width:52px;height:52px;border-radius:16px;background:var(--c,rgba(79,227,164,.18));color:var(--ci,var(--deep))}
+.fx .ai-ic svg{width:28px;height:28px}
+.fx h3{font-size:17px;margin-bottom:2px}
+.fx p{color:var(--ink2);font-size:14.5px;line-height:1.65}
+.fx .chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.fx .chips span{font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--bg2);color:var(--deep)}
+.fx:hover .bob2{animation:bob2 .8s ease}
+@keyframes bob2{0%,100%{translate:0}40%{translate:0 -3px}}
+.drop{animation:drop 2.6s ease-in infinite}
+@keyframes drop{0%{translate:0 -3px;opacity:0}30%{opacity:1}100%{translate:0 5px;opacity:0}}
+.beat{transform-origin:12px 13px;animation:beat 1.8s ease-in-out infinite}
+@keyframes beat{0%,100%{scale:1}15%{scale:1.15}30%{scale:1}45%{scale:1.1}}
+.ring2{transform-origin:12px 4px;animation:ring2 3s ease-in-out infinite}
+@keyframes ring2{0%,70%,100%{rotate:0}75%{rotate:14deg}85%{rotate:-12deg}95%{rotate:6deg}}
+.swap1{animation:sw 3s ease-in-out infinite}
+@keyframes sw{0%,100%{translate:0}50%{translate:3px 0}}
+.breathe{transform-origin:12px 12px;animation:br 4s ease-in-out infinite}
+@keyframes br{0%,100%{scale:.8;opacity:.6}50%{scale:1.1;opacity:1}}
+@media (max-width:900px){.feats{grid-template-columns:1fr}}
+
 /* ===== قسم المساعد الذكي */
 .ai{background:linear-gradient(180deg,var(--bg) 0,#EAF7F2 18%,#EAF7F2 82%,var(--bg) 100%)}
 .ai-top{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:48px;align-items:center}
@@ -214,7 +238,7 @@ footer .copy{grid-column:1/-1;border-top:1px solid rgba(255,255,255,.1);padding-
 <header class="nav" id="nav">
   <div class="wrap">
     <a class="logo" href="#top" aria-label="زنها Pro">/*PROLOGO*/</a>
-    <nav class="links" aria-label="أقسام الصفحة"><a href="#pro">للأخصائيين</a><a href="#client">لعملائك</a><a href="#ai">المساعد الذكي</a><a href="#safe">الأمان</a></nav>
+    <nav class="links" aria-label="أقسام الصفحة"><a href="#pro">للأخصائيين</a><a href="#client">لعملائك</a><a href="#features">المميزات</a><a href="#ai">المساعد الذكي</a><a href="#safe">الأمان</a></nav>
     <a class="btn" href="/*APPURL*/">تسجيل الدخول</a>
   </div>
 </header>
@@ -305,6 +329,24 @@ footer .copy{grid-column:1/-1;border-top:1px solid rgba(255,255,255,.1);padding-
   </div>
 </section>
 
+<!-- ٤ب) مميزات تطبيق زنها -->
+<section class="sec" id="features" style="padding-top:30px">
+  <div class="wrap">
+    <div class="center"><span class="kick rv"><i></i> داخل تطبيق «زنها»</span><h2 class="rv" style="margin-top:12px">كل ما يحتاجه عميلك <span class="hl">ليلتزم</span>… في تطبيق واحد</h2><p class="lead rv">أدوات يومية صغيرة تصنع الفرق، وكل ما يسجّله يصلك في «زنها Pro».</p></div>
+    <div class="feats">
+      <article class="fx rv"><div class="ai-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path class="dr" d="M8 12.5l2.7 2.7L16 10"/></svg></div><div><h3>تسجيل الوجبات</h3><p>«أكلتها كاملة» بلمسة، أو جزءاً منها، أو بديلاً، أو وجبة زيادة، مع صورة الطبق إن أحب.</p><div class="chips"><span>بلمسة</span><span>صورة الوجبة</span><span>أكل من الخارج</span></div></div></article>
+      <article class="fx rv"><div class="ai-ic"><svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.8 7L4 20l1.1-4.6A8 8 0 1 1 21 12z"/><g class="ty" fill="currentColor" stroke="none"><circle cx="9" cy="12" r="1.3"/><circle cx="12.5" cy="12" r="1.3"/><circle cx="16" cy="12" r="1.3"/></g></svg></div><div><h3>شات مع أخصائيه</h3><p>يسألك متى احتاج ويرسل الصور، والرسائل مشفّرة من طرف إلى طرف وتظهر فور وصولها.</p><div class="chips"><span>مشفّر</span><span>صور</span><span>مجموعات</span></div></div></article>
+      <article class="fx rv" style="--c:rgba(94,174,252,.16);--ci:#2f7fd6"><div class="ai-ic"><svg viewBox="0 0 24 24"><path d="M6 8h12l-1.5 12h-9z"/><path class="drop" d="M12 2.5c1 1.5 2 2.5 2 3.5a2 2 0 0 1-4 0c0-1 1-2 2-3.5z"/></svg></div><div><h3>العادات اليومية</h3><p>عادات صغيرة يختارها مع أخصائيه ويتابعها كل يوم بسلسلة إنجاز تحفّزه.</p><div class="chips"><span>الماء</span><span>المشي</span><span>الخضار</span><span>بلا سكر</span><span>الأكل بوعي</span><span>الكافيين</span></div></div></article>
+      <article class="fx rv" style="--c:rgba(255,171,74,.16);--ci:#d9821f"><div class="ai-ic"><svg viewBox="0 0 24 24"><path d="M4 20h16"/><path class="dr" d="M5 16l4-5 3 3 6-7"/><path d="M15 7h3v3"/></svg></div><div><h3>تقدّمي</h3><p>الوزن والقياسات والالتزام أسبوعاً بأسبوع برسوم واضحة، فيرى أين وصل.</p><div class="chips"><span>الوزن</span><span>القياسات</span><span>الالتزام</span></div></div></article>
+      <article class="fx rv"><div class="ai-ic"><svg viewBox="0 0 24 24"><path class="swap1" d="M4 8h13l-3-3M20 16H7l3 3"/></svg></div><div><h3>بدائل مكافئة</h3><p>لا يحب صنفاً؟ يبدّله ببديل من نفس المجموعة دون أن تختل سعرات يومه.</p></div></article>
+      <article class="fx rv" style="--c:rgba(255,123,123,.14);--ci:#e0504f"><div class="ai-ic"><svg viewBox="0 0 24 24"><g class="ring2"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></g></svg></div><div><h3>تذكيرات في وقتها</h3><p>بالوجبات والماء والمتابعة، حتى لو كان التطبيق مغلقاً.</p></div></article>
+      <article class="fx rv" style="--c:rgba(173,124,255,.15);--ci:#7f4fe0"><div class="ai-ic"><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 1 6.5 18H20v3H6.5"/><path class="dr" d="M9 8h7M9 11h5"/></svg></div><div><h3>التثقيف والوصفات</h3><p>مقالات ونصائح ووصفات صحية ينشرها أخصائيه، تصله في التطبيق.</p></div></article>
+      <article class="fx rv" style="--c:rgba(255,200,97,.2);--ci:#c48a12"><div class="ai-ic"><svg viewBox="0 0 24 24"><circle class="beat" cx="12" cy="9" r="5.5"/><path d="M8.5 13.5L7 21l5-2.5 5 2.5-1.5-7.5"/></svg></div><div><h3>تحديات وشهادات</h3><p>تحديات قصيرة تكسر الملل، وشهادة إنجاز يحتفظ بها ويشاركها.</p></div></article>
+      <article class="fx rv" style="--c:rgba(79,208,124,.16);--ci:#1f9d55"><div class="ai-ic"><svg viewBox="0 0 24 24"><circle class="breathe" cx="12" cy="12" r="7"/><path d="M12 8v8M8 12h8" opacity=".0"/><circle cx="12" cy="12" r="2.2" fill="currentColor" stroke="none"/></svg></div><div><h3>ركن الهدوء</h3><p>تمرين تنفّس موجّه وأذكار اليوم، لهدوء يساعده على الالتزام.</p><div class="chips"><span>تنفّس</span><span>أذكار</span></div></div></article>
+    </div>
+  </div>
+</section>
+
 <!-- ٥) المساعد الذكي -->
 <section class="sec ai" id="ai">
   <div class="doodles" data-dz="ai"></div>
@@ -383,7 +425,7 @@ footer .copy{grid-column:1/-1;border-top:1px solid rgba(255,255,255,.1);padding-
   <div class="wrap">
     <div><a class="logo" href="#top" aria-label="زنها Pro">/*PROLOGO_DARK*/</a><p>نظام أخصائي التغذية العربي: «زنها Pro» للأخصائي، وتطبيق «زنها» لعميله.</p></div>
     <div><h4>زنها Pro</h4><ul><li><a href="/*APPURL*/">تسجيل الدخول</a></li><li><a href="#pro">للأخصائيين</a></li><li><a href="#ai">المساعد الذكي</a></li></ul></div>
-    <div><h4>لعملائك</h4><ul><li><a href="#client">تطبيق «زنها»</a></li><li><a href="#safe">الخصوصية والأمان</a></li></ul></div>
+    <div><h4>لعملائك</h4><ul><li><a href="#client">تطبيق «زنها»</a></li><li><a href="#features">مميزات «زنها»</a></li><li><a href="#safe">الخصوصية والأمان</a></li></ul></div>
     <div class="copy"><span>© <span id="yr">2026</span> زنها</span><span>صُنع للعيادات العربية</span></div>
   </div>
 </footer>

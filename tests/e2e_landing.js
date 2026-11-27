@@ -11,7 +11,7 @@ const DIR = path.resolve(__dirname, '../worker/landing/public'), T = { html: 'te
     await p.goto(URL); await p.waitForLoadState('networkidle');
     if (nm === 'desk') {
       assert.strictEqual(await p.getAttribute('html', 'dir'), 'rtl'); assert(/زنها Pro/.test(await p.title()));
-      const sec = await p.$$eval('main > section', (x) => x.length); assert(sec >= 8, sec); ok('ثمانية أقسام: الواجهة، لأن كل عميل مختلف، للأخصائي، لعميلك، المساعد الذكي، المميزات، رحلة العميل، المتابعة');
+      const sec = await p.$$eval('main > section', (x) => x.length); assert(sec >= 9, sec); assert.strictEqual(await p.$$eval('#features .fx', (x) => x.length), 9); ok('تسعة أقسام (ومنها مميزات «زنها»: الوجبات والشات والعادات والتقدّم والبدائل والتذكيرات والتثقيف والتحديات وركن الهدوء): الواجهة، لأن كل عميل مختلف، للأخصائي، لعميلك، المساعد الذكي، المميزات، رحلة العميل، المتابعة');
       const hrefs = await p.$$eval('a.btn', (x) => x.map((a) => a.href)); assert(hrefs.length >= 3 && hrefs.every((u) => u === 'https://hessanu.ah6171317.workers.dev/'), hrefs.join()); assert(await p.isVisible('#login .btn')); ok('الدخول: بطاقة في الواجهة الأولى وكل الأزرار إلى زنها Pro نفسه (طريقة الدخول الحالية)');
       const ls = await p.$$eval('*', (x) => x.filter((e) => /[؀-ۿ]/.test(e.textContent) && parseFloat(getComputedStyle(e).letterSpacing) < 0).length); assert.strictEqual(ls, 0); ok('لا تباعد سالب بين الحروف على أي نص عربي');
       for (let y = 0; y < 9000; y += 600) { await p.evaluate((v) => scrollTo(0, v), y); await p.waitForTimeout(120); }
