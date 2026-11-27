@@ -9,7 +9,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); };
   let G = { status: 200, out: {} }, seen = [];
   const realFetch = globalThis.fetch;
   globalThis.fetch = async (u, o) => {
-    if (String(u).startsWith('https://generativelanguage.googleapis.com/')) { seen.push({ u: String(u), o }); if (G.throw) throw new Error('net'); return new Response(JSON.stringify(G.status === 200 ? { candidates: [{ content: { parts: [{ text: typeof G.out === 'string' ? G.out : JSON.stringify(G.out) }] } }] } : { error: {} }), { status: G.status }); }
+    if (String(u).startsWith('https://generativelanguage.googleapis.com/')) { seen.push({ u: String(u), o }); if (G.throw) throw new Error('net'); if (G.once) { const st = G.once; G.once = 0; return new Response(st === 'bad' ? JSON.stringify({ candidates: [{ content: { parts: [{ text: '{"ok":true,"items":[' }] } }] }) : '{}', { status: st === 'bad' ? 200 : st }); } return new Response(JSON.stringify(G.status === 200 ? { candidates: [{ content: { parts: [{ text: typeof G.out === 'string' ? G.out : JSON.stringify(G.out) }] } }] } : { error: {} }), { status: G.status }); }
     return realFetch(u, o);
   };
   const call = async (ident, obj, e, hdr) => {
@@ -60,6 +60,10 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); };
   assert.strictEqual((await call(cl, { mode: 'nope' })).s, 400); assert.strictEqual((await call(cl, { mode: 'text', text: '' })).s, 400);
   assert.strictEqual((await call(cl, { mode: 'text', text: 'أرز' }, { DB: env.DB, REG_KEY: 'k' })).s, 503);
   ok('الأخطاء: مشغول 429، خطأ المفتاح 502 دون كشفه، رد غير مفهوم → ok:false، انقطاع 504، نوع أو نص فارغ 400، وبلا مفتاح 503');
+  // 7ب) محاولة ثانية واحدة: ضغط مؤقت (503) أو رد مقطوع
+  G.status = 200; G.out = { ok: true, items: [{ name: 'تمر', kcal: 66 }] }; G.once = 503; const rt1 = await call(cl, { mode: 'text', text: 'تمرة' }); assert.strictEqual(rt1.j.ok, true, JSON.stringify(rt1.j));
+  G.once = 'bad'; const rt2 = await call(cl, { mode: 'text', text: 'تمرتان' }); assert.strictEqual(rt2.j.ok, true, JSON.stringify(rt2.j)); ok('ضغط مؤقت من غوغل (503) أو رد مقطوع: محاولة ثانية تلقائية تنجح');
+  G.out = '{\n "ok": true,\n "items": [ {"name": "لبن", "kcal": 90,}, ],\n}'; const rt3 = await call(cl, { mode: 'text', text: 'كوب لبن' }); assert.strictEqual(rt3.j.ok, true, JSON.stringify(rt3.j)); assert.strictEqual(rt3.j.items[0].kcal, 90); ok('JSON بفاصلة زائدة قبل الإغلاق يُقرأ');
   // 8) الحدود اليومية
   G.out = { ok: true, items: [{ name: 'أرز', kcal: 200 }] }; let last429 = 0; for (let i = 0; i < 45; i++) { const r = await call(cl, { mode: 'text', text: 'أرز' + i }); if (r.s === 429) { last429 = i; break; } }
   assert(last429 > 20 && last429 <= 40, last429); ok('حد يومي لكل عميل (' + 40 + ' تحليلاً) ثم 429 برسالة واضحة');
@@ -75,11 +79,21 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); };
     G.status = 200; G.throw = 0; const off = await call(cl2, { mode: 'supp', text: 'فيتامين د 5000 وحدة' }); assert.strictEqual(off.s, 503); assert.strictEqual(off.j.code, 'nosupp');
     const eS = Object.assign({}, env, { AI_SUPP: '1' }); G.out = { ok: true, product: 'فيتامين د3', kind: 'vitamin', serving: 'كبسولة', grade: 'Z', summary: 'مفيد عند النقص', items: [{ name: 'فيتامين د3', amount: '5000 وحدة', form: 'D3', usual: '600–800 وحدة', upper: '4000 وحدة', verdict: 'high' }, { name: 'x', verdict: 'weird' }], proven: ['صحة العظام عند النقص', 'صحة القلب (دليل متباين)'], claimed: ['يمنع الاكتئاب'], who: ['من لديه نقص مثبت'], notNeeded: ['مستواك طبيعي'], onset: 'أسابيع', dose: '600–800 وحدة يومياً', timing: ['مع أكبر وجبة فيها دهون'], food: ['لا تعارض غذائي مهم'], howTo: ['مع وجبة فيها دهون'], cautions: ['ارتفاع الكالسيوم'], quality: [], foods: ['السمك الدهني'] };
     const n2 = seen.length, r6 = await call(cl2, { mode: 'supp', text: 'فيتامين د 5000 وحدة يومياً' }, eS); assert.strictEqual(r6.s, 200, JSON.stringify(r6.j));
-    assert.strictEqual(r6.j.grade, 'C'); assert.strictEqual(r6.j.items[0].verdict, 'high'); assert.strictEqual(r6.j.items[1].verdict, 'unknown'); assert.deepStrictEqual(r6.j.proven, ['صحة العظام عند النقص']); assert.deepStrictEqual(r6.j.claimed, ['يمنع الاكتئاب', 'صحة القلب (دليل متباين)']); assert.strictEqual(r6.j.onset, 'أسابيع'); assert.strictEqual(r6.j.dose, '600–800 وحدة يومياً'); assert.deepStrictEqual(r6.j.timing, ['مع أكبر وجبة فيها دهون']); assert.deepStrictEqual(r6.j.food, ['لا تعارض غذائي مهم']);
+    assert.strictEqual(r6.j.grade, 'C'); assert.strictEqual(r6.j.items[0].verdict, 'high'); assert.strictEqual(r6.j.items[1].verdict, 'unknown'); assert.deepStrictEqual(r6.j.proven, ['صحة العظام عند النقص']); assert.deepStrictEqual(r6.j.claimed, ['يمنع الاكتئاب']); assert.deepStrictEqual(r6.j.emerging, ['صحة القلب (دليل متباين)']); assert.strictEqual(r6.j.onset, 'أسابيع'); assert.strictEqual(r6.j.dose, '600–800 وحدة يومياً'); assert.deepStrictEqual(r6.j.timing, ['مع أكبر وجبة فيها دهون']); assert.deepStrictEqual(r6.j.food, ['لا تعارض غذائي مهم']);
     const body6 = JSON.parse(seen[n2].o.body).contents[0].parts.map((x) => x.text || '').join(' '); assert(/4000 وحدة يومياً/.test(body6) && /الشاي والقهوة والحليب/.test(body6) && /التعارض مع الطعام/.test(body6) && /الكرياتين مونوهيدرات/.test(body6) && /فيتامين د 5000/.test(body6), 'الجدول المرجعي ووصف المستخدم في الطلب');
     const r7 = await call(cl2, { mode: 'supp', img: 'QUJD', mime: 'image/jpeg' }, eS); assert.strictEqual(r7.s, 200); assert(JSON.parse(seen[seen.length - 1].o.body).contents[0].parts.some((x) => x.inline_data));
     assert.strictEqual((await call(cl2, { mode: 'supp', text: '' }, eS)).s, 400); assert(W.SUPP_REF.length >= 15 && W.SUPP_REF.every((r) => r.length === 8 && r[6] && r[7]));
     ok('م1.56 المكملات: مغلق حتى AI_SUPP=1، يقبل الوصف أو صورة الملصق، الجدول المرجعي (' + W.SUPP_REF.length + ' مكمّلاً بمصادرها) مع الطلب، الفائدة المثبتة والمروّجة ومن يستفيد، وحكم الجرعة low/ok/high'); }
+  // 11) 1.57 الأعشاب: مغلق حتى AI_HERB=1، بالاسم (ثقة عالية لأن المستخدم سمّاه) أو بالصورة (ثقة النموذج)، و«مدعومة» بلا التقليدي/المحدود
+  { const cl3 = await HXC.genIdentity(); await env.DB.prepare('INSERT INTO clients (id, did, sig, enc, label, created) VALUES (?, ?, ?, ?, ?, ?)').bind(cl3.id, 'd0', JSON.stringify(cl3.sigPub), JSON.stringify(cl3.encPub), 'ع3', 1).run();
+    G.status = 200; G.throw = 0; assert.strictEqual((await call(cl3, { mode: 'herb', text: 'بابونج' })).j.code, 'noherb');
+    const eH = Object.assign({}, env, { AI_HERB: '1' }); G.out = { ok: true, name: 'البابونج', sci: 'Matricaria chamomilla', confidence: 'medium', lookalikes: ['الأقحوان البري'], uses: ['للاسترخاء'], proven: ['يحسّن النوم (دليل محدود)'], claimed: ['يعالج الأرق المزمن'], grade: 'C', dose: '1–3 جرام لكوب', timing: ['مساءً'], maxDuration: '', food: ['لا تعارض مهم'], drugs: ['الوارفارين'], avoidIf: ['حساسية الأقحوان'], cautions: [] };
+    const n3 = seen.length, h1 = await call(cl3, { mode: 'herb', text: 'بابونج' }, eH); assert.strictEqual(h1.s, 200, JSON.stringify(h1.j));
+    assert.strictEqual(h1.j.confidence, 'high'); assert.strictEqual(h1.j.fromImg, false); assert.deepStrictEqual(h1.j.proven, []); assert.deepStrictEqual(h1.j.emerging, ['يحسّن النوم (دليل محدود)']); assert.deepStrictEqual(h1.j.claimed, ['يعالج الأرق المزمن']); assert.deepStrictEqual(h1.j.drugs, ['الوارفارين']);
+    const bodyH = JSON.parse(seen[n3].o.body).contents[0].parts.map((x) => x.text || '').join(' '); assert(/Matricaria chamomilla/.test(bodyH) && /السنامكي/.test(bodyH) && /اسم العشب كما كتبه المستخدم: بابونج/.test(bodyH));
+    const h2 = await call(cl3, { mode: 'herb', img: 'QUJD', mime: 'image/jpeg' }, eH); assert.strictEqual(h2.j.confidence, 'medium'); assert.strictEqual(h2.j.fromImg, true); assert.deepStrictEqual(h2.j.lookalikes, ['الأقحوان البري']);
+    assert(W.HERB_REF.length >= 20 && W.HERB_REF.every((r) => r.length === 8 && r[7]));
+    ok('م1.57 الأعشاب: مغلق حتى AI_HERB=1، بالاسم أو بالصورة (ثقة التعرّف والنباتات المشابهة)، الجدول المرجعي (' + W.HERB_REF.length + ' عشباً بمصادرها) مع الطلب، و«مدعومة علمياً» لا تضم المحدود أو التقليدي، والتداخل مع الأدوية ومن يتجنّبه'); }
   // 9) تنظيف العدّادات القديمة
   await env.DB.prepare("INSERT INTO kv (k, v) VALUES ('ai.old.2020-01-01', '5')").run(); await W.default.scheduled({ scheduledTime: Date.now() }, env, null).catch(() => { });
   await new Promise((r) => setTimeout(r, 50)); assert(!(await env.DB.prepare("SELECT v FROM kv WHERE k = 'ai.old.2020-01-01'").first())); ok('عدّادات الأيام السابقة تُحذف في المهمة الدورية');

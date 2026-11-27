@@ -10,10 +10,11 @@ const AI_MODES = [
   ['photo', '📸', 'صوّر وجبتك', 'التقط صورة طبقك ونتعرّف على الأصناف ونقدّر قيمها'],
   ['label', '🏷️', 'امسح الملصق الغذائي', 'صوّر جدول القيم الغذائية لمنتج، ونقرأه ونقيّمه صحياً'],
   ['store', '🧊', 'التخزين والسلامة', 'صوّر طعاماً، ونخبرك كيف تحفظه ومدة صلاحيته وعلامات فساده'],
-  ['supp', '💊', 'قيّم مكمّلاً', 'صوّر ملصق المكمّل أو اكتب اسمه: فائدته، ودليله العلمي، وجرعته مقارنة بالحد الآمن']
+  ['supp', '💊', 'قيّم مكمّلاً', 'صوّر ملصق المكمّل أو اكتب اسمه: فائدته، ودليله العلمي، وجرعته مقارنة بالحد الآمن'],
+  ['herb', '🌿', 'الأعشاب', 'صوّر عشباً أو اكتب اسمه: نتعرّف عليه، وفائدته المحتملة، وكيف يُستعمل بأمان']
 ];
 // 1.56: «قيّم مكمّلاً» اعتمده المالك 2026-11-27 (الجدول المرجعي في المحطة، والتفعيل بـ AI_SUPP=1 على الخادم)
-const aiModes = () => AI_MODES;
+const aiModes = () => AI_MODES.filter((m) => m[0] !== 'herb' || DEMO || window.HX_HERB);      // 1.57 الأعشاب: المعاينة فقط حتى يعتمد المالك جدولها
 const AI_OFF = [['extra', '🍽 وجبة زيادة'], ['out', '🍔 أكل من الخارج'], ['sweets', '🍰 حلويات'], ['drinks', '🥤 مشروبات محلّاة']];
 function aiBtn(cls) { return '<button class="aibtn' + (cls ? ' ' + cls : '') + '" data-act="aiOpen" aria-label="مساعد الطعام بالذكاء الاصطناعي" title="مساعد الطعام"><img class="aiimg" src="' + AI_CAM_IMG + '" alt="" width="28" height="28">' + (cls ? '<span>حلّل طعامك</span>' : '') + '</button>'; }
 // 1.55: أيقونة المالك (صورة دائرية من تصميمه) زرّاً بارزاً في منتصف الشريط السفلي بين «خطتي» و«تثقيف» — المدخل الرئيسي الوحيد
@@ -38,11 +39,14 @@ function aiSheet() {
   const v = AIV(), M = AI_MODES.find((m) => m[0] === v.step);
   if (v.step === 'menu') return ['مساعد الطعام', '<p class="dim">اختر ما تريد، وسيحلله المساعد في ثوانٍ.</p><div class="aimenu">' + aiModes().map((m) => '<button class="aiopt" data-act="aiMode" data-v="' + m[0] + '"><span class="aie" aria-hidden="true">' + m[1] + '</span><span><b>' + m[2] + '</b><small>' + m[3] + '</small></span></button>').join('') + '</div>'];
   const title = M[1] + ' ' + M[2];
-  if (v.busy) return [title, (v.thumb ? '<img class="aithumb" src="' + v.thumb + '" alt="">' : '') + '<div class="aiload" role="status"><span class="aispin" aria-hidden="true"></span><b>' + ({ text: 'نحلل وصف وجبتك…', photo: 'نتعرّف على أصناف وجبتك…', label: 'نقرأ الملصق ونقيّمه…', store: 'نجهّز إرشادات الحفظ والسلامة…', supp: 'نقرأ المكمّل ونقارنه بالمراجع العلمية…' })[v.step] + '</b><small>قد يستغرق ذلك حتى 20 ثانية</small></div>'];
+  if (v.busy) return [title, (v.thumb ? '<img class="aithumb" src="' + v.thumb + '" alt="">' : '') + '<div class="aiload" role="status"><span class="aispin" aria-hidden="true"></span><b>' + ({ text: 'نحلل وصف وجبتك…', photo: 'نتعرّف على أصناف وجبتك…', label: 'نقرأ الملصق ونقيّمه…', store: 'نجهّز إرشادات الحفظ والسلامة…', supp: 'نقرأ المكمّل ونقارنه بالمراجع العلمية…', herb: 'نتعرّف على العشب ونراجع فائدته وأمانه…' })[v.step] + '</b><small>قد يستغرق ذلك حتى 20 ثانية</small></div>'];
   if (v.err) return [title, '<div class="aierr" role="alert"><b>' + esc(v.err) + '</b></div><div class="row"><button class="btn" data-act="aiRetry">حاول مرة أخرى</button><button class="btn sec" data-act="aiBack">رجوع</button></div>'];
   if (v.res) return [title, (v.thumb ? '<img class="aithumb" src="' + v.thumb + '" alt="صورتك">' : '') + aiResult(v)];
   if (v.step === 'text') return [title, '<label class="dim" for="aiTxt">صف وجبتك كما أكلتها (الأصناف والكمية إن عرفتها)</label><textarea class="inp" id="aiTxt" rows="4" maxlength="600" placeholder="مثال: برجر لحم بجبنة شيدر مع بطاطس صغيرة وكولا دايت">' + esc(v.text || '') + '</textarea>'
     + '<button class="btn full" data-act="aiGo">حلّل الوجبة</button>' + aiEst()];
+  if (v.step === 'herb') return [title, '<p class="dim">صوّر العشب (أوراقه أو بذوره أو زهوره) قريباً بإضاءة جيدة، أو اكتب اسمه.</p><div class="aipick"><button class="btn" data-act="aiPick" data-v="cam">' + I('camera') + ' صوّر العشب</button><button class="btn sec" data-act="aiPick" data-v="lib">' + I('plusSq') + ' اختر من الصور</button></div>'
+    + '<label class="dim" for="aiTxt">أو اكتب اسمه</label><input class="inp" id="aiTxt" maxlength="120" placeholder="مثال: حبة البركة، البابونج، الزنجبيل" value="' + esc(v.text || '') + '"><button class="btn sec full" data-act="aiGoHerb">اعرف عن العشب</button>'
+    + '<p class="aiest">⚠️ لا تأكل نباتاً برياً اعتماداً على التعرّف من صورة، فبعض النباتات السامة تشبه الأعشاب المعروفة. والمعلومات عامة لا تغني عن استشارة أخصائيك أو طبيبك، خاصة مع الحمل أو الأدوية أو الأمراض المزمنة.</p>'];
   if (v.step === 'supp') return [title, '<p class="dim">صوّر جدول «Supplement Facts» أو المكونات على العبوة، أو اكتب اسم المكمّل وجرعته.</p><div class="aipick"><button class="btn" data-act="aiPick" data-v="cam">' + I('camera') + ' صوّر الملصق</button><button class="btn sec" data-act="aiPick" data-v="lib">' + I('plusSq') + ' اختر من الصور</button></div>'
     + '<label class="dim" for="aiTxt">أو اكتب اسمه وجرعته</label><textarea class="inp" id="aiTxt" rows="2" maxlength="300" placeholder="مثال: فيتامين د 5000 وحدة يومياً، أو كرياتين 5 جرام">' + esc(v.text || '') + '</textarea><button class="btn sec full" data-act="aiGoSupp">قيّم المكمّل</button>'
     + '<p class="aiest">⚠️ تقييم عام بالذكاء الاصطناعي وليس وصفة؛ لا تبدأ مكمّلاً أو توقفه إلا بعد استشارة أخصائيك أو طبيبك، خاصة مع الحمل أو الأمراض المزمنة أو الأدوية.</p>'];
@@ -82,13 +86,26 @@ function aiResult(v) {
     const ls = (t, a, c) => a.length ? '<div class="ails ' + c + '"><b>' + t + '</b><ul>' + a.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul></div>' : '';
     return '<div class="aihead"><b>' + esc(r.product || 'المكمّل') + '</b>' + (r.serving ? '<span class="aiconf mid">الحصة: ' + esc(r.serving) + '</span>' : '') + '</div>'
       + '<div class="airate ' + G[1] + '"><span>' + G[2] + '</span><div><b>' + G[0] + '</b><small>' + esc(r.summary || r.gradeWhy) + '</small></div></div>'
-      + '<div class="aiben"><h3>💡 فائدة المكمّل</h3>' + ls('✅ فوائد مثبتة علمياً', r.proven, 'pos') + ls('❔ يُروَّج لها بلا دليل كافٍ', r.claimed, 'neg') + ls('👤 من يستفيد منه فعلاً', r.who, 'alt') + ls('🙅 قد لا تحتاجه إذا', r.notNeeded, '')
+      + '<div class="aiben"><h3>💡 فائدة المكمّل</h3>' + ls('✅ فوائد مثبتة علمياً', r.proven, 'pos') + ls('🔬 دليل ناشئ أو محدود', r.emerging || [], 'alt') + ls('❔ يُروَّج لها بلا دليل كافٍ', r.claimed, 'neg') + ls('👤 من يستفيد منه فعلاً', r.who, 'alt') + ls('🙅 قد لا تحتاجه إذا', r.notNeeded, '')
       + (r.onset ? '<div class="ails"><b>⏳ متى تظهر الفائدة</b><p>' + esc(r.onset) + '</p></div>' : '') + '</div>'
       + '<div class="aiuse"><h3>📋 كيف تأخذه</h3>' + (r.dose ? '<div class="ails"><b>💊 الجرعة المناسبة</b><p>' + esc(r.dose) + '</p></div>' : '') + ls('⏰ التوقيت المناسب', (r.timing && r.timing.length ? r.timing : r.howTo) || [], '') + ls('🍽️ التعارض مع الطعام والمشروبات', r.food || [], 'neg') + '</div>'
       + (r.items.some((x) => x.verdict !== 'unknown' || /\d/.test(x.amount || '')) ? '<div class="aidose" role="table" aria-label="الجرعة مقارنة بالمدى والحد الآمن">' + r.items.filter((x) => x.verdict !== 'unknown' || /\d/.test(x.amount || '')).map((x) => { const d = VD[x.verdict] || VD.unknown; return '<div class="aidr" role="row"><div><b>' + esc(x.name) + (x.form ? ' <small>(' + esc(x.form) + ')</small>' : '') + '</b><small>في المنتج: <b>' + esc(x.amount || '—') + '</b>' + (x.usual ? ' • المعتاد: ' + esc(x.usual) : '') + (x.upper ? ' • الحد الآمن: ' + esc(x.upper) : '') + '</small>' + (x.note ? '<small>' + esc(x.note) + '</small>' : '') + '</div><span class="aiconf ' + d[1] + '">' + d[0] + '</span></div>'; }).join('') + '</div>' : '')
       + (r.gradeWhy && r.summary ? '<p class="dim">' + esc(r.gradeWhy) + '</p>' : '') + ls('⚠️ تحذيرات وتداخلات', r.cautions, 'neg') + ls('🏅 الجودة', r.quality, '') + ls('🥗 بدائل من الطعام', r.foods, 'alt')
       + '<p class="aiest">⚠️ تقييم عام وليس وصفة؛ لا تبدأ مكمّلاً أو توقفه إلا بعد استشارة أخصائيك أو طبيبك.</p>'
       + '<button class="btn full" data-act="aiShare">' + I('msg') + ' أرسلها لأخصائيك</button><button class="btn sec full" data-act="aiAgain">قيّم مكمّلاً آخر</button>';
+  }
+  if (m === 'herb') {
+    const G = { A: ['دليل قوي', 'ok', '🟢'], B: ['دليل متوسط', 'ok', '🟢'], C: ['دليل محدود أو استعمال تقليدي', 'mid', '🟡'], D: ['غير آمن', 'low', '🔴'] }[r.grade] || ['دليل غير واضح', 'mid', '⚪'];
+    const CF = { high: ['تعرّف واضح', 'ok'], medium: ['تعرّف متوسط الثقة', 'mid'], low: ['تعرّف غير مؤكد', 'low'] }[r.confidence] || ['', 'mid'];
+    const ls = (t, a, c) => a && a.length ? '<div class="ails ' + c + '"><b>' + t + '</b><ul>' + a.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul></div>' : '';
+    return '<div class="aihead"><b>' + esc(r.name || 'العشب') + '</b>' + (r.sci ? '<span class="aiconf mid" dir="ltr"><i>' + esc(r.sci) + '</i></span>' : '') + (r.fromImg ? '<span class="aiconf ' + CF[1] + '">' + CF[0] + '</span>' : '') + '</div>'
+      + (r.fromImg && r.confidence !== 'high' ? '<div class="aierr"><b>تأكد من اسم العشب قبل استعماله.</b> التعرّف من الصورة قد يخطئ' + (r.lookalikes.length ? '، وقد يشبه: ' + r.lookalikes.map(esc).join('، ') : '') + '. لا تأكل نباتاً برياً اعتماداً على الصورة. <button class="btn sm sec" data-act="aiHerbName">اكتب الاسم بدلاً من الصورة</button></div>' : (r.lookalikes.length ? ls('👀 قد يشبهه', r.lookalikes, 'neg') : ''))
+      + '<div class="airate ' + G[1] + '"><span>' + G[2] + '</span><div><b>' + G[0] + '</b><small>' + esc(r.summary || r.gradeWhy) + '</small></div></div>'
+      + '<div class="aiben"><h3>🌿 الفائدة المحتملة</h3>' + ls('✅ مدعومة علمياً', r.proven, 'pos') + ls('🔬 دليل ناشئ أو محدود', r.emerging || [], 'alt') + ls('📜 استعمالات تقليدية', r.uses, '') + ls('❔ يُروَّج لها بلا دليل كافٍ', r.claimed, 'neg') + '</div>'
+      + '<div class="aiuse"><h3>📋 كيف يُستعمل</h3>' + (r.dose ? '<div class="ails"><b>🥄 الطريقة والكمية المعتادة</b><p>' + esc(r.dose) + '</p></div>' : '') + ls('⏰ التوقيت المناسب', r.timing, '') + (r.maxDuration ? '<div class="ails"><b>📅 أقصى مدة</b><p>' + esc(r.maxDuration) + '</p></div>' : '') + ls('🍽️ التعارض مع الطعام والمشروبات', r.food, 'neg') + '</div>'
+      + ls('💊 تداخلات مع الأدوية', r.drugs, 'neg') + ls('⛔ تجنّبه إذا', r.avoidIf, 'neg') + ls('⚠️ تحذيرات', r.cautions, 'neg')
+      + '<p class="aiest">⚠️ معلومات عامة وليست علاجاً؛ لا تستبدل بها دواءك، واستشر أخصائيك أو طبيبك قبل استعمال الأعشاب بجرعات علاجية.</p>'
+      + '<button class="btn full" data-act="aiShare">' + I('msg') + ' أرسلها لأخصائيك</button><button class="btn sec full" data-act="aiAgain">عشب آخر</button>';
   }
   const PL = { fridge: ['🧊', 'في الثلاجة'], freezer: ['❄️', 'في الفريزر'], pantry: ['🗄️', 'خارج الثلاجة'], mixed: ['🧊', 'الثلاجة أو الفريزر'] }[r.place];
   const ls = (t, a, c) => a.length ? '<div class="ails ' + c + '"><b>' + t + '</b><ul>' + a.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul></div>' : '';
@@ -111,7 +128,7 @@ async function aiRun(o) {
   v.busy = 0; if (sheet && sheet.t === 'ai') render();
 }
 async function aiImage(file, step) {
-  const dims = step === 'label' || step === 'supp' ? [[1600, 0.82], [1280, 0.75], [1024, 0.7], [320, 0.6]] : [[1024, 0.75], [800, 0.7], [640, 0.65], [320, 0.6]];
+  const dims = step === 'label' || step === 'supp' || step === 'herb' ? [[1600, 0.82], [1280, 0.75], [1024, 0.7], [320, 0.6]] : [[1024, 0.75], [800, 0.7], [640, 0.65], [320, 0.6]];
   const out = await shrink(file, dims), big = out.slice(0, 3).find((x) => x.length < 900000) || out[2];
   return { img: big.split(',')[1], mime: 'image/jpeg', thumb: out[3] };
 }
@@ -133,6 +150,10 @@ function aiAct(a, v, el) {
     case 'aiPick': { const step = s.step, note = (($('#aiNote') || $('#aiTxt') || {}).value || '').trim(); s.text = note;
       aiPickFile(v === 'cam', async (f) => { try { const im = await aiImage(f, step); s.thumb = im.thumb; aiRun({ mode: step, img: im.img, mime: im.mime, text: note || undefined }); } catch (e) { s.err = e.message || 'تعذّر فتح الصورة'; render(); } }); return false; }
     case 'aiGoSupp': { const t = (($('#aiTxt') || {}).value || '').trim(); s.text = t; if (t.length < 3) { toast('اكتب اسم المكمّل وجرعته أو صوّر الملصق'); return false; } s.thumb = ''; aiRun({ mode: 'supp', text: t }); return false; }
+    case 'aiGoHerb': { const t = (($('#aiTxt') || {}).value || '').trim(); s.text = t; if (t.length < 2) { toast('اكتب اسم العشب أو صوّره'); return false; } s.thumb = ''; aiRun({ mode: 'herb', text: t }); return false; }
+    case 'aiHerbName': V.ai = { step: 'herb', text: (s.res && s.res.name) || '' }; setTimeout(() => { const t = $('#aiTxt'); if (t) { t.focus(); t.select(); } }, 60); return true;
+    case 'aiShare': if (s.step === 'herb' && s.res) { const r = s.res, G = { A: 'دليل قوي', B: 'دليل متوسط', C: 'دليل محدود', D: 'غير آمن' }[r.grade] || '';
+      if (!sendMsg(('🌿 سؤال عن عشب: ' + (r.name || '') + (r.sci ? ' (' + r.sci + ')' : '') + ' — ' + G + '. الفائدة المحتملة: ' + (r.proven.concat(r.uses).slice(0, 3).join('، ') || '—') + '. هل يناسبني وبأي كمية؟').slice(0, 1900))) return false; sheet = null; V.ai = null; toast('أُرسل لأخصائيك ✓'); return true; }
     case 'aiShare': { const r = s.res; if (!r) return false; const G = { A: 'دليل قوي', B: 'دليل ناشئ', C: 'دليل ضعيف', D: 'غير مستحسن' }[r.grade] || '';
       const hi = r.items.filter((x) => x.verdict === 'high').map((x) => x.name), txt = '💊 تقييم مكمّل بالمساعد: ' + (r.product || 'مكمّل') + (r.serving ? ' (حصة ' + r.serving + ')' : '') + ' — ' + G + '. ' + r.items.slice(0, 6).map((x) => x.name + ' ' + (x.amount || '')).join('، ') + (hi.length ? '. ⚠️ فوق الحد الآمن: ' + hi.join('، ') : '') + '. هل يناسبني؟';
       if (!sendMsg(txt.slice(0, 1900))) return false; sheet = null; V.ai = null; toast('أُرسل التقييم لأخصائيك ✓'); return true; }

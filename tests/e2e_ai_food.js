@@ -8,6 +8,7 @@ const R = {
   photo: { mode: 'photo', est: true, ok: true, title: 'أرز ودجاج مشوي وسلطة', items: [{ name: 'أرز أبيض', portion: '1 كوب', grams: 160, kcal: 210, p: 4, c: 46, f: 0.5 }, { name: 'صدر دجاج مشوي', portion: 'قطعة متوسطة', grams: 120, kcal: 200, p: 37, c: 0, f: 4.5 }, { name: 'سلطة خضراء', portion: 'طبق صغير', grams: 100, kcal: 25, p: 1, c: 5, f: 0.2 }], total: { kcal: 435, p: 42, c: 51, f: 5.2 }, confidence: 'medium', note: 'التقدير من الصورة تقريبي.' },
   label: { mode: 'label', est: true, ok: true, product: 'تونة قطع بالزيت', serving: '85 جم', servings: 2, per: { kcal: 180, fat: 12, satFat: 2, transFat: 1.5, chol: 30, sodium: 640, carbs: 0, fiber: null, sugars: null, addedSugars: null, protein: 17 }, ingredients: ['تونة', 'زيت نباتي مهدرج جزئياً', 'ملح'], assessment: { rating: 'occasional', summary: 'بروتين جيد لكن فيه دهون متحولة وصوديوم مرتفع.', positives: ['بروتين 17 جم في الحصة'], concerns: ['1.5 جم دهون متحولة', 'صوديوم 640 ملجم (نحو 28% من الحد اليومي)'], reasons: ['الزيت المهدرج جزئياً مصدر الدهون المتحولة'], alternatives: ['تونة بالماء قليلة الملح'], tips: ['صفِّ الزيت قبل الأكل'] } },
   supp: { mode: 'supp', est: true, ok: true, product: 'فيتامين د3 5000 وحدة', kind: 'vitamin', serving: 'كبسولة واحدة', grade: 'A', gradeWhy: 'دليل قوي عند وجود نقص', summary: 'مفيد لمن لديه نقص، والجرعة أعلى من الحد الآمن للاستعمال اليومي بلا إشراف.', items: [{ name: 'فيتامين د3', amount: '5000 وحدة', form: 'كوليكالسيفيرول', usual: '600–800 وحدة', upper: '4000 وحدة', verdict: 'high', note: 'تحتاج إشرافاً طبياً' }], proven: ['صحة العظام عند النقص'], claimed: ['يقي من الاكتئاب'], who: ['من لديه نقص مثبت بالتحليل'], notNeeded: ['مستواك طبيعي'], onset: 'عدة أسابيع حتى يرتفع المستوى', dose: '600–800 وحدة يومياً؛ الجرعات الأعلى بإشراف طبي', timing: ['مع أكبر وجبة فيها دهون'], food: ['يمتص أفضل مع الدهون؛ لا تعارض غذائي مهم'], howTo: ['مع وجبة فيها دهون'], cautions: ['الزيادة ترفع الكالسيوم'], quality: ['لا تظهر شهادة فحص مستقل'], foods: ['السمك الدهني', 'صفار البيض'] },
+  herb: { mode: 'herb', est: true, ok: true, name: 'حبة البركة', sci: 'Nigella sativa', confidence: 'medium', fromImg: true, lookalikes: ['بذور البصل'], uses: ['مستعملة تقليدياً للهضم'], proven: [], claimed: ['تعالج كل الأمراض'], grade: 'C', gradeWhy: 'دليل ناشئ', summary: 'دليل ناشئ لتحسن بسيط في الضغط والسكر.', dose: 'نصف إلى ملعقة صغيرة يومياً', timing: ['مع الطعام'], maxDuration: '', food: ['لا تعارض مهم'], drugs: ['قد تزيد خفض السكر مع أدوية السكري'], avoidIf: ['جرعات كبيرة في الحمل'], cautions: [] },
   store: { mode: 'store', est: true, ok: true, food: 'سمك بلطي طازج', category: 'أسماك', place: 'fridge', temp: 'الثلاجة 4°م أو أقل', fridge: 'يوم إلى يومين', freezer: '6–8 أشهر', room: 'لا يزيد عن ساعتين', howTo: ['اغسله وجففه ولفّه بإحكام'], spoilSigns: ['رائحة حامضة أو نشادرية'], unsafeSigns: ['لزوجة أو لون باهت'], handling: ['اطهه حتى 63°م في الداخل'], note: 'لا يمكن التأكد من السلامة من صورة؛ عند الشك تخلّص منه.' }
 };
 (async () => {
@@ -25,8 +26,8 @@ const R = {
   await p.goto(URL); await p.waitForTimeout(1200); for (let i = 0; i < 4; i++) { const s = p.getByText('تخطّي'); if (await s.count()) { await s.first().click().catch(() => { }); await p.waitForTimeout(400); } }
   const shot = async (nm) => { if (SHOT) await p.screenshot({ path: SHOT + '/ai_' + nm + '.png' }); };
   // م1
-  await p.click('.tabbar .aifab'); await p.waitForSelector('.aiopt'); assert.strictEqual(await p.locator('.aiopt').count(), 5);
-  const lbl = await p.$$eval('.aiopt b', (x) => x.map((e) => e.textContent)); assert.deepStrictEqual(lbl, ['صف وجبتك', 'صوّر وجبتك', 'امسح الملصق الغذائي', 'التخزين والسلامة', 'قيّم مكمّلاً']); await shot('1menu');
+  await p.click('.tabbar .aifab'); await p.waitForSelector('.aiopt'); assert.strictEqual(await p.locator('.aiopt').count(), 6);
+  const lbl = await p.$$eval('.aiopt b', (x) => x.map((e) => e.textContent)); assert.deepStrictEqual(lbl, ['صف وجبتك', 'صوّر وجبتك', 'امسح الملصق الغذائي', 'التخزين والسلامة', 'قيّم مكمّلاً', 'الأعشاب']); await shot('1menu');
   assert.strictEqual(await p.locator('.hello .aibtn').count(), 0); const tabs = await p.$$eval('.tabbar > button', (x) => x.map((b) => b.classList.contains('aifab') ? 'AI' : b.textContent.trim())); assert.deepStrictEqual(tabs, ['صفحتي', 'خطتي', 'AI', 'تثقيف', 'الإعدادات']); ok('م1: أيقونة المالك زر بارز في منتصف الشريط السفلي (بين خطتي وتثقيف) يفتح 4 خيارات بهوية «زنها»');
   // م2 الوصف + التحميل + الإضافة
   await p.click('[data-act="aiMode"][data-v="text"]'); await p.fill('#aiTxt', 'برجر بجبنة شيدر وكولا دايت'); await p.click('[data-act="aiGo"]');
@@ -71,7 +72,7 @@ const R = {
   const L3 = await p.evaluate(() => { const s = window.HissatiApp.state(), k = Object.keys(s.log).sort().pop(); return s.log[k]; }); assert(L3.ai.length >= 2 && L3.ai.some((x) => x.src === 'label') && L3.off.extra === 1);
   ok('السجل اليومي يجمع ما أُضيف من الصورة والملصق في نفس «تسجيل اليوم»');
   // 1.56 المكملات (تظهر في نسخة العرض/المعاينة)
-  await p.click('.tabbar .aifab'); await p.waitForSelector('.aiopt'); assert.strictEqual(await p.locator('.aiopt').count(), 5); await p.click('[data-act="aiMode"][data-v="supp"]');
+  await p.click('.tabbar .aifab'); await p.waitForSelector('.aiopt'); assert.strictEqual(await p.locator('.aiopt').count(), 6); await p.click('[data-act="aiMode"][data-v="supp"]');
   await p.fill('#aiTxt', 'فيتامين د 5000 وحدة يومياً'); await p.click('[data-act="aiGoSupp"]'); await p.waitForSelector('.aiben');
   assert.strictEqual(calls[calls.length - 1].mode, 'supp'); assert(/5000/.test(calls[calls.length - 1].text));
   const sp = await p.textContent('.aish'); assert(/فائدة المكمّل/.test(sp) && /فوائد مثبتة علمياً/.test(sp) && /يُروَّج لها بلا دليل/.test(sp) && /من يستفيد منه/.test(sp) && /متى تظهر الفائدة/.test(sp));
@@ -79,6 +80,16 @@ const R = {
   const m0 = await p.evaluate(() => window.HissatiApp.state().msgs.length); await p.click('[data-act="aiShare"]'); await p.waitForFunction(() => !document.querySelector('.aish'));
   const lm = await p.evaluate(() => { const m = window.HissatiApp.state().msgs; return [m.length, m[m.length - 1].t]; }); assert.strictEqual(lm[0], m0 + 1); assert(/تقييم مكمّل/.test(lm[1]) && /فوق الحد الآمن/.test(lm[1]), lm[1]);
   ok('1.56 المكملات: خيار خامس، الوصف أو الصورة، «كيف تأخذه» (الجرعة المناسبة، التوقيت، التعارض مع الطعام)، «فائدة المكمّل» (مثبتة/مروّجة/من يستفيد/متى/كيف)، درجة الدليل، الجرعة مقارنة بالحد الآمن، تنبيه الاستشارة، و«أرسلها لأخصائيك» يرسلها في الشات');
+  // 1.57 الأعشاب (نسخة العرض)
+  await p.click('.tabbar .aifab'); await p.waitForSelector('.aiopt'); assert.strictEqual(await p.locator('.aiopt').count(), 6); await p.click('[data-act="aiMode"][data-v="herb"]');
+  assert(/لا تأكل نباتاً برياً/.test(await p.textContent('.aish')));
+  const [fh] = await Promise.all([p.waitForEvent('filechooser'), p.click('[data-act="aiPick"][data-v="cam"]')]); await fh.setFiles(IMG); await p.waitForSelector('.aiben');
+  assert.strictEqual(calls[calls.length - 1].mode, 'herb'); const ht = await p.textContent('.aish');
+  assert(/تأكد من اسم العشب/.test(ht) && /بذور البصل/.test(ht) && /الفائدة المحتملة/.test(ht) && /كيف يُستعمل/.test(ht) && /تداخلات مع الأدوية/.test(ht) && /تجنّبه إذا/.test(ht) && /Nigella sativa/.test(ht)); await shot('11herb');
+  await p.click('[data-act="aiHerbName"]'); assert.strictEqual(await p.inputValue('#aiTxt'), 'حبة البركة'); await p.click('[data-act="aiGoHerb"]'); await p.waitForSelector('.aiben'); assert.strictEqual(calls[calls.length - 1].text, 'حبة البركة');
+  const k0 = await p.evaluate(() => window.HissatiApp.state().msgs.length); await p.click('[data-act="aiShare"]'); await p.waitForFunction(() => !document.querySelector('.aish'));
+  const hm = await p.evaluate(() => { const m = window.HissatiApp.state().msgs; return [m.length, m[m.length - 1].t]; }); assert.strictEqual(hm[0], k0 + 1); assert(/سؤال عن عشب: حبة البركة/.test(hm[1]), hm[1]);
+  ok('1.57 الأعشاب: صورة أو اسم، ثقة التعرّف وتحذير التشابه و«اكتب الاسم بدلاً»، الفائدة المحتملة، كيف يُستعمل، التعارض مع الطعام والأدوية، من يتجنّبه، و«أرسلها لأخصائيك»');
   // العرض على الحاسوب
   await p.setViewportSize({ width: 1280, height: 860 }); await p.click('.tabbar .aifab'); await p.waitForSelector('.aiopt'); assert.strictEqual(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true); await shot('10desk');
   await p.setViewportSize({ width: 360, height: 740 }); await p.waitForTimeout(150); assert.strictEqual(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true); ok('يعمل على الجوال (360) والحاسوب (1280) بلا تمرير جانبي');
