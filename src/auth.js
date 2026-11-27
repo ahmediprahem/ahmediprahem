@@ -32,7 +32,7 @@
   function gate(inner, wide) {
     var g = $('#gate'), cfg = gateCfg(), sig = JSON.stringify([cfg.splash, cfg.video.length]); document.body.classList.add('gating'); g.style.display = 'flex'; g.style.background = bgCss(cfg);
     if (!g.querySelector('#gsp') || g.dataset.sig !== sig) { g.dataset.sig = sig; g.innerHTML = '<div id="gsp">' + splashHtml(cfg, 'gvid') + '</div><div class="gcard" id="gcard"></div>'; bindVideo(g); }
-    var card = g.querySelector('#gcard'); card.style.maxWidth = (wide ? 580 : 410) + 'px'; card.innerHTML = inner; $('#app').style.display = 'none'; $('#hd').innerHTML = '';
+    var card = g.querySelector('#gcard'); card.style.maxWidth = (wide ? 580 : 410) + 'px'; card.innerHTML = inner; $('#app').style.display = 'none'; $('#hd').innerHTML = ''; if (window.G161) window.G161(g, cfg);      // 1.62 تصميم شاشة الدخول
   }
   function openGate() { $('#gate').style.display = 'none'; document.body.classList.remove('gating'); $('#app').style.display = ''; }
   function copy(txt, ok) { (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(function () { ok && ok(); }, function () { var ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); ok && ok(); } catch (e) { } ta.remove(); }); }
