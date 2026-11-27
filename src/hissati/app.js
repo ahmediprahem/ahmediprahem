@@ -289,7 +289,7 @@ let logT = {}; function queueLog(k) { clearTimeout(logT[k]); logT[k] = setTimeou
 function sendLog(k) {
   const L = S.log[k]; if (!L || !S.plan) return; const dow = new Date(k + 'T12:00:00').getDay(), day = S.plan[dow % S.plan.length]; let n = 0, done = 0;
   day.slots.forEach((s, si) => s.lines.forEach((l, li) => { n++; if (L.ck[si + '_' + li]) done++; }));
-  send({ t: 'log', d: k, dow, pv: S.pv, ck: L.ck, sw: L.sw, note: L.note, skip: L.skip, water: L.water, wp: L.wp || {}, pl: plStat(k), done, n, h: L.h || {}, hs: hList(), off: L.off || {}, offT: L.offT || '', sub: L.sub || 0 });
+  send({ t: 'log', d: k, dow, pv: S.pv, ck: L.ck, sw: L.sw, note: L.note, skip: L.skip, water: L.water, wp: L.wp || {}, pl: plStat(k), done, n, h: L.h || {}, hs: hList(), off: L.off || {}, offT: L.offT || '', sub: L.sub || 0, ai: (L.ai || []).map((x) => ({ t: x.t, kcal: x.kcal, p: x.p, c: x.c, f: x.f, src: x.src, est: x.est })) });      // 1.28: ما أُضيف بمساعد الطعام (تقديري)
 }
 
 // ---- 0.49: «تسجيل اليوم» في 30 ثانية: زر الالتزام الكامل، الماء، المشي، وما خرج عن النظام، ثم «أرسل تسجيل اليوم»
@@ -2952,6 +2952,8 @@ window.addEventListener('online', () => { V.online = true; poll(); });
 window.addEventListener('offline', () => { V.online = false; render(); });
 window.HissatiApp = { remapLogs, mcLeft, remItems, whDayOk, badge: () => V.badge, wheel: { dayOk: whDayOk, cats: () => whCats().map((i) => whx().cats[i].id), dia: whDia, text: (id, i) => { const ci = whx().cats.findIndex((c) => c.id === id); return whText(ci, i); }, maybe: () => { WHL.shown = false; whMaybe(); }, open: (m) => whOpen(m) }, state: () => S, toast, poll, flush, feed: () => FD, feedLoad: fdLoad, celebrateTest: (id) => celebrate(id), sound: { avail: sndAvail, quiet: sndPrayerQuiet, times: prNow, playing: () => SND.playing, state: () => (SND.ctx ? SND.ctx.state : 'none'), vol: () => snd().vol, level: () => { if (!SND.an) return 0; const b = new Float32Array(SND.an.fftSize); SND.an.getFloatTimeDomainData(b); let t = 0, pk = 0; for (const x of b) { t += x * x; pk = Math.max(pk, Math.abs(x)); } return { rms: Math.sqrt(t / b.length), peak: pk }; } },  alarm: (items) => almShow(items), alarmTick: almTick, alarmFire: almFire, remItems, render, prayTimes, khams: { portions: khPortions, range: khRange, state: khState, rel: khRel, meta: () => QM, cert: khCertCanvas, stats: khStats } };     // للاختبارات
 boot();
+/*AIFOOD*/
 })();
 
 document.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('[data-hxv]'); if (!b || !window.HXV) return; e.preventDefault(); e.stopPropagation(); HXV.toggle(b.dataset.hxv, (p, o) => api('POST', p, o), (er) => toast(er.message)); }, true);   // تشغيل الرسائل الصوتية
+

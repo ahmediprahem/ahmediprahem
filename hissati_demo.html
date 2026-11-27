@@ -1176,6 +1176,66 @@ html:has(.scr.qz),body:has(.scr.qz){background:#fff!important}body:has(.scr.qz):
 .zpin{overflow-y:auto}.zp-top{flex:0 0 auto;height:min(32vh,260px)}.zp-zz{width:min(36%,150px);margin-bottom:6px}.zp-sheet{flex:1 0 auto}
 .zp-top{height:min(25vh,210px)}.zp-zz{width:min(30%,124px)}.zp-sheet{gap:12px;padding-top:20px}.zpin .pad{gap:10px}.zpin .pad button{height:56px}
 
+/* ================= 1.28 مساعد الطعام بالذكاء الاصطناعي — بمتغيرات «زنها» نفسها (يتبع كل المظاهر) */
+.aibtn{position:relative;display:inline-grid;place-items:center;width:44px;height:44px;flex:none;border-radius:14px;background:var(--glass);border:1px solid var(--line);color:var(--text);cursor:pointer;box-shadow:var(--hi)}
+.aibtn .ico{width:22px;height:22px}
+.aibtn:active{transform:scale(.96)}
+.aibtn:focus-visible,.aiopt:focus-visible{outline:2.5px solid var(--mint);outline-offset:2px}
+.aibtn.wide{display:flex;width:100%;height:auto;min-height:46px;gap:8px;justify-content:center;margin-top:4px;font-weight:600;font-size:calc(15px*var(--fs));border-style:dashed}
+.hello .aibtn{margin-inline-end:6px}
+.aimenu{display:grid;gap:10px}
+.aiopt{display:flex;align-items:center;gap:14px;width:100%;padding:14px;border-radius:var(--r2);background:var(--glass);border:1px solid var(--line);color:var(--text);text-align:start;cursor:pointer;font:inherit}
+.aiopt:active{background:var(--glass2)}
+.aiopt .aie{display:grid;place-items:center;flex:none;width:46px;height:46px;border-radius:14px;background:var(--glass2);font-size:24px}
+.aiopt b{display:block;font-size:calc(16px*var(--fs))}
+.aiopt small{display:block;color:var(--mut);font-size:calc(13px*var(--fs));line-height:1.5;margin-top:2px}
+.aipick{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.aipick .btn{display:flex;align-items:center;justify-content:center;gap:6px}
+.aiest{margin:8px 0 0;padding:10px 12px;border-radius:var(--r3);background:rgba(255,210,122,.12);border:1px solid rgba(255,210,122,.35);color:var(--text);font-size:calc(13px*var(--fs));line-height:1.6}
+.aiload{display:grid;justify-items:center;gap:8px;padding:28px 10px;text-align:center}
+.aiload small{color:var(--mut)}
+.aispin{width:36px;height:36px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--mint);animation:aisp 0.9s linear infinite}
+@keyframes aisp{to{transform:rotate(360deg)}}
+.aierr{padding:12px 14px;border-radius:var(--r3);background:var(--coralBg);border:1px solid rgba(255,157,136,.45);margin-bottom:12px}
+.aithumb{display:block;width:100%;max-height:180px;object-fit:cover;border-radius:var(--r2);margin-bottom:12px;border:1px solid var(--line)}
+.aihead{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.aihead>b{font-size:calc(17px*var(--fs));flex:1 1 100%}
+.aiconf{display:inline-flex;align-items:center;min-height:24px;padding:0 9px;border-radius:12px;font-size:calc(12px*var(--fs));font-weight:600;background:var(--glass2);color:var(--mut)}
+.aiconf.ok{background:rgba(111,227,169,.18);color:var(--mint)}.aiconf.low{background:var(--coralBg);color:var(--coral)}
+.aikc{display:flex;align-items:baseline;gap:8px;margin:6px 0}
+.aikc b{font-size:calc(34px*var(--fs));line-height:1.1;color:var(--text)}.aikc span{color:var(--mut)}
+.aimac{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.aimac span{display:inline-flex;gap:4px;align-items:baseline;padding:5px 10px;border-radius:12px;background:var(--glass);border:1px solid var(--line);font-size:calc(13px*var(--fs))}
+.aimac .c{border-color:rgba(255,210,122,.5)}.aimac .p{border-color:rgba(157,187,255,.55)}.aimac .f{border-color:rgba(255,157,136,.55)}
+.aitbl{display:grid;gap:8px;margin-bottom:10px}
+.aiit{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r3);background:var(--glass);border:1px solid var(--line)}
+.aiit b{display:block}.aiit small{display:block;color:var(--mut);font-size:calc(12.5px*var(--fs))}
+.aiit .aik{font-weight:700;text-align:center;line-height:1.1}.aiit .aik small{font-weight:400}
+.aiit.off{opacity:.45}.aiit.off b{text-decoration:line-through}
+.aix{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--mut);font-size:18px;cursor:pointer}
+.aiadd{display:grid;gap:8px;margin:12px 0 8px;padding:12px;border-radius:var(--r2);background:var(--glass);border:1px solid var(--line)}
+.airate{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:var(--r2);margin-bottom:12px;border:1px solid var(--line);background:var(--glass)}
+.airate>span{font-size:28px;flex:none}.airate b{display:block;font-size:calc(17px*var(--fs))}.airate small{display:block;color:var(--mut);line-height:1.6}
+.airate.ok{background:rgba(111,227,169,.13);border-color:rgba(111,227,169,.45)}.airate.mid{background:rgba(255,210,122,.11);border-color:rgba(255,210,122,.4)}.airate.low{background:var(--coralBg);border-color:rgba(255,157,136,.5)}
+.ailbl{border:1px solid var(--line);border-radius:var(--r3);overflow:hidden;margin-bottom:12px}
+.ailbl>div{display:flex;justify-content:space-between;gap:10px;padding:8px 12px;border-top:1px solid var(--line);font-size:calc(14px*var(--fs))}
+.ailbl>div:first-child{border-top:0}.ailbl .ailh{background:var(--glass2);font-weight:600;color:var(--mut);font-size:calc(12.5px*var(--fs))}
+.ails{margin-bottom:10px;padding:10px 12px;border-radius:var(--r3);background:var(--glass);border:1px solid var(--line)}
+.ails ul{margin:6px 0 0;padding-inline-start:18px}.ails li{margin:3px 0;line-height:1.6}
+.ails.pos{border-color:rgba(111,227,169,.4)}.ails.neg{border-color:rgba(255,157,136,.45)}.ails.alt{border-color:rgba(157,187,255,.45)}
+.aiing summary{cursor:pointer;color:var(--mut);padding:6px 0}.aiing p{line-height:1.7}
+.aidur{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-bottom:12px}
+.aidur>div{padding:10px;border-radius:var(--r3);background:var(--glass);border:1px solid var(--line)}
+.aidur small{display:block;color:var(--mut)}.aidur b{display:block;margin-top:2px;line-height:1.5}
+.aish .sb>.btn+.btn,.aish .sb>.btn.full{margin-top:8px}
+.ailog{display:grid;gap:6px;padding:10px 12px;border-radius:var(--r3);background:var(--glass);border:1px solid var(--line)}
+.ailog>b{display:flex;align-items:center;gap:6px}.ailog>b .ico{width:18px;height:18px}
+.ailrow{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:8px}
+.ailrow small{color:var(--mut);white-space:nowrap}.ailrow.tot{border-top:1px solid var(--line);padding-top:6px;font-weight:600;grid-template-columns:minmax(0,1fr) auto}
+@media (prefers-reduced-motion:reduce){.aispin{animation-duration:2.5s}}
+.aish .sb>*{flex-shrink:0}      /* .sb عمود flex بتمرير: العناصر ذات overflow:hidden كانت تنكمش إلى صفر */
+
+
 /* ==========================================================================
    «حصتي» — themes.css  •  ثيم «وردة» (data-theme="rose") وثيم «نبض» (data-theme="pulse")
    يُحمَّل بعد code/style.css. الثيم الحالي يبقى الافتراضي: بلا data-theme لا يتغيّر شيء.
@@ -3799,7 +3859,7 @@ let logT = {}; function queueLog(k) { clearTimeout(logT[k]); logT[k] = setTimeou
 function sendLog(k) {
   const L = S.log[k]; if (!L || !S.plan) return; const dow = new Date(k + 'T12:00:00').getDay(), day = S.plan[dow % S.plan.length]; let n = 0, done = 0;
   day.slots.forEach((s, si) => s.lines.forEach((l, li) => { n++; if (L.ck[si + '_' + li]) done++; }));
-  send({ t: 'log', d: k, dow, pv: S.pv, ck: L.ck, sw: L.sw, note: L.note, skip: L.skip, water: L.water, wp: L.wp || {}, pl: plStat(k), done, n, h: L.h || {}, hs: hList(), off: L.off || {}, offT: L.offT || '', sub: L.sub || 0 });
+  send({ t: 'log', d: k, dow, pv: S.pv, ck: L.ck, sw: L.sw, note: L.note, skip: L.skip, water: L.water, wp: L.wp || {}, pl: plStat(k), done, n, h: L.h || {}, hs: hList(), off: L.off || {}, offT: L.offT || '', sub: L.sub || 0, ai: (L.ai || []).map((x) => ({ t: x.t, kcal: x.kcal, p: x.p, c: x.c, f: x.f, src: x.src, est: x.est })) });      // 1.28: ما أُضيف بمساعد الطعام (تقديري)
 }
 
 // ---- 0.49: «تسجيل اليوم» في 30 ثانية: زر الالتزام الكامل، الماء، المشي، وما خرج عن النظام، ثم «أرسل تسجيل اليوم»
@@ -7075,7 +7135,142 @@ window.addEventListener('online', () => { V.online = true; poll(); });
 window.addEventListener('offline', () => { V.online = false; render(); });
 window.HissatiApp = { remapLogs, mcLeft, remItems, whDayOk, badge: () => V.badge, wheel: { dayOk: whDayOk, cats: () => whCats().map((i) => whx().cats[i].id), dia: whDia, text: (id, i) => { const ci = whx().cats.findIndex((c) => c.id === id); return whText(ci, i); }, maybe: () => { WHL.shown = false; whMaybe(); }, open: (m) => whOpen(m) }, state: () => S, toast, poll, flush, feed: () => FD, feedLoad: fdLoad, celebrateTest: (id) => celebrate(id), sound: { avail: sndAvail, quiet: sndPrayerQuiet, times: prNow, playing: () => SND.playing, state: () => (SND.ctx ? SND.ctx.state : 'none'), vol: () => snd().vol, level: () => { if (!SND.an) return 0; const b = new Float32Array(SND.an.fftSize); SND.an.getFloatTimeDomainData(b); let t = 0, pk = 0; for (const x of b) { t += x * x; pk = Math.max(pk, Math.abs(x)); } return { rms: Math.sqrt(t / b.length), peak: pk }; } },  alarm: (items) => almShow(items), alarmTick: almTick, alarmFire: almFire, remItems, render, prayTimes, khams: { portions: khPortions, range: khRange, state: khState, rel: khRel, meta: () => QM, cert: khCertCanvas, stats: khStats } };     // للاختبارات
 boot();
+// ================= 1.28 مساعد الطعام بالذكاء الاصطناعي في «زنها» (طلب المالك 2026-11-27)
+// زر الكاميرا في رأس «اليوم» وفي بطاقة «تسجيل اليوم» يفتح ورقة بأربعة خيارات: وصف الوجبة، صورة الوجبة، ملصق المعلومات الغذائية (مع تقييم صحي)، التخزين والسلامة.
+// التحليل على الخادم فقط (/v1/ai/food → Gemini، المفتاح سرّ على المحطة)، والطلب موقّع بمفتاح العميل. النتائج تقديرية دائماً ويُقال ذلك بوضوح.
+// الإضافة إلى «تسجيل اليوم» الموجود نفسه (L.off + L.offT + L.ai) فتصل الأخصائي مع المتابعة اليومية — لا نظام تسجيل ثانٍ.
+// الأيقونة: AI_ICON مؤقتة إلى أن يرسل المالك أيقونته (تُستبدل هنا وحدها).
+const AI_ICON = '<svg class="ico aiico" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5h-5L7 8H4a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="14" r="3.5"/><path d="M19 1.5l.7 1.6 1.6.7-1.6.7-.7 1.6-.7-1.6-1.6-.7 1.6-.7z" fill="currentColor" stroke="none"/></svg>';
+const AIV = () => V.ai || (V.ai = { step: 'menu' });
+const AI_MODES = [
+  ['text', '✍️', 'صف وجبتك', 'اكتب ما أكلت، ونقدّر السعرات والبروتين والكربوهيدرات والدهون'],
+  ['photo', '📸', 'صوّر وجبتك', 'التقط صورة طبقك ونتعرّف على الأصناف ونقدّر قيمها'],
+  ['label', '🏷️', 'امسح الملصق الغذائي', 'صوّر جدول القيم الغذائية لمنتج، ونقرأه ونقيّمه صحياً'],
+  ['store', '🧊', 'التخزين والسلامة', 'صوّر طعاماً، ونخبرك كيف تحفظه ومدة صلاحيته وعلامات فساده']
+];
+const AI_OFF = [['extra', '🍽 وجبة زيادة'], ['out', '🍔 أكل من الخارج'], ['sweets', '🍰 حلويات'], ['drinks', '🥤 مشروبات محلّاة']];
+function aiBtn(cls) { return '<button class="aibtn' + (cls ? ' ' + cls : '') + '" data-act="aiOpen" aria-label="مساعد الطعام بالذكاء الاصطناعي" title="مساعد الطعام">' + AI_ICON + (cls ? '<span>حلّل طعامك</span>' : '') + '</button>'; }
+// الرأس (بشكليه): بجانب زر المحادثة
+chatBtn = ((f) => function () { return aiBtn() + f.apply(this, arguments); })(chatBtn);
+// بطاقة «تسجيل اليوم»: مدخل ثانٍ + ما أُضيف بالمساعد اليوم
+dayLogCard = ((f) => function (d) {
+  const h = f.apply(this, arguments), L = dl(d), a = (L.ai || []);
+  const list = a.length ? '<div class="ailog"><b>' + AI_ICON + ' أُضيف بالمساعد اليوم</b>' + a.map((x, i) => '<div class="ailrow"><span>' + esc(x.t) + '</span><small>~' + Math.round(x.kcal) + ' سعرة</small><button class="aix" data-act="aiDel" data-v="' + i + '" aria-label="احذف ' + esc(x.t) + '">×</button></div>').join('')
+    + '<div class="ailrow tot"><span>المجموع التقديري</span><small>~' + Math.round(a.reduce((s, x) => s + (+x.kcal || 0), 0)) + ' سعرة</small></div></div>' : '';
+  return h.replace(/<\/section>\s*$/, list + aiBtn('wide') + '</section>');
+})(dayLogCard);
+// الورقة
+sheetHtml = ((f) => function () {
+  if (!sheet || sheet.t !== 'ai') return f.apply(this, arguments);
+  const r = aiSheet();
+  return '<div class="sheet-bg" data-act="aiClose"></div><div class="sheet aish" role="dialog" aria-label="' + r[0].replace(/<[^>]+>/g, '') + '"><div class="grab"></div><div class="sh">'
+    + (AIV().step !== 'menu' && !AIV().busy ? '<button class="back" data-act="aiBack" aria-label="رجوع">' + I('back') + '</button>' : '') + '<h2>' + r[0] + '</h2><button class="back" data-act="aiClose" aria-label="إغلاق">' + I('x') + '</button></div><div class="sb">' + r[1] + '</div></div>';
+})(sheetHtml);
+function aiEst() { return '<p class="aiest" role="note">⚠️ القيم تقديرية من الذكاء الاصطناعي وليست قياساً دقيقاً، ولا تغني عن إرشاد أخصائيك.</p>'; }
+function aiSheet() {
+  const v = AIV(), M = AI_MODES.find((m) => m[0] === v.step);
+  if (v.step === 'menu') return ['مساعد الطعام', '<p class="dim">اختر ما تريد، وسيحلله المساعد في ثوانٍ.</p><div class="aimenu">' + AI_MODES.map((m) => '<button class="aiopt" data-act="aiMode" data-v="' + m[0] + '"><span class="aie" aria-hidden="true">' + m[1] + '</span><span><b>' + m[2] + '</b><small>' + m[3] + '</small></span></button>').join('') + '</div>'];
+  const title = M[1] + ' ' + M[2];
+  if (v.busy) return [title, (v.thumb ? '<img class="aithumb" src="' + v.thumb + '" alt="">' : '') + '<div class="aiload" role="status"><span class="aispin" aria-hidden="true"></span><b>' + ({ text: 'نحلل وصف وجبتك…', photo: 'نتعرّف على أصناف وجبتك…', label: 'نقرأ الملصق ونقيّمه…', store: 'نجهّز إرشادات الحفظ والسلامة…' })[v.step] + '</b><small>قد يستغرق ذلك حتى 20 ثانية</small></div>'];
+  if (v.err) return [title, '<div class="aierr" role="alert"><b>' + esc(v.err) + '</b></div><div class="row"><button class="btn" data-act="aiRetry">حاول مرة أخرى</button><button class="btn sec" data-act="aiBack">رجوع</button></div>'];
+  if (v.res) return [title, (v.thumb ? '<img class="aithumb" src="' + v.thumb + '" alt="صورتك">' : '') + aiResult(v)];
+  if (v.step === 'text') return [title, '<label class="dim" for="aiTxt">صف وجبتك كما أكلتها (الأصناف والكمية إن عرفتها)</label><textarea class="inp" id="aiTxt" rows="4" maxlength="600" placeholder="مثال: برجر لحم بجبنة شيدر مع بطاطس صغيرة وكولا دايت">' + esc(v.text || '') + '</textarea>'
+    + '<button class="btn full" data-act="aiGo">حلّل الوجبة</button>' + aiEst()];
+  const hint = { photo: 'صوّر الطبق كاملاً من الأعلى بإضاءة جيدة. كلما كانت الصورة أوضح كان التقدير أقرب.', label: 'صوّر جدول «المعلومات الغذائية» قريباً ومستقيماً حتى تُقرأ الأرقام، ويفضّل أن تظهر المكونات.', store: 'صوّر الطعام الذي تريد حفظه (سمك، دجاج، أرز مطبوخ، خضار…).' }[v.step];
+  return [title, '<p class="dim">' + hint + '</p><div class="aipick"><button class="btn" data-act="aiPick" data-v="cam">' + I('camera') + ' التقط صورة</button><button class="btn sec" data-act="aiPick" data-v="lib">' + I('img') + ' اختر من الصور</button></div>'
+    + (v.step === 'photo' ? '<label class="dim" for="aiNote">ملاحظة اختيارية (مثل: مقلي بالزيت، نصف الطبق)</label><input class="inp" id="aiNote" maxlength="200" value="' + esc(v.text || '') + '">' : '') + (v.step === 'store' ? '<p class="aiest">⚠️ لا يمكن التأكد من سلامة الطعام من صورة. عند الشك تخلّص منه.</p>' : aiEst())];
+}
+const aiN = (x, u) => x === null || x === undefined ? '<i class="dim">غير مذكور</i>' : esc(String(x)) + (u ? ' ' + u : '');
+function aiResult(v) {
+  const r = v.res, m = v.step;
+  if (m === 'text' || m === 'photo') {
+    const conf = { high: ['ثقة عالية', 'ok'], medium: ['ثقة متوسطة', 'mid'], low: ['ثقة منخفضة', 'low'] }[r.confidence] || ['تقدير', 'mid'], items = r.items.filter((x, i) => !(v.drop || {})[i]);
+    const t = items.reduce((a, x) => ({ kcal: a.kcal + x.kcal, p: a.p + x.p, c: a.c + x.c, f: a.f + x.f }), { kcal: 0, p: 0, c: 0, f: 0 });
+    return '<div class="aihead"><b>' + esc(r.title) + '</b><span class="aiconf ' + conf[1] + '">' + conf[0] + '</span><span class="aiconf mid">تقديري</span></div>'
+      + '<div class="aikc"><b>~' + Math.round(t.kcal) + '</b><span>سعرة تقريباً</span></div>'
+      + '<div class="aimac"><span class="c">كربوهيدرات <b>' + Math.round(t.c) + '</b> جم</span><span class="p">بروتين <b>' + Math.round(t.p) + '</b> جم</span><span class="f">دهون <b>' + Math.round(t.f) + '</b> جم</span></div>'
+      + '<div class="aitbl" role="table" aria-label="الأصناف">' + r.items.map((x, i) => { const off = (v.drop || {})[i]; return '<div class="aiit' + (off ? ' off' : '') + '" role="row"><div><b>' + esc(x.name) + '</b><small>' + esc(x.portion || '') + (x.grams ? ' • ~' + Math.round(x.grams) + ' جم' : '') + '</small><small class="aim">ك ' + Math.round(x.c) + ' • ب ' + Math.round(x.p) + ' • د ' + Math.round(x.f) + '</small></div><span class="aik">~' + Math.round(x.kcal) + '<small>سعرة</small></span><button class="aix" data-act="aiDrop" data-v="' + i + '" aria-label="' + (off ? 'أرجع ' : 'استبعد ') + esc(x.name) + '">' + (off ? '↺' : '×') + '</button></div>'; }).join('') + '</div>'
+      + (r.note ? '<p class="dim">' + esc(r.note) + '</p>' : '') + aiEst()
+      + (items.length ? '<div class="aiadd"><b>أضفها إلى «تسجيل اليوم» كـ:</b><div class="chips">' + AI_OFF.map((o, i) => '<button class="chip' + ((v.cat || 'extra') === o[0] ? ' on' : '') + '" data-act="aiCat" data-v="' + o[0] + '" aria-pressed="' + ((v.cat || 'extra') === o[0]) + '">' + o[1] + '</button>').join('') + '</div><button class="btn full" data-act="aiAdd">' + I('check') + ' أضف إلى تسجيل اليوم</button></div>' : '')
+      + '<button class="btn sec full" data-act="aiAgain">تحليل جديد</button>';
+  }
+  if (m === 'label') {
+    const P = r.per, A = r.assessment, RT = { healthy: ['خيار صحي', 'ok', '🟢'], moderate: ['خيار معتدل', 'mid', '🟡'], occasional: ['للمناسبات فقط', 'low', '🔴'] }[A.rating];
+    const rows = [['السعرات', P.kcal, 'سعرة'], ['الدهون الكلية', P.fat, 'جم'], ['الدهون المشبعة', P.satFat, 'جم'], ['الدهون المتحولة', P.transFat, 'جم'], ['الكوليسترول', P.chol, 'ملجم'], ['الصوديوم', P.sodium, 'ملجم'], ['الكربوهيدرات', P.carbs, 'جم'], ['الألياف', P.fiber, 'جم'], ['السكريات', P.sugars, 'جم'], ['السكر المضاف', P.addedSugars, 'جم'], ['البروتين', P.protein, 'جم']];
+    const ls = (t, a, c) => a.length ? '<div class="ails ' + c + '"><b>' + t + '</b><ul>' + a.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul></div>' : '';
+    return '<div class="aihead"><b>' + esc(r.product || 'المنتج') + '</b>' + (r.serving ? '<span class="aiconf mid">الحصة: ' + esc(r.serving) + '</span>' : '') + (r.servings ? '<span class="aiconf mid">' + esc(String(r.servings)) + ' حصص في العبوة</span>' : '') + '</div>'
+      + '<div class="airate ' + RT[1] + '"><span>' + RT[2] + '</span><div><b>' + RT[0] + '</b><small>' + esc(A.summary) + '</small></div></div>'
+      + '<div class="ailbl" role="table" aria-label="القيم الغذائية لكل حصة"><div class="ailh" role="row"><span>القيمة لكل حصة كما على الملصق</span></div>' + rows.map((x) => '<div role="row"><span>' + x[0] + '</span><b>' + aiN(x[1], x[1] === null ? '' : x[2]) + '</b></div>').join('') + '</div>'
+      + ls('👍 الإيجابيات', A.positives, 'pos') + ls('⚠️ ما يدعو للانتباه', A.concerns, 'neg') + ls('لماذا هذا التقييم', A.reasons, '') + ls('🔁 بدائل أصح', A.alternatives, 'alt') + ls('💡 نصائح', A.tips, '')
+      + (r.ingredients.length ? '<details class="aiing"><summary>المكونات (' + r.ingredients.length + ')</summary><p>' + r.ingredients.map(esc).join('، ') + '</p></details>' : '')
+      + '<p class="aiest">⚠️ التقييم مبني على ما قُرئ من الملصق فقط، وقد يخطئ في قراءة رقم؛ راجع الملصق نفسه، واسأل أخصائيك إن كانت لديك حالة صحية.</p>'
+      + (P.kcal ? '<button class="btn sec full" data-act="aiAddLbl">' + I('check') + ' أضف حصة واحدة إلى تسجيل اليوم</button>' : '') + '<button class="btn sec full" data-act="aiAgain">امسح ملصقاً آخر</button>';
+  }
+  const PL = { fridge: ['🧊', 'في الثلاجة'], freezer: ['❄️', 'في الفريزر'], pantry: ['🗄️', 'خارج الثلاجة'], mixed: ['🧊', 'الثلاجة أو الفريزر'] }[r.place];
+  const ls = (t, a, c) => a.length ? '<div class="ails ' + c + '"><b>' + t + '</b><ul>' + a.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul></div>' : '';
+  return '<div class="aihead"><b>' + esc(r.food) + '</b>' + (r.category ? '<span class="aiconf mid">' + esc(r.category) + '</span>' : '') + '</div>'
+    + '<div class="airate mid"><span>' + PL[0] + '</span><div><b>يُحفظ ' + PL[1] + '</b><small>' + esc(r.temp) + '</small></div></div>'
+    + '<div class="aidur">' + [['🧊 الثلاجة', r.fridge], ['❄️ الفريزر', r.freezer], ['🌡️ خارج التبريد', r.room]].filter((x) => x[1]).map((x) => '<div><small>' + x[0] + '</small><b>' + esc(x[1]) + '</b></div>').join('') + '</div>'
+    + ls('طريقة الحفظ', r.howTo, '') + ls('🔍 علامات الفساد', r.spoilSigns, 'neg') + ls('⛔ لا تأكله إذا', r.unsafeSigns, 'neg') + ls('🧼 التعامل والطهي الآمن', r.handling, 'pos')
+    + '<p class="aiest">⚠️ ' + esc(r.note || 'لا يمكن التأكد من سلامة الطعام من صورة. عند الشك تخلّص منه.') + '</p><button class="btn sec full" data-act="aiAgain">صوّر طعاماً آخر</button>';
+}
+// الشبكة: موقّع بمفتاح العميل؛ وفي نسخة العرض (المعاينة) بلا حساب
+async function aiCall(o) {
+  const path = '/v1/ai/food';
+  if (DEMO) { o.demo = 1; let r; try { r = await fetch(API + path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(o), cache: 'no-store' }); } catch (e) { throw new Error('لا اتصال بالإنترنت'); } const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.error || 'تعذّر التحليل (' + r.status + ')'); return j; }
+  try { return await api('POST', path, o); } catch (e) { throw new Error(e.net ? 'لا اتصال بالإنترنت. حاول عند عودة الاتصال.' : e.message); }
+}
+async function aiRun(o) {
+  const v = AIV(); v.busy = 1; v.err = ''; v.res = null; v.drop = {}; v.last = o; render();
+  try { const r = await aiCall(o); if (!r.ok) throw new Error(r.reason || r.error || 'تعذّر التحليل'); v.res = r; }
+  catch (e) { v.err = e.message || 'تعذّر التحليل'; }
+  v.busy = 0; if (sheet && sheet.t === 'ai') render();
+}
+async function aiImage(file, step) {
+  const dims = step === 'label' ? [[1600, 0.82], [1280, 0.75], [1024, 0.7], [320, 0.6]] : [[1024, 0.75], [800, 0.7], [640, 0.65], [320, 0.6]];
+  const out = await shrink(file, dims), big = out.slice(0, 3).find((x) => x.length < 900000) || out[2];
+  return { img: big.split(',')[1], mime: 'image/jpeg', thumb: out[3] };
+}
+function aiPickFile(cam, cb) { const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'; if (cam) inp.setAttribute('capture', 'environment'); inp.style.display = 'none'; document.body.appendChild(inp); inp.onchange = () => { const f = inp.files && inp.files[0]; inp.remove(); if (f) cb(f); }; inp.click(); }
+function aiAddLog(entry, cat, line) {
+  const L = dl(TODAY); L.ai = (L.ai || []).concat([entry]).slice(-20); L.off = L.off || {}; L.off[cat] = 1;
+  L.offT = ((L.offT ? L.offT + '\n' : '') + line).slice(-500); queueLog(dkey(new Date())); save();
+}
+function aiAct(a, v, el) {
+  const s = AIV();
+  switch (a) {
+    case 'aiOpen': V.ai = { step: 'menu' }; sheet = { t: 'ai' }; return true;
+    case 'aiClose': if (s.busy) return false; sheet = null; V.ai = null; return true;
+    case 'aiBack': if (s.busy) return false; V.ai = s.res || s.err ? { step: s.step, text: s.text } : { step: 'menu' }; return true;
+    case 'aiMode': V.ai = { step: v }; if (v === 'text') setTimeout(() => { const t = $('#aiTxt'); if (t) t.focus(); }, 60); return true;
+    case 'aiAgain': V.ai = { step: s.step }; return true;
+    case 'aiRetry': if (s.last) aiRun(s.last); return false;
+    case 'aiGo': { const t = ($('#aiTxt') || {}).value || ''; s.text = t; if (t.trim().length < 3) { toast('اكتب وصفاً لوجبتك أولاً'); return false; } s.thumb = ''; aiRun({ mode: 'text', text: t.trim() }); return false; }
+    case 'aiPick': { const step = s.step, note = (($('#aiNote') || {}).value || '').trim(); s.text = note;
+      aiPickFile(v === 'cam', async (f) => { try { const im = await aiImage(f, step); s.thumb = im.thumb; aiRun({ mode: step, img: im.img, mime: im.mime, text: note || undefined }); } catch (e) { s.err = e.message || 'تعذّر فتح الصورة'; render(); } }); return false; }
+    case 'aiDrop': { s.drop = s.drop || {}; s.drop[v] = !s.drop[v]; return true; }
+    case 'aiCat': s.cat = v; return true;
+    case 'aiAdd': { const r = s.res, items = r.items.filter((x, i) => !(s.drop || {})[i]); if (!items.length) return false;
+      const t = items.reduce((q, x) => ({ kcal: q.kcal + x.kcal, p: q.p + x.p, c: q.c + x.c, f: q.f + x.f }), { kcal: 0, p: 0, c: 0, f: 0 }), cat = s.cat || 'extra';
+      const title = items.length === r.items.length ? r.title : items.map((x) => x.name).join(' + ');
+      aiAddLog({ t: title.slice(0, 80), src: s.step, kcal: Math.round(t.kcal), p: Math.round(t.p), c: Math.round(t.c), f: Math.round(t.f), it: items.map((x) => x.name + (x.portion ? ' (' + x.portion + ')' : '')).slice(0, 12), at: Date.now(), est: 1 }, cat,
+        '🤖 ' + title + ' — ~' + Math.round(t.kcal) + ' سعرة (ك ' + Math.round(t.c) + ' • ب ' + Math.round(t.p) + ' • د ' + Math.round(t.f) + ') تقدير المساعد');
+      sheet = null; V.ai = null; toast('أُضيفت «' + title.slice(0, 40) + '» إلى تسجيل اليوم ✓'); return true; }
+    case 'aiAddLbl': { const r = s.res, P = r.per, nm = (r.product || 'منتج') + (r.serving ? ' (حصة ' + r.serving + ')' : '');
+      aiAddLog({ t: nm.slice(0, 80), src: 'label', kcal: Math.round(P.kcal || 0), p: Math.round(P.protein || 0), c: Math.round(P.carbs || 0), f: Math.round(P.fat || 0), it: [nm], at: Date.now(), est: 0 }, 'extra', '🏷️ ' + nm + ' — ' + Math.round(P.kcal || 0) + ' سعرة من الملصق');
+      sheet = null; V.ai = null; toast('أُضيفت حصة إلى تسجيل اليوم ✓'); return true; }
+    case 'aiDel': { const L = dl(TODAY), x = (L.ai || [])[+v]; if (!x) return false; L.ai.splice(+v, 1); if (L.offT) L.offT = L.offT.split('\n').filter((ln) => ln.indexOf(x.t) < 0).join('\n'); queueLog(dkey(new Date())); save(); toast('حُذفت من تسجيل اليوم'); return true; }
+  }
+  return false;
+}
+// تُستدعى أولاً من موزّع النقرات (قبل switch)
+document.addEventListener('click', (e) => {
+  const el = e.target.closest && e.target.closest('[data-act^="ai"]'); if (!el || !S) return;
+  e.stopImmediatePropagation(); if (aiAct(el.dataset.act, el.dataset.v, el)) render();
+}, true);
+
 })();
 
 document.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('[data-hxv]'); if (!b || !window.HXV) return; e.preventDefault(); e.stopPropagation(); HXV.toggle(b.dataset.hxv, (p, o) => api('POST', p, o), (er) => toast(er.message)); }, true);   // تشغيل الرسائل الصوتية
+
 </script></body></html>

@@ -1168,3 +1168,5 @@ html:has(.scr.qz),body:has(.scr.qz){background:#fff!important}body:has(.scr.qz):
 @media (prefers-reduced-motion:reduce){.zpin .pin span,.zpin .pad button{transition:none}}
 .zpin{overflow-y:auto}.zp-top{flex:0 0 auto;height:min(32vh,260px)}.zp-zz{width:min(36%,150px);margin-bottom:6px}.zp-sheet{flex:1 0 auto}
 .zp-top{height:min(25vh,210px)}.zp-zz{width:min(30%,124px)}.zp-sheet{gap:12px;padding-top:20px}.zpin .pad{gap:10px}.zpin .pad button{height:56px}
+
+/*AIFOODCSS*/
