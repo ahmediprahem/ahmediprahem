@@ -8,7 +8,7 @@
 var VT = { st: null, busy: false, msg: '', list: null, timer: 0, dirtyAt: 0 }, VKEY = 'vault', VITER = 310000;
 function vtLoad() { return tx('meta', 'readonly', function (s) { return s.get(VKEY); }).then(function (r) { return r ? decRec('meta', r) : null; }).then(function (r) { VT.st = r || { key: VKEY, on: 0, tomb: [] }; VT.st.tomb = VT.st.tomb || []; vtTimer(); }).catch(function () { VT.st = { key: VKEY, on: 0, tomb: [] }; }); }
 function vtSave() { saveQ = saveQ.then(function () { return dbPut('meta', VT.st); }).catch(function () { }); return saveQ; }
-function vtIdDefault() { var m = /^hissa_u_(.+)$/.exec(CFG.dbName || ''); return m ? m[1] : S.mode === 'admin' ? 'admin' : ''; }
+function vtIdDefault() { var m = /^hissa_u_(.+)$/.exec(CFG.dbName || ''), u = m ? m[1] : S.mode === 'admin' ? 'admin' : '', e = /^em_(.+?)(_r\d+)?$/.exec(u); return e ? e[1] : u; }      // 1.64: حساب البريد → البريد نفسه (ثابت بعد «نسيت كلمة السر»)
 function vtRelay() { return hxRelay(); }
 // اشتقاق معرّف الخزنة ومفتاح الوصول ومفتاح التشفير من (المعرّف + كلمة السر)
 function vtDerive(id, pw) {

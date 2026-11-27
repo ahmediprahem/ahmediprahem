@@ -117,13 +117,13 @@
       var p; try { p = await H.verify(window.ADMIN_PUB, x.lic); } catch (e) { return emNo({ error: 'رخصة حسابك غير صالحة. تواصل مع الإدارة.', email: x.email }); }
       var em = String(x.email || '').toLowerCase(); if (p.t !== 'em' || String(p.em || '').toLowerCase() !== em) return emNo({ error: 'الرخصة لا تخص هذا البريد.', email: em });
       if (p.exp && p.exp * 1000 < Date.now()) return emNo({ error: 'انتهى اشتراكك في «زنها Pro». تواصل مع الإدارة للتجديد.', email: em });
-      var acct = await kvGet(db, 'kv', 'emacct:' + em), u = acct ? acct.u : (p.lu ? String(p.lu) : 'em_' + em);
+      var acct = await kvGet(db, 'kv', 'emacct:' + em), rs = acct ? null : await kvGet(db, 'kv', 'emreset:' + em), u = acct ? acct.u : rs ? rs.u : (p.lu ? String(p.lu) : 'em_' + em);      // 1.64 rs: بدء جديد بعد «نسيت كلمة السر» (قاعدة بيانات جديدة، والقديمة تبقى)
       var P = function (a) { return { u: a.u, n: p.n, exp: p.exp, sd: a.sd, it: a.it }; };
       var keep = async function (a) { a.at = Date.now(); await kvPut(db, 'kv', a); await kvPut(db, 'kv', { key: 'token:' + a.u.toLowerCase(), token: x.lic, u: a.u, em: 1 }); };
       var st = await REM.staying(); if (acct && st && st.u.toLowerCase() === acct.u.toLowerCase()) { var pw0 = await REM.pw(st); if (pw0 && await H.checkPw(pw0, acct)) { await keep(acct); await REM.save(acct.u, pw0, { stay: true, fill: st.fill }); return enter(P(acct), pw0, true); } await REM.clear(st.u); }
       var pr = await REM.prefs(), hello = '<h2>مرحباً ' + esc(p.n || '') + '</h2><p class="small">دخلت بالبريد <b dir="ltr">' + esc(em) + '</b>' + (x.offline ? ' (بلا اتصال — تُستعمل آخر رخصة محفوظة)' : '') + '.</p>';
-      var old = !acct && p.lu ? await kvGet(db, 'kv', 'token:' + String(p.lu).toLowerCase()) : null, po = null; if (old && !old.em) { try { po = await H.verify(window.ADMIN_PUB, old.token); } catch (e) { po = null; } }
-      if (acct) gate(hello + '<label for="ep">كلمة سر هذا الجهاز</label><input id="ep" type="password" autocomplete="current-password"><div id="eerr"></div>' + remBox(pr, false) + '<p><button id="ebtn">دخول</button></p><p class="small">كلمة السر هذه تفتح بياناتك المحفوظة على هذا الجهاز فقط.</p>');
+      var old = !acct && !rs && p.lu ? await kvGet(db, 'kv', 'token:' + String(p.lu).toLowerCase()) : null, po = null; if (old && !old.em) { try { po = await H.verify(window.ADMIN_PUB, old.token); } catch (e) { po = null; } }
+      if (acct) gate(hello + '<label for="ep">كلمة سر هذا الجهاز</label><input id="ep" type="password" autocomplete="current-password"><div id="eerr"></div>' + remBox(pr, false) + '<p><button id="ebtn">دخول</button></p><p class="small">كلمة السر هذه تفتح بياناتك المحفوظة على هذا الجهاز فقط. <button class="link" id="eforgot" type="button">نسيت كلمة السر؟</button></p>');
       else if (po) gate(hello + '<div class="gok">رُبط بريدك بحسابك السابق «' + esc(po.n || p.lu) + '». اكتب كلمة سرك المعتادة مرة واحدة لتبقى بياناتك كما هي، وبعدها تدخل ببريدك.</div><label for="ep">كلمة سرك الحالية في «زنها Pro»</label><input id="ep" type="password" autocomplete="current-password"><div id="eerr"></div>' + remBox(pr, false) + '<p><button id="ebtn">متابعة</button></p>');
       else gate(hello + '<p class="small">اختر كلمة سر لهذا الجهاز (8 أحرف على الأقل). تشفّر بيانات عملائك على هذا الجهاز، فلا يفتحها من يصل إلى بريدك وحده.</p><label for="ep">كلمة سر الجهاز</label><input id="ep" type="password" autocomplete="new-password"><label for="ep2">تأكيدها</label><input id="ep2" type="password" autocomplete="new-password"><div id="eerr"></div>' + remBox(pr, false) + '<p><button id="ebtn">ابدأ</button></p>');
       var bad = function (m, form) { if (!form) failed(); $('#eerr').innerHTML = '<div class="gerr">' + esc(m) + '</div>'; };
@@ -132,8 +132,13 @@
         if (acct) { if (!(await H.checkPw(pw, acct))) return bad('كلمة السر غير صحيحة'); }
         else if (po) { if (!(await H.checkPw(pw, po))) return bad('كلمة السر غير صحيحة'); a = { key: 'emacct:' + em, em: em, u: po.u, sv: po.sv, sd: po.sd, it: po.it, vf: po.vf }; }
         else { if (pw.length < 8) return bad('كلمة السر 8 أحرف على الأقل', 1); if (pw !== $('#ep2').value) return bad('كلمتا السر غير متطابقتين', 1); a = Object.assign({ key: 'emacct:' + em, em: em, u: u }, await H.makeVerifier(pw)); }
-        await keep(a); var stay = $('#rmStay').checked, fl = $('#rmFill').checked; if (stay || fl) await REM.save(a.u, pw, { stay: stay, fill: fl }); else { await REM.clear(a.u); await REM.setPrefs(false, false); }
+        await keep(a); if (rs) await kvDel(db, 'kv', 'emreset:' + em); var stay = $('#rmStay').checked, fl = $('#rmFill').checked; if (stay || fl) await REM.save(a.u, pw, { stay: stay, fill: fl }); else { await REM.clear(a.u); await REM.setPrefs(false, false); }
         await enter(P(a), pw, stay);
+      };
+      var fgt = $('#eforgot'); if (fgt) fgt.onclick = function () {      // 1.64 «نسيت كلمة السر؟»: لا يمكن فك تشفير بيانات هذا الجهاز بدونها؛ نبدأ دخولاً جديداً ونسترجع العملاء من النسخة الاحتياطية بكود الاسترداد
+        gate('<h2>نسيت كلمة السر؟</h2><p class="small">كلمة سر الجهاز هي مفتاح تشفير بيانات عملائك عليه، ولا يملك أحد نسخة منها، حتى «زنها».</p><div class="gok"><b>إن كنت فعّلت «حماية البيانات»</b> فبياناتك محفوظة مشفّرة على المحطة: ابدأ دخولاً جديداً على هذا الجهاز، ثم اختر «استرجاع عملائي» واكتب <b>كود الاسترداد</b> الذي حفظته.</div><p class="small">بيانات هذا الجهاز القديمة لا تُحذف، وتبقى مقفلة إن تذكّرت كلمة السر لاحقاً (تواصل مع الإدارة لفتحها).</p><p><button id="fgNew">ابدأ من جديد واسترجع عملائي</button></p><p><button class="sec" id="fgBack">تذكّرتها — رجوع</button></p>');
+        $('#fgBack').onclick = function () { emailFlow(x); };
+        $('#fgNew').onclick = async function () { if (!confirm('سيُنشأ دخول جديد على هذا الجهاز بكلمة سر جديدة، وتبقى بياناتك القديمة مقفلة كما هي. متابعة؟')) return; var t = Date.now(); await kvPut(db, 'kv', Object.assign({}, acct, { key: 'emacct_old:' + em + ':' + t })); await kvPut(db, 'kv', { key: 'emreset:' + em, u: 'em_' + em + '_r' + t, at: t }); await kvDel(db, 'kv', 'emacct:' + em); await REM.clear(acct.u); emailFlow(x); };
       };
       $('#ebtn').onclick = go; $('#ep').onkeydown = function (e) { if (e.key === 'Enter' && !$('#ep2')) go(); }; if ($('#ep2')) $('#ep2').onkeydown = function (e) { if (e.key === 'Enter') go(); };
     }

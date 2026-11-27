@@ -1,0 +1,26 @@
+/* 1.64 «حماية البيانات»: بطاقة أعلى «اليوم» ونافذة كود الاسترداد — بألوان نظام زنها */
+.zp164{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:16px;align-items:center;margin-bottom:14px;padding:18px 20px;border-radius:22px;background:linear-gradient(135deg,#FFF6EA,#FFFDF8);border:1.5px solid rgba(242,165,65,.45);box-shadow:0 10px 26px rgba(242,165,65,.14)}
+html:not([data-tone="light"]) .zp164{background:rgba(242,165,65,.10)}
+.zp164 h3{margin:0 0 4px;font-family:'Zenha Head','Hissa Plex',sans-serif;font-weight:800;font-size:18px;letter-spacing:normal}
+.zp164 p{margin:0;font-size:14px;line-height:1.75;color:inherit;opacity:.85}
+.zp164 button{border-radius:999px!important;min-height:46px;padding:0 20px;font-weight:700;background:linear-gradient(135deg,#12A88E,#0E7F72)!important;color:#fff!important;border:0!important;box-shadow:0 8px 20px rgba(14,127,114,.28);white-space:nowrap}
+.zpi{display:grid;place-items:center;width:52px;height:52px;border-radius:16px;background:rgba(242,165,65,.18);color:#C47A12}
+.zpi.ok{background:rgba(79,227,164,.2);color:#0E7F72;margin:0 auto 8px}
+.zpi svg{width:30px;height:30px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.zpck{stroke-dasharray:20;stroke-dashoffset:20;animation:zpck 1s .3s ease forwards}@keyframes zpck{to{stroke-dashoffset:0}}
+@media (max-width:700px){.zp164{grid-template-columns:auto minmax(0,1fr)}.zp164 .zpb{grid-column:1/-1}.zp164 button{width:100%}}
+.zp164m{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;padding:16px;background:rgba(14,26,40,.55);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+.zpcard{width:min(100%,480px);background:#fff;color:#16324A;border-radius:26px;padding:26px;box-shadow:0 30px 80px rgba(0,0,0,.3);text-align:center}
+.zpcard h3{margin:0 0 6px;font-family:'Zenha Head','Hissa Plex',sans-serif;font-weight:800;font-size:21px}
+.zpcard p{font-size:14.5px;line-height:1.8;color:#4A5E70;margin:0 0 14px}
+.zpkv{text-align:start;background:#F5FAF9;border:1px solid rgba(22,50,74,.1);border-radius:14px;padding:10px 14px;margin-bottom:8px}
+.zpkv small{display:block;color:#7B8C9B;font-size:12.5px}.zpkv b{display:block;font-size:16px;word-break:break-all}
+.zpkv.code b{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:20px;letter-spacing:1px;color:#0E7F72}
+.zpact{display:flex;gap:8px;justify-content:center;margin:12px 0}
+.zpact button{border-radius:999px!important;background:#fff!important;color:#0E7F72!important;border:1.5px solid rgba(14,127,114,.35)!important;min-height:40px;padding:0 14px;font-weight:700}
+.zpchk{display:flex;gap:8px;align-items:center;justify-content:center;font-size:14px;margin:6px 0 12px}
+.zpchk input{accent-color:#12A88E;width:18px;height:18px}
+#zpDone{width:100%;min-height:48px;border-radius:999px!important;font-weight:700;background:linear-gradient(135deg,#12A88E,#0E7F72)!important;color:#fff!important;border:0!important}
+#zpDone:disabled{opacity:.45}
+@media (prefers-reduced-motion:reduce){.zpck{animation:none;stroke-dashoffset:0}}
+.zp164m #zpDone:disabled{opacity:.45!important;filter:grayscale(.5);cursor:not-allowed}

@@ -21,6 +21,15 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); };
   await N.reload(); await N.waitForSelector('#ep'); assert.strictEqual(await N.locator('#ep2').count(), 0); await N.fill('#ep', 'wrong-pass'); await N.click('#ebtn'); await N.waitForFunction((t) => new RegExp(t).test(document.querySelector('#eerr').textContent), 'غير صحيحة', { timeout: 15000 }); await N.waitForTimeout(2200);
   await N.fill('#ep', 'MyDevice#2026'); await N.click('#ebtn'); await N.waitForSelector('aside .sidebtn', { state: 'attached' }); assert(await N.evaluate(() => DPApp.S.clients.some((c) => c.name === 'عميل جديد')));
   ok('أخصائي جديد بالبريد: يختار كلمة سر للجهاز (8 أحرف وتأكيد)، يدخل ويضيف عميلاً، وبعد إعادة التحميل يدخل بكلمة السر فقط وعميله موجود');
+  // 3ب) 1.64 «نسيت كلمة السر؟»: رجوع، ثم بدء جديد بكلمة سر جديدة؛ قاعدة جديدة فارغة (للاسترجاع بكود الاسترداد) والقديمة لا تُحذف
+  N.on('dialog', (d) => d.accept().catch(() => { }));
+  await N.reload(); await N.waitForSelector('#eforgot'); await N.click('#eforgot'); await N.waitForSelector('#fgNew'); assert(/كود الاسترداد/.test(await N.textContent('body')));
+  await N.click('#fgBack'); await N.waitForSelector('#ep'); await N.click('#eforgot'); await N.click('#fgNew'); await N.waitForSelector('#ep2');
+  await N.fill('#ep', 'NewDevice#2027'); await N.fill('#ep2', 'NewDevice#2027'); await N.click('#ebtn'); await N.waitForSelector('aside .sidebtn', { state: 'attached' });
+  assert.strictEqual(await N.evaluate(() => DPApp.S.clients.length), 0); await N.waitForSelector('.vthome');
+  const dbs = await N.evaluate(async () => (await indexedDB.databases()).map((d) => d.name).filter((x) => /new@x\.com/.test(x))); assert(dbs.length >= 2, JSON.stringify(dbs));
+  await N.reload(); await N.waitForSelector('#ep'); await N.fill('#ep', 'NewDevice#2027'); await N.click('#ebtn'); await N.waitForSelector('aside .sidebtn', { state: 'attached' });
+  ok('«نسيت كلمة السر؟»: شرح صادق ورجوع، ثم بدء جديد بكلمة سر جديدة على قاعدة فارغة مع بطاقة «جهاز جديد؟» للاسترجاع، والبيانات القديمة لا تُحذف، وكلمة السر الجديدة تعمل بعد إعادة التحميل');
   // 4) اشتراك منتهٍ
   LIC = await lic('new@x.com', 'د. جديد', -1); await N.reload(); await N.waitForSelector('#emOld'); assert(/انتهى اشتراكك/.test(await N.textContent('body'))); ok('الاشتراك المنتهي: رسالة «انتهى اشتراكك» ولا دخول');
   // 4ب) بلغ حد الأجهزة: رسالة واضحة، والطلب يحمل رمز الجهاز واسمه

@@ -2855,6 +2855,32 @@ html.zt162 .home.zh.z162in>*{animation:z162u .6s cubic-bezier(.2,.8,.2,1) both}
 html.zt162 .home.zh.z162in>*:nth-child(2){animation-delay:.06s}html.zt162 .home.zh.z162in>*:nth-child(3){animation-delay:.12s}html.zt162 .home.zh.z162in>*:nth-child(4){animation-delay:.18s}
 @keyframes z162u{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){html.zt162 .home.zh *,.z162dz svg,.z162dz svg *{animation:none!important;transition:none!important;stroke-dashoffset:0!important}}
+/* 1.64 «حماية البيانات»: بطاقة أعلى «اليوم» ونافذة كود الاسترداد — بألوان نظام زنها */
+.zp164{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:16px;align-items:center;margin-bottom:14px;padding:18px 20px;border-radius:22px;background:linear-gradient(135deg,#FFF6EA,#FFFDF8);border:1.5px solid rgba(242,165,65,.45);box-shadow:0 10px 26px rgba(242,165,65,.14)}
+html:not([data-tone="light"]) .zp164{background:rgba(242,165,65,.10)}
+.zp164 h3{margin:0 0 4px;font-family:'Zenha Head','Hissa Plex',sans-serif;font-weight:800;font-size:18px;letter-spacing:normal}
+.zp164 p{margin:0;font-size:14px;line-height:1.75;color:inherit;opacity:.85}
+.zp164 button{border-radius:999px!important;min-height:46px;padding:0 20px;font-weight:700;background:linear-gradient(135deg,#12A88E,#0E7F72)!important;color:#fff!important;border:0!important;box-shadow:0 8px 20px rgba(14,127,114,.28);white-space:nowrap}
+.zpi{display:grid;place-items:center;width:52px;height:52px;border-radius:16px;background:rgba(242,165,65,.18);color:#C47A12}
+.zpi.ok{background:rgba(79,227,164,.2);color:#0E7F72;margin:0 auto 8px}
+.zpi svg{width:30px;height:30px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.zpck{stroke-dasharray:20;stroke-dashoffset:20;animation:zpck 1s .3s ease forwards}@keyframes zpck{to{stroke-dashoffset:0}}
+@media (max-width:700px){.zp164{grid-template-columns:auto minmax(0,1fr)}.zp164 .zpb{grid-column:1/-1}.zp164 button{width:100%}}
+.zp164m{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;padding:16px;background:rgba(14,26,40,.55);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+.zpcard{width:min(100%,480px);background:#fff;color:#16324A;border-radius:26px;padding:26px;box-shadow:0 30px 80px rgba(0,0,0,.3);text-align:center}
+.zpcard h3{margin:0 0 6px;font-family:'Zenha Head','Hissa Plex',sans-serif;font-weight:800;font-size:21px}
+.zpcard p{font-size:14.5px;line-height:1.8;color:#4A5E70;margin:0 0 14px}
+.zpkv{text-align:start;background:#F5FAF9;border:1px solid rgba(22,50,74,.1);border-radius:14px;padding:10px 14px;margin-bottom:8px}
+.zpkv small{display:block;color:#7B8C9B;font-size:12.5px}.zpkv b{display:block;font-size:16px;word-break:break-all}
+.zpkv.code b{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:20px;letter-spacing:1px;color:#0E7F72}
+.zpact{display:flex;gap:8px;justify-content:center;margin:12px 0}
+.zpact button{border-radius:999px!important;background:#fff!important;color:#0E7F72!important;border:1.5px solid rgba(14,127,114,.35)!important;min-height:40px;padding:0 14px;font-weight:700}
+.zpchk{display:flex;gap:8px;align-items:center;justify-content:center;font-size:14px;margin:6px 0 12px}
+.zpchk input{accent-color:#12A88E;width:18px;height:18px}
+#zpDone{width:100%;min-height:48px;border-radius:999px!important;font-weight:700;background:linear-gradient(135deg,#12A88E,#0E7F72)!important;color:#fff!important;border:0!important}
+#zpDone:disabled{opacity:.45}
+@media (prefers-reduced-motion:reduce){.zpck{animation:none;stroke-dashoffset:0}}
+.zp164m #zpDone:disabled{opacity:.45!important;filter:grayscale(.5);cursor:not-allowed}
 </style></head>
 <body class="gating"><header id="hd"></header><div id="gate" style="display:flex"><div class="gcard" style="text-align:center"><div style="font-weight:700;color:#253464">حصة — جارٍ التحميل…</div></div></div><div id="app" style="display:none"><aside></aside><main></main></div>
 <noscript><div style="position:fixed;inset:0;background:#092061;color:#fff;padding:24px;text-align:center;font:16px Tahoma,Arial">هذا الملف يحتاج تفعيل JavaScript. افتحه مباشرة في Chrome أو Edge أو Safari (وليس من معاينة واتساب أو البريد).</div></noscript>
@@ -8824,7 +8850,7 @@ document.addEventListener('change', function (e) {
 var VT = { st: null, busy: false, msg: '', list: null, timer: 0, dirtyAt: 0 }, VKEY = 'vault', VITER = 310000;
 function vtLoad() { return tx('meta', 'readonly', function (s) { return s.get(VKEY); }).then(function (r) { return r ? decRec('meta', r) : null; }).then(function (r) { VT.st = r || { key: VKEY, on: 0, tomb: [] }; VT.st.tomb = VT.st.tomb || []; vtTimer(); }).catch(function () { VT.st = { key: VKEY, on: 0, tomb: [] }; }); }
 function vtSave() { saveQ = saveQ.then(function () { return dbPut('meta', VT.st); }).catch(function () { }); return saveQ; }
-function vtIdDefault() { var m = /^hissa_u_(.+)$/.exec(CFG.dbName || ''); return m ? m[1] : S.mode === 'admin' ? 'admin' : ''; }
+function vtIdDefault() { var m = /^hissa_u_(.+)$/.exec(CFG.dbName || ''), u = m ? m[1] : S.mode === 'admin' ? 'admin' : '', e = /^em_(.+?)(_r\d+)?$/.exec(u); return e ? e[1] : u; }      // 1.64: حساب البريد → البريد نفسه (ثابت بعد «نسيت كلمة السر»)
 function vtRelay() { return hxRelay(); }
 // اشتقاق معرّف الخزنة ومفتاح الوصول ومفتاح التشفير من (المعرّف + كلمة السر)
 function vtDerive(id, pw) {
@@ -12114,6 +12140,51 @@ A.hqBell = (function (f) { return function () { var r = f.apply(this, arguments)
   window.ZN_home162 = { scan: scan, classic: function (on) { try { localStorage.setItem('zn_classic', on ? '1' : '0'); } catch (e) { } R.classList.toggle('zt162', !on); } };
 })();
 
+// ================= 1.64 «حماية البيانات» (المرحلة 0 من خطة زنها السحابي): نسخ احتياطي تلقائي مشفّر بلمسة واحدة + «كود الاسترداد»
+// يستعمل خزنة 1.x نفسها (vault_ui.js) بلا أي تغيير في المحطة: معرّف النسخة = بريد الحساب (أو اسم المستخدم)، وكلمة سر النسخ = كود عشوائي يُعرض مرة واحدة.
+// بطاقة لا تُتجاهل في «اليوم» ما دام عند الأخصائي عملاء بلا حماية، والكود يُحفظ نسخاً/تنزيلاً/طباعةً قبل الإغلاق.
+var ZP = { busy: false };
+function zpId() { var m = /^hissa_u_(.+)$/.exec(CFG.dbName || ''), u = m ? m[1] : (S.mode === 'admin' ? 'admin' : ''); var e = /^em_(.+?)(_r\d+)?$/.exec(u); return e ? e[1] : u; }      // بريد الحساب يبقى ثابتاً حتى بعد «نسيت كلمة السر»
+function zpCode() { var A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', b = crypto.getRandomValues(new Uint8Array(20)), s = ''; for (var i = 0; i < 20; i++) { s += A[b[i] % 32]; if (i % 5 === 4 && i < 19) s += '-'; } return s; }      // 100 بت: XXXXX-XXXXX-XXXXX-XXXXX
+function zpNeed() { return !!(VT.st && !VT.st.on && S.clients && S.clients.length && hxOn() && S.view !== 'settings'); }
+function zpCard() {
+  return '<section class="zp164" role="alert" aria-labelledby="zp164h"><div class="zpi" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6z"/><path class="zpck" d="M8.5 12.2l2.4 2.4 4.6-4.8"/></svg></div>'
+    + '<div class="zpt"><h3 id="zp164h">احمِ بيانات عملائك الآن</h3><p>بيانات <b>' + S.clients.length + '</b> عميل محفوظة على هذا الجهاز فقط. إن نسيت كلمة السر أو مُسح المتصفح ضاعت. فعّل الحماية لتُحفظ نسخة مشفّرة تلقائياً بعد كل تعديل، وتسترجعها من أي جهاز بكود استرداد.</p></div>'
+    + '<div class="zpb"><button data-a="zpOn"' + (ZP.busy ? ' disabled' : '') + '>' + (ZP.busy ? 'جارٍ التفعيل…' : 'فعّل الحماية الآن') + '</button></div></section>';
+}
+function zpShowCode(id, code) {
+  var d = document.createElement('div'); d.className = 'zp164m'; d.setAttribute('role', 'dialog'); d.setAttribute('aria-modal', 'true'); d.setAttribute('aria-labelledby', 'zpmh');
+  d.innerHTML = '<div class="zpcard"><div class="zpi ok" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6z"/><path class="zpck" d="M8.5 12.2l2.4 2.4 4.6-4.8"/></svg></div>'
+    + '<h3 id="zpmh">فُعّلت الحماية ✓</h3><p>احفظ هذين في مكان آمن خارج هذا الجهاز (ورقة مطبوعة، أو مدير كلمات المرور). تحتاجهما لاسترجاع عملائك إن نسيت كلمة السر أو غيّرت الجهاز. <b>لن يظهر الكود مرة أخرى.</b></p>'
+    + '<div class="zpkv"><small>معرّف النسخة</small><b dir="ltr">' + esc(id) + '</b></div><div class="zpkv code"><small>كود الاسترداد</small><b dir="ltr" id="zpcode">' + esc(code) + '</b></div>'
+    + '<div class="zpact"><button class="sec" id="zpCopy">نسخ</button><button class="sec" id="zpDl">تنزيل ملف</button><button class="sec" id="zpPr">طباعة</button></div>'
+    + '<label class="zpchk"><input type="checkbox" id="zpOk"> حفظت معرّف النسخة وكود الاسترداد في مكان آمن</label><button id="zpDone" disabled>تم</button></div>';
+  document.body.appendChild(d);
+  var txt = 'زنها Pro — بيانات استرجاع العملاء\nمعرّف النسخة: ' + id + '\nكود الاسترداد: ' + code + '\nالاسترجاع: الإعدادات ← النسخ والمزامنة ← استرجاع (أو «استرجاع عملائي» في جهاز جديد)\nاحفظه خارج هذا الجهاز ولا تشاركه.\n';
+  d.querySelector('#zpCopy').onclick = function () { (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(function () { toast('✓ نُسخ'); }, function () { toast('انسخ الكود يدوياً'); }); };
+  d.querySelector('#zpDl').onclick = function () { var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt], { type: 'text/plain;charset=utf-8' })); a.download = 'zenha-recovery.txt'; document.body.appendChild(a); a.click(); a.remove(); };
+  d.querySelector('#zpPr').onclick = function () { var w = window.open('', '_blank'); if (!w) return toast('اسمح بالنوافذ المنبثقة للطباعة'); w.document.write('<html dir="rtl"><body style="font:18px system-ui;padding:40px;line-height:2"><pre style="font:inherit;white-space:pre-wrap">' + esc(txt) + '</pre><script>print()<\/script></body></html>'); w.document.close(); };
+  var ok = d.querySelector('#zpOk'), dn = d.querySelector('#zpDone'); ok.onchange = function () { dn.disabled = !ok.checked; }; dn.onclick = function () { d.remove(); main(); };
+  setTimeout(function () { ok.focus(); }, 50);
+}
+A.zpOn = function () {
+  if (ZP.busy) return; var id = zpId(), code = zpCode(); if (!id) { toast('تعذّر تحديد معرّف الحساب'); return; }
+  ZP.busy = true; main(); toast('جارٍ تجهيز الحماية المشفّرة…');
+  vtDerive(id, code).then(function (k) {
+    VT.st = Object.assign(VT.st || {}, { key: VKEY, on: 1, id: id, dev: VT.st && VT.st.dev || 'جهاز', vid: k.vid, auth: k.auth, enc: k.enc, sync: 1, tomb: (VT.st && VT.st.tomb) || [], seenVer: 0, syncAt: 0, zp: 1 });
+    return vtSave().then(function () { return vtBackup('zp'); });
+  }).then(function (ok) {
+    ZP.busy = false; vtTimer(); vtRail(); main();
+    if (ok) zpShowCode(id, code); else { toast('تعذّر رفع أول نسخة: ' + (VT.st.err || 'حاول مرة أخرى')); VT.st.on = 0; vtSave(); main(); }
+  }).catch(function (e) { ZP.busy = false; if (VT.st) { VT.st.on = 0; vtSave(); } main(); toast('تعذّر التفعيل: ' + e.message); });
+};
+// تظهر البطاقة أعلى «اليوم» ما دامت الحماية غير مفعّلة (تُرسم بعد الصفحة؛ لا تغيّر محتواها)
+(function () {
+  var put = function () { var h = document.querySelector('.home'); if (!h) return; var c = h.querySelector('.zp164'); if (!zpNeed()) { if (c) c.remove(); return; } if (!c) { h.insertAdjacentHTML('afterbegin', zpCard()); } };
+  if (window.MutationObserver) new MutationObserver(function () { if (document.querySelector('.home') && !document.querySelector('.home .zp164') && zpNeed()) put(); }).observe(document.documentElement, { childList: true, subtree: true });
+  window.ZN_protect = { put: put, need: zpNeed, id: zpId };
+})();
+
 // ================= 1.19 المرحلة 4: تبويب «توليد الخطة» — يُدمج داخل app.js عند /*GENUI*/
 // بند جانبي «توليد الخطة» يفتح قائمة العملاء مع «＋ عميل جديد»، واختيار العميل يفتح ملفه على قسم «توليد» (مجموعة «الخطة»).
 // الخطوات: 1 العميل • 2 المراجعة والاستبعاد (سبب كل استبعاد، ويعتمده الأخصائي) • 3 الإعداد (النظام، الوجبات، جاهز أو يدوي، شكل الأسبوع) • 4 الخطة • 5 المراجعة والإرسال.
@@ -12859,13 +12930,13 @@ refresh:function(){render()},reencrypt:function(newKey){var stores=['clients','v
       var p; try { p = await H.verify(window.ADMIN_PUB, x.lic); } catch (e) { return emNo({ error: 'رخصة حسابك غير صالحة. تواصل مع الإدارة.', email: x.email }); }
       var em = String(x.email || '').toLowerCase(); if (p.t !== 'em' || String(p.em || '').toLowerCase() !== em) return emNo({ error: 'الرخصة لا تخص هذا البريد.', email: em });
       if (p.exp && p.exp * 1000 < Date.now()) return emNo({ error: 'انتهى اشتراكك في «زنها Pro». تواصل مع الإدارة للتجديد.', email: em });
-      var acct = await kvGet(db, 'kv', 'emacct:' + em), u = acct ? acct.u : (p.lu ? String(p.lu) : 'em_' + em);
+      var acct = await kvGet(db, 'kv', 'emacct:' + em), rs = acct ? null : await kvGet(db, 'kv', 'emreset:' + em), u = acct ? acct.u : rs ? rs.u : (p.lu ? String(p.lu) : 'em_' + em);      // 1.64 rs: بدء جديد بعد «نسيت كلمة السر» (قاعدة بيانات جديدة، والقديمة تبقى)
       var P = function (a) { return { u: a.u, n: p.n, exp: p.exp, sd: a.sd, it: a.it }; };
       var keep = async function (a) { a.at = Date.now(); await kvPut(db, 'kv', a); await kvPut(db, 'kv', { key: 'token:' + a.u.toLowerCase(), token: x.lic, u: a.u, em: 1 }); };
       var st = await REM.staying(); if (acct && st && st.u.toLowerCase() === acct.u.toLowerCase()) { var pw0 = await REM.pw(st); if (pw0 && await H.checkPw(pw0, acct)) { await keep(acct); await REM.save(acct.u, pw0, { stay: true, fill: st.fill }); return enter(P(acct), pw0, true); } await REM.clear(st.u); }
       var pr = await REM.prefs(), hello = '<h2>مرحباً ' + esc(p.n || '') + '</h2><p class="small">دخلت بالبريد <b dir="ltr">' + esc(em) + '</b>' + (x.offline ? ' (بلا اتصال — تُستعمل آخر رخصة محفوظة)' : '') + '.</p>';
-      var old = !acct && p.lu ? await kvGet(db, 'kv', 'token:' + String(p.lu).toLowerCase()) : null, po = null; if (old && !old.em) { try { po = await H.verify(window.ADMIN_PUB, old.token); } catch (e) { po = null; } }
-      if (acct) gate(hello + '<label for="ep">كلمة سر هذا الجهاز</label><input id="ep" type="password" autocomplete="current-password"><div id="eerr"></div>' + remBox(pr, false) + '<p><button id="ebtn">دخول</button></p><p class="small">كلمة السر هذه تفتح بياناتك المحفوظة على هذا الجهاز فقط.</p>');
+      var old = !acct && !rs && p.lu ? await kvGet(db, 'kv', 'token:' + String(p.lu).toLowerCase()) : null, po = null; if (old && !old.em) { try { po = await H.verify(window.ADMIN_PUB, old.token); } catch (e) { po = null; } }
+      if (acct) gate(hello + '<label for="ep">كلمة سر هذا الجهاز</label><input id="ep" type="password" autocomplete="current-password"><div id="eerr"></div>' + remBox(pr, false) + '<p><button id="ebtn">دخول</button></p><p class="small">كلمة السر هذه تفتح بياناتك المحفوظة على هذا الجهاز فقط. <button class="link" id="eforgot" type="button">نسيت كلمة السر؟</button></p>');
       else if (po) gate(hello + '<div class="gok">رُبط بريدك بحسابك السابق «' + esc(po.n || p.lu) + '». اكتب كلمة سرك المعتادة مرة واحدة لتبقى بياناتك كما هي، وبعدها تدخل ببريدك.</div><label for="ep">كلمة سرك الحالية في «زنها Pro»</label><input id="ep" type="password" autocomplete="current-password"><div id="eerr"></div>' + remBox(pr, false) + '<p><button id="ebtn">متابعة</button></p>');
       else gate(hello + '<p class="small">اختر كلمة سر لهذا الجهاز (8 أحرف على الأقل). تشفّر بيانات عملائك على هذا الجهاز، فلا يفتحها من يصل إلى بريدك وحده.</p><label for="ep">كلمة سر الجهاز</label><input id="ep" type="password" autocomplete="new-password"><label for="ep2">تأكيدها</label><input id="ep2" type="password" autocomplete="new-password"><div id="eerr"></div>' + remBox(pr, false) + '<p><button id="ebtn">ابدأ</button></p>');
       var bad = function (m, form) { if (!form) failed(); $('#eerr').innerHTML = '<div class="gerr">' + esc(m) + '</div>'; };
@@ -12874,8 +12945,13 @@ refresh:function(){render()},reencrypt:function(newKey){var stores=['clients','v
         if (acct) { if (!(await H.checkPw(pw, acct))) return bad('كلمة السر غير صحيحة'); }
         else if (po) { if (!(await H.checkPw(pw, po))) return bad('كلمة السر غير صحيحة'); a = { key: 'emacct:' + em, em: em, u: po.u, sv: po.sv, sd: po.sd, it: po.it, vf: po.vf }; }
         else { if (pw.length < 8) return bad('كلمة السر 8 أحرف على الأقل', 1); if (pw !== $('#ep2').value) return bad('كلمتا السر غير متطابقتين', 1); a = Object.assign({ key: 'emacct:' + em, em: em, u: u }, await H.makeVerifier(pw)); }
-        await keep(a); var stay = $('#rmStay').checked, fl = $('#rmFill').checked; if (stay || fl) await REM.save(a.u, pw, { stay: stay, fill: fl }); else { await REM.clear(a.u); await REM.setPrefs(false, false); }
+        await keep(a); if (rs) await kvDel(db, 'kv', 'emreset:' + em); var stay = $('#rmStay').checked, fl = $('#rmFill').checked; if (stay || fl) await REM.save(a.u, pw, { stay: stay, fill: fl }); else { await REM.clear(a.u); await REM.setPrefs(false, false); }
         await enter(P(a), pw, stay);
+      };
+      var fgt = $('#eforgot'); if (fgt) fgt.onclick = function () {      // 1.64 «نسيت كلمة السر؟»: لا يمكن فك تشفير بيانات هذا الجهاز بدونها؛ نبدأ دخولاً جديداً ونسترجع العملاء من النسخة الاحتياطية بكود الاسترداد
+        gate('<h2>نسيت كلمة السر؟</h2><p class="small">كلمة سر الجهاز هي مفتاح تشفير بيانات عملائك عليه، ولا يملك أحد نسخة منها، حتى «زنها».</p><div class="gok"><b>إن كنت فعّلت «حماية البيانات»</b> فبياناتك محفوظة مشفّرة على المحطة: ابدأ دخولاً جديداً على هذا الجهاز، ثم اختر «استرجاع عملائي» واكتب <b>كود الاسترداد</b> الذي حفظته.</div><p class="small">بيانات هذا الجهاز القديمة لا تُحذف، وتبقى مقفلة إن تذكّرت كلمة السر لاحقاً (تواصل مع الإدارة لفتحها).</p><p><button id="fgNew">ابدأ من جديد واسترجع عملائي</button></p><p><button class="sec" id="fgBack">تذكّرتها — رجوع</button></p>');
+        $('#fgBack').onclick = function () { emailFlow(x); };
+        $('#fgNew').onclick = async function () { if (!confirm('سيُنشأ دخول جديد على هذا الجهاز بكلمة سر جديدة، وتبقى بياناتك القديمة مقفلة كما هي. متابعة؟')) return; var t = Date.now(); await kvPut(db, 'kv', Object.assign({}, acct, { key: 'emacct_old:' + em + ':' + t })); await kvPut(db, 'kv', { key: 'emreset:' + em, u: 'em_' + em + '_r' + t, at: t }); await kvDel(db, 'kv', 'emacct:' + em); await REM.clear(acct.u); emailFlow(x); };
       };
       $('#ebtn').onclick = go; $('#ep').onkeydown = function (e) { if (e.key === 'Enter' && !$('#ep2')) go(); }; if ($('#ep2')) $('#ep2').onkeydown = function (e) { if (e.key === 'Enter') go(); };
     }
