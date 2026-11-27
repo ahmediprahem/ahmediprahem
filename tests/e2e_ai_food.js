@@ -24,13 +24,25 @@ const R = {
   await new Promise((x) => srv.listen(0, '127.0.0.1', x)); const URL = 'http://127.0.0.1:' + srv.address().port + '/';
   const b = await chromium.launch(); const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: SHOT ? 2 : 1 }), p = await ctx.newPage(); p.on('pageerror', (e) => errs.push(String(e)));
   await p.goto(URL); await p.waitForTimeout(1200); for (let i = 0; i < 4; i++) { const s = p.getByText('تخطّي'); if (await s.count()) { await s.first().click().catch(() => { }); await p.waitForTimeout(400); } }
+  const pick = async (v) => { await p.click('.aiw[data-v="' + v + '"]'); await p.waitForSelector('.aiw.on[data-v="' + v + '"]'); await p.click('[data-act="aiMode"][data-v="' + v + '"]'); };      // 1.59 الطبق: اختيار القسم ثم «ابدأ»
   const shot = async (nm) => { if (SHOT) await p.screenshot({ path: SHOT + '/ai_' + nm + '.png' }); };
   // م1
-  await p.click('.tabbar .aifab'); await p.waitForSelector('.aiopt'); assert.strictEqual(await p.locator('.aiopt').count(), 6);
-  const lbl = await p.$$eval('.aiopt b', (x) => x.map((e) => e.textContent)); assert.deepStrictEqual(lbl, ['صف وجبتك', 'صوّر وجبتك', 'امسح الملصق الغذائي', 'التخزين والسلامة', 'قيّم مكمّلاً', 'الأعشاب']); await shot('1menu');
+  await p.click('.tabbar .aifab'); await p.waitForSelector('.aiw'); assert.strictEqual(await p.locator('.aiw').count(), 6);
+  const lbl = await p.$$eval('.aiw', (x) => x.map((e) => e.getAttribute('aria-label').split(' — ')[0])); assert.deepStrictEqual(lbl, ['صف وجبتك', 'صوّر وجبتك', 'امسح الملصق الغذائي', 'التخزين والسلامة', 'قيّم مكمّلاً', 'الأعشاب']); await shot('1menu');
+  { await p.click('.aiw[data-v="label"]'); await p.waitForSelector('.aiw.on[data-v="label"]'); assert(/امسح الملصق الغذائي/.test(await p.textContent('.aicard')));
+    const top = await p.evaluate(() => { const r = document.querySelector('.aiw.on .aiws').getBoundingClientRect(), s = document.querySelector('.aiplw svg').getBoundingClientRect(); return Math.abs((r.left + r.width / 2) - (s.left + s.width / 2)) < 12 && r.top < s.top + s.height * 0.3; }); assert(top, 'القسم المختار يصعد إلى أعلى الطبق');
+    const up = await p.evaluate(() => [...document.querySelectorAll('.aiwt')].every((t) => { const m = t.getScreenCTM(); return Math.abs(m.b) < 0.02 && m.a > 0; })); assert(up, 'النص قائم (غير مائل) بعد الدوران');
+    { const bx = await p.locator('.aiplw svg').boundingBox(), cx = bx.x + bx.width / 2, cy = bx.y + bx.height / 2, R = bx.width * 0.36; await p.mouse.move(cx + R, cy); await p.mouse.down();
+      for (let k = 1; k <= 8; k++) { const a = k * Math.PI / 16; await p.mouse.move(cx + R * Math.cos(a), cy + R * Math.sin(a)); } await p.mouse.up(); await p.waitForTimeout(700);
+      const now = await p.getAttribute('.aiw.on', 'data-v'); assert(now && now !== 'label', 'السحب يدير الطبق ويختار قسماً آخر: ' + now); await shot('1wheel'); }
+    await p.click('.aiw[data-v="label"]'); await p.waitForSelector('.aiw.on[data-v="label"]'); assert.strictEqual(await p.getAttribute('.aiw[data-v="label"]', 'aria-pressed'), 'true'); await shot('1plate');
+    await p.click('.aihub'); assert(/أدِر الطبق/.test(await p.textContent('.aicard'))); await p.focus('.aiw[data-v="herb"]'); await p.keyboard.press('Enter'); await p.waitForSelector('.aiw.on[data-v="herb"]'); assert(/الأعشاب/.test(await p.textContent('.aicard b')));
+    await p.focus('.aiw[data-v="herb"]'); await p.keyboard.press('ArrowLeft'); await p.waitForSelector('.aiw.on[data-v="text"]');
+    const ov = await p.evaluate(() => { const t = [...document.querySelectorAll('.aiwt')].map((e) => e.getBBox()), s = [...document.querySelectorAll('.aiws')].map((e) => e.getBBox()); return t.every((b) => b.width < 130) && new Set(t.map((b) => Math.round(b.height))).size === 1; }); assert(ov, 'أسماء الأقسام بسطر واحد وبارتفاع واحد');
+    ok('1.59 الطبق عجلة: اللمس يدير القسم إلى الأعلى ويُظهر بطاقته (وصف، وسوم، «ابدأ»)، السحب يدير الطبق ويستقر على قسم، النص يبقى قائماً، المركز يعيد النظرة العامة، Enter والأسهم من لوحة المفاتيح'); }
   assert.strictEqual(await p.locator('.hello .aibtn').count(), 0); const tabs = await p.$$eval('.tabbar > button', (x) => x.map((b) => b.classList.contains('aifab') ? 'AI' : b.textContent.trim())); assert.deepStrictEqual(tabs, ['صفحتي', 'خطتي', 'AI', 'تثقيف', 'الإعدادات']); ok('م1: أيقونة المالك زر بارز في منتصف الشريط السفلي (بين خطتي وتثقيف) يفتح 4 خيارات بهوية «زنها»');
   // م2 الوصف + التحميل + الإضافة
-  await p.click('[data-act="aiMode"][data-v="text"]'); await p.fill('#aiTxt', 'برجر بجبنة شيدر وكولا دايت'); await p.click('[data-act="aiGo"]');
+  await pick('text'); await p.fill('#aiTxt', 'برجر بجبنة شيدر وكولا دايت'); await p.click('[data-act="aiGo"]');
   await p.waitForSelector('.aiload'); assert(/نحلل وصف وجبتك/.test(await p.textContent('.aiload'))); await shot('2load');
   await p.waitForSelector('.aikc'); assert.strictEqual(calls[calls.length - 1].mode, 'text'); assert.strictEqual(calls[calls.length - 1].demo, 1);
   assert(/542/.test(await p.textContent('.aikc'))); assert.strictEqual(await p.locator('.aiit').count(), 2); assert(/تقديرية/.test(await p.textContent('.aiest'))); assert(/تقديري/.test(await p.textContent('.aihead')));
@@ -46,20 +58,20 @@ const R = {
   const hasLog = await p.locator('.ailog').count(); if (hasLog) { assert(/540/.test(await p.textContent('.ailog'))); await shot('4daylog'); await p.click('.ailog [data-act="aiDel"]'); const L2 = await p.evaluate(() => { const s = window.HissatiApp.state(), k = Object.keys(s.log).sort().pop(); return s.log[k]; }); assert.strictEqual(L2.ai.length, 0); assert(!/برجر/.test(L2.offT || '')); ok('«تسجيل اليوم»: قائمة «أُضيف بالمساعد اليوم» بمجموعها، والحذف يزيلها من السجل'); await p.click('.sheet .sh [data-act="close"]').catch(() => { }); await p.waitForTimeout(200); }
   else console.log('   (ورقة تسجيل اليوم غير متاحة في نسخة العرض الآن — فُحص السجل مباشرة)');
   // م3 الصورة
-  await p.click('.tabbar .aifab'); await p.click('[data-act="aiMode"][data-v="photo"]'); await p.fill('#aiNote', 'مطبوخ بقليل من الزيت');
+  await p.click('.tabbar .aifab'); await pick('photo'); await p.fill('#aiNote', 'مطبوخ بقليل من الزيت');
   const [fc] = await Promise.all([p.waitForEvent('filechooser'), p.click('[data-act="aiPick"][data-v="lib"]')]); await fc.setFiles(IMG);
   await p.waitForSelector('.aikc'); const c3 = calls[calls.length - 1]; assert.strictEqual(c3.mode, 'photo'); assert(c3.img && c3.img.length > 100 && c3.mime === 'image/jpeg' && /الزيت/.test(c3.text));
   assert(await p.locator('.aithumb').count() === 1 && await p.locator('.aiit').count() === 3); await shot('5photo'); ok('م3 الصورة: اختيار/التقاط صورة تُصغَّر وتُرسل مع الملاحظة، ثم الأصناف المتعرَّف عليها بقيمها وصورة مصغّرة');
   await p.click('[data-act="aiAdd"]'); await p.waitForFunction(() => !document.querySelector('.aish'));
   // م4–م5 الملصق
-  await p.click('.tabbar .aifab'); await p.click('[data-act="aiMode"][data-v="label"]'); const [fc2] = await Promise.all([p.waitForEvent('filechooser'), p.click('[data-act="aiPick"][data-v="cam"]')]);
+  await p.click('.tabbar .aifab'); await pick('label'); const [fc2] = await Promise.all([p.waitForEvent('filechooser'), p.click('[data-act="aiPick"][data-v="cam"]')]);
   assert((await fc2.element().getAttribute('capture')) === 'environment'); await fc2.setFiles(IMG); await p.waitForSelector('.airate');
   assert(/للمناسبات فقط/.test(await p.textContent('.airate'))); const lt = await p.textContent('.ailbl'); assert(/640/.test(lt) && /1.5/.test(lt) && /غير مذكور/.test(lt));
   assert(/دهون متحولة/.test(await p.textContent('.ails.neg'))); assert(/تونة بالماء/.test(await p.textContent('.ails.alt'))); await shot('6label');
   ok('م4–م5 الملصق: «التقط صورة» يفتح الكاميرا الخلفية، القيم كما على الملصق وما لم يُذكر «غير مذكور»، والتقييم (للمناسبات) بالإيجابيات والمخاوف والأسباب والبدائل');
   await p.click('[data-act="aiAddLbl"]'); await p.waitForFunction(() => !document.querySelector('.aish'));
   // م6 التخزين
-  await p.click('.tabbar .aifab'); await p.click('[data-act="aiMode"][data-v="store"]'); assert(/لا يمكن التأكد من سلامة الطعام من صورة/.test(await p.textContent('.aish')));
+  await p.click('.tabbar .aifab'); await pick('store'); assert(/لا يمكن التأكد من سلامة الطعام من صورة/.test(await p.textContent('.aish')));
   const [fc3] = await Promise.all([p.waitForEvent('filechooser'), p.click('[data-act="aiPick"][data-v="lib"]')]); await fc3.setFiles(IMG); await p.waitForSelector('.aidur');
   const st = await p.textContent('.aish'); assert(/يُحفظ في الثلاجة/.test(st) && /6–8 أشهر/.test(st) && /علامات الفساد/.test(st) && /63°م/.test(st) && /عند الشك/.test(st)); await shot('7store');
   ok('م6 التخزين: المكان والحرارة والمدد وعلامات الفساد وما يمنع الأكل والطهي الآمن، وتنبيه أن الصورة لا تؤكد السلامة');
@@ -72,7 +84,7 @@ const R = {
   const L3 = await p.evaluate(() => { const s = window.HissatiApp.state(), k = Object.keys(s.log).sort().pop(); return s.log[k]; }); assert(L3.ai.length >= 2 && L3.ai.some((x) => x.src === 'label') && L3.off.extra === 1);
   ok('السجل اليومي يجمع ما أُضيف من الصورة والملصق في نفس «تسجيل اليوم»');
   // 1.56 المكملات (تظهر في نسخة العرض/المعاينة)
-  await p.click('.tabbar .aifab'); await p.waitForSelector('.aiopt'); assert.strictEqual(await p.locator('.aiopt').count(), 6); await p.click('[data-act="aiMode"][data-v="supp"]');
+  await p.click('.tabbar .aifab'); await p.waitForSelector('.aiw'); assert.strictEqual(await p.locator('.aiw').count(), 6); await pick('supp');
   await p.fill('#aiTxt', 'فيتامين د 5000 وحدة يومياً'); await p.click('[data-act="aiGoSupp"]'); await p.waitForSelector('.aiben');
   assert.strictEqual(calls[calls.length - 1].mode, 'supp'); assert(/5000/.test(calls[calls.length - 1].text));
   const sp = await p.textContent('.aish'); assert(/فائدة المكمّل/.test(sp) && /فوائد مثبتة علمياً/.test(sp) && /يُروَّج لها بلا دليل/.test(sp) && /من يستفيد منه/.test(sp) && /متى تظهر الفائدة/.test(sp));
@@ -81,7 +93,7 @@ const R = {
   const lm = await p.evaluate(() => { const m = window.HissatiApp.state().msgs; return [m.length, m[m.length - 1].t]; }); assert.strictEqual(lm[0], m0 + 1); assert(/تقييم مكمّل/.test(lm[1]) && /فوق الحد الآمن/.test(lm[1]), lm[1]);
   ok('1.56 المكملات: خيار خامس، الوصف أو الصورة، «كيف تأخذه» (الجرعة المناسبة، التوقيت، التعارض مع الطعام)، «فائدة المكمّل» (مثبتة/مروّجة/من يستفيد/متى/كيف)، درجة الدليل، الجرعة مقارنة بالحد الآمن، تنبيه الاستشارة، و«أرسلها لأخصائيك» يرسلها في الشات');
   // 1.57 الأعشاب (نسخة العرض)
-  await p.click('.tabbar .aifab'); await p.waitForSelector('.aiopt'); assert.strictEqual(await p.locator('.aiopt').count(), 6); await p.click('[data-act="aiMode"][data-v="herb"]');
+  await p.click('.tabbar .aifab'); await p.waitForSelector('.aiw'); assert.strictEqual(await p.locator('.aiw').count(), 6); await pick('herb');
   assert(/لا تأكل نباتاً برياً/.test(await p.textContent('.aish')));
   const [fh] = await Promise.all([p.waitForEvent('filechooser'), p.click('[data-act="aiPick"][data-v="cam"]')]); await fh.setFiles(IMG); await p.waitForSelector('.aiben');
   assert.strictEqual(calls[calls.length - 1].mode, 'herb'); const ht = await p.textContent('.aish');
@@ -91,7 +103,7 @@ const R = {
   const hm = await p.evaluate(() => { const m = window.HissatiApp.state().msgs; return [m.length, m[m.length - 1].t]; }); assert.strictEqual(hm[0], k0 + 1); assert(/سؤال عن عشب: حبة البركة/.test(hm[1]), hm[1]);
   ok('1.57 الأعشاب: صورة أو اسم، ثقة التعرّف وتحذير التشابه و«اكتب الاسم بدلاً»، الفائدة المحتملة، كيف يُستعمل، التعارض مع الطعام والأدوية، من يتجنّبه، و«أرسلها لأخصائيك»');
   // العرض على الحاسوب
-  await p.setViewportSize({ width: 1280, height: 860 }); await p.click('.tabbar .aifab'); await p.waitForSelector('.aiopt'); assert.strictEqual(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true); await shot('10desk');
+  await p.setViewportSize({ width: 1280, height: 860 }); await p.click('.tabbar .aifab'); await p.waitForSelector('.aiw'); assert.strictEqual(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true); await shot('10desk');
   await p.setViewportSize({ width: 360, height: 740 }); await p.waitForTimeout(150); assert.strictEqual(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true); ok('يعمل على الجوال (360) والحاسوب (1280) بلا تمرير جانبي');
   assert.deepStrictEqual(errs, [], errs.join(' | ')); ok('لا أخطاء في وحدة التحكم');
   console.log('\nنجح', n, 'اختبارات مساعد الطعام (الواجهة)'); await b.close(); srv.close();

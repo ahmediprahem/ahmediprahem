@@ -82,3 +82,48 @@
 .aidr .aiconf{white-space:nowrap}
 .aiuse{display:grid;gap:8px;margin-bottom:12px;padding:12px;border-radius:var(--r2);background:rgba(157,187,255,.08);border:1px solid rgba(157,187,255,.35)}
 .aiuse h3{margin:0 0 2px;font-size:calc(16px*var(--fs))}.aiuse .ails{margin:0}.aiuse .ails p{margin:6px 0 0;line-height:1.6}
+/* 1.59 قائمة المساعد «طبق من ست وظائف» (تصميم المالك) — النص: اسم قصير بسطر واحد، نفس الحجم والوزن والبعد عن المركز في كل الأقسام */
+.aipl{display:grid;justify-items:center;gap:14px}
+.aiplw{position:relative;width:min(100%,330px)}
+.aiplw::before{content:"";position:absolute;inset:-6%;border-radius:50%;background:radial-gradient(circle,rgba(124,138,255,.28) 0,transparent 64%);filter:blur(18px);pointer-events:none}
+.aiplw svg{position:relative;display:block;width:100%;height:auto;filter:drop-shadow(0 16px 34px rgba(5,8,25,.45));overflow:visible}
+.aipr{fill:#f4f6ff;stroke:rgba(255,255,255,.75);stroke-width:1.5}
+.aipd{fill:#fbfcff;stroke:#d5dcf5;stroke-width:1.5}
+.aipdot{fill:none;stroke:#cfd7f2;stroke-width:2;stroke-dasharray:2 10;pointer-events:none}
+.aiw{cursor:pointer;outline:none;transition:transform .3s cubic-bezier(.34,1.56,.64,1),opacity .25s;-webkit-tap-highlight-color:transparent}
+.aiw.dim{opacity:.45}
+.aiws{stroke:rgba(255,255,255,.4);stroke-width:1;transition:stroke .2s,stroke-width .2s}
+.aiw.on .aiws,.aiw:focus-visible .aiws{stroke:#fff;stroke-width:3}
+.aiw.on{filter:drop-shadow(0 6px 14px var(--gl))}
+.aiwc{fill:rgba(255,255,255,.24);stroke:rgba(255,255,255,.55);stroke-width:1.5}
+.aiwi{fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.aiwt{font-family:inherit;font-size:17px;font-weight:800;letter-spacing:normal;fill:#fff;text-anchor:middle;dominant-baseline:central;paint-order:stroke;stroke:rgba(20,26,66,.5);stroke-width:4px;stroke-linejoin:round;pointer-events:none}
+.aihub{cursor:pointer;outline:none}
+.aihubc{fill:#fff;stroke:#e3e8ff;stroke-width:2;transition:stroke .25s}
+.aihub:focus-visible .aihubc,.aihub:hover .aihubc{stroke:#ffc861;stroke-width:3}
+.aihubi{fill:none;stroke:#1c2650;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.aihubt{font-family:inherit;font-size:14px;font-weight:700;fill:#4d5886;text-anchor:middle;pointer-events:none}
+.aipl.in .aiw{animation:aiwp .55s cubic-bezier(.34,1.56,.64,1) both;animation-delay:calc(var(--i)*.06s + .05s)}
+@keyframes aiwp{from{opacity:0}to{opacity:1}}
+.aipl.in .aiplw svg{animation:aiplz .6s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes aiplz{from{transform:scale(.86) rotate(-8deg);opacity:.2}to{transform:none;opacity:1}}
+.aicard{position:relative;width:100%;overflow:hidden;padding:16px;border-radius:var(--r2);background:var(--glass);border:1px solid var(--line)}
+.aicard::before{content:"";position:absolute;top:0;inset-inline:0;height:3px;background:linear-gradient(90deg,transparent,var(--ac) 30%,var(--ac) 70%,transparent)}
+.aict{display:flex;align-items:center;gap:12px}
+.aicic{display:grid;place-items:center;flex:none;width:46px;height:46px;border-radius:14px;box-shadow:inset 0 1px 0 rgba(255,255,255,.35)}
+.aicic svg{width:24px;height:24px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.aict small{display:block;color:var(--mut);font-size:calc(12.5px*var(--fs))}
+.aict b{display:block;font-size:calc(18px*var(--fs));line-height:1.4}
+.aicard p{margin:10px 0 0;color:var(--text);line-height:1.8;font-size:calc(14.5px*var(--fs))}
+.aitags{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.aitags span{padding:4px 11px;border-radius:999px;background:var(--glass2);border:1px solid var(--line);font-size:calc(12.5px*var(--fs));color:var(--text)}
+.aistart{margin-top:14px}
+@media (prefers-reduced-motion:reduce){.aipl.in .aiw,.aipl.in .aiplw svg{animation:none}.aiw{transition:none}}
+/* 1.59 العجلة: الأقسام تدور حول المركز، ومجموعة الأيقونة والاسم تدور عكسها فيبقى النص قائماً؛ المؤشر الذهبي أعلى الطبق يدل على القسم المختار */
+.aiwheel{transform-origin:220px 220px;transform:rotate(var(--rot,0deg));transition:transform .42s cubic-bezier(.22,1.2,.36,1)}
+.aiup{transform:rotate(calc(var(--rot,0deg) * -1));transition:transform .42s cubic-bezier(.22,1.2,.36,1)}
+.aipl.drag .aiwheel,.aipl.drag .aiup{transition:none}
+.aiplw svg{touch-action:none;user-select:none;-webkit-user-select:none}
+.aiwt{text-anchor:middle;dominant-baseline:central}
+.aipin{fill:#ffc861;stroke:#fff;stroke-width:2;stroke-linejoin:round;filter:drop-shadow(0 2px 4px rgba(0,0,0,.35))}
+@media (prefers-reduced-motion:reduce){.aiwheel,.aiup{transition:none}}

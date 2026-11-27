@@ -37,7 +37,7 @@ sheetHtml = ((f) => function () {
 function aiEst() { return '<p class="aiest" role="note">⚠️ القيم تقديرية من الذكاء الاصطناعي وليست قياساً دقيقاً، ولا تغني عن إرشاد أخصائيك.</p>'; }
 function aiSheet() {
   const v = AIV(), M = AI_MODES.find((m) => m[0] === v.step);
-  if (v.step === 'menu') return ['مساعد الطعام', '<p class="dim">اختر ما تريد، وسيحلله المساعد في ثوانٍ.</p><div class="aimenu">' + aiModes().map((m) => '<button class="aiopt" data-act="aiMode" data-v="' + m[0] + '"><span class="aie" aria-hidden="true">' + m[1] + '</span><span><b>' + m[2] + '</b><small>' + m[3] + '</small></span></button>').join('') + '</div>'];
+  if (v.step === 'menu') return ['مساعد الطعام', aiPlate(v)];      // 1.59 الطبق التفاعلي (تصميم المالك)
   const title = M[1] + ' ' + M[2];
   if (v.busy) return [title, (v.thumb ? '<img class="aithumb" src="' + v.thumb + '" alt="">' : '') + '<div class="aiload" role="status"><span class="aispin" aria-hidden="true"></span><b>' + ({ text: 'نحلل وصف وجبتك…', photo: 'نتعرّف على أصناف وجبتك…', label: 'نقرأ الملصق ونقيّمه…', store: 'نجهّز إرشادات الحفظ والسلامة…', supp: 'نقرأ المكمّل ونقارنه بالمراجع العلمية…', herb: 'نتعرّف على العشب ونراجع فائدته وأمانه…' })[v.step] + '</b><small>قد يستغرق ذلك حتى 20 ثانية</small></div>'];
   if (v.err) return [title, '<div class="aierr" role="alert"><b>' + esc(v.err) + '</b></div><div class="row"><button class="btn" data-act="aiRetry">حاول مرة أخرى</button><button class="btn sec" data-act="aiBack">رجوع</button></div>'];
@@ -115,6 +115,83 @@ function aiResult(v) {
     + ls('طريقة الحفظ', r.howTo, '') + ls('🔍 علامات الفساد', r.spoilSigns, 'neg') + ls('⛔ لا تأكله إذا', r.unsafeSigns, 'neg') + ls('🧼 التعامل والطهي الآمن', r.handling, 'pos')
     + '<p class="aiest">⚠️ ' + esc(r.note || 'لا يمكن التأكد من سلامة الطعام من صورة. عند الشك تخلّص منه.') + '</p><button class="btn sec full" data-act="aiAgain">صوّر طعاماً آخر</button>';
 }
+// 1.59 قائمة المساعد «طبق من ست وظائف» (تصميم المالك): الكاميرا في المنتصف وكل قسم وظيفة؛ لمسة تختار القسم وتُظهر بطاقته، و«ابدأ» يفتحه
+// ترتيب النص: في كل قسم الأيقونة ثم الاسم تحتها مباشرة (عمودياً مهما كان اتجاه القسم)، اسم قصير بسطر واحد بنفس الحجم؛ الاسم الكامل والشرح في البطاقة
+const AI_PL = { text: ['صف وجبتك', 'pen', '#ffab4a', '#ffcb85', '#ef8d13', ['سعرات', 'بروتين', 'كربوهيدرات', 'دهون']], photo: ['صوّر وجبتك', 'cam', '#2fcdb4', '#7cebd9', '#17a58e', ['التعرّف بالصورة', 'تقدير القيم']],
+  label: ['الملصق', 'tag', '#ff7b7b', '#ffa3a3', '#e94848', ['قراءة الجدول', 'تقييم صحي']], store: ['التخزين', 'flake', '#5eaefc', '#a1d2ff', '#3a8be6', ['الحفظ', 'الصلاحية', 'علامات الفساد']],
+  supp: ['المكملات', 'pill', '#ad7cff', '#d6b6ff', '#8b4bf0', ['الفائدة', 'الدليل العلمي', 'الجرعة الآمنة']], herb: ['الأعشاب', 'leaf', '#4fd07c', '#93efb0', '#25ad58', ['التعرّف', 'الفائدة المحتملة', 'الاستعمال الآمن']] };
+const AI_PLI = { pen: '<path d="M4 20l1.2-4.2L15.5 5.5a2.1 2.1 0 0 1 3 3L8.2 18.8 4 20z"/><path d="M13.5 7.5l3 3"/>',
+  cam: '<rect x="3" y="7.5" width="18" height="12.5" rx="3"/><path d="M8.5 7.5L10 4.5h4l1.5 3"/><circle cx="12" cy="13.5" r="3.6"/>',
+  tag: '<path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.4"/>',
+  flake: '<path d="M12 3v18"/><path d="M12 3l-2.4 2.4M12 3l2.4 2.4M12 21l-2.4-2.4M12 21l2.4-2.4"/><path d="M4.2 7.5l15.6 9M19.8 7.5l-15.6 9"/>',
+  pill: '<g transform="rotate(45 12 12)"><rect x="4.5" y="8.75" width="15" height="6.5" rx="3.25"/><path d="M12 8.75v6.5"/></g>',
+  leaf: '<path d="M19.5 4.5C10.5 5 5.5 9.5 5 19c9.5-.5 14.5-5.5 14.5-14.5z"/><path d="M5 19C8.5 13.5 12 10 17 7"/>' };
+const aiStepOf = () => 360 / aiModes().length, aiAmOf = (m) => { const i = aiModes().findIndex((x) => x[0] === m); return i < 0 ? 0 : i * aiStepOf() + aiStepOf() / 2; };
+const aiNear = (rot, t) => t + 360 * Math.round((rot - t) / 360);      // أقرب دوران يوصل القسم للأعلى (بلا لفّة كاملة زائدة)
+function aiPlate(v) {
+  const M = aiModes(), n = M.length, C = 220, P = (r, a) => (C + r * Math.sin(a * Math.PI / 180)).toFixed(1) + ',' + (C - r * Math.cos(a * Math.PI / 180)).toFixed(1);
+  const sec = (r0, r1, a0, a1) => 'M' + P(r0, a0) + 'L' + P(r1, a0) + 'A' + r1 + ' ' + r1 + ' 0 0 1 ' + P(r1, a1) + 'L' + P(r0, a1) + 'A' + r0 + ' ' + r0 + ' 0 0 0 ' + P(r0, a0) + 'Z';
+  const xy = (r, a) => P(r, a).split(',').map(Number), sel = v.sel || '', step = 360 / n;
+  if (v.rot == null) v.rot = sel ? -aiAmOf(sel) : 0;
+  let defs = '', parts = '';
+  M.forEach((m, i) => {
+    const d = AI_PL[m[0]] || ['', 'cam', '#7c8aff', '#a9b2ff', '#5866e0', []], a0 = i * step + 2.5, a1 = (i + 1) * step - 2.5, am = i * step + step / 2, c = xy(124, am), on = sel === m[0];
+    const off = on ? xy(8, am).map((z) => (z - C).toFixed(1)) : [0, 0];
+    defs += '<radialGradient id="aiw' + i + '" gradientUnits="userSpaceOnUse" cx="220" cy="220" r="178"><stop offset="0" stop-color="' + d[3] + '"/><stop offset=".55" stop-color="' + d[2] + '"/><stop offset="1" stop-color="' + d[4] + '"/></radialGradient>';
+    // الأيقونة والاسم مجموعة واحدة حول مركز القسم، تدور عكس العجلة فيبقى النص قائماً ومقروءاً في أي وضع
+    parts += '<g class="aiw' + (on ? ' on' : sel ? ' dim' : '') + '" data-act="aiSel" data-v="' + m[0] + '" role="button" tabindex="0" aria-pressed="' + on + '" aria-label="' + esc(m[2] + ' — ' + m[3]) + '" style="--i:' + i + ';--gl:' + d[2] + '80;transform:translate(' + off[0] + 'px,' + off[1] + 'px)">'
+      + '<path class="aiws" d="' + sec(76, 178, a0, a1) + '" fill="url(#aiw' + i + ')"/>'
+      + '<g transform="translate(' + c[0] + ' ' + c[1] + ')"><g class="aiup"><circle cy="-15" r="22" class="aiwc"/><g transform="translate(-15 -30) scale(1.25)" class="aiwi">' + AI_PLI[d[1]] + '</g>'
+      + '<text y="24" class="aiwt">' + esc(d[0]) + '</text></g></g></g>';
+  });
+  const cur = M.find((m) => m[0] === sel), d = cur && AI_PL[cur[0]];
+  const card = cur ? '<div class="aicard" style="--ac:' + d[2] + '" aria-live="polite"><div class="aict"><span class="aicic" style="background:' + d[2] + '"><svg viewBox="0 0 24 24" aria-hidden="true">' + AI_PLI[d[1]] + '</svg></span><div><small>وظيفة من وظائف المساعد</small><b>' + esc(cur[2]) + '</b></div></div><p>' + esc(cur[3]) + '</p>'
+      + '<div class="aitags">' + d[5].map((t) => '<span>' + esc(t) + '</span>').join('') + '</div><button class="btn full aistart" data-act="aiMode" data-v="' + cur[0] + '">ابدأ: ' + esc(cur[2]) + '</button></div>'
+    : '<div class="aicard" style="--ac:#7c8aff" aria-live="polite"><div class="aict"><span class="aicic" style="background:#4a56b8"><svg viewBox="0 0 24 24" aria-hidden="true">' + AI_PLI.cam + '</svg></span><div><small>مساعد الطعام</small><b>كاميرا واحدة، ' + n + ' وظائف</b></div></div><p>أدِر الطبق أو المس قسماً ليصعد إلى الأعلى ويظهر شرحه هنا، ثم اضغط «ابدأ».</p></div>';
+  const anim = !v.seen; v.seen = 1;
+  return '<div class="aipl' + (anim ? ' in' : '') + '"><div class="aiplw"><svg viewBox="0 0 440 440" role="group" aria-label="طبق وظائف مساعد الطعام، يدور بالسحب أو بالأسهم" style="--rot:' + v.rot.toFixed(1) + 'deg"><defs>' + defs + '</defs>'
+    + '<circle cx="220" cy="220" r="206" class="aipr"/><circle cx="220" cy="220" r="184" class="aipd"/><g class="aiwheel">' + parts + '</g>'
+    + '<circle cx="220" cy="220" r="196" class="aipdot"/><circle cx="220" cy="220" r="76" class="aipd"/>'
+    + '<path d="M209 4h22l-11 15z" class="aipin"/>'
+    + '<g class="aihub" data-act="aiSel" data-v="" role="button" tabindex="0" aria-label="النظرة العامة"><circle cx="220" cy="220" r="62" class="aihubc"/><g transform="translate(199 186) scale(1.75)" class="aihubi">' + AI_PLI.cam + '</g><text x="220" y="246" class="aihubt">مساعد الطعام</text></g>'
+    + '</svg></div>' + card + '</div>';
+}
+// تدوير العجلة إلى قسم: حركة على الطبق الحالي، ثم إعادة الرسم بالقسم المختار وبطاقته
+function aiSpinTo(m, rot) {
+  const s = AIV(), sv = $('.aiplw svg'), t = aiNear(rot != null ? rot : s.rot || 0, -aiAmOf(m));
+  s.sel = m; s.rot = t; s.seen = 1;
+  if (!sv || matchMedia('(prefers-reduced-motion: reduce)').matches) { render(); return; }
+  sv.closest('.aipl').classList.remove('drag'); sv.style.setProperty('--rot', t + 'deg'); clearTimeout(aiSpinTo.t); aiSpinTo.t = setTimeout(() => { if (V.ai === s && s.step === 'menu') render(); }, 430);
+}
+// السحب بالإصبع أو الفأرة يدير الطبق كعجلة، مع اندفاع خفيف ثم يستقر على أقرب قسم (يصير هو المختار)
+let aiDrag = null, aiNoClick = 0;
+const aiAng = (e, D) => Math.atan2(e.clientX - D.cx, -(e.clientY - D.cy)) * 180 / Math.PI;
+document.addEventListener('pointerdown', (e) => {
+  const sv = e.target.closest && e.target.closest('.aiplw svg'); if (!sv || e.button > 0) return;
+  const r = sv.getBoundingClientRect(), D = { sv, cx: r.left + r.width / 2, cy: r.top + r.height / 2, moved: 0, vel: 0 };
+  if (Math.hypot(e.clientX - D.cx, e.clientY - D.cy) < r.width * 70 / 440) return;      // المركز زر النظرة العامة
+  D.last = aiAng(e, D); D.t = performance.now(); D.rot = AIV().rot || 0; D.x = e.clientX; D.y = e.clientY; aiDrag = D;
+});
+document.addEventListener('pointermove', (e) => {
+  const D = aiDrag; if (!D) return; const a = aiAng(e, D); let d = a - D.last; d = ((d + 540) % 360) - 180;
+  if (!D.moved && Math.hypot(e.clientX - D.x, e.clientY - D.y) < 8) return;
+  if (!D.moved) { D.moved = 1; D.sv.closest('.aipl').classList.add('drag'); }
+  const now = performance.now(); D.vel = 0.7 * D.vel + 0.3 * (d / Math.max(8, now - D.t)); D.t = now; D.last = a; D.rot += d;
+  D.sv.style.setProperty('--rot', D.rot.toFixed(1) + 'deg'); e.preventDefault();
+}, { passive: false });
+const aiDragEnd = () => {
+  const D = aiDrag; aiDrag = null; if (!D || !D.moved) return; aiNoClick = 1; setTimeout(() => { aiNoClick = 0; }, 80);
+  const step = aiStepOf(), rot = D.rot + Math.max(-240, Math.min(240, D.vel * 260)), i = Math.round((-rot - step / 2) / step), n = aiModes().length;
+  aiSpinTo(aiModes()[((i % n) + n) % n][0], rot);
+};
+document.addEventListener('pointerup', aiDragEnd); document.addEventListener('pointercancel', aiDragEnd);
+window.addEventListener('click', (e) => { if (aiNoClick && e.target.closest && e.target.closest('.aiplw')) { e.stopPropagation(); e.preventDefault(); aiNoClick = 0; } }, true);      // السحب لا يُحسب نقرة
+// لوحة المفاتيح: Enter/مسافة مثل النقر، والأسهم تدير الطبق قسماً قسماً
+document.addEventListener('keydown', (e) => {
+  if (!e.target.closest || !e.target.closest('.aipl')) return;
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { const M = aiModes(), s = AIV(), i = Math.max(0, M.findIndex((x) => x[0] === s.sel)), j = (i + (e.key === 'ArrowLeft' ? 1 : -1) + M.length) % M.length; e.preventDefault(); aiSpinTo(M[j][0]); setTimeout(() => { const g = $('.aiw[data-v="' + M[j][0] + '"]'); if (g) g.focus(); }, 480); return; }
+  const g = (e.key === 'Enter' || e.key === ' ') && e.target.closest('.aipl [role="button"]'); if (!g) return; e.preventDefault(); g.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+});
 // الشبكة: موقّع بمفتاح العميل؛ وفي نسخة العرض (المعاينة) بلا حساب
 async function aiCall(o) {
   const path = '/v1/ai/food';
@@ -141,8 +218,9 @@ function aiAct(a, v, el) {
   const s = AIV();
   switch (a) {
     case 'aiOpen': V.ai = { step: 'menu' }; sheet = { t: 'ai' }; return true;
+    case 'aiSel': if (!v) { s.sel = ''; return true; } aiSpinTo(v); return false;      // 1.59 لمس قسم: يدور الطبق ليصعد للأعلى ويُختار (المركز = النظرة العامة)
     case 'aiClose': if (s.busy) return false; sheet = null; V.ai = null; return true;
-    case 'aiBack': if (s.busy) return false; V.ai = s.res || s.err ? { step: s.step, text: s.text } : { step: 'menu' }; return true;
+    case 'aiBack': if (s.busy) return false; V.ai = s.res || s.err ? { step: s.step, text: s.text } : { step: 'menu', sel: s.step, seen: 1, rot: -aiAmOf(s.step) }; return true;
     case 'aiMode': V.ai = { step: v }; if (v === 'text') setTimeout(() => { const t = $('#aiTxt'); if (t) t.focus(); }, 60); return true;
     case 'aiAgain': V.ai = { step: s.step }; return true;
     case 'aiRetry': if (s.last) aiRun(s.last); return false;
