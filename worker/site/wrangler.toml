@@ -7,6 +7,7 @@ workers_dev = true
 
 [vars]
 ACCESS_TEAM = "misty-scene-bff7"
+GOOGLE_CID = "147394524279-87tbngr51nicmasmmsfbvhu6udn57fmg.apps.googleusercontent.com"
 SITE_AUD = "15aa2363df2a4007c3f0cf7394afc0cc8210d7e8e32317657dd2ae08d5b1b951"
 
 [[d1_databases]]
