@@ -22,7 +22,7 @@
     + '<div class="g161txt"><span class="g161k"><i></i> نظام أخصائي التغذية</span><h2>تغذية علاجية <span>أقرب</span> لعميلك… كل يوم</h2><p>«زنها Pro» يبني الخطة، وتطبيق «زنها» يرافق عميلك في يومه حتى يصل.</p></div>'
     + '<div class="g161ph"><img src="' + IMG + '" alt=""><div class="g161f">' + svg(IC.msg) + '<span><b>رسالة من منى</b><small>التزمت بالخطة اليوم كلها ✓</small></span></div><div class="g161f g161f2">' + svg(IC.spark) + '<span><b>خطة جديدة جاهزة</b><small>بالحصص أو بالجرامات</small></span></div></div></div>';
   var css = ''
-    + 'html:not(#mxz):not(#mxy) #gate.g161{background:#F5FAF9!important;display:grid!important;grid-template-columns:minmax(0,1.05fr) minmax(360px,.95fr);align-items:stretch;justify-content:stretch;gap:0!important;padding:0!important;min-height:100vh;color:#16324A}'
+    + 'html:not(#mxz):not(#mxy) #gate.g161:not([style*="display: none"]):not([style*="display:none"]){display:grid!important}html:not(#mxz):not(#mxy) #gate.g161{background:#F5FAF9!important;grid-template-columns:minmax(0,1.05fr) minmax(360px,.95fr);align-items:stretch;justify-content:stretch;gap:0!important;padding:0!important;min-height:100vh;color:#16324A}'
     + 'html:not(#mxz):not(#mxy) body.gating:has(#gate.g161){background:#F5FAF9!important}'
     + '#gate.g161 .g161m{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:32px 24px;position:relative;z-index:1}'
     + 'html:not(#mxz):not(#mxy) #gate.g161 #gsp,html:not(#mxz):not(#mxy) #gate.g161 #gsp :is(.hxlogo,svg,.hx-word,.hx-tag){color:#16324A!important}html:not(#mxz):not(#mxy) #gate.g161 #gsp .gvid{max-height:120px;width:auto;max-width:300px}'

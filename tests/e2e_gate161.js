@@ -14,6 +14,8 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   assert.strictEqual(await p.evaluate(() => getComputedStyle(document.querySelector('.g161s')).display), 'none'); assert.strictEqual(await p.evaluate(() => document.documentElement.scrollWidth), 390); ok('الجوال: البطاقة وحدها بلا تمرير جانبي');
   await p.evaluate(() => { window.HGateCfg = { bgType: 'color', bgColor: '#333333' }; }); await p.evaluate(() => { const g = document.querySelector('#gate'); window.G161(g, Object.assign({ splash: 'video', video: '' }, window.HGateCfg)); });
   assert.strictEqual(await p.evaluate(() => document.querySelector('#gate').classList.contains('g161')), false); ok('إن خصّص المدير الخلفية يبقى تخصيصه (التصميم الجديد للخلفية الافتراضية فقط)');
+  { const q = await (await b.newContext({ viewport: { width: 1440, height: 900 } })).newPage(); q.on('dialog', (d) => d.accept()); await q.goto(fileUrl(path.resolve(__dirname, '../admin.html'))); await require('./auth_helper')(q);
+    const g = await q.evaluate(() => [getComputedStyle(document.querySelector('#gate')).display, getComputedStyle(document.querySelector('#app')).display]); assert.strictEqual(g[0], 'none', JSON.stringify(g)); assert.notStrictEqual(g[1], 'none'); ok('بعد الدخول تختفي شاشة الدخول ويظهر التطبيق (إصلاح: كانت تبقى ظاهرة فوقه)'); }
   assert.deepStrictEqual(errs, [], errs.join(' | ')); ok('لا أخطاء في وحدة التحكم');
   console.log('\nنجح', n, 'اختبارات شاشة الدخول 1.62'); await b.close();
 })().catch((e) => { console.log('✘', String(e && e.stack || e).slice(0, 1200)); process.exit(1); });
