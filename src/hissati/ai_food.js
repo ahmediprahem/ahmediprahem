@@ -2,7 +2,7 @@
 // زر الكاميرا في رأس «اليوم» وفي بطاقة «تسجيل اليوم» يفتح ورقة بأربعة خيارات: وصف الوجبة، صورة الوجبة، ملصق المعلومات الغذائية (مع تقييم صحي)، التخزين والسلامة.
 // التحليل على الخادم فقط (/v1/ai/food → Gemini، المفتاح سرّ على المحطة)، والطلب موقّع بمفتاح العميل. النتائج تقديرية دائماً ويُقال ذلك بوضوح.
 // الإضافة إلى «تسجيل اليوم» الموجود نفسه (L.off + L.offT + L.ai) فتصل الأخصائي مع المتابعة اليومية — لا نظام تسجيل ثانٍ.
-// الأيقونة: AI_ICON مؤقتة إلى أن يرسل المالك أيقونته (تُستبدل هنا وحدها).
+// الأيقونة: صورة المالك assets/hissati/ai-cam.webp (مقصوصة دائرياً من تصميمه) تُضمَّن عند البناء مكان /*AICAMIMG*/؛ AI_ICON للأيقونات الصغيرة داخل الورقة.
 const AI_ICON = '<svg class="ico aiico" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5h-5L7 8H4a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="14" r="3.5"/><path d="M19 1.5l.7 1.6 1.6.7-1.6.7-.7 1.6-.7-1.6-1.6-.7 1.6-.7z" fill="currentColor" stroke="none"/></svg>';
 const AIV = () => V.ai || (V.ai = { step: 'menu' });
 const AI_MODES = [
@@ -12,9 +12,10 @@ const AI_MODES = [
   ['store', '🧊', 'التخزين والسلامة', 'صوّر طعاماً، ونخبرك كيف تحفظه ومدة صلاحيته وعلامات فساده']
 ];
 const AI_OFF = [['extra', '🍽 وجبة زيادة'], ['out', '🍔 أكل من الخارج'], ['sweets', '🍰 حلويات'], ['drinks', '🥤 مشروبات محلّاة']];
-function aiBtn(cls) { return '<button class="aibtn' + (cls ? ' ' + cls : '') + '" data-act="aiOpen" aria-label="مساعد الطعام بالذكاء الاصطناعي" title="مساعد الطعام">' + AI_ICON + (cls ? '<span>حلّل طعامك</span>' : '') + '</button>'; }
-// الرأس (بشكليه): بجانب زر المحادثة
-chatBtn = ((f) => function () { return aiBtn() + f.apply(this, arguments); })(chatBtn);
+function aiBtn(cls) { return '<button class="aibtn' + (cls ? ' ' + cls : '') + '" data-act="aiOpen" aria-label="مساعد الطعام بالذكاء الاصطناعي" title="مساعد الطعام"><img class="aiimg" src="' + AI_CAM_IMG + '" alt="" width="28" height="28">' + (cls ? '<span>حلّل طعامك</span>' : '') + '</button>'; }
+// 1.55: أيقونة المالك (صورة دائرية من تصميمه) زرّاً بارزاً في منتصف الشريط السفلي بين «خطتي» و«تثقيف» — المدخل الرئيسي الوحيد
+const AI_CAM_IMG = '/*AICAMIMG*/';
+function aiTabFab(tb) { const a = tb.slice(); a.splice(2, 0, '<button class="aifab" data-act="aiOpen" aria-label="مساعد الطعام: صوّر أو صف طعامك" title="مساعد الطعام"><span class="airays" aria-hidden="true"><i></i><i></i><i></i></span><img src="' + AI_CAM_IMG + '" alt="" width="64" height="64"></button>'); return a; }
 // بطاقة «تسجيل اليوم»: مدخل ثانٍ + ما أُضيف بالمساعد اليوم
 dayLogCard = ((f) => function (d) {
   const h = f.apply(this, arguments), L = dl(d), a = (L.ai || []);
