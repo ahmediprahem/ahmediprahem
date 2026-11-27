@@ -54,6 +54,7 @@ open(os.path.join(H, 'index.html'), 'w', encoding='utf-8').write(user); open(os.
 # 0.96: موقع الأخصائيين hessanu (worker/site): index.html بمفتاح المدير العام وعنوان المحطة من site.json، مع الأصول الثابتة
 _sc = json.load(open(os.path.join(H, 'worker', 'site', 'site.json'), encoding='utf-8')); _sd = os.path.join(H, 'worker', 'site', 'public'); os.makedirs(_sd, exist_ok=True)
 _si = user.replace('ADMIN_PUB=null', 'ADMIN_PUB=' + json.dumps(_sc['admin_pub'], separators=(',', ':')), 1).replace('BASE_SETTINGS=null', 'BASE_SETTINGS=' + json.dumps({"colors": {}, "over": {}, "deleted": [], "custom": [], "hx": {"relay": _sc['relay']}}, separators=(',', ':'), ensure_ascii=False), 1)
+if _sc.get('google_cid'): _si = _si.replace('window.ADMIN_SEED=null;', 'window.ADMIN_SEED=null;window.GOOGLE_CID=' + json.dumps(_sc['google_cid']) + ';window.TRIAL_PUB=' + (json.dumps(_sc['trial_pub'], separators=(',', ':')) if _sc.get('trial_pub') else 'null') + ';', 1)      # 1.65 دخول Google والتجربة المجانية (المعرّف والمفتاح العام فقط)
 assert 'ADMIN_PUB=null' not in _si and 'BASE_SETTINGS=null' not in _si, 'لم يُحقن مفتاح المدير في موقع الأخصائيين'
 open(os.path.join(_sd, 'index.html'), 'w', encoding='utf-8').write(_si)
 import shutil

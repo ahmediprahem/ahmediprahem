@@ -1,0 +1,17 @@
+# معاينة 1.65 (دخول Google والتجربة المجانية): نفس خادم الموقع بقاعدة منفصلة، بلا Cloudflare Access — لا تمس hessanu
+name = "hessanu-preview"
+main = "index.mjs"
+compatibility_date = "2026-10-01"
+workers_dev = true
+
+[vars]
+GOOGLE_CID = "147394524279-87tbngr51nicmasmmsfbvhu6udn57fmg.apps.googleusercontent.com"
+
+[[d1_databases]]
+binding = "ADB"
+database_name = "zenha_admin_preview"
+database_id = "0141c100-d989-421d-90d6-e911ab3acbe4"
+
+[assets]
+directory = "./public"
+binding = "ASSETS"

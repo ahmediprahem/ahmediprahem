@@ -9,5 +9,16 @@
   "x": "lFuHrRFjLWRLKUgXqXBkJ4D33dgqMMWb0A_zS3QTwJs",
   "y": "fPLqpZb9SzNUsTBNQthlYj6ouQIECGsxpR_uAX5KoAk"
  },
- "relay": "https://hissati.ah6171317.workers.dev"
+ "relay": "https://hissati.ah6171317.workers.dev",
+ "google_cid": "147394524279-87tbngr51nicmasmmsfbvhu6udn57fmg.apps.googleusercontent.com",
+ "trial_pub": {
+  "key_ops": [
+   "verify"
+  ],
+  "ext": true,
+  "kty": "EC",
+  "x": "70kWuiGCRGW1ZY5ZkSkMNFazUeQnM_-p3OblUZASpTs",
+  "y": "vNv7SjmrSi9Kcv9qqgdUk-juefWDY7QM7GLUsJJzK6Q",
+  "crv": "P-256"
+ }
 }

@@ -56,7 +56,7 @@
   var SP = { list: null, err: '', loading: 0, open: {} }, SP_DEV = [[1, 'جهاز واحد'], [2, 'جهازان'], [3, '3 أجهزة'], [5, '5 أجهزة'], [0, 'بلا حد']], SP_DAYS = [[30, 'شهر'], [90, '3 أشهر'], [180, '6 أشهر'], [365, 'سنة'], [0, 'بلا انتهاء']];
   async function spLicense(email, name, exp, lu) { var t = Math.floor(Date.now() / 1000), pl = { v: 1, t: 'em', u: 'em:' + email, em: email, n: name, iat: t, exp: exp || 0 }; if (lu) pl.lu = lu; return H.sign(HAD.priv, pl); }   // lu: حسابه القديم (اسم المستخدم) لتبقى بياناته
   async function spLoad() { try { SP.list = (await cloudApi('GET', '/api/specialists')).specialists; SP.err = ''; } catch (e) { SP.err = e.message; } var el = document.getElementById('spBox'); if (el) el.outerHTML = spBoxHtml(); }
-  function spState(x) { var t = Date.now() / 1000; return x.status === 'off' ? ['موقوف', 'warn'] : x.exp && x.exp < t ? ['منتهٍ', 'warn'] : ['فعّال', 'ok']; }
+  function spState(x) { var t = Date.now() / 1000; return x.status === 'off' ? ['موقوف', 'warn'] : x.exp && x.exp < t ? [x.status === 'trial' ? 'انتهت التجربة' : 'منتهٍ', 'warn'] : x.status === 'trial' ? ['تجربة مجانية — باقٍ ' + Math.max(0, Math.ceil((x.exp - t) / 86400)) + ' يوماً', 'warn'] : ['فعّال', 'ok']; }      // 1.65
   function spBoxHtml() {
     var fmt = function (ts) { return ts ? new Date(ts * 1000).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'; };
     return '<div class="addbox cloudbox" id="spBox"><h3>🩺 الأخصائيون — الدخول بالبريد</h3><p class="small">أضف بريد الأخصائي واسمه ومدة اشتراكه فقط. يدخل «زنها Pro» برمز يصله على بريده، بلا اسم مستخدم ولا كود تفعيل ولا رمز جهاز. الرخصة تُوقَّع هنا في متصفحك بمفتاح المدير.</p>'
