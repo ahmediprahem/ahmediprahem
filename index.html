@@ -2671,6 +2671,74 @@ html:not(#mxz) .cf151 .cfside.go>h3{color:#fff!important}
 .cf151 .cfside.go .cfgo .rdgen{display:contents}
 html:not(#mxz):not(#mxy) .cf151 .cfside.go .cfgo button{width:100%;justify-content:center}
 .cf151 .cfside.go .cfgo{color:rgba(255,255,255,.9);font-size:13px}
+/* ================= 1.52 «قائمة الطعام» بنمط محرر الخطة المرجعي: بطاقة الوجبة + «تحليل اليوم» الثابت */
+.g152{--g5-card:#fff;--g5-line:#E3EAEA;--g5-ink:#17303A;--g5-mut:#62747C;--g5-soft:#F4F8F8;--g5-track:#EEF2F2;--g5-c:#E9A23B;--g5-p:#4F86E8;--g5-f:#E0705A;--g5-k:#7C5CC4}
+html[data-dw="dark"] .g152,html[data-theme="glass"]:not([data-tone="light"]) .g152{--g5-card:rgba(255,255,255,.04);--g5-line:rgba(255,255,255,.12);--g5-ink:#E6F1EF;--g5-mut:#9DB3B0;--g5-soft:rgba(255,255,255,.05);--g5-track:rgba(255,255,255,.10)}
+.g152 .g5grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(270px,330px);gap:20px;align-items:start;margin:10px 0 14px}
+.g152 .g5main{display:grid;gap:12px;min-width:0}
+.g152 .g5h{margin-bottom:0}
+/* تبويبات الوجبات */
+.g152 .g5tabs{display:flex;gap:6px;flex-wrap:wrap;padding:4px;border-radius:12px;background:var(--g5-soft);border:1px solid var(--g5-line);margin:0}
+html:not(#mxz):not(#mxy) .g152 .g5tabs button{background:transparent!important;border:0!important;box-shadow:none!important;color:var(--g5-mut)!important;border-radius:9px!important;min-height:36px;padding:0 14px!important;font-weight:600}
+html:not(#mxz):not(#mxy) .g152 .g5tabs button.on{background:var(--g5-card)!important;color:var(--g5-ink)!important;box-shadow:0 1px 3px rgba(23,45,67,.12)!important}
+/* بطاقة الوجبة */
+html:not(#mxz) .g152 .g5meal{background:var(--g5-card)!important;border:1px solid var(--g5-line)!important;border-radius:16px!important;overflow:hidden;box-shadow:0 1px 2px rgba(23,45,67,.04)!important;padding:0!important;margin:0!important}
+.g152 .g5mh{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 16px;border-bottom:1px solid var(--g5-line);background:linear-gradient(180deg,rgba(19,137,122,.05),transparent)}
+.g152 .g5mi{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:#DDF3EE;color:#13897A;flex:none}
+.g152 .g5mi svg{width:20px;height:20px}
+.g152 .g5mt{display:grid;flex:1;min-width:0}.g152 .g5mt b{font-size:17px;color:var(--g5-ink)}.g152 .g5mt small{font-size:13px;color:var(--g5-mut)}
+.g152 .g5auto{display:flex;gap:6px;flex-wrap:wrap}
+.g152 .g5dish{margin:0!important;padding:12px 16px!important;border:0!important;background:none!important;box-shadow:none!important}
+.g152 .g5dish .eqlines{display:grid;gap:8px}
+.g152 .g5dish .eqli{display:grid;grid-template-columns:auto minmax(0,1fr) minmax(0,260px);align-items:center;gap:12px;padding:8px 10px;border:1px solid var(--g5-line);border-radius:12px;background:var(--g5-card);transition:border-color .15s}
+.g152 .g5dish .eqli:hover{border-color:#13897A}
+.g152 .g5dish .eqli .eqlt b{font-size:15px;color:var(--g5-ink)}
+.g152 .g5dish .eqli .eqlt small{color:var(--g5-mut)}
+.g152 .g5dish .eqli select{margin:0;width:100%}
+/* تذييل الماكروز: وسم ملوّن فوق الرقم */
+.g152 .g5mf{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0!important;padding:12px 16px;border-top:1px solid var(--g5-line);background:var(--g5-soft)}
+.g152 .g5mf .mc{display:grid;justify-items:start;gap:4px;padding:0!important;background:none!important;font-size:16px;font-weight:700;color:var(--g5-ink)!important;border-radius:0}
+.g152 .g5mf .mc::before{content:attr(data-l);font-size:11.5px;font-weight:600;padding:2px 9px;border-radius:999px}
+.g152 .g5mf .mc.kc::before{background:#EFE9FB;color:var(--g5-k)}.g152 .g5mf .mc.cb::before{background:#FCF0DC;color:#9A6510}.g152 .g5mf .mc.pr::before{background:#E3ECFC;color:#2F5FB8}.g152 .g5mf .mc.ft::before{background:#FBE6E1;color:#A8452F}
+.g152 .g5help{margin:0;padding:10px 16px 14px;color:var(--g5-mut)}
+/* العمود الجانبي */
+.g152 .g5side{display:grid;gap:12px;position:sticky;top:84px;min-width:0}
+.g152 .g5card{background:var(--g5-card);border:1px solid var(--g5-line);border-radius:16px;padding:14px;display:grid;gap:12px}
+.g152 .g5card h4{margin:0;font-size:15px;font-weight:700;color:var(--g5-ink)}
+.g152 .g5rl{display:flex;align-items:baseline;gap:8px;font-size:13.5px;color:var(--g5-ink)}
+.g152 .g5rl>b{flex:1}
+.g152 .g5v{color:var(--g5-mut);font-variant-numeric:tabular-nums;white-space:nowrap}.g152 .g5v b{color:var(--g5-ink);font-size:15px}
+.g152 .g5rl em{font-style:normal;font-size:11.5px;font-weight:700;padding:1px 7px;border-radius:999px;font-variant-numeric:tabular-nums}
+.g152 .g5rl em.hi{background:#FBE6E1;color:#A8452F}.g152 .g5rl em.lo{background:#FCF0DC;color:#9A6510}
+.g152 .g5bar{height:8px;border-radius:999px;background:var(--g5-track);overflow:hidden;margin-top:6px}
+.g152 .g5bar i{display:block;height:100%;border-radius:inherit;background:var(--g5-k)}
+.g152 .g5row.c .g5bar i,.g152 .g5row.c .g5dot{background:var(--g5-c)}.g152 .g5row.p .g5bar i,.g152 .g5row.p .g5dot{background:var(--g5-p)}.g152 .g5row.f .g5bar i,.g152 .g5row.f .g5dot{background:var(--g5-f)}
+.g152 .g5dot{width:9px;height:9px;border-radius:50%;flex:none;align-self:center}
+.g152 .g5mx{display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px;align-items:center}
+.g152 .g5rows{display:grid;gap:10px;min-width:0}
+.g152 .g5ck{font-size:20px;font-weight:700;fill:var(--g5-ink)}.g152 .g5cu{font-size:11px;fill:var(--g5-mut)}
+.g152 .g5note{margin:0;font-size:12px;color:var(--g5-mut)}
+.g152 .g5meals{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:8px}
+html:not(#mxz):not(#mxy) .g152 .g5m{all:unset;box-sizing:border-box;display:grid;justify-items:center;gap:2px;padding:8px 4px;border-radius:12px;border:1px solid transparent;text-align:center}
+html:not(#mxz):not(#mxy) .g152 .g5m:hover{background:var(--g5-soft)}
+html:not(#mxz):not(#mxy) .g152 .g5m.on{border-color:#13897A;background:rgba(19,137,122,.06)}
+.g152 .g5m:focus-visible{outline:2.5px solid #13897A;outline-offset:2px}
+.g152 .g5m b{font-size:12.5px;color:var(--g5-ink)}.g152 .g5m small{font-size:11.5px;color:var(--g5-mut);font-variant-numeric:tabular-nums}
+.g152 .g5leg{display:flex;gap:14px;justify-content:center;font-size:12px;color:var(--g5-mut)}
+.g152 .g5leg span::before{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;margin-inline-end:5px}
+.g152 .g5leg .c::before{background:var(--g5-c)}.g152 .g5leg .p::before{background:var(--g5-p)}.g152 .g5leg .f::before{background:var(--g5-f)}
+@media (max-width:1100px){.g152 .g5grid{grid-template-columns:minmax(0,1fr)}.g152 .g5side{position:static;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}.g152 .g5leg{grid-column:1/-1}}
+@media (max-width:640px){.g152 .g5dish .eqli{grid-template-columns:auto minmax(0,1fr)}.g152 .g5dish .eqli select{grid-column:1/-1}.g152 .g5mf{grid-template-columns:repeat(2,minmax(0,1fr))}.g152 .g5mh{padding:12px}.g152 .g5dish{padding:10px 12px!important}}
+@media (prefers-reduced-motion:reduce){.g152 .g5dish .eqli{transition:none}}
+html:not(#mxz):not(#mxy) .g152 .g5m{background:transparent!important;box-shadow:none!important;color:var(--g5-ink)!important;min-height:0!important}
+html:not(#mxz):not(#mxy) .g152 .g5m:hover{background:var(--g5-soft)!important}
+html:not(#mxz):not(#mxy) .g152 .g5m.on{background:rgba(19,137,122,.07)!important;border:1px solid #13897A!important}
+@media (max-width:640px){
+  .g152 .g5mh .g5auto{flex:1 1 100%;display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  html:not(#mxz):not(#mxy) .g152 .g5mh .g5auto button{position:static!important;width:100%;margin:0!important;white-space:normal;min-height:40px}
+  .g152 .g5mx{grid-template-columns:minmax(0,1fr);justify-items:center}
+  .g152 .g5rows{width:100%}
+}
 </style></head>
 <body class="gating"><header id="hd"></header><div id="gate" style="display:flex"><div class="gcard" style="text-align:center"><div style="font-weight:700;color:#253464">حصة — جارٍ التحميل…</div></div></div><div id="app" style="display:none"><aside></aside><main></main></div>
 <noscript><div style="position:fixed;inset:0;background:#092061;color:#fff;padding:24px;text-align:center;font:16px Tahoma,Arial">هذا الملف يحتاج تفعيل JavaScript. افتحه مباشرة في Chrome أو Edge أو Safari (وليس من معاينة واتساب أو البريد).</div></noscript>
@@ -11707,6 +11775,61 @@ document.addEventListener('change', function (e) {
   setTimeout(function () { var c = typeof cur === 'function' ? cur() : null; if (!c) return; var id = s.dataset.cfs, sm = s.querySelector('summary .cfst small'), dn = s.querySelector('summary .cfsdone');
     if (sm) sm.textContent = cfsLine(c, id); if (dn) dn.outerHTML = cfsDone(c, id); }, 0);
 }, true);
+
+// ================= 1.52 (طلب المالك 2026-11-27): «قائمة الطعام» (توليد الخطة، الخطوة 5) بنمط محرر الخطة المرجعي (فيديو المالك)
+// عمود رئيسي: بطاقة الوجبة (رأس بالاسم والسعرات وأزرار التوليد، أسطر الأصناف، تذييل ماكروز ملوّن)
+// عمود جانبي ثابت «تحليل اليوم»: الطاقة مقابل الهدف، دائرة الماكروز، أشرطة الكارب/البروتين/الدهون مقابل الهدف، ودوائر صغيرة لكل وجبة (تفتحها).
+// لا تغيير في المنطق: نفس عناصر الخطوة تُنقل كما هي (select[data-gp] وأزرار genAutoMeal/genAutoAll/genEm)، والأرقام من نفس الدوال (genDist/E.countsVals/E.targets).
+var G152 = { col: { c: '#E9A23B', p: '#4F86E8', f: '#E0705A' } };
+function g152Donut(v, r, w, center) {
+  var C = 2 * Math.PI * r, tot = v.c * 4 + v.p * 4 + v.f * 9, off = 0, seg = '';
+  if (tot > 0) [['c', v.c * 4], ['p', v.p * 4], ['f', v.f * 9]].forEach(function (s) { var L = C * s[1] / tot; if (L <= 0) return; seg += '<circle r="' + r + '" cx="0" cy="0" fill="none" stroke="' + G152.col[s[0]] + '" stroke-width="' + w + '" stroke-dasharray="' + L.toFixed(2) + ' ' + (C - L).toFixed(2) + '" stroke-dashoffset="' + (-off).toFixed(2) + '"/>'; off += L; });
+  var s = r * 2 + w + 2;
+  return '<svg viewBox="' + (-s / 2) + ' ' + (-s / 2) + ' ' + s + ' ' + s + '" width="' + s + '" height="' + s + '" aria-hidden="true"><g transform="rotate(-90)"><circle r="' + r + '" fill="none" stroke="var(--g5-track)" stroke-width="' + w + '"/>' + seg + '</g>' + (center || '') + '</svg>';
+}
+function g152Bar(lbl, cls, val, tg, unit) {
+  var pc = tg > 0 ? Math.min(100, Math.round(val / tg * 100)) : 0, d = tg > 0 ? Math.round(val - tg) : 0, st = !tg ? '' : Math.abs(d) <= Math.max(5, tg * 0.05) ? 'ok' : d > 0 ? 'hi' : 'lo';
+  return '<div class="g5row ' + cls + '"><div class="g5rl"><span class="g5dot"></span><b>' + lbl + '</b><span class="g5v"><b>' + Math.round(val) + '</b> / ' + Math.round(tg) + ' ' + unit + '</span>' + (st && st !== 'ok' ? '<em class="' + st + '">' + (d > 0 ? '+' : '') + d + '</em>' : '') + '</div><div class="g5bar"><i style="width:' + pc + '%"></i></div></div>';
+}
+function g152Side(c) {
+  var g = genOf(c), md = genDist(c), sl = E.slots(+c.meals || 5, D), act = sl.filter(function (q) { return q.active && md[q.i].some(function (v) { return v > 0; }); }), mi = Math.min(g.em || 0, act.length - 1), T = null;
+  try { T = E.targets(ec(c), D); } catch (e) { }
+  var day = { c: 0, p: 0, f: 0, k: 0 }, per = act.map(function (q) { var v = E.countsVals(md[q.i], D); day.c += v.c; day.p += v.p; day.f += v.f; day.k += v.k; return v; });
+  var tk = T ? T.kcal : 0, kp = tk ? Math.min(100, Math.round(day.k / tk * 100)) : 0;
+  var center = '<text x="0" y="-4" text-anchor="middle" class="g5ck">' + Math.round(day.k) + '</text><text x="0" y="16" text-anchor="middle" class="g5cu">سعرة</text>';
+  return '<div class="g5side" role="complementary" aria-label="تحليل اليوم">'
+    + '<section class="g5card"><h4>تحليل اليوم</h4>'
+    + '<div class="g5en"><div class="g5rl"><b>الطاقة</b><span class="g5v"><b>' + Math.round(day.k) + '</b> / ' + Math.round(tk) + ' سعرة</span></div><div class="g5bar en"><i style="width:' + kp + '%"></i></div></div>'
+    + '<div class="g5mx">' + g152Donut(day, 46, 16, center) + '<div class="g5rows">'
+    + g152Bar('كربوهيدرات', 'c', day.c, T ? T.cho : 0, 'جم') + g152Bar('بروتين', 'p', day.p, T ? T.pro : 0, 'جم') + g152Bar('دهون', 'f', day.f, T ? T.fat : 0, 'جم') + '</div></div>'
+    + '<p class="g5note">من توزيع الحصص على الوجبات؛ الهدف من «الطاقة» و«الماكروز».</p></section>'
+    + '<section class="g5card"><h4>الوجبات</h4><div class="g5meals">' + act.map(function (q, i) {
+      var v = per[i]; return '<div class="g5m' + (i === mi ? ' on' : '') + '"' + (i === mi ? ' aria-current="true"' : '') + '>' + g152Donut(v, 17, 7, '') + '<b>' + esc(q.name) + '</b><small>' + Math.round(v.k) + ' سعرة</small></div>';      // للعرض فقط: التبديل من تبويبات الوجبات (بلا تكرار)
+    }).join('') + '</div></section>'
+    + '<div class="g5leg"><span class="c">كربوهيدرات</span><span class="p">بروتين</span><span class="f">دهون</span></div></div>';
+}
+function g152(c, html) {
+  var t = document.createElement('div'); t.innerHTML = html;
+  var box = t.querySelector('.geneqv'), dish = t.querySelector('.eqdish'), meals = t.querySelector('.eqmeals'); if (!box || !dish || !meals) return html;
+  var h3 = meals.previousElementSibling, auto = h3 && h3.querySelector('.eqauto'), help = dish.nextElementSibling && dish.nextElementSibling.matches('p.small') ? dish.nextElementSibling : null;
+  var on = meals.querySelector('.on'), mf = dish.querySelector('.mf');
+  var card = document.createElement('section'); card.className = 'g5meal';
+  card.innerHTML = '<div class="g5mh"><span class="g5mi">' + IC('utensils') + '</span><div class="g5mt"><b>' + (on ? on.textContent : '') + '</b><small>' + (dish.querySelectorAll('.eqli').length) + ' أصناف</small></div></div>';
+  if (auto) { auto.className = 'g5auto'; card.querySelector('.g5mh').appendChild(auto); }
+  dish.classList.add('g5dish'); card.appendChild(dish);
+  if (mf) { mf.classList.add('g5mf'); [['kc', 'الطاقة'], ['cb', 'كربوهيدرات'], ['pr', 'بروتين'], ['ft', 'دهون']].forEach(function (x) { var s = mf.querySelector('.mc.' + x[0]); if (s) { s.setAttribute('data-l', x[1]); s.textContent = s.textContent.replace(/^[^\d\u0660-\u0669]+/, ''); } }); card.appendChild(mf); }
+  if (help) { help.classList.add('g5help'); card.appendChild(help); }
+  meals.classList.add('g5tabs'); meals.setAttribute('role', 'tablist');
+  var main = document.createElement('div'); main.className = 'g5main'; main.appendChild(meals); main.appendChild(card);
+  var grid = document.createElement('div'); grid.className = 'g5grid'; grid.appendChild(main); grid.insertAdjacentHTML('beforeend', g152Side(c));
+  if (h3) { h3.after(grid); h3.classList.add('g5h'); } else box.prepend(grid);
+  box.classList.add('g152');
+  return t.innerHTML;
+}
+genEqv = (function (f) { return function (c, g) {
+  var h = f.apply(this, arguments); if ((g && g.es) !== 5 || typeof isGlass !== 'function' || !isGlass()) return h;
+  try { return g152(c, h); } catch (e) { return h; }
+}; })(genEqv);
 
 // ================= 1.19 المرحلة 4: تبويب «توليد الخطة» — يُدمج داخل app.js عند /*GENUI*/
 // بند جانبي «توليد الخطة» يفتح قائمة العملاء مع «＋ عميل جديد»، واختيار العميل يفتح ملفه على قسم «توليد» (مجموعة «الخطة»).
