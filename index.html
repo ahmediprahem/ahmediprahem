@@ -11472,7 +11472,7 @@ A.alt = (function (f) { return function (v, el) {
 }; })(A.alt);
 function flxBar(msg) {
   var b = document.getElementById('flxbar'); if (!b) { b = document.createElement('div'); b.id = 'flxbar'; b.setAttribute('role', 'status'); document.body.appendChild(b); }
-  b.innerHTML = '<span>' + esc(msg) + '</span><button class="sec sm" data-a="flexUndo">تراجع</button>'; b.className = 'on'; clearTimeout(FLX.t); FLX.t = setTimeout(function () { b.className = ''; }, 9000);
+  b.innerHTML = '<span>' + esc(msg) + '</span><button class="sec sm" data-a="' + (arguments[1] || 'flexUndo') + '">تراجع</button>'; b.className = 'on'; clearTimeout(FLX.t); FLX.t = setTimeout(function () { b.className = ''; }, 9000);
 }
 document.addEventListener('change', function (e) {
   var t = e.target; if (!t || !t.dataset || !t.dataset.alt || String(t.value).charAt(0) !== 'f') return; e.stopImmediatePropagation();
@@ -11497,6 +11497,41 @@ portionsPage = (function (f) { return function () {
     + (keys.length ? '<p class="rotchips">' + keys.map(function (k) { return '<span class="chip">' + esc(k) + ' <b>' + R[k] + '</b></span>'; }).join(' ') + '</p>' : '<p class="small">لا مجموعات بعد.</p>')
     + '<datalist id="rotlist">' + keys.concat(['أسماك', 'بقول', 'لحوم حمراء', 'دواجن', 'أجبان', 'فواكه', 'خضار ورقية']).filter(function (k, i, a) { return a.indexOf(k) === i; }).map(function (k) { return '<option value="' + esc(k) + '">'; }).join('') + '</datalist></div>' + f.apply(this, arguments);
 }; })(portionsPage);
+
+// ================= 1.49ب التبادل المرن في «قائمة الطعام» (الخطوة 5 في توليد الخطة): البروتين من أي مجموعة (بقول وكل درجات اللحوم)،
+// والاختيار ينقل حصص بروتين الوجبة للمجموعة الجديدة ويعوّض الدهون والنشويات في توزيع الوجبات (الوجبة نفسها أولاً) وفي مجموع اليوم.
+function flxBuilderOpts(c, qi, gi, e) {
+  var md = genDist(c), row = md[qi], sl = E.slots(+c.meals || 5, D)[qi], type = sl && sl.type, cx = E.ctx(ec(c), D), from = gi === 1 ? [1] : [2, 3, 4, 5], out = [];
+  if (!type || E.FLEXP.indexOf(gi) < 0) return '';
+  E.FLEXP.filter(function (g) { return g !== gi && !(gi === 1 && g === 1); }).forEach(function (g) {      // كل مجموعات البروتين الأخرى: بقول ودرجات اللحوم كلها
+    var dl = flxRowDelta(row, from, g, e), cands = E.eqvCands(ec(c), g, type, D, cx, e).filter(function (f) { return !E.fmeta(f).x; }).slice(0, 3);
+    cands.forEach(function (f) { out.push('<option value="flex:' + g + ':' + esc(f.n) + '">' + esc(f.n) + ' (' + esc(D.groups[g]) + ') — ' + esc(E.flexNote(dl)) + '</option>'); });
+  });
+  return out.length ? '<optgroup label="تبادل بروتين مرن (يعوّض باقي اليوم)">' + out.join('') + '</optgroup>' : '';
+}
+function flxRowDelta(row, from, toG, e) {
+  var X = D.EX, oF = 0, oC = 0, r = function (v) { return Math.round(v * 2) / 2; }; from.forEach(function (g) { oF += (+row[g] || 0) * X[g][2]; oC += (+row[g] || 0) * X[g][0]; });
+  return { fat: r((e * X[toG][2] - oF) / 5), carb: r((e * X[toG][0] - oC) / 15) };
+}
+document.addEventListener('change', function (ev) {
+  var t = ev.target; if (!t || !t.dataset || !t.dataset.gp || String(t.value).indexOf('flex:') !== 0) return; ev.stopImmediatePropagation();
+  var c = cur(); if (!c) return; var p = t.value.split(':'), toG = +p[1], name = p.slice(2).join(':'), k = t.dataset.gp.split('_'), qi = +k[0], gi = +k[1];
+  var md = genDist(c), cn = genCounts(c).cn.slice(), row = md[qi], from = gi === 1 ? [1] : [2, 3, 4, 5], e = from.reduce(function (a, g) { return a + (+row[g] || 0); }, 0); if (!(e > 0)) return;
+  FLX.bld = { code: c.code, md: c.mealDist ? JSON.stringify(c.mealDist) : null, bc: c.baseCounts ? JSON.stringify(c.baseCounts) : null, pk: JSON.stringify(c.eqvPicks || {}) };
+  var dl = flxRowDelta(row, from, toG, e); from.forEach(function (g) { cn[g] -= +row[g] || 0; row[g] = 0; }); row[toG] = (+row[toG] || 0) + e; cn[toG] = (+cn[toG] || 0) + e;
+  var order = [qi].concat(md.map(function (x, i) { return i; }).filter(function (i) { return i !== qi; })), ch = [], left = { fat: 0, carb: 0 };
+  [['fat', [11]], ['carb', [0, 12, 10]]].forEach(function (pr) {
+    var need = dl[pr[0]]; if (!need) return;
+    if (need < 0) { var g0 = pr[1][0], tq = order.filter(function (i) { return (+md[i][g0] || 0) > 0; })[0]; tq = tq == null ? qi : tq; md[tq][g0] = (+md[tq][g0] || 0) - need; cn[g0] = (+cn[g0] || 0) - need; ch.push([g0, -need]); return; }
+    pr[1].forEach(function (g) { order.forEach(function (i) { if (need < 0.5) return; var v = +md[i][g] || 0, take = Math.min(need, v); take = Math.floor(take * 2) / 2; if (!take) return; md[i][g] = v - take; cn[g] = Math.max(0, (+cn[g] || 0) - take); need -= take; ch.push([g, -take]); }); });
+    left[pr[0]] = need;
+  });
+  c.mealDist = md; c.baseCounts = cn.map(function (v) { return Math.round(v * 2) / 2; }); c.eqvPicks = c.eqvPicks || {}; from.forEach(function (g) { delete c.eqvPicks[qi + '_' + g]; }); c.eqvPicks[qi + '_' + toG] = name;
+  var nm = { 11: 'دهون', 0: 'نشويات', 12: 'كربوهيدرات أخرى', 10: 'فاكهة' }, agg = {}; ch.forEach(function (x) { var kk = nm[x[0]]; agg[kk] = (agg[kk] || 0) + x[1]; });
+  var parts = Object.keys(agg).map(function (kk) { return (agg[kk] < 0 ? 'قلّلنا ' + (-agg[kk]) : 'زدنا ' + agg[kk]) + ' حصة ' + kk; });
+  save(); main(); flxBar('تم التبديل إلى ' + name + ' (' + D.groups[toG] + ')' + (parts.length ? '. ' + parts.join('، ') + ' في توزيع اليوم' : '') + (left.fat || left.carb ? '. تعذّر تعويض ' + [left.fat ? left.fat + ' حصة دهون' : '', left.carb ? left.carb + ' حصة نشويات' : ''].filter(Boolean).join(' و') + ' (لا حصص كافية في اليوم)' : '') + '.', 'flexUndoB');
+}, true);
+A.flexUndoB = function () { var u = FLX.bld, c = cur(); if (!u || !c || c.code !== u.code) return; if (u.md) c.mealDist = JSON.parse(u.md); else delete c.mealDist; if (u.bc) c.baseCounts = JSON.parse(u.bc); else delete c.baseCounts; c.eqvPicks = JSON.parse(u.pk); FLX.bld = null; save(); main(); var b = document.getElementById('flxbar'); if (b) b.className = ''; toast('تراجعنا عن التبديل'); };
 
 // ================= 1.19 المرحلة 4: تبويب «توليد الخطة» — يُدمج داخل app.js عند /*GENUI*/
 // بند جانبي «توليد الخطة» يفتح قائمة العملاء مع «＋ عميل جديد»، واختيار العميل يفتح ملفه على قسم «توليد» (مجموعة «الخطة»).
@@ -11659,7 +11694,7 @@ function genEqv(c, g, T) {
       var row5 = md5[q5.i], lines = '', mv = E.countsVals(row5, D);
       var mt5 = 0, gm5 = -1; [2, 3, 4, 5].forEach(function (q) { var v = +row5[q] || 0; mt5 += v; if (v > 0 && (gm5 < 0 || v > (+row5[gm5] || 0))) gm5 = q; });
       E.EQV_ORDER.forEach(function (gi) { var e = row5[gi]; if (gi >= 2 && gi <= 5) { if (gi !== gm5) return; e = mt5; } if (!e) return; var cands = E.eqvCands(ec(c), gi, q5.type, D, cx, e), key = q5.i + '_' + gi, cur5 = picks[key] || ''; var f0 = cands.filter(function (f) { return f.n === cur5; })[0] || cands[0];
-        lines += '<div class="eqli"><span class="eqgi">' + genGi(gi) + '</span><div class="eqlt"><b>' + (f0 ? esc(E.lineText(f0, e, c.alias)) : 'لا صنف مناسب') + '</b><small>' + e + ' ' + esc(D.groups[gi]) + '</small></div><select data-gp="' + key + '" aria-label="صنف ' + esc(D.groups[gi]) + '"><option value="">تلقائي (يتنوّع يومياً)</option>' + cands.slice(0, 40).map(function (f) { return '<option' + (f.n === cur5 ? ' selected' : '') + '>' + esc(f.n) + '</option>'; }).join('') + '</select></div>'; });
+        lines += '<div class="eqli"><span class="eqgi">' + genGi(gi) + '</span><div class="eqlt"><b>' + (f0 ? esc(E.lineText(f0, e, c.alias)) : 'لا صنف مناسب') + '</b><small>' + e + ' ' + esc(D.groups[gi]) + '</small></div><select data-gp="' + key + '" aria-label="صنف ' + esc(D.groups[gi]) + '"><option value="">تلقائي (يتنوّع يومياً)</option>' + cands.slice(0, 40).map(function (f) { return '<option' + (f.n === cur5 ? ' selected' : '') + '>' + esc(f.n) + '</option>'; }).join('') + (typeof flxBuilderOpts === 'function' ? flxBuilderOpts(c, q5.i, gi, e) : '') + '</select></div>'; });      // 1.49ب: تبادل بروتين مرن من مجموعات أخرى
       h += '<div class="eqdish"><div class="eqlines">' + lines + '</div><div class="mf"><span class="mc kc">🔥 ' + Math.round(mv.k) + ' سعرة</span><span class="mc cb">● ' + mv.c + ' جم</span><span class="mc pr">◆ ' + mv.p + ' جم</span><span class="mc ft">✦ ' + mv.f + ' جم</span></div></div>'
         + '<p class="small">«تلقائي» يختار من الأصناف المناسبة للوجبة والعميل (بلا المستبعد والحساسية) ويتنوّع كل يوم؛ اختيار صنف يثبّته كل الأيام.</p>';
     }

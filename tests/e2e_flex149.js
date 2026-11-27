@@ -27,6 +27,18 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [], SHOT = 
   const rot = await p.evaluate(() => [DPApp.S.settings.over['سلمون'] && DPApp.S.settings.over['سلمون'].rot, DATA.foods.find((f) => f.n === 'سلمون').rot]); assert.deepStrictEqual(rot, ['أسماك', 'أسماك']);
   if (SHOT) { await p.evaluate(() => { const el = document.querySelector('[data-fe="' + encodeURIComponent('سلمون') + '|rot"]'); el.scrollIntoView({ block: 'center' }); }); await p.screenshot({ path: SHOT + '/rot_field.png' }); await p.evaluate(() => window.scrollTo(0, 0)); await p.evaluate(() => DPApp.A.settings()); await p.click('[data-a="setTab"][data-v="portions"]'); await p.screenshot({ path: SHOT + '/rot_info.png' }); }
   ok('«الحصص والبدائل»: حقل 🔁 مجموعة التدوير لكل صنف يُحفظ في الإعدادات ويصل للمحرك، وبطاقة تشرح المجموعات');
+  // 1.49ب: «قائمة الطعام» في توليد الخطة (الخطوة 5)
+  await p.evaluate(() => DPApp.A.genNew()); await p.fill('[data-f="name"]', 'م'); await p.selectOption('[data-f="sex"]', 'ذكر'); await p.fill('[data-f="age"]', '35'); await p.fill('[data-f="weight"]', '85'); await p.fill('[data-f="height"]', '175'); await p.press('[data-f="height"]', 'Tab');
+  await p.selectOption('[data-f="goal"]', { index: 2 }); await p.selectOption('[data-f="activity"]', { index: 1 });
+  await p.evaluate(() => { DPApp.A.genStep(3); DPApp.A.genRevOk(); DPApp.A.genOpen(4); DPApp.A.genEs(5); }); await p.waitForSelector('select[data-gp]');
+  const ems = await p.$$eval('[data-a="genEm"]', (x) => x.map((e) => e.textContent)), lu = ems.findIndex((t) => /غداء/.test(t)); if (lu >= 0) await p.click('[data-a="genEm"][data-v="' + lu + '"]');
+  const gp = await p.$$eval('select[data-gp]', (x) => x.map((s) => [s.dataset.gp, [...s.querySelectorAll('optgroup option')].map((o) => o.textContent)])).then((L) => L.find((x) => x[1].length));
+  assert(gp && gp[1].some((t) => /بقوليات/.test(t)) && gp[1].some((t) => /(متوسطة|عالية|قليلة) الدهون/.test(t)), JSON.stringify(gp));
+  const c0 = await p.evaluate(() => { const c = DPApp.S.clients.find((x) => x.code === DPApp.S.cur); return JSON.stringify([c.mealDist || null, c.baseCounts || null, c.eqvPicks || {}]); });
+  const v0 = await p.$eval('select[data-gp="' + gp[0] + '"] optgroup option', (o) => o.value); await p.selectOption('select[data-gp="' + gp[0] + '"]', v0); await p.waitForSelector('#flxbar.on [data-a="flexUndoB"]');
+  const c1 = await p.evaluate(() => { const c = DPApp.S.clients.find((x) => x.code === DPApp.S.cur); return { pk: c.eqvPicks, bc: c.baseCounts }; }); assert(Object.values(c1.pk).length && c1.bc, JSON.stringify(c1));
+  await p.click('#flxbar [data-a="flexUndoB"]'); const c2 = await p.evaluate(() => { const c = DPApp.S.clients.find((x) => x.code === DPApp.S.cur); return JSON.stringify([c.mealDist || null, c.baseCounts || null, c.eqvPicks || {}]); }); assert.strictEqual(c2, c0);
+  ok('«قائمة الطعام»: خيارات بروتين من البقول وكل درجات اللحوم، والاختيار ينقل الحصص ويعوّض في التوزيع ومجموع اليوم، و«تراجع» يعيده');
   assert.deepStrictEqual(errs, [], errs.join(' | ')); ok('لا أخطاء في وحدة التحكم');
   console.log('\nنجح', n, 'اختبارات 1.49'); await b.close();
 })().catch((e) => { console.log('✘', String(e && e.stack || e).slice(0, 1200)); process.exit(1); });
