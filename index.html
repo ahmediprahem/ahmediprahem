@@ -2600,6 +2600,11 @@ html.ntrmini #hd .ntrcol svg{transform:rotate(90deg)}
   html.ntrmini aside .rail .sidebtn>span,html.ntrmini aside .rail .rgl,html.ntrmini aside .rail .rcnt{display:none!important}
   html:not(#mxz):not(#mxy).ntrmini aside .rail .sidebtn{justify-content:center!important;padding-inline:0!important;position:relative}
   html.ntrmini aside .rail .sidebtn em{position:absolute;top:2px;inset-inline-start:4px}
+  /* 1.60 إصلاح (فيديو المالك): قاعدة الزجاجي بين 1200 و1280px كانت تُظهر الأسماء وتعرض الأزرار 214px فوق المحتوى رغم الطي — الطي يغلب في كل المقاسات */
+  html:not(#mxz):not(#mxy).ntrmini aside .rail .sidebtn span,html:not(#mxz):not(#mxy).ntrmini aside .rail .sbh,html:not(#mxz):not(#mxy).ntrmini aside .rail .small,html:not(#mxz):not(#mxy).ntrmini aside .rail .rgl,html:not(#mxz):not(#mxy).ntrmini aside .rail .rcnt{display:none!important}
+  html:not(#mxz):not(#mxy).ntrmini aside .rail .sidebtn{width:48px!important;max-width:48px;margin-inline:auto}
+  html:not(#mxz):not(#mxy).ntrmini body.clx aside{grid-template-columns:minmax(0,1fr)!important}
+  html:not(#mxz):not(#mxy).ntrmini aside .rail,html:not(#mxz):not(#mxy).ntrmini aside .rail .rgrp{width:auto!important;min-width:0!important;max-width:100%!important}
 }
 /* إزالة التكرار في الترويسة على الشاشة الواسعة: أيقونة البحث (حقل البحث بجانبها وCtrl+K)، وأيقونة الرسائل («شات زنها» في الشريط بعدّاده) */
 @media (min-width:761px){html:not(#mxz):not(#mxy) #hd .hqb:is([data-a="hqSearch"],[data-a="hqMsg"]){display:none!important}}
