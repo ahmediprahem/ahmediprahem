@@ -18,7 +18,8 @@
     var w = h.querySelector('.zhw'); if (w && !w.querySelector('.z162dz')) { w.insertAdjacentHTML('afterbegin', dz(W)); var t = w.querySelector('h2'); if (t && !t.querySelector('.z162hl')) { var m = /^(.*?،\s*)(.+)$/.exec(t.textContent); if (m) { t.textContent = m[1]; var s = document.createElement('span'); s.className = 'z162hl'; s.textContent = m[2]; t.appendChild(s); } } }
     var ins = h.querySelector('.zhins'); if (ins && !ins.querySelector('.z162dz')) ins.insertAdjacentHTML('afterbegin', dz(P));
   }
-  function scan() { var h = document.querySelector('.home.zh:not([data-z162])'); if (h) enhance(h); }
+  var CF = [['mint', 30, 10, 40, 'f'], ['o', 46, 70, 14, 'p'], ['apple', 60, 20, 30, 's'], ['x', 74, 64, 14, 'p']];
+  function scan() { var h = document.querySelector('.home.zh:not([data-z162])'); if (h) enhance(h); var c = R.classList.contains('zt162') && document.querySelector('main .cfhead:not([data-z162])'); if (c) { c.setAttribute('data-z162', '1'); c.insertAdjacentHTML('afterbegin', dz(CF)); } }      // 1.68 رأس ملف العميل
   if (window.MutationObserver) new MutationObserver(scan).observe(document.documentElement, { childList: true, subtree: true });
   window.ZN_home162 = { scan: scan, classic: function (on) { try { localStorage.setItem('zn_classic', on ? '1' : '0'); } catch (e) { } R.classList.toggle('zt162', !on); } };
 })();

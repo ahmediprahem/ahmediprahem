@@ -1,0 +1,35 @@
+/* ================= 1.68 نظام زنها البصري الموحّد (zn-ds) — نفس رموز صفحة الاستقبال وشاشة الدخول و«اليوم»، مطبّق على ملف العميل.
+   شكل فقط تحت html.zt162 (المظهر السابق: zn_classic=1). لا تباعد أحرف على العربي، والعناوين Alexandria. */
+html.zt162{--zd-mint:#4FE3A4;--zd-teal:#12A88E;--zd-deep:#0E7F72;--zd-ink:#16324A;--zd-ink2:#4A5E70;--zd-mut:#7B8C9B;--zd-bg:#F5FAF9;--zd-tint:#E4F7F0;--zd-line:rgba(22,50,74,.09);--zd-card:#fff;--zd-sh:0 8px 22px rgba(22,50,74,.07);--zd-sh2:0 14px 34px rgba(22,50,74,.10);--zd-r:22px;--zd-head:'Zenha Head','Hissa Plex','IBM Plex Sans Arabic',sans-serif}
+html.zt162:not([data-tone="light"]){--zd-ink:#E6F0EE;--zd-ink2:#B9C8C5;--zd-mut:#8FA39F;--zd-tint:rgba(79,227,164,.10);--zd-line:rgba(255,255,255,.10);--zd-card:rgba(255,255,255,.04);--zd-sh:0 8px 22px rgba(0,0,0,.25);--zd-mint:#3FD9A4;--zd-teal:#2CC79C}
+html.zt162:not(#mxz):not(#mxy) main :is(.cfname,.cfsec>summary h3,.cfsec h3,.cfside h3,.cfh3){font-family:var(--zd-head)!important;letter-spacing:normal!important}
+/* رأس ملف العميل: بطاقة بخلفية نعناعية ورسومات خطية خفيفة (كترحيب «اليوم») */
+html.zt162:not(#mxz):not(#mxy) main .cfhead{position:relative;overflow:hidden;border-radius:26px!important;border:1px solid var(--zd-line)!important;background:linear-gradient(160deg,var(--zd-tint) 0,rgba(238,249,245,.6) 60%,var(--zd-card) 100%)!important;box-shadow:var(--zd-sh)!important;padding:16px 18px!important}
+html.zt162:not(#mxz):not(#mxy):not([data-tone="light"]) main .cfhead{background:linear-gradient(160deg,rgba(63,217,164,.12),rgba(63,217,164,.03) 70%,transparent)!important}
+html.zt162:not(#mxz):not(#mxy) main .cfhead>*{position:relative;z-index:1}
+html.zt162:not(#mxz):not(#mxy) main .cfhead .cav{width:52px!important;height:52px!important;font-size:22px!important;font-family:var(--zd-head);background:linear-gradient(135deg,var(--zd-mint),var(--zd-teal))!important;color:#fff!important;box-shadow:0 0 0 4px rgba(79,227,164,.22)!important}
+html.zt162:not(#mxz):not(#mxy) main .cfhead .cfname{font-size:clamp(20px,1.7vw,26px)!important;font-weight:800!important;color:var(--zd-ink)!important}
+html.zt162:not(#mxz):not(#mxy) main .cfhead .cfb{border-radius:999px!important;border:1px solid var(--zd-line)!important;background:var(--zd-card)!important;box-shadow:0 3px 10px rgba(22,50,74,.05)!important;transition:transform .2s,box-shadow .2s}
+html.zt162:not(#mxz):not(#mxy) main .cfhead .cfb:hover{transform:translateY(-1px);box-shadow:var(--zd-sh)!important}
+html.zt162:not(#mxz):not(#mxy) main .cfhead .cfb:not(.n){border-color:rgba(18,168,142,.35)!important;color:var(--zd-deep)!important}
+/* التبويبات: شريط مقاطع بمؤشر نعناعي */
+html.zt162:not(#mxz):not(#mxy) main .cftabs{border-radius:999px!important;padding:5px!important;background:var(--zd-card)!important;border:1px solid var(--zd-line)!important;box-shadow:var(--zd-sh)!important;gap:4px!important}
+html.zt162:not(#mxz):not(#mxy) main .cftabs>button{border-radius:999px!important;border:0!important;background:transparent!important;color:var(--zd-ink2)!important;font-weight:700!important;transition:background .2s,color .2s}
+html.zt162:not(#mxz):not(#mxy) main .cftabs>button:hover{background:var(--zd-tint)!important;color:var(--zd-deep)!important}
+html.zt162:not(#mxz):not(#mxy) main .cftabs>button.on{background:linear-gradient(135deg,var(--zd-teal),var(--zd-deep))!important;color:#fff!important;box-shadow:0 6px 16px rgba(14,127,114,.28)!important}
+html.zt162:not(#mxz):not(#mxy) main .cftabs>button.on svg{color:#fff!important;stroke:#fff}
+html.zt162:not(#mxz):not(#mxy) main .cfseg>button{border-radius:999px!important;font-weight:700}
+html.zt162:not(#mxz):not(#mxy) main .cfseg>button.on{background:var(--zd-tint)!important;color:var(--zd-deep)!important;border-color:rgba(18,168,142,.35)!important}
+/* أقسام «البيانات» وبطاقات العمود الجانبي */
+html.zt162:not(#mxz):not(#mxy) main .cf151 .cfsec,html.zt162:not(#mxz):not(#mxy) main .cf151 .cfside{border-radius:var(--zd-r)!important;border:1px solid var(--zd-line)!important;box-shadow:var(--zd-sh)!important;background:var(--zd-card)!important;transition:box-shadow .25s}
+html.zt162:not(#mxz):not(#mxy) main .cf151 .cfsec:hover{box-shadow:var(--zd-sh2)!important}
+html.zt162:not(#mxz):not(#mxy) main .cf151 .cfsec>summary{border-radius:var(--zd-r) var(--zd-r) 0 0}
+html.zt162:not(#mxz):not(#mxy) main .cf151 .cfside.go{background:linear-gradient(135deg,#0E7F72 0%,#12A88E 55%,#3FCB9E 100%)!important;border:0!important;box-shadow:0 18px 40px -16px rgba(14,127,114,.6)!important}
+/* الحقول والأزرار (نفس شاشة الدخول) */
+html.zt162:not(#mxz):not(#mxy) main .cfbody :is(input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea){border-radius:14px!important;border:1.5px solid rgba(22,50,74,.12)!important;transition:border-color .2s,box-shadow .2s}
+html.zt162:not(#mxz):not(#mxy):not([data-tone="light"]) main .cfbody :is(input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea){border-color:rgba(255,255,255,.14)!important}
+html.zt162:not(#mxz):not(#mxy) main .cfbody :is(input,select,textarea):focus{border-color:var(--zd-teal)!important;box-shadow:0 0 0 4px rgba(79,227,164,.22)!important;outline:none!important}
+html.zt162:not(#mxz):not(#mxy) main .cfbody input[type=checkbox],html.zt162:not(#mxz):not(#mxy) main .cfbody input[type=radio]{accent-color:var(--zd-teal)}
+html.zt162:not(#mxz):not(#mxy) main .cf151 .cfaside .cfside:not(.go) button:not(.link):not(.sec){border-radius:999px!important;background:linear-gradient(135deg,var(--zd-teal),var(--zd-deep))!important;color:#fff!important;border:0!important;box-shadow:0 6px 16px rgba(14,127,114,.24)!important}
+html.zt162:not(#mxz):not(#mxy) main .cf151 .tag,html.zt162:not(#mxz):not(#mxy) main .cf151 .req{border-radius:999px}
+@media (prefers-reduced-motion:reduce){html.zt162:not(#mxz):not(#mxy) main .cfhead .cfb,html.zt162:not(#mxz):not(#mxy) main .cftabs>button,html.zt162:not(#mxz):not(#mxy) main .cf151 .cfsec{transition:none!important}}
