@@ -25,11 +25,11 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); };
   ok('ذاكرة النتائج: الطلب المطابق بعد التطبيع يُعاد فوراً بلا استهلاك أي حد');
   // 3) الملصق: Gemini ثم Cloudflare ثم Groq؛ النتيجة «تقدير احتياطي»، والمشغول يُتجاوز دقيقة
   const LBL = { mode: 'label', img: 'QUJDRA==', mime: 'image/jpeg' }, lb = { ok: true, product: 'ت', per: { kcal: 100, fat: 1, carbs: 20, protein: 3 }, assessment: { rating: 'healthy', summary: 'جيد' } };
-  R = { gl: { st: 429 }, cf: { st: 500 }, groq: { st: 200, o: lb } }; calls = []; r = await call(LBL); assert.strictEqual(r.s, 200); assert.deepStrictEqual(calls.map((x) => x.p), ['cf', 'groq']); assert.strictEqual(r.j.prov, 'groq'); assert.strictEqual(r.j.backup, 1);      // Gemini ردّ 429 في (1) قبل ثوانٍ: يُتجاوز دقيقة
-  const gq = JSON.parse(calls[1].o.body); assert.strictEqual(gq.messages[0].content[1].image_url.url, 'data:image/jpeg;base64,QUJDRA=='); assert.strictEqual(gq.model, 'qwen/qwen3.8-27b');
-  calls = []; r = await call(Object.assign({}, LBL, { img: 'QUJDRUU=' })); assert.deepStrictEqual(calls.map((x) => x.p), ['cf', 'groq']);
+  R = { gl: { st: 429 }, groq: { st: 500 }, cf: { st: 200, o: lb } }; calls = []; r = await call(LBL); assert.strictEqual(r.s, 200); assert.deepStrictEqual(calls.map((x) => x.p), ['groq', 'cf']); assert.strictEqual(r.j.prov, 'cf'); assert.strictEqual(r.j.backup, 1);      // Gemini ردّ 429 في (1) قبل ثوانٍ: يُتجاوز دقيقة
+  const gq = JSON.parse(calls[0].o.body); assert.strictEqual(gq.messages[0].content[1].image_url.url, 'data:image/jpeg;base64,QUJDRA=='); assert.strictEqual(gq.model, 'qwen/qwen3.8-27b');
+  calls = []; r = await call(Object.assign({}, LBL, { img: 'QUJDRUU=' })); assert.deepStrictEqual(calls.map((x) => x.p), ['groq', 'cf']);
   R = { gl: { st: 429 } }; calls = []; r = await call({ mode: 'supp', text: 'فيتامين د ' + Date.now() }); assert(!calls.some((x) => x.p === 'cf' || x.p === 'gf'));
-  ok('ترتيب لكل نوع: الملصق Gemini ثم Cloudflare ثم Groq بعلامة «تقدير احتياطي»، والمشغول يُتجاوز، والمكملات لا تذهب إلى Cloudflare ولا Gemini Flash');
+  ok('ترتيب لكل نوع: الملصق Gemini ثم Groq ثم Cloudflare بعلامة «تقدير احتياطي»، والمشغول يُتجاوز، والمكملات لا تذهب إلى Cloudflare ولا Gemini Flash');
   // 4) حارس الجودة: سعرات غير متسقة أو رد غير عربي → المزوّد التالي
   R = { gl: { st: 429 }, groq: { st: 200, o: bad }, zai: { st: 200, o: en } }; calls = [];
   r = await call({ mode: 'text', text: 'طبق أرز ' + Date.now(), bench: 'b3nch', nocache: 1 }); assert.strictEqual(r.j.prov, 'zai' === r.j.prov ? 'x' : r.j.prov);

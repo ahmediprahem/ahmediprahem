@@ -294,9 +294,9 @@ const AI_PV = {
   zai: { k: 'oai', key: 'ZAI_API_KEY', m: 'glm-4.6v-flash', u: 'https://api.z.ai/api/paas/v4/chat/completions' },
   cf: { k: 'cf', m: '@cf/meta/llama-4-scout-17b-16e-instruct' }                           // Workers AI داخل الحساب بلا مفتاح: آخر احتياط
 };
-// الترتيب لكل نوع من قياس الدقة على 22 حالة عربية (2026-11-27): Gemini أولاً دائماً (الأدق)، ثم الأفضل في كل نوع؛ Cloudflare (Llama 4) ممتاز في الملصقات وصور الوجبات
+// الترتيب لكل نوع من قياس الدقة على 22 حالة عربية (2026-11-27): Gemini أولاً دائماً (الأدق)، ثم الأفضل في كل نوع؛ Groq ثانياً (قارب Gemini)، ثم Cloudflare (Llama 4) ممتاز في الملصقات وصور الوجبات
 // ويفشل في المكملات والأعشاب فلا يُستعمل فيها؛ وGemini Flash بطيء (~28 ث) فلا يُستعمل. يُغيَّر بلا كود: AI_ORDER_TEXT / _PHOTO / _LABEL / _STORE / _SUPP / _HERB
-const AI_ORD = { text: ['gl', 'groq', 'cf', 'zai'], photo: ['gl', 'cf', 'zai', 'groq'], label: ['gl', 'cf', 'groq', 'zai'], store: ['gl', 'cf', 'groq', 'zai'], supp: ['gl', 'groq', 'zai'], herb: ['gl', 'groq', 'zai'] };
+const AI_ORD = { text: ['gl', 'groq', 'cf', 'zai'], photo: ['gl', 'groq', 'cf', 'zai'], label: ['gl', 'groq', 'cf', 'zai'], store: ['gl', 'groq', 'cf', 'zai'], supp: ['gl', 'groq', 'zai'], herb: ['gl', 'groq', 'zai'] };      // Groq (Qwen 3.8) قارب Gemini في كل الأنواع؛ Z.ai الأضعف والأكثر انشغالاً فآخراً
 export { AI_PV, AI_ORD };
 async function aiTick(db, p, day) { const k = 'ai.p.' + day + '.' + p, r = await one(db, 'SELECT v FROM kv WHERE k = ?', k); await run(db, 'INSERT INTO kv (k, v) VALUES (?, ?) ON CONFLICT(k) DO UPDATE SET v = excluded.v', k, String((r ? +r.v || 0 : 0) + 1)); }
 export function aiJson(t) {                                          // رد نصي ← كائن: يحذف التفكير والأسوار، ويأخذ أول { إلى آخر }، ويصلح الفواصل الزائدة
