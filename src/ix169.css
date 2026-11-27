@@ -1,0 +1,25 @@
+/* 1.69 (م1ب) الاستقبال والتاريخ + ملاحظات الزيارات ADIME */
+.cf151 .t-violet{--cs-tint:#ECE6F8;--cs-ac:#6A4FA8}
+.ix169 .ixg{border:0;margin:0 0 14px;padding:0}
+.ix169 .ixg legend{font-weight:700;font-size:14px;color:var(--cs-ac,#6A4FA8);margin-bottom:8px;padding:0}
+.ix169 .ixgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px 14px}
+.ix169 .ixf{display:flex;flex-direction:column;gap:4px;min-width:0}
+.ix169 .ixf label,.ix169 .ixl{font-size:13px;color:var(--ink2,#475069);line-height:1.5}
+.ix169 .ixw{grid-column:1/-1}
+.ix169 .ixf select,.ix169 .ixf input,.ix169 .ixf textarea{width:100%;box-sizing:border-box}
+.ix169 .ixchips{display:flex;flex-wrap:wrap;gap:6px}
+.ix169 .ixchip{display:inline-flex;align-items:center;cursor:pointer}
+.ix169 .ixchip input{position:absolute;opacity:0;width:1px;height:1px}
+.ix169 .ixchip span{padding:5px 12px;border-radius:999px;border:1px solid var(--line,#d9dce6);background:#fff;font-size:13px;line-height:1.4}
+.ix169 .ixchip input:checked+span{background:var(--cs-tint,#ECE6F8);border-color:var(--cs-ac,#6A4FA8);color:var(--cs-ac,#6A4FA8);font-weight:700}
+.ix169 .ixchip input:focus-visible+span{outline:2px solid var(--cs-ac,#6A4FA8);outline-offset:2px}
+.ad169{margin-top:18px}
+.ad169 .ad169f summary{cursor:pointer;padding:2px 0}
+.ad169 .ad169f textarea{width:100%;box-sizing:border-box}
+.ad169 .ad169n{border:1px solid var(--line,#e3e6ef);border-radius:12px;padding:10px 14px;margin:10px 0;background:#fff}
+.ad169 .ad169n header{display:flex;align-items:center;gap:10px}
+.ad169 .ad169n header small{color:var(--ink2,#667)}
+.ad169 .ad169n header button{margin-inline-start:auto}
+.ad169 .ad169n dl{margin:6px 0 0}
+.ad169 .ad169n dt{font-weight:700;font-size:13px;color:#6A4FA8;margin-top:6px}
+.ad169 .ad169n dd{margin:2px 0 0;white-space:pre-wrap}

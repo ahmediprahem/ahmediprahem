@@ -10,7 +10,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
     seen.healthDisabled = await m.isDisabled('.foot .btn'); await m.click('[data-act="set"][data-k="dmed"][data-v="y"]'); await m.click('[data-act="set"][data-k="preg"][data-v="n"]'); seen.healthOk = !(await m.isDisabled('.foot .btn'));
   } });
   const { d, m, env, C, RELAY } = L;
-  assert(/من 5/.test(seen.hd), seen.hd); ok('الاستبيان المختصر: 5 أقسام (كانت 6) ' + seen.hd.trim().slice(0, 30));
+  assert(/من 8/.test(seen.hd), seen.hd); ok('الاستبيان المختصر: 5 أقسام أساسية + 3 اختيارية (1.69) ' + seen.hd.trim().slice(0, 30));
   assert(/أغلب يومي جالس/.test(seen.goal) && /أنزل وزني بهدوء/.test(seen.goal) && !/خامل/.test(seen.goal) && !/تعديل يدوي/.test(seen.goal)); ok('الهدف والنشاط بلغة يوم العميل («أغلب يومي جالس»، «أنزل وزني بهدوء»)، و«تعديل يدوي» لا يظهر للعميل');
   assert(seen.healthDisabled && seen.healthOk); ok('سؤالا السلامة إلزاميان قبل المتابعة (حامل أو مرضع للأنثى، وأدوية السكر)');
   const c = await C(); assert(c.safety && c.safety.dmed === true && c.safety.preg === false, JSON.stringify(c.safety)); assert(!c.intakePrefs || c.intakePrefs.week === 'mix'); ok('السلامة تصل الأخصائي في ملف العميل، والأسئلة المحذوفة قيم افتراضية');

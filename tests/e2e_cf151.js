@@ -7,7 +7,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   await p.goto(fileUrl(path.resolve(__dirname, '../admin.html'))); await login(p);
   await p.evaluate(() => DPApp.A.new('ex')); await p.fill('[data-f="name"]', 'سارة'); await p.selectOption('[data-f="sex"]', 'أنثى').catch(() => { }); await p.fill('[data-f="age"]', '32'); await p.fill('[data-f="weight"]', '72'); await p.fill('[data-f="height"]', '163'); await p.press('[data-f="height"]', 'Tab');
   await p.evaluate(() => DPApp.A.tab('client')); await p.waitForSelector('.cf151');
-  const secs = await p.$$eval('.cf151 .cfsec', (x) => x.map((s) => s.dataset.cfs)); assert.deepStrictEqual(secs, ['base', 'goal', 'health', 'pref', 'life']); ok('خمسة أقسام: الأساسية، الهدف، الصحة، التفضيلات، نمط الحياة');
+  const secs = await p.$$eval('.cf151 .cfsec', (x) => x.map((s) => s.dataset.cfs)); assert.deepStrictEqual(secs, ['base', 'goal', 'health', 'intake', 'pref', 'life']); ok('ستة أقسام: الأساسية، الهدف، الصحة، الاستقبال والتاريخ (1.69)، التفضيلات، نمط الحياة');
   for (const s of ['name', 'phone', 'sex', 'age', 'weight', 'height', 'activity', 'goal', 'kcalManual', 'meals', 'keywords', 'notes', 'cuisine', 'budget', 'life']) assert.strictEqual(await p.$$eval('.cf151 [data-f="' + s + '"]', (x) => x.length), 1, s);
   for (const s of ['#tg', '#mcond', '#mstyle', '#mtailor', '#f-love', '#f-avoid', '#f-favMeals', '#f-excludedMeals', '.wdbox', '.dxbox', '[data-a="genOpen"]']) assert(await p.$('.cf151 ' + s), s); ok('كل الحقول والمعرّفات موجودة مرة واحدة');
   assert(await p.$('.cf151 .cfaside .cfside.go [data-a="genOpen"]') && await p.$('.cf151 .cfaside #f-notes')); ok('العمود الجانبي: «أنشئ الخطة» والنظام والمحرك والملاحظات');

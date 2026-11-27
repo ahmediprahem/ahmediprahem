@@ -26,18 +26,18 @@ const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html'));
   ok('النظامان الأساسيان بالاسم الجديد: «نظام الحصص» و«نظام الجرامات» (بدل «رياضي»)');
   // ---- 2) محرر الاستبيان: الحصص
   await d.click('.rail [data-a="settings"]'); await d.click('[data-a="setTab"][data-v="forms"]'); await d.waitForSelector('.fmstep');
-  const exSteps = await d.locator('.fmstep').count(); assert.strictEqual(exSteps, 5); for (let i = 0; i < 6; i++) assert.strictEqual(await d.locator('.fmstep').first().locator('.fmq').nth(i).locator('input[data-fm$=",show"]').count(), 0, 'الأسئلة الأساسية جداً لا تُخفى');
-  let sp = await spec('ex'); assert.deepStrictEqual(sp.steps.map((s) => s.id), ['basic', 'goal', 'health', 'day', 'mfoods'], 'المحرر يعرض الاستبيان الذي يراه العميل');
+  const exSteps = await d.locator('.fmstep').count(); assert.strictEqual(exSteps, 8); for (let i = 0; i < 6; i++) assert.strictEqual(await d.locator('.fmstep').first().locator('.fmq').nth(i).locator('input[data-fm$=",show"]').count(), 0, 'الأسئلة الأساسية جداً لا تُخفى');
+  let sp = await spec('ex'); assert.deepStrictEqual(sp.steps.map((s) => s.id), ['basic', 'goal', 'health', 'day', 'mfoods', 'xhab', 'xhist', 'xlife'], 'المحرر يعرض الاستبيان الذي يراه العميل');
   const gSi = sp.steps.findIndex((s) => s.id === 'goal'), acQi = sp.steps[gSi].q.findIndex((q) => q.id === 'act'), hSi = sp.steps.findIndex((s) => s.id === 'health'), mdQi = sp.steps[hSi].q.findIndex((q) => q.id === 'meds'), sfQi = sp.steps[hSi].q.findIndex((q) => q.id === 'safe'), alQi = sp.steps[hSi].q.findIndex((q) => q.id === 'allg');
   await d.uncheck(`[data-fm="q,${hSi},${mdQi},show"]`); await d.uncheck(`[data-fm="q,${hSi},${sfQi},show"]`); await d.fill(`[data-fm="q,${hSi},${alQi},label"]`, 'هل هناك أكل يتعبك أو لا تأكله؟'); await d.press(`[data-fm="q,${hSi},${alQi},label"]`, 'Tab');
   await d.locator('.fmstep').nth(gSi).locator('.fmopts summary').nth(1).click(); await d.fill(`[data-fm="q,${gSi},${acQi},ol,0"]`, 'مكتبي معظم اليوم'); await d.press(`[data-fm="q,${gSi},${acQi},ol,0"]`, 'Tab');
   await d.locator('.fmstep').nth(gSi).locator('.fmopts summary').nth(1).click(); await d.uncheck(`[data-fm="q,${gSi},${acQi},oh,4"]`);
   await d.locator('.fmstep').nth(hSi).locator('[data-a="fmQAdd"]').click(); await d.selectOption('#fm_t', 'one'); await d.fill('#fm_l', 'كم مرة تأكل خارج البيت أسبوعياً؟'); await d.fill('#fm_o', 'لا آكل خارجاً\n1–2 مرة\n3 مرات أو أكثر'); await d.check('#fm_r'); await d.click('[data-a="fmQSave"]');
-  sp = await spec('ex'); const custEx = sp.steps[hSi].q.find((q) => !q.b), act = sp.steps[gSi].q[acQi]; assert.deepStrictEqual([custEx.type, custEx.opts.length, custEx.req], ['one', 3, 1]); assert(sp.steps[hSi].q[mdQi].hide && sp.steps[hSi].q[sfQi].hide); assert.strictEqual(sp.steps[hSi].q[alQi].label, 'هل هناك أكل يتعبك أو لا تأكله؟');
+  sp = await spec('ex'); const custEx = sp.steps[hSi].q.find((q) => !q.b && !q.ix), act = sp.steps[gSi].q[acQi]; assert.deepStrictEqual([custEx.type, custEx.opts.length, custEx.req], ['one', 3, 1]); assert(sp.steps[hSi].q[mdQi].hide && sp.steps[hSi].q[sfQi].hide); assert.strictEqual(sp.steps[hSi].q[alQi].label, 'هل هناك أكل يتعبك أو لا تأكله؟');
   assert.deepStrictEqual([act.ol, act.oh], [{ 0: 'مكتبي معظم اليوم' }, ['4']]);
   ok('1.45 محرر استبيان الحصص = استبيان «زنها» الموحّد: إخفاء سؤال أساسي (وسؤال السلامة بعد تأكيد)، تعديل النص، تسمية خيار وإخفاء آخر، وإضافة سؤال إلزامي في قسم «صحتك» (والأساسي جداً لا يُخفى)');
   // ---- 3) محرر الاستبيان: الجرامات (قسم جديد بأسئلة مختلفة، ترتيب، حذف)
-  await d.click('[data-a="fmSys"][data-v="g"]'); assert.strictEqual(await d.locator('.fmstep').count(), 5);
+  await d.click('[data-a="fmSys"][data-v="g"]'); assert.strictEqual(await d.locator('.fmstep').count(), 8);
   await d.click('[data-a="fmStepAdd"]'); const last = d.locator('.fmstep').last(); await last.locator('[data-fm$=",t"]').fill('نومك وتعافيك'); await last.locator('[data-fm$=",t"]').press('Tab');
   await d.selectOption('#fm_t', 'scale'); await d.fill('#fm_l', 'قيّم جودة نومك'); await d.check('#fm_r'); await d.click('[data-a="fmQSave"]');
   await d.locator('.fmstep').last().locator('[data-a="fmQAdd"]').click(); await d.selectOption('#fm_t', 'num'); await d.fill('#fm_l', 'كم ساعة تنام؟'); await d.fill('#fm_u', 'ساعة'); await d.click('[data-a="fmQSave"]');
@@ -55,13 +55,14 @@ const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html'));
   ok('دعوة بنظام الجرامات: تحمل استبيان الجرامات المعدّل وأغذية النظام وفئاتها وأنواع أيام التدريب');
   // ---- 5) العميل يملأ استبيان الجرامات
   await m.goto(link); await m.waitForSelector('.invite .dr'); await m.click('[data-act="go"][data-v="pin"]'); for (let i = 0; i < 2; i++) for (const k of '2468') await m.click(`.pad [data-v="${k}"]`); await m.waitForSelector('.prog');
-  assert((await m.textContent('.hd')).includes('الخطوة 1 من 6')); assert(await m.isVisible('#f_bf') && await m.isVisible('#f_sport'));
+  assert((await m.textContent('.hd')).includes('الخطوة 1 من 9')); assert(await m.isVisible('#f_bf') && await m.isVisible('#f_sport'));
   await m.fill('#f_phone', '0500000000'); await m.click('#f_age'); await m.keyboard.type('٢٦'); await m.click('#f_weight'); await m.keyboard.type('82'); await m.click('#f_height'); await m.keyboard.type('180'); await m.click('[data-act="set"][data-k="sex"][data-v="ذكر"]');
   await m.click('#f_bf'); await m.keyboard.type('15'); await m.fill('#f_sport', 'كرة قدم'); await m.click('[data-act="set"][data-k="gphase"][data-v="تنشيف"]'); await m.click('.foot .btn');
   assert.strictEqual(await m.locator('.trow').count(), 7); await m.selectOption('[data-sch="0"]', 'تدريب ثقيل'); await m.fill('[data-schm="0"]', '90'); await m.fill('[data-scht="0"]', '18:30'); await m.selectOption('[data-sch="2"]', 'تدريب متوسط');
   await m.click('.foot .btn'); await m.click('.foot .btn');
   assert((await m.textContent('.fgrid')).length > 10 && (await m.textContent('.tabs')).includes('نشويات وحبوب')); const love = (await m.textContent('.food >> nth=0')).trim(); await m.click('.food >> nth=0'); await m.click('.foot .btn');
   await m.click('[data-act="set"][data-k="nmeals"][data-v="6"]'); await m.click('.foot .btn');
+  for (let i = 0; i < 3; i++) await m.click('.foot .btn');      // 1.69 خطوات الملف المتكامل الثلاث اختيارية
   assert((await m.textContent('.hd')).includes('نومك وتعافيك')); assert(await m.isDisabled('.foot .btn'), 'السؤال الإلزامي يمنع المتابعة'); await m.fill('[data-cq]', '٧'); await m.click('[data-act="cq1"][data-v="4"]'); assert(!(await m.isDisabled('.foot .btn'))); await m.click('.foot .btn');
   const rv = await m.textContent('.stack'); for (const s of ['كرة قدم', 'تنشيف', 'تدريب ثقيل 90د 18:30', 'تدريب متوسط 60د', '4 من 5', '7 ساعة', love]) assert(rv.includes(s), 'المراجعة بلا: ' + s);
   await m.check('#consent'); await m.click('[data-act="submit"]'); await m.waitForSelector('text=وصل طلبك إلى أخصائيك'); await cPoll();
@@ -87,7 +88,7 @@ const ADMIN = fileUrl(path.resolve(__dirname, '../admin.html'));
   await d.evaluate(() => DPApp.A.hxv()); await d.click('main [data-a="hxInvForm"]'); if (await d.$('#hxi_s')) await d.selectOption('#hxi_s', 'ex'); await d.fill('#hxi_l', 'سارة'); await d.click('[data-a="hxInvMake"]'); await d.waitForSelector('.hxinv.made .hxlink');
   const link2 = (await d.textContent('.hxinv.made .hxlink')).trim(), j = await (async () => { const c = await b.newContext({ ...devices['Pixel 7'] }); await c.addInitScript(() => { try { localStorage.setItem('hissati_onb', '1'); } catch (e) { } }); return c.newPage(); })(); j.on('pageerror', (e) => errs.push('حصص: ' + e));
   await j.goto(link2); await j.click('[data-act="go"][data-v="pin"]'); for (let i = 0; i < 2; i++) for (const k of '1357') await j.click(`.pad [data-v="${k}"]`); await j.waitForSelector('.prog');
-  assert((await j.textContent('.hd')).includes('من 5'), 'الاستبيان الموحّد: 5 أقسام (السؤال المضاف داخل «صحتك»)'); await j.fill('#f_phone', '0511111111'); await j.fill('#f_age', '30'); await j.fill('#f_weight', '70'); await j.fill('#f_height', '165'); await j.click('[data-act="set"][data-k="sex"][data-v="أنثى"]');
+  assert((await j.textContent('.hd')).includes('من 8'), 'الاستبيان الموحّد: 8 أقسام (3 اختيارية منذ 1.69) (السؤال المضاف داخل «صحتك»)'); await j.fill('#f_phone', '0511111111'); await j.fill('#f_age', '30'); await j.fill('#f_weight', '70'); await j.fill('#f_height', '165'); await j.click('[data-act="set"][data-k="sex"][data-v="أنثى"]');
   await j.click('.foot .btn'); await j.waitForTimeout(120); const gx = await j.textContent('.stack'); assert(gx.includes('مكتبي معظم اليوم'), 'تسمية الخيار تصل العميل'); assert.strictEqual(await j.locator('[data-act="set"][data-k="act"]').count(), 4, 'الخيار المخفي لا يظهر');
   await j.click('[data-act="set"][data-k="act"][data-v="0"]'); await j.click('.foot .btn'); await j.waitForTimeout(120);
   const h = await j.textContent('.stack'); assert(/صحتك/.test(await j.textContent('.scr h2')), await j.textContent('.scr h2')); assert(h.includes('كم مرة تأكل خارج البيت أسبوعياً؟') && h.includes('هل هناك أكل يتعبك أو لا تأكله؟')); assert.strictEqual(await j.locator('#f_meds').count() + await j.locator('[data-k="dmed"]').count(), 0, 'الأسئلة المخفية لا تظهر');

@@ -13,6 +13,7 @@ function fmOpts(q, si, qi) {                                    // 1.45 خيار
 }
 function fmQRow(q, si, qi, n) {
   var mv = '<button class="sec sm" data-a="fmQMv" data-v="' + si + ',' + qi + ',-1"' + (qi ? '' : ' disabled') + ' title="لأعلى">↑</button><button class="sec sm" data-a="fmQMv" data-v="' + si + ',' + qi + ',1"' + (qi < n - 1 ? '' : ' disabled') + ' title="لأسفل">↓</button>';
+  if (q.ix) return '<div class="fmq' + (q.hide ? ' off' : '') + '"><div class="fmql"><input data-fm="q,' + si + ',' + qi + ',label" value="' + esc(q.label) + '" aria-label="نص السؤال">' + (q.opts ? '<small class="small">' + esc(q.opts.join(' • ')) + '</small>' : '') + '</div><div class="fmqa"><span class="fmb" title="يُنقل تلقائياً إلى ملف العميل">ملف العميل</span><label class="chk"><input type="checkbox" data-fm="q,' + si + ',' + qi + ',show"' + (q.hide ? '' : ' checked') + '> ظاهر للعميل</label>' + mv + '</div></div>';      // 1.69 أسئلة الملف المتكامل: نص وإخفاء وترتيب، بلا حذف ولا تغيير خيارات
   var kind = q.b ? '<span class="fmb">أساسي' + (q.lock ? ' 🔒' : '') + '</span>' : '<span class="fmb c">' + esc(FMT[q.type] || q.type) + '</span>';
   var extra = q.b ? fmOpts(q, si, qi) : (q.type === 'one' || q.type === 'many' ? '<textarea data-fm="q,' + si + ',' + qi + ',opts" rows="2" placeholder="خيار في كل سطر">' + esc((q.opts || []).join('\n')) + '</textarea>' : q.type === 'num' ? '<input data-fm="q,' + si + ',' + qi + ',unit" value="' + esc(q.unit || '') + '" placeholder="الوحدة (اختياري)">' : '');
   var tog = q.b ? (q.lock ? '<small class="small">لا يُخفى</small>' : '<label class="chk"><input type="checkbox" data-fm="q,' + si + ',' + qi + ',show"' + (q.hide ? '' : ' checked') + '> ظاهر للعميل</label>') : '<label class="chk"><input type="checkbox" data-fm="q,' + si + ',' + qi + ',req"' + (q.req ? ' checked' : '') + '> إلزامي</label>';
@@ -62,7 +63,7 @@ Object.assign(A, {
     if (t === 'num') q.unit = ($('#fm_u').value || '').trim();
     st.q.push(q); fmSave(sp); S.fadd = null; main(); toast('أُضيف السؤال إلى «' + st.t + '»');
   },
-  fmQDel: function (v) { var a = v.split(',').map(Number), sp = fmSpec(), q = sp.steps[a[0]].q[a[1]]; if (!q || q.b || !confirm('حذف السؤال «' + q.label + '»؟')) return; sp.steps[a[0]].q.splice(a[1], 1); fmSave(sp); main(); },
+  fmQDel: function (v) { var a = v.split(',').map(Number), sp = fmSpec(), q = sp.steps[a[0]].q[a[1]]; if (!q || q.b || q.ix || !confirm('حذف السؤال «' + q.label + '»؟')) return; sp.steps[a[0]].q.splice(a[1], 1); fmSave(sp); main(); },
   fmQMv: function (v) { var a = v.split(',').map(Number), sp = fmSpec(), qs = sp.steps[a[0]].q, j = a[1] + a[2]; if (j < 0 || j >= qs.length) return; var t = qs[a[1]]; qs[a[1]] = qs[j]; qs[j] = t; fmSave(sp); main(); },
   fmPrint: function () { dlFile(new Blob([fmPrintHtml()], { type: 'text/html' }), 'استبيان_' + (fmSys() === 'g' ? 'نظام_الجرامات' : 'نظام_الحصص') + '.html'); toast('نُزّل الاستبيان الورقي — افتحه واطبعه'); }
 });

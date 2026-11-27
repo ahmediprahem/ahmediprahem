@@ -717,7 +717,7 @@ function head(t, act, v, sub) { return '<div class="hd"><button class="back" dat
 // ---------- الاستبيان: يُعرض كما أعدّه الأخصائي (يصل مع الدعوة؛ HForms يكمّل ما ينقصه). نظامان: الحصص (ex) والجرامات (g)
 let FS = [], SYS = 'ex';
 function mkForm() { const f0 = S.cat && S.cat.form, sy = f0 && f0.sys || (S.cat && S.cat.sys); const f = HForms.normalize(sy !== 'g' ? Object.assign({}, f0 || {}, { tailor: 1 }) : f0, sy); SYS = f.sys; FS = HForms.visibleSteps(f); }   // 1.05: الاستبيان الموحّد دائماً لنظام الحصص (حتى الدعوات القديمة)
-const vq = (st) => st.q.filter((q) => !q.hide);
+const vq = (st) => st.q.filter((q) => !q.hide && !(q.fem && S.p.sex !== 'أنثى'));   // 1.69 أسئلة النساء لا تظهر لغيرهن
 const lab = (q, forId) => (forId ? '<label for="' + forId + '">' : '<span class="lbl">') + esc(q.label) + (q.req ? ' <span class="req">*</span>' : '') + (forId ? '</label>' : '</span>') + (q.help ? '<div class="dim">' + esc(q.help) + '</div>' : '');
 function inp(k, label, type, extra) { const nm = type === 'number', ph = type === 'tel'; return '<div class="field"><label for="f_' + k + '">' + label + '</label><input class="inp" id="f_' + k + '" data-bind="' + k + '" type="' + (nm ? 'text' : type || 'text') + '"' + (nm ? ' data-numf="1" autocomplete="off"' : ph ? ' data-tel="1"' : '') + ' value="' + esc(S.p[k]) + '" ' + (extra || '') + '></div>'; }
 const oL = (q, v, d) => HForms.optLabel ? HForms.optLabel(q, v, d) : d, oOn = (q, v) => !HForms.optOn || HForms.optOn(q, v);   // 1.45 خيارات الأسئلة الأساسية كما عدّلها الأخصائي (القيمة لا تتغير)
@@ -2669,7 +2669,7 @@ document.addEventListener('click', (e) => {
     case 'step': { mkForm(); const n = +v; if (n < 1) return; if (n > FS.length) S.screen = 'review'; else { if (vq(FS[n - 1]).some((q) => q.id === 'mfoods')) S.tls = S.screen === 'wizard' && n < S.step ? tlSeq().length - 1 : 0; S.screen = 'wizard'; S.step = n; } break; }
     case 'tls': { const q = tlSeq(); S.tls = Math.max(0, Math.min(q.length - 1, +v)); requestAnimationFrame(() => { const sc = $('.scroll'); if (sc) sc.scrollTop = 0; }); break; }
     case 'cq1': { S.p.cq = S.p.cq || {}; S.p.cq[k] = S.p.cq[k] === v ? '' : v; break; }
-    case 'cqm': { S.p.cq = S.p.cq || {}; const a = S.p.cq[k] = Array.isArray(S.p.cq[k]) ? S.p.cq[k] : [], i = a.indexOf(v); i < 0 ? a.push(v) : a.splice(i, 1); break; }
+    case 'cqm': { S.p.cq = S.p.cq || {}; const a = S.p.cq[k] = Array.isArray(S.p.cq[k]) ? S.p.cq[k] : [], i = a.indexOf(v); i < 0 ? a.push(v) : a.splice(i, 1); if (i < 0 && /^x_/.test(k)) S.p.cq[k] = v === 'لا شيء' ? [v] : a.filter((x) => x !== 'لا شيء'); break; }   // 1.69 «لا شيء» يلغي غيره في أسئلة الملف المتكامل
     case 'set': S.p[k] = isNaN(+v) || k === 'sex' || k === 'gphase' ? v : +v; break;
     case 'tlmore': V.tlmore = V.tlmore || {}; V.tlmore[v] = 1; break;
     case 'mf': { const m = tlP().mfood[k] || (S.p.mfood[k] = {}), cur = m[v], nx = cur === 'love' ? 'no' : cur === 'no' ? undefined : 'love'; if (nx) m[v] = nx; else delete m[v]; if (nx === 'love' && navigator.vibrate) try { navigator.vibrate(8); } catch (e) { } break; }

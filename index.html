@@ -2921,6 +2921,31 @@ html.zt162:not(#mxz):not(#mxy) main .cf151 .tag,html.zt162:not(#mxz):not(#mxy) m
 .m168w>b{font-family:'Zenha Head','Hissa Plex',sans-serif;font-size:20px;font-weight:800}.m168w>b small{font-size:13px;font-weight:600;opacity:.7}
 .m168w .m168src{opacity:.75;font-size:12.5px}.m168w button{margin-inline-start:auto;border-radius:999px!important}
 .m168t{margin-top:8px}.m168tg{display:flex;align-items:flex-end;padding-bottom:10px}
+/* 1.69 (م1ب) الاستقبال والتاريخ + ملاحظات الزيارات ADIME */
+.cf151 .t-violet{--cs-tint:#ECE6F8;--cs-ac:#6A4FA8}
+.ix169 .ixg{border:0;margin:0 0 14px;padding:0}
+.ix169 .ixg legend{font-weight:700;font-size:14px;color:var(--cs-ac,#6A4FA8);margin-bottom:8px;padding:0}
+.ix169 .ixgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px 14px}
+.ix169 .ixf{display:flex;flex-direction:column;gap:4px;min-width:0}
+.ix169 .ixf label,.ix169 .ixl{font-size:13px;color:var(--ink2,#475069);line-height:1.5}
+.ix169 .ixw{grid-column:1/-1}
+.ix169 .ixf select,.ix169 .ixf input,.ix169 .ixf textarea{width:100%;box-sizing:border-box}
+.ix169 .ixchips{display:flex;flex-wrap:wrap;gap:6px}
+.ix169 .ixchip{display:inline-flex;align-items:center;cursor:pointer}
+.ix169 .ixchip input{position:absolute;opacity:0;width:1px;height:1px}
+.ix169 .ixchip span{padding:5px 12px;border-radius:999px;border:1px solid var(--line,#d9dce6);background:#fff;font-size:13px;line-height:1.4}
+.ix169 .ixchip input:checked+span{background:var(--cs-tint,#ECE6F8);border-color:var(--cs-ac,#6A4FA8);color:var(--cs-ac,#6A4FA8);font-weight:700}
+.ix169 .ixchip input:focus-visible+span{outline:2px solid var(--cs-ac,#6A4FA8);outline-offset:2px}
+.ad169{margin-top:18px}
+.ad169 .ad169f summary{cursor:pointer;padding:2px 0}
+.ad169 .ad169f textarea{width:100%;box-sizing:border-box}
+.ad169 .ad169n{border:1px solid var(--line,#e3e6ef);border-radius:12px;padding:10px 14px;margin:10px 0;background:#fff}
+.ad169 .ad169n header{display:flex;align-items:center;gap:10px}
+.ad169 .ad169n header small{color:var(--ink2,#667)}
+.ad169 .ad169n header button{margin-inline-start:auto}
+.ad169 .ad169n dl{margin:6px 0 0}
+.ad169 .ad169n dt{font-weight:700;font-size:13px;color:#6A4FA8;margin-top:6px}
+.ad169 .ad169n dd{margin:2px 0 0;white-space:pre-wrap}
 </style></head>
 <body class="gating"><header id="hd"></header><div id="gate" style="display:flex"><div class="gcard" style="text-align:center"><div style="font-weight:700;color:#253464">حصة — جارٍ التحميل…</div></div></div><div id="app" style="display:none"><aside></aside><main></main></div>
 <noscript><div style="position:fixed;inset:0;background:#092061;color:#fff;padding:24px;text-align:center;font:16px Tahoma,Arial">هذا الملف يحتاج تفعيل JavaScript. افتحه مباشرة في Chrome أو Edge أو Safari (وليس من معاينة واتساب أو البريد).</div></noscript>
@@ -6893,39 +6918,76 @@ E.ctx = function (client, D) {
 // الاستبيان المعتمد يُرسل مع رابط الدعوة، فتعرضه «زنها» كما هو.
 (function (root, factory) { var api = factory(); if (typeof module === 'object' && module.exports) module.exports = api; else root.HForms = api; })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
+  var clone = function (o) { return JSON.parse(JSON.stringify(o)); };
   var TYPES = [['text', 'نص قصير'], ['long', 'نص طويل'], ['num', 'رقم'], ['one', 'اختيار واحد'], ['many', 'اختيار متعدد'], ['yn', 'نعم / لا'], ['scale', 'مقياس 1–5']];
   var B = function (id, label, x) { var q = { id: id, b: 1, label: label }; for (var k in x || {}) q[k] = x[k]; return q; }, L = { lock: 1 };
   var BASIC = function () { return [B('name', 'الاسم الكامل', L), B('phone', 'رقم الجوال', L), B('sex', 'الجنس', L), B('age', 'العمر', L), B('weight', 'الوزن (كجم)', L), B('height', 'الطول (سم)', L)]; };
+  // 1.69 (م1ب) أسئلة «الملف المتكامل»: ثابتة المعرّف (x_…) وبأنواع الأسئلة المخصّصة نفسها، فتعرضها حتى نسخ «زنها» القديمة،
+  // وتنتقل إجاباتها إلى ملف العميل في «زنها Pro» (c.ix). كلها اختيارية. النصوص معتمدة من المالك 2026-11-27.
+  var FQ = ['يومياً', 'أسبوعياً', 'نادراً'];
+  var X = function (id, type, label, x) { var q = { id: id, ix: 1, type: type, label: label, req: 0 }; for (var k in x || {}) q[k] = x[k]; return q; };
+  var IXQ = {
+    x_intol: X('x_intol', 'text', 'أكل يتعبك لكن ليس حساسية (انتفاخ، حرقة…)'),
+    x_supp: X('x_supp', 'text', 'مكملات أو فيتامينات تأخذها'),
+    x_water: X('x_water', 'one', 'كم كوب ماء تشرب في اليوم تقريباً؟', { opts: ['أقل من 4', '4–6', '7–9', '10 أو أكثر'] }),
+    x_out: X('x_out', 'one', 'كم مرة تأكل من خارج البيت في الأسبوع؟', { opts: ['نادراً', '1–2', '3–5', 'يومياً'] }),
+    x_f_dairy: X('x_f_dairy', 'one', 'الألبان (حليب، زبادي، جبن)', { opts: FQ, help: 'كم مرة تأكل هذه الأصناف؟' }),
+    x_f_veg: X('x_f_veg', 'one', 'الخضار', { opts: FQ }), x_f_fruit: X('x_f_fruit', 'one', 'الفاكهة', { opts: FQ }), x_f_sweet: X('x_f_sweet', 'one', 'الحلويات', { opts: FQ }),
+    x_f_sdrink: X('x_f_sdrink', 'one', 'المشروبات المحلّاة (عصائر، غازية)', { opts: FQ }), x_f_fast: X('x_f_fast', 'one', 'الأكل السريع', { opts: FQ }), x_f_caf: X('x_f_caf', 'one', 'القهوة والشاي', { opts: FQ }),
+    x_day: X('x_day', 'long', 'صف يوم أكل عادي لك: ماذا تأكل ومتى؟'),
+    x_diets: X('x_diets', 'long', 'جرّبت أنظمة غذائية قبل ذلك؟ ماذا حدث؟'),
+    x_wmax: X('x_wmax', 'num', 'أعلى وزن وصلت له', { unit: 'كجم' }), x_wmin: X('x_wmin', 'num', 'أقل وزن وصلت له', { unit: 'كجم' }),
+    x_wchg: X('x_wchg', 'one', 'هل تغيّر وزنك في آخر 6 أشهر؟', { opts: ['زاد', 'نقص', 'ثابت'] }),
+    x_surg: X('x_surg', 'text', 'عمليات جراحية سابقة (منها عمليات السمنة)'),
+    x_fam: X('x_fam', 'many', 'أمراض في العائلة؟', { opts: ['السكري', 'الضغط', 'القلب', 'السمنة', 'الغدة', 'لا شيء'] }),
+    x_gi: X('x_gi', 'many', 'هل يتكرر معك؟', { opts: ['انتفاخ', 'إمساك', 'إسهال', 'حرقة', 'لا شيء'] }),
+    x_cycle: X('x_cycle', 'one', 'للنساء: الدورة الشهرية', { opts: ['منتظمة', 'غير منتظمة', 'انقطعت'], fem: 1 }),
+    x_pcos: X('x_pcos', 'one', 'للنساء: تكيس المبايض؟', { opts: ['نعم', 'لا', 'لا أعرف'], fem: 1 }),
+    x_sleepH: X('x_sleepH', 'num', 'ساعات نومك عادة', { unit: 'ساعة' }),
+    x_sleepQ: X('x_sleepQ', 'one', 'جودة نومك', { opts: ['جيدة', 'متوسطة', 'سيئة'] }),
+    x_stress: X('x_stress', 'one', 'مستوى التوتر عندك', { opts: ['قليل', 'متوسط', 'عالٍ'] }),
+    x_work: X('x_work', 'one', 'نظام عملك', { opts: ['صباحي', 'مسائي', 'ورديات', 'لا أعمل'] }),
+    x_cook: X('x_cook', 'one', 'من يطبخ في البيت؟', { opts: ['أنا', 'أحد أفراد الأسرة', 'أشتري جاهزاً'] }),
+    x_skill: X('x_skill', 'one', 'مهارتك في الطبخ', { opts: ['مبتدئ', 'متوسط', 'جيد'] }),
+    x_smoke: X('x_smoke', 'one', 'تدخّن؟', { opts: ['نعم', 'لا', 'أقلعت'] }),
+    x_ready: X('x_ready', 'scale', 'كم أنت مستعد للتغيير الآن؟', { help: '1 غير مستعد، و5 مستعد تماماً' }),
+    x_barrier: X('x_barrier', 'text', 'ما أكثر شيء قد يعيقك؟')
+  };
+  var IXS = [['xhab', 'عاداتك', ['x_water', 'x_out', 'x_f_dairy', 'x_f_veg', 'x_f_fruit', 'x_f_sweet', 'x_f_sdrink', 'x_f_fast', 'x_f_caf', 'x_day', 'x_diets']],
+    ['xhist', 'تاريخك الصحي', ['x_wmax', 'x_wmin', 'x_wchg', 'x_surg', 'x_fam', 'x_gi', 'x_cycle', 'x_pcos']],
+    ['xlife', 'نمط حياتك', ['x_sleepH', 'x_sleepQ', 'x_stress', 'x_work', 'x_cook', 'x_skill', 'x_smoke', 'x_ready', 'x_barrier']]];
+  var IXQ_ = function (id) { return clone(IXQ[id]); };
+  var IXSTEPS = function (skip) { return IXS.map(function (s) { return { id: s[0], t: s[1], q: s[2].filter(function (id) { return !skip || skip.indexOf(id) < 0; }).map(IXQ_) }; }); };
+  var OLDL = { allg: ['الحساسية وما تتجنبه', 'أكل يتعبك أو لا تأكله أبداً'], meds: ['أدوية أو مكملات تتناولها', 'أدوية أو مكملات تأخذها بانتظام (اختياري)', 'أدوية تتناولها'] };   // نص افتراضي قديم محفوظ ← النص الجديد
   var DEF = {
     ex: function () {
       return { sys: 'ex', steps: [
         { id: 'basic', t: 'بياناتك', q: BASIC().concat([B('act', 'نشاطك اليومي'), B('goal', 'هدفك')]) },
-        { id: 'health', t: 'صحتك', q: [B('cond', 'هل لديك أي من هذه الحالات؟'), B('allg', 'الحساسية وما تتجنبه'), B('meds', 'أدوية أو مكملات تتناولها'), B('notes', 'أي شيء آخر يحتاج أخصائيك معرفته')] },
+        { id: 'health', t: 'صحتك', q: [B('cond', 'هل لديك أي من هذه الحالات؟'), B('allg', 'عندك حساسية من أكل؟ (تسبب طفحاً أو تورماً أو ضيق نفس)'), IXQ_('x_intol'), B('meds', 'أدوية تأخذها بانتظام: الاسم والجرعة إن عرفتها'), IXQ_('x_supp'), B('notes', 'أي شيء آخر يحتاج أخصائيك معرفته')] },
         { id: 'meals', t: 'وجباتك المفضلة', q: [B('meals', 'اختر ما تحب أن يتكرر في خطتك وما لا تريده')] },
         { id: 'foods', t: 'أكلاتك', q: [B('foods', 'المس الصنف مرة إن كنت تحبه ومرتين إن كنت لا تحبه')] },
         { id: 'habits', t: 'يومك', q: [B('wake', 'أستيقظ عادة'), B('sleep', 'أنام عادة'), B('nmeals', 'كم وجبة تفضّل في اليوم؟'), B('wdays', 'أيام التمرين')] }
-      ] };
+      ].concat(IXSTEPS(['x_sleepH'])) };
     },
     tailor: function () {                                              // 1.16 الاستبيان المختصر (قرار المالك): 5 أقسام بلغة يوم العميل؛ الوزن المستهدف وشكل الأسبوع والواقع والتكرار والميزان قيم افتراضية تُعدَّل لاحقاً
       return { sys: 'ex', tailor: 1, steps: [
         { id: 'basic', t: 'عنك', q: BASIC() },
         { id: 'goal', t: 'هدفك ويومك', q: [B('goal', 'ماذا تريد أن تحقق؟'), B('act', 'أي وصف أقرب ليومك العادي؟')] },
-        { id: 'health', t: 'صحتك', q: [B('cond', 'هل عندك شيء من هذه؟'), B('safe', 'سؤالان مهمان لسلامتك'), B('allg', 'أكل يتعبك أو لا تأكله أبداً'), B('meds', 'أدوية أو مكملات تأخذها بانتظام (اختياري)')] },
+        { id: 'health', t: 'صحتك', q: [B('cond', 'هل عندك شيء من هذه؟'), B('safe', 'سؤالان مهمان لسلامتك'), B('allg', 'عندك حساسية من أكل؟ (تسبب طفحاً أو تورماً أو ضيق نفس)'), IXQ_('x_intol'), B('meds', 'أدوية تأخذها بانتظام: الاسم والجرعة إن عرفتها'), IXQ_('x_supp')] },
         { id: 'day', t: 'وجباتك', q: [B('nmeals', 'كم مرة تأكل في يومك عادة؟')] },
         { id: 'mfoods', t: 'أكلاتك', q: [B('mfoods', 'اختر ما تحبه في كل وجبة')] }
-      ] };
+      ].concat(IXSTEPS()) };
     },
     g: function () {
       return { sys: 'g', steps: [
         { id: 'basic', t: 'بياناتك', q: BASIC().concat([B('bf', 'نسبة الدهون % (إن كنت تعرفها)'), B('sport', 'رياضتك'), B('gphase', 'هدفك الحالي')]) },
         { id: 'train', t: 'تدريبك', q: [B('train', 'جدول تدريبك الأسبوعي: نوع كل يوم ومدته ووقته')] },
-        { id: 'health', t: 'صحتك', q: [B('cond', 'هل لديك أي من هذه الحالات؟'), B('allg', 'الحساسية وما تتجنبه'), B('meds', 'أدوية تتناولها'), B('supp', 'المكملات الرياضية التي تستعملها'), B('notes', 'أي شيء آخر يحتاج أخصائيك معرفته')] },
+        { id: 'health', t: 'صحتك', q: [B('cond', 'هل لديك أي من هذه الحالات؟'), B('allg', 'عندك حساسية من أكل؟ (تسبب طفحاً أو تورماً أو ضيق نفس)'), IXQ_('x_intol'), B('meds', 'أدوية تأخذها بانتظام: الاسم والجرعة إن عرفتها'), B('supp', 'المكملات الرياضية التي تستعملها'), B('notes', 'أي شيء آخر يحتاج أخصائيك معرفته')] },
         { id: 'foods', t: 'أكلاتك', q: [B('foods', 'المس الصنف مرة إن كنت تحبه ومرتين إن كنت لا تحبه')] },
         { id: 'habits', t: 'يومك', q: [B('wake', 'أستيقظ عادة'), B('sleep', 'أنام عادة'), B('nmeals', 'كم وجبة تفضّل في اليوم؟')] }
-      ] };
+      ].concat(IXSTEPS(['x_sleepH'])) };
     }
   };
-  var clone = function (o) { return JSON.parse(JSON.stringify(o)); };
   // 1.45 الأسئلة الأساسية ذات الخيارات (يعدّل الأخصائي تسميتها أو يخفيها؛ القيمة الحسابية ثابتة). القوائم الطويلة (الحالات والحساسية) تأتي من البيانات
   var OPT = { act: ['أغلب يومي جالس: مكتب أو بيت أو سيارة', 'أمشي قليلاً، أو رياضة خفيفة من يوم إلى 3 أيام في الأسبوع', 'أتحرك كثيراً في شغلي، أو أتمرن من 3 إلى 5 أيام', 'شغلي فيه مجهود، أو أتمرن من 6 إلى 7 أيام', 'مجهود بدني شاق كل يوم، أو تمرين مرتين في اليوم'],
     goal: ['أنزل وزني بهدوء', 'أنزل وزني بوتيرة أسرع', 'أحافظ على وزني', 'أزيد وزني بهدوء', 'أزيد وزني بوتيرة أسرع'], nmeals: ['3', '4', '5', '6'], cond: 1, allg: 1, safe: [['preg', 'هل أنتِ حامل أو ترضعين؟'], ['dmed', 'هل تأخذ إنسولين أو أدوية لخفض السكر؟']] };
@@ -6933,7 +6995,7 @@ E.ctx = function (client, D) {
   function normalize(spec, sys) {
     if (spec && spec.tailor) {                                           // 1.04 الاستبيان الموحّد: أسئلة التفصيل ثابتة، وأسئلة الأخصائي المضافة في قسم أخير
       var T = DEF.tailor(), extra = [], seenX = {};
-      (spec.steps || []).forEach(function (s) { if (!s || s.hide) return; (s.q || []).forEach(function (q) { if (!q || q.b || q.hide || !q.id || seenX[q.id]) return; var t = TYPES.some(function (x) { return x[0] === q.type; }) ? q.type : 'text', c = { id: String(q.id).slice(0, 24), type: t, label: String(q.label || '').slice(0, 160) || 'سؤال', req: q.req ? 1 : 0 };
+      (spec.steps || []).forEach(function (s) { if (!s || s.hide) return; (s.q || []).forEach(function (q) { if (!q || q.b || q.hide || !q.id || seenX[q.id] || IXQ[q.id]) return; var t = TYPES.some(function (x) { return x[0] === q.type; }) ? q.type : 'text', c = { id: String(q.id).slice(0, 24), type: t, label: String(q.label || '').slice(0, 160) || 'سؤال', req: q.req ? 1 : 0 };
         if (q.help) c.help = String(q.help).slice(0, 200); if (t === 'num' && q.unit) c.unit = String(q.unit).slice(0, 20); if (t === 'one' || t === 'many') { c.opts = (q.opts || []).map(function (o) { return String(o).trim().slice(0, 80); }).filter(Boolean).slice(0, 20); if (!c.opts.length) c.opts = ['نعم', 'لا']; } seenX[c.id] = 1; extra.push(c); }); });
       if (extra.length) T.steps.push({ id: 'custom_x', t: String(spec.xt || 'أسئلة أخصائيك').slice(0, 60), custom: 1, q: extra });
       if (spec.tv !== 2) return T;
@@ -6954,7 +7016,8 @@ E.ctx = function (client, D) {
       var st = { id: s.id, t: String(s.t || (ds && ds.t) || 'قسم').slice(0, 60), q: [] }; if (s.custom) st.custom = 1; if (s.hide && s.id !== 'basic') st.hide = 1;
       (s.q || []).forEach(function (q) {
         if (!q || !q.id || seen[q.id]) return;
-        if (q.b) { if (!dq[q.id]) return; var b = clone(dq[q.id]); b.label = String(q.label || b.label).slice(0, 160); if (q.hide && !b.lock) b.hide = 1; if (OPT[q.id]) optsOv(b, q); seen[q.id] = 1; st.q.push(b); return; }
+        if (IXQ[q.id]) { if (!dq[q.id]) return; var x = clone(dq[q.id]); x.label = String(q.label || x.label).slice(0, 160); if (q.hide) x.hide = 1; seen[q.id] = 1; st.q.push(x); return; }      // 1.69 أسئلة الملف المتكامل: النص والإخفاء فقط، والنوع والخيارات ثابتة
+        if (q.b) { if (!dq[q.id]) return; var b = clone(dq[q.id]); b.label = String(q.label && (OLDL[q.id] || []).indexOf(q.label) < 0 ? q.label : b.label).slice(0, 160); if (q.hide && !b.lock) b.hide = 1; if (OPT[q.id]) optsOv(b, q); seen[q.id] = 1; st.q.push(b); return; }
         var t = TYPES.some(function (x) { return x[0] === q.type; }) ? q.type : 'text', c = { id: String(q.id).slice(0, 24), type: t, label: String(q.label || '').slice(0, 160) || 'سؤال', req: q.req ? 1 : 0 };
         if (q.help) c.help = String(q.help).slice(0, 200); if (t === 'num' && q.unit) c.unit = String(q.unit).slice(0, 20);
         if (t === 'one' || t === 'many') { c.opts = (q.opts || []).map(function (o) { return String(o).trim().slice(0, 80); }).filter(Boolean).slice(0, 20); if (!c.opts.length) c.opts = ['نعم', 'لا']; }
@@ -6963,7 +7026,8 @@ E.ctx = function (client, D) {
       out.steps.push(st);
     });
     d.steps.forEach(function (s) {                                       // أساسي غير موجود (استبيان قديم): يعود لقسمه الافتراضي
-      s.q.forEach(function (q) { if (seen[q.id]) return; var st = out.steps.filter(function (x) { return x.id === dstep[q.id]; })[0]; if (!st) { st = { id: s.id, t: s.t, q: [] }; out.steps.push(st); } st.q.push(clone(q)); seen[q.id] = 1; });
+      s.q.forEach(function (q) { if (seen[q.id]) return; var st = out.steps.filter(function (x) { return x.id === dstep[q.id]; })[0]; if (!st) { st = { id: s.id, t: s.t, q: [] };      // 1.69 القسم الافتراضي الغائب يعود بعد آخر قسم يسبقه في الترتيب الافتراضي (لا في الآخر)
+          var di = d.steps.indexOf(s), at = -1; out.steps.forEach(function (x, j) { for (var k = 0; k < di; k++) if (d.steps[k].id === x.id) at = j; }); out.steps.splice(at + 1, 0, st); } st.q.push(clone(q)); seen[q.id] = 1; });
     });
     var bi = out.steps.map(function (x) { return x.id; }).indexOf('basic'); if (bi > 0) out.steps.unshift(out.steps.splice(bi, 1)[0]);   // «بياناتك» أولاً دائماً
     return out;
@@ -6988,7 +7052,7 @@ E.ctx = function (client, D) {
   }
   function optLabel(q, v, def) { return (q && q.ol && q.ol[String(v)]) || def; }
   function optOn(q, v) { return !(q && q.oh && q.oh.indexOf(String(v)) >= 0); }
-  return { OPT: OPT, exSpec: exSpec, optList: optList, optLabel: optLabel, optOn: optOn, TYPES: TYPES, defaults: function (sys) { return DEF[sys === 'g' ? 'g' : sys === 'tailor' ? 'tailor' : 'ex'](); }, normalize: normalize, visibleSteps: visibleSteps, uid: uid, answerText: answerText, answered: answered };
+  return { IXQ: IXQ, IXS: IXS, OPT: OPT, exSpec: exSpec, optList: optList, optLabel: optLabel, optOn: optOn, TYPES: TYPES, defaults: function (sys) { return DEF[sys === 'g' ? 'g' : sys === 'tailor' ? 'tailor' : 'ex'](); }, normalize: normalize, visibleSteps: visibleSteps, uid: uid, answerText: answerText, answered: answered };
 });
 </script><script>// ================= زيزو — شخصية «زنها» (اعتمدها المالك 2026-11-21): ثعلب فنك بوشاح أخضر. وحدة مشتركة بين «زنها» و«زنها Pro» (ES5)
 // Zizo.svg(o): رسم متجهي بالحالة (mouth/eyes/prop/hat/coat/anim…). Zizo.say(o, text): ظهور عائم مؤقت بفقاعة. الحركة تتوقف مع «تقليل الحركة».
@@ -8816,6 +8880,7 @@ function fmOpts(q, si, qi) {                                    // 1.45 خيار
 }
 function fmQRow(q, si, qi, n) {
   var mv = '<button class="sec sm" data-a="fmQMv" data-v="' + si + ',' + qi + ',-1"' + (qi ? '' : ' disabled') + ' title="لأعلى">↑</button><button class="sec sm" data-a="fmQMv" data-v="' + si + ',' + qi + ',1"' + (qi < n - 1 ? '' : ' disabled') + ' title="لأسفل">↓</button>';
+  if (q.ix) return '<div class="fmq' + (q.hide ? ' off' : '') + '"><div class="fmql"><input data-fm="q,' + si + ',' + qi + ',label" value="' + esc(q.label) + '" aria-label="نص السؤال">' + (q.opts ? '<small class="small">' + esc(q.opts.join(' • ')) + '</small>' : '') + '</div><div class="fmqa"><span class="fmb" title="يُنقل تلقائياً إلى ملف العميل">ملف العميل</span><label class="chk"><input type="checkbox" data-fm="q,' + si + ',' + qi + ',show"' + (q.hide ? '' : ' checked') + '> ظاهر للعميل</label>' + mv + '</div></div>';      // 1.69 أسئلة الملف المتكامل: نص وإخفاء وترتيب، بلا حذف ولا تغيير خيارات
   var kind = q.b ? '<span class="fmb">أساسي' + (q.lock ? ' 🔒' : '') + '</span>' : '<span class="fmb c">' + esc(FMT[q.type] || q.type) + '</span>';
   var extra = q.b ? fmOpts(q, si, qi) : (q.type === 'one' || q.type === 'many' ? '<textarea data-fm="q,' + si + ',' + qi + ',opts" rows="2" placeholder="خيار في كل سطر">' + esc((q.opts || []).join('\n')) + '</textarea>' : q.type === 'num' ? '<input data-fm="q,' + si + ',' + qi + ',unit" value="' + esc(q.unit || '') + '" placeholder="الوحدة (اختياري)">' : '');
   var tog = q.b ? (q.lock ? '<small class="small">لا يُخفى</small>' : '<label class="chk"><input type="checkbox" data-fm="q,' + si + ',' + qi + ',show"' + (q.hide ? '' : ' checked') + '> ظاهر للعميل</label>') : '<label class="chk"><input type="checkbox" data-fm="q,' + si + ',' + qi + ',req"' + (q.req ? ' checked' : '') + '> إلزامي</label>';
@@ -8865,7 +8930,7 @@ Object.assign(A, {
     if (t === 'num') q.unit = ($('#fm_u').value || '').trim();
     st.q.push(q); fmSave(sp); S.fadd = null; main(); toast('أُضيف السؤال إلى «' + st.t + '»');
   },
-  fmQDel: function (v) { var a = v.split(',').map(Number), sp = fmSpec(), q = sp.steps[a[0]].q[a[1]]; if (!q || q.b || !confirm('حذف السؤال «' + q.label + '»؟')) return; sp.steps[a[0]].q.splice(a[1], 1); fmSave(sp); main(); },
+  fmQDel: function (v) { var a = v.split(',').map(Number), sp = fmSpec(), q = sp.steps[a[0]].q[a[1]]; if (!q || q.b || q.ix || !confirm('حذف السؤال «' + q.label + '»؟')) return; sp.steps[a[0]].q.splice(a[1], 1); fmSave(sp); main(); },
   fmQMv: function (v) { var a = v.split(',').map(Number), sp = fmSpec(), qs = sp.steps[a[0]].q, j = a[1] + a[2]; if (j < 0 || j >= qs.length) return; var t = qs[a[1]]; qs[a[1]] = qs[j]; qs[j] = t; fmSave(sp); main(); },
   fmPrint: function () { dlFile(new Blob([fmPrintHtml()], { type: 'text/html' }), 'استبيان_' + (fmSys() === 'g' ? 'نظام_الجرامات' : 'نظام_الحصص') + '.html'); toast('نُزّل الاستبيان الورقي — افتحه واطبعه'); }
 });
@@ -12285,6 +12350,81 @@ document.addEventListener('change', function (e) {
   if (t.dataset.f === 'targetW' || t.dataset.f === 'targetBy') { var gp = document.querySelector('.m168tg'); if (gp) gp.innerHTML = m168Gap(c, m168Last(c)); }
 });
 (function () { if (window.MutationObserver) new MutationObserver(function () { var r = document.querySelector('main .cf151'); if (r) m168Enhance(r); }).observe(document.documentElement, { childList: true, subtree: true }); })();
+
+// ================= 1.69 (م1ب) ملف عميل متكامل — خطة العمل docs/work_plan_168.md (النصوص معتمدة من المالك 2026-11-27)
+// 1) «الاستقبال والتاريخ» في «البيانات»: إجابات أسئلة الملف المتكامل في استبيان «زنها» (HForms.IXQ، معرّفات x_…) تظهر هنا تلقائياً
+//    من c.hx.intake.cq، ويكمّلها الأخصائي أو يعدّلها في المكان نفسه (c.ix يغلب ما أرسله العميل). بيانات فقط: لا تغيّر أي حساب.
+// 2) «ملاحظة زيارة منظمة» (ADIME) في «القياسات والتحاليل»: التقييم، والتشخيص الغذائي، والتدخل، وأهداف SMART، والمتابعة (c.med.adime).
+var IX169 = { G: [['xhealth', 'من الصحة', ['x_intol', 'x_supp']]] };
+function ixDefs() { return (window.HForms && HForms.IXQ) || {}; }
+function ixGroups() { return IX169.G.concat(((window.HForms && HForms.IXS) || []).map(function (s) { return [s[0], s[1], s[2]]; })); }
+function ixVals(c) {      // ما أرسله العميل ثم تعديلات الأخصائي
+  var cq = (c.hx && c.hx.intake && c.hx.intake.cq) || {}, d = ixDefs(), o = {};
+  Object.keys(d).forEach(function (k) { if (cq[k] != null && cq[k] !== '') o[k] = cq[k]; });
+  var ix = c.ix || {}; Object.keys(ix).forEach(function (k) { if (d[k]) o[k] = ix[k]; });
+  return o;
+}
+function ixShown(c, q) { return !(q.fem && c.sex !== 'أنثى'); }
+function ixHas(v) { return !(v == null || v === '' || (Array.isArray(v) && !v.length)); }
+function ixCount(c) { var d = ixDefs(), v = ixVals(c), n = 0, t = 0; ixGroups().forEach(function (g) { g[2].forEach(function (k) { var q = d[k]; if (!q || !ixShown(c, q)) return; t++; if (ixHas(v[k])) n++; }); }); return [n, t]; }
+function ixField(c, q, v) {
+  var id = 'ix-' + q.id, L = '<label for="' + id + '">' + esc(q.label) + (q.unit ? ' <small>(' + esc(q.unit) + ')</small>' : '') + '</label>';
+  if (q.type === 'one' || q.type === 'scale') {
+    var op = q.type === 'scale' ? ['1', '2', '3', '4', '5'] : q.opts;
+    return '<div class="ixf">' + L + '<select id="' + id + '" data-ix="' + q.id + '"><option value="">—</option>' + op.map(function (o) { return '<option' + (String(v) === o ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join('') + '</select>' + (q.help && q.type === 'scale' ? '<small class="dim">' + esc(q.help) + '</small>' : '') + '</div>';
+  }
+  if (q.type === 'many') { var a = Array.isArray(v) ? v : []; return '<div class="ixf ixw"><span class="ixl" id="' + id + '">' + esc(q.label) + '</span><div class="ixchips" role="group" aria-labelledby="' + id + '">' + q.opts.map(function (o) { return '<label class="ixchip"><input type="checkbox" data-ixm="' + q.id + '" value="' + esc(o) + '"' + (a.indexOf(o) >= 0 ? ' checked' : '') + '><span>' + esc(o) + '</span></label>'; }).join('') + '</div></div>'; }
+  if (q.type === 'long') return '<div class="ixf ixw">' + L + '<textarea id="' + id + '" data-ix="' + q.id + '" rows="2">' + esc(v || '') + '</textarea></div>';
+  if (q.type === 'num') return '<div class="ixf">' + L + '<input id="' + id + '" type="number" inputmode="decimal" step="0.5" data-ix="' + q.id + '" value="' + esc(v == null ? '' : v) + '"></div>';
+  return '<div class="ixf">' + L + '<input id="' + id + '" data-ix="' + q.id + '" value="' + esc(v || '') + '"></div>';
+}
+function ixLine(c) { var n = ixCount(c); return n[0] ? n[0] + ' من ' + n[1] + ' مُجاب' + (c.hx && c.hx.intake && c.hx.intake.cq ? ' • من استبيان «زنها» ومن تعديلك' : '') : 'لم تُسجّل بعد — تصل من استبيان «زنها» أو اكتبها هنا'; }
+function ixSection(c) {
+  var d = ixDefs(), v = ixVals(c), s = document.createElement('details'), on = typeof cfsOpen === 'function' ? cfsOpen('intake') : true;
+  s.className = 'cfsec t-violet ix169'; s.dataset.cfs = 'intake'; if (on) s.open = true;
+  s.innerHTML = '<summary><span class="cfsic">' + IC('book') + '</span><span class="cfst"><b>الاستقبال والتاريخ</b><small class="ixsum">' + esc(ixLine(c)) + '</small></span><span class="cfschev" aria-hidden="true">' + IC('chevron') + '</span></summary><div class="cfsb">'
+    + ixGroups().map(function (g) { var qs = g[2].map(function (k) { return d[k]; }).filter(function (q) { return q && ixShown(c, q); }); return qs.length ? '<fieldset class="ixg"><legend>' + esc(g[1]) + '</legend><div class="ixgrid">' + qs.map(function (q) { return ixField(c, q, v[q.id]); }).join('') + '</div></fieldset>' : ''; }).join('')
+    + '<p class="small dim">بيانات للتقييم فقط، ولا تغيّر حساب السعرات أو الخطة.</p></div>';
+  return s;
+}
+function ixEnhance(root) {
+  var c = cur(); if (!c || c.kind === 'athlete' || !Object.keys(ixDefs()).length) return; if (root.querySelector('.ix169')) return;
+  var h = root.querySelector('.cfsec[data-cfs="health"]'); if (!h) return; h.parentNode.insertBefore(ixSection(c), h.nextSibling);
+}
+function ixSave(c) { c.updated = Date.now(); persist(c); var sm = document.querySelector('.ix169 .ixsum'); if (sm) sm.textContent = ixLine(c); }
+document.addEventListener('change', function (e) {
+  var t = e.target; if (!t || !t.dataset || (!t.dataset.ix && !t.dataset.ixm)) return; var c = cur(); if (!c) return; var d = ixDefs(); c.ix = c.ix || {};
+  if (t.dataset.ixm) { var k = t.dataset.ixm, a = [].map.call(document.querySelectorAll('input[data-ixm="' + k + '"]:checked'), function (x) { return x.value; });
+    if (t.checked && t.value === 'لا شيء') { a = ['لا شيء']; [].forEach.call(document.querySelectorAll('input[data-ixm="' + k + '"]'), function (x) { x.checked = x.value === 'لا شيء'; }); }
+    else if (t.checked) { a = a.filter(function (x) { return x !== 'لا شيء'; }); var n = document.querySelector('input[data-ixm="' + k + '"][value="لا شيء"]'); if (n) n.checked = false; }
+    c.ix[k] = a; return ixSave(c); }
+  var q = d[t.dataset.ix]; if (!q) return; var v = t.value;
+  if (q.type === 'num') { v = v === '' ? '' : +v; if (v !== '' && !(v > 0 && v < 500)) { toast('رقم غير مقبول'); return; } } else v = String(v).trim().slice(0, q.type === 'long' ? 1000 : 200);
+  c.ix[q.id] = v; ixSave(c);
+});
+// ألا تتكرر إجابات الملف المتكامل في «الملاحظات» عند اعتماد عميل الحصص (لها قسمها)؛ وتبقى في الملاحظات لعميل الجرامات
+if (typeof hxQA === 'function') hxQA = (function (f) { return function (q) { var r = f.apply(this, arguments); if (!q || q.sys === 'g') return r; var L = {}, d = ixDefs(); Object.keys(d).forEach(function (k) { L[d[k].label] = 1; }); return r.filter(function (x) { return !L[x[0]]; }); }; })(hxQA);
+// ---------- 2) ملاحظة الزيارة المنظمة ADIME
+var AD169 = [['a', 'التقييم (A)', 'ما لاحظته: القياسات، والالتزام، والأكل، والأعراض'], ['dx', 'التشخيص الغذائي (D)', 'المشكلة، وسببها، والدليل عليها'], ['i', 'التدخل (I)', 'ما اتفقتما عليه: تعديل الخطة، والتثقيف، والإحالة'], ['sm', 'أهداف SMART', 'هدف محدد وقابل للقياس ومؤقت'], ['me', 'المتابعة والتقييم (M/E)', 'ما ستقيسه في الزيارة القادمة']];
+function adOf(c) { var m = medOf(c); m.adime = m.adime || []; return m.adime; }
+function adHtml(c) {
+  var L = adOf(c).slice().sort(function (p, q) { return p.d < q.d ? 1 : p.d > q.d ? -1 : (q.id > p.id ? 1 : -1); });
+  var form = '<details class="ucard ad169f"' + (S.ad169 ? ' open' : '') + '><summary><b>＋ ملاحظة زيارة منظمة (ADIME)</b></summary><div class="row"><div><label for="ad_d">تاريخ الزيارة</label><input type="date" id="ad_d" value="' + medToday() + '"></div><div><label for="ad_nx">موعد المتابعة</label><input type="date" id="ad_nx"></div></div>'
+    + AD169.map(function (f) { return '<label for="ad_' + f[0] + '">' + f[1] + '</label><textarea id="ad_' + f[0] + '" rows="2" placeholder="' + esc(f[2]) + '"></textarea>'; }).join('')
+    + '<p class="two"><button data-a="adSave">حفظ الملاحظة</button></p></details>';
+  var list = L.map(function (n) { return '<article class="ad169n"><header><b>' + esc(n.d) + '</b>' + (n.nx ? '<small>المتابعة: ' + esc(n.nx) + '</small>' : '') + '<button class="r sm" data-a="adDel" data-v="' + esc(n.id) + '" title="حذف الملاحظة" aria-label="حذف ملاحظة ' + esc(n.d) + '">×</button></header><dl>'
+    + AD169.map(function (f) { return n[f[0]] ? '<dt>' + f[1] + '</dt><dd>' + esc(n[f[0]]) + '</dd>' : ''; }).join('') + '</dl></article>'; }).join('');
+  return '<section class="ad169"><div class="hxtop"><h3>📝 ملاحظات الزيارات (' + L.length + ')</h3></div>' + form + (list || '<p class="small">لا ملاحظات بعد. سجّل ملاحظة لكل زيارة لتوثيق التقييم والخطة والمتابعة.</p>') + '</section>';
+}
+if (typeof medTab === 'function') medTab = (function (f) { return function (c) { var h = f.apply(this, arguments); try { return h + adHtml(c); } catch (e) { return h; } }; })(medTab);
+A.adSave = function () {
+  var c = cur(); if (!c) return; var n = { id: 'n' + Date.now().toString(36), d: ($('#ad_d') || {}).value || medToday(), nx: ($('#ad_nx') || {}).value || '' }, any = false;
+  AD169.forEach(function (f) { var v = (($('#ad_' + f[0]) || {}).value || '').trim().slice(0, 2000); if (v) { n[f[0]] = v; any = true; } });
+  if (!any) { toast('اكتب جزءاً واحداً على الأقل من الملاحظة'); return; }
+  adOf(c).push(n); S.ad169 = false; persist(c); main(); toast('✓ حُفظت ملاحظة الزيارة');
+};
+A.adDel = function (id) { var c = cur(); if (!c || !confirm('حذف ملاحظة الزيارة؟')) return; var m = medOf(c); m.adime = adOf(c).filter(function (x) { return x.id !== id; }); persist(c); main(); };
+(function () { if (window.MutationObserver) new MutationObserver(function () { var r = document.querySelector('main .cf151'); if (r) ixEnhance(r); }).observe(document.documentElement, { childList: true, subtree: true }); })();
 
 // ================= 1.19 المرحلة 4: تبويب «توليد الخطة» — يُدمج داخل app.js عند /*GENUI*/
 // بند جانبي «توليد الخطة» يفتح قائمة العملاء مع «＋ عميل جديد»، واختيار العميل يفتح ملفه على قسم «توليد» (مجموعة «الخطة»).
