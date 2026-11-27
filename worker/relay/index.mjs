@@ -4,7 +4,7 @@
    - تقدّم تطبيق «زنها» نفسه على الصفحة الرئيسية (/)، فرابط الدعوة = عنوان هذه المحطة.
    - الجداول تُنشأ تلقائياً أول مرة؛ يكفي ربط قاعدة D1 باسم DB. متغير اختياري REG_KEY: مفتاح تسجيل الأخصائيين (بدونه يقبل أي «حصة»).
    - لا تسجّل أي محتوى (لا console.log). يُبنى منه worker/relay/dist/worker.js بـ py build_web.py (يُضمَّن تطبيق «زنها» وأيقونته). */
-const VER = '1.28';
+const VER = '1.29';
 // ---- 1.7: رخصة الأخصائي: كود تفعيل موقَّع بمفتاح المدير (ADMIN_PUB، مفتاح عام) يغني عن مفتاح التسجيل، فيُربط الأخصائي تلقائياً دون سر في الموقع
 const b64uBytes = (x) => { x = x.replace(/-/g, '+').replace(/_/g, '/'); while (x.length % 4) x += '='; const b = atob(x), u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; };
 async function licOk(tok, env) {
@@ -131,7 +131,7 @@ async function pushTo(db, id, origin, kind) {
 
 // ---------- 1.28 مساعد الطعام بالذكاء الاصطناعي (Gemini) — المفتاح سرّ على الخادم فقط (env.GEMINI_API_KEY) ولا يصل للمتصفح أبداً
 const AI = { model: 'gemini-2.5-flash-lite', fallback: 'gemini-3.5-flash-lite',      // طلب المالك 2.5؛ وغوغل لا تتيحه للحسابات الجديدة (404) فيُستعمل البديل الذي توصي به تلقائياً
-  perDay: 40, demoPerDay: 150, demoIpPerDay: 40, img: 1200000, text: 600, timeout: 28000 };
+  perDay: 40, demoPerDay: 150, demoIpPerDay: 40, img: 1200000, text: 600, timeout: 28000, budget: 45000, cacheDays: 30, cool: {} };
 const AI_BASE = 'أنت مساعد تغذية داخل تطبيق «زنها» العربي. اكتب بالعربية الفصحى البسيطة القصيرة التي يفهمها أي شخص، وكل نقطة في القوائم جملة قصيرة واحدة (نحو 15 كلمة أو أقل). القيم الغذائية تقديرية دائماً؛ لا تدّعِ الدقة. لا تشخّص أمراضاً ولا تصف علاجاً. أعد JSON فقط بالمفاتيح المطلوبة.';
 // 1.56 تقييم المكملات — الجدول المرجعي (اعتمده المالك 2026-11-27؛ يعمل حيث env.AI_SUPP='1': hissati وhissati-preview).
 // [المكمّل، المدى المعتاد للبالغين، الحد الأعلى الآمن، درجة الدليل وفق AIS (أ قوي/ب ناشئ/ج ضعيف/د خطِر)، الفوائد المثبتة، تحذيرات، المصدر، التوقيت والتعارض مع الطعام]
@@ -228,12 +228,12 @@ function aiClean(mode, o, J) {                                        // لا ي
   return { ok: true, food: aiStr(o.food, 80), category: aiStr(o.category, 60), place: ['fridge', 'freezer', 'pantry', 'mixed'].includes(o.place) ? o.place : 'fridge', temp: aiStr(o.temp, 120), fridge: aiStr(o.fridge, 120), freezer: aiStr(o.freezer, 120), room: aiStr(o.room, 120),
     howTo: aiArr(o.howTo, 8), spoilSigns: aiArr(o.spoilSigns, 8), unsafeSigns: aiArr(o.unsafeSigns, 8), handling: aiArr(o.handling, 8), note: aiStr(o.note, 300) };
 }
-async function aiGc(env) { const db = env.DB; if (!db) return 0; const d = new Date(), t = d.toISOString().slice(0, 10), y = new Date(d - 864e5).toISOString().slice(0, 10); return run(db, "DELETE FROM kv WHERE k LIKE 'ai.%' AND k NOT LIKE ? AND k NOT LIKE ?", '%' + t + '%', '%' + y + '%'); }      // عدّادات الأيام السابقة تُحذف
+async function aiGc(env) { const db = env.DB; if (!db) return 0; const d = new Date(), t = d.toISOString().slice(0, 10), y = new Date(d - 864e5).toISOString().slice(0, 10); await run(db, "DELETE FROM kv WHERE k LIKE 'aic.%' AND CAST(substr(v, 1, 13) AS INTEGER) < ?", Date.now() - AI.cacheDays * 864e5); return run(db, "DELETE FROM kv WHERE k LIKE 'ai.%' AND k NOT LIKE ? AND k NOT LIKE ?", '%' + t + '%', '%' + y + '%'); }      // عدّادات الأيام السابقة تُحذف
 const AI_SCH = {};
 function aiSchema(mode) {                                            // 1.57: مخطط مُلزِم للرد (responseSchema) يُستخرج من قالب «أعد: {...}» في التعليمات — يمنع JSON المكسور
   if (AI_SCH[mode]) return AI_SCH[mode];
   const p = AI_P[mode], i = p.lastIndexOf('أعد: '); let ex; try { ex = JSON.parse(p.slice(i + 5).replace(/:bool/g, ':true')); } catch { return null; }
-  const conv = (v) => v === null ? { type: 'NUMBER', nullable: true } : Array.isArray(v) ? { type: 'ARRAY', items: conv(v[0] === undefined ? '' : v[0]) } : typeof v === 'object' ? { type: 'OBJECT', properties: Object.fromEntries(Object.keys(v).map((k) => [k, conv(v[k])])), required: Object.keys(v).filter((k) => v[k] !== null) } : typeof v === 'number' ? { type: 'NUMBER' } : typeof v === 'boolean' ? { type: 'BOOLEAN' } : /\|/.test(v) ? { type: 'STRING', enum: v.split('|') } : { type: 'STRING' };
+  const conv = (v) => v === null ? { type: 'NUMBER', nullable: true } : Array.isArray(v) ? { type: 'ARRAY', items: conv(v[0] === undefined ? '' : v[0]) } : typeof v === 'object' ? { type: 'OBJECT', properties: Object.fromEntries(Object.keys(v).map((k) => [k, conv(v[k])])), required: Object.keys(v) }      /* 1.58: كل المفاتيح مطلوبة (null مسموح) — وإلا كان Flash-Lite يحذف أرقام الملصق ويكتفي بالسعرات */ : typeof v === 'number' ? { type: 'NUMBER' } : typeof v === 'boolean' ? { type: 'BOOLEAN' } : /\|/.test(v) ? { type: 'STRING', enum: v.split('|') } : { type: 'STRING' };
   return (AI_SCH[mode] = conv(ex));
 }
 async function aiCount(db, k, lim) { const r = await one(db, 'SELECT v FROM kv WHERE k = ?', k), n = r ? +r.v || 0 : 0; if (n >= lim) return false; await run(db, 'INSERT INTO kv (k, v) VALUES (?, ?) ON CONFLICT(k) DO UPDATE SET v = excluded.v', k, String(n + 1)); return true; }
@@ -241,35 +241,99 @@ async function aiFood(req, env, db, path, body, J) {
   const mode = String(J.mode || ''); if (!AI_P[mode]) return err(400, 'mode', 'نوع تحليل غير معروف');
   if (mode === 'supp' && env.AI_SUPP !== '1') return err(503, 'nosupp', 'تقييم المكملات قريباً');
   if (mode === 'herb' && env.AI_HERB !== '1') return err(503, 'noherb', 'قسم الأعشاب قريباً');      // 1.57: يُفعَّل بعد اعتماد المالك      // يُفعَّل بعد اعتماد المالك للجدول المرجعي
-  const day = new Date().toISOString().slice(0, 10), demo = env.AI_DEMO === '1' && J.demo === 1;
-  if (demo) {                                                     // بيئة المعاينة فقط: بلا حساب، بحد يومي عام وحد لكل عنوان
+  const day = new Date().toISOString().slice(0, 10), demo = env.AI_DEMO === '1' && J.demo === 1, bench = demo && !!env.AI_BENCH && J.bench === env.AI_BENCH;      // bench: قياس الدقة على المعاينة فقط (سرّ AI_BENCH)
+  if (demo && !bench) {                                           // بيئة المعاينة فقط: بلا حساب، بحد يومي عام وحد لكل عنوان
     const ip = req.headers.get('cf-connecting-ip') || 'x', ih = b64u(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(ip + day)))).slice(0, 16);
     if (!await aiCount(db, 'ai.demo.' + day, AI.demoPerDay) || !await aiCount(db, 'ai.ip.' + day + '.' + ih, AI.demoIpPerDay)) return err(429, 'ailimit', 'وصلت للحد اليومي للتجربة. حاول غداً.');
-  } else {
+  } else if (!demo) {
     const a = await authed(req, db, path, body); if (a.e) return a.e; if (!a.who || a.who.role !== 'c') return err(403, 'role', 'متاح لحسابات العملاء فقط');
     if (!await aiCount(db, 'ai.' + a.id + '.' + day, AI.perDay)) return err(429, 'ailimit', 'وصلت للحد اليومي للمساعد (' + AI.perDay + ' تحليلاً). حاول غداً.');
   }
-  if (!env.GEMINI_API_KEY) return err(503, 'noai', 'المساعد الذكي غير مفعّل بعد');
-  const parts = [{ text: AI_BASE + '\n\n' + AI_P[mode] }];
-  if (mode === 'text' || ((mode === 'supp' || mode === 'herb') && !J.img)) { const t = aiStr(J.text, AI.text); if (t.length < 2) return err(400, 'empty', mode === 'supp' ? 'اكتب اسم المكمّل وجرعته' : mode === 'herb' ? 'اكتب اسم العشب' : 'اكتب وصف وجبتك'); parts.push({ text: (mode === 'supp' ? 'المكمّل كما وصفه المستخدم: ' : mode === 'herb' ? 'اسم العشب كما كتبه المستخدم: ' : 'الوصف: ') + t }); }
+  let ut = '', img = '', mime = '', note = '';
+  if (mode === 'text' || ((mode === 'supp' || mode === 'herb') && !J.img)) { const t = aiStr(J.text, AI.text); if (t.length < 2) return err(400, 'empty', mode === 'supp' ? 'اكتب اسم المكمّل وجرعته' : mode === 'herb' ? 'اكتب اسم العشب' : 'اكتب وصف وجبتك'); ut = (mode === 'supp' ? 'المكمّل كما وصفه المستخدم: ' : mode === 'herb' ? 'اسم العشب كما كتبه المستخدم: ' : 'الوصف: ') + t; }
   else {
-    const img = String(J.img || ''), mime = String(J.mime || 'image/jpeg');
+    img = String(J.img || ''); mime = String(J.mime || 'image/jpeg');
     if (!/^image\/(jpeg|png|webp)$/.test(mime) || !img || img.length > AI.img || !/^[A-Za-z0-9+/=]+$/.test(img)) return err(400, 'img', 'الصورة غير صالحة أو كبيرة جداً');
-    parts.push({ inline_data: { mime_type: mime, data: img } });
-    if (J.text) parts.push({ text: 'ملاحظة المستخدم: ' + aiStr(J.text, 200) });
+    if (J.text) note = 'ملاحظة المستخدم: ' + aiStr(J.text, 200);
   }
-  const ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), AI.timeout), req1 = JSON.stringify({ contents: [{ role: 'user', parts }], generationConfig: Object.assign({ temperature: 0.2, responseMimeType: 'application/json', maxOutputTokens: 8192 }, aiSchema(mode) ? { responseSchema: aiSchema(mode) } : {}) }); let r;
-  const pick = () => (AI.dead && !env.AI_MODEL ? AI.fallback : env.AI_MODEL || AI.model);      // بعد أول 404 لا نعيد طلب 2.5 في نفس العامل
-  const call = (m) => fetch('https://generativelanguage.googleapis.com/v1beta/models/' + m + ':generateContent', { method: 'POST', signal: ctl.signal, headers: { 'content-type': 'application/json', 'x-goog-api-key': env.GEMINI_API_KEY }, body: req1 });
-  try { r = await call(pick()); if (r.status === 404 && AI.fallback && pick() !== AI.fallback) { AI.dead = 1; r = await call(AI.fallback); } }
-  catch (e) { return err(504, 'aitime', 'استغرق التحليل وقتاً طويلاً. حاول مرة أخرى.'); } finally { clearTimeout(tm); }
-  if (r.status >= 500) { try { await new Promise((z) => setTimeout(z, 600)); r = await call(pick()); } catch { /* يبقى الرد الأول */ } }      // ضغط مؤقت عند غوغل: محاولة ثانية واحدة
-  if (r.status === 429) return err(429, 'aibusy', 'المساعد مشغول الآن. حاول بعد دقيقة.');
-  if (!r.ok) return err(502, 'aierr', r.status === 400 || r.status === 403 ? 'تعذّر الاتصال بالمساعد (إعداد المفتاح).' : 'تعذّر التحليل الآن. حاول مرة أخرى.');
-  const parse = async (res) => { const g = await res.json().catch(() => null), txt = g && g.candidates && g.candidates[0] && g.candidates[0].content && (g.candidates[0].content.parts || []).filter((x) => !x.thought).map((x) => x.text || '').join(''); const t0 = String(txt || '').replace(/^\s*```(?:json)?|```\s*$/g, '').trim(); try { return JSON.parse(t0); } catch { try { return JSON.parse(t0.replace(/,\s*([}\]])/g, '$1').replace(/[\u201c\u201d]/g, '"')); } catch { return null; } } };      // فاصلة زائدة قبل الإغلاق تُصلح
-  let o = await parse(r);
-  if (!o) { try { const r2 = await call(pick()); if (r2.ok) o = await parse(r2); } catch { o = null; } }      // رد ناقص أو غير مفهوم: محاولة ثانية واحدة
-  return json(Object.assign({ mode, est: true }, aiClean(mode, o, J || {})));
+  const route = env.AI_ROUTE === '1', kind = img ? 'IMG' : 'TEXT';
+  let order = route ? String(env['AI_ORDER_' + kind] || '').split(',').map((x) => x.trim()).filter((x) => AI_PV[x]) : ['gl', 'gl'];      // بلا الموزّع: Gemini وحده بمحاولة ثانية (كما في 1.28)
+  if (route && !order.length) order = AI_ORD[kind];
+  if (bench && AI_PV[J.prov]) order = [J.prov];
+  order = order.filter((p) => AI_PV[p].k === 'cf' ? !!(env.AI && env.AI.run) : !!env[AI_PV[p].key]);
+  if (!order.length) return err(503, 'noai', 'المساعد الذكي غير مفعّل بعد');
+  const ck = route && !(bench && J.nocache) ? 'aic.' + b64u(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(mode + '|' + ut.replace(/\s+/g, ' ').trim().toLowerCase() + '|' + note + '|' + img)))).slice(0, 32) : '';
+  if (ck) {                                                       // طبقة 0: نتيجة طلب مطابق (نفس النص بعد التطبيع أو نفس الصورة) خلال 30 يوماً — بلا أي بيانات عن العميل
+    const h = await one(db, 'SELECT v FROM kv WHERE k = ?', ck), i = h ? h.v.indexOf('|') : -1;
+    if (i > 0 && +h.v.slice(0, i) > Date.now() - AI.cacheDays * 864e5) { try { const o = JSON.parse(h.v.slice(i + 1)); await aiTick(db, 'cache', day); return json(Object.assign(o, { cached: 1 })); } catch { /* تالفة: تُعاد */ } }
+  }
+  const t0 = Date.now(); let best = null, busy = 0, cfg = 0, net = 0, why = '';
+  for (let i = 0; i < order.length; i++) {
+    const p = order[i]; if (route && (AI.cool[p] || 0) > Date.now() && order.slice(i + 1).some((x) => (AI.cool[x] || 0) <= Date.now())) continue;      // مشغول منذ قليل: يُتجاوز ما دام غيره متاحاً
+    const left = AI.budget - (Date.now() - t0); if (left < 5000) break;
+    let r; try { r = await aiCall(p, env, mode, ut, img, mime, note, Math.min(left, AI.timeout)); } catch { r = { st: 0 }; net = 1; }
+    if (r.st === 429) { busy = 1; AI.cool[p] = Date.now() + 60000; if (!route) break; continue; }
+    if (r.st === 400 || r.st === 401 || r.st === 403) cfg = 1;
+    if (!r.o) continue;
+    await aiTick(db, p, day);
+    const c = aiClean(mode, r.o, J), g = route ? aiGuard(mode, c) : '';
+    const out = Object.assign({ mode, est: true }, c, route ? { prov: p } : {}, img && AI_PV[p].k !== 'gem' ? { backup: 1 } : {});
+    if (!g) { if (ck && c.ok) await run(db, 'INSERT INTO kv (k, v) VALUES (?, ?) ON CONFLICT(k) DO UPDATE SET v = excluded.v', ck, Date.now() + '|' + JSON.stringify(out)); return json(out); }
+    if (!best) best = out; why = g;                               // حارس الجودة رفضها: يُجرَّب المزوّد التالي، وتبقى هذه إن لم يوجد أفضل
+  }
+  if (best) return json(Object.assign(best, { guard: why }));
+  if (busy) return err(429, 'aibusy', 'المساعد مشغول الآن. حاول بعد دقيقة.');
+  if ((net || Date.now() - t0 >= AI.timeout) && !cfg) return err(504, 'aitime', 'استغرق التحليل وقتاً طويلاً. حاول مرة أخرى.');
+  return err(502, 'aierr', cfg && !route ? 'تعذّر الاتصال بالمساعد (إعداد المفتاح).' : 'تعذّر التحليل الآن. حاول مرة أخرى.');
+}
+// 1.58 (المحطة 1.29) الموزّع: عدة مزوّدين بالتناوب حين env.AI_ROUTE='1' — المفاتيح أسرار على الخادم فقط
+const AI_PV = {
+  gl: { k: 'gem', key: 'GEMINI_API_KEY' },                                                  // Gemini Flash-Lite (الأساسي)
+  gf: { k: 'gem', key: 'GEMINI_API_KEY', m: 'gemini-3.5-flash' },                          // Gemini Flash: حدّ يومي مستقل
+  groq: { k: 'oai', key: 'GROQ_API_KEY', m: 'qwen/qwen3.8-27b', u: 'https://api.groq.com/openai/v1/chat/completions' },
+  zai: { k: 'oai', key: 'ZAI_API_KEY', m: 'glm-4.6v-flash', u: 'https://api.z.ai/api/paas/v4/chat/completions' },
+  cf: { k: 'cf', m: '@cf/meta/llama-4-scout-17b-16e-instruct' }                           // Workers AI داخل الحساب بلا مفتاح: آخر احتياط
+};
+const AI_ORD = { IMG: ['gl', 'gf', 'groq', 'zai', 'cf'], TEXT: ['groq', 'gl', 'zai', 'gf', 'cf'] };      // النصوص لا تستهلك حد Gemini المحجوز للصور؛ ويُغيَّر بـ AI_ORDER_IMG / AI_ORDER_TEXT
+export { AI_PV, AI_ORD };
+async function aiTick(db, p, day) { const k = 'ai.p.' + day + '.' + p, r = await one(db, 'SELECT v FROM kv WHERE k = ?', k); await run(db, 'INSERT INTO kv (k, v) VALUES (?, ?) ON CONFLICT(k) DO UPDATE SET v = excluded.v', k, String((r ? +r.v || 0 : 0) + 1)); }
+export function aiJson(t) {                                          // رد نصي ← كائن: يحذف التفكير والأسوار، ويأخذ أول { إلى آخر }، ويصلح الفواصل الزائدة
+  t = String(t || '').replace(/<think>[\s\S]*?<\/think>/g, '').replace(/```(?:json)?/g, '').trim(); const a = t.indexOf('{'), b = t.lastIndexOf('}'); if (a < 0 || b <= a) return null; t = t.slice(a, b + 1);
+  try { return JSON.parse(t); } catch { try { return JSON.parse(t.replace(/,\s*([}\]])/g, '$1').replace(/[“”]/g, '"')); } catch { return null; } }
+}
+const AR = /[؀-ۿ]/;
+export function aiGuard(mode, c) {                                   // حارس الجودة: '' = مقبول، وإلا سبب الرفض
+  if (!c || !c.ok) return '';                                          // «ليس طعاماً / غير واضح» رد مشروع
+  const en = (k, p, cb, f) => k > 60 && p + cb + f > 0 && Math.abs(k - (4 * p + 4 * cb + 9 * f)) / k > 0.3;
+  if (mode === 'text' || mode === 'photo') { const t = c.total; if (en(t.kcal, t.p, t.c, t.f)) return 'energy'; return AR.test(c.title + c.items.map((x) => x.name).join('')) ? '' : 'lang'; }
+  if (mode === 'label') { const p = c.per, A = c.assessment; if (p.satFat != null && p.fat != null && p.satFat > p.fat + 0.5) return 'sat'; if (p.sugars != null && p.carbs != null && p.sugars > p.carbs + 0.5) return 'sugar'; if (p.kcal == null && p.protein == null && p.carbs == null && p.fat == null) return 'empty'; if (p.kcal != null && p.protein != null && p.carbs != null && p.fat != null && en(p.kcal, p.protein, p.carbs, p.fat)) return 'energy'; return AR.test(A.summary + A.positives.join('') + A.concerns.join('')) ? '' : 'lang'; }
+  return AR.test(mode === 'store' ? c.food + c.howTo.join('') : mode === 'supp' ? c.summary + c.product + c.items.map((x) => x.note).join('') : c.summary + c.name) ? '' : 'lang';
+}
+async function aiCall(p, env, mode, ut, img, mime, note, ms) {
+  const P = AI_PV[p], prompt = AI_BASE + '\n\n' + AI_P[mode], ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), ms);
+  try {
+    if (P.k === 'gem') {
+      const parts = [{ text: prompt }]; if (ut) parts.push({ text: ut }); if (img) parts.push({ inline_data: { mime_type: mime, data: img } }); if (note) parts.push({ text: note });
+      const sch = aiSchema(mode), mk = (th) => JSON.stringify({ contents: [{ role: 'user', parts }], generationConfig: Object.assign({ temperature: 0.2, responseMimeType: 'application/json', maxOutputTokens: 8192 }, sch ? { responseSchema: sch } : {}, th ? { thinkingConfig: { thinkingLevel: 'low' } } : {}) });
+      const go = (m, th) => fetch('https://generativelanguage.googleapis.com/v1beta/models/' + m + ':generateContent', { method: 'POST', signal: ctl.signal, headers: { 'content-type': 'application/json', 'x-goog-api-key': env.GEMINI_API_KEY }, body: mk(th) });
+      const m = P.m || (AI.dead && !env.AI_MODEL ? AI.fallback : env.AI_MODEL || AI.model); let r = await go(m, !!P.m);      // Flash: تفكير قليل وإلا تجاوز المهلة
+      if (P.m && r.status === 400) r = await go(m, 0);
+      if (!P.m && r.status === 404 && AI.fallback && m !== AI.fallback) { AI.dead = 1; r = await go(AI.fallback); }      // 2.5 غير متاح للحسابات الجديدة
+      if (!r.ok) return { st: r.status };
+      const g = await r.json().catch(() => null), c0 = g && g.candidates && g.candidates[0];
+      return { st: 200, o: aiJson(c0 && c0.content ? (c0.content.parts || []).filter((x) => !x.thought).map((x) => x.text || '').join('') : '') };
+    }
+    const content = [{ type: 'text', text: prompt + (ut ? '\n\n' + ut : '') + (note ? '\n' + note : '') + '\n\nأعد كائن JSON واحداً فقط بنفس المفاتيح والقيم المسموحة، بلا أي شرح خارجه.' }];
+    if (img) content.push({ type: 'image_url', image_url: { url: 'data:' + mime + ';base64,' + img } });
+    const messages = [{ role: 'user', content }];
+    if (P.k === 'cf') { const res = await env.AI.run(P.m, { messages, max_tokens: 4096, temperature: 0.2 }); const t = res && res.response; return { st: 200, o: t && typeof t === 'object' ? t : aiJson(t) }; }
+    const go = (rf) => fetch(P.u, { method: 'POST', signal: ctl.signal, headers: { 'content-type': 'application/json', authorization: 'Bearer ' + env[P.key], 'user-agent': 'zenha-relay/' + VER },
+      body: JSON.stringify(Object.assign({ model: P.m, messages, temperature: 0.2, max_tokens: 6000 }, rf ? { response_format: { type: 'json_object' } } : {}, p === 'zai' ? { thinking: { type: 'disabled' } } : {})) });
+    let r = await go(1); if (r.status === 400) r = await go(0);      // مزوّد لا يقبل وضع JSON: بدونه
+    if (!r.ok) return { st: r.status };
+    const g = await r.json().catch(() => null), m0 = g && g.choices && g.choices[0] && g.choices[0].message;
+    return { st: 200, o: aiJson(m0 && m0.content) };
+  } finally { clearTimeout(tm); }
 }
 
 // ---------- المسارات
