@@ -1,0 +1,55 @@
+/* ================= 1.53 كل الوجبات في صفحة واحدة: طيّ + سحب بين الوجبات (حصص وجرامات) — ألوان ومسافات الفيديو المرجعي بهوية زنها */
+.g153 .g5list{display:grid;gap:16px}
+.g153 .g5meal{scroll-margin-top:90px}
+.g153 .g5mh{background:none!important;padding:16px 18px!important}
+.g153 .g5mt b{font-size:17px}
+.g5acts{display:flex;gap:8px;flex:none}
+html:not(#mxz):not(#mxy) .g5ib{all:unset;box-sizing:border-box;cursor:pointer;display:grid;place-items:center;width:36px;height:36px;border-radius:10px;border:1px solid var(--g5-line,#E3EAEA);color:var(--g5-mut,#62747C);background:var(--g5-card,#fff)}
+html:not(#mxz):not(#mxy) .g5ib:hover{border-color:#13897A;color:#13897A}
+.g5ib:focus-visible{outline:2.5px solid #13897A;outline-offset:2px}
+.g5ib svg{width:17px;height:17px}
+.g5fold svg{transition:transform .2s;transform:rotate(180deg)}
+.shut .g5fold svg{transform:none}
+.g153 .shut .g5body,.g153 .shut .g5mf{display:none!important}
+.g153 .shut .g5mh{border-bottom:0!important}
+.g153 .g5body{padding:14px 18px;display:grid;gap:10px}
+.g153 .g5body .eqlines{display:grid;gap:10px}
+/* سطر الصنف: مقبض | أيقونة | النص | الاختيار | النقل */
+.g153 .g5body .eqli{display:grid;grid-template-columns:auto auto minmax(0,1fr) minmax(0,240px) minmax(0,150px);align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--g5-line);border-radius:12px;background:var(--g5-card)}
+.g153 .g5body .eqli:not(.g5dr){grid-template-columns:auto minmax(0,1fr) minmax(0,240px)}
+.g153 .g5body .eqli select{margin:0;width:100%}
+.g5grip{display:grid;grid-template-columns:repeat(2,4px);gap:3px;padding:8px 7px;border-radius:8px;background:var(--g5-soft,#F4F8F8);cursor:grab;flex:none}
+.g5grip i{width:4px;height:4px;border-radius:50%;background:var(--g5-mut,#62747C)}
+.g5dr{cursor:grab}.g5dr:active{cursor:grabbing}
+.g5drag{opacity:.45}
+.g153 select.g5mv,.athed select.g5mv{font-size:13px;color:var(--g5-mut,#62747C);background:var(--g5-soft,#F4F8F8)}
+/* شريط الإفلات (مثل «أضف صنفاً +» في المرجع) */
+.g5drop{display:flex;align-items:center;justify-content:center;gap:8px;min-height:42px;border-radius:10px;background:#EEF3FD;color:#4A5E9C;font-size:14px;border:1.5px dashed transparent;transition:background .15s,border-color .15s}
+.g5drop svg{width:16px;height:16px}
+html.g5dragging .g5drop{border-color:#8CA6E6}
+.g5over .g5drop{background:#DCE7FF;border-color:#4F86E8;color:#2F5FB8}
+.g5over{box-shadow:0 0 0 2px #4F86E8!important}
+html[data-dw="dark"] .g5drop,html[data-theme="glass"]:not([data-tone="light"]) .g5drop{background:rgba(79,134,232,.12);color:#AFC6F5}
+.g153 .g5mf{border-top:1px solid var(--g5-line)}
+/* نظام الجرامات: بطاقات الوجبة بنفس الأسلوب */
+.athed .mcard{border:1px solid #E3EAEA!important;border-radius:16px!important;background:#fff;overflow:hidden;padding:0!important;margin:0 0 16px!important;box-shadow:0 1px 2px rgba(16,45,59,.04)}
+html[data-dw="dark"] .athed .mcard,html[data-theme="glass"]:not([data-tone="light"]) .athed .mcard{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.12)!important}
+.athed .mcard .mh{display:flex!important;align-items:center;gap:10px;flex-wrap:wrap;padding:14px 16px!important;border-bottom:1px solid #E3EAEA;background:none!important;color:inherit!important}
+.athed .mcard .mh>b{font-size:17px}
+.athed .mcard .mh .g5mi{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:#DDF3EE;color:#13897A;flex:none}
+.athed .mcard .mh .g5mi svg{width:19px;height:19px}
+.athed .mcard .mh small{flex-basis:100%;order:9;color:#62747C}
+.athed .mcard .mh .g5mk{margin-inline-start:auto;font-size:13px;color:#62747C;white-space:nowrap}
+.athed .mcard table.at{margin:0;width:100%}
+.athed .mcard table.at td.in{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+.athed .mcard .g5drop{margin:10px 16px}
+.athed .mcard .madd{padding:0 16px 14px}
+.athed .mcard.shut table.at,.athed .mcard.shut .madd,.athed .mcard.shut .g5drop{display:none!important}
+.athed .mcard.shut .mh{border-bottom:0}
+@media (max-width:900px){.g153 .g5body .eqli{grid-template-columns:auto auto minmax(0,1fr)}.g153 .g5body .eqli select{grid-column:1/-1}.g153 .g5body .eqli:not(.g5dr){grid-template-columns:auto minmax(0,1fr)}}
+@media (max-width:640px){.g153 .g5body{padding:12px}.g153 .g5mh{padding:12px!important}.g5grip{display:none}.g153 .g5body .eqli{grid-template-columns:auto minmax(0,1fr)}}
+@media (prefers-reduced-motion:reduce){.g5fold svg,.g5drop{transition:none}}
+html:not(#mxz):not(#mxy) .g5acts .g5ib,html:not(#mxz):not(#mxy) .athed .mh .g5ib{background:var(--g5-card,#fff)!important;color:var(--g5-mut,#62747C)!important;border:1px solid var(--g5-line,#E3EAEA)!important;box-shadow:none!important;padding:0!important;min-width:0!important;min-height:0!important;width:36px!important;height:36px!important;border-radius:10px!important}
+html:not(#mxz):not(#mxy) .g5acts .g5ib:hover,html:not(#mxz):not(#mxy) .athed .mh .g5ib:hover{color:#13897A!important;border-color:#13897A!important}
+@media (min-width:901px){.g153 .g5body .eqli{grid-template-columns:auto auto minmax(0,1fr) minmax(0,210px) minmax(0,128px)}}
+html:not(#mxz) .athed td.in select.g5mv{width:auto!important;max-width:170px;flex:none;min-height:32px;padding-block:2px;margin:0}
