@@ -7,6 +7,9 @@ logo = open(P('assets', 'zenha', 'pro_logo.svg'), encoding='utf-8').read(); logo
 h = open(P('src', 'landing', 'index.html'), encoding='utf-8').read()
 h = h.replace('/*PROLOGO*/', logo.replace('<svg ', '<svg style="color:#16324A" ', 1)).replace('/*PROLOGO_DARK*/', logo.replace('<svg ', '<svg style="color:#fff" ', 1).replace('id="pzg"', 'id="pzg2"').replace('url(#pzg)', 'url(#pzg2)').replace('id="pzs"', 'id="pzs2"').replace('url(#pzs)', 'url(#pzs2)')).replace('/*APPURL*/', APP)
 open(os.path.join(OUT, 'index.html'), 'w', encoding='utf-8').write(h)
+for pg in ('privacy', 'terms'):      # صفحات مطلوبة لنشر تطبيق Google OAuth
+    q = open(P('src', 'landing', pg + '.html'), encoding='utf-8').read(); q = q.replace('/*PROLOGO*/', logo.replace('<svg ', '<svg style="color:#16324A" ', 1)).replace('/*PROLOGO_DARK*/', logo.replace('<svg ', '<svg style="color:#fff" ', 1).replace('id="pzg"', 'id="pzg2"').replace('url(#pzg)', 'url(#pzg2)').replace('id="pzs"', 'id="pzs2"').replace('url(#pzs)', 'url(#pzs2)')).replace('/*APPURL*/', APP)
+    open(os.path.join(OUT, pg + '.html'), 'w', encoding='utf-8').write(q)
 for f in os.listdir(P('src', 'landing', 'img')): shutil.copy(P('src', 'landing', 'img', f), os.path.join(OUT, 'img', f))
 shutil.copy(P('assets', 'zenha', 'pro_mark.svg'), os.path.join(OUT, 'img', 'mark.svg'))
 F = {'plex-ar-400': 'ibm-plex-sans-arabic-arabic-400-normal', 'plex-ar-700': 'ibm-plex-sans-arabic-arabic-700-normal', 'plex-lat-400': 'ibm-plex-sans-arabic-latin-400-normal', 'plex-lat-700': 'ibm-plex-sans-arabic-latin-700-normal', 'head-ar': 'alexandria-arabic-500-800', 'head-lat': 'alexandria-latin-500-800'}
