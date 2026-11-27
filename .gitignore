@@ -6,3 +6,4 @@ worker/admin/.wrangler/
 worker/site/public/
 worker/site/.wrangler/
 __pycache__/
+worker/landing/public/

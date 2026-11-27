@@ -1,0 +1,7 @@
+# معاينة صفحة استقبال «زنها Pro» (أصول ثابتة فقط، يبنيها tools/landing/build.py) — لا تمس hessanu ولا hissati
+name = "zenha-pro-landing-preview"
+compatibility_date = "2026-10-01"
+workers_dev = true
+
+[assets]
+directory = "./public"
