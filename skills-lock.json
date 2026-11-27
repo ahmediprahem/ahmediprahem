@@ -1,6 +1,13 @@
 {
   "version": 2,
   "skills": {
+    "arabic-design": {
+      "source": "JamalMohafil/claude-skills",
+      "commit": "8e6fa73c274c65704134b663513ca7754e99e199",
+      "sourceType": "github",
+      "skillPath": "arabic-design/SKILL.md",
+      "computedHash": "d1ce56c51e5c23ba60181f0bc4a9f8ed40ce0dd122e7fe694cc1fe7faf1a10ae"
+    },
     "graphic-designer": {
       "source": "charlie947/social-media-skills",
       "commit": "10ca79c0ec0be0f7654d19cd4f0c86b6fa6ed23b",
