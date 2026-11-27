@@ -256,9 +256,9 @@ async function aiFood(req, env, db, path, body, J) {
     if (!/^image\/(jpeg|png|webp)$/.test(mime) || !img || img.length > AI.img || !/^[A-Za-z0-9+/=]+$/.test(img)) return err(400, 'img', 'الصورة غير صالحة أو كبيرة جداً');
     if (J.text) note = 'ملاحظة المستخدم: ' + aiStr(J.text, 200);
   }
-  const route = env.AI_ROUTE === '1', kind = img ? 'IMG' : 'TEXT';
-  let order = route ? String(env['AI_ORDER_' + kind] || '').split(',').map((x) => x.trim()).filter((x) => AI_PV[x]) : ['gl', 'gl'];      // بلا الموزّع: Gemini وحده بمحاولة ثانية (كما في 1.28)
-  if (route && !order.length) order = AI_ORD[kind];
+  const route = env.AI_ROUTE === '1';
+  let order = route ? String(env['AI_ORDER_' + mode.toUpperCase()] || '').split(',').map((x) => x.trim()).filter((x) => AI_PV[x]) : ['gl', 'gl'];      // بلا الموزّع: Gemini وحده بمحاولة ثانية (كما في 1.28)
+  if (route && !order.length) order = AI_ORD[mode];
   if (bench && AI_PV[J.prov]) order = [J.prov];
   order = order.filter((p) => AI_PV[p].k === 'cf' ? !!(env.AI && env.AI.run) : !!env[AI_PV[p].key]);
   if (!order.length) return err(503, 'noai', 'المساعد الذكي غير مفعّل بعد');
@@ -294,7 +294,9 @@ const AI_PV = {
   zai: { k: 'oai', key: 'ZAI_API_KEY', m: 'glm-4.6v-flash', u: 'https://api.z.ai/api/paas/v4/chat/completions' },
   cf: { k: 'cf', m: '@cf/meta/llama-4-scout-17b-16e-instruct' }                           // Workers AI داخل الحساب بلا مفتاح: آخر احتياط
 };
-const AI_ORD = { IMG: ['gl', 'gf', 'groq', 'zai', 'cf'], TEXT: ['groq', 'gl', 'zai', 'gf', 'cf'] };      // النصوص لا تستهلك حد Gemini المحجوز للصور؛ ويُغيَّر بـ AI_ORDER_IMG / AI_ORDER_TEXT
+// الترتيب لكل نوع من قياس الدقة على 22 حالة عربية (2026-11-27): Gemini أولاً دائماً (الأدق)، ثم الأفضل في كل نوع؛ Cloudflare (Llama 4) ممتاز في الملصقات وصور الوجبات
+// ويفشل في المكملات والأعشاب فلا يُستعمل فيها؛ وGemini Flash بطيء (~28 ث) فلا يُستعمل. يُغيَّر بلا كود: AI_ORDER_TEXT / _PHOTO / _LABEL / _STORE / _SUPP / _HERB
+const AI_ORD = { text: ['gl', 'groq', 'cf', 'zai'], photo: ['gl', 'cf', 'zai', 'groq'], label: ['gl', 'cf', 'groq', 'zai'], store: ['gl', 'cf', 'groq', 'zai'], supp: ['gl', 'groq', 'zai'], herb: ['gl', 'groq', 'zai'] };
 export { AI_PV, AI_ORD };
 async function aiTick(db, p, day) { const k = 'ai.p.' + day + '.' + p, r = await one(db, 'SELECT v FROM kv WHERE k = ?', k); await run(db, 'INSERT INTO kv (k, v) VALUES (?, ?) ON CONFLICT(k) DO UPDATE SET v = excluded.v', k, String((r ? +r.v || 0 : 0) + 1)); }
 export function aiJson(t) {                                          // رد نصي ← كائن: يحذف التفكير والأسوار، ويأخذ أول { إلى آخر }، ويصلح الفواصل الزائدة
