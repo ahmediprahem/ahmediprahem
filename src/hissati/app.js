@@ -137,6 +137,8 @@ function flush() {
   })().finally(() => { flushing = null; });
   return flushing;
 }
+// الشات المفتوح: تحقق كل 5 ثوانٍ ما دام ظاهراً (بدل 30 ثانية) فتظهر رسائل الأخصائي فوراً تقريباً
+setInterval(() => { if (S && S.chat && K && !document.hidden && !V.polling) poll(); }, 5000);
 async function poll() {
   if (!S || !K || !S.cid || V.polling || S.removed) return; V.polling = true;
   try {
@@ -2378,7 +2380,7 @@ function scrChat() {
 }
 function sendMsg(text) {
   text = String(text || '').trim().slice(0, 2000); if (!text || S.removed) return false;
-  const m = { from: 'c', t: text, ts: now(), ctx: S.ctx }; S.msgs.push(m); S.ctx = ''; send({ t: 'msg', text: m.t, ctx: m.ctx, ts: m.ts }).then(render); return true;
+  const m = { from: 'c', t: text, ts: now(), ctx: S.ctx }; S.msgs.push(m); S.ctx = ''; const ci = $('#chatIn'); if (ci) ci.value = ''; send({ t: 'msg', text: m.t, ctx: m.ctx, ts: m.ts }).then(render); return true;
 }
 document.addEventListener('keydown', (e) => {     // Enter يرسل، وShift+Enter سطر جديد
   if (e.key === 'Enter' && !e.isComposing && e.target && e.target.id === 'plIn') { e.preventDefault(); const b = document.querySelector('[data-act="plAdd"]'); if (b) b.click(); return; }
@@ -2405,13 +2407,15 @@ function render() {
   if (V.khg && (V.screen === 'khg' || S)) scr = scrKhGuide(); else if (V.screen === 'boot') scr = scrBoot(); else if (V.screen === 'bad') scr = scrBad(); else if (V.screen === 'start') scr = scrStart(); else if (V.screen === 'inst') scr = scrInst(); else if (V.screen === 'moved') scr = scrMoved(); else if (V.screen === 'lock') scr = scrLock(); else if (V.screen === 'pin') scr = scrPin(); else if (V.screen === 'onb') scr = scrOnb();
   else scr = V.az ? scrAdhkar() : V.qr ? scrReader() : V.qfree ? scrQuranFree() : S.screen === 'khams' ? (S.kh && S.kh.on ? scrKhams() : scrKhRestart()) : V.kh && S.kh && S.kh.on ? scrKhams() : V.rd && !V.wk && !V.bd && S && S.plan && S.screen === 'app' ? scrReady() : V.cpk && S && S.plan && S.screen === 'app' ? scrChp() : V.mv ? scrMv() : V.sd != null && S.sd && S.sd.st ? scrSd() : V.hf ? scrHF() : V.wk ? scrWk() : V.bd ? scrBody() : V.pan != null ? scrPantry() : V.pf != null ? scrProf() : S.rqOpen && window.RL && RL.idx ? scrQuiz() : S.chat ? scrChat() : S.plan && S.screen === 'app' ? scrApp() : { invite: scrInvite, setup: scrSetup, wizard: scrWizard, review: scrReview, sent: scrSent, app: scrSent }[S.screen]();
   const keep = {}; document.querySelectorAll('video[data-keep]').forEach((n) => { keep[n.dataset.keep] = n; });
-  const cmI = $('#cmIn'), cmV = cmI ? [cmI.value, document.activeElement === cmI] : null;          // مسودة التعليق تبقى عند إعادة الرسم (وصول التعليقات مثلاً)
+  const cmI = $('#cmIn'), cmV = cmI ? [cmI.value, document.activeElement === cmI] : null;
+  const chI = $('#chatIn'), chV = chI ? [chI.value, document.activeElement === chI, chI.selectionStart] : null;          // مسودة رسالة الشات تبقى عند وصول رسالة جديدة          // مسودة التعليق تبقى عند إعادة الرسم (وصول التعليقات مثلاً)
   const fs = S && S.ui && [1.15, 1.3].indexOf(S.ui.fs) >= 0 ? String(S.ui.fs) : '1';          // 0.60 أ2: حجم الخط العام
   if (document.documentElement.style.getPropertyValue('--fs') !== fs) document.documentElement.style.setProperty('--fs', fs);
   $('#root').innerHTML = '<div class="stage"><div class="device">' + (V.online ? '' : '<div class="offline" role="status">بلا اتصال — تُرسل بياناتك عند عودة الإنترنت</div>') + scr + (S ? sheetHtml() : '') + (toastMsg ? '<div class="toast" role="status">' + I('check') + '<span>' + esc(toastMsg) + '</span><button class="tx" data-act="toastX" aria-label="إغلاق الإشعار">' + I('x') + '</button></div>' : '') + '</div></div>';
   placeBars();
   document.querySelectorAll('video[data-keep]').forEach((n) => { const o = keep[n.dataset.keep]; if (o && o !== n) n.replaceWith(o); });   // فيديو يعمل لا يتوقف عند إعادة الرسم
   if (cmV) { const n = $('#cmIn'); if (n) { n.value = cmV[0]; if (cmV[1]) n.focus(); } }
+  if (chV && chV[0]) { const n = $('#chatIn'); if (n) { n.value = chV[0]; if (chV[1]) { n.focus(); try { n.setSelectionRange(chV[2], chV[2]); } catch (e) { } } } }
   const s2 = $('.scroll'); if (s2 && key === lastKey) s2.scrollTop = top; lastKey = key;
   const th = $('#thread'); if (th) { th.dataset.pin = th.dataset.pin || '1'; const go = () => { if (th.dataset.pin !== '0') th.scrollTop = th.scrollHeight; }; go(); requestAnimationFrame(() => { go(); requestAnimationFrame(go); }); setTimeout(go, 150); if (!th._pb) { th._pb = 1; th.addEventListener('scroll', () => { th.dataset.pin = (th.scrollHeight - th.scrollTop - th.clientHeight < 80) ? '1' : '0'; }, { passive: true }); } }
   onbSplashTimer(); introRun(); fillCerts(); if (window.HxMotion) HxMotion.after(); if (S && S.chal && S.screen === 'app' && V.screen === '') chalCheck(); chalCheck(); whMaybe(); actMaybe(); badgeSync(); { const c = $('#chatIn'); if (c) c.focus(); focusChat = false; }
