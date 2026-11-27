@@ -1250,6 +1250,14 @@ html:has(.scr.qz),body:has(.scr.qz){background:#fff!important}body:has(.scr.qz):
 .hasTabs .logbar{bottom:calc(112px + env(safe-area-inset-bottom,0px))}
 .hasLog .scroll{padding-bottom:196px}
 .hasTabs .scroll{padding-bottom:max(130px,var(--pb,0px))}
+/* 1.56 تقييم المكملات */
+.aiben{display:grid;gap:8px;margin-bottom:12px;padding:12px;border-radius:var(--r2);background:rgba(111,227,169,.07);border:1px solid rgba(111,227,169,.3)}
+.aiben h3{margin:0 0 2px;font-size:calc(16px*var(--fs))}
+.aiben .ails{margin:0}.aiben .ails p{margin:6px 0 0;line-height:1.6}
+.aidose{display:grid;gap:8px;margin-bottom:12px}
+.aidr{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:10px;padding:10px 12px;border-radius:var(--r3);background:var(--glass);border:1px solid var(--line)}
+.aidr b small{font-weight:400;color:var(--mut)}.aidr small{display:block;color:var(--mut);font-size:calc(12.5px*var(--fs));line-height:1.6;margin-top:2px}.aidr small b{color:var(--text)}
+.aidr .aiconf{white-space:nowrap}
 
 
 /* ==========================================================================
@@ -7162,8 +7170,11 @@ const AI_MODES = [
   ['text', '✍️', 'صف وجبتك', 'اكتب ما أكلت، ونقدّر السعرات والبروتين والكربوهيدرات والدهون'],
   ['photo', '📸', 'صوّر وجبتك', 'التقط صورة طبقك ونتعرّف على الأصناف ونقدّر قيمها'],
   ['label', '🏷️', 'امسح الملصق الغذائي', 'صوّر جدول القيم الغذائية لمنتج، ونقرأه ونقيّمه صحياً'],
-  ['store', '🧊', 'التخزين والسلامة', 'صوّر طعاماً، ونخبرك كيف تحفظه ومدة صلاحيته وعلامات فساده']
+  ['store', '🧊', 'التخزين والسلامة', 'صوّر طعاماً، ونخبرك كيف تحفظه ومدة صلاحيته وعلامات فساده'],
+  ['supp', '💊', 'قيّم مكمّلاً', 'صوّر ملصق المكمّل أو اكتب اسمه: فائدته، ودليله العلمي، وجرعته مقارنة بالحد الآمن']
 ];
+// 1.56: «قيّم مكمّلاً» يظهر في المعاينة فقط حتى يعتمد المالك الجدول المرجعي (ثم تُضبط HX_SUPP أو يُزال الشرط)
+const aiModes = () => AI_MODES.filter((m) => m[0] !== 'supp' || DEMO || window.HX_SUPP);
 const AI_OFF = [['extra', '🍽 وجبة زيادة'], ['out', '🍔 أكل من الخارج'], ['sweets', '🍰 حلويات'], ['drinks', '🥤 مشروبات محلّاة']];
 function aiBtn(cls) { return '<button class="aibtn' + (cls ? ' ' + cls : '') + '" data-act="aiOpen" aria-label="مساعد الطعام بالذكاء الاصطناعي" title="مساعد الطعام"><img class="aiimg" src="' + AI_CAM_IMG + '" alt="" width="28" height="28">' + (cls ? '<span>حلّل طعامك</span>' : '') + '</button>'; }
 // 1.55: أيقونة المالك (صورة دائرية من تصميمه) زرّاً بارزاً في منتصف الشريط السفلي بين «خطتي» و«تثقيف» — المدخل الرئيسي الوحيد
@@ -7186,13 +7197,16 @@ sheetHtml = ((f) => function () {
 function aiEst() { return '<p class="aiest" role="note">⚠️ القيم تقديرية من الذكاء الاصطناعي وليست قياساً دقيقاً، ولا تغني عن إرشاد أخصائيك.</p>'; }
 function aiSheet() {
   const v = AIV(), M = AI_MODES.find((m) => m[0] === v.step);
-  if (v.step === 'menu') return ['مساعد الطعام', '<p class="dim">اختر ما تريد، وسيحلله المساعد في ثوانٍ.</p><div class="aimenu">' + AI_MODES.map((m) => '<button class="aiopt" data-act="aiMode" data-v="' + m[0] + '"><span class="aie" aria-hidden="true">' + m[1] + '</span><span><b>' + m[2] + '</b><small>' + m[3] + '</small></span></button>').join('') + '</div>'];
+  if (v.step === 'menu') return ['مساعد الطعام', '<p class="dim">اختر ما تريد، وسيحلله المساعد في ثوانٍ.</p><div class="aimenu">' + aiModes().map((m) => '<button class="aiopt" data-act="aiMode" data-v="' + m[0] + '"><span class="aie" aria-hidden="true">' + m[1] + '</span><span><b>' + m[2] + '</b><small>' + m[3] + '</small></span></button>').join('') + '</div>'];
   const title = M[1] + ' ' + M[2];
-  if (v.busy) return [title, (v.thumb ? '<img class="aithumb" src="' + v.thumb + '" alt="">' : '') + '<div class="aiload" role="status"><span class="aispin" aria-hidden="true"></span><b>' + ({ text: 'نحلل وصف وجبتك…', photo: 'نتعرّف على أصناف وجبتك…', label: 'نقرأ الملصق ونقيّمه…', store: 'نجهّز إرشادات الحفظ والسلامة…' })[v.step] + '</b><small>قد يستغرق ذلك حتى 20 ثانية</small></div>'];
+  if (v.busy) return [title, (v.thumb ? '<img class="aithumb" src="' + v.thumb + '" alt="">' : '') + '<div class="aiload" role="status"><span class="aispin" aria-hidden="true"></span><b>' + ({ text: 'نحلل وصف وجبتك…', photo: 'نتعرّف على أصناف وجبتك…', label: 'نقرأ الملصق ونقيّمه…', store: 'نجهّز إرشادات الحفظ والسلامة…', supp: 'نقرأ المكمّل ونقارنه بالمراجع العلمية…' })[v.step] + '</b><small>قد يستغرق ذلك حتى 20 ثانية</small></div>'];
   if (v.err) return [title, '<div class="aierr" role="alert"><b>' + esc(v.err) + '</b></div><div class="row"><button class="btn" data-act="aiRetry">حاول مرة أخرى</button><button class="btn sec" data-act="aiBack">رجوع</button></div>'];
   if (v.res) return [title, (v.thumb ? '<img class="aithumb" src="' + v.thumb + '" alt="صورتك">' : '') + aiResult(v)];
   if (v.step === 'text') return [title, '<label class="dim" for="aiTxt">صف وجبتك كما أكلتها (الأصناف والكمية إن عرفتها)</label><textarea class="inp" id="aiTxt" rows="4" maxlength="600" placeholder="مثال: برجر لحم بجبنة شيدر مع بطاطس صغيرة وكولا دايت">' + esc(v.text || '') + '</textarea>'
     + '<button class="btn full" data-act="aiGo">حلّل الوجبة</button>' + aiEst()];
+  if (v.step === 'supp') return [title, '<p class="dim">صوّر جدول «Supplement Facts» أو المكونات على العبوة، أو اكتب اسم المكمّل وجرعته.</p><div class="aipick"><button class="btn" data-act="aiPick" data-v="cam">' + I('camera') + ' صوّر الملصق</button><button class="btn sec" data-act="aiPick" data-v="lib">' + I('plusSq') + ' اختر من الصور</button></div>'
+    + '<label class="dim" for="aiTxt">أو اكتب اسمه وجرعته</label><textarea class="inp" id="aiTxt" rows="2" maxlength="300" placeholder="مثال: فيتامين د 5000 وحدة يومياً، أو كرياتين 5 جرام">' + esc(v.text || '') + '</textarea><button class="btn sec full" data-act="aiGoSupp">قيّم المكمّل</button>'
+    + '<p class="aiest">⚠️ تقييم عام بالذكاء الاصطناعي وليس وصفة؛ لا تبدأ مكمّلاً أو توقفه إلا بعد استشارة أخصائيك أو طبيبك، خاصة مع الحمل أو الأمراض المزمنة أو الأدوية.</p>'];
   const hint = { photo: 'صوّر الطبق كاملاً من الأعلى بإضاءة جيدة. كلما كانت الصورة أوضح كان التقدير أقرب.', label: 'صوّر جدول «المعلومات الغذائية» قريباً ومستقيماً حتى تُقرأ الأرقام، ويفضّل أن تظهر المكونات.', store: 'صوّر الطعام الذي تريد حفظه (سمك، دجاج، أرز مطبوخ، خضار…).' }[v.step];
   return [title, '<p class="dim">' + hint + '</p><div class="aipick"><button class="btn" data-act="aiPick" data-v="cam">' + I('camera') + ' التقط صورة</button><button class="btn sec" data-act="aiPick" data-v="lib">' + I('img') + ' اختر من الصور</button></div>'
     + (v.step === 'photo' ? '<label class="dim" for="aiNote">ملاحظة اختيارية (مثل: مقلي بالزيت، نصف الطبق)</label><input class="inp" id="aiNote" maxlength="200" value="' + esc(v.text || '') + '">' : '') + (v.step === 'store' ? '<p class="aiest">⚠️ لا يمكن التأكد من سلامة الطعام من صورة. عند الشك تخلّص منه.</p>' : aiEst())];
@@ -7223,6 +7237,19 @@ function aiResult(v) {
       + '<p class="aiest">⚠️ التقييم مبني على ما قُرئ من الملصق فقط، وقد يخطئ في قراءة رقم؛ راجع الملصق نفسه، واسأل أخصائيك إن كانت لديك حالة صحية.</p>'
       + (P.kcal ? '<button class="btn sec full" data-act="aiAddLbl">' + I('check') + ' أضف حصة واحدة إلى تسجيل اليوم</button>' : '') + '<button class="btn sec full" data-act="aiAgain">امسح ملصقاً آخر</button>';
   }
+  if (m === 'supp') {
+    const G = { A: ['دليل قوي', 'ok', '🟢'], B: ['دليل ناشئ', 'mid', '🟡'], C: ['دليل ضعيف', 'mid', '🟠'], D: ['غير مستحسن أو خطِر', 'low', '🔴'] }[r.grade] || ['دليل غير واضح', 'mid', '⚪'];
+    const VD = { low: ['أقل من الجرعة الفعّالة', 'mid'], ok: ['ضمن المدى', 'ok'], high: ['فوق الحد الآمن', 'low'], unknown: ['غير محدد', 'mid'] };
+    const ls = (t, a, c) => a.length ? '<div class="ails ' + c + '"><b>' + t + '</b><ul>' + a.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul></div>' : '';
+    return '<div class="aihead"><b>' + esc(r.product || 'المكمّل') + '</b>' + (r.serving ? '<span class="aiconf mid">الحصة: ' + esc(r.serving) + '</span>' : '') + '</div>'
+      + '<div class="airate ' + G[1] + '"><span>' + G[2] + '</span><div><b>' + G[0] + '</b><small>' + esc(r.summary || r.gradeWhy) + '</small></div></div>'
+      + '<div class="aiben"><h3>💡 فائدة المكمّل</h3>' + ls('✅ فوائد مثبتة علمياً', r.proven, 'pos') + ls('❔ يُروَّج لها بلا دليل كافٍ', r.claimed, 'neg') + ls('👤 من يستفيد منه فعلاً', r.who, 'alt') + ls('🙅 قد لا تحتاجه إذا', r.notNeeded, '')
+      + (r.onset ? '<div class="ails"><b>⏳ متى تظهر الفائدة</b><p>' + esc(r.onset) + '</p></div>' : '') + ls('🕒 أفضل طريقة لأخذه', r.howTo, '') + '</div>'
+      + (r.items.length ? '<div class="aidose" role="table" aria-label="الجرعة مقارنة بالمدى والحد الآمن">' + r.items.map((x) => { const d = VD[x.verdict] || VD.unknown; return '<div class="aidr" role="row"><div><b>' + esc(x.name) + (x.form ? ' <small>(' + esc(x.form) + ')</small>' : '') + '</b><small>في المنتج: <b>' + esc(x.amount || '—') + '</b>' + (x.usual ? ' • المعتاد: ' + esc(x.usual) : '') + (x.upper ? ' • الحد الآمن: ' + esc(x.upper) : '') + '</small>' + (x.note ? '<small>' + esc(x.note) + '</small>' : '') + '</div><span class="aiconf ' + d[1] + '">' + d[0] + '</span></div>'; }).join('') + '</div>' : '')
+      + (r.gradeWhy && r.summary ? '<p class="dim">' + esc(r.gradeWhy) + '</p>' : '') + ls('⚠️ تحذيرات وتداخلات', r.cautions, 'neg') + ls('🏅 الجودة', r.quality, '') + ls('🥗 بدائل من الطعام', r.foods, 'alt')
+      + '<p class="aiest">⚠️ تقييم عام وليس وصفة؛ لا تبدأ مكمّلاً أو توقفه إلا بعد استشارة أخصائيك أو طبيبك.</p>'
+      + '<button class="btn full" data-act="aiShare">' + I('msg') + ' أرسلها لأخصائيك</button><button class="btn sec full" data-act="aiAgain">قيّم مكمّلاً آخر</button>';
+  }
   const PL = { fridge: ['🧊', 'في الثلاجة'], freezer: ['❄️', 'في الفريزر'], pantry: ['🗄️', 'خارج الثلاجة'], mixed: ['🧊', 'الثلاجة أو الفريزر'] }[r.place];
   const ls = (t, a, c) => a.length ? '<div class="ails ' + c + '"><b>' + t + '</b><ul>' + a.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul></div>' : '';
   return '<div class="aihead"><b>' + esc(r.food) + '</b>' + (r.category ? '<span class="aiconf mid">' + esc(r.category) + '</span>' : '') + '</div>'
@@ -7244,7 +7271,7 @@ async function aiRun(o) {
   v.busy = 0; if (sheet && sheet.t === 'ai') render();
 }
 async function aiImage(file, step) {
-  const dims = step === 'label' ? [[1600, 0.82], [1280, 0.75], [1024, 0.7], [320, 0.6]] : [[1024, 0.75], [800, 0.7], [640, 0.65], [320, 0.6]];
+  const dims = step === 'label' || step === 'supp' ? [[1600, 0.82], [1280, 0.75], [1024, 0.7], [320, 0.6]] : [[1024, 0.75], [800, 0.7], [640, 0.65], [320, 0.6]];
   const out = await shrink(file, dims), big = out.slice(0, 3).find((x) => x.length < 900000) || out[2];
   return { img: big.split(',')[1], mime: 'image/jpeg', thumb: out[3] };
 }
@@ -7263,8 +7290,12 @@ function aiAct(a, v, el) {
     case 'aiAgain': V.ai = { step: s.step }; return true;
     case 'aiRetry': if (s.last) aiRun(s.last); return false;
     case 'aiGo': { const t = ($('#aiTxt') || {}).value || ''; s.text = t; if (t.trim().length < 3) { toast('اكتب وصفاً لوجبتك أولاً'); return false; } s.thumb = ''; aiRun({ mode: 'text', text: t.trim() }); return false; }
-    case 'aiPick': { const step = s.step, note = (($('#aiNote') || {}).value || '').trim(); s.text = note;
+    case 'aiPick': { const step = s.step, note = (($('#aiNote') || $('#aiTxt') || {}).value || '').trim(); s.text = note;
       aiPickFile(v === 'cam', async (f) => { try { const im = await aiImage(f, step); s.thumb = im.thumb; aiRun({ mode: step, img: im.img, mime: im.mime, text: note || undefined }); } catch (e) { s.err = e.message || 'تعذّر فتح الصورة'; render(); } }); return false; }
+    case 'aiGoSupp': { const t = (($('#aiTxt') || {}).value || '').trim(); s.text = t; if (t.length < 3) { toast('اكتب اسم المكمّل وجرعته أو صوّر الملصق'); return false; } s.thumb = ''; aiRun({ mode: 'supp', text: t }); return false; }
+    case 'aiShare': { const r = s.res; if (!r) return false; const G = { A: 'دليل قوي', B: 'دليل ناشئ', C: 'دليل ضعيف', D: 'غير مستحسن' }[r.grade] || '';
+      const hi = r.items.filter((x) => x.verdict === 'high').map((x) => x.name), txt = '💊 تقييم مكمّل بالمساعد: ' + (r.product || 'مكمّل') + (r.serving ? ' (حصة ' + r.serving + ')' : '') + ' — ' + G + '. ' + r.items.slice(0, 6).map((x) => x.name + ' ' + (x.amount || '')).join('، ') + (hi.length ? '. ⚠️ فوق الحد الآمن: ' + hi.join('، ') : '') + '. هل يناسبني؟';
+      if (!sendMsg(txt.slice(0, 1900))) return false; sheet = null; V.ai = null; toast('أُرسل التقييم لأخصائيك ✓'); return true; }
     case 'aiDrop': { s.drop = s.drop || {}; s.drop[v] = !s.drop[v]; return true; }
     case 'aiCat': s.cat = v; return true;
     case 'aiAdd': { const r = s.res, items = r.items.filter((x, i) => !(s.drop || {})[i]); if (!items.length) return false;
