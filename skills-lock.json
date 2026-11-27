@@ -29,6 +29,13 @@
       "skillPath": "skills/using-superpowers/SKILL.md",
       "computedHash": "6a9104fac7e16c3cec2bc118943aefd331cac35b4cfabd427cea4dc16337c6a5"
     },
+    "ux-writing-arabic": {
+      "source": "itady74/ux-writing-arabic",
+      "commit": "412f6318084d33b4946f31f06849a34bbb49051a",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "1782868ea4105a9181709f82595731138deef4a3c3c8a7deeb260186d4eaa338"
+    },
     "web-design-guidelines": {
       "source": "vercel-labs/agent-skills",
       "commit": "5a37a6329fbad3666c3207392a6a7c0110e92efb",
