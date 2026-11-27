@@ -12263,7 +12263,7 @@ function m168Enhance(root) {
   var wi = root.querySelector('input[data-f="weight"]'), last = m168Last(c);
   if (wi && last) {      // للقراءة: آخر وزن ومصدره، والتسجيل في مكانه الوحيد
     var box = document.createElement('div'); box.className = 'm168w'; box.setAttribute('role', 'group'); box.setAttribute('aria-label', 'آخر وزن');
-    box.innerHTML = '<b><bdi>' + num(last.w) + '</bdi> <small>كجم</small></b><small class="m168src">' + esc(last.s === 'زنها' ? 'سجّله العميل في «زنها»' : 'قياس زيارة') + ' • ' + esc(m168Fmt(last.t)) + '</small><button class="sec sm" data-a="mxOpen" data-v="w" data-add="1">＋ سجّل قياساً</button>';
+    box.innerHTML = '<b><bdi>' + num(last.w) + '</bdi> <small>كجم</small></b><small class="m168src">' + esc(last.s === 'زنها' ? 'سجّله العميل في «زنها»' : 'قياس زيارة') + ' • ' + esc(m168Fmt(last.t)) + '</small>' + (m168Whtr(c) != null ? '<small class="m168src">الخصر ÷ الطول: <bdi>' + num(m168Whtr(c)) + '</bdi></small>' : '') + '<button class="sec sm" data-a="mxOpen" data-v="w" data-add="1">＋ سجّل قياساً</button>';
     wi.style.display = 'none'; wi.setAttribute('aria-hidden', 'true'); wi.tabIndex = -1; wi.parentNode.insertBefore(box, wi.nextSibling);
     var lb = root.querySelector('label[for="' + wi.id + '"]'); if (lb && !/آخر/.test(lb.textContent)) lb.firstChild.nodeValue = 'آخر وزن (كجم) ';
   }      // بلا أي قياس: الحقل كما هو (وزن البداية)، ويصبح للقراءة فقط بعد أول قياس
