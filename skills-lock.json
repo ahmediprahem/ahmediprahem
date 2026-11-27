@@ -15,6 +15,13 @@
       "skillPath": "skills/graphic-designer/SKILL.md",
       "computedHash": "f2c09405144d0ff472031679d5b310c850fd35bb537862c4f9b261b7543fcd40"
     },
+    "replica": {
+      "source": "albertirgi/replica",
+      "commit": "6e79299d9505f363b2bc08aad700ddcf4e3fe00c",
+      "sourceType": "github",
+      "skillPath": "skills/replica/SKILL.md",
+      "computedHash": "335bbbcce4ec3716b66f019955031fbc04246a9b8cbda58be475c7d82637d31f"
+    },
     "ui-ux-pro-max": {
       "source": "nextlevelbuilder/ui-ux-pro-max-skill",
       "commit": "11ca2b3bdd555649f278ee348c32a9302b24dcf1",
