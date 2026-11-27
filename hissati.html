@@ -1258,6 +1258,8 @@ html:has(.scr.qz),body:has(.scr.qz){background:#fff!important}body:has(.scr.qz):
 .aidr{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:10px;padding:10px 12px;border-radius:var(--r3);background:var(--glass);border:1px solid var(--line)}
 .aidr b small{font-weight:400;color:var(--mut)}.aidr small{display:block;color:var(--mut);font-size:calc(12.5px*var(--fs));line-height:1.6;margin-top:2px}.aidr small b{color:var(--text)}
 .aidr .aiconf{white-space:nowrap}
+.aiuse{display:grid;gap:8px;margin-bottom:12px;padding:12px;border-radius:var(--r2);background:rgba(157,187,255,.08);border:1px solid rgba(157,187,255,.35)}
+.aiuse h3{margin:0 0 2px;font-size:calc(16px*var(--fs))}.aiuse .ails{margin:0}.aiuse .ails p{margin:6px 0 0;line-height:1.6}
 
 
 /* ==========================================================================
@@ -7244,7 +7246,8 @@ function aiResult(v) {
     return '<div class="aihead"><b>' + esc(r.product || 'المكمّل') + '</b>' + (r.serving ? '<span class="aiconf mid">الحصة: ' + esc(r.serving) + '</span>' : '') + '</div>'
       + '<div class="airate ' + G[1] + '"><span>' + G[2] + '</span><div><b>' + G[0] + '</b><small>' + esc(r.summary || r.gradeWhy) + '</small></div></div>'
       + '<div class="aiben"><h3>💡 فائدة المكمّل</h3>' + ls('✅ فوائد مثبتة علمياً', r.proven, 'pos') + ls('❔ يُروَّج لها بلا دليل كافٍ', r.claimed, 'neg') + ls('👤 من يستفيد منه فعلاً', r.who, 'alt') + ls('🙅 قد لا تحتاجه إذا', r.notNeeded, '')
-      + (r.onset ? '<div class="ails"><b>⏳ متى تظهر الفائدة</b><p>' + esc(r.onset) + '</p></div>' : '') + ls('🕒 أفضل طريقة لأخذه', r.howTo, '') + '</div>'
+      + (r.onset ? '<div class="ails"><b>⏳ متى تظهر الفائدة</b><p>' + esc(r.onset) + '</p></div>' : '') + '</div>'
+      + '<div class="aiuse"><h3>📋 كيف تأخذه</h3>' + (r.dose ? '<div class="ails"><b>💊 الجرعة المناسبة</b><p>' + esc(r.dose) + '</p></div>' : '') + ls('⏰ التوقيت المناسب', (r.timing && r.timing.length ? r.timing : r.howTo) || [], '') + ls('🍽️ التعارض مع الطعام والمشروبات', r.food || [], 'neg') + '</div>'
       + (r.items.length ? '<div class="aidose" role="table" aria-label="الجرعة مقارنة بالمدى والحد الآمن">' + r.items.map((x) => { const d = VD[x.verdict] || VD.unknown; return '<div class="aidr" role="row"><div><b>' + esc(x.name) + (x.form ? ' <small>(' + esc(x.form) + ')</small>' : '') + '</b><small>في المنتج: <b>' + esc(x.amount || '—') + '</b>' + (x.usual ? ' • المعتاد: ' + esc(x.usual) : '') + (x.upper ? ' • الحد الآمن: ' + esc(x.upper) : '') + '</small>' + (x.note ? '<small>' + esc(x.note) + '</small>' : '') + '</div><span class="aiconf ' + d[1] + '">' + d[0] + '</span></div>'; }).join('') + '</div>' : '')
       + (r.gradeWhy && r.summary ? '<p class="dim">' + esc(r.gradeWhy) + '</p>' : '') + ls('⚠️ تحذيرات وتداخلات', r.cautions, 'neg') + ls('🏅 الجودة', r.quality, '') + ls('🥗 بدائل من الطعام', r.foods, 'alt')
       + '<p class="aiest">⚠️ تقييم عام وليس وصفة؛ لا تبدأ مكمّلاً أو توقفه إلا بعد استشارة أخصائيك أو طبيبك.</p>'
