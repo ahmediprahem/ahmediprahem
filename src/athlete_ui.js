@@ -177,8 +177,8 @@ function setPage() {
   var tabs = '<div class="stgs">' + grp('البيانات الغذائية', b('portions', 'الحصص والبدائل') + b('ath', 'أغذية نظام الجرامات') + b('supp', IC('apple') + ' المكملات والأعشاب'))     // 0.46: عشرة تبويبات في أربعة أقسام
     + grp('زنها والعملاء', b('hx', '📲 زنها') + b('app', '📲 تطبيق الجوال') + b('forms', IC('file') + ' الاستبيانات') + b('chal', IC('sparkles') + ' التحديات'))
     + grp('المظهر والمساعد', b('theme', '🌙 المظهر') + (S.mode === 'admin' ? b('gate', '🎨 واجهة الدخول') : '') + b('dt', '🤖 المساعد'))
-    + grp('النسخ والأدوات', b('vault', IC('upload') + ' النسخ والمزامنة') + b('tools', IC('tool') + ' النسخ الاحتياطي والأدوات')) + '</div>';
-  return '<h2>⚙ إعدادات النظام</h2>' + tabs + (tab === 'ath' ? athFoodsPage() : tab === 'app' ? appPage() : tab === 'dt' ? dtSettingsPage() : tab === 'theme' ? themePage() : tab === 'hx' ? hxSetPage() : tab === 'forms' ? formsPage() : tab === 'vault' ? vaultPage() : tab === 'tools' ? toolsPage() : tab === 'chal' ? chTplPage() : (tab === 'gate' && S.mode === 'admin') ? gatePage() : tab === 'supp' ? suppSetPage() : portionsPage());
+    + grp('النسخ والأدوات', b('vault', IC('upload') + ' النسخ والمزامنة') + b('tools', IC('tool') + ' النسخ الاحتياطي والأدوات') + (window.HK && HK.acct && HK.acct() ? b('acct', '🔐 الحساب وكلمة السر') : '')) + '</div>';      // 1.66
+  return '<h2>⚙ إعدادات النظام</h2>' + tabs + (tab === 'ath' ? athFoodsPage() : tab === 'app' ? appPage() : tab === 'dt' ? dtSettingsPage() : tab === 'theme' ? themePage() : tab === 'hx' ? hxSetPage() : tab === 'forms' ? formsPage() : tab === 'vault' ? vaultPage() : tab === 'tools' ? toolsPage() : tab === 'chal' ? chTplPage() : (tab === 'gate' && S.mode === 'admin') ? gatePage() : tab === 'supp' ? suppSetPage() : tab === 'acct' && typeof acctPage === 'function' ? acctPage() : portionsPage());
 }
 Object.assign(A, {
   setTab: function (v) { S.setTab = v; main(); if (v === 'ath') { renderMng(); renderImp(); } if (v === 'gate') gatePrev(); },

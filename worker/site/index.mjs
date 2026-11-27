@@ -116,7 +116,11 @@ async function authApi(req, env, path) {
   const me = await session(req, env); if (!me) return json({ ok: false, code: 'auth', error: 'سجّل الدخول أولاً' }, 401);
   if (path === '/api/auth/setpw') {
     const h = String(J.h || ''); if (!/^[A-Za-z0-9_-]{40,90}$/.test(h)) return json({ ok: false, code: 'bad' }, 400);
-    const ex = await db.prepare('SELECT email FROM spauth WHERE email = ?').bind(me.email).first(); if (ex && me.via !== 'g' && !J.force) return json({ ok: false, code: 'exists', error: 'لتغيير كلمة السر ادخل بـ Google أولاً' }, 403);
+    const ex = await db.prepare('SELECT h, salt FROM spauth WHERE email = ?').bind(me.email).first();
+    if (ex && me.via !== 'g') {      // 1.66: بجلسة كلمة السر يلزم إثبات كلمة السر الحالية؛ بجلسة Google («نسيت كلمة السر») يكفي الدخول
+      const o = String(J.old || ''), d0 = /^[A-Za-z0-9_-]{40,90}$/.test(o) ? b64uEnc(await crypto.subtle.digest('SHA-256', tenc.encode(ex.salt + '|' + o))) : ''; let same = d0.length === ex.h.length; if (same) { let r = 0; for (let i = 0; i < d0.length; i++) r |= d0.charCodeAt(i) ^ ex.h.charCodeAt(i); same = r === 0; }
+      if (!same) return json({ ok: false, code: 'old', error: o ? 'كلمة السر الحالية غير صحيحة' : 'لتغيير كلمة السر ادخل بـ Google أو اكتب كلمة السر الحالية' }, 403);
+    }
     const salt = b64uEnc(crypto.getRandomValues(new Uint8Array(16))), d = b64uEnc(await crypto.subtle.digest('SHA-256', tenc.encode(salt + '|' + h)));
     await db.prepare('INSERT INTO spauth (email, h, salt, created, updated) VALUES (?, ?, ?, ?, ?) ON CONFLICT(email) DO UPDATE SET h = excluded.h, salt = excluded.salt, updated = excluded.updated').bind(me.email, d, salt, now(), now()).run();
     return json({ ok: true });

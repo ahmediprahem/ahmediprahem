@@ -42,3 +42,20 @@ A.zpOn = function () {
   if (window.MutationObserver) new MutationObserver(function () { if (document.querySelector('.home') && !document.querySelector('.home .zp164') && zpNeed()) put(); }).observe(document.documentElement, { childList: true, subtree: true });
   window.ZN_protect = { put: put, need: zpNeed, id: zpId };
 })();
+// ================= 1.66 الإعدادات ← «الحساب وكلمة السر»: تغيير كلمة السر (تفتح البيانات على هذا الجهاز وتُستعمل للدخول بالبريد)
+function acctPage() {
+  var a = window.HK && HK.acct && HK.acct(); if (!a) return '<div class="ucard"><p class="small">تغيير كلمة السر هنا متاح لحسابات البريد. حسابات اسم المستخدم تغيّرها الإدارة.</p></div>';
+  return '<div class="ucard acp166"><h3>🔐 الحساب وكلمة السر</h3><p class="small">حسابك: <b dir="ltr">' + esc(a.email) + '</b>' + (a.google ? ' — تدخل بحساب Google أو بهذا البريد وكلمة السر.' : '') + '</p>'
+    + '<p class="small">كلمة السر نفسها تفتح بياناتك المشفّرة على هذا الجهاز. عند تغييرها يُعاد تشفير بياناتك بالمفتاح الجديد، فلا تغلق الصفحة حتى تظهر رسالة النجاح.</p>'
+    + '<label for="ac_old">كلمة السر الحالية</label><input id="ac_old" type="password" autocomplete="current-password">'
+    + '<label for="ac_new">كلمة السر الجديدة (8 أحرف على الأقل)</label><input id="ac_new" type="password" autocomplete="new-password"><label for="ac_new2">تأكيدها</label><input id="ac_new2" type="password" autocomplete="new-password">'
+    + '<div id="ac_msg"></div><p><button data-a="acPw">تغيير كلمة السر</button></p>'
+    + '<p class="small">نسيت كلمة السر الحالية؟ سجّل الخروج ثم ادخل بحساب Google واختر «نسيت كلمة السر؟»، وتسترجع عملاءك بكود الاسترداد من «حماية البيانات».</p></div>';
+}
+A.acPw = function () {
+  var o = ($('#ac_old') || {}).value || '', n1 = ($('#ac_new') || {}).value || '', n2 = ($('#ac_new2') || {}).value || '', msg = function (h, ok) { var m = $('#ac_msg'); if (m) m.innerHTML = '<div class="' + (ok ? 'ok' : 'warn') + '">' + h + '</div>'; };
+  if (!o) return msg('اكتب كلمة السر الحالية'); if (n1.length < 8) return msg('كلمة السر الجديدة 8 أحرف على الأقل'); if (n1 !== n2) return msg('كلمتا السر الجديدتان غير متطابقتين'); if (n1 === o) return msg('اختر كلمة سر مختلفة عن الحالية');
+  var btn = document.querySelector('[data-a="acPw"]'); if (btn) { btn.disabled = true; btn.textContent = 'جارٍ إعادة التشفير…'; }
+  HK.changePw(o, n1).then(function (r) { ['#ac_old', '#ac_new', '#ac_new2'].forEach(function (s) { var e = $(s); if (e) e.value = ''; }); msg('✓ تغيّرت كلمة السر' + (r.server ? '، واستعملها للدخول بالبريد من أي جهاز.' : ' على هذا الجهاز.'), 1); toast('✓ تغيّرت كلمة السر'); })
+    .catch(function (e) { msg(esc(e.message || 'تعذّر تغيير كلمة السر')); }).then(function () { if (btn) { btn.disabled = false; btn.textContent = 'تغيير كلمة السر'; } });
+};

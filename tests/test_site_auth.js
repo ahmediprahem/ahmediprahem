@@ -29,7 +29,8 @@ const b64u = (u) => Buffer.from(u).toString('base64url');
   assert.strictEqual((await post('/api/auth/password', { email: 'new@x.com', h: Hw })).s, 401); assert.strictEqual((await post('/api/auth/password', { email: 'who@x.com', h: H })).s, 401);
   for (let i = 0; i < 4; i++) await post('/api/auth/password', { email: 'new@x.com', h: Hw }); assert.strictEqual((await post('/api/auth/password', { email: 'new@x.com', h: H })).s, 429);
   ok('الدخول بالبريد وكلمة السر يعمل، والخاطئة وغير الموجود 401 بنفس الرسالة، و5 محاولات خاطئة توقف البريد ربع ساعة');
-  assert.strictEqual((await post('/api/auth/setpw', { h: Hw }, p1.c)).s, 403); assert.strictEqual((await post('/api/auth/setpw', { h: Hw }, g.c)).s, 200); ok('تغيير كلمة السر يحتاج دخولاً بـ Google («نسيت كلمة السر» = ادخل بـ Google ثم غيّرها)');
+  assert.strictEqual((await post('/api/auth/setpw', { h: Hw }, p1.c)).s, 403); assert.strictEqual((await post('/api/auth/setpw', { h: Hw, old: Hw }, p1.c)).s, 403); assert.strictEqual((await post('/api/auth/setpw', { h: Hw, old: H }, p1.c)).s, 200);
+  assert.strictEqual((await post('/api/auth/setpw', { h: H }, g.c)).s, 200); ok('تغيير كلمة السر: بجلسة كلمة السر يلزم إثبات الحالية (الخاطئة 403)، وبجلسة Google يكفي الدخول («نسيت كلمة السر»)');
   // 3) انتهاء التجربة والتمديد
   await db.prepare("UPDATE specialists SET exp = ? WHERE email = 'new@x.com'").bind(Math.floor(Date.now() / 1000) - 10).run(); const e1 = await lic(g.c); assert.strictEqual(e1.s, 403); assert.strictEqual(e1.j.code, 'expired'); assert.strictEqual(e1.j.trial, 1); assert(/انتهت تجربتك المجانية/.test(e1.j.error));
   await db.prepare("UPDATE specialists SET exp = ?, status = 'active', lic = 'admin.sig' WHERE email = 'new@x.com'").bind(Math.floor(Date.now() / 1000) + 86400 * 30).run(); const e2 = await lic(g.c); assert.strictEqual(e2.s, 200); assert.strictEqual(e2.j.lic, 'admin.sig'); assert.strictEqual(e2.j.trial, 0);
