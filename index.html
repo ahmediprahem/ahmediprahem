@@ -11921,7 +11921,7 @@ function g153Meals(c, g) {
   }).join('');
 }
 // يحل محل تحويل 1.52 (بطاقة وجبة واحدة + تبويبات) — يبقى «تحليل اليوم»
-g152 = function (c, html) {
+if (typeof g152 === 'function') g152 = function (c, html) {
   var t = document.createElement('div'); t.innerHTML = html;
   var box = t.querySelector('.geneqv'), dish = t.querySelector('.eqdish'), meals = t.querySelector('.eqmeals'); if (!box || !meals) return html;
   var h3 = meals.previousElementSibling, auto = h3 && h3.querySelector('.eqauto'), help = dish && dish.nextElementSibling && dish.nextElementSibling.matches('p.small') ? dish.nextElementSibling : null;
