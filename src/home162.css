@@ -33,13 +33,11 @@ html.zt162 .zhring .rb{stroke:rgba(18,168,142,.12)!important}
 html.zt162 .zhring.t-mint .rf{stroke:#12A88E}html.zt162 .zhring.t-sky .rf{stroke:#4FA3E8}html.zt162 .zhring.t-warn .rf{stroke:#F2A541}
 html.zt162 .zhring .rf{animation:z162r 1.1s cubic-bezier(.2,.8,.2,1) both}
 @keyframes z162r{from{stroke-dasharray:0 999}}
-/* شارات الأرقام: أيقونة ملونة في دائرة مثل شريط مهام المساعد */
+/* شارات الأرقام: بطاقات صغيرة بيضاء ترتفع عند المرور، وأيقونتها الأصلية بلون زنها */
 html.zt162 .ghome .zhchips .zhs{border-radius:18px!important;background:var(--zh-card)!important;border:1px solid var(--zh-line)!important;box-shadow:0 4px 12px rgba(22,50,74,.05)!important;transition:transform .2s,box-shadow .2s}
 html.zt162 .ghome .zhchips .zhs:hover{transform:translateY(-2px);box-shadow:var(--zh-sh)!important}
 html.zt162 .ghome .zhchips .zhs b{font-family:'Zenha Head','Hissa Plex',sans-serif;font-weight:800}
-.z162ic{display:inline-grid;place-items:center;flex:none;width:28px;height:28px;border-radius:50%;color:#fff;margin-inline-end:6px;vertical-align:middle}
-.z162ic svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-html.zt162 .ghome .zhchips .zhs.zero .z162ic{filter:saturate(.35);opacity:.75}
+html.zt162 .ghome .zhchips .zhs .zhk svg{color:var(--zh-mint)}html.zt162 .ghome .zhchips .zhs:not(.zero){border-color:rgba(18,168,142,.28)!important}
 /* البطاقات */
 html.zt162 .home.zh .zhcard,html.zt162 .home.zh .ucard{border-radius:22px!important;box-shadow:var(--zh-sh)!important;border:1px solid var(--zh-line)!important;transition:box-shadow .25s,transform .25s}
 html.zt162 .home.zh .zhcard:hover{box-shadow:0 14px 34px rgba(22,50,74,.10)!important}

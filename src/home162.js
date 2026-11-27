@@ -17,7 +17,6 @@
     if (Date.now() - last > 4000) { h.classList.add('z162in'); setTimeout(function () { h.classList.remove('z162in'); }, 900); } last = Date.now();
     var w = h.querySelector('.zhw'); if (w && !w.querySelector('.z162dz')) { w.insertAdjacentHTML('afterbegin', dz(W)); var t = w.querySelector('h2'); if (t && !t.querySelector('.z162hl')) { var m = /^(.*?،\s*)(.+)$/.exec(t.textContent); if (m) { t.textContent = m[1]; var s = document.createElement('span'); s.className = 'z162hl'; s.textContent = m[2]; t.appendChild(s); } } }
     var ins = h.querySelector('.zhins'); if (ins && !ins.querySelector('.z162dz')) ins.insertAdjacentHTML('afterbegin', dz(P));
-    [].forEach.call(h.querySelectorAll('.zhchips .zhs'), function (b) { if (b.querySelector('.z162ic')) return; var k = b.querySelector('.zhk') || b, c = icFor(b); k.insertAdjacentHTML('afterbegin', '<span class="z162ic" aria-hidden="true" style="background:' + c[0] + '"><svg viewBox="0 0 24 24">' + c[1] + '</svg></span>'); });
   }
   function scan() { var h = document.querySelector('.home.zh:not([data-z162])'); if (h) enhance(h); }
   if (window.MutationObserver) new MutationObserver(scan).observe(document.documentElement, { childList: true, subtree: true });

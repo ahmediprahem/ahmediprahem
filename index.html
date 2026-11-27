@@ -2834,13 +2834,11 @@ html.zt162 .zhring .rb{stroke:rgba(18,168,142,.12)!important}
 html.zt162 .zhring.t-mint .rf{stroke:#12A88E}html.zt162 .zhring.t-sky .rf{stroke:#4FA3E8}html.zt162 .zhring.t-warn .rf{stroke:#F2A541}
 html.zt162 .zhring .rf{animation:z162r 1.1s cubic-bezier(.2,.8,.2,1) both}
 @keyframes z162r{from{stroke-dasharray:0 999}}
-/* شارات الأرقام: أيقونة ملونة في دائرة مثل شريط مهام المساعد */
+/* شارات الأرقام: بطاقات صغيرة بيضاء ترتفع عند المرور، وأيقونتها الأصلية بلون زنها */
 html.zt162 .ghome .zhchips .zhs{border-radius:18px!important;background:var(--zh-card)!important;border:1px solid var(--zh-line)!important;box-shadow:0 4px 12px rgba(22,50,74,.05)!important;transition:transform .2s,box-shadow .2s}
 html.zt162 .ghome .zhchips .zhs:hover{transform:translateY(-2px);box-shadow:var(--zh-sh)!important}
 html.zt162 .ghome .zhchips .zhs b{font-family:'Zenha Head','Hissa Plex',sans-serif;font-weight:800}
-.z162ic{display:inline-grid;place-items:center;flex:none;width:28px;height:28px;border-radius:50%;color:#fff;margin-inline-end:6px;vertical-align:middle}
-.z162ic svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-html.zt162 .ghome .zhchips .zhs.zero .z162ic{filter:saturate(.35);opacity:.75}
+html.zt162 .ghome .zhchips .zhs .zhk svg{color:var(--zh-mint)}html.zt162 .ghome .zhchips .zhs:not(.zero){border-color:rgba(18,168,142,.28)!important}
 /* البطاقات */
 html.zt162 .home.zh .zhcard,html.zt162 .home.zh .ucard{border-radius:22px!important;box-shadow:var(--zh-sh)!important;border:1px solid var(--zh-line)!important;transition:box-shadow .25s,transform .25s}
 html.zt162 .home.zh .zhcard:hover{box-shadow:0 14px 34px rgba(22,50,74,.10)!important}
@@ -12110,7 +12108,6 @@ A.hqBell = (function (f) { return function () { var r = f.apply(this, arguments)
     if (Date.now() - last > 4000) { h.classList.add('z162in'); setTimeout(function () { h.classList.remove('z162in'); }, 900); } last = Date.now();
     var w = h.querySelector('.zhw'); if (w && !w.querySelector('.z162dz')) { w.insertAdjacentHTML('afterbegin', dz(W)); var t = w.querySelector('h2'); if (t && !t.querySelector('.z162hl')) { var m = /^(.*?،\s*)(.+)$/.exec(t.textContent); if (m) { t.textContent = m[1]; var s = document.createElement('span'); s.className = 'z162hl'; s.textContent = m[2]; t.appendChild(s); } } }
     var ins = h.querySelector('.zhins'); if (ins && !ins.querySelector('.z162dz')) ins.insertAdjacentHTML('afterbegin', dz(P));
-    [].forEach.call(h.querySelectorAll('.zhchips .zhs'), function (b) { if (b.querySelector('.z162ic')) return; var k = b.querySelector('.zhk') || b, c = icFor(b); k.insertAdjacentHTML('afterbegin', '<span class="z162ic" aria-hidden="true" style="background:' + c[0] + '"><svg viewBox="0 0 24 24">' + c[1] + '</svg></span>'); });
   }
   function scan() { var h = document.querySelector('.home.zh:not([data-z162])'); if (h) enhance(h); }
   if (window.MutationObserver) new MutationObserver(scan).observe(document.documentElement, { childList: true, subtree: true });
