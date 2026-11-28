@@ -573,6 +573,39 @@ E.ctx = function (client, D) {
     if (client.diet && E.dietAll) sol = E.dietAll(client.diet, sol, client) || sol;
     return E.fillGap(sol, st.T, D, cap);
   };
+  // 1.75 (ر1أ، قرار المالك): «جداول حصص بديلة» — 3–5 جداول لنفس الهدف، كلها داخل حدود الفحص (E.CHECK: السعرات ±5%، الماكروز ±10%).
+  // إضافة فقط: لا تغيّر baseSuggestion ولا planWeek. بحث محلي بأعداد صحيحة حول الاقتراح الحالي مع قيود الحساسية والنباتي والسكري.
+  E.altSuggestions = function (client, D) {
+    var T = E.targets(client, D), base = E.baseSuggestion(client, D).counts.slice(), al = client.allergens || [], cond = client.conditions || [];
+    var diab = cond.some(function (c) { return /سكري|الإنسولين/.test(c); });      // استبعاد الأصناف (حساسية، نباتي…) يطبّقه المحرك عند الملء؛ هنا نحافظ على نطاق الاقتراح الحالي
+    var MIN = [2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1, 1, 0].map(function (x, g) { return Math.min(x, base[g]); }), MAX = [14, 4, 10, 10, 8, 3, 4, 4, 3, 8, 6, 10, 2].map(function (x, g) { return Math.max(x, base[g]); });
+    var ach = function (cn) { var a = [0, 0, 0]; for (var g = 0; g < 13; g++) for (var k = 0; k < 3; k++) a[k] += cn[g] * D.EX[g][k]; return a; };
+    var kc = function (a) { return a[0] * 4 + a[1] * 4 + a[2] * 9; };
+    var fixed0 = function (g) { return diab && g === 12 && !base[12]; };
+    var within = function (cn) { var a = ach(cn), r = E.checkVals({ k: kc(a), c: a[0], p: a[1], f: a[2] }, { k: T.kcal, c: T.cho, p: T.pro, f: T.fat }); return r.st === 'ok' ? r : null; };
+    var solve = function (start, tg, lim, keep) {      // tg: أهداف معدّلة [c,p,f]؛ lim(g, cn): قيد إضافي؛ keep: قرب من البداية
+      var cn = start.map(function (x, g) { return fixed0(g) ? 0 : Math.max(MIN[g], Math.min(MAX[g], Math.round(x))); });
+      var cost = function (v) { var a = ach(v), e = 0; for (var k = 0; k < 3; k++) e += Math.pow((a[k] - tg[k]) / Math.max(1, tg[k]), 2) * 100; var kk = kc(a); e += Math.pow((kk - T.kcal) / T.kcal, 2) * 300; for (var g = 0; g < 13; g++) { e += keep * Math.abs(v[g] - start[g]); if ((g === 5 || g === 8 || g === 12) && v[g] > base[g]) e += 0.4 * (v[g] - base[g]); if (lim && lim(g, v)) e += 1000; } return e; };      // لا تعويض بلحوم أو حليب عالي الدهون أو سكريات فوق الاقتراح
+      var best = cost(cn);
+      for (var it = 0; it < 400; it++) {
+        var bm = null, bc = best;
+        for (var g = 0; g < 13; g++) { if (fixed0(g)) continue;
+          [-1, 1].forEach(function (d) { var v = cn.slice(); v[g] += d; if (v[g] < MIN[g] || v[g] > MAX[g]) return; var c0 = cost(v); if (c0 < bc - 1e-9) { bc = c0; bm = v; } });
+          for (var h = 0; h < 13; h++) { if (h === g || fixed0(h)) continue; var v2 = cn.slice(); v2[g] += 1; v2[h] -= 1; if (v2[g] > MAX[g] || v2[h] < MIN[h]) continue; var c2 = cost(v2); if (c2 < bc - 1e-9) { bc = c2; bm = v2; } } }
+        if (!bm) break; cn = bm; best = bc;
+      }
+      return cn;
+    };
+    var P = [
+      ['bal', 'متوازن', 'الاقتراح الحالي كما هو', function () { return base.slice(); }],
+      ['cho', 'كارب أكثر، دهون أقل', 'نشويات أو فاكهة أكثر، وزيت أقل', function () { return solve(base, [T.cho * 1.07, T.pro, T.fat * 0.9], null, 0.02); }],
+      ['pro', 'بروتين أعلى', 'للشبع ولمن يتمرن', function () { var s0 = base.slice(); s0[3] += 1; return solve(s0, [T.cho * 0.94, T.pro * 1.09, T.fat], null, 0.02); }],
+      ['nomilk', 'ألبان أقل / بلا ألبان', 'لمن لا يحب الألبان أو لا يتحمّلها', function () { var s0 = base.slice(); s0[6] = s0[7] = s0[8] = 0; return solve(s0, [T.cho, T.pro, T.fat], function (g, v) { return g >= 6 && g <= 8 && v[g] > 0; }, 0.02); }],
+      ['veg', 'خضار وفاكهة أكثر', 'حجم أكبر وألياف أكثر بالسعرات نفسها', function () { var s0 = base.slice(); s0[9] = Math.min(MAX[9], s0[9] + 2); s0[10] = Math.min(MAX[10], s0[10] + 1); return solve(s0, [T.cho, T.pro, T.fat], function (g, v) { return (g === 9 && v[9] < s0[9]) || (g === 10 && v[10] < s0[10]); }, 0.05); }]];
+    var out = [], seen = {};
+    P.forEach(function (p) { var cn = p[3](), key = cn.join(','); if (seen[key]) return; var r = within(cn); if (!r && p[0] !== 'bal') return; seen[key] = 1; var a = ach(cn); out.push({ id: p[0], label: p[1], desc: p[2], counts: cn, ach: a, kcal: Math.round(kc(a)), ok: !!r }); });
+    return out;
+  };
   E.planWeek = function (client, D, opt) {
     opt = opt || {}; var st = E.state(client, D, opt), T = st.T, meals = st.meals, days = [], manual = client.baseCounts && client.baseCounts.length === 13 && client.baseCounts.some(function (x) { return +x > 0; });
     for (var d = 0; d < 7; d++) {

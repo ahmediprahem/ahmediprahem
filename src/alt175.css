@@ -1,0 +1,21 @@
+/* 1.75 (ر1أ) جداول حصص بديلة + الفعلي مقابل الاسمي */
+.a175{margin:8px 0 14px}
+.a175grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.a175c{border:1.5px solid #DCE6EE;border-radius:14px;padding:10px 12px;background:#fff}
+.a175c.on{border-color:#13897A;background:#F3FBF8}
+.a175c .a175h{display:flex;align-items:center;gap:8px;justify-content:space-between}
+.a175c .a175h em{font-style:normal;font-size:11px;background:#0E6559;color:#fff;border-radius:999px;padding:1px 8px}
+.a175c p{margin:4px 0}
+.a175m{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:13px;margin:6px 0}
+.a175m span:first-child{font-weight:700}
+.a175gs{display:flex;flex-wrap:wrap;gap:4px}
+.a175g{font-size:12px;background:#F1F5F8;border-radius:999px;padding:2px 8px;color:#30405a}
+html:not(#mxz):not(#mxy) .g171c small.a175act{display:block;font-size:11.5px;margin:2px 0 0;padding:0;background:none!important;border:0!important;box-shadow:none!important;border-radius:0;width:auto;font-weight:600}
+.a175act.ok{color:#0E6559}.a175act.warn{color:#8A5A12}.a175act.bad{color:#A8322D}
+.a175w ul{margin:6px 0;padding-inline-start:18px}
+html[data-theme="glass"]:not([data-tone="light"]) .a175c,html[data-theme="linear"] .a175c{background:#212C3D;border-color:#3A475E}
+html[data-theme="glass"]:not([data-tone="light"]) .a175c.on,html[data-theme="linear"] .a175c.on{background:#173A36;border-color:#5FD0BC}
+html[data-theme="glass"]:not([data-tone="light"]) .a175g,html[data-theme="linear"] .a175g{background:#2C374A;color:#D5DCE8}
+html[data-theme="glass"]:not([data-tone="light"]) .a175act.ok,html[data-theme="linear"] .a175act.ok{color:#9BE6D6}
+html[data-theme="glass"]:not([data-tone="light"]) .a175act.warn,html[data-theme="linear"] .a175act.warn{color:#F2C46B}
+html[data-theme="glass"]:not([data-tone="light"]) .a175act.bad,html[data-theme="linear"] .a175act.bad{color:#F29A93}
