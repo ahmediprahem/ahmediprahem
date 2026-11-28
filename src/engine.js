@@ -165,6 +165,8 @@ E.panOf = function (client, D) {
   return out;
 };
 E.panS = function (cx, f, t) { var p = cx && cx.pan && cx.pan[t]; if (!p) return 0; var v = p.f[f.n]; return v === 'h' ? 6 : v === 'c' ? 4 : (p.g[f.g] || 0) >= 2 ? -5 : 0; };
+// 1.73 (قرار المالك): كلمة الحساسية/الاستبعاد تطابق بداية كلمة (مع «ال/و/وال/بال/ب») لا أي جزء منها: «بيض» تطابق «بيضة» و«البيض» لا «أرز أبيض»، و«لحم» لا تطابق «الحمص»؛ والكلمة القصيرة (≤2) كاملة فقط («بط» لا تطابق «بطاطس»)
+var KWR = {}; E.kwHit = function (n, k) { k = String(k); var r = KWR[k]; if (!r) { var e = k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); r = KWR[k] = new RegExp('(^|[\\s،,()\\-/])(ال|و|وال|بال|ب)?' + e + (k.length <= 2 ? '($|[\\s،,()\\-/])' : '')); } return r.test(String(n)); };
 E.ctx = function (client, D) {
     var kws = [], diab = (client.conditions || []).some(function (c) { return c === 'سكري النوع الثاني' || c === 'مقاومة الإنسولين / ما قبل السكري'; });
     (client.allergens || []).forEach(function (lab) { var a = D.allergens.filter(function (x) { return x.label === lab; })[0]; if (a) kws = kws.concat(a.kw); });
@@ -178,9 +180,9 @@ E.ctx = function (client, D) {
     var byName = {}; D.foods.forEach(function (f) { byName[f.n] = f; });
     var cx = {
       D: D, client: client, diab: diab, byName: byName, love: love, avoid: avoid, pan: E.panOf(client, D),
-      isExcluded: function (n) { return !!excl[n] || kws.some(function (k) { return n.indexOf(k) >= 0; }); },
+      isExcluded: function (n) { return !!excl[n] || kws.some(function (k) { return E.kwHit(n, k); }); },
       rules: rules, tierOf: function (n) { var t = 0, p = ' ' + n + ' '; rules.forEach(function (r) { if (r.exact ? n === r.kw : p.indexOf(r.kw) >= 0) { var v = TIER[r.tier] || 0; if (v > t) t = v; } }); return t; },
-      keywordsMatch: function (n) { return kws.some(function (k) { return n.indexOf(k) >= 0; }); }
+      keywordsMatch: function (n) { return kws.some(function (k) { return E.kwHit(n, k); }); }
     };
     cx.cache = {}; cx.ok = function (f) { if (cx.cache[f.n] === undefined) cx.cache[f.n] = !f.on || cx.isExcluded(f.n) || cx.tierOf(f.n) === 3 ? 0 : 1; return cx.cache[f.n]; };
     return cx;

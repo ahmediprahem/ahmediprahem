@@ -9,7 +9,7 @@ var G171 = { V: [[1, 'الاحتياج', [1]], [2, 'النظام والشكل', 
 function g171Names() { if (G171.n || typeof GEN_STEPS === 'undefined') return; G171.n = 1; GEN_STEPS[0][1] = 'الاحتياج'; GEN_STEPS[1][1] = 'النظام والشكل'; GEN_STEPS[2][1] = 'الاستبعاد والسلامة'; GEN_STEPS[3][1] = 'الوجبات'; GEN_STEPS[4][1] = 'المراجعة والإرسال'; }      // GEN_STEPS يُعرَّف بعد هذه الوحدة في البناء
 function g171Vis(step) { for (var i = 0; i < G171.V.length; i++) if (G171.V[i][2].indexOf(step) >= 0) return i; return 0; }
 genStepper = (function (f) { return function (c, g) {
-  g171Names(); if (!c || c.kind === 'athlete') return f.apply(this, arguments);
+  g171Names(); if (!c) return f.apply(this, arguments);      // 1.73 (م5): نظام الجرامات على الخطوات الأربع نفسها
   var vi = g171Vis(g.step), V = G171.V, sub = g.step === 3 ? ' — الاستبعاد والسلامة' : '';
   var mob = '<nav class="genstepm" aria-label="خطوات الخطة"><button class="sec" data-a="genStep" data-v="' + (vi > 0 ? V[vi - 1][0] : 1) + '"' + (vi <= 0 ? ' disabled' : '') + ' aria-label="الخطوة السابقة">›</button><span><b>' + (vi + 1) + ' من 4</b> • ' + V[vi][1] + sub + '</span><button class="sec" data-a="genStep" data-v="' + (vi < 3 ? V[vi + 1][0] : 5) + '"' + (vi >= 3 ? ' disabled' : '') + ' aria-label="الخطوة التالية">‹</button></nav>';
   return mob + '<ol class="gensteps g171" aria-label="خطوات الخطة">' + V.map(function (s, i) { var st = i < vi ? 'done' : i === vi ? 'on' : 'next';
@@ -51,7 +51,7 @@ function g171Need(c) {
     + '<details class="fold g171mm"' + (S.mxOpen ? ' open' : '') + ' data-fold="mxOpen"><summary>⚙ طريقة الماكروز ونسبها — ' + esc(E.MODES[c.macroMode] || '') + '</summary>' + mm + '</details>'
     + '<p class="genfoot"><button data-a="genStep" data-v="2">التالي: النظام والشكل ‹</button></p></div>';
 }
-genClient = (function (f) { return function (c, g) { var h = f.apply(this, arguments); if (!c || c.kind === 'athlete' || !genBodyOk(c) || h.indexOf('data-a="genEditData"') < 0) return h; try { return h.replace(/<p class="genfoot"><button class="sec" data-a="genEditData">([^<]*)<\/button> <button data-a="genStep" data-v="2">[^<]*<\/button><\/p>/, '<p class="genfoot"><button class="sec" data-a="genEditData">$1</button></p>') + g171Need(c); } catch (e) { return h; } }; })(genClient);
+genClient = (function (f) { return function (c, g) { var h = f.apply(this, arguments); if (c && c.kind === 'athlete') return h + g171DrugHtml(c); if (!c || !genBodyOk(c) || h.indexOf('data-a="genEditData"') < 0) return h; try { return h.replace(/<p class="genfoot"><button class="sec" data-a="genEditData">([^<]*)<\/button> <button data-a="genStep" data-v="2">[^<]*<\/button><\/p>/, '<p class="genfoot"><button class="sec" data-a="genEditData">$1</button></p>') + g171Need(c); } catch (e) { return h; } }; })(genClient);
 A.g171Goal = function (v) { var c = cur(); if (!c) return; var g = D.settings.goals.filter(function (x) { return x[1] === +v; })[0]; if (!g) return; c.goal = g[0]; c.kcalManual = ''; save(); main(); toast('✓ الهدف: ' + g[0]); };
 A.g171Man = function (v) { var c = cur(), T = c && g171T(c); if (!T || !T.tdee) return; c.kcalManual = Math.round(T.tdee - +v); save(); main(); toast('✓ سعرات يدوية ' + c.kcalManual + ' (عجز ' + v + ')'); };
 A.g171Need = function () { var c = cur(); if (!c) return; genOf(c).step = 1; S.tab = 'gen'; save(); render(); window.scrollTo(0, 0); };
@@ -63,8 +63,16 @@ function g171Counter(c) {
   var cell = function (lab, got, tgt, u) { var r = tgt > 0 ? got / tgt : 0, st = Math.abs(r - 1) <= 0.05 ? 'ok' : Math.abs(r - 1) <= 0.1 ? 'warn' : 'bad'; return '<div class="g171c st-' + st + '"><small>' + lab + '</small><b>' + Math.round(got) + '<span> / ' + Math.round(tgt) + ' ' + u + '</span></b><i style="--w:' + Math.min(100, Math.round(r * 100)) + '%"></i></div>'; };
   return '<div class="g171cnt" role="status" aria-label="المخطط مقابل الهدف (متوسط الأيام)">' + cell('السعرات', k0, T.kcal, '') + cell('كربوهيدرات', c0, T.cho, 'جم') + cell('بروتين', p0, T.pro, 'جم') + cell('دهون', f0, T.fat, 'جم') + '</div>';
 }
+function g171CounterAth(c) {      // 1.73: عدّاد الجرامات (متوسط الأيام: المخطط مقابل هدف كل يوم حسب نوعه)
+  var p = c.plan; if (!p || !p.days || !p.days.length || typeof genAthCheck !== 'function') return ''; var sg = { k: 0, c: 0, p: 0, f: 0 }, st = { k: 0, c: 0, p: 0, f: 0 }, n = 0;
+  try { p.days.forEach(function (d) { var r = genAthCheck(d), m = r && r.dims; if (!m) return; ['k', 'c', 'p', 'f'].forEach(function (k) { if (m[k]) { sg[k] += m[k].got; st[k] += m[k].tgt; } }); n++; }); } catch (e) { return ''; }
+  if (!n || !(st.k > 0)) return ''; var cell = function (lab, k, u) { var got = sg[k] / n, tgt = st[k] / n, r = tgt > 0 ? got / tgt : 0, s0 = Math.abs(r - 1) <= 0.05 ? 'ok' : Math.abs(r - 1) <= 0.1 ? 'warn' : 'bad'; return '<div class="g171c st-' + s0 + '"><small>' + lab + '</small><b>' + Math.round(got) + '<span> / ' + Math.round(tgt) + ' ' + u + '</span></b><i style="--w:' + Math.min(100, Math.round(r * 100)) + '%"></i></div>'; };
+  return '<div class="g171cnt" role="status" aria-label="المخطط مقابل الهدف (متوسط الأيام)">' + cell('السعرات', 'k', '') + cell('كربوهيدرات', 'c', 'جم') + cell('بروتين', 'p', 'جم') + cell('دهون', 'f', 'جم') + '</div>';
+}
 function g171WithCnt(f) { return function (c) { var h = f.apply(this, arguments); return c && c.kind !== 'athlete' ? g171Counter(c) + h : h; }; }
 genSetup = g171WithCnt(genSetup); genRev = g171WithCnt(genRev); genPlanStep = g171WithCnt(genPlanStep);
+function g171WithCntAth(f, drug) { return function (c) { var h = f.apply(this, arguments); return c && c.kind === 'athlete' ? g171CounterAth(c) + (drug ? g171DrugHtml(c) : '') + h : h; }; }
+genAthSetup = g171WithCntAth(genAthSetup); genAthRev = g171WithCntAth(genAthRev); genAthPlan = g171WithCntAth(genAthPlan); genAthSend = g171WithCntAth(genAthSend, 1);
 // ---------- ④ المراجعة والإرسال: الحساسية (مانع)، والأدوية، والصلاحية، والمشتريات
 function g171Word(n, k) {      // بداية كلمة (مع «ال/و/بال/ب»): «بيض» تطابق «بيضة» و«البيض» لا «أرز أبيض»؛ والكلمة القصيرة (≤2) كاملة فقط («بط» لا تطابق «بطاطس»)
   var e = String(k).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), end = String(k).length <= 2 ? '($|[\\s،,()\\-/])' : '';
@@ -73,7 +81,7 @@ function g171Word(n, k) {      // بداية كلمة (مع «ال/و/بال/ب�
 function g171Allergy(c) {      // أصناف في الخطة تطابق كلمات حساسية العميل
   var p = c.plan, al = c.allergens || []; if (!p || !p.days || !al.length) return [];
   var kws = []; al.forEach(function (lab) { var a = D.allergens.filter(function (x) { return x.label === lab; })[0]; if (a && a.kw) kws = kws.concat(a.kw.map(function (k) { return [k, lab]; })); });
-  var hit = {}; p.days.forEach(function (d) { (d.slots || []).forEach(function (s) { (s.lines || []).forEach(function (ln) { if (!ln || ln.missing || !ln.name) return; kws.forEach(function (k) { if (g171Word(ln.name, k[0])) hit[ln.name] = k[1]; }); }); }); });
+  var hit = {}; p.days.forEach(function (d) { (d.slots || []).forEach(function (s) { (s.lines || []).forEach(function (ln) { if (!ln || ln.missing || !ln.name) return; kws.forEach(function (k) { if ((E.kwHit || g171Word)(ln.name, k[0])) hit[ln.name] = k[1]; }); }); }); });
   return Object.keys(hit).map(function (n) { return [n, hit[n]]; });
 }
 function g171Shop(c) {      // مجموع كل صنف في الأسبوع بالجرام والمقياس المنزلي

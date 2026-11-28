@@ -90,17 +90,17 @@ A.arDel = function (v) {
 A.del = (function (f) { return function () { var c = cur(), r = f.apply(this, arguments); if (c && S.clients.indexOf(c) < 0) tx('versions', 'readonly', function (s) { return s.index('code').getAllKeys('pg:' + c.code); }).then(function (ks) { (ks || []).forEach(function (k) { dbDel('versions', k); }); }).catch(function () { }); return r; }; })(A.del);
 // ---------- «كيف تبدأ؟»
 function st170(c) {
-  var has = !!(c && c.plan && c.plan.days), last = (S.versions || []).filter(function (v) { return v.kind === 'arch'; })[0];
+  var ath = !!(c && c.kind === 'athlete'), has = !!(c && c.plan && c.plan.days), last = (S.versions || []).filter(function (v) { return v.kind === 'arch'; })[0];
   var o = [['auto', 'sparkles', 'تلقائي بالمحرك', 'من احتياج العميل وتفضيلاته — الأنسب لأغلب العملاء', 1],
-    ['lib', 'layers', 'من نظام في المكتبة', 'اختر من الأنظمة الثلاثين وعدّل السعرات والحصص', 1],
-    ['ready', 'book', 'من خطة جاهزة', 'خطط البنك وقوالبك' + (c && c.hx && c.hx.quiz ? '، واختيار العميل في «زنها»' : ''), 1],
+    ['lib', 'layers', 'من نظام في المكتبة', ath ? 'لنظام الحصص فقط' : 'اختر من الأنظمة الثلاثين وعدّل السعرات والحصص', !ath],
+    ['ready', 'book', 'من خطة جاهزة', ath ? 'لنظام الحصص فقط' : 'خطط البنك وقوالبك' + (c && c.hx && c.hx.quiz ? '، واختيار العميل في «زنها»' : ''), !ath],
     ['copy', 'repeat', 'انسخ الخطة السابقة وعدّلها', has ? 'للأسبوع الجديد: تبدأ من خطته الحالية' + (last ? ' (المحفوظة ' + arDate(last.at) + ')' : '') : 'لا توجد خطة سابقة لهذا العميل', has]];
   return '<div class="st170" role="dialog" aria-modal="true" aria-labelledby="st170h"><div class="stcard"><div class="sthd"><h3 id="st170h">خطة جديدة — كيف تبدأ؟</h3><button class="sec sm" data-a="st170x" aria-label="إغلاق">✕</button></div>'
     + '<p class="small">كل الطرق تكمل في الخطوات نفسها: الاحتياج، ثم النظام، ثم الوجبات، ثم المراجعة والإرسال.</p><div class="stgrid">'
     + o.map(function (x, i) { return '<button class="stopt' + (i === 0 ? ' def' : '') + '" data-a="st170go" data-v="' + x[0] + '"' + (x[4] ? '' : ' disabled') + '><span class="stic">' + IC(x[1]) + '</span><b>' + x[2] + '</b><small>' + esc(x[3]) + '</small></button>'; }).join('')
     + '</div></div></div>';
 }
-A.newPlan = function () { var c = cur(); if (!c) return; if (c.kind === 'athlete') return A.genOpen(1); if (!c.name) { toast('اكتب اسم العميل أولاً'); return; } var d = document.querySelector('.st170'); if (d) d.remove(); document.body.insertAdjacentHTML('beforeend', st170(c)); var b = document.querySelector('.st170 .stopt.def'); if (b) b.focus(); };
+A.newPlan = function () { var c = cur(); if (!c) return; if (!c.name) { toast('اكتب اسم العميل أولاً'); return; } var d = document.querySelector('.st170'); if (d) d.remove(); document.body.insertAdjacentHTML('beforeend', st170(c)); var b = document.querySelector('.st170 .stopt.def'); if (b) b.focus(); };
 A.st170x = function () { var d = document.querySelector('.st170'); if (d) d.remove(); };
 A.st170go = function (v) {
   A.st170x(); var c = cur(); if (!c) return;
@@ -112,9 +112,9 @@ A.st170go = function (v) {
 // كل مداخل «أنشئ الخطة» و«نافذة الأخصائي» (الأزرار) تمر بـ«كيف تبدأ؟»
 document.addEventListener('click', function (e) {
   var b = e.target && e.target.closest ? e.target.closest('[data-a="genOpen"][data-v="1"],[data-a="tab"][data-v="pw"]') : null; if (!b || b.closest('.st170')) return;
-  var c = typeof cur === 'function' ? cur() : null; if (!c || c.kind === 'athlete') return;
+  var c = typeof cur === 'function' ? cur() : null; if (!c) return;
   e.preventDefault(); e.stopPropagation(); A.newPlan();
 }, true);
 document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && document.querySelector('.st170')) A.st170x(); });
 // زر «خطة جديدة» ظاهر في رأس ملف العميل
-(function () { if (window.MutationObserver) new MutationObserver(function () { var h = document.querySelector('main .cfhead'), c = typeof cur === 'function' ? cur() : null; if (!h || !c || c.kind === 'athlete' || h.querySelector('.np170')) return; var b = document.createElement('button'); b.className = 'np170'; b.setAttribute('data-a', 'newPlan'); b.innerHTML = IC('plus') + ' خطة جديدة'; h.appendChild(b); }).observe(document.documentElement, { childList: true, subtree: true }); })();
+(function () { if (window.MutationObserver) new MutationObserver(function () { var h = document.querySelector('main .cfhead'), c = typeof cur === 'function' ? cur() : null; if (!h || !c || h.querySelector('.np170')) return; var b = document.createElement('button'); b.className = 'np170'; b.setAttribute('data-a', 'newPlan'); b.innerHTML = IC('plus') + ' خطة جديدة'; h.appendChild(b); }).observe(document.documentElement, { childList: true, subtree: true }); })();

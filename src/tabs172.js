@@ -10,12 +10,12 @@
   CF_L.appt = CF_L.appt || 'المواعيد'; CF_L.sub = CF_L.sub || 'الاشتراك'; CF_L.link = CF_L.link || 'ربط زنها';
 })();
 function st172(c) {
-  var ok1 = !!(c.name && c.sex && +c.age > 0 && +c.height > 0 && c.activity && c.goal), last = typeof m168Last === 'function' ? m168Last(c) : null, ok2 = !!last;
+  var ath = c.kind === 'athlete', ok1 = !!(c.name && c.sex && +c.age > 0 && +c.height > 0 && (ath ? (c.sport || c.phase) : c.activity && c.goal)), last = typeof m168Last === 'function' ? m168Last(c) : null, ok2 = !!last;
   var ok3 = !!(c.plan && c.plan.days && c.plan.days.length), ok4 = !!c.hx, v = c.planValid || {};
   var fmt = function (t) { try { return new Date(t).toLocaleDateString('ar', { day: 'numeric', month: 'short' }); } catch (e) { return ''; } };
-  var kc = ok3 && c.plan.targets ? Math.round(c.plan.targets.kcal) + ' سعرة' : '';
+  var kc = ok3 && c.plan.targets && c.plan.targets.kcal ? Math.round(c.plan.targets.kcal) + ' سعرة' : ok3 ? c.plan.days.length + ' أيام' : '';
   return [
-    ['client', '①', 'الاستقبال', ok1, ok1 ? [c.goal, (c.conditions || []).length ? c.conditions.length + ' حالة' : ''].filter(Boolean).join(' • ') : 'أكمل البيانات الأساسية'],
+    ['client', '①', 'الاستقبال', ok1, ok1 ? (ath ? [c.sport, c.phase] : [c.goal, (c.conditions || []).length ? c.conditions.length + ' حالة' : '']).filter(Boolean).join(' • ') : 'أكمل البيانات الأساسية'],
     ['med', '②', 'القياسات', ok2, ok2 ? num(last.w) + ' كجم • ' + fmt(last.t) : 'سجّل أول قياس'],
     [ok3 ? 'plan' : 'newPlan', '③', 'الخطة', ok3, ok3 ? [kc, v.to ? 'حتى ' + fmt(v.to) : ''].filter(Boolean).join(' • ') : 'أنشئ أول خطة'],
     [ok4 ? 'day' : 'link', '④', 'المتابعة', ok4, ok4 ? 'مرتبط بـ«زنها»' + (v.next ? ' • متابعة ' + fmt(v.next) : '') : 'اربط العميل بـ«زنها»']];
@@ -28,7 +28,7 @@ function st172Html(c) {
   }).join('') + '</nav>';
 }
 (function () { if (window.MutationObserver) new MutationObserver(function () {
-  var h = document.querySelector('main .cftabs'), c = typeof cur === 'function' ? cur() : null; if (!h || !c || c.kind === 'athlete') return;      // فوق شريط التبويبات (في عموده) لا داخل رأس «نظرة عامة» الضيق
+  var h = document.querySelector('main .cftabs'), c = typeof cur === 'function' ? cur() : null; if (!h || !c) return;      // 1.73: ونظام الجرامات أيضاً. فوق شريط التبويبات (في عموده) لا داخل رأس «نظرة عامة» الضيق
   var sig = [c.code, S.tab, !!c.plan, !!c.hx, c.goal, c.weight, (c.planValid || {}).to, ((c.med || {}).visits || []).length].join('|'), ex = document.querySelector('main .st172');
   if (ex && ex.dataset.sig === sig && ex.nextElementSibling === h) return; var w = document.createElement('div'); w.innerHTML = st172Html(c); var n = w.firstChild; n.dataset.sig = sig;
   if (ex) ex.remove(); h.parentNode.insertBefore(n, h);
