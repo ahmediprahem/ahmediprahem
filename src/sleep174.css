@@ -1,0 +1,14 @@
+/* 1.74 (م6) بطاقة «متوسط النوم» */
+.sl174 .slavg{font-size:14px;color:#5b647a}.sl174 .slavg b{font-size:22px;color:#4B3A8C}
+.sl174.low{border-color:#E7B3B0}
+.sl174 .warn{margin:6px 0}
+.sl174 .slbars{list-style:none;margin:10px 0 0;padding:0;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;align-items:end}
+.sl174 .slb{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0}
+.sl174 .slv{position:relative;width:100%;max-width:34px;height:84px;border-radius:10px;background:#F1F0F8;overflow:hidden}
+.sl174 .slv i{position:absolute;inset-inline:0;bottom:0;height:var(--h);border-radius:10px;background:#8E7CD6}
+.sl174 .t-ok .slv i{background:#13897A}.sl174 .t-warn .slv i{background:#D9921A}.sl174 .t-bad .slv i{background:#C2413B}
+.sl174 .slb b{font-size:13px;color:#16233F}.sl174 .slb small{font-size:11px;color:#5b647a}.sl174 .slb em{font-style:normal;font-size:10px;color:#5b647a}
+html[data-theme="glass"]:not([data-tone="light"]) .sl174 .slv,html[data-theme="linear"] .sl174 .slv{background:#2C374A}
+html[data-theme="glass"]:not([data-tone="light"]) .sl174 .slb b,html[data-theme="linear"] .sl174 .slb b{color:#E8EEF6}
+html[data-theme="glass"]:not([data-tone="light"]) .sl174 .slb small,html[data-theme="glass"]:not([data-tone="light"]) .sl174 .slb em,html[data-theme="glass"]:not([data-tone="light"]) .sl174 .slavg,html[data-theme="linear"] .sl174 .slb small,html[data-theme="linear"] .sl174 .slb em,html[data-theme="linear"] .sl174 .slavg{color:#B8C2D3}
+html[data-theme="glass"]:not([data-tone="light"]) .sl174 .slavg b,html[data-theme="linear"] .sl174 .slavg b{color:#C7B6F2}

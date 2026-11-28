@@ -1170,3 +1170,5 @@ html:has(.scr.qz),body:has(.scr.qz){background:#fff!important}body:has(.scr.qz):
 .zp-top{height:min(25vh,210px)}.zp-zz{width:min(30%,124px)}.zp-sheet{gap:12px;padding-top:20px}.zpin .pad{gap:10px}.zpin .pad button{height:56px}
 
 /*AIFOODCSS*/
+/* 1.74 جودة النوم */
+.hw-sleep .slq{margin-top:10px;display:flex;flex-direction:column;gap:6px}

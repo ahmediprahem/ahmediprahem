@@ -3049,6 +3049,20 @@ html[data-theme="glass"]:not([data-tone="light"]) .st172 .stn.done .stb,html[dat
 html:not(#mxz):not(#mxy) main .cfside .cfhead{flex-wrap:wrap;overflow:visible;height:auto}
 html:not(#mxz):not(#mxy) main .cfside .cfhead .np170{display:none}
 html:not(#mxz):not(#mxy) main .cfside .cfhead .cfbadges,html:not(#mxz):not(#mxy) main .cfside .cfhead .cfchips{flex-wrap:wrap;max-width:100%}
+/* 1.74 (م6) بطاقة «متوسط النوم» */
+.sl174 .slavg{font-size:14px;color:#5b647a}.sl174 .slavg b{font-size:22px;color:#4B3A8C}
+.sl174.low{border-color:#E7B3B0}
+.sl174 .warn{margin:6px 0}
+.sl174 .slbars{list-style:none;margin:10px 0 0;padding:0;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;align-items:end}
+.sl174 .slb{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0}
+.sl174 .slv{position:relative;width:100%;max-width:34px;height:84px;border-radius:10px;background:#F1F0F8;overflow:hidden}
+.sl174 .slv i{position:absolute;inset-inline:0;bottom:0;height:var(--h);border-radius:10px;background:#8E7CD6}
+.sl174 .t-ok .slv i{background:#13897A}.sl174 .t-warn .slv i{background:#D9921A}.sl174 .t-bad .slv i{background:#C2413B}
+.sl174 .slb b{font-size:13px;color:#16233F}.sl174 .slb small{font-size:11px;color:#5b647a}.sl174 .slb em{font-style:normal;font-size:10px;color:#5b647a}
+html[data-theme="glass"]:not([data-tone="light"]) .sl174 .slv,html[data-theme="linear"] .sl174 .slv{background:#2C374A}
+html[data-theme="glass"]:not([data-tone="light"]) .sl174 .slb b,html[data-theme="linear"] .sl174 .slb b{color:#E8EEF6}
+html[data-theme="glass"]:not([data-tone="light"]) .sl174 .slb small,html[data-theme="glass"]:not([data-tone="light"]) .sl174 .slb em,html[data-theme="glass"]:not([data-tone="light"]) .sl174 .slavg,html[data-theme="linear"] .sl174 .slb small,html[data-theme="linear"] .sl174 .slb em,html[data-theme="linear"] .sl174 .slavg{color:#B8C2D3}
+html[data-theme="glass"]:not([data-tone="light"]) .sl174 .slavg b,html[data-theme="linear"] .sl174 .slavg b{color:#C7B6F2}
 </style></head>
 <body class="gating"><header id="hd"></header><div id="gate" style="display:flex"><div class="gcard" style="text-align:center"><div style="font-weight:700;color:#253464">حصة — جارٍ التحميل…</div></div></div><div id="app" style="display:none"><aside></aside><main></main></div>
 <noscript><div style="position:fixed;inset:0;background:#092061;color:#fff;padding:24px;text-align:center;font:16px Tahoma,Arial">هذا الملف يحتاج تفعيل JavaScript. افتحه مباشرة في Chrome أو Edge أو Safari (وليس من معاينة واتساب أو البريد).</div></noscript>
@@ -12804,6 +12818,39 @@ function st172Html(c) {
   if (ex && ex.dataset.sig === sig && ex.nextElementSibling === h) return; var w = document.createElement('div'); w.innerHTML = st172Html(c); var n = w.firstChild; n.dataset.sig = sig;
   if (ex) ex.remove(); h.parentNode.insertBefore(n, h);
 }).observe(document.documentElement, { childList: true, subtree: true }); })();
+
+// ================= 1.74 (م6) النوم — قرار المالك 2026-11-28: يُسجَّل في «زنها» لكل العملاء تلقائياً (الساعات والجودة)،
+// وفي «زنها Pro»: بطاقة «متوسط النوم» في «نظرة عامة» بمدة نوم كل يوم (آخر 7 أيام)، وتنبيه في «من يحتاج اهتمامك اليوم؟»
+// إذا كان متوسط النوم أقل من 6 ساعات في آخر 3 أيام (مسجّلة كلها). البيانات من سجل اليوم نفسه (c.hx.logs[يوم].h.sleep / sleepQ).
+var SL174 = { Q: { g: 'جيد', m: 'متوسط', b: 'سيئ' }, MIN: 6, DAYS: 3 };
+if (typeof HX_HB === 'object') HX_HB.sleepQ = ['🛏', function (v) { return 'نوم ' + (SL174.Q[v] || ''); }, function (v) { return v === 'g'; }];
+function sl174Key(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function sl174Days(c, n) {      // آخر n أيام (الأقدم أولاً): [{k, d, h, q}]
+  var L = (c && c.hx && c.hx.logs) || {}, out = [], t = new Date(); t.setHours(12, 0, 0, 0);
+  for (var i = n - 1; i >= 0; i--) { var d = new Date(t.getTime() - i * 864e5), k = sl174Key(d), l = L[k], h = l && l.h ? +l.h.sleep : 0; out.push({ k: k, d: d, h: h > 0 && h < 24 ? h : 0, q: l && l.h ? l.h.sleepQ || '' : '' }); }
+  return out;
+}
+function sl174Avg(a) { var x = a.filter(function (d) { return d.h > 0; }); return x.length ? Math.round(x.reduce(function (s, d) { return s + d.h; }, 0) / x.length * 10) / 10 : 0; }
+function sl174Low(c) { var a = sl174Days(c, SL174.DAYS); return a.every(function (d) { return d.h > 0; }) && sl174Avg(a) < SL174.MIN ? sl174Avg(a) : 0; }
+function sl174Card(c) {
+  if (!c || !c.hx) return '';
+  var a = sl174Days(c, 7), av = sl174Avg(a), n = a.filter(function (d) { return d.h > 0; }).length, short = a.filter(function (d) { return d.h > 0 && d.h < SL174.MIN; }).length, last = a.slice().reverse().filter(function (d) { return d.h > 0; })[0];
+  var low = sl174Low(c), ix = (c.ix && c.ix.x_sleepH) || (c.hx.intake && c.hx.intake.cq && c.hx.intake.cq.x_sleepH);
+  var day = function (d) { try { return d.toLocaleDateString('ar', { weekday: 'short' }); } catch (e) { return ''; } };
+  var bars = a.map(function (d) { var tone = !d.h ? 'none' : d.h < SL174.MIN ? 'bad' : d.h < 7 ? 'warn' : d.h <= 9 ? 'ok' : 'warn';
+    return '<li class="slb t-' + tone + '" title="' + esc(day(d.d) + ' ' + d.k) + '"><span class="slv"><i style="--h:' + Math.min(100, Math.round((d.h || 0) / 10 * 100)) + '%"></i></span><b>' + (d.h ? num(d.h) : '—') + '</b><small>' + esc(day(d.d)) + '</small>' + (d.q ? '<em>' + esc(SL174.Q[d.q] || '') + '</em>' : '') + '</li>'; }).join('');
+  return '<section class="mxcard sl174' + (low ? ' low' : '') + '" aria-labelledby="sl174h"><div class="mxhd"><h3 id="sl174h">😴 متوسط النوم</h3><span class="slavg"><b>' + (av ? num(av) : '—') + '</b> ساعة</span></div>'
+    + (low ? '<p class="warn" role="alert">⚠ متوسط آخر 3 أيام ' + num(low) + ' ساعات — أقل من ' + SL174.MIN + '.</p>' : '')
+    + '<p class="small">' + (n ? 'آخر 7 أيام: ' + n + ' ليالٍ مسجّلة' + (short ? '، منها ' + short + ' أقل من ' + SL174.MIN + ' ساعات' : '') + (last ? ' • آخر ليلة ' + num(last.h) + ' ساعات' + (last.q ? ' (' + SL174.Q[last.q] + ')' : '') : '') : 'لم يسجّل العميل نومه بعد في «زنها».') + (ix ? ' • في الاستبيان: ' + num(ix) + ' ساعات' : '') + '</p>'
+    + '<ol class="slbars" aria-label="مدة النوم يومياً">' + bars + '</ol></section>';
+}
+if (typeof mxGrid === 'function') mxGrid = (function (f) { return function (c) { var h = f.apply(this, arguments); try { return h + sl174Card(c); } catch (e) { return h; } }; })(mxGrid);
+if (typeof wkItems === 'function') wkItems = (function (f) { return function () {
+  var out = f.apply(this, arguments), hid = typeof wkHidden === 'function' ? wkHidden() : {};
+  (S.clients || []).forEach(function (c) { if (!c.hx) return; var v = sl174Low(c), key = c.code + ':sleep'; if (v && !hid[key]) out.push({ c: c, pri: 1, ic: '😴', txt: 'نوم قليل: متوسط ' + num(v) + ' ساعات في آخر 3 أيام', tab: 'ov', key: key }); });
+  return out.sort(function (a, b) { return a.pri - b.pri || String(a.c ? a.c.name : '').localeCompare(String(b.c ? b.c.name : ''), 'ar'); });
+}; })(wkItems);
+if (typeof WK_KIND !== 'undefined') WK_KIND.push([/^sleep$/, 'moon', 'النوم']);
 
 // ================= 1.19 المرحلة 4: تبويب «توليد الخطة» — يُدمج داخل app.js عند /*GENUI*/
 // بند جانبي «توليد الخطة» يفتح قائمة العملاء مع «＋ عميل جديد»، واختيار العميل يفتح ملفه على قسم «توليد» (مجموعة «الخطة»).

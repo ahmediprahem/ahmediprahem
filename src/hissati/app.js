@@ -1980,7 +1980,7 @@ const HABITS = [
 const HB = (id) => HABITS.find((h) => h.id === id);
 function hWaterGoal() { const dp = S.plan ? dayPlan(TODAY) : {}, wt = +(dp.water || DATA.water || 2.5); return Math.max(4, Math.min(16, Math.round(wt / CUP))); }
 const RELH = ['adhkar', 'adhkarPm'];
-function hList() { if (!Array.isArray(S.habits)) S.habits = ['water']; return S.habits.filter((id) => HB(id) && (isMus() || !RELH.includes(id))); }
+function hList() { if (!Array.isArray(S.habits)) S.habits = ['water']; if (!S.habits.includes('sleep')) S.habits.push('sleep'); return S.habits.filter((id) => HB(id) && (isMus() || !RELH.includes(id))); }      // 1.74 (قرار المالك): النوم يُسجَّل لكل العملاء تلقائياً
 function hVal(id, k) { const L = S.log[k || dkey(new Date())]; if (!L) return null; if (id === 'water') return L.water || 0; return L.h ? L.h[id] : null; }
 function hSet(id, v) { const L = dl(TODAY); if (id === 'water') L.water = v; else { L.h = L.h || {}; if (v == null) delete L.h[id]; else L.h[id] = v; } queueLog(dkey(new Date())); }
 function hOkDay(id, k) { const v = hVal(id, k); return v != null && HB(id).ok(v); }
@@ -1996,7 +1996,7 @@ function hWidget(h) {
     case 'steps': { const n = v || 0;
       return '<div class="hw-gauge"><svg viewBox="0 0 120 70">' + hArc(n / 8000, 48, 10, h.c) + '<text x="60" y="52" text-anchor="middle" class="gv">' + n.toLocaleString('en') + '</text><text x="60" y="66" text-anchor="middle" class="gl">من 8,000 خطوة</text></svg><div class="row hbtns">' + b('-1000', '−1000', 'btn sm sec') + b('set', 'اكتب العدد', 'btn sm sec') + b('+1000', '+1000', 'btn sm') + '</div></div>'; }
     case 'sleep': { const n = v || 0;
-      return '<div class="hw-sleep"><div class="sky"><span class="moon"></span>' + [12, 30, 55, 72, 88].map((x, i) => '<i class="star" style="left:' + x + '%;top:' + (14 + (i * 23) % 50) + '%"></i>').join('') + '<b>' + (n ? n + ' ساعات' : 'كم نمت؟') + '</b>' + (n ? '<small>' + (h.ok(n) ? 'نوم مثالي ✨' : n < 7 ? 'أقل من حاجتك' : 'أكثر من المعتاد') + '</small>' : '') + '</div><div class="chips">' + [5, 6, 7, 8, 9, 10].map((x) => b(x, x + 'س', 'chip' + (n === x ? ' on' : '') + (x >= 7 && x <= 9 ? ' good' : ''))).join('') + '</div></div>'; }
+      return '<div class="hw-sleep"><div class="sky"><span class="moon"></span>' + [12, 30, 55, 72, 88].map((x, i) => '<i class="star" style="left:' + x + '%;top:' + (14 + (i * 23) % 50) + '%"></i>').join('') + '<b>' + (n ? n + ' ساعات' : 'كم نمت؟') + '</b>' + (n ? '<small>' + (h.ok(n) ? 'نوم مثالي ✨' : n < 7 ? 'أقل من حاجتك' : 'أكثر من المعتاد') + '</small>' : '') + '</div><div class="chips">' + [5, 6, 7, 8, 9, 10].map((x) => b(x, x + 'س', 'chip' + (n === x ? ' on' : '') + (x >= 7 && x <= 9 ? ' good' : ''))).join('') + '</div>' + (n ? '<div class="slq"><span class="dim">جودة نومك</span><div class="chips">' + [['g', 'جيد'], ['m', 'متوسط'], ['b', 'سيئ']].map((q) => '<button class="chip' + (hVal('sleepQ') === q[0] ? ' on' : '') + '" data-act="hb" data-v="sleepQ" data-k="' + q[0] + '">' + q[1] + '</button>').join('') + '</div></div>' : '') + '</div>'; }
     case 'veg': { const n = v || 0, cols = ['#8fd16a', '#ff9d6b', '#e85d75', '#ffd27a', '#6fe3a9'];
       const sl = cols.map((c, i) => { const a0 = (i / 5) * 2 * Math.PI - Math.PI / 2, a1 = ((i + 1) / 5) * 2 * Math.PI - Math.PI / 2, x0 = 50 + 40 * Math.cos(a0), y0 = 50 + 40 * Math.sin(a0), x1 = 50 + 40 * Math.cos(a1), y1 = 50 + 40 * Math.sin(a1);
         return '<path data-act="hb" data-v="veg" data-k="' + i + '" d="M50 50 L' + x0.toFixed(1) + ' ' + y0.toFixed(1) + ' A40 40 0 0 1 ' + x1.toFixed(1) + ' ' + y1.toFixed(1) + 'Z" fill="' + (i < n ? c : 'rgba(255,255,255,.08)') + '" stroke="#16224f" stroke-width="2.5" style="cursor:pointer"><title>' + (i + 1) + ' حصص</title></path>'; }).join('');
@@ -2726,13 +2726,14 @@ document.addEventListener('click', (e) => {
     case 'achs': sheet = { t: 'achs' }; break;
     case 'cert': if (!v) return; sheet = { t: 'cert', v }; break;
     case 'certdl': certDownload(v); return;
-    case 'htoggle': { const ls = hList(), i = ls.indexOf(v); if (i >= 0) ls.splice(i, 1); else { ls.push(v); toast('أُضيفت «' + HB(v).n + '» إلى صفحتك'); } S.habits = ls; queueLog(dkey(new Date())); break; }
+    case 'htoggle': { if (v === 'sleep') { toast('😴 تسجيل النوم ثابت لكل العملاء ليتابعه أخصائيك'); break; } const ls = hList(), i = ls.indexOf(v); if (i >= 0) ls.splice(i, 1); else { ls.push(v); toast('أُضيفت «' + HB(v).n + '» إلى صفحتك'); } S.habits = ls; queueLog(dkey(new Date())); break; }
     case 'breathe': breathe(); return;
     case 'adhkar': adhOpen(v === 'adhkarPm' ? 'adhkarPm' : 'adhkar'); return;
     case 'hb': {
       const cv = hVal(v), x = k;
       if (v === 'steps') { if (x === 'set') { const r = prompt('عدد خطواتك اليوم:', cv || ''); if (r == null) return; const n = parseInt(numOnly(r), 10); if (!(n >= 0 && n < 100000)) { toast('اكتب رقماً صحيحاً'); return; } hSet(v, n); } else hSet(v, Math.max(0, (cv || 0) + (+x))); }
-      else if (v === 'sleep') hSet(v, cv === +x ? null : +x);
+      else if (v === 'sleep') { hSet(v, cv === +x ? null : +x); if (cv === +x) hSet('sleepQ', null); }
+      else if (v === 'sleepQ') hSet(v, cv === x ? null : x);
       else if (v === 'veg') hSet(v, cv === +x + 1 ? +x : +x + 1);
       else if (v === 'sugar' || v === 'kitchen') hSet(v, cv === +x ? null : +x);
       else if (v === 'move') hSet(v, (cv || 0) === (+x + 1) * 10 ? +x * 10 : (+x + 1) * 10);
