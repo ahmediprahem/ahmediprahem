@@ -38,3 +38,6 @@ html.zt162:not(#mxz):not(#mxy) main .cf151 .tag,html.zt162:not(#mxz):not(#mxy) m
 .m168w>b{font-family:'Zenha Head','Hissa Plex',sans-serif;font-size:20px;font-weight:800}.m168w>b small{font-size:13px;font-weight:600;opacity:.7}
 .m168w .m168src{opacity:.75;font-size:12.5px}.m168w button{margin-inline-start:auto;border-radius:999px!important}
 .m168t{margin-top:8px}.m168tg{display:flex;align-items:flex-end;padding-bottom:10px}
+/* 1.70: التبويب النشط في الثيمين الداكنين (ماسح التباين e2e_theme) */
+html.zt162:not(#mxz):not(#mxy) main .cftabs>button.on{background-color:var(--zd-deep)!important}
+html.zt162[data-theme="glass"]:not([data-tone="light"]):not(#mxz):not(#mxy) main .cfseg>button.on,html.zt162[data-theme="linear"]:not(#mxz):not(#mxy) main .cfseg>button.on{background:#173A36!important;color:#9BE6D6!important;border-color:#2E6B62!important}

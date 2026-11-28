@@ -1,0 +1,40 @@
+/* 1.70 (م2) سجل الخطط + «كيف تبدأ؟» + زر «خطة جديدة» */
+.ar170{margin:4px 0 18px}
+.ar170 .arhd{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.ar170 .arhd h3{margin:0}
+.ar170l{list-style:none;margin:0;padding:0;border-inline-start:2px solid #BFE5D8;padding-inline-start:16px}
+.ar170r{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding:10px 12px;margin:0 0 10px;border:1px solid var(--line,#e3e6ef);border-radius:14px;background:#fff}
+.ar170r .ardot{position:absolute;inset-inline-start:-24px;top:18px;width:12px;height:12px;border-radius:50%;background:#13897A;box-shadow:0 0 0 3px #DDF3EE}
+.ar170r .arm{flex:1 1 220px;min-width:0;display:flex;flex-direction:column;gap:2px}
+.ar170r .arm small{color:var(--ink2,#5b647a)}
+.ar170r .arnow{font-style:normal;font-size:12px;background:#DDF3EE;color:#0E5F55;border-radius:999px;padding:1px 8px;margin-inline-start:6px}
+.ar170r .ara{display:flex;flex-wrap:wrap;gap:6px}
+.arold{margin-top:18px}
+.st170{position:fixed;inset:0;z-index:1000;background:rgba(16,28,48,.45);display:grid;place-items:center;padding:16px}
+.st170 .stcard{background:var(--card,#fff);border-radius:22px;max-width:720px;width:100%;max-height:calc(100vh - 32px);overflow:auto;padding:20px 22px;box-shadow:0 24px 60px rgba(16,28,48,.25)}
+.st170 .sthd{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.st170 .sthd h3{margin:0;font-size:20px}
+.st170 .stgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:12px}
+.st170 .stopt,html:not(#mxz):not(#mxy) ;flex-direction:column;align-items:flex-start;gap:4px;text-align:start;padding:14px 16px;border-radius:16px;border:1.5px solid var(--line,#e3e6ef);background:#fff;color:inherit;cursor:pointer;min-height:110px}
+.st170 .stopt:hover:not([disabled]),.st170 .stopt:focus-visible{border-color:#13897A;background:#F3FBF8}
+.st170 .stopt.def{border-color:#13897A;background:#F3FBF8}
+.st170 .stopt[disabled]{opacity:.55;cursor:not-allowed}
+.st170 .stopt b{font-size:16px}
+.st170 .stopt small{color:var(--ink2,#5b647a);line-height:1.6}
+.st170 .stic{display:inline-grid;place-items:center;width:36px;height:36px;border-radius:12px;background:#DDF3EE;color:#13897A}
+.st170 .stic svg{width:20px;height:20px}
+.np170{display:inline-flex;align-items:center;gap:6px;margin-inline-start:auto}
+.np170 svg{width:16px;height:16px}
+
+html:not(#mxz):not(#mxy) .st170 button.stopt{display:flex!important;flex-direction:column;align-items:flex-start;gap:4px;text-align:start;padding:14px 16px;border-radius:16px;border:1.5px solid #DCE3EA!important;background:#fff!important;color:#16233F!important;box-shadow:none!important;cursor:pointer;min-height:110px;font-weight:400}
+html:not(#mxz):not(#mxy) .st170 button.stopt:hover:not([disabled]),html:not(#mxz):not(#mxy) .st170 button.stopt:focus-visible,html:not(#mxz):not(#mxy) .st170 button.stopt.def{border-color:#13897A!important;background:#F3FBF8!important}
+html:not(#mxz):not(#mxy) .st170 button.stopt[disabled]{opacity:.55;cursor:not-allowed}
+html:not(#mxz):not(#mxy) .st170 button.stopt small{color:#5b647a!important}
+html[data-theme="glass"]:not([data-tone="light"]) .st170 .stcard,html[data-theme="linear"] .st170 .stcard{background:#1B2433;color:#E8EEF6}
+html[data-theme="glass"]:not([data-tone="light"]):not(#mxz):not(#mxy) .st170 button.stopt,html[data-theme="linear"]:not(#mxz):not(#mxy) .st170 button.stopt{background:#212C3D!important;border-color:#3A475E!important;color:#E8EEF6!important}
+html[data-theme="glass"]:not([data-tone="light"]):not(#mxz):not(#mxy) .st170 button.stopt.def,html[data-theme="linear"]:not(#mxz):not(#mxy) .st170 button.stopt.def,html[data-theme="glass"]:not([data-tone="light"]):not(#mxz):not(#mxy) .st170 button.stopt:hover:not([disabled]),html[data-theme="linear"]:not(#mxz):not(#mxy) .st170 button.stopt:hover:not([disabled]){background:#173A36!important;border-color:#5FD0BC!important}
+html[data-theme="glass"]:not([data-tone="light"]):not(#mxz):not(#mxy) .st170 button.stopt small,html[data-theme="linear"]:not(#mxz):not(#mxy) .st170 button.stopt small{color:#B8C2D3!important}
+html[data-theme="glass"]:not([data-tone="light"]) .ar170r,html[data-theme="linear"] .ar170r{background:transparent;border-color:#3A475E}
+html[data-theme="glass"]:not([data-tone="light"]) .ar170r .arm small,html[data-theme="linear"] .ar170r .arm small{color:#B8C2D3}
+html[data-theme="glass"]:not([data-tone="light"]) .ar170r .arnow,html[data-theme="linear"] .ar170r .arnow{background:#173A36;color:#9BE6D6}
+.np170{position:relative;z-index:2}

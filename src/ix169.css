@@ -23,3 +23,12 @@
 .ad169 .ad169n dl{margin:6px 0 0}
 .ad169 .ad169n dt{font-weight:700;font-size:13px;color:#6A4FA8;margin-top:6px}
 .ad169 .ad169n dd{margin:2px 0 0;white-space:pre-wrap}
+/* الداكن */
+html[data-theme="glass"]:not([data-tone="light"]) .ix169,html[data-theme="linear"] .ix169{--cs-tint:#2E2747;--cs-ac:#C7B6F2}
+html[data-theme="glass"]:not([data-tone="light"]) .ix169 .ixg legend,html[data-theme="linear"] .ix169 .ixg legend{color:#C7B6F2}
+html[data-theme="glass"]:not([data-tone="light"]) .ix169 .ixf label,html[data-theme="linear"] .ix169 .ixf label,html[data-theme="glass"]:not([data-tone="light"]) .ix169 .ixl,html[data-theme="linear"] .ix169 .ixl{color:#D5DCE8}
+html[data-theme="glass"]:not([data-tone="light"]) .ix169 .ixchip span,html[data-theme="linear"] .ix169 .ixchip span{background:transparent;border-color:#3A475E;color:#E8EEF6}
+html[data-theme="glass"]:not([data-tone="light"]) .ix169 .ixchip input:checked+span,html[data-theme="linear"] .ix169 .ixchip input:checked+span{background:#2E2747;border-color:#C7B6F2;color:#E6DDFF}
+html[data-theme="glass"]:not([data-tone="light"]) .ad169 .ad169n,html[data-theme="linear"] .ad169 .ad169n{background:transparent;border-color:#3A475E}
+html[data-theme="glass"]:not([data-tone="light"]) .ad169 .ad169n dt,html[data-theme="linear"] .ad169 .ad169n dt{color:#C7B6F2}
+html[data-theme="glass"]:not([data-tone="light"]) .ad169 .ad169n header small,html[data-theme="linear"] .ad169 .ad169n header small{color:#B8C2D3}

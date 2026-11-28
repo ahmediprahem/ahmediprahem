@@ -2921,6 +2921,9 @@ html.zt162:not(#mxz):not(#mxy) main .cf151 .tag,html.zt162:not(#mxz):not(#mxy) m
 .m168w>b{font-family:'Zenha Head','Hissa Plex',sans-serif;font-size:20px;font-weight:800}.m168w>b small{font-size:13px;font-weight:600;opacity:.7}
 .m168w .m168src{opacity:.75;font-size:12.5px}.m168w button{margin-inline-start:auto;border-radius:999px!important}
 .m168t{margin-top:8px}.m168tg{display:flex;align-items:flex-end;padding-bottom:10px}
+/* 1.70: التبويب النشط في الثيمين الداكنين (ماسح التباين e2e_theme) */
+html.zt162:not(#mxz):not(#mxy) main .cftabs>button.on{background-color:var(--zd-deep)!important}
+html.zt162[data-theme="glass"]:not([data-tone="light"]):not(#mxz):not(#mxy) main .cfseg>button.on,html.zt162[data-theme="linear"]:not(#mxz):not(#mxy) main .cfseg>button.on{background:#173A36!important;color:#9BE6D6!important;border-color:#2E6B62!important}
 /* 1.69 (م1ب) الاستقبال والتاريخ + ملاحظات الزيارات ADIME */
 .cf151 .t-violet{--cs-tint:#ECE6F8;--cs-ac:#6A4FA8}
 .ix169 .ixg{border:0;margin:0 0 14px;padding:0}
@@ -2946,6 +2949,55 @@ html.zt162:not(#mxz):not(#mxy) main .cf151 .tag,html.zt162:not(#mxz):not(#mxy) m
 .ad169 .ad169n dl{margin:6px 0 0}
 .ad169 .ad169n dt{font-weight:700;font-size:13px;color:#6A4FA8;margin-top:6px}
 .ad169 .ad169n dd{margin:2px 0 0;white-space:pre-wrap}
+/* الداكن */
+html[data-theme="glass"]:not([data-tone="light"]) .ix169,html[data-theme="linear"] .ix169{--cs-tint:#2E2747;--cs-ac:#C7B6F2}
+html[data-theme="glass"]:not([data-tone="light"]) .ix169 .ixg legend,html[data-theme="linear"] .ix169 .ixg legend{color:#C7B6F2}
+html[data-theme="glass"]:not([data-tone="light"]) .ix169 .ixf label,html[data-theme="linear"] .ix169 .ixf label,html[data-theme="glass"]:not([data-tone="light"]) .ix169 .ixl,html[data-theme="linear"] .ix169 .ixl{color:#D5DCE8}
+html[data-theme="glass"]:not([data-tone="light"]) .ix169 .ixchip span,html[data-theme="linear"] .ix169 .ixchip span{background:transparent;border-color:#3A475E;color:#E8EEF6}
+html[data-theme="glass"]:not([data-tone="light"]) .ix169 .ixchip input:checked+span,html[data-theme="linear"] .ix169 .ixchip input:checked+span{background:#2E2747;border-color:#C7B6F2;color:#E6DDFF}
+html[data-theme="glass"]:not([data-tone="light"]) .ad169 .ad169n,html[data-theme="linear"] .ad169 .ad169n{background:transparent;border-color:#3A475E}
+html[data-theme="glass"]:not([data-tone="light"]) .ad169 .ad169n dt,html[data-theme="linear"] .ad169 .ad169n dt{color:#C7B6F2}
+html[data-theme="glass"]:not([data-tone="light"]) .ad169 .ad169n header small,html[data-theme="linear"] .ad169 .ad169n header small{color:#B8C2D3}
+/* 1.70 (م2) سجل الخطط + «كيف تبدأ؟» + زر «خطة جديدة» */
+.ar170{margin:4px 0 18px}
+.ar170 .arhd{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.ar170 .arhd h3{margin:0}
+.ar170l{list-style:none;margin:0;padding:0;border-inline-start:2px solid #BFE5D8;padding-inline-start:16px}
+.ar170r{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding:10px 12px;margin:0 0 10px;border:1px solid var(--line,#e3e6ef);border-radius:14px;background:#fff}
+.ar170r .ardot{position:absolute;inset-inline-start:-24px;top:18px;width:12px;height:12px;border-radius:50%;background:#13897A;box-shadow:0 0 0 3px #DDF3EE}
+.ar170r .arm{flex:1 1 220px;min-width:0;display:flex;flex-direction:column;gap:2px}
+.ar170r .arm small{color:var(--ink2,#5b647a)}
+.ar170r .arnow{font-style:normal;font-size:12px;background:#DDF3EE;color:#0E5F55;border-radius:999px;padding:1px 8px;margin-inline-start:6px}
+.ar170r .ara{display:flex;flex-wrap:wrap;gap:6px}
+.arold{margin-top:18px}
+.st170{position:fixed;inset:0;z-index:1000;background:rgba(16,28,48,.45);display:grid;place-items:center;padding:16px}
+.st170 .stcard{background:var(--card,#fff);border-radius:22px;max-width:720px;width:100%;max-height:calc(100vh - 32px);overflow:auto;padding:20px 22px;box-shadow:0 24px 60px rgba(16,28,48,.25)}
+.st170 .sthd{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.st170 .sthd h3{margin:0;font-size:20px}
+.st170 .stgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:12px}
+.st170 .stopt,html:not(#mxz):not(#mxy) ;flex-direction:column;align-items:flex-start;gap:4px;text-align:start;padding:14px 16px;border-radius:16px;border:1.5px solid var(--line,#e3e6ef);background:#fff;color:inherit;cursor:pointer;min-height:110px}
+.st170 .stopt:hover:not([disabled]),.st170 .stopt:focus-visible{border-color:#13897A;background:#F3FBF8}
+.st170 .stopt.def{border-color:#13897A;background:#F3FBF8}
+.st170 .stopt[disabled]{opacity:.55;cursor:not-allowed}
+.st170 .stopt b{font-size:16px}
+.st170 .stopt small{color:var(--ink2,#5b647a);line-height:1.6}
+.st170 .stic{display:inline-grid;place-items:center;width:36px;height:36px;border-radius:12px;background:#DDF3EE;color:#13897A}
+.st170 .stic svg{width:20px;height:20px}
+.np170{display:inline-flex;align-items:center;gap:6px;margin-inline-start:auto}
+.np170 svg{width:16px;height:16px}
+
+html:not(#mxz):not(#mxy) .st170 button.stopt{display:flex!important;flex-direction:column;align-items:flex-start;gap:4px;text-align:start;padding:14px 16px;border-radius:16px;border:1.5px solid #DCE3EA!important;background:#fff!important;color:#16233F!important;box-shadow:none!important;cursor:pointer;min-height:110px;font-weight:400}
+html:not(#mxz):not(#mxy) .st170 button.stopt:hover:not([disabled]),html:not(#mxz):not(#mxy) .st170 button.stopt:focus-visible,html:not(#mxz):not(#mxy) .st170 button.stopt.def{border-color:#13897A!important;background:#F3FBF8!important}
+html:not(#mxz):not(#mxy) .st170 button.stopt[disabled]{opacity:.55;cursor:not-allowed}
+html:not(#mxz):not(#mxy) .st170 button.stopt small{color:#5b647a!important}
+html[data-theme="glass"]:not([data-tone="light"]) .st170 .stcard,html[data-theme="linear"] .st170 .stcard{background:#1B2433;color:#E8EEF6}
+html[data-theme="glass"]:not([data-tone="light"]):not(#mxz):not(#mxy) .st170 button.stopt,html[data-theme="linear"]:not(#mxz):not(#mxy) .st170 button.stopt{background:#212C3D!important;border-color:#3A475E!important;color:#E8EEF6!important}
+html[data-theme="glass"]:not([data-tone="light"]):not(#mxz):not(#mxy) .st170 button.stopt.def,html[data-theme="linear"]:not(#mxz):not(#mxy) .st170 button.stopt.def,html[data-theme="glass"]:not([data-tone="light"]):not(#mxz):not(#mxy) .st170 button.stopt:hover:not([disabled]),html[data-theme="linear"]:not(#mxz):not(#mxy) .st170 button.stopt:hover:not([disabled]){background:#173A36!important;border-color:#5FD0BC!important}
+html[data-theme="glass"]:not([data-tone="light"]):not(#mxz):not(#mxy) .st170 button.stopt small,html[data-theme="linear"]:not(#mxz):not(#mxy) .st170 button.stopt small{color:#B8C2D3!important}
+html[data-theme="glass"]:not([data-tone="light"]) .ar170r,html[data-theme="linear"] .ar170r{background:transparent;border-color:#3A475E}
+html[data-theme="glass"]:not([data-tone="light"]) .ar170r .arm small,html[data-theme="linear"] .ar170r .arm small{color:#B8C2D3}
+html[data-theme="glass"]:not([data-tone="light"]) .ar170r .arnow,html[data-theme="linear"] .ar170r .arnow{background:#173A36;color:#9BE6D6}
+.np170{position:relative;z-index:2}
 </style></head>
 <body class="gating"><header id="hd"></header><div id="gate" style="display:flex"><div class="gcard" style="text-align:center"><div style="font-weight:700;color:#253464">حصة — جارٍ التحميل…</div></div></div><div id="app" style="display:none"><aside></aside><main></main></div>
 <noscript><div style="position:fixed;inset:0;background:#092061;color:#fff;padding:24px;text-align:center;font:16px Tahoma,Arial">هذا الملف يحتاج تفعيل JavaScript. افتحه مباشرة في Chrome أو Edge أو Safari (وليس من معاينة واتساب أو البريد).</div></noscript>
@@ -12425,6 +12477,127 @@ A.adSave = function () {
 };
 A.adDel = function (id) { var c = cur(); if (!c || !confirm('حذف ملاحظة الزيارة؟')) return; var m = medOf(c); m.adime = adOf(c).filter(function (x) { return x.id !== id; }); persist(c); main(); };
 (function () { if (window.MutationObserver) new MutationObserver(function () { var r = document.querySelector('main .cf151'); if (r) ixEnhance(r); }).observe(document.documentElement, { childList: true, subtree: true }); })();
+
+// ================= 1.70 (م2) «خطة جديدة» مدخل واحد + أرشيف الخطط — docs/work_plan_168.md (ب)، docs/flow_plan_167.md (③)
+// 1) الأرشيف بلا تغيير في قاعدة البيانات: في مخزن versions نفسه (مشفّر بمفتاح الجهاز، وفي نسخة «حماية البيانات»):
+//    - سجل صغير kind:'arch' (التاريخ، السعرات، السبب) برمز العميل c.code فيظهر في «سجل الخطط».
+//    - صفحة الخطة مضغوطة gzip في سجل منفصل kind:'archp' برمز 'pg:'+c.code فلا تُقرأ إلا عند «فتح» (تُربط بالتاريخ at لا بالمعرّف، فتصمد بعد الاسترجاع).
+//    يُحفظ تلقائياً عند الإرسال إلى «زنها» وعند PDF/Word/HTML (والخطة نفسها لا تُكرَّر: يُضاف السبب للسجل الأخير).
+// 2) فتح العميل يقرأ سجلاته فقط عبر الفهرس code (كان يفك تشفير إصدارات كل العملاء).
+// 3) «كيف تبدأ؟»: كل مداخل «أنشئ الخطة» و«نافذة الأخصائي» تفتح شاشة اختيار واحدة، وكل خيار يستدعي الوظيفة الموجودة كما هي (لا يتغير أي حساب).
+var AR170 = { busy: 0 };
+loadVersions = function () {
+  var c = cur(); if (!c || !c.code) { S.versions = []; return Promise.resolve(); }
+  return tx('versions', 'readonly', function (s) { return s.index('code').getAll(c.code); })
+    .then(function (rs) { return Promise.all((rs || []).map(function (r) { return decRec('versions', r).catch(function () { return null; }); })); })
+    .then(function (v) { S.versions = v.filter(Boolean).sort(function (a, b) { return b.at - a.at; }); })
+    .catch(function () { return dbAll('versions').then(function (v) { S.versions = v.filter(function (x) { return x.code === c.code; }).sort(function (a, b) { return b.at - a.at; }); }); });
+};
+function arB64(u8) { var s = '', i, n = 0x8000; for (i = 0; i < u8.length; i += n) s += String.fromCharCode.apply(null, u8.subarray(i, i + n)); return btoa(s); }
+function arU8(b) { var s = atob(b), u = new Uint8Array(s.length); for (var i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; }
+function arZip(str) {
+  if (!window.CompressionStream) return Promise.resolve({ raw: str });
+  return new Response(new Blob([str]).stream().pipeThrough(new CompressionStream('gzip'))).arrayBuffer().then(function (b) { return { gz: arB64(new Uint8Array(b)) }; });
+}
+function arUnzip(o) {
+  if (o.raw != null) return Promise.resolve(o.raw); if (!window.DecompressionStream) return Promise.reject(new Error('المتصفح لا يدعم فك الضغط'));
+  return new Response(new Blob([arU8(o.gz)]).stream().pipeThrough(new DecompressionStream('gzip'))).text();
+}
+function arKcal(p) { try { var t = p && (p.targets || p.target); return Math.round((t && (t.kcal || t.energy)) || 0); } catch (e) { return 0; } }
+function arHash(p) { var s = JSON.stringify(p || {}), h = 0; for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return h + ':' + s.length; }
+var AR_WHY = { send: 'أُرسلت إلى «زنها»', print: 'PDF', docx: 'Word', html: 'صفحة HTML', manual: 'حفظ يدوي' };
+function arSave(c, why) {      // يحفظ نسخة مؤرخة من الخطة الحالية (لا يغيّر الخطة)
+  if (!c || !c.plan || !c.plan.days || AR170.busy) return Promise.resolve(null);
+  var h = arHash(c.plan), last = (S.versions || []).filter(function (v) { return v.kind === 'arch' && v.code === c.code; })[0];
+  if (last && last.h === h) { if (last.why.indexOf(why) < 0) { last.why.push(why); return dbPut('versions', last).then(function () { return last; }); } return Promise.resolve(last); }
+  var body; try { body = c.kind === 'athlete' ? athAll(c, c.plan, false) : allPages(c, c.plan, false); } catch (e) { return Promise.resolve(null); }
+  var at = Date.now(), meta = { code: c.code, at: at, kind: 'arch', why: [why], h: h, kcal: arKcal(c.plan), w: +c.weight || 0, name: c.name || '', days: c.plan.days.length, note: '' };
+  AR170.busy = 1;
+  return arZip(JSON.stringify({ html: body, plan: c.plan, client: typeof ec === 'function' ? ec(c) : null })).then(function (z) {
+    return dbPut('versions', Object.assign({ code: 'pg:' + c.code, at: at, kind: 'archp' }, z));
+  }).then(function () { return dbPut('versions', meta); }).then(function () { AR170.busy = 0; return S.cur === c.code ? loadVersions() : null; }).then(function () { return meta; })
+    .catch(function (e) { AR170.busy = 0; return null; });
+}
+function arPage(code, at) {
+  return tx('versions', 'readonly', function (s) { return s.index('code').getAll('pg:' + code); })
+    .then(function (rs) { return Promise.all((rs || []).map(function (r) { return decRec('versions', r).catch(function () { return null; }); })); })
+    .then(function (a) { var p = a.filter(function (x) { return x && x.at === at; })[0]; if (!p) throw new Error('لم تُوجد صفحة هذه الخطة'); return arUnzip(p); })
+    .then(function (s) { return JSON.parse(s); });
+}
+function arDate(t) { try { return new Date(t).toLocaleDateString('ar', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }); } catch (e) { return ''; } }
+function arDoc(m, d) {
+  var css = (document.querySelector('style') || {}).textContent || '';
+  return '<!doctype html><html lang="ar" dir="rtl"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>خطة ' + esc(m.name) + ' — ' + esc(arDate(m.at)) + '</title><style>' + css
+    + '.arbar{position:sticky;top:0;z-index:9;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;background:#E6F6F1;border-bottom:1px solid #BFE5D8;padding:10px 16px;font:15px/1.6 inherit}.arbar b{color:#0E5F55}@media print{.arbar{display:none}}</style>'
+    + '<body><div class="arbar" role="banner"><span><b>أرشيف الخطط</b> • ' + esc(m.name) + ' • ' + esc(arDate(m.at)) + (m.kcal ? ' • ' + m.kcal + ' سعرة' : '') + ' • ' + esc((m.why || []).map(function (k) { return AR_WHY[k] || k; }).join('، ')) + '</span><button onclick="print()">طباعة / PDF</button></div><main style="max-width:980px;margin:auto">' + d.html + '</main></body></html>';
+}
+function arList(c) {
+  var L = (S.versions || []).filter(function (v) { return v.kind === 'arch'; });
+  var rows = L.map(function (m, i) {
+    return '<li class="ar170r"><span class="ardot" aria-hidden="true"></span><div class="arm"><b>' + esc(arDate(m.at)) + ' <small class="artm">' + esc(new Date(m.at).toLocaleTimeString('ar', { hour: 'numeric', minute: '2-digit' })) + '</small>' + (i === 0 ? ' <em class="arnow">الأحدث</em>' : '') + '</b><small>' + [m.kcal ? m.kcal + ' سعرة' : '', m.days ? m.days + ' أيام' : '', m.w ? 'وزن ' + num(m.w) + ' كجم' : '', (m.why || []).map(function (k) { return AR_WHY[k] || k; }).join('، ')].filter(Boolean).join(' • ') + '</small></div>'
+      + '<div class="ara"><button class="sec sm" data-a="arOpen" data-v="' + m.at + '">فتح</button><button class="sec sm" data-a="arUse" data-v="' + m.at + '">ابدأ من هذه الخطة</button><button class="r sm" data-a="arDel" data-v="' + m.at + '" aria-label="حذف خطة ' + esc(arDate(m.at)) + '">×</button></div></li>';
+  }).join('');
+  return '<section class="ar170"><div class="arhd"><h3>سجل الخطط</h3>' + (c.plan ? '<button class="sm" data-a="arSnap">حفظ نسخة الآن</button>' : '') + '</div>'
+    + (rows ? '<ol class="ar170l">' + rows + '</ol>' : '<p class="small">تُحفظ هنا نسخة مؤرخة من الخطة تلقائياً عند إرسالها إلى «زنها» أو تصديرها PDF أو Word، وتفتح صفحةً مستقلة للقراءة والطباعة.</p>') + '</section>';
+}
+verTab = (function (f) { return function (c) {
+  var all = S.versions || [], ar = all.filter(function (v) { return v.kind === 'arch'; }); S.versions = all.filter(function (v) { return v.kind !== 'arch'; });
+  var h; try { h = f.apply(this, arguments); } finally { S.versions = all; }
+  return arList(c) + (all.length > ar.length ? '<h3 class="arold">الإصدارات المحفوظة سابقاً</h3>' + h : '');      // «حفظ نسخة الآن» يغني عن «حفظ إصدار»؛ الإصدارات القديمة تبقى ظاهرة كما هي
+}; })(verTab);
+A.arSnap = function () { var c = cur(); arSave(c, 'manual').then(function (m) { toast(m ? '✓ حُفظت نسخة مؤرخة في سجل الخطط' : 'تعذّر حفظ النسخة'); main(); }); };
+A.arOpen = function (v) {
+  var c = cur(), m = (S.versions || []).filter(function (x) { return x.kind === 'arch' && x.at === +v; })[0]; if (!c || !m) return;
+  var w = window.open('', '_blank');
+  arPage(c.code, m.at).then(function (d) { var doc = arDoc(m, d); if (w) { w.document.open(); w.document.write(doc); w.document.close(); } else dlFile(new Blob([doc], { type: 'text/html' }), 'خطة_' + fileBase(c) + '_' + new Date(m.at).toISOString().slice(0, 10) + '.html'); })
+    .catch(function (e) { if (w) w.close(); toast('تعذّر فتح الخطة: ' + e.message); });
+};
+A.arUse = function (v) {
+  var c = cur(), m = (S.versions || []).filter(function (x) { return x.kind === 'arch' && x.at === +v; })[0]; if (!c || !m) return;
+  if (!confirm('تبدأ من خطة ' + arDate(m.at) + '؟ تُحفظ الخطة الحالية في السجل أولاً.')) return;
+  arSave(c, 'manual').then(function () { return arPage(c.code, m.at); }).then(function (d) { c.plan = d.plan; save(); S.tab = 'gen'; var g = genOf(c); g.step = 4; save(); render(); toast('✓ بدأت من خطة ' + arDate(m.at) + '، عدّلها ثم أرسلها'); })
+    .catch(function (e) { toast('تعذّر: ' + e.message); });
+};
+A.arDel = function (v) {
+  var c = cur(), at = +v, m = (S.versions || []).filter(function (x) { return x.kind === 'arch' && x.at === at; })[0]; if (!c || !m || !confirm('حذف خطة ' + arDate(at) + ' من السجل؟')) return;
+  tx('versions', 'readonly', function (s) { return s.index('code').getAllKeys('pg:' + c.code); }).then(function (ks) {
+    return Promise.all((ks || []).map(function (k) { return tx('versions', 'readonly', function (s) { return s.get(k); }).then(function (r) { return decRec('versions', r); }).then(function (p) { return p && p.at === at ? dbDel('versions', k) : null; }); }));
+  }).then(function () { return dbDel('versions', m.id); }).then(loadVersions).then(main);
+};
+// الحفظ التلقائي: الإرسال إلى «زنها» وPDF وWord وHTML (لا يغيّر سلوكها؛ النسخة تُحفظ بعدها)
+['print', 'docx', 'html', 'hxSendPlan'].forEach(function (k) { var f = A[k]; if (typeof f !== 'function') return; A[k] = function () { var c = cur(), r = f.apply(this, arguments); try { if (c && c.plan) setTimeout(function () { arSave(c, k === 'hxSendPlan' ? 'send' : k); }, 300); } catch (e) { } return r; }; });
+// حذف العميل يحذف صفحات أرشيفه أيضاً
+A.del = (function (f) { return function () { var c = cur(), r = f.apply(this, arguments); if (c && S.clients.indexOf(c) < 0) tx('versions', 'readonly', function (s) { return s.index('code').getAllKeys('pg:' + c.code); }).then(function (ks) { (ks || []).forEach(function (k) { dbDel('versions', k); }); }).catch(function () { }); return r; }; })(A.del);
+// ---------- «كيف تبدأ؟»
+function st170(c) {
+  var has = !!(c && c.plan && c.plan.days), last = (S.versions || []).filter(function (v) { return v.kind === 'arch'; })[0];
+  var o = [['auto', 'sparkles', 'تلقائي بالمحرك', 'من احتياج العميل وتفضيلاته — الأنسب لأغلب العملاء', 1],
+    ['lib', 'layers', 'من نظام في المكتبة', 'اختر من الأنظمة الثلاثين وعدّل السعرات والحصص', 1],
+    ['ready', 'book', 'من خطة جاهزة', 'خطط البنك وقوالبك' + (c && c.hx && c.hx.quiz ? '، واختيار العميل في «زنها»' : ''), 1],
+    ['copy', 'repeat', 'انسخ الخطة السابقة وعدّلها', has ? 'للأسبوع الجديد: تبدأ من خطته الحالية' + (last ? ' (المحفوظة ' + arDate(last.at) + ')' : '') : 'لا توجد خطة سابقة لهذا العميل', has]];
+  return '<div class="st170" role="dialog" aria-modal="true" aria-labelledby="st170h"><div class="stcard"><div class="sthd"><h3 id="st170h">خطة جديدة — كيف تبدأ؟</h3><button class="sec sm" data-a="st170x" aria-label="إغلاق">✕</button></div>'
+    + '<p class="small">كل الطرق تكمل في الخطوات نفسها: الاحتياج، ثم النظام، ثم الوجبات، ثم المراجعة والإرسال.</p><div class="stgrid">'
+    + o.map(function (x, i) { return '<button class="stopt' + (i === 0 ? ' def' : '') + '" data-a="st170go" data-v="' + x[0] + '"' + (x[4] ? '' : ' disabled') + '><span class="stic">' + IC(x[1]) + '</span><b>' + x[2] + '</b><small>' + esc(x[3]) + '</small></button>'; }).join('')
+    + '</div></div></div>';
+}
+A.newPlan = function () { var c = cur(); if (!c) return; if (c.kind === 'athlete') return A.genOpen(1); if (!c.name) { toast('اكتب اسم العميل أولاً'); return; } var d = document.querySelector('.st170'); if (d) d.remove(); document.body.insertAdjacentHTML('beforeend', st170(c)); var b = document.querySelector('.st170 .stopt.def'); if (b) b.focus(); };
+A.st170x = function () { var d = document.querySelector('.st170'); if (d) d.remove(); };
+A.st170go = function (v) {
+  A.st170x(); var c = cur(); if (!c) return;
+  if (v === 'auto') return A.genOpen(1);
+  if (v === 'lib') return A.tab('pw');
+  if (v === 'ready') return A.genBank ? A.genBank() : A.genOpen(1);
+  if (v === 'copy') { if (!c.plan) return; arSave(c, 'manual').then(function () { genOf(c).step = 4; S.tab = 'gen'; save(); render(); window.scrollTo(0, 0); toast('✓ حُفظت الخطة السابقة في السجل — عدّل نسختها للأسبوع الجديد'); }); }
+};
+// كل مداخل «أنشئ الخطة» و«نافذة الأخصائي» (الأزرار) تمر بـ«كيف تبدأ؟»
+document.addEventListener('click', function (e) {
+  var b = e.target && e.target.closest ? e.target.closest('[data-a="genOpen"][data-v="1"],[data-a="tab"][data-v="pw"]') : null; if (!b || b.closest('.st170')) return;
+  var c = typeof cur === 'function' ? cur() : null; if (!c || c.kind === 'athlete') return;
+  e.preventDefault(); e.stopPropagation(); A.newPlan();
+}, true);
+document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && document.querySelector('.st170')) A.st170x(); });
+// زر «خطة جديدة» ظاهر في رأس ملف العميل
+(function () { if (window.MutationObserver) new MutationObserver(function () { var h = document.querySelector('main .cfhead'), c = typeof cur === 'function' ? cur() : null; if (!h || !c || c.kind === 'athlete' || h.querySelector('.np170')) return; var b = document.createElement('button'); b.className = 'np170'; b.setAttribute('data-a', 'newPlan'); b.innerHTML = IC('plus') + ' خطة جديدة'; h.appendChild(b); }).observe(document.documentElement, { childList: true, subtree: true }); })();
 
 // ================= 1.19 المرحلة 4: تبويب «توليد الخطة» — يُدمج داخل app.js عند /*GENUI*/
 // بند جانبي «توليد الخطة» يفتح قائمة العملاء مع «＋ عميل جديد»، واختيار العميل يفتح ملفه على قسم «توليد» (مجموعة «الخطة»).
