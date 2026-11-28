@@ -12,14 +12,24 @@ html:not(#mxz):not(#mxy) main .st172 .stn.next{border-color:#13897A;background:#
 .st172 .stn.next .stb{background:#DDF3EE;color:#0E5F55}
 .st172 .stn em{position:absolute;top:-9px;inset-inline-end:12px;font-style:normal;font-size:11px;background:#0E6559;color:#fff;border-radius:999px;padding:1px 8px}
 .st172 .stl{flex:0 0 14px;align-self:center;height:2px;background:#CFE6DF}
-@media (max-width:760px){.st172{overflow-x:auto;scrollbar-width:none}.st172 .stn{flex:0 0 auto;min-width:150px}}
+
 html[data-theme="glass"]:not([data-tone="light"]):not(#mxz):not(#mxy) main .st172 .stn,html[data-theme="linear"]:not(#mxz):not(#mxy) main .st172 .stn{background:#212C3D;border-color:#3A475E;color:#E8EEF6}
 html[data-theme="glass"]:not([data-tone="light"]) .st172 .stt small,html[data-theme="linear"] .st172 .stt small{color:#B8C2D3}
 html[data-theme="glass"]:not([data-tone="light"]):not(#mxz):not(#mxy) main .st172 .stn.next,html[data-theme="linear"]:not(#mxz):not(#mxy) main .st172 .stn.next{background:#173A36;border-color:#5FD0BC}
 html[data-theme="glass"]:not([data-tone="light"]) .st172 .stb,html[data-theme="linear"] .st172 .stb{background:#2C374A;color:#D5DCE8}
 html[data-theme="glass"]:not([data-tone="light"]) .st172 .stn.next .stb,html[data-theme="linear"] .st172 .stn.next .stb{background:#2E6B62;color:#E6FFF9}
 html[data-theme="glass"]:not([data-tone="light"]) .st172 .stn.done .stb,html[data-theme="linear"] .st172 .stn.done .stb{background:#13897A;color:#fff}
-@container (max-width:720px){.st172 .stn{padding:8px;gap:6px}.st172 .stt small{display:none}.st172 .stb{flex-basis:26px;height:26px;font-size:13px}.st172 .stt b{font-size:13px}.st172 .stl{flex-basis:6px}}
+/* 1.75: الضيق (الجوال والعمود الضيق): الرقم فوق الاسم في المنتصف، والأربع تملأ العرض بلا تمرير، ومكان لشارة «التالي» */
+@container (max-width:720px){
+  .st172{gap:6px;padding-top:10px}
+  .st172 .stl{display:none}
+  .st172 .stn,html:not(#mxz):not(#mxy) main .st172 .stn{flex:1 1 0;min-width:0;flex-direction:column;justify-content:center;gap:4px;padding:10px 4px 8px;text-align:center;border-radius:14px}
+  .st172 .stb{flex:0 0 auto;width:28px;height:28px;font-size:13px}
+  .st172 .stt{align-items:center;max-width:100%}
+  .st172 .stt b{font-size:12.5px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  .st172 .stt small{display:none}
+  .st172 .stn em{top:-10px;inset-inline-end:auto;right:auto;left:50%;transform:translateX(-50%);font-size:10.5px;padding:0 7px;line-height:18px;white-space:nowrap}
+}
 /* رأس العميل في عمود «نظرة عامة» الضيق: يلتف ولا يُقص (زر «خطة جديدة» والشارات) */
 html:not(#mxz):not(#mxy) main .cfside .cfhead{flex-wrap:wrap;overflow:visible;height:auto}
 html:not(#mxz):not(#mxy) main .cfside .cfhead .np170{display:none}
