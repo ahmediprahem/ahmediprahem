@@ -3023,6 +3023,32 @@ html[data-theme="glass"]:not([data-tone="light"]) .g171c b,html[data-theme="line
 html[data-theme="glass"]:not([data-tone="light"]) .g171c small,html[data-theme="glass"]:not([data-tone="light"]) .g171c b span,html[data-theme="linear"] .g171c small,html[data-theme="linear"] .g171c b span{color:#B8C2D3}
 html[data-theme="glass"]:not([data-tone="light"]) .g171need .g171rate,html[data-theme="linear"] .g171need .g171rate{background:#173A36;border-color:#2E6B62}
 html[data-theme="glass"]:not([data-tone="light"]) .g171drug,html[data-theme="linear"] .g171drug{background:#3A2E14;border-color:#7A5E22}
+/* 1.72 (م4) شريط المحطات ①②③④ */
+.st172w{container-type:inline-size}
+.st172{container-type:inline-size;display:flex;align-items:stretch;gap:0;margin:12px 0 14px;flex-wrap:nowrap}
+.st172 .stn{flex:1 1 0;min-width:0;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:16px;border:1.5px solid #DCE6EE;background:#fff;color:#16233F;text-align:start;cursor:pointer;position:relative;font-weight:400}
+html:not(#mxz):not(#mxy) main .st172 .stn{background:#fff;color:#16233F;box-shadow:none;border:1.5px solid #DCE6EE}
+.st172 .stb{flex:0 0 32px;height:32px;border-radius:50%;display:grid;place-items:center;background:#EEF2F6;color:#5b647a;font-weight:700}
+.st172 .stt{display:flex;flex-direction:column;min-width:0}
+.st172 .stt b{font-size:15px}
+.st172 .stt small{color:#5b647a;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.st172 .stn.done .stb{background:#13897A;color:#fff}
+html:not(#mxz):not(#mxy) main .st172 .stn.next{border-color:#13897A;background:#F3FBF8}
+.st172 .stn.next .stb{background:#DDF3EE;color:#0E5F55}
+.st172 .stn em{position:absolute;top:-9px;inset-inline-end:12px;font-style:normal;font-size:11px;background:#0E6559;color:#fff;border-radius:999px;padding:1px 8px}
+.st172 .stl{flex:0 0 14px;align-self:center;height:2px;background:#CFE6DF}
+@media (max-width:760px){.st172{overflow-x:auto;scrollbar-width:none}.st172 .stn{flex:0 0 auto;min-width:150px}}
+html[data-theme="glass"]:not([data-tone="light"]):not(#mxz):not(#mxy) main .st172 .stn,html[data-theme="linear"]:not(#mxz):not(#mxy) main .st172 .stn{background:#212C3D;border-color:#3A475E;color:#E8EEF6}
+html[data-theme="glass"]:not([data-tone="light"]) .st172 .stt small,html[data-theme="linear"] .st172 .stt small{color:#B8C2D3}
+html[data-theme="glass"]:not([data-tone="light"]):not(#mxz):not(#mxy) main .st172 .stn.next,html[data-theme="linear"]:not(#mxz):not(#mxy) main .st172 .stn.next{background:#173A36;border-color:#5FD0BC}
+html[data-theme="glass"]:not([data-tone="light"]) .st172 .stb,html[data-theme="linear"] .st172 .stb{background:#2C374A;color:#D5DCE8}
+html[data-theme="glass"]:not([data-tone="light"]) .st172 .stn.next .stb,html[data-theme="linear"] .st172 .stn.next .stb{background:#2E6B62;color:#E6FFF9}
+html[data-theme="glass"]:not([data-tone="light"]) .st172 .stn.done .stb,html[data-theme="linear"] .st172 .stn.done .stb{background:#13897A;color:#fff}
+@container (max-width:720px){.st172 .stn{padding:8px;gap:6px}.st172 .stt small{display:none}.st172 .stb{flex-basis:26px;height:26px;font-size:13px}.st172 .stt b{font-size:13px}.st172 .stl{flex-basis:6px}}
+/* رأس العميل في عمود «نظرة عامة» الضيق: يلتف ولا يُقص (زر «خطة جديدة» والشارات) */
+html:not(#mxz):not(#mxy) main .cfside .cfhead{flex-wrap:wrap;overflow:visible;height:auto}
+html:not(#mxz):not(#mxy) main .cfside .cfhead .np170{display:none}
+html:not(#mxz):not(#mxy) main .cfside .cfhead .cfbadges,html:not(#mxz):not(#mxy) main .cfside .cfhead .cfchips{flex-wrap:wrap;max-width:100%}
 </style></head>
 <body class="gating"><header id="hd"></header><div id="gate" style="display:flex"><div class="gcard" style="text-align:center"><div style="font-weight:700;color:#253464">حصة — جارٍ التحميل…</div></div></div><div id="app" style="display:none"><aside></aside><main></main></div>
 <noscript><div style="position:fixed;inset:0;background:#092061;color:#fff;padding:24px;text-align:center;font:16px Tahoma,Arial">هذا الملف يحتاج تفعيل JavaScript. افتحه مباشرة في Chrome أو Edge أو Safari (وليس من معاينة واتساب أو البريد).</div></noscript>
@@ -12731,6 +12757,42 @@ allPages = (function (f) { return function (c, p, edit) { var h = f.apply(this, 
   var wrap = k ? k.closest('.row > div') || k.parentNode : null; if (wrap) wrap.style.display = 'none'; if (mx) mx.style.display = 'none';
   var b = document.createElement('p'); b.className = 'g171ro small'; b.innerHTML = 'السعرات اليدوية وطريقة الماكروز تُعدَّل في مكان واحد: <button class="sec sm" data-a="g171Need">① الاحتياج ‹</button>' + (+c.kcalManual > 0 ? ' <b>سعرات يدوية: ' + esc(c.kcalManual) + '</b>' : '');
   var tg = r.querySelector('#tg'); (tg || mx || wrap).parentNode.insertBefore(b, (tg || mx || wrap).nextSibling);
+}).observe(document.documentElement, { childList: true, subtree: true }); })();
+
+// ================= 1.72 (م4) تبويبات ملف العميل الستة + شريط المحطات ①②③④ — docs/flow_plan_167.md (3، 4)
+// التبويبات: نظرة عامة | البيانات | القياسات والتحاليل | الخطة | المتابعة | الإدارة (المواعيد، الاشتراك، ربط «زنها»).
+// نفس الصفحات ونفس الأقسام (S.tab كما هو)؛ يتغير التجميع فقط. ومعرّف مجموعة «نظرة عامة» يبقى 'file'.
+// شريط المحطات في رأس الملف: ① الاستقبال ② القياسات ③ الخطة ④ المتابعة، لكل محطة حالتها (✓ / التالي) وسطر ملخص، والضغط يفتح مكانها الوحيد.
+(function () {
+  var by = {}; CF_G.forEach(function (g) { by[g[0]] = g; });
+  var med = by.medical || ['medical', 'القياسات والتحاليل', 'ruler', ['med']];
+  var T = [['file', 'نظرة عامة', 'grid', ['ov']], ['data', 'البيانات', 'user', ['client']], med, by.plan, by.follow, ['admin', 'الإدارة', 'settings', ['appt', 'sub', 'link']]].filter(Boolean);
+  CF_G.length = 0; T.forEach(function (g) { CF_G.push(g); });
+  CF_L.appt = CF_L.appt || 'المواعيد'; CF_L.sub = CF_L.sub || 'الاشتراك'; CF_L.link = CF_L.link || 'ربط زنها';
+})();
+function st172(c) {
+  var ok1 = !!(c.name && c.sex && +c.age > 0 && +c.height > 0 && c.activity && c.goal), last = typeof m168Last === 'function' ? m168Last(c) : null, ok2 = !!last;
+  var ok3 = !!(c.plan && c.plan.days && c.plan.days.length), ok4 = !!c.hx, v = c.planValid || {};
+  var fmt = function (t) { try { return new Date(t).toLocaleDateString('ar', { day: 'numeric', month: 'short' }); } catch (e) { return ''; } };
+  var kc = ok3 && c.plan.targets ? Math.round(c.plan.targets.kcal) + ' سعرة' : '';
+  return [
+    ['client', '①', 'الاستقبال', ok1, ok1 ? [c.goal, (c.conditions || []).length ? c.conditions.length + ' حالة' : ''].filter(Boolean).join(' • ') : 'أكمل البيانات الأساسية'],
+    ['med', '②', 'القياسات', ok2, ok2 ? num(last.w) + ' كجم • ' + fmt(last.t) : 'سجّل أول قياس'],
+    [ok3 ? 'plan' : 'newPlan', '③', 'الخطة', ok3, ok3 ? [kc, v.to ? 'حتى ' + fmt(v.to) : ''].filter(Boolean).join(' • ') : 'أنشئ أول خطة'],
+    [ok4 ? 'day' : 'link', '④', 'المتابعة', ok4, ok4 ? 'مرتبط بـ«زنها»' + (v.next ? ' • متابعة ' + fmt(v.next) : '') : 'اربط العميل بـ«زنها»']];
+}
+function st172Html(c) {
+  var L = st172(c), nx = -1; L.forEach(function (s, i) { if (nx < 0 && !s[3]) nx = i; });
+  return '<nav class="st172" aria-label="محطات العميل">' + L.map(function (s, i) {
+    var cls = s[3] ? 'done' : i === nx ? 'next' : 'todo', a = s[0] === 'newPlan' ? 'data-a="newPlan"' : 'data-a="tab" data-v="' + s[0] + '"';
+    return '<button class="stn ' + cls + '" ' + a + '><span class="stb" aria-hidden="true">' + (s[3] ? '✓' : s[1]) + '</span><span class="stt"><b>' + s[2] + '</b><small>' + esc(s[4]) + '</small></span>' + (i === nx ? '<em>التالي</em>' : '') + '</button>' + (i < 3 ? '<span class="stl" aria-hidden="true"></span>' : '');
+  }).join('') + '</nav>';
+}
+(function () { if (window.MutationObserver) new MutationObserver(function () {
+  var h = document.querySelector('main .cftabs'), c = typeof cur === 'function' ? cur() : null; if (!h || !c || c.kind === 'athlete') return;      // فوق شريط التبويبات (في عموده) لا داخل رأس «نظرة عامة» الضيق
+  var sig = [c.code, S.tab, !!c.plan, !!c.hx, c.goal, c.weight, (c.planValid || {}).to, ((c.med || {}).visits || []).length].join('|'), ex = document.querySelector('main .st172');
+  if (ex && ex.dataset.sig === sig && ex.nextElementSibling === h) return; var w = document.createElement('div'); w.innerHTML = st172Html(c); var n = w.firstChild; n.dataset.sig = sig;
+  if (ex) ex.remove(); h.parentNode.insertBefore(n, h);
 }).observe(document.documentElement, { childList: true, subtree: true }); })();
 
 // ================= 1.19 المرحلة 4: تبويب «توليد الخطة» — يُدمج داخل app.js عند /*GENUI*/

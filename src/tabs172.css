@@ -1,0 +1,26 @@
+/* 1.72 (م4) شريط المحطات ①②③④ */
+.st172w{container-type:inline-size}
+.st172{container-type:inline-size;display:flex;align-items:stretch;gap:0;margin:12px 0 14px;flex-wrap:nowrap}
+.st172 .stn{flex:1 1 0;min-width:0;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:16px;border:1.5px solid #DCE6EE;background:#fff;color:#16233F;text-align:start;cursor:pointer;position:relative;font-weight:400}
+html:not(#mxz):not(#mxy) main .st172 .stn{background:#fff;color:#16233F;box-shadow:none;border:1.5px solid #DCE6EE}
+.st172 .stb{flex:0 0 32px;height:32px;border-radius:50%;display:grid;place-items:center;background:#EEF2F6;color:#5b647a;font-weight:700}
+.st172 .stt{display:flex;flex-direction:column;min-width:0}
+.st172 .stt b{font-size:15px}
+.st172 .stt small{color:#5b647a;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.st172 .stn.done .stb{background:#13897A;color:#fff}
+html:not(#mxz):not(#mxy) main .st172 .stn.next{border-color:#13897A;background:#F3FBF8}
+.st172 .stn.next .stb{background:#DDF3EE;color:#0E5F55}
+.st172 .stn em{position:absolute;top:-9px;inset-inline-end:12px;font-style:normal;font-size:11px;background:#0E6559;color:#fff;border-radius:999px;padding:1px 8px}
+.st172 .stl{flex:0 0 14px;align-self:center;height:2px;background:#CFE6DF}
+@media (max-width:760px){.st172{overflow-x:auto;scrollbar-width:none}.st172 .stn{flex:0 0 auto;min-width:150px}}
+html[data-theme="glass"]:not([data-tone="light"]):not(#mxz):not(#mxy) main .st172 .stn,html[data-theme="linear"]:not(#mxz):not(#mxy) main .st172 .stn{background:#212C3D;border-color:#3A475E;color:#E8EEF6}
+html[data-theme="glass"]:not([data-tone="light"]) .st172 .stt small,html[data-theme="linear"] .st172 .stt small{color:#B8C2D3}
+html[data-theme="glass"]:not([data-tone="light"]):not(#mxz):not(#mxy) main .st172 .stn.next,html[data-theme="linear"]:not(#mxz):not(#mxy) main .st172 .stn.next{background:#173A36;border-color:#5FD0BC}
+html[data-theme="glass"]:not([data-tone="light"]) .st172 .stb,html[data-theme="linear"] .st172 .stb{background:#2C374A;color:#D5DCE8}
+html[data-theme="glass"]:not([data-tone="light"]) .st172 .stn.next .stb,html[data-theme="linear"] .st172 .stn.next .stb{background:#2E6B62;color:#E6FFF9}
+html[data-theme="glass"]:not([data-tone="light"]) .st172 .stn.done .stb,html[data-theme="linear"] .st172 .stn.done .stb{background:#13897A;color:#fff}
+@container (max-width:720px){.st172 .stn{padding:8px;gap:6px}.st172 .stt small{display:none}.st172 .stb{flex-basis:26px;height:26px;font-size:13px}.st172 .stt b{font-size:13px}.st172 .stl{flex-basis:6px}}
+/* رأس العميل في عمود «نظرة عامة» الضيق: يلتف ولا يُقص (زر «خطة جديدة» والشارات) */
+html:not(#mxz):not(#mxy) main .cfside .cfhead{flex-wrap:wrap;overflow:visible;height:auto}
+html:not(#mxz):not(#mxy) main .cfside .cfhead .np170{display:none}
+html:not(#mxz):not(#mxy) main .cfside .cfhead .cfbadges,html:not(#mxz):not(#mxy) main .cfside .cfhead .cfchips{flex-wrap:wrap;max-width:100%}
