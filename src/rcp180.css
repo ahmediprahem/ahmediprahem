@@ -1,0 +1,22 @@
+/* 1.80 (ر5) بطاقة الوصفة ومكتبة «وصفاتي» */
+.rcpgo{margin-top:6px}
+.rcp{display:grid;grid-template-columns:minmax(0,180px) 1fr;gap:12px;border:1.5px solid #CFE6DF;border-radius:14px;padding:10px;margin-top:8px;background:#fff}
+.rcp:not(:has(.rcpimg)){grid-template-columns:1fr}
+.rcpimg{margin:0}.rcpimg img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;display:block}.rcpimg figcaption{font-size:11px;color:#5b647a;margin-top:3px}
+.rcpb h5{margin:0 0 4px;font-size:15px}.rcpb h5 small{font-weight:400;color:#5b647a}.rcpb h6{margin:8px 0 3px;font-size:13px}.rcpb h6 small{font-weight:400;color:#7a8296}
+.rcpk{margin:2px 0 6px;color:#0E5F55}
+.rcping,.rcpst{margin:0;padding-inline-start:18px;font-size:13px}.rcping li,.rcpst li{margin:2px 0}
+.rcping small{color:#0E5F55;margin-inline-start:4px}.rcping .rcp-rv small{color:#7A5200}.rcping .rcp-skip{color:#7a8296}.rcpwhy{display:block;color:#7A5200!important;margin:0!important}
+html:not(#mxz):not(#mxy) .rcpbtn{display:flex;flex-wrap:wrap;gap:6px}html:not(#mxz):not(#mxy) .rcpbtn button{width:auto;flex:0 0 auto}
+.rcplib{border:1.5px solid #E3E9EF;border-radius:14px;padding:10px 12px;margin:10px 0;background:#FBFCFD}.rcplib h4{margin:0 0 6px}
+.rcpgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.rcpli{border:1px solid #E3E9EF;border-radius:12px;padding:6px;background:#fff;display:flex;flex-direction:column;gap:3px;font-size:13px}
+.rcpli img,.rcpnoimg{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:8px;display:grid;place-items:center;background:#EEF2F6;font-size:28px}
+.rcpli small{color:#5b647a}
+html:not(#mxz):not(#mxy) .rcpli .genfoot{display:flex;gap:6px;margin:4px 0 0}html:not(#mxz):not(#mxy) .rcpli .genfoot button{width:auto;flex:0 0 auto}
+@media (max-width:560px){.rcp{grid-template-columns:1fr}.rcpimg img{aspect-ratio:16/10}}
+html[data-theme="glass"]:not([data-tone="light"]) .rcp,html[data-theme="linear"] .rcp,html[data-theme="glass"]:not([data-tone="light"]) .rcplib,html[data-theme="linear"] .rcplib{background:#16202E;border-color:#2E6B62;color:#E8EEF6}
+html[data-theme="glass"]:not([data-tone="light"]) .rcp :is(h5,h6,li,b,p),html[data-theme="linear"] .rcp :is(h5,h6,li,b,p),html[data-theme="glass"]:not([data-tone="light"]) .rcplib :is(h4,b,p,label),html[data-theme="linear"] .rcplib :is(h4,b,p,label){color:#E8EEF6}
+html[data-theme="glass"]:not([data-tone="light"]) .rcpli,html[data-theme="linear"] .rcpli{background:#1E2A3B;border-color:#3A475E}
+html[data-theme="glass"]:not([data-tone="light"]) .rcping small,html[data-theme="linear"] .rcping small,html[data-theme="glass"]:not([data-tone="light"]) .rcpk,html[data-theme="linear"] .rcpk{color:#9BE6D6}
+html[data-theme="glass"]:not([data-tone="light"]) :is(.rcpimg figcaption,.rcpb h5 small,.rcpli small),html[data-theme="linear"] :is(.rcpimg figcaption,.rcpb h5 small,.rcpli small){color:#B8C2D3}

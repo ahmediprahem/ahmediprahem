@@ -4,7 +4,7 @@
    - تقدّم تطبيق «زنها» نفسه على الصفحة الرئيسية (/)، فرابط الدعوة = عنوان هذه المحطة.
    - الجداول تُنشأ تلقائياً أول مرة؛ يكفي ربط قاعدة D1 باسم DB. متغير اختياري REG_KEY: مفتاح تسجيل الأخصائيين (بدونه يقبل أي «حصة»).
    - لا تسجّل أي محتوى (لا console.log). يُبنى منه worker/relay/dist/worker.js بـ py build_web.py (يُضمَّن تطبيق «زنها» وأيقونته). */
-const VER = '1.33';
+const VER = '1.34';
 // ---- 1.7: رخصة الأخصائي: كود تفعيل موقَّع بمفتاح المدير (ADMIN_PUB، مفتاح عام) يغني عن مفتاح التسجيل، فيُربط الأخصائي تلقائياً دون سر في الموقع
 const b64uBytes = (x) => { x = x.replace(/-/g, '+').replace(/_/g, '/'); while (x.length % 4) x += '='; const b = atob(x), u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; };
 async function licOk(tok, env) {
@@ -131,7 +131,7 @@ async function pushTo(db, id, origin, kind) {
 
 // ---------- 1.28 مساعد الطعام بالذكاء الاصطناعي (Gemini) — المفتاح سرّ على الخادم فقط (env.GEMINI_API_KEY) ولا يصل للمتصفح أبداً
 const AI = { model: 'gemini-2.5-flash-lite', fallback: 'gemini-3.5-flash-lite',      // طلب المالك 2.5؛ وغوغل لا تتيحه للحسابات الجديدة (404) فيُستعمل البديل الذي توصي به تلقائياً
-  perDay: 40, mealPerDay: 60, demoPerDay: 150, demoIpPerDay: 40, img: 1200000, text: 600, timeout: 28000, budget: 45000, cacheDays: 30, cool: {} };
+  perDay: 40, mealPerDay: 60, recipePerDay: 30, imgPerDay: 20, imgAll: 150, demoPerDay: 150, demoIpPerDay: 40, img: 1200000, text: 600, timeout: 28000, budget: 45000, cacheDays: 30, cool: {} };
 const AI_BASE = 'أنت مساعد تغذية داخل تطبيق «زنها» العربي. اكتب بالعربية الفصحى البسيطة القصيرة التي يفهمها أي شخص، وكل نقطة في القوائم جملة قصيرة واحدة (نحو 15 كلمة أو أقل). القيم الغذائية تقديرية دائماً؛ لا تدّعِ الدقة. لا تشخّص أمراضاً ولا تصف علاجاً. أعد JSON فقط بالمفاتيح المطلوبة.';
 // 1.56 تقييم المكملات — الجدول المرجعي (اعتمده المالك 2026-11-27؛ يعمل حيث env.AI_SUPP='1': hissati وhissati-preview).
 // [المكمّل، المدى المعتاد للبالغين، الحد الأعلى الآمن، درجة الدليل وفق AIS (أ قوي/ب ناشئ/ج ضعيف/د خطِر)، الفوائد المثبتة، تحذيرات، المصدر، التوقيت والتعارض مع الطعام]
@@ -191,6 +191,14 @@ const AI_P = {
     + 'understood = جملة عربية قصيرة واضحة تشرح ما فهمته للأخصائي. وفي المستوى العام: avoid وprefer من «تعليمات عامة»، وunderstood قائمة جمل قصيرة. '
     + 'لا تضف أصنافاً لم تُذكر، ولا كميات ولا سعرات. إن كانت الوجبة بلا وصف فاجعلها pattern=free بقوائم فارغة. '
     + 'أعد: {"ok":true,"meals":[{"key":"","pattern":"","rotation":[""],"always":[""],"avoid":[""],"notTogether":[[""]],"tags":[""],"understood":""}],"avoid":[""],"prefer":[""],"understood":[""]}',
+  recipe: 'أنت طاهٍ ومساعد أخصائي تغذية. اكتب وصفة صحية بسيطة للطبق المطلوب (dish) لشخص واحد، بمكونات متاحة في المطبخ العربي. '
+    + 'ingredients = سطور المكونات، كل سطر: الكمية ثم الوحدة ثم اسم المكوّن بالعربية، بوحدات منزلية أو جرامات فقط (مثل: 1 كوب فول مدمس، 1 ملعقة صغيرة زيت زيتون، 100 جرام صدر دجاج، 1 رغيف خبز بلدي)، '
+    + 'قائمة foods فيها أصناف قاعدتنا بصيغة «الاسم — الوحدة»: إن وُجد فيها المكوّن فاكتب الكمية ثم وحدته المذكورة ثم اسمه حرفياً كما في القائمة (مثل: 1 موزة موز، 4 ملعقة كبيرة شوفان جاف، 100 جم صدر دجاج)، ولا تضف أوصافاً بعد الاسم (مقطع، متوسط…)، ولا تكتب «—» في الوصفة. '
+    + 'واختر اسم المكوّن من قائمة foods حين يوجد فيها ما يناسب. لا توابل كثيرة (سطر واحد للملح والبهارات يكفي). أقل دهون وسكر ممكن، ولا قلي عميق. '
+    + 'steps = خطوات التحضير جملاً قصيرة مرقّمة ضمنياً (6 خطوات أو أقل). minutes = وقت التحضير بالدقائق. title = اسم الطبق بالعربية. '
+    + 'img = وصف إنجليزي قصير ودقيق لشكل الطبق النهائي لتوليد صورة (مثل: Egyptian fava beans stew with olive oil and cumin in a clay bowl). '
+    + 'إن لم يكن المطلوب طعاماً فأعد ok=false مع reason. '
+    + 'أعد: {"ok":true,"title":"","ingredients":[""],"steps":[""],"minutes":0,"img":"","reason":""}',
   text: 'حلّل وصف الوجبة التالي. قسّمه إلى أصناف، وقدّر الحصة لكل صنف بوحدة منزلية مألوفة وبالجرام، وسعراته وبروتينه وكربوهيدراته ودهونه بالجرام، ثم المجموع. كل القيم أرقام فقط بلا وحدات. إن لم يكن الوصف طعاماً أو كان غير مفهوم فاجعل ok=false واذكر السبب في reason. أعد: {"ok":bool,"reason":"","title":"اسم قصير للوجبة","items":[{"name":"","portion":"","grams":0,"kcal":0,"p":0,"c":0,"f":0}],"total":{"kcal":0,"p":0,"c":0,"f":0},"confidence":"high|medium|low","note":"ملاحظة قصيرة عن دقة التقدير"}',
   photo: 'في الصورة وجبة. تعرّف على الأطعمة الظاهرة، وقدّر حجم كل حصة بوحدة منزلية وبالجرام، وسعراتها وبروتينها وكربوهيدراتها ودهونها، ثم المجموع. التقدير من الصورة تقريبي: الزيت والصلصات المخفية والحجم الحقيقي قد تختلف، فاجعل confidence منخفضة أو متوسطة واذكر ذلك في note. إن لم تكن في الصورة أطعمة أو كانت غير واضحة فاجعل ok=false واذكر السبب في reason. أعد: {"ok":bool,"reason":"","title":"","items":[{"name":"","portion":"","grams":0,"kcal":0,"p":0,"c":0,"f":0}],"total":{"kcal":0,"p":0,"c":0,"f":0},"confidence":"high|medium|low","note":""}',
   label: 'الصورة لملصق المعلومات الغذائية لمنتج. اقرأ فقط ما هو مكتوب فعلاً على الملصق؛ ما لا يظهر اجعله null ولا تخمّنه. القيم لكل حصة كما على الملصق، أرقاماً فقط بلا وحدات (الجرام للدهون والكربوهيدرات والسكر والبروتين والألياف، والملليجرام للصوديوم والكوليسترول). ثم قيّم المنتج بناءً على الملصق وحده: rating = "healthy" (خيار صحي) أو "moderate" (معتدل) أو "occasional" (للمناسبات فقط)، مع إيجابيات ومخاوف وأسباب مرتبطة بأرقام الملصق ومكوناته (مثل الدهون المتحولة، الصوديوم المرتفع، السكر المضاف، الدهون المشبعة، المواد المضافة)، وبدائل أصح من نفس النوع، ونصائح عملية. لا تذكر ادعاءً صحياً لا يدعمه الملصق. إن لم تكن الصورة ملصقاً غذائياً مقروءاً فاجعل ok=false واذكر السبب. أعد: {"ok":bool,"reason":"","product":"","serving":"","servings":null,"per":{"kcal":null,"fat":null,"satFat":null,"transFat":null,"chol":null,"sodium":null,"carbs":null,"fiber":null,"sugars":null,"addedSugars":null,"protein":null},"ingredients":[""],"assessment":{"rating":"healthy|moderate|occasional","summary":"","positives":[""],"concerns":[""],"reasons":[""],"alternatives":[""],"tips":[""]}}',
@@ -211,6 +219,12 @@ function aiClean(mode, o, J) {                                        // لا ي
     const meals = (Array.isArray(o.meals) ? o.meals : []).filter((m) => m && keys.has(String(m.key))).map((m) => ({ key: String(m.key), pattern: ['rotate', 'fixed', 'free'].includes(m.pattern) ? m.pattern : 'free', rotation: w(m.rotation, 8), always: w(m.always, 6), avoid: w(m.avoid, 8),
       notTogether: (Array.isArray(m.notTogether) ? m.notTogether : []).map((x) => w(x, 4)).filter((x) => x.length >= 2).slice(0, 6), tags: (Array.isArray(m.tags) ? m.tags : []).filter((t) => TAGS.includes(t)).slice(0, 5), understood: aiStr(m.understood, 220) }));
     return { ok: true, meals, avoid: w(o.avoid, 10), prefer: w(o.prefer, 10), understood: (Array.isArray(o.understood) ? o.understood : []).map((x) => aiStr(x, 220)).filter(Boolean).slice(0, 6) };
+  }
+  if (mode === 'recipe') {    // 1.80 (ر5): وصفة — نصوص قصيرة فقط؛ الحساب في زنها Pro بمحرك الوصفة على قاعدة الأصناف
+    if (o.ok === false) return { ok: false, reason: aiStr(o.reason, 200) || 'الطلب ليس طبقاً واضحاً' };
+    const ing = aiArr(o.ingredients, 14, 70), st = aiArr(o.steps, 8, 180), img = String(o.img || '').replace(/[^A-Za-z0-9 ,.'()-]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160);
+    if (!ing.length) return { ok: false, reason: 'لم تُكتب مكونات. حاول مرة أخرى.' };
+    return { ok: true, title: aiStr(o.title, 60) || aiStr(J.dish, 60), ingredients: ing, steps: st, minutes: Math.max(0, Math.min(240, Math.round(aiF(o.minutes) || 0))), img };
   }
   if (!o.ok) return { ok: false, reason: aiStr(o.reason, 240) || 'لم أتعرّف على طعام واضح. جرّب وصفاً أوضح أو صورة أقرب بإضاءة جيدة.' };
   if (mode === 'text' || mode === 'photo') {
@@ -261,12 +275,16 @@ async function aiFood(req, env, db, path, body, J) {
     if (!await aiCount(db, 'ai.demo.' + day, AI.demoPerDay) || !await aiCount(db, 'ai.ip.' + day + '.' + ih, AI.demoIpPerDay)) return err(429, 'ailimit', 'وصلت للحد اليومي للتجربة. حاول غداً.');
   } else if (!demo) {
     const a = await authed(req, db, path, body); if (a.e) return a.e;
-    if (mode === 'meal') { if (!a.who || a.who.role !== 'd') return err(403, 'role', 'متاح للأخصائيين فقط'); if (!await aiCount(db, 'ai.m.' + a.id + '.' + day, AI.mealPerDay)) return err(429, 'ailimit', 'وصلت للحد اليومي للمساعد الذكي (' + AI.mealPerDay + ' طلباً). حاول غداً.'); }      // 1.78 (ر3)
+    if (mode === 'recipe') { if (!a.who || a.who.role !== 'd') return err(403, 'role', 'متاح للأخصائيين فقط'); if (!await aiCount(db, 'ai.r.' + a.id + '.' + day, AI.recipePerDay)) return err(429, 'ailimit', 'وصلت للحد اليومي للوصفات (' + AI.recipePerDay + '). حاول غداً.'); }
+    else if (mode === 'meal') { if (!a.who || a.who.role !== 'd') return err(403, 'role', 'متاح للأخصائيين فقط'); if (!await aiCount(db, 'ai.m.' + a.id + '.' + day, AI.mealPerDay)) return err(429, 'ailimit', 'وصلت للحد اليومي للمساعد الذكي (' + AI.mealPerDay + ' طلباً). حاول غداً.'); }      // 1.78 (ر3)
     else { if (!a.who || a.who.role !== 'c') return err(403, 'role', 'متاح لحسابات العملاء فقط');
     if (!await aiCount(db, 'ai.' + a.id + '.' + day, AI.perDay)) return err(429, 'ailimit', 'وصلت للحد اليومي للمساعد (' + AI.perDay + ' تحليلاً). حاول غداً.'); }
   }
   let ut = '', img = '', mime = '', note = '';
-  if (mode === 'meal') {      // 1.78 (ر3): وصف الوجبات فقط (مُجهّل: بلا اسم ولا جوال ولا أرقام)
+  if (mode === 'recipe') {    // 1.80 (ر5): اسم الطبق ونوع الوجبة وأسماء أصناف القاعدة القريبة فقط (بلا أي بيانات عن العميل)
+    const dish = aiStr(J.dish, 60); if (dish.length < 2) return err(400, 'empty', 'اكتب اسم الطبق');
+    ut = 'الطلب: ' + JSON.stringify({ dish, meal: aiStr(J.meal, 30), foods: aiArr(J.foods, 80, 70) }); J.dish = dish;
+  } else if (mode === 'meal') {      // 1.78 (ر3): وصف الوجبات فقط (مُجهّل: بلا اسم ولا جوال ولا أرقام)
     const ms = (Array.isArray(J.meals) ? J.meals : []).slice(0, 24).map((m) => ({ key: aiStr(m && m.key, 12), name: aiStr(m && m.name, 40), kind: m && m.kind === 'snack' ? 'snack' : 'main', desc: aiStr(m && m.desc, 400) })).filter((m) => m.key);
     if (!ms.length || !ms.some((m) => m.desc) && !aiStr(J.notes, 400)) return err(400, 'empty', 'اكتب وصفاً لوجبة واحدة على الأقل');
     ut = 'الطلب: ' + JSON.stringify({ meals: ms, notes: aiStr(J.notes, 400) }); J.meals = ms;
@@ -306,6 +324,35 @@ async function aiFood(req, env, db, path, body, J) {
   if ((net || Date.now() - t0 >= AI.timeout) && !cfg) return err(504, 'aitime', 'استغرق التحليل وقتاً طويلاً. حاول مرة أخرى.');
   return err(502, 'aierr', cfg && !route ? 'تعذّر الاتصال بالمساعد (إعداد المفتاح).' : 'تعذّر التحليل الآن. حاول مرة أخرى.');
 }
+// 1.80 (ر5) صورة توضيحية للوصفة — قرار المالك 2026-11-28: Cloudflare FLUX أساساً، وPixabay احتياطاً (إن نفدت الحصة أو تعطّل)، ولا صورة خاطئة أبداً
+const IMG_FOOD = ['food', 'dish', 'meal', 'plate', 'bowl', 'breakfast', 'lunch', 'dinner', 'salad', 'soup', 'cuisine', 'cooking', 'vegetable', 'meat', 'bread', 'rice', 'pasta', 'beans', 'chicken', 'fish', 'dessert', 'snack', 'healthy', 'delicious', 'stew', 'egg', 'cheese', 'yogurt', 'fruit'];
+const b64buf = (ab) => { const u = new Uint8Array(ab); let s = ''; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(s); };
+export function imgPick(hits, q) {      // صورة Pixabay تُقبل فقط إن كانت وسومها طعاماً (اختبار المفتاح: «foul medames» أعاد كرة قدم)
+  const qw = String(q || '').toLowerCase().split(/[^a-z]+/).filter((w) => w.length > 3);
+  return (Array.isArray(hits) ? hits : []).map((h) => { const t = String(h && h.tags || '').toLowerCase(), food = IMG_FOOD.filter((w) => t.includes(w)).length, rel = qw.filter((w) => t.includes(w)).length; return { h, food, rel }; })
+    .filter((x) => x.food >= 1 && x.h.webformatURL && !/\b(football|soccer|sport|ball|player|person|woman|man|girl|boy)\b/.test(String(x.h.tags || '').toLowerCase())).sort((a, b) => (b.rel - a.rel) || (b.food - a.food))[0] || null;
+}
+async function aiImg(req, env, db, path, body, J) {
+  const day = new Date().toISOString().slice(0, 10), demo = env.AI_DEMO === '1' && J.demo === 1, bench = demo && !!env.AI_BENCH && J.bench === env.AI_BENCH;
+  const q = String(J.prompt || '').replace(/[^A-Za-z0-9 ,.'()-]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160); if (q.length < 3) return err(400, 'empty', 'لا وصف للصورة');
+  if (demo && !bench) { if (!await aiCount(db, 'ai.demo.' + day, AI.demoPerDay)) return err(429, 'ailimit', 'وصلت للحد اليومي للتجربة. حاول غداً.'); }
+  else if (!demo) { const a = await authed(req, db, path, body); if (a.e) return a.e; if (!a.who || a.who.role !== 'd') return err(403, 'role', 'متاح للأخصائيين فقط'); if (!await aiCount(db, 'ai.i.' + a.id + '.' + day, AI.imgPerDay)) return err(429, 'ailimit', 'وصلت للحد اليومي للصور (' + AI.imgPerDay + '). حاول غداً.'); }
+  const want = bench && J.src === 'pixabay' ? 'pixabay' : '';
+  if (!want && env.AI && env.AI.run && await aiCount(db, 'ai.img.' + day, AI.imgAll)) {
+    try {
+      const r = await env.AI.run('@cf/black-forest-labs/flux-1-schnell', { prompt: 'Appetizing realistic food photograph of ' + q + ', served and plated, top-down view, soft natural light, no text, no people, no hands', steps: 4 });
+      if (r && r.image) { await aiTick(db, 'flux', day); return json({ ok: true, src: 'flux', mime: 'image/jpeg', img: r.image, credit: 'صورة توضيحية مولّدة' }); }
+    } catch { /* نفدت الحصة أو تعطّل: Pixabay */ }
+  }
+  if (!env.PIXABAY_API_KEY) return json({ ok: false, reason: 'لا صورة الآن' });
+  try {
+    const r = await fetch('https://pixabay.com/api/?key=' + encodeURIComponent(env.PIXABAY_API_KEY) + '&q=' + encodeURIComponent(q.split(/\s+/).slice(0, 6).join(' ')) + '&image_type=photo&category=food&safesearch=true&per_page=20');
+    const j = r.ok ? await r.json() : null, pick = j && imgPick(j.hits, q); if (!pick) return json({ ok: false, reason: 'لم أجد صورة مناسبة للطبق؛ تبقى الوصفة بلا صورة' });
+    const ir = await fetch(pick.h.webformatURL); if (!ir.ok) return json({ ok: false, reason: 'تعذّر تحميل الصورة' });
+    const ab = await ir.arrayBuffer(); if (ab.byteLength > 1500000) return json({ ok: false, reason: 'الصورة كبيرة' });
+    await aiTick(db, 'pixabay', day); return json({ ok: true, src: 'pixabay', mime: ir.headers.get('content-type') || 'image/jpeg', img: b64buf(ab), credit: 'Pixabay — ' + String(pick.h.user || '').slice(0, 40), link: String(pick.h.pageURL || '').slice(0, 200) });
+  } catch { return json({ ok: false, reason: 'تعذّر جلب صورة الآن' }); }
+}
 // 1.58 (المحطة 1.29) الموزّع: عدة مزوّدين بالتناوب حين env.AI_ROUTE='1' — المفاتيح أسرار على الخادم فقط
 const AI_PV = {
   gl: { k: 'gem', key: 'GEMINI_API_KEY' },                                                  // Gemini Flash-Lite (الأساسي)
@@ -316,7 +363,7 @@ const AI_PV = {
 };
 // الترتيب لكل نوع من قياس الدقة على 22 حالة عربية (2026-11-27): Gemini أولاً دائماً (الأدق)، ثم الأفضل في كل نوع؛ Groq ثانياً (قارب Gemini)، ثم Cloudflare (Llama 4) ممتاز في الملصقات وصور الوجبات
 // ويفشل في المكملات والأعشاب فلا يُستعمل فيها؛ وGemini Flash بطيء (~28 ث) فلا يُستعمل. يُغيَّر بلا كود: AI_ORDER_TEXT / _PHOTO / _LABEL / _STORE / _SUPP / _HERB
-const AI_ORD = { text: ['gl', 'groq', 'cf', 'zai'], photo: ['gl', 'groq', 'cf', 'zai'], label: ['gl', 'groq', 'cf', 'zai'], store: ['gl', 'groq', 'cf', 'zai'], supp: ['gl', 'groq', 'zai'], herb: ['gl', 'groq', 'zai'], meal: ['gl', 'zai', 'groq', 'cf'] };      // Groq (Qwen 3.8) قارب Gemini في كل الأنواع؛ Z.ai الأضعف والأكثر انشغالاً فآخراً
+const AI_ORD = { text: ['gl', 'groq', 'cf', 'zai'], photo: ['gl', 'groq', 'cf', 'zai'], label: ['gl', 'groq', 'cf', 'zai'], store: ['gl', 'groq', 'cf', 'zai'], supp: ['gl', 'groq', 'zai'], herb: ['gl', 'groq', 'zai'], meal: ['gl', 'zai', 'groq', 'cf'], recipe: ['gl', 'zai', 'groq', 'cf'] };      // Groq (Qwen 3.8) قارب Gemini في كل الأنواع؛ Z.ai الأضعف والأكثر انشغالاً فآخراً
 export { AI_PV, AI_ORD };
 async function aiTick(db, p, day) { const k = 'ai.p.' + day + '.' + p, r = await one(db, 'SELECT v FROM kv WHERE k = ?', k); await run(db, 'INSERT INTO kv (k, v) VALUES (?, ?) ON CONFLICT(k) DO UPDATE SET v = excluded.v', k, String((r ? +r.v || 0 : 0) + 1)); }
 export function aiJson(t) {                                          // رد نصي ← كائن: يحذف التفكير والأسوار، ويأخذ أول { إلى آخر }، ويصلح الفواصل الزائدة
@@ -327,6 +374,7 @@ const AR = /[؀-ۿ]/;
 export function aiGuard(mode, c) {                                   // حارس الجودة: '' = مقبول، وإلا سبب الرفض
   if (!c || !c.ok) return '';                                          // «ليس طعاماً / غير واضح» رد مشروع
   if (mode === 'meal') return c.meals.some((m) => m.pattern !== 'free' && !AR.test(m.understood + m.rotation.join('') + m.always.join(''))) ? 'lang' : '';      // 1.78: الفهم والأصناف بالعربية
+  if (mode === 'recipe') return AR.test(c.title + c.ingredients.join('')) ? '' : 'lang';      // 1.80: الوصفة بالعربية
   const en = (k, p, cb, f) => k > 60 && p + cb + f > 0 && Math.abs(k - (4 * p + 4 * cb + 9 * f)) / k > 0.3;
   if (mode === 'text' || mode === 'photo') { const t = c.total; if (en(t.kcal, t.p, t.c, t.f)) return 'energy'; return AR.test(c.title + c.items.map((x) => x.name).join('')) ? '' : 'lang'; }
   if (mode === 'label') { const p = c.per, A = c.assessment; if (p.satFat != null && p.fat != null && p.satFat > p.fat + 0.5) return 'sat'; if (p.sugars != null && p.carbs != null && p.sugars > p.carbs + 0.5) return 'sugar'; if (p.kcal == null && p.protein == null && p.carbs == null && p.fat == null) return 'empty'; if (p.kcal != null && p.protein != null && p.carbs != null && p.fat != null && en(p.kcal, p.protein, p.carbs, p.fat)) return 'energy'; return AR.test(A.summary + A.positives.join('') + A.concerns.join('')) ? '' : 'lang'; }
@@ -440,7 +488,8 @@ async function api(req, env, url, ctx) {
     const r = await one(db, 'SELECT kind, last FROM push_subs WHERE ep = ?', String(url.searchParams.get('ep') || '')); return json({ ok: true, kind: r ? r.kind || 'msg' : 'msg', at: r ? r.last : 0 });
   }
   if (p === '/v1/push/key' && method === 'GET') return json({ ok: true, key: (await vapid(db)).pub });
-  if (p === '/v1/ai/food' && method === 'POST') return aiFood(req, env, db, path, body, J);      // 1.28: يتحقق من التوقيع بنفسه (أو وضع المعاينة)
+  if (p === '/v1/ai/food' && method === 'POST') return aiFood(req, env, db, path, body, J);
+  if (p === '/v1/ai/recipe-img' && method === 'POST') return aiImg(req, env, db, path, body, J);      // 1.80 (ر5)      // 1.28: يتحقق من التوقيع بنفسه (أو وضع المعاينة)
   // كل ما يلي يحتاج طرفاً مسجّلاً
   const a = await authed(req, db, path, body); if (a.e) return a.e; const me = a.who;
   if (p === '/v1/invites' && method === 'POST') {
