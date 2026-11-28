@@ -1,0 +1,5 @@
+/* 1.81 (ر5ب) حالة تثبيت الوصفة */
+.rcppin{font-size:13px;border-radius:10px;padding:6px 10px;margin:6px 0}.rcppin.on{background:#E4F5F0;color:#0E5F55}.rcppin.warn{background:#FFF6E0;color:#7A5200}
+html:not(#mxz):not(#mxy) .rcppin button{width:auto;margin-inline-start:6px}
+html[data-theme="glass"]:not([data-tone="light"]) .rcppin.on,html[data-theme="linear"] .rcppin.on{background:#173A36;color:#9BE6D6}
+html[data-theme="glass"]:not([data-tone="light"]) .rcppin.warn,html[data-theme="linear"] .rcppin.warn{background:#2E2618;color:#F0C873}
