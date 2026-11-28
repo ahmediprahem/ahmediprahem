@@ -1,0 +1,25 @@
+/* 1.71 (م3) الخطوات الأربع */
+.gensteps.g171 li button small{display:block;font-size:11px;opacity:.8}
+.g171need .g171rate{border:1px solid #CFE6DF;background:#F4FBF8;border-radius:14px;padding:10px 14px;margin:10px 0}
+.g171need .g171rate p{margin:4px 0}
+.g171drug{border:1px solid #F1D9A8;background:#FFF8EA;border-radius:14px;padding:10px 14px;margin:10px 0}
+.g171drug h4{margin:0 0 6px}
+.g171drug ul{margin:0;padding-inline-start:18px}
+.g171drug li{margin:4px 0;line-height:1.7}
+.g171cnt{position:sticky;top:8px;z-index:5;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0 0 12px;padding:8px;border-radius:16px;background:rgba(255,255,255,.92);border:1px solid #DCE6EE;box-shadow:0 6px 18px rgba(16,28,48,.08);backdrop-filter:blur(6px)}
+.g171c{position:relative;display:flex;flex-direction:column;gap:2px;padding:6px 10px 10px;border-radius:12px;background:#F6F8FB;overflow:hidden;min-width:0}
+.g171c small{color:#5b647a;font-size:12px}
+.g171c b{font-size:16px;color:#16233F;white-space:nowrap}
+.g171c b span{font-weight:400;font-size:12px;color:#5b647a}
+.g171c i{position:absolute;inset-inline-start:0;bottom:0;height:4px;width:var(--w);background:#13897A;border-radius:0 4px 4px 0}
+.g171c.st-warn i{background:#D9921A}.g171c.st-bad i{background:#C2413B}
+.g171blk{margin:0 0 12px}
+.g171rev .g171val h4{margin:0 0 6px}
+.g171shop table{width:100%}
+@media (max-width:600px){.g171cnt{grid-template-columns:repeat(2,minmax(0,1fr))}}
+html[data-theme="glass"]:not([data-tone="light"]) .g171cnt,html[data-theme="linear"] .g171cnt{background:rgba(27,36,51,.92);border-color:#3A475E}
+html[data-theme="glass"]:not([data-tone="light"]) .g171c,html[data-theme="linear"] .g171c{background:#212C3D}
+html[data-theme="glass"]:not([data-tone="light"]) .g171c b,html[data-theme="linear"] .g171c b{color:#E8EEF6}
+html[data-theme="glass"]:not([data-tone="light"]) .g171c small,html[data-theme="glass"]:not([data-tone="light"]) .g171c b span,html[data-theme="linear"] .g171c small,html[data-theme="linear"] .g171c b span{color:#B8C2D3}
+html[data-theme="glass"]:not([data-tone="light"]) .g171need .g171rate,html[data-theme="linear"] .g171need .g171rate{background:#173A36;border-color:#2E6B62}
+html[data-theme="glass"]:not([data-tone="light"]) .g171drug,html[data-theme="linear"] .g171drug{background:#3A2E14;border-color:#7A5E22}

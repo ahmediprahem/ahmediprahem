@@ -28,6 +28,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   await p.evaluate(() => DPApp.A.new('ex')); await p.fill('[data-f="name"]', 'فحص'); await p.selectOption('[data-f="sex"]', 'ذكر'); await p.fill('[data-f="age"]', '30'); await p.fill('[data-f="weight"]', '80'); await p.fill('[data-f="height"]', '178'); await p.press('[data-f="height"]', 'Tab');
   await p.evaluate(() => { const c = DPApp.S.clients.find((x) => x.code === DPApp.S.cur); c.goal = DATA.settings.goals[2][0]; c.activity = DATA.settings.activity[1][0]; DPApp.A.tab('client'); });
   await p.waitForSelector('#tg .tgx'); assert(/الحرق الأساسي/.test(await p.textContent('#tg .tgx'))); ok('شرح الهدف ظاهر تحت الأرقام في ملف العميل');
+  await p.evaluate(() => DPApp.A.g171Need()); await p.waitForSelector('.g171need [data-f="kcalManual"]');      // 1.71: السعرات اليدوية في ① الاحتياج فقط
   await p.fill('[data-f="kcalManual"]', '1100'); await p.press('[data-f="kcalManual"]', 'Tab'); await p.waitForSelector('#tg .chkb.st-block'); await p.click('[data-a="kcalLowOk"]'); await p.waitForSelector('#tg .chkb.st-warn');
   assert(await p.evaluate(() => DPApp.S.clients.find((x) => x.code === DPApp.S.cur).kcalLowOk === true)); await p.fill('[data-f="kcalManual"]', '1050'); await p.press('[data-f="kcalManual"]', 'Tab'); await p.waitForSelector('#tg .chkb.st-block');
   ok('تحت الحد الآمن: حافة حمراء وزر «أؤكد»؛ بعد التأكيد كهرماني، وتغيير الرقم يلغي التأكيد');

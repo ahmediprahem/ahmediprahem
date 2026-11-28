@@ -14,7 +14,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); }, errs = [];
   assert.strictEqual(await p.getAttribute('.gennew [data-a="genSurvey"]', 'aria-disabled'), 'true'); await p.click('.gennew [data-a="genSurvey"]', { force: true }); await p.waitForSelector('.toast:has-text("اربط")');
   ok('«＋ عميل جديد»: خياران — «أعبّئها بنفسي» و«يعبّئها العميل باستبيان زنها» (يشرح أن الربط بالمحطة أولاً حين لا يكون مربوطاً)');
   await p.click('.gennew [data-a="genNew"]'); await p.waitForSelector('.genclient');
-  assert.deepStrictEqual(await p.evaluate(() => [...document.querySelectorAll('.gensteps li')].map((x) => x.textContent.replace(/^[\d✓]\s*/, '').trim())), ['العميل', 'النظام', 'الفحص', 'البناء', 'الإرسال']);
+  assert.deepStrictEqual(await p.evaluate(() => [...document.querySelectorAll('.gensteps li')].map((x) => x.textContent.replace(/^[\d✓①②③④]\s*/, '').trim())), ['الاحتياج', 'النظام والشكل', 'الوجبات', 'المراجعة والإرسال']);      // 1.71: الخطوات الأربع
   assert.strictEqual(await p.locator('main .cfhead, main .cftabs, main .cfseg').count(), 0, 'لا رأس ملف ولا تبويبات داخل المسار'); assert.strictEqual(await p.locator('main .genflowh').count(), 1);
   ok('الخطوات الخمس: العميل، النظام، الفحص، البناء، الإرسال؛ والمسار صفحة مستقلة برأس واحد (لا رأس الملف وتبويباته)');
   await p.fill('[data-f="name"]', 'منى أحمد'); await p.selectOption('[data-f="sex"]', 'أنثى'); await p.fill('[data-f="age"]', '32'); await p.fill('[data-f="weight"]', '82'); await p.fill('[data-f="height"]', '163'); await p.press('[data-f="height"]', 'Tab');
