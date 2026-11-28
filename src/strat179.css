@@ -1,0 +1,28 @@
+/* 1.79 (ر4) معاينة الأسبوع من فهم المساعد */
+.s179{border:1.5px solid #CFE6DF;border-radius:14px;padding:10px 12px;margin-top:10px;background:#fff}
+.s179 h4{margin:0 0 6px}
+.s179w{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:6px 0}
+.s179t{border-collapse:separate;border-spacing:6px;min-width:640px;width:100%}
+.s179t th{font-size:13px;text-align:start;vertical-align:top;white-space:nowrap;padding:6px 4px}
+.s179c{vertical-align:top;border:1px solid #E3E9EF;border-radius:10px;padding:6px 8px;font-size:13px;background:#FBFCFD;min-width:130px}
+.s179c.st-ok{border-color:#BFE3D9}.s179c.st-warn{border-color:#F0D39A;background:#FFFBF2}
+.s179c ul{margin:4px 0;padding-inline-start:16px}.s179c li{margin:1px 0}
+.s179c li.ai{background:#E4F5F0;border-radius:6px;padding:0 4px;color:#0E5F55;list-style-position:inside}
+.s179b{font-size:11px;border-radius:999px;padding:0 6px;white-space:nowrap}.s179b.st-ok{background:#DDF3EE;color:#0E5F55}.s179b.st-warn{background:#FCEBC8;color:#7A5200}.s179b.st-none{background:#EEF2F6;color:#5b647a}
+.s179n{display:block;color:#7A5200;line-height:1.5}
+.s179k{font-weight:600;padding:0}.s179k.k-ok{color:#0E5F55}.s179k.k-bad{color:#A8322D}
+html:not(#mxz):not(#mxy) .s179 .genfoot{display:flex;flex-wrap:wrap;gap:8px}
+html:not(#mxz):not(#mxy) .s179 .genfoot button{width:auto;flex:0 0 auto}
+html[data-theme="glass"]:not([data-tone="light"]) .s179,html[data-theme="linear"] .s179{background:#16202E;border-color:#2E6B62;color:#E8EEF6}
+html[data-theme="glass"]:not([data-tone="light"]) .s179 :is(h4,b,th,li,p),html[data-theme="linear"] .s179 :is(h4,b,th,li,p){color:#E8EEF6}
+html[data-theme="glass"]:not([data-tone="light"]) .s179c,html[data-theme="linear"] .s179c{background:#1E2A3B;border-color:#3A475E}
+html[data-theme="glass"]:not([data-tone="light"]) .s179c.st-warn,html[data-theme="linear"] .s179c.st-warn{background:#2E2618;border-color:#7A5A1E}
+html[data-theme="glass"]:not([data-tone="light"]) .s179c li.ai,html[data-theme="linear"] .s179c li.ai{background:#173A36;color:#9BE6D6}
+html[data-theme="glass"]:not([data-tone="light"]) .s179n,html[data-theme="linear"] .s179n{color:#F0C873}
+.s179n .i{color:#5b647a}html[data-theme="glass"]:not([data-tone="light"]) .s179n .i,html[data-theme="linear"] .s179n .i{color:#B8C2D3}
+/* الجوال: كل يوم بطاقة، والوجبات تحتها (بلا تمرير أفقي) */
+@media (max-width:720px){.s179t{min-width:0;border-spacing:0}.s179t,.s179t tbody,.s179t tr,.s179t th,.s179t td{display:block;width:auto}
+.s179t tr{border:1px solid #E3E9EF;border-radius:12px;padding:6px;margin-bottom:10px}.s179t th{white-space:normal;padding:2px 4px 6px}.s179t th br{display:none}.s179t th small{margin-inline-start:8px}
+.s179c{min-width:0;margin:6px 0}}
+html[data-theme="glass"]:not([data-tone="light"]) .s179t tr,html[data-theme="linear"] .s179t tr{border-color:#3A475E}
+html[data-theme="glass"]:not([data-tone="light"]) .s179t th,html[data-theme="linear"] .s179t th{background:#1B2534;color:#E8EEF6}
