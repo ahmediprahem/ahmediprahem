@@ -1,0 +1,35 @@
+/* 1.77 (ر2 = ذ0) واجهة المساعد الذكي */
+.ai176bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0 0 12px;padding:10px 12px;border:1.5px dashed #9FD8CB;border-radius:14px;background:#F6FCFA}
+.ai176bar small{flex:1 1 220px}
+.ai176 .ai176top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.ai176 .ai176top h3{margin:0}.ai176 .ai176top em{font-style:normal;font-size:11px;background:#ECE6F8;color:#4B3A8C;border-radius:999px;padding:1px 8px;margin-inline-start:6px}
+.ai176g{border:1px solid #DCE6EE;border-radius:14px;padding:10px 12px;margin:10px 0}
+.ai176gh{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:6px}
+.ai176gn{max-width:200px}
+.ai176days{display:flex;flex-wrap:wrap;gap:6px;flex-basis:100%}
+.ai176day{display:inline-flex;cursor:pointer}.ai176day input{position:absolute;opacity:0;width:1px;height:1px}
+.ai176day span{padding:4px 10px;border-radius:999px;border:1px solid #DCE6EE;font-size:13px}
+.ai176day.on span{background:#DDF3EE;border-color:#13897A;color:#0E5F55;font-weight:700}
+.ai176day input:disabled+span{opacity:.4;cursor:not-allowed}
+.ai176day input:focus-visible+span{outline:2px solid #13897A;outline-offset:2px}
+.ai176m{border-top:1px dashed #E3E9EF;padding:8px 0}
+.ai176mh{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:6px}
+.ai176k{font-size:12px;border-radius:999px;padding:2px 8px;background:#EEF6FF;color:#2F63A8;white-space:nowrap}.ai176k.snack{background:#FFF4E5;color:#8A5A12}
+.ai176n{flex:1 1 140px;min-width:0}.ai176t{width:120px}
+.ai176m textarea{width:100%;box-sizing:border-box}
+.ai176q{display:none;flex-wrap:wrap;gap:4px;margin:4px 0}
+.ai176m.empty .ai176q,.ai176m:focus-within .ai176q{display:flex}      /* الاقتراحات الجاهزة لوجبة بلا وصف أو أثناء الكتابة فقط */
+.ai176q .chip{font-size:12px;padding:2px 8px}
+.ai176r{display:flex;flex-direction:column;gap:2px;margin-top:4px}
+.ai176add{border:1px solid #CFE6DF;background:#F4FBF8;border-radius:12px;padding:8px 10px;margin:8px 0}
+.ai176opt{margin:10px 0}
+.ai176prev{border:1px solid #CFE6DF;background:#F4FBF8;border-radius:12px;padding:8px 12px;margin-top:8px}
+.ai176prev pre{max-height:260px;overflow:auto;font-size:12px;background:#fff;border-radius:8px;padding:8px;white-space:pre-wrap;word-break:break-word}
+html[data-theme="glass"]:not([data-tone="light"]) .ai176bar,html[data-theme="linear"] .ai176bar,html[data-theme="glass"]:not([data-tone="light"]) .ai176add,html[data-theme="linear"] .ai176add,html[data-theme="glass"]:not([data-tone="light"]) .ai176prev,html[data-theme="linear"] .ai176prev{background:#173A36;border-color:#2E6B62}
+html[data-theme="glass"]:not([data-tone="light"]) .ai176g,html[data-theme="linear"] .ai176g{border-color:#3A475E}
+html[data-theme="glass"]:not([data-tone="light"]) .ai176day span,html[data-theme="linear"] .ai176day span{border-color:#3A475E;color:#E8EEF6}
+html[data-theme="glass"]:not([data-tone="light"]) .ai176day.on span,html[data-theme="linear"] .ai176day.on span{background:#173A36;border-color:#5FD0BC;color:#9BE6D6}
+html[data-theme="glass"]:not([data-tone="light"]) .ai176k,html[data-theme="linear"] .ai176k{background:#22324A;color:#BFD6FF}
+html[data-theme="glass"]:not([data-tone="light"]) .ai176k.snack,html[data-theme="linear"] .ai176k.snack{background:#3A2E14;color:#F2C46B}
+html[data-theme="glass"]:not([data-tone="light"]) .ai176prev pre,html[data-theme="linear"] .ai176prev pre{background:#1B2433;color:#E8EEF6}
+html[data-theme="glass"]:not([data-tone="light"]) .ai176 .ai176top em,html[data-theme="linear"] .ai176 .ai176top em{background:#2E2747;color:#E6DDFF}
