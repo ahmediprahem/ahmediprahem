@@ -79,3 +79,37 @@ document.addEventListener('change', function (e) {
   if (t.dataset.ai176u) { m.units = t.dataset.ai176u; ai176Save(); main(); return; }
   if (t.dataset.ai176notes) { m.notes = String(t.value || '').slice(0, 600); ai176Save(); }
 });
+// ================= 1.78 (ر3) المُحلِّل: «ولّد بالمساعد» يرسل وصف الوجبات (مُجهّلاً) إلى المحطة /v1/ai/food (mode: meal) ويعرض «فهمتُ منك»
+// كل كلمة صنف تُطابَق مع قاعدة الأصناف بمحرك الوصفة (DPRecipe.match): ✓ عدد الأصناف المطابقة، أو ⚠ غير موجود في القاعدة. الأخصائي يحذف ما لا يريد، أو يعيد الفهم.
+var AI176_TAG = { high_protein: 'بروتين عالٍ', no_bread: 'بلا خبز', light: 'خفيفة', quick: 'سريعة', portable: 'تُحمل للعمل', high_fiber: 'ألياف أعلى', low_carb: 'كارب أقل' };
+function ai176Keyed(c) { var m = ai176Of(c), out = []; m.groups.forEach(function (g, gi) { g.meals.forEach(function (ml, mi) { out.push({ key: 'g' + gi + 'm' + mi, name: ml.name, kind: ml.kind, desc: ml.desc || '', gi: gi, mi: mi, gname: g.name }); }); }); return out; }
+function ai176Match(w) { try { var R = window.DPRecipe, r = R && R.match ? R.match(D, w) : null; if (!r) return []; return (r.exact.length ? r.exact : r.close.length ? r.close : []).slice(0, 30); } catch (e) { return []; } }
+function ai176Chip(w, kind, path) { var L = kind === 'food' ? ai176Match(w) : null, okm = !L || L.length;
+  return '<span class="ai176c' + (okm ? '' : ' miss') + '" title="' + esc(L ? (L.length ? L.slice(0, 6).join('، ') + (L.length > 6 ? '…' : '') : 'غير موجود في قاعدة الأصناف') : '') + '">' + esc(w) + (L ? ' <small>' + (L.length ? '✓ ' + L.length : '⚠') + '</small>' : '') + '<button class="link" data-a="ai176Rm" data-v="' + esc(path) + '" aria-label="حذف ' + esc(w) + '">✕</button></span>'; }
+function ai176Parsed(c) {
+  var P = c.ai176 && c.ai176.parsed; if (!P || !P.res) return ''; var res = P.res, K = {}; ai176Keyed(c).forEach(function (k) { K[k.key] = k; });
+  var rows = res.meals.filter(function (m) { return K[m.key]; }).map(function (m, i) { var k = K[m.key], idx = res.meals.indexOf(m), row = function (lab, arr, kind, f) { return arr && arr.length ? '<div class="ai176pr"><span class="lbl">' + lab + '</span>' + arr.map(function (w, j) { return ai176Chip(w, kind, idx + '.' + f + '.' + j); }).join('') + '</div>' : ''; };
+    return '<article class="ai176pm"><div class="ai176pmh"><b>' + esc(k.name) + '</b>' + (k.gi ? ' <small class="dim">(' + esc(k.gname) + ')</small>' : '') + ' <span class="ai176pt ' + m.pattern + '">' + ({ rotate: 'تتناوب يومياً', fixed: 'ثابتة', free: 'حرة: من تفضيلات العميل' }[m.pattern] || '') + '</span></div>'
+      + (m.understood ? '<p>' + esc(m.understood) + '</p>' : '') + row('تتناوب:', m.rotation, 'food', 'rotation') + row('كل يوم:', m.always, 'food', 'always') + row('بلا:', m.avoid, 'word', 'avoid')
+      + (m.notTogether.length ? '<div class="ai176pr"><span class="lbl">لا يجتمعان:</span>' + m.notTogether.map(function (pr, j) { return '<span class="ai176c">' + esc(pr.join(' ✕ ')) + '<button class="link" data-a="ai176Rm" data-v="' + idx + '.notTogether.' + j + '" aria-label="حذف القاعدة">✕</button></span>'; }).join('') + '</div>' : '')
+      + (m.tags.length ? '<div class="ai176pr"><span class="lbl">طابع:</span>' + m.tags.map(function (t, j) { return '<span class="ai176c tag">' + esc(AI176_TAG[t] || t) + '<button class="link" data-a="ai176Rm" data-v="' + idx + '.tags.' + j + '" aria-label="حذف">✕</button></span>'; }).join('') + '</div>' : '') + '</article>'; }).join('');
+  var miss = res.meals.some(function (m) { return m.rotation.concat(m.always).some(function (w) { return !ai176Match(w).length; }); });
+  return '<section class="ai176parsed" aria-labelledby="ai176ph"><h4 id="ai176ph">🧠 فهمتُ منك' + (P.prov ? ' <small class="dim">(' + esc(P.prov === 'gl' ? 'Gemini' : P.prov === 'zai' ? 'GLM' : P.prov === 'groq' ? 'Groq' : P.prov) + (P.cached ? '، من الذاكرة' : '') + ')</small>' : '') + '</h4>'
+    + (res.understood && res.understood.length ? '<ul class="ai176gu">' + res.understood.map(function (u) { return '<li>' + esc(u) + '</li>'; }).join('') + '</ul>' : '') + rows
+    + (miss ? '<p class="warn small">⚠ كلمات غير موجودة في قاعدة الأصناف لن تُستعمل. احذفها أو عدّل الوصف.</p>' : '')
+    + '<p class="genfoot"><button class="sec" data-a="ai176Gen">↻ أعد الفهم</button> <button data-a="ai176Ok"' + (P.ok ? ' disabled' : '') + '>' + (P.ok ? '✓ اعتمدتَ الفهم' : '✓ الفهم صحيح') + '</button></p>'
+    + (P.ok ? '<p class="small dim">التوزيع الحسابي من هذا الفهم يأتي في المرحلة التالية (ر4: المحرك الحسابي).</p>' : '') + '</section>';
+}
+ai176Panel = (function (f) { return function (c) { var h = f.apply(this, arguments), p = ai176Parsed(c), i = h.lastIndexOf('</section>'); return p && i > 0 ? h.slice(0, i) + p + h.slice(i) : h; }; })(ai176Panel);
+A.ai176Gen = function () {
+  var c = cur(); if (!c) return; ai176Of(c); var ks = ai176Keyed(c), notes = (c.ai176.notes || '').trim();
+  if (!ks.some(function (k) { return k.desc.trim(); }) && !notes) { AI176.prev = 1; main(); toast('اكتب وصفاً لوجبة واحدة على الأقل، أو اترك التوزيع للمحرك من تفضيلات العميل'); return; }
+  if (!(typeof HX !== 'undefined' && HX.st && HX.st.ident && typeof hxFetch === 'function')) { AI176.prev = 1; main(); toast('اربط «زنها» من الإعدادات ← زنها لاستعمال المساعد الذكي'); return; }
+  var btn = document.querySelector('[data-a="ai176Gen"]'); if (btn) { btn.disabled = true; btn.textContent = '… المساعد يقرأ وصفك'; }
+  hxFetch('POST', '/v1/ai/food', { mode: 'meal', meals: ks.map(function (k) { return { key: k.key, name: k.name, kind: k.kind, desc: k.desc }; }), notes: notes }, true)
+    .then(function (j) { if (!j || !j.ok) throw new Error((j && (j.reason || j.msg || j.error)) || 'تعذّر الفهم الآن'); return j; })      // hxFetch يعيد الكائن، ويرمي خطأ المحطة برسالتها
+    .then(function (j) { c.ai176.parsed = { at: Date.now(), prov: j.prov || '', cached: j.cached ? 1 : 0, ok: 0, res: { meals: j.meals || [], avoid: j.avoid || [], prefer: j.prefer || [], understood: j.understood || [] } }; AI176.prev = 0; save(); main(); })
+    .catch(function (e) { toast('⚠ ' + (e.message || 'تعذّر الاتصال بالمساعد')); main(); });
+};
+A.ai176Ok = function () { var c = cur(); if (!c || !c.ai176 || !c.ai176.parsed) return; c.ai176.parsed.ok = 1; save(); main(); toast('✓ اعتمدتَ فهم المساعد'); };
+A.ai176Rm = function (v) { var c = cur(); if (!c || !c.ai176 || !c.ai176.parsed) return; var a = String(v).split('.'), m = c.ai176.parsed.res.meals[+a[0]], arr = m && m[a[1]]; if (!arr) return; arr.splice(+a[2], 1); if (a[1] === 'rotation' && !m.rotation.length && m.pattern === 'rotate') m.pattern = 'free'; c.ai176.parsed.ok = 0; save(); main(); };
