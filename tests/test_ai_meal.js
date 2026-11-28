@@ -22,8 +22,10 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); };
   // 2) الذاكرة
   calls = []; r = await call(REQ); assert.strictEqual(r.j.cached, 1); assert.strictEqual(calls.length, 0); ok('الطلب المطابق من الذاكرة بلا استهلاك');
   // 3) Gemini مشغول ← GLM (Z.ai)، ورد غير عربي يُرفض ويُجرَّب التالي
-  R = { gl: { st: 429 }, zai: { st: 200, o: en } }; calls = []; r = await call(Object.assign({}, REQ, { notes: 'مختلف' })); assert.deepStrictEqual(calls.map((x) => x.p), ['gl', 'zai', 'groq']); assert.strictEqual(r.j.prov, 'groq');
-  ok('Gemini مشغول ← GLM، وردّه غير العربي يرفضه الحارس فيُستعمل Groq');
+  R = { gl: { st: 429 }, groq: { st: 200, o: en } }; calls = []; r = await call(Object.assign({}, REQ, { notes: 'مختلف' })); assert.deepStrictEqual(calls.map((x) => x.p), ['gl', 'groq', 'zai']); assert.strictEqual(r.j.prov, 'zai');
+  ok('Gemini مشغول ← Groq (الأدق في المعيار)، وردّه غير العربي يرفضه الحارس فيُستعمل GLM');
+  const FX = { st: 200, o: Object.assign({}, good, { meals: [Object.assign({}, good.meals[0], { pattern: 'free', rotation: ['الدجاج', 'السمك', 'الدجاج', 'أرز'], always: ['أرز'] })] }) }; R = { gl: FX, groq: FX, zai: FX }; r = await call(Object.assign({}, REQ, { notes: 'تصحيح' }));
+  assert.strictEqual(r.j.meals[0].pattern, 'rotate'); assert.deepStrictEqual(r.j.meals[0].rotation, ['دجاج', 'سمك']); assert.deepStrictEqual(r.j.meals[0].always, ['أرز']); ok('تصحيح حتمي: «حرة» مع أصناف = تناوب، وبلا تكرار ولا «ال»، وما في «كل يوم» لا يتناوب'); R = {};
   R = {};
   // 4) بلا وصف ولا تعليمات: لا يُستدعى أي مزوّد
   calls = []; r = await call({ meals: [{ key: 'g0m0', name: 'الإفطار', desc: '' }], notes: '' }); assert.strictEqual(r.s, 400); assert.strictEqual(calls.length, 0); ok('بلا وصف: رفض واضح بلا استدعاء');

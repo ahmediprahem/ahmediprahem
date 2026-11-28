@@ -189,6 +189,9 @@ const AI_P = {
     + 'always = ما يأتي مع الوجبة كل يوم (مثل الخبز)، avoid = ما طُلب استبعاده، notTogether = أزواج لا تجتمع في الوجبة نفسها (إن طُلب ذلك صراحة أو كان الحليب واللبن معاً في التناوب)، '
     + 'pattern = rotate إن طُلب التنوع، أو fixed إن طُلبت وجبة ثابتة، أو free إن لم يوجد وصف. tags من القائمة فقط: high_protein, no_bread, light, quick, portable, high_fiber, low_carb. '
     + 'understood = جملة عربية قصيرة واضحة تشرح ما فهمته للأخصائي. وفي المستوى العام: avoid وprefer من «تعليمات عامة»، وunderstood قائمة جمل قصيرة. '
+    + 'قواعد مهمة: (1) ما يأتي بعد «مع» أو «ومعه» أو «دائماً» يوضع في always وليس في rotation. (2) pattern=rotate فقط إذا وُجدت صيغة تنوع أو اختيار (يتنوع، يتناوب، بين، أو، مرة… ومرة، بالتبادل، يتغير)؛ '
+    + 'وإلا فهي fixed وكل الأصناف المذكورة في rotation (مثل «زبادي مع فاكهة» = fixed: rotation [زبادي] وalways [فاكهة]). (3) ما بعد «بدون» أو «بلا» أو «لا» أو «لا يحب» يوضع في avoid دائماً، حتى إن كان النمط free. '
+    + '(4) اكتب الأصناف بلا «ال» التعريف (دجاج لا الدجاج). '
     + 'لا تضف أصنافاً لم تُذكر، ولا كميات ولا سعرات. إن كانت الوجبة بلا وصف فاجعلها pattern=free بقوائم فارغة. '
     + 'أعد: {"ok":true,"meals":[{"key":"","pattern":"","rotation":[""],"always":[""],"avoid":[""],"notTogether":[[""]],"tags":[""],"understood":""}],"avoid":[""],"prefer":[""],"understood":[""]}',
   recipe: 'أنت طاهٍ ومساعد أخصائي تغذية. اكتب وصفة صحية بسيطة للطبق المطلوب (dish) لشخص واحد، بمكونات متاحة في المطبخ العربي. '
@@ -215,9 +218,14 @@ function aiClean(mode, o, J) {                                        // لا ي
   if (!o || typeof o !== 'object') return { ok: false, reason: 'تعذّر فهم الرد. حاول مرة أخرى.' };
   if (mode === 'meal') {      // 1.78 (ر3): استراتيجية الوجبات — مفاتيح الطلب فقط، وقوائم قصيرة من كلمات، ووسوم من قائمة ثابتة
     const keys = new Set((Array.isArray(J.meals) ? J.meals : []).map((m) => String(m && m.key || ''))), TAGS = ['high_protein', 'no_bread', 'light', 'quick', 'portable', 'high_fiber', 'low_carb'];
-    const w = (a, n) => (Array.isArray(a) ? a : []).map((x) => aiStr(x, 30)).filter(Boolean).slice(0, n);
+    const w = (a, n) => [...new Set((Array.isArray(a) ? a : []).map((x) => aiStr(x, 30).replace(/^ال(?=\S{3})/, '')).filter(Boolean))].slice(0, n);      // 1.80: بلا تكرار وبلا «ال»
     const meals = (Array.isArray(o.meals) ? o.meals : []).filter((m) => m && keys.has(String(m.key))).map((m) => ({ key: String(m.key), pattern: ['rotate', 'fixed', 'free'].includes(m.pattern) ? m.pattern : 'free', rotation: w(m.rotation, 8), always: w(m.always, 6), avoid: w(m.avoid, 8),
       notTogether: (Array.isArray(m.notTogether) ? m.notTogether : []).map((x) => w(x, 4)).filter((x) => x.length >= 2).slice(0, 6), tags: (Array.isArray(m.tags) ? m.tags : []).filter((t) => TAGS.includes(t)).slice(0, 5), understood: aiStr(m.understood, 220) }));
+    meals.forEach((m) => {      // 1.80 (من معيار النماذج الحقيقية): تصحيح حتمي للنمط — «حرة» مع أصناف مذكورة ليست حرة، وما في «كل يوم» لا يتناوب
+      m.rotation = m.rotation.filter((x) => !m.always.includes(x));
+      if (m.pattern === 'free' && m.rotation.length) m.pattern = m.rotation.length > 1 ? 'rotate' : 'fixed';
+      if (m.pattern === 'rotate' && m.rotation.length < 2) m.pattern = m.rotation.length ? 'fixed' : 'free';
+    });
     return { ok: true, meals, avoid: w(o.avoid, 10), prefer: w(o.prefer, 10), understood: (Array.isArray(o.understood) ? o.understood : []).map((x) => aiStr(x, 220)).filter(Boolean).slice(0, 6) };
   }
   if (mode === 'recipe') {    // 1.80 (ر5): وصفة — نصوص قصيرة فقط؛ الحساب في زنها Pro بمحرك الوصفة على قاعدة الأصناف
@@ -363,7 +371,7 @@ const AI_PV = {
 };
 // الترتيب لكل نوع من قياس الدقة على 22 حالة عربية (2026-11-27): Gemini أولاً دائماً (الأدق)، ثم الأفضل في كل نوع؛ Groq ثانياً (قارب Gemini)، ثم Cloudflare (Llama 4) ممتاز في الملصقات وصور الوجبات
 // ويفشل في المكملات والأعشاب فلا يُستعمل فيها؛ وGemini Flash بطيء (~28 ث) فلا يُستعمل. يُغيَّر بلا كود: AI_ORDER_TEXT / _PHOTO / _LABEL / _STORE / _SUPP / _HERB
-const AI_ORD = { text: ['gl', 'groq', 'cf', 'zai'], photo: ['gl', 'groq', 'cf', 'zai'], label: ['gl', 'groq', 'cf', 'zai'], store: ['gl', 'groq', 'cf', 'zai'], supp: ['gl', 'groq', 'zai'], herb: ['gl', 'groq', 'zai'], meal: ['gl', 'zai', 'groq', 'cf'], recipe: ['gl', 'zai', 'groq', 'cf'] };      // Groq (Qwen 3.8) قارب Gemini في كل الأنواع؛ Z.ai الأضعف والأكثر انشغالاً فآخراً
+const AI_ORD = { text: ['gl', 'groq', 'cf', 'zai'], photo: ['gl', 'groq', 'cf', 'zai'], label: ['gl', 'groq', 'cf', 'zai'], store: ['gl', 'groq', 'cf', 'zai'], supp: ['gl', 'groq', 'zai'], herb: ['gl', 'groq', 'zai'], meal: ['gl', 'groq', 'zai', 'cf'], recipe: ['gl', 'groq', 'zai', 'cf'] };      // 1.80: معيار 30 وصفاً حقيقياً (2026-11-28): Gemini 90% (1.4 ث)، Groq 97% (6.8 ث)، GLM 53% (15.6 ث)      // Groq (Qwen 3.8) قارب Gemini في كل الأنواع؛ Z.ai الأضعف والأكثر انشغالاً فآخراً
 export { AI_PV, AI_ORD };
 async function aiTick(db, p, day) { const k = 'ai.p.' + day + '.' + p, r = await one(db, 'SELECT v FROM kv WHERE k = ?', k); await run(db, 'INSERT INTO kv (k, v) VALUES (?, ?) ON CONFLICT(k) DO UPDATE SET v = excluded.v', k, String((r ? +r.v || 0 : 0) + 1)); }
 export function aiJson(t) {                                          // رد نصي ← كائن: يحذف التفكير والأسوار، ويأخذ أول { إلى آخر }، ويصلح الفواصل الزائدة

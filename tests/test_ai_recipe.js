@@ -21,7 +21,7 @@ let n = 0; const ok = (m) => { n++; console.log('✔', m); };
   const sent = calls[0].o.body; assert(!/سلوى|0501234567/.test(sent)); assert(/فول مدمس/.test(sent)); ok('ما يُرسل: اسم الطبق ونوع الوجبة وأسماء أصناف القاعدة فقط (بلا اسم ولا جوال)');
   // 2) رد غير عربي يُرفض ويُجرَّب التالي
   R = { gl: { st: 200, o: Object.assign({}, good, { title: 'Foul', ingredients: ['1 cup fava beans'] }) } }; calls = []; r = await call('/v1/ai/food', { mode: 'recipe', dish: 'فول بالطماطم' });
-  assert.strictEqual(r.j.prov, 'zai'); assert(/فول/.test(r.j.title)); ok('رد غير عربي يرفضه الحارس فيُستعمل GLM'); R = {};
+  assert.strictEqual(r.j.prov, 'groq'); assert(/فول/.test(r.j.title)); ok('رد غير عربي يرفضه الحارس فيُستعمل Groq'); R = {};
   // 3) بلا اسم طبق: رفض بلا استدعاء، وخارج المعاينة يلزم توقيع أخصائي
   calls = []; r = await call('/v1/ai/food', { mode: 'recipe', dish: '' }); assert.strictEqual(r.s, 400); assert.strictEqual(calls.length, 0);
   const r4 = await W.default.fetch(new Request('https://relay.example/v1/ai/food', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ mode: 'recipe', dish: 'فول' }) }), env); assert.strictEqual(r4.status, 401);
